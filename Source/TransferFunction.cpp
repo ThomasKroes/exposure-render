@@ -22,8 +22,33 @@ float QNode::GetNormalizedX(void) const
 
 void QNode::SetNormalizedX(const float& NormalizedX)
 {
-	SetPosition(NormalizedX);
+	SetPosition(m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedX));
 }
+
+float QNode::GetNormalizedY(void) const 
+{
+	return GetOpacity();
+}
+
+void QNode::SetNormalizedY(const float& NormalizedY)
+{
+	SetOpacity(NormalizedY);
+}
+
+float	QNode::GetPosition(void) const 						{	return m_Position; 								}				
+void	QNode::SetPosition(const float& Position)				{	m_Position = Position; emit NodeChanged(this);}		
+float	QNode::GetOpacity(void) const							{	return m_Opacity;								}
+void	QNode::SetOpacity(const float& Opacity)				{	m_Opacity = Opacity; emit NodeChanged(this);	}
+QColor	QNode::GetColor(void) const							{	return m_Color;									}
+void	QNode::SetColor(const float& Color)					{	m_Color = Color; emit NodeChanged(this);		}
+bool	QNode::GetAllowMoveH(void) const						{	return m_AllowMoveH;							}
+void	QNode::SetAllowMoveH(const bool& AllowMoveH)			{	m_AllowMoveH = AllowMoveH;						}
+bool	QNode::GetAllowMoveV(void) const						{	return m_AllowMoveV;							}
+void	QNode::SetAllowMoveV(const bool& AllowMoveV)			{	m_AllowMoveV = AllowMoveV;						}
+float	QNode::GetMinX(void) const								{	return m_MinX;									}
+void	QNode::SetMinX(const float& MinX)						{	m_MinX = MinX;									}
+float	QNode::GetMaxX(void) const								{	return m_MaxX;									}
+void	QNode::SetMaxX(const float& MaxX)						{	m_MaxX = MaxX;									}
 
 QTransferFunction::QTransferFunction(QObject* pParent) :
 	QObject(pParent),

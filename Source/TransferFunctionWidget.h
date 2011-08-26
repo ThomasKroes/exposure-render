@@ -36,6 +36,7 @@ protected:
 	virtual void				mousePressEvent(QGraphicsSceneMouseEvent* pEvent);
 	virtual QVariant			itemChange(GraphicsItemChange Change, const QVariant& Value);
 	virtual void				mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent);
+	virtual void				mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent);
 	virtual void				paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL);
 
 private:
@@ -109,14 +110,6 @@ public:
 	void OnNodeMove(CNodeGraphics* pNodeGraphics);
 
 	void SetSelectedNode(QNode* pSelectedNode);
-	QRectF GetRect(void)
-	{
-		QRectF Rect = m_pGraphicsScene->sceneRect();
-
-		Rect.adjust(10, 10, -10, -10);
-
-		return Rect;
-	}
 
 	void	UpdateCanvas(void);
 	void	UpdateGrid(void);
@@ -135,6 +128,10 @@ private slots:
 	void OnNodeAdd(QNode* pTransferFunctionNode);
 	void OnNodeRemove(QNode* pTransferFunctionNode);
 	void OnNodeSelectionChanged(QNode* pNode);
+	
+
+public:
+	QRectF							m_EditRect;
 
 private:
 	QGraphicsScene*					m_pGraphicsScene;
@@ -146,7 +143,7 @@ private:
 	QLinearGradient					m_LinearGradient;
 	QGraphicsRectItem*				m_pCanvas;
 	QGraphicsRectItem*				m_pOutline;
-	QRectF							m_EditRect;
+	
 	float							m_Margin;
 	QList<QGraphicsLineItem*>		m_GridLinesHorizontal;
 	QPen							m_GridPenHorizontal;
@@ -194,6 +191,7 @@ private slots:
 	void OnColorChanged(const QColor& Color);
 	void OnNodeAdd(QNode* pNode);
 	void OnNodeRemove(QNode* pNode);
+	void OnTransferFunctionChanged(void);
 
 private:
 	QTransferFunction*	m_pTransferFunction;

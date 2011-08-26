@@ -35,7 +35,7 @@ CNodeGraphics::CNodeGraphics(QGraphicsItem* pParent, QNode* pNode, CTransferFunc
 
 	// Make item movable
 	setFlag(QGraphicsItem::ItemIsMovable);
-	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+//	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 	setFlag(QGraphicsItem::ItemIsSelectable);
 
 	// We are going to catch hover events
@@ -107,18 +107,18 @@ QVariant CNodeGraphics::itemChange(GraphicsItemChange Change, const QVariant& Va
     QPointF NewPoint = Value.toPointF();
  
     if (Change == ItemPositionChange && scene())
-	{
-		// Get a copy of the scene's rectangle
-		QRectF SceneRect = m_pTransferFunctionView->GetRect();
+	{/*
+		const float NormX = (GetCenter().x() - m_pTransferFunctionView->m_EditRect.left()) / m_pTransferFunctionView->m_EditRect.width();
+		const float NormY = (GetCenter().y() - m_pTransferFunctionView->m_EditRect.top()) / m_pTransferFunctionView->m_EditRect.height();
 
-//		m_pNode->SetX(50.0f);//m_pNode->m_pTransferFunction->m_RangeMin + m_pNode->m_pTransferFunction->m_Range * ((NewPoint.x() - SceneRect.left()) / SceneRect.width()));
-//		m_pNode->SetY(1.0f - (NewPoint.y() / SceneRect.height()));
+		m_pNode->SetNormalizedX(NormX);
+		m_pNode->SetNormalizedY(NormY);
 		
-		UpdateTooltip();
+//		UpdateTooltip();
 
 //		m_pNode->SetValueY(0.01f * NewPoint.y());
 
-		/*
+		
 		if (!m_pNode->GetAllowMoveH() && !m_pNode->GetAllowMoveV())
 		{
 			NewPoint = m_LastPos;
@@ -173,6 +173,13 @@ void CNodeGraphics::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 	// Change the cursor shape to normal
 //	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
 //	setCursor(m_Cursor);
+}
+
+void CNodeGraphics::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
+{
+//	QGraphicsItem::mouseMoveEvent(pEvent);
+	m_pNode->SetNormalizedX((pEvent->scenePos().x() - (float)m_pTransferFunctionView->rect().left()) / (float)m_pTransferFunctionView->rect().width());
+	m_pNode->SetNormalizedY(1.0f - ((pEvent->scenePos().y() - (float)m_pTransferFunctionView->rect().top()) / (float)m_pTransferFunctionView->rect().height()));
 }
 
 void CNodeGraphics::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
@@ -247,7 +254,7 @@ CTransferFunctionView::CTransferFunctionView(QWidget* pParent, QTransferFunction
 	m_pPolygon(NULL),
 	m_pOutline(NULL),
 	m_pCanvas(NULL),
-	m_Margin(20.0f)
+	m_Margin(0.0f)
 {
 	// Dimensions
 	setFixedHeight(170);
@@ -358,7 +365,7 @@ void CTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 	QGraphicsView::resizeEvent(pResizeEvent);
 
 	Update();
-	UpdateGrid();
+//	UpdateGrid();
 }
 
 void CTransferFunctionView::keyPressEvent(QKeyEvent* pEvent)
@@ -388,7 +395,7 @@ void CTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 
 void CTransferFunctionView::UpdateCanvas(void)
 {
-	m_EditRect = sceneRect();
+	m_EditRect = rect();
 	m_EditRect.adjust(m_Margin, m_Margin, -m_Margin, -m_Margin);
 
 	// Update canvas
@@ -451,18 +458,22 @@ void CTransferFunctionView::UpdateEdges(void)
 
 void CTransferFunctionView::UpdateNodes(void)
 {
+	m_EditRect = rect();
+
 	// Set the gradient stops
 	foreach(CNodeGraphics* pNodeGraphics, m_Nodes)
 	{
 		QPointF Center;
 
-		Center.setX(m_EditRect.left() + m_EditRect.width() * pNodeGraphics->GetNode()->GetNormalizedX());
-		Center.setY(m_EditRect.top() + m_EditRect.height() - (pNodeGraphics->GetNode()->GetOpacity() * m_EditRect.height()));
+		Center.setX(rect().left() + rect().width() * pNodeGraphics->GetNode()->GetNormalizedX());
+		Center.setY(rect().top() + rect().height() - (pNodeGraphics->GetNode()->GetOpacity() * rect().height()));
 		
 		pNodeGraphics->SetCenter(Center);
+
+//		pNodeGraphics->setPos(Center);
 	}
 
-	m_pOutline->setRect(GetRect());
+	m_pOutline->setRect(m_EditRect);
 }
 
 void CTransferFunctionView::UpdateGradient(void)
@@ -533,11 +544,11 @@ void CTransferFunctionView::Update(void)
 	setSceneRect(rect());
 
 	UpdateCanvas();
-	UpdateHistogram();
+//	UpdateHistogram();
 	UpdateNodes();
 	UpdateEdges();
-	UpdateGradient();
-	UpdatePolygon();
+//	UpdateGradient();
+//	UpdatePolygon();
 }
 
 void CTransferFunctionView::OnNodeAdd(QNode* pTransferFunctionNode)
@@ -851,6 +862,7 @@ CNodePropertiesWidget::CNodePropertiesWidget(QWidget* pParent, QTransferFunction
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), m_pPositionSpinBox, SLOT(setValue(int)));
 	connect(m_pPositionSpinBox, SIGNAL(valueChanged(int)), m_pPositionSlider, SLOT(setValue(int)));
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), this, SLOT(OnPositionChanged(int)));
+	connect(m_pTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnTransferFunctionChanged()));
 
 	// Setup connections for opacity
 	connect(m_pOpacitySlider, SIGNAL(valueChanged(int)), m_pOpacitySpinBox, SLOT(setValue(int)));
@@ -928,10 +940,19 @@ void CNodePropertiesWidget::OnNextNode(void)
 	m_pTransferFunction->SelectNextNode();
 }
 
+void CNodePropertiesWidget::OnTransferFunctionChanged(void)
+{
+	if (m_pTransferFunction->m_pSelectedNode)
+		m_pPositionSlider->setValue(m_pTransferFunction->m_pSelectedNode->GetPosition());
+}
+
 void CNodePropertiesWidget::OnPositionChanged(const int& Position)
 {
 	if (m_pTransferFunction->m_pSelectedNode)
+	{
 		m_pTransferFunction->m_pSelectedNode->SetPosition(Position);
+//		m_pPositionSlider->setValue(Position);
+	}
 }
 
 void CNodePropertiesWidget::OnOpacityChanged(const int& Opacity)

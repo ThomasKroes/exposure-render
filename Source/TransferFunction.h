@@ -25,22 +25,24 @@ public:
 	
 	float	GetNormalizedX(void) const;
 	void	SetNormalizedX(const float& NormalizedX);
+	float	GetNormalizedY(void) const;
+	void	SetNormalizedY(const float& NormalizedY);
 
 
-	float	GetPosition(void) const 						{	return m_Position; 								}				
-	void	SetPosition(const float& Position)				{	m_Position = Position; emit NodeChanged(this);	}		
-	float	GetOpacity(void) const							{	return m_Opacity;								}
-	void	SetOpacity(const float& Opacity)				{	m_Opacity = Opacity; emit NodeChanged(this);	}
-	QColor	GetColor(void) const							{	return m_Color;									}
-	void	SetColor(const float& Color)					{	m_Color = Color; emit NodeChanged(this);		}
-	bool	GetAllowMoveH(void) const						{	return m_AllowMoveH;							}
-	void	SetAllowMoveH(const bool& AllowMoveH)			{	m_AllowMoveH = AllowMoveH;						}
-	bool	GetAllowMoveV(void) const						{	return m_AllowMoveV;							}
-	void	SetAllowMoveV(const bool& AllowMoveV)			{	m_AllowMoveV = AllowMoveV;						}
-	float	GetMinX(void) const								{	return m_MinX;									}
-	void	SetMinX(const float& MinX)						{	m_MinX = MinX;									}
-	float	GetMaxX(void) const								{	return m_MaxX;									}
-	void	SetMaxX(const float& MaxX)						{	m_MaxX = MaxX;									}
+	float	GetPosition(void) const;// 						{	return m_Position; 								}				
+	void	SetPosition(const float& Position);//				{	m_Position = Position; emit NodeChanged(this);	}		
+	float	GetOpacity(void) const;//							{	return m_Opacity;								}
+	void	SetOpacity(const float& Opacity);//				{	m_Opacity = Opacity; emit NodeChanged(this);	}
+	QColor	GetColor(void) const;//							{	return m_Color;									}
+	void	SetColor(const float& Color)	;//				{	m_Color = Color; emit NodeChanged(this);		}
+	bool	GetAllowMoveH(void) const	;//					{	return m_AllowMoveH;							}
+	void	SetAllowMoveH(const bool& AllowMoveH);//			{	m_AllowMoveH = AllowMoveH;						}
+	bool	GetAllowMoveV(void) const		;//				{	return m_AllowMoveV;							}
+	void	SetAllowMoveV(const bool& AllowMoveV);//			{	m_AllowMoveV = AllowMoveV;						}
+	float	GetMinX(void) const			;//					{	return m_MinX;									}
+	void	SetMinX(const float& MinX)	;//					{	m_MinX = MinX;									}
+	float	GetMaxX(void) const		;//						{	return m_MaxX;									}
+	void	SetMaxX(const float& MaxX)		;//				{	m_MaxX = MaxX;									}
 
 	QNode& operator = (const QNode& Other)			
 	{
