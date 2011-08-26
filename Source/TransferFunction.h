@@ -16,6 +16,11 @@ public:
 
 	QNode(QTransferFunction* pTransferFunction, const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable = true);
 
+	bool operator < (const QNode& Other) const
+	{
+		return GetPosition() > Other.GetPosition();
+    }
+
 public:
 	// From 2D
 	float	GetX(void) const								{	return GetPosition();					}
@@ -70,6 +75,8 @@ public:
 	bool					m_AllowMoveV;
 	float					m_MinX;
 	float					m_MaxX;
+	float					m_MinY;
+	float					m_MaxY;
 };
 
 class QTransferFunction : public QObject

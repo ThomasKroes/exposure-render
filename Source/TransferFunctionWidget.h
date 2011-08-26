@@ -8,6 +8,8 @@ class CTransferFunctionView;
 class QTransferFunction;
 class QNode;
 
+
+
 class CNodeGraphics : public QGraphicsEllipseItem
 {
 public:
@@ -29,6 +31,11 @@ public:
 	{
 		setRect(QRectF(Center - 0.5f * QPointF(CNodeGraphics::m_Radius, CNodeGraphics::m_Radius), QSizeF(CNodeGraphics::m_Radius, CNodeGraphics::m_Radius)));
 	}
+
+	bool operator < (const CNodeGraphics& Other) const
+	{
+		return m_pNode->GetPosition() > Other.m_pNode->GetPosition();
+    }
 
 protected:
 	virtual void				hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent);
@@ -116,9 +123,13 @@ public:
 	void	UpdateHistogram(void);
 	void	UpdateEdges(void);
 	void	UpdateNodes(void);
+	void	UpdateNodeRanges(void);
 	void	UpdateGradient(void);
 	void	UpdatePolygon(void);
 	
+	QPointF SceneToTf(const QPointF& ScenePoint);
+	QPointF TfToScene(const QPointF& TfPoint);
+
 
 signals:
 	void SelectionChange(QNode* pTransferFunctionNode);

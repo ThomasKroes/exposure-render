@@ -35,7 +35,7 @@ CNodeGraphics::CNodeGraphics(QGraphicsItem* pParent, QNode* pNode, CTransferFunc
 
 	// Make item movable
 	setFlag(QGraphicsItem::ItemIsMovable);
-//	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 	setFlag(QGraphicsItem::ItemIsSelectable);
 
 	// We are going to catch hover events
@@ -104,46 +104,9 @@ void CNodeGraphics::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
 
 QVariant CNodeGraphics::itemChange(GraphicsItemChange Change, const QVariant& Value)
 {
-    QPointF NewPoint = Value.toPointF();
+    QPointF ScenePoint = Value.toPointF();
  
-    if (Change == ItemPositionChange && scene())
-	{/*
-		const float NormX = (GetCenter().x() - m_pTransferFunctionView->m_EditRect.left()) / m_pTransferFunctionView->m_EditRect.width();
-		const float NormY = (GetCenter().y() - m_pTransferFunctionView->m_EditRect.top()) / m_pTransferFunctionView->m_EditRect.height();
-
-		m_pNode->SetNormalizedX(NormX);
-		m_pNode->SetNormalizedY(NormY);
-		
-//		UpdateTooltip();
-
-//		m_pNode->SetValueY(0.01f * NewPoint.y());
-
-		
-		if (!m_pNode->GetAllowMoveH() && !m_pNode->GetAllowMoveV())
-		{
-			NewPoint = m_LastPos;
-		}
-		
-		if (m_pNode->GetAllowMoveH() && !m_pNode->GetAllowMoveV())
-			NewPoint.setY(m_LastPos.y());
-
-		if (!m_pNode->GetAllowMoveH() && m_pNode->GetAllowMoveV())
-			NewPoint.setX(m_LastPos.x());
-
-		
-		QRectF SceneRectangle = scene()->sceneRect();
-		
-		if (!SceneRectangle.contains(NewPoint))
-		{
-			// Keep the item inside the scene rect.
-			NewPoint.setX(qMin(SceneRectangle.right(), qMax(NewPoint.x(), SceneRectangle.left())));
-			NewPoint.setY(qMin(SceneRectangle.bottom(), qMax(NewPoint.y(), SceneRectangle.top())));
-		}
-
-		return NewPoint;*/
-    }
-
-	if (Change == QGraphicsItem::ItemSelectedHasChanged)
+    if (Change == QGraphicsItem::ItemSelectedHasChanged)
 	{
 		if (isSelected())
 		{
@@ -171,15 +134,25 @@ void CNodeGraphics::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 	QGraphicsEllipseItem::mouseReleaseEvent(pEvent);
 
 	// Change the cursor shape to normal
-//	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
-//	setCursor(m_Cursor);
+	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
+	setCursor(m_Cursor);
 }
 
 void CNodeGraphics::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
-//	QGraphicsItem::mouseMoveEvent(pEvent);
-	m_pNode->SetNormalizedX((pEvent->scenePos().x() - (float)m_pTransferFunctionView->rect().left()) / (float)m_pTransferFunctionView->rect().width());
-	m_pNode->SetNormalizedY(1.0f - ((pEvent->scenePos().y() - (float)m_pTransferFunctionView->rect().top()) / (float)m_pTransferFunctionView->rect().height()));
+
+	const QPointF Min = m_pTransferFunctionView->TfToScene(QPointF(GetNode()->m_MinX, 0.0f));
+	const QPointF Max = m_pTransferFunctionView->TfToScene(QPointF(GetNode()->m_MaxX, 1.0f));
+
+	QPointF ScenePoint;
+
+	ScenePoint.setX(qMin((float)Max.x(), qMax((float)pEvent->scenePos().x(), (float)Min.x())));
+	ScenePoint.setY(qMin((float)Max.y(), qMax((float)pEvent->scenePos().y(), (float)Min.y())));
+
+	QPointF TfPoint = m_pTransferFunctionView->SceneToTf(ScenePoint);
+
+	m_pNode->SetX(TfPoint.x());
+	m_pNode->SetY(TfPoint.y());
 }
 
 void CNodeGraphics::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
@@ -227,25 +200,6 @@ void CNodeGraphics::UpdateTooltip(void)
 	// Update the tooltip
 	setToolTip(ToolTipString);
 }
-/*
-CTransferFunctionEdge::CTransferFunctionEdge(CTransferFunctionView* pTransferFunctionView, QNode* pTransferFunctionNode1, QNode* pTransferFunctionNode2) :
-	QObject(NULL),
-	m_pTransferFunctionView(pTransferFunctionView),
-	m_pTransferFunctionNode1(pTransferFunctionNode1),
-	m_pTransferFunctionNode2(pTransferFunctionNode2),
-	m_Cursor()
-{
-	m_pLine = new QGraphicsLineItem(NULL, m_pTransferFunctionView->scene());
-	
-	// Setup connections
-	connect(pTransferFunctionNode1, SIGNAL(NodeMove()), this, SLOT(Update()));
-};
-
-void CTransferFunctionEdge::Update(void)
-{
-	m_pLine->setLine(m_pTransferFunctionNode1->GetPosition(), m_pTransferFunctionNode1->GetOpacity(), m_pTransferFunctionNode2->GetPosition(), m_pTransferFunctionNode2->GetOpacity());
-}
-*/
 
 CTransferFunctionView::CTransferFunctionView(QWidget* pParent, QTransferFunction* pTransferFunction) :
 	QGraphicsView(pParent),
@@ -254,7 +208,7 @@ CTransferFunctionView::CTransferFunctionView(QWidget* pParent, QTransferFunction
 	m_pPolygon(NULL),
 	m_pOutline(NULL),
 	m_pCanvas(NULL),
-	m_Margin(0.0f)
+	m_Margin(20.0f)
 {
 	// Dimensions
 	setFixedHeight(170);
@@ -386,11 +340,18 @@ void CTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 	CNodeGraphics* pNodeGraphics = dynamic_cast<CNodeGraphics*>(itemAt(pEvent->pos()));
 
 	if (!pNodeGraphics)
-		SetSelectedNode(NULL);
-	else
-		SetSelectedNode(pNodeGraphics->GetNode());
+	{
+		QPointF TfPoint = SceneToTf(pEvent->pos());
 
-//	m_pTransferFunction->AddNode(new QNode(m_pTransferFunction, 50.0f, 30.0f, QColor(255, 160, 30, 255)));
+		m_pTransferFunction->AddNode(new QNode(m_pTransferFunction, TfPoint.x(), TfPoint.y(), QColor(255, 160, 30, 255)));
+//		SetSelectedNode(NULL);
+	}
+	else
+	{
+		SetSelectedNode(pNodeGraphics->GetNode());
+	}
+
+//	
 }
 
 void CTransferFunctionView::UpdateCanvas(void)
@@ -458,28 +419,54 @@ void CTransferFunctionView::UpdateEdges(void)
 
 void CTransferFunctionView::UpdateNodes(void)
 {
-	m_EditRect = rect();
-
 	// Set the gradient stops
 	foreach(CNodeGraphics* pNodeGraphics, m_Nodes)
 	{
 		QPointF Center;
 
-		Center.setX(rect().left() + rect().width() * pNodeGraphics->GetNode()->GetNormalizedX());
-		Center.setY(rect().top() + rect().height() - (pNodeGraphics->GetNode()->GetOpacity() * rect().height()));
+		Center.setX(m_EditRect.left() + m_EditRect.width() * pNodeGraphics->GetNode()->GetNormalizedX());
+		Center.setY(m_EditRect.top() + m_EditRect.height() - (pNodeGraphics->GetNode()->GetOpacity() * m_EditRect.height()));
 		
 		pNodeGraphics->SetCenter(Center);
-
-//		pNodeGraphics->setPos(Center);
 	}
 
 	m_pOutline->setRect(m_EditRect);
 }
 
+void CTransferFunctionView::UpdateNodeRanges(void)
+{
+	if (m_pTransferFunction->m_Nodes.size() < 2)
+		return;
+
+	for (int i = 0; i < m_pTransferFunction->m_Nodes.size(); i++)
+	{
+		QNode* pNode = m_pTransferFunction->m_Nodes[i];
+
+		if (pNode == m_pTransferFunction->m_Nodes.front())
+		{
+			pNode->m_MinX = 0.0f;
+			pNode->m_MaxX = 0.0f;
+		}
+		else if (pNode == m_pTransferFunction->m_Nodes.back())
+		{
+			pNode->m_MinX = m_pTransferFunction->m_RangeMax;
+			pNode->m_MaxX = m_pTransferFunction->m_RangeMax;
+		}
+		else
+		{
+			QNode* pNodeLeft	= m_pTransferFunction->m_Nodes[i - 1];
+			QNode* pNodeRight	= m_pTransferFunction->m_Nodes[i + 1];
+
+			pNode->m_MinX = pNodeLeft->GetPosition();
+			pNode->m_MaxX = pNodeRight->GetPosition();
+		}
+	}
+}
+
 void CTransferFunctionView::UpdateGradient(void)
 {
-	m_LinearGradient.setStart(rect().left(), rect().top());
-	m_LinearGradient.setFinalStop(rect().right(), rect().top());
+	m_LinearGradient.setStart(m_EditRect.left(), m_EditRect.top());
+	m_LinearGradient.setFinalStop(m_EditRect.right(), m_EditRect.top());
 
 	QGradientStops GradientStops;
 
@@ -546,9 +533,19 @@ void CTransferFunctionView::Update(void)
 	UpdateCanvas();
 //	UpdateHistogram();
 	UpdateNodes();
+	UpdateNodeRanges();
 	UpdateEdges();
-//	UpdateGradient();
-//	UpdatePolygon();
+	UpdateGradient();
+	UpdatePolygon();
+}
+
+bool LessThan1( QNode *a,  QNode *b )
+{
+	return (a->GetPosition()) < (b->GetPosition());
+}
+bool LessThan2( CNodeGraphics *a, CNodeGraphics *b )
+{
+	return (a->GetNode()->GetPosition()) < (b->GetNode()->GetPosition());
 }
 
 void CTransferFunctionView::OnNodeAdd(QNode* pTransferFunctionNode)
@@ -561,6 +558,10 @@ void CTransferFunctionView::OnNodeAdd(QNode* pTransferFunctionNode)
 	m_pGraphicsScene->addItem(pNodeGraphics);
 
 	m_Nodes.append(pNodeGraphics);
+
+
+	qSort(m_Nodes.begin(), m_Nodes.end(), LessThan2);
+	qSort(m_pTransferFunction->m_Nodes.begin(), m_pTransferFunction->m_Nodes.end(), LessThan1);
 
 	/*
 	qSort(m_Nodes.begin(), m_Nodes.end(), NodeLessThan);
@@ -576,6 +577,28 @@ void CTransferFunctionView::OnNodeAdd(QNode* pTransferFunctionNode)
 		QGraphicsLineItem* pLine = new QGraphicsLineItem();
 	}
 	*/
+}
+
+QPointF CTransferFunctionView::SceneToTf(const QPointF& ScenePoint)
+{
+	const float NormalizedX = (ScenePoint.x() - (float)rect().left()) / (float)rect().width();
+	const float NormalizedY = 1.0f - ((ScenePoint.y() - (float)rect().top()) / (float)rect().height());
+
+	const float TfX = m_pTransferFunction->m_RangeMin + NormalizedX * m_pTransferFunction->m_Range;
+	const float TfY = NormalizedY;
+
+	return QPointF(TfX, TfY);
+}
+
+QPointF CTransferFunctionView::TfToScene(const QPointF& TfPoint)
+{
+	const float NormalizedX = (TfPoint.x() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
+	const float NormalizedY = TfPoint.y();
+
+	const float SceneX = rect().left() + NormalizedX * rect().width();
+	const float SceneY = rect().top() + NormalizedY * rect().height();
+
+	return QPointF(SceneX, SceneY);
 }
 
 void CTransferFunctionView::OnNodeRemove(QNode* pTransferFunctionNode)
@@ -943,7 +966,10 @@ void CNodePropertiesWidget::OnNextNode(void)
 void CNodePropertiesWidget::OnTransferFunctionChanged(void)
 {
 	if (m_pTransferFunction->m_pSelectedNode)
+	{
 		m_pPositionSlider->setValue(m_pTransferFunction->m_pSelectedNode->GetPosition());
+//		m_pOpacitySlider->setValue(m_pTransferFunction->m_pSelectedNode->GetOpacity() * 100.0f);
+	}
 }
 
 void CNodePropertiesWidget::OnPositionChanged(const int& Position)

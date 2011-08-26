@@ -11,7 +11,9 @@ QNode::QNode(QTransferFunction* pTransferFunction, const float& Position, const 
 	m_AllowMoveH(Deletable),
 	m_AllowMoveV(true),
 	m_MinX(0.0f),
-	m_MaxX(255.0f)
+	m_MaxX(255.0f),
+	m_MinY(0.0f),
+	m_MaxY(1.0f)
 {
 }
 
