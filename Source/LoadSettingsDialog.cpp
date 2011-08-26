@@ -125,6 +125,11 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 	SetToolTips();
 };
 
+bool CLoadSettingsDialog::GetResample(void)		{ return m_Resample;  }
+float CLoadSettingsDialog::GetResampleX(void)	{ return m_ResampleX; }
+float CLoadSettingsDialog::GetResampleY(void)	{ return m_ResampleY; }
+float CLoadSettingsDialog::GetResampleZ(void)	{ return m_ResampleZ; }
+
 void CLoadSettingsDialog::LockY(const int& State)
 {
 	m_pResampleYLabel->setEnabled(!State);

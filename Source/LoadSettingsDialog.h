@@ -10,10 +10,10 @@ public:
     CLoadSettingsDialog(QWidget* pParent = NULL);
 
 public:
-	bool GetResample(void)		{ return m_Resample;  }
-	float GetResampleX(void)	{ return m_ResampleX; }
-	float GetResampleY(void)	{ return m_ResampleY; }
-	float GetResampleZ(void)	{ return m_ResampleZ; }
+	bool GetResample(void);
+	float GetResampleX(void);
+	float GetResampleY(void);
+	float GetResampleZ(void);
 
 	void Reset(void);
 	void SetToolTips(void);

@@ -88,8 +88,8 @@ bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataV
 
 	pImageDataVolume = pImageCast->GetOutput();
 
-	if (LoadSettingsDialog.GetResample())
-	{
+//	if (LoadSettingsDialog.GetResample())
+//	{
 		// Create resampler
 		vtkSmartPointer<vtkImageResample> ImageResample = vtkImageResample::New();
 
@@ -112,7 +112,7 @@ bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataV
 		ImageResample->Update();
 
 		pImageDataVolume = ImageResample->GetOutput();
-	}
+//	}
 
 	/*
 	// Create magnitude volume
