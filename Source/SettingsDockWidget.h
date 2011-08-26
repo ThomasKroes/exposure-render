@@ -19,9 +19,11 @@ private:
 	QLabel*			m_pNoBouncesLabel;
 	QSlider*		m_pNoBouncesSlider;
 	QSpinBox*		m_pNoBouncesSpinBox;
-	QLabel*			m_pPhaseLabel;
+	QLabel*			m_pScatteringLabel;
+	QGridLayout*	m_pScatteringLayout;
+	QLabel*			m_pForwardLabel;
 	QSlider*		m_pPhaseSlider;
-	QSpinBox*		m_pPhaseSpinBox;
+	QLabel*			m_pBackwardLabel;
 };
 
 class CKernelSettingsWidget : public QGroupBox

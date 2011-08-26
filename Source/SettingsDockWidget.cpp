@@ -8,9 +8,11 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	m_pNoBouncesLabel(NULL),
 	m_pNoBouncesSlider(NULL),
 	m_pNoBouncesSpinBox(NULL),
-	m_pPhaseLabel(NULL),
+	m_pScatteringLabel(NULL),
+	m_pScatteringLayout(NULL),
+	m_pForwardLabel(NULL),
 	m_pPhaseSlider(NULL),
-	m_pPhaseSpinBox(NULL)
+	m_pBackwardLabel(NULL)
 {
 	setTitle("Tracer");
 	setToolTip("Tracer settings");
@@ -48,22 +50,25 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	connect(m_pNoBouncesSlider, SIGNAL(valueChanged(int)), this, SLOT(SetNoBounces(int)));
 
 	// Phase
-	m_pPhaseLabel = new QLabel("Phase");
-	m_pGridLayout->addWidget(m_pPhaseLabel, 2, 0);
+	m_pScatteringLabel = new QLabel("Scattering");
+	m_pGridLayout->addWidget(m_pScatteringLabel, 2, 0);
+
+	// Create scattering layout
+	m_pScatteringLayout = new QGridLayout();
+	m_pGridLayout->addLayout(m_pScatteringLayout, 2, 1, 1, 2);
+
+	m_pBackwardLabel = new QLabel("Backward");
+	m_pScatteringLayout->addWidget(m_pBackwardLabel, 0, 0);
 
 	m_pPhaseSlider = new QSlider(Qt::Orientation::Horizontal);
-    m_pPhaseSlider->setFocusPolicy(Qt::StrongFocus);
-    m_pPhaseSlider->setTickPosition(QSlider::TickPosition::NoTicks);
 	m_pPhaseSlider->setRange(-100, 100);
-	m_pGridLayout->addWidget(m_pPhaseSlider, 2, 1);
+	m_pPhaseSlider->setToolTip("Move slider to the left to increase <i>backward</i> scattering and right to increase <i>forward</i> scattering");
+	m_pScatteringLayout->addWidget(m_pPhaseSlider, 0, 1);
 	
-	m_pPhaseSpinBox = new QSpinBox;
-    m_pPhaseSpinBox->setRange(-100, 100);
-	m_pGridLayout->addWidget(m_pPhaseSpinBox, 2, 2);
+	m_pForwardLabel = new QLabel("Forward");
+	m_pScatteringLayout->addWidget(m_pForwardLabel, 0, 2);
 	
-	connect(m_pPhaseSlider, SIGNAL(valueChanged(int)), m_pPhaseSpinBox, SLOT(setValue(int)));
-	connect(m_pPhaseSpinBox, SIGNAL(valueChanged(int)), m_pPhaseSlider, SLOT(setValue(int)));
-	connect(m_pPhaseSpinBox, SIGNAL(valueChanged(int)), this, SLOT(SetPhase(int)));
+	connect(m_pPhaseSlider, SIGNAL(valueChanged(int)), this, SLOT(SetPhase(int)));
 }
 
 void CTracerSettingsWidget::SetNoBounces(const int& NoBounces)
