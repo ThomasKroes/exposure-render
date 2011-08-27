@@ -36,7 +36,6 @@ MainWindow.cpp
 TransferFunctionWidget.cpp 
 LightingDockWidget.cpp 
 VolumeAppearanceDockWidget.cpp
-Node.cpp
 PieceWiseFunction.cpp
 Camera.cpp
 Filter.cpp
@@ -71,7 +70,6 @@ MainWindow.h
 TransferFunctionWidget.h 
 LightingDockWidget.h 
 VolumeAppearanceDockWidget.h
-Node.h
 PieceWiseFunction.h
 Camera.h
 Defines.h
