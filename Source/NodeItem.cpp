@@ -74,30 +74,58 @@ void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
 {
 	QGraphicsEllipseItem::mousePressEvent(pEvent);
 
-	/*
-	// Change the cursor shape
-	if (m_pNode->GetAllowMoveH() && m_pNode->GetAllowMoveV())
-		m_Cursor.setShape(Qt::CursorShape::sizeAllCursor);
-
-	if (!m_pNode->GetAllowMoveH() && m_pNode->GetAllowMoveV())
-		m_Cursor.setShape(Qt::CursorShape::SizeVerCursor);
-
-	if (m_pNode->GetAllowMoveH() && !m_pNode->GetAllowMoveV())
-		m_Cursor.setShape(Qt::CursorShape::SizeHorCursor);
-
+	// Change the cursor shape to normal
+	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
 	setCursor(m_Cursor);
-	
-	m_LastPos = pEvent->pos();
-	
-
-	m_pTransferFunctionView->SetSelectedNode(m_pNode);*/
 }
-
 
 QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 {
-    QPointF ScenePoint = Value.toPointF();
+	QPointF ScenePoint = m_pTransferFunctionView->m_pCanvas->mapFromScene(Value.toPointF());
  
+
+	/*
+	const QPointF Min = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MinX, 0.0f));
+	const QPointF Max = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MaxX, 1.0f));
+
+	QPointF ScenePoint, MouseScenePoint;
+
+	MouseScenePoint = m_pTransferFunctionView->m_pCanvas->mapFromScene(pEvent->scenePos().x(), pEvent->scenePos().y());
+
+	ScenePoint.setX(qMin((float)Max.x(), qMax((float)MouseScenePoint.x(), (float)Min.x())));
+	ScenePoint.setY(qMin((float)Max.y(), qMax((float)MouseScenePoint.y(), (float)Min.y())));
+
+	QPointF TfPoint = m_pTransferFunctionView->SceneToTf(ScenePoint);
+
+	m_pNode->SetX(TfPoint.x());
+	m_pNode->SetY(TfPoint.y());
+	*/
+
+	if (Change == QGraphicsItem::ItemPositionChange)
+	{
+		QPointF SceneMinPt = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->GetMinX(), m_pNode->GetMinY()));
+		QPointF SceneMaxPt = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->GetMaxX(), m_pNode->GetMaxY()));
+
+		QRectF AllowedRect(SceneMinPt, SceneMaxPt);
+
+		if (AllowedRect.contains(ScenePoint))
+		{
+			return Value;
+		}
+		else
+		{
+			ScenePoint.setX(qMin((float)SceneMaxPt.x(), qMax((float)ScenePoint.x(), (float)SceneMinPt.x())));
+			ScenePoint.setY(qMin((float)SceneMaxPt.y(), qMax((float)ScenePoint.y(), (float)SceneMinPt.y())));
+
+			return ScenePoint;
+		}
+	}
+
+	if (Change == QGraphicsItem::ItemPositionHasChanged)
+	{
+
+	}
+
     if (Change == QGraphicsItem::ItemSelectedHasChanged)
 	{
 		if (isSelected())
@@ -115,7 +143,6 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 			setBrush(m_CacheBrush);
 		}
 	}
-	
 
     return QGraphicsItem::itemChange(Change, Value);
 }
@@ -132,21 +159,7 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
-
-	const QPointF Min = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MinX, 0.0f));
-	const QPointF Max = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MaxX, 1.0f));
-
-	QPointF ScenePoint, MouseScenePoint;
-
-	MouseScenePoint = m_pTransferFunctionView->m_pCanvas->mapFromScene(pEvent->scenePos().x(), pEvent->scenePos().y());
-
-	ScenePoint.setX(qMin((float)Max.x(), qMax((float)MouseScenePoint.x(), (float)Min.x())));
-	ScenePoint.setY(qMin((float)Max.y(), qMax((float)MouseScenePoint.y(), (float)Min.y())));
-
-	QPointF TfPoint = m_pTransferFunctionView->SceneToTf(ScenePoint);
-
-	m_pNode->SetX(TfPoint.x());
-	m_pNode->SetY(TfPoint.y());
+	QGraphicsItem::mouseMoveEvent(pEvent);
 }
 
 void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)

@@ -60,7 +60,7 @@ void QNode::SetOpacity(const float& Opacity)
 	m_Opacity = Opacity;
 
 	emit NodeChanged(this);
-	emit OpacityChanged(this);
+//	emit OpacityChanged(this);
 }
 
 QColor QNode::GetColor(void) const

@@ -401,8 +401,8 @@ QPointF QTransferFunctionView::TfToScene(const QPointF& TfPoint)
 	const float NormalizedX = (TfPoint.x() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
 	const float NormalizedY = TfPoint.y();
 
-	const float SceneX = rect().left() + NormalizedX * rect().width();
-	const float SceneY = rect().top() + NormalizedY * rect().height();
+	const float SceneX = m_EditRect.left() + NormalizedX * m_EditRect.width();
+	const float SceneY = m_EditRect.top() + NormalizedY * m_EditRect.height();
 
 	return QPointF(SceneX, SceneY);
 }

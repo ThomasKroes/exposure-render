@@ -61,6 +61,7 @@ Scene.cpp
 NodeItem.cpp
 TransferFunctionView.cpp
 GradientView.cpp
+NodePropertiesWidget.cpp
 VolumeTracer.cu
 )
 
@@ -98,6 +99,7 @@ Scene.h
 NodeItem.h
 TransferFunctionView.h
 GradientView.h
+NodePropertiesWidget.h
 VolumeTracer.cuh
 )
 
