@@ -59,6 +59,9 @@ SettingsDockWidget.cpp
 LoadSettingsDialog.cpp
 VtkWidget.cpp
 Scene.cpp
+NodeItem.cpp
+TransferFunctionView.cpp
+GradientView.cpp
 VolumeTracer.cu
 )
 
@@ -94,6 +97,9 @@ SettingsDockWidget.h
 LoadSettingsDialog.h
 VtkWidget.h
 Scene.h
+NodeItem.h
+TransferFunctionView.h
+GradientView.h
 VolumeTracer.cuh
 )
 

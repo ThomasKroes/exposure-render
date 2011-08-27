@@ -200,7 +200,7 @@ void CMainWindow::CreateDockWindows()
 	// Appearance dock widget
     m_pVolumeAppearanceDockWidget = new CVolumeAppearanceDockWidget(this);
 	m_pVolumeAppearanceDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-	addDockWidget(Qt::LeftDockWidgetArea, m_pVolumeAppearanceDockWidget);
+	addDockWidget(Qt::BottomDockWidgetArea, m_pVolumeAppearanceDockWidget);
     m_pViewMenu->addAction(m_pVolumeAppearanceDockWidget->toggleViewAction());
 
 	// Statistics dock widget
