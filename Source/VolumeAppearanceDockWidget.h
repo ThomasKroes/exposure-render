@@ -3,14 +3,14 @@
 #include <QtGui>
 
 class CVolumeAppearanceDockWidget;
-class CTransferFunctionWidget;
+class QTransferFunctionWidget;
 
-class CVolumeAppearancePresetsWidget : public QGroupBox
+class QVolumeAppearancePresetsWidget : public QGroupBox
 {
     Q_OBJECT
 
 public:
-    CVolumeAppearancePresetsWidget(QWidget* pParent = NULL);
+    QVolumeAppearancePresetsWidget(QWidget* pParent = NULL);
 
 private:
 	void CreateActions(void);
@@ -36,8 +36,8 @@ public:
 
 protected:
 	QVBoxLayout*						m_pMainLayout;
-	CVolumeAppearancePresetsWidget*		m_pVolumeAppearancePresetsWidget;
-	CTransferFunctionWidget*			m_pTransferFunctionWidget;
+	QVolumeAppearancePresetsWidget*		m_pVolumeAppearancePresetsWidget;
+	QTransferFunctionWidget*			m_pTransferFunctionWidget;
 };
 
 class CVolumeAppearanceDockWidget : public QDockWidget
