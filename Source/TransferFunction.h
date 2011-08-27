@@ -34,20 +34,24 @@ public:
 	void	SetNormalizedY(const float& NormalizedY);
 
 
-	float	GetPosition(void) const;// 						{	return m_Position; 								}				
-	void	SetPosition(const float& Position);//				{	m_Position = Position; emit NodeChanged(this);	}		
-	float	GetOpacity(void) const;//							{	return m_Opacity;								}
-	void	SetOpacity(const float& Opacity);//				{	m_Opacity = Opacity; emit NodeChanged(this);	}
-	QColor	GetColor(void) const;//							{	return m_Color;									}
-	void	SetColor(const float& Color)	;//				{	m_Color = Color; emit NodeChanged(this);		}
-	bool	GetAllowMoveH(void) const	;//					{	return m_AllowMoveH;							}
-	void	SetAllowMoveH(const bool& AllowMoveH);//			{	m_AllowMoveH = AllowMoveH;						}
-	bool	GetAllowMoveV(void) const		;//				{	return m_AllowMoveV;							}
-	void	SetAllowMoveV(const bool& AllowMoveV);//			{	m_AllowMoveV = AllowMoveV;						}
-	float	GetMinX(void) const			;//					{	return m_MinX;									}
-	void	SetMinX(const float& MinX)	;//					{	m_MinX = MinX;									}
-	float	GetMaxX(void) const		;//						{	return m_MaxX;									}
-	void	SetMaxX(const float& MaxX)		;//				{	m_MaxX = MaxX;									}
+	float	GetPosition(void) const;
+	void	SetPosition(const float& Position);
+	float	GetOpacity(void) const;
+	void	SetOpacity(const float& Opacity);
+	QColor	GetColor(void) const;
+	void	SetColor(const QColor& Color);
+	bool	GetAllowMoveH(void) const;
+	void	SetAllowMoveH(const bool& AllowMoveH);
+	bool	GetAllowMoveV(void) const;
+	void	SetAllowMoveV(const bool& AllowMoveV);
+	float	GetMinX(void) const;
+	void	SetMinX(const float& MinX);
+	float	GetMaxX(void) const;
+	void	SetMaxX(const float& MaxX);
+	float	GetMinY(void) const;
+	void	SetMinY(const float& MinY);
+	float	GetMaxY(void) const;
+	void	SetMaxY(const float& MaxY);
 
 	QNode& operator = (const QNode& Other)			
 	{
@@ -64,6 +68,10 @@ public:
 
 signals:
 	void NodeChanged(QNode* pNode);
+	void PositionChanged(QNode* pNode);
+	void OpacityChanged(QNode* pNode);
+	void ColorChanged(QNode* pNode);
+	void RangeChanged(QNode* pNode);
 
 public:
 	QTransferFunction*		m_pTransferFunction;

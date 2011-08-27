@@ -1,7 +1,7 @@
 
 #include "GradientView.h"
 #include "TransferFunction.h"
-#include "Node.h"
+#include "NodeItem.h"
 
 QGradientView::QGradientView(QWidget* pParent, QTransferFunction* pTransferFunction) :
 	QGraphicsView(pParent),

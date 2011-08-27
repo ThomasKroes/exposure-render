@@ -50,7 +50,7 @@ private slots:
 public:
 	QRectF							m_EditRect;
 
-private:
+
 	QGraphicsScene*					m_pGraphicsScene;
 	QTransferFunction*				m_pTransferFunction;
 	QList<QNodeItem*>			m_Nodes;

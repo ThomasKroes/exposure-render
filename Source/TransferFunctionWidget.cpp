@@ -6,6 +6,7 @@
 CNodePropertiesWidget::CNodePropertiesWidget(QWidget* pParent, QTransferFunction* pTransferFunction) :
 	QWidget(pParent),
 	m_pTransferFunction(pTransferFunction),
+	m_pLastSelectedNode(NULL),
 	m_pMainLayout(NULL),
 	m_pSelectionLabel(NULL),
 	m_pSelectionLayout(NULL),
@@ -130,7 +131,7 @@ CNodePropertiesWidget::CNodePropertiesWidget(QWidget* pParent, QTransferFunction
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), m_pPositionSpinBox, SLOT(setValue(int)));
 	connect(m_pPositionSpinBox, SIGNAL(valueChanged(int)), m_pPositionSlider, SLOT(setValue(int)));
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), this, SLOT(OnPositionChanged(int)));
-	connect(m_pTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnTransferFunctionChanged()));
+//	connect(m_pTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnTransferFunctionChanged()));
 
 	// Setup connections for opacity
 	connect(m_pOpacitySlider, SIGNAL(valueChanged(int)), m_pOpacitySpinBox, SLOT(setValue(int)));
@@ -190,6 +191,22 @@ void CNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		m_pPreviousNodePushButton->setToolTip(PreviousToolTip);
 		m_pNextNodePushButton->setStatusTip(NextToolTip);
 		m_pNextNodePushButton->setToolTip(NextToolTip);
+
+		// Disconnect previous node
+		if (m_pLastSelectedNode)
+		{
+			disconnect(m_pLastSelectedNode, SIGNAL(PositionChanged(QNode*)), this, SLOT(OnNodePositionChanged(QNode*)));
+			disconnect(m_pLastSelectedNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
+			disconnect(m_pLastSelectedNode, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
+		}
+
+		// Setup connections
+		connect(pNode, SIGNAL(PositionChanged(QNode*)), this, SLOT(OnNodePositionChanged(QNode*)));
+		connect(pNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
+		connect(pNode, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
+
+		// Chache last node
+		m_pLastSelectedNode = pNode;
 	}
 }
 
@@ -238,6 +255,24 @@ void CNodePropertiesWidget::OnColorChanged(const QColor& Color)
 
 	for (int i = 0; i < m_pTransferFunction->m_Nodes.size(); i++)
 		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
+}
+
+void CNodePropertiesWidget::OnNodePositionChanged(QNode* pNode)
+{
+	if (pNode)
+		m_pPositionSlider->setValue(pNode->GetPosition());
+}
+
+void CNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
+{
+	if (pNode)
+		m_pOpacitySlider->setValue(pNode->GetOpacity());
+}
+
+void CNodePropertiesWidget::OnNodeColorChanged(QNode* pNode)
+{
+//	if (pNode)
+//		m_pTransferFunction->m_pSelectedNode->SetColor(pNode->GetColor());
 }
 
 void CNodePropertiesWidget::OnNodeAdd(QNode* pNode)

@@ -143,7 +143,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 
 	if (!pNodeGraphics)
 	{
-		QPointF TfPoint = SceneToTf(pEvent->pos());
+		QPointF TfPoint = SceneToTf(m_pCanvas->mapFromScene(pEvent->posF()));
 
 		int R = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 		int G = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);

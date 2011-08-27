@@ -136,10 +136,12 @@ void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 	const QPointF Min = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MinX, 0.0f));
 	const QPointF Max = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MaxX, 1.0f));
 
-	QPointF ScenePoint;
+	QPointF ScenePoint, MouseScenePoint;
 
-	ScenePoint.setX(qMin((float)Max.x(), qMax((float)pEvent->scenePos().x(), (float)Min.x())));
-	ScenePoint.setY(qMin((float)Max.y(), qMax((float)pEvent->scenePos().y(), (float)Min.y())));
+	MouseScenePoint = m_pTransferFunctionView->m_pCanvas->mapFromScene(pEvent->scenePos().x(), pEvent->scenePos().y());
+
+	ScenePoint.setX(qMin((float)Max.x(), qMax((float)MouseScenePoint.x(), (float)Min.x())));
+	ScenePoint.setY(qMin((float)Max.y(), qMax((float)MouseScenePoint.y(), (float)Min.y())));
 
 	QPointF TfPoint = m_pTransferFunctionView->SceneToTf(ScenePoint);
 

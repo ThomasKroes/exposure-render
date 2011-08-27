@@ -37,20 +37,91 @@ void QNode::SetNormalizedY(const float& NormalizedY)
 	SetOpacity(NormalizedY);
 }
 
-float	QNode::GetPosition(void) const 						{	return m_Position; 								}				
-void	QNode::SetPosition(const float& Position)				{	m_Position = Position; emit NodeChanged(this);}		
-float	QNode::GetOpacity(void) const							{	return m_Opacity;								}
-void	QNode::SetOpacity(const float& Opacity)				{	m_Opacity = Opacity; emit NodeChanged(this);	}
-QColor	QNode::GetColor(void) const							{	return m_Color;									}
-void	QNode::SetColor(const float& Color)					{	m_Color = Color; emit NodeChanged(this);		}
-bool	QNode::GetAllowMoveH(void) const						{	return m_AllowMoveH;							}
-void	QNode::SetAllowMoveH(const bool& AllowMoveH)			{	m_AllowMoveH = AllowMoveH;						}
-bool	QNode::GetAllowMoveV(void) const						{	return m_AllowMoveV;							}
-void	QNode::SetAllowMoveV(const bool& AllowMoveV)			{	m_AllowMoveV = AllowMoveV;						}
-float	QNode::GetMinX(void) const								{	return m_MinX;									}
-void	QNode::SetMinX(const float& MinX)						{	m_MinX = MinX;									}
-float	QNode::GetMaxX(void) const								{	return m_MaxX;									}
-void	QNode::SetMaxX(const float& MaxX)						{	m_MaxX = MaxX;									}
+float	QNode::GetPosition(void) const
+{
+	return m_Position;
+}
+
+void QNode::SetPosition(const float& Position)
+{
+	m_Position = Position; 
+	
+	emit NodeChanged(this);
+	emit PositionChanged(this);
+}
+
+float QNode::GetOpacity(void) const
+{
+	return m_Opacity;
+}
+
+void QNode::SetOpacity(const float& Opacity)
+{
+	m_Opacity = Opacity;
+
+	emit NodeChanged(this);
+	emit OpacityChanged(this);
+}
+
+QColor QNode::GetColor(void) const
+{
+	return m_Color;
+}
+
+void QNode::SetColor(const QColor& Color)
+{
+	m_Color = Color;
+	
+	emit ColorChanged(this);
+}
+
+float QNode::GetMinX(void) const
+{
+	return m_MinX;
+}
+
+void QNode::SetMinX(const float& MinX)
+{
+	m_MinX = MinX;
+
+	emit RangeChanged(this);
+}
+
+float QNode::GetMaxX(void) const
+{
+	return m_MaxX;
+}
+
+void QNode::SetMaxX(const float& MaxX)
+{
+	m_MaxX = MaxX;
+
+	emit RangeChanged(this);
+}
+
+float QNode::GetMinY(void) const
+{
+	return m_MinY;
+}
+
+void QNode::SetMinY(const float& MinY)
+{
+	m_MinY = MinY;
+
+	emit RangeChanged(this);
+}
+
+float QNode::GetMaxY(void) const
+{
+	return m_MaxY;
+}
+
+void QNode::SetMaxY(const float& MaxY)
+{
+	m_MaxY = MaxY;
+
+	emit RangeChanged(this);
+}
 
 QTransferFunction::QTransferFunction(QObject* pParent) :
 	QObject(pParent),
