@@ -3,7 +3,8 @@
 #include <QtGui>
 
 class QTransferFunction;
-class QNodeGraphics;
+class QNodeItem;
+class QNode;
 
 class QTransferFunctionView : public QGraphicsView
 {
@@ -19,7 +20,7 @@ public:
 	void keyReleaseEvent(QKeyEvent* pEvent);
 	void mousePressEvent ( QMouseEvent * event );
 
-	void OnNodeMove(QNodeGraphics* pNodeGraphics);
+	void OnNodeMove(QNodeItem* pNodeGraphics);
 
 	void SetSelectedNode(QNode* pSelectedNode);
 
@@ -52,7 +53,7 @@ public:
 private:
 	QGraphicsScene*					m_pGraphicsScene;
 	QTransferFunction*				m_pTransferFunction;
-	QList<QNodeGraphics*>			m_Nodes;
+	QList<QNodeItem*>			m_Nodes;
 	QList<QGraphicsLineItem*>		m_Edges;
 	QGraphicsPolygonItem*			m_pPolygon;
 	QCursor							m_Cursor;

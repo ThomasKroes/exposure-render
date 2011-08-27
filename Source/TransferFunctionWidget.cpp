@@ -1,6 +1,7 @@
 
 #include "TransferFunctionWidget.h"
-
+#include "TransferFunctionView.h"
+#include "GradientView.h"
 
 CNodePropertiesWidget::CNodePropertiesWidget(QWidget* pParent, QTransferFunction* pTransferFunction) :
 	QWidget(pParent),

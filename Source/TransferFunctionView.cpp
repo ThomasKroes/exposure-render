@@ -1,5 +1,7 @@
 
 #include "TransferFunctionView.h"
+#include "TransferFunction.h"
+#include "NodeItem.h"
 
 QTransferFunctionView::QTransferFunctionView(QWidget* pParent, QTransferFunction* pTransferFunction) :
 	QGraphicsView(pParent),
@@ -14,7 +16,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent, QTransferFunction
 //	setFixedHeight(170);
 
 	// Styling
-	setFrameShadow(QFrame::Shadow::Sunken);
+	setFrameShadow(Sunken);
 	setFrameShape(NoFrame);
 
 	// Never show scrollbars
@@ -137,7 +139,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 {
 	QGraphicsView::mousePressEvent(pEvent);
 
-	QNodeGraphics* pNodeGraphics = dynamic_cast<QNodeGraphics*>(itemAt(pEvent->pos()));
+	QNodeItem* pNodeGraphics = dynamic_cast<QNodeItem*>(itemAt(pEvent->pos()));
 
 	if (!pNodeGraphics)
 	{
@@ -152,7 +154,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 	}
 	else
 	{
-		SetSelectedNode(pNodeGraphics->GetNode());
+		SetSelectedNode(pNodeGraphics->m_pNode);
 	}
 
 //	
@@ -224,12 +226,12 @@ void QTransferFunctionView::UpdateEdges(void)
 void QTransferFunctionView::UpdateNodes(void)
 {
 	// Set the gradient stops
-	foreach(QNodeGraphics* pNodeGraphics, m_Nodes)
+	foreach(QNodeItem* pNodeGraphics, m_Nodes)
 	{
 		QPointF Center;
 
-		Center.setX(m_EditRect.left() + m_EditRect.width() * pNodeGraphics->GetNode()->GetNormalizedX());
-		Center.setY(m_EditRect.top() + m_EditRect.height() - (pNodeGraphics->GetNode()->GetOpacity() * m_EditRect.height()));
+		Center.setX(m_EditRect.left() + m_EditRect.width() * pNodeGraphics->m_pNode->GetNormalizedX());
+		Center.setY(m_EditRect.top() + m_EditRect.height() - (pNodeGraphics->m_pNode->GetOpacity() * m_EditRect.height()));
 		
 		pNodeGraphics->SetCenter(Center);
 	}
@@ -297,12 +299,12 @@ void QTransferFunctionView::UpdatePolygon(void)
 	// Set the gradient stops
 	for (int i = 0; i < m_Nodes.size(); i++)
 	{
-		QNodeGraphics* pNodeGraphics = m_Nodes[i];
+		QNodeItem* pNodeGraphics = m_Nodes[i];
 
 		QPointF Center;
 
-		Center.setX(m_EditRect.left() + pNodeGraphics->GetNode()->GetNormalizedX() * m_EditRect.width());
-		Center.setY(m_EditRect.bottom() - pNodeGraphics->GetNode()->GetOpacity() * m_EditRect.height());
+		Center.setX(m_EditRect.left() + pNodeGraphics->m_pNode->GetNormalizedX() * m_EditRect.width());
+		Center.setY(m_EditRect.bottom() - pNodeGraphics->m_pNode->GetOpacity() * m_EditRect.height());
 
 		if (pNodeGraphics == m_Nodes.front())
 		{
@@ -347,14 +349,14 @@ bool LessThan1( QNode *a,  QNode *b )
 {
 	return (a->GetPosition()) < (b->GetPosition());
 }
-bool LessThan2( QNodeGraphics *a, QNodeGraphics *b )
+bool LessThan2( QNodeItem *a, QNodeItem *b )
 {
-	return (a->GetNode()->GetPosition()) < (b->GetNode()->GetPosition());
+	return (a->m_pNode->GetPosition()) < (b->m_pNode->GetPosition());
 }
 
 void QTransferFunctionView::OnNodeAdd(QNode* pTransferFunctionNode)
 {
-	QNodeGraphics* pNodeGraphics = new QNodeGraphics(NULL, pTransferFunctionNode, this);
+	QNodeItem* pNodeGraphics = new QNodeItem(NULL, pTransferFunctionNode, this);
 	
 	// Ensure the item is drawn in the right order
 	pNodeGraphics->setZValue(900);
@@ -410,11 +412,11 @@ void QTransferFunctionView::OnNodeRemove(QNode* pTransferFunctionNode)
 	m_Edges.clear();
 }
 
-void QTransferFunctionView::OnNodeMove(QNodeGraphics* pNodeGraphics)
+void QTransferFunctionView::OnNodeMove(QNodeItem* pNodeGraphics)
 {
 	m_Edges.clear();
 
-	QNode * pNode = pNodeGraphics->GetNode();
+	QNode * pNode = pNodeGraphics->m_pNode;
 
 //	pNode->SetPosition(m_pTransferFunction->m_RangeMin + (float)pNodeGraphics->pos().x() * (m_pTransferFunction->m_Range / (float)rect().width()));
 
@@ -431,7 +433,7 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 	if (pNode)
 	{
 		// Deselect all nodes
-		foreach (QNodeGraphics* pNode, m_Nodes)
+		foreach (QNodeItem* pNode, m_Nodes)
 			pNode->setSelected(false);
 
 		// Obtain node index

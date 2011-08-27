@@ -4,13 +4,10 @@
 
 #include "TransferFunction.h"
 
-class CTransferFunctionView;
 class QTransferFunction;
-class QNode;
-
-
-
-
+class QTransferFunctionView;
+class QGradientView;
+class QNodeItem;
 
 class CNodePropertiesWidget : public QWidget
 {
@@ -62,7 +59,7 @@ public:
 protected:
 	QGridLayout*				m_pMainLayout;
 	QTransferFunction*			m_pTransferFunction;
-	CTransferFunctionView*		m_pTransferFunctionView;
+	QTransferFunctionView*		m_pTransferFunctionView;
 	QGradientView*				m_pGradientView;
 	CNodePropertiesWidget*		m_pNodePropertiesWidget;
 };
