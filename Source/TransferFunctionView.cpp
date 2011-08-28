@@ -15,14 +15,34 @@ bool CompareNodeItems(QNodeItem* pNodeItemA, QNodeItem* pNodeItemB)
 	return pNodeItemA->m_pNode->GetPosition() < pNodeItemB->m_pNode->GetPosition();
 }
 
-QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent) :
-	QGraphicsRectItem(pParent)
+QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene) :
+	QGraphicsRectItem(pParent, pGraphicsScene),
+	m_BackgroundBrush(),
+	m_BackgroundPen()
 {
 	// Add polygon graphics item
-	m_pPolygon = new QGraphicsPolygonItem;
+//	m_pPolygon = new QGraphicsPolygonItem;
 
 	// Ensure the item is drawn in the right order
-	m_pPolygon->setZValue(500);
+//	m_pPolygon->setZValue(500);
+
+	// Background styling
+	m_BackgroundBrush.setColor(QColor(210, 210, 210));
+	m_BackgroundBrush.setStyle(Qt::BrushStyle::SolidPattern);
+	m_BackgroundPen.setColor(QColor(90, 90, 90));
+	m_BackgroundPen.setJoinStyle(Qt::MiterJoin);
+	m_BackgroundPen.setWidthF(0.5f);
+	m_BackgroundPen.setStyle(Qt::SolidLine);
+
+	// Create background rectangle
+	setBrush(m_BackgroundBrush);
+	setPen(m_BackgroundPen);
+
+	// Make sure this rectangle is drawn behind everything else
+	setZValue(0);
+
+	// Update the canvas
+	Update();
 }
 
 void QTransferFunctionCanvas::mousePressEvent(QGraphicsSceneMouseEvent* pGraphicsSceneMouseEvent)
@@ -37,22 +57,20 @@ void QTransferFunctionCanvas::mousePressEvent(QGraphicsSceneMouseEvent* pGraphic
 		// Add a new node if the user clicked the left button
 		if (pGraphicsSceneMouseEvent->button() == Qt::MouseButton::LeftButton)
 		{
-			/*
-			QPointF TfPoint = SceneToTransferFunction(m_pCanvas->mapFromScene(pEvent->posF()));
+			QPointF TfPoint = SceneToTransferFunction(pGraphicsSceneMouseEvent->pos());
 
 			int R = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 			int G = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 			int B = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 
 			// Create new transfer function node
-			QNode* pNode = new QNode(m_pTransferFunction, TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
+			QNode* pNode = new QNode(TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
 
 			// Add to node list
 			gTransferFunction.AddNode(pNode);
 
 			// Select it immediately
 			SetSelectedNode(pNode);
-			*/
 		}
 		else
 		{
@@ -78,7 +96,7 @@ void QTransferFunctionCanvas::Update(void)
 	UpdateNodeRanges();
 	UpdateEdges();
 	UpdateGradient();
-	UpdatePolygon();
+//	UpdatePolygon();
 }
 
 void QTransferFunctionCanvas::UpdateGrid(void)
@@ -259,8 +277,8 @@ QPointF QTransferFunctionCanvas::TransferFunctionToScene(const QPointF& TfPoint)
 	const float NormalizedX = (TfPoint.x() - gTransferFunction.m_RangeMin) / gTransferFunction.m_Range;
 	const float NormalizedY = 1.0f - TfPoint.y();
 
-	const float SceneX = rect().left() + NormalizedX * rect().width();
-	const float SceneY = rect().top() + NormalizedY * rect().height();
+	const float SceneX = NormalizedX * rect().width();
+	const float SceneY = NormalizedY * rect().height();
 
 	return QPointF(SceneX, SceneY);
 }
@@ -269,7 +287,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	QGraphicsView(pParent),
 	m_pGraphicsScene(NULL),
 	m_pTransferFunctionCanvas(NULL),
-	m_Margin(4.0f)
+	m_Margin(12.0f)
 {
 	// Dimensions
 	setFixedHeight(250);
@@ -288,13 +306,16 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 
 	// Create scene and apply
 	m_pGraphicsScene = new QGraphicsScene(this);
-	setScene(scene());
+	setScene(m_pGraphicsScene);
 
 	// Turn antialiasing on
 	setRenderHint(QPainter::Antialiasing);
 
 	// Respond to changes in the transfer function
-	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
+//	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
+
+	// Create the transfer function canvas and add it to the scene
+	m_pTransferFunctionCanvas = new QTransferFunctionCanvas(NULL, m_pGraphicsScene);
 
 	/*
 	connect(m_pTransferFunction, SIGNAL(NodeAdd(QNode*)), this, SLOT(OnNodeAdd(QNode*)));
@@ -351,28 +372,28 @@ void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rec
 {
 	// Base class
 	QGraphicsView::drawBackground(pPainter, Rectangle);
-	
+//	setSceneRect(rect());
+//	centerOn(Rectangle.center());
+
 	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
 }
 
-void QTransferFunctionView::OnNodeAdd(QNode* pTransferFunctionNode)
+void QTransferFunctionView::OnNodeAdd(QNode* pNode)
 {
-	/*
-	QNodeItem* pNodeItem = new QNodeItem(NULL, pTransferFunctionNode, this);
+	
+	QNodeItem* pNodeItem = new QNodeItem(NULL, pNode, m_pTransferFunctionCanvas);
 	
 	// Ensure the item is drawn in the right order
 	pNodeItem->setZValue(900);
 
 	scene()->addItem(pNodeItem);
 
-	m_Nodes.append(pNodeItem);
+	m_pTransferFunctionCanvas->m_Nodes.append(pNodeItem);
 	
-	qSort(m_Nodes.begin(), m_Nodes.end(), CompareNodeItems);
+	qSort(m_pTransferFunctionCanvas->m_Nodes.begin(), m_pTransferFunctionCanvas->m_Nodes.end(), CompareNodeItems);
 	qSort(gTransferFunction.m_Nodes.begin(), gTransferFunction.m_Nodes.end(), CompareNodes);
 
-	UpdateNodes();
-	*/
-
+	m_pTransferFunctionCanvas->Update();
 }
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
@@ -398,4 +419,21 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 	{
 	}
 	*/
+}
+
+void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
+{
+	QGraphicsView::resizeEvent(pResizeEvent);
+
+	setSceneRect(rect());
+
+	// Get new scene rectangle
+	QRectF NewRectangle = sceneRect();
+
+	// Apply the margins
+	NewRectangle.adjust(m_Margin, m_Margin, -m_Margin, -m_Margin);
+
+	// Update the transfer function canvas
+	m_pTransferFunctionCanvas->setRect(NewRectangle);
+	m_pTransferFunctionCanvas->Update();
 }

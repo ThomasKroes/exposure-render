@@ -40,10 +40,9 @@ QGradientMarker::QGradientMarker(QGraphicsItem* pParent) :
 	pen().setStyle(Qt::PenStyle::DashLine);
 }
 
-QGradientView::QGradientView(QWidget* pParent, QTransferFunction* gTransferFunction) :
+QGradientView::QGradientView(QWidget* pParent) :
 	QGraphicsView(pParent),
 	m_pGraphicsScene(NULL),
-	m_pTransferFunction(gTransferFunction),
 	m_CheckerSize(10, 10),
 	m_pGradientRectangle(NULL),
 	m_LinearGradient(),
@@ -77,7 +76,7 @@ QGradientView::QGradientView(QWidget* pParent, QTransferFunction* gTransferFunct
 	m_pGraphicsScene->addItem(m_pGradientRectangle);
 
 	// Setup connections
-	connect(m_pTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
+	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
 }
 
 void QGradientView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)

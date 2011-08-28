@@ -6,20 +6,19 @@ class QTransferFunction;
 class QNodeItem;
 class QNode;
 
-class QTransferFunctionCanvas : public QGraphicsRectItem, QObject
+class QTransferFunctionCanvas : public QGraphicsRectItem
 {
-	Q_OBJECT
-
 public:
-    QTransferFunctionCanvas(QGraphicsItem* pParent);
+    QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene);
 
 protected:
 	void	resizeEvent(QResizeEvent* pResizeEvent);
 	void	mousePressEvent(QGraphicsSceneMouseEvent* pGraphicsSceneMouseEvent);
 
-public slots:
+public:
 	void	SetSelectedNode(QNode* pSelectedNode);
 	void	Update(void);
+	void	UpdateBackground(void);
 	void	UpdateGrid(void);
 	void	UpdateHistogram(void);
 	void	UpdateEdges(void);
@@ -31,13 +30,17 @@ public slots:
 	QPointF SceneToTransferFunction(const QPointF& ScenePoint);
 	QPointF TransferFunctionToScene(const QPointF& TfPoint);
 
-private:
+protected:
+	QBrush							m_BackgroundBrush;
+	QPen							m_BackgroundPen;
 	QList<QNodeItem*>				m_Nodes;
 	QList<QGraphicsLineItem*>		m_Edges;
 	QGraphicsPolygonItem*			m_pPolygon;
 	QLinearGradient					m_LinearGradient;
 	QList<QGraphicsLineItem*>		m_GridLinesHorizontal;
 	QPen							m_GridPenHorizontal;
+
+	friend class QTransferFunctionView;
 };
 
 class QTransferFunctionView : public QGraphicsView
@@ -47,14 +50,11 @@ class QTransferFunctionView : public QGraphicsView
 public:
     QTransferFunctionView(QWidget* pParent);
 
-	void	drawBackground(QPainter* pPainter, const QRectF& Rectangle);
-	void	mousePressEvent(QMouseEvent* pEvent);
-
-signals:
-	void SelectionChange(QNode* pTransferFunctionNode);
+	void drawBackground(QPainter* pPainter, const QRectF& Rectangle);
+	void resizeEvent(QResizeEvent* pResizeEvent);
 
 private slots:
-	void OnNodeAdd(QNode* pTransferFunctionNode);
+	void OnNodeAdd(QNode* pNode);
 	void OnNodeSelectionChanged(QNode* pNode);
 
 public:

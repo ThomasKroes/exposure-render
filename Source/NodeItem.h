@@ -3,12 +3,12 @@
 #include <QtGui>
 
 class QNode;
-class QTransferFunctionView;
+class QTransferFunctionCanvas;
 
 class QNodeItem : public QGraphicsEllipseItem
 {
 public:
-	QNodeItem(QGraphicsItem* pParent, QNode* pTransferFunctionNode, QTransferFunctionView* pTransferFunctionView);
+	QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanvas* pTransferFunctionCanvas);
 
 	void UpdateTooltip(void);
 	
@@ -32,7 +32,7 @@ protected:
 	virtual void				paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL);
 
 public:
-	QTransferFunctionView*		m_pTransferFunctionView;
+	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
 	QNode*						m_pNode;
 	QCursor						m_Cursor;
 	QPointF						m_LastPos;

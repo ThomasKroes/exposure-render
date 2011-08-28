@@ -14,7 +14,7 @@ public:
 		*this = Other;
 	};
 
-	QNode(QTransferFunction* gTransferFunction, const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable = true);
+	QNode(const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable = true);
 
 	bool operator < (const QNode& Other) const
 	{

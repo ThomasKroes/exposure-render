@@ -25,7 +25,7 @@ class QGradientView : public QGraphicsView
     Q_OBJECT
 
 public:
-    QGradientView(QWidget* pParent, QTransferFunction* pTransferFunction);
+    QGradientView(QWidget* pParent);
 
 	void drawBackground(QPainter* pPainter, const QRectF& Rectangle);
 	void resizeEvent(QResizeEvent* pResizeEvent);
@@ -40,7 +40,6 @@ private slots:
 
 private:
 	QGraphicsScene*				m_pGraphicsScene;
-	QTransferFunction*			m_pTransferFunction;
 	QSizeF						m_CheckerSize;
 	QGraphicsRectItem*			m_pGradientRectangle;
 	QLinearGradient				m_LinearGradient;

@@ -3,7 +3,7 @@
 
 QTransferFunction gTransferFunction;
 
-QNode::QNode(QTransferFunction* gTransferFunction, const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable) :
+QNode::QNode(const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable) :
 	QObject(),
 	m_Position(Position),
 	m_Opacity(Opacity),

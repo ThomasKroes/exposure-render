@@ -15,9 +15,9 @@ QColor	QNodeItem::m_PenColor			= QColor(160, 160, 160);
 QColor	QNodeItem::m_PenColorHover		= QColor(50, 50, 50);
 QColor	QNodeItem::m_PenColorSelected	= QColor(200, 50, 50);
 
-QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionView* pTransferFunctionView) :
+QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanvas* pTransferFunctionCanvas) :
 	QGraphicsEllipseItem(pParent),
-	m_pTransferFunctionView(pTransferFunctionView),
+	m_pTransferFunctionCanvas(pTransferFunctionCanvas),
 	m_pNode(pNode),
 	m_Cursor(),
 	m_LastPos(),
@@ -136,13 +136,6 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 		}
 	}
 */
-	if (Change == QGraphicsItem::ItemPositionHasChanged)
-	{
-		QPointF NewTfPoint = m_pTransferFunctionView->SceneToTf(m_LastPos);
-
-//		m_pNode->SetX(NewTfPoint.x());
-//		m_pNode->SetY(NewTfPoint.y());
-	}
 
     if (Change == QGraphicsItem::ItemSelectedHasChanged)
 	{
@@ -176,13 +169,11 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
-	
-
 	m_LastPos = pEvent->scenePos();
 
 	QGraphicsItem::mouseMoveEvent(pEvent);
 
-	QPointF NewTfPoint = m_pTransferFunctionView->SceneToTf(m_LastPos);
+	QPointF NewTfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(m_LastPos);
 
 		m_pNode->SetX(NewTfPoint.x());
 		m_pNode->SetY(NewTfPoint.y());
