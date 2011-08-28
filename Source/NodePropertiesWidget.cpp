@@ -13,6 +13,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_pNodeSelectionComboBox(NULL),
 	m_pPreviousNodePushButton(NULL),
 	m_pNextNodePushButton(NULL),
+	m_pDeleteNodePushButton(NULL),
 	m_pPositionLabel(NULL),
 	m_pPositionSlider(NULL),
 	m_pPositionSpinBox(NULL),
@@ -50,24 +51,36 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 
 	connect(m_pNodeSelectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnNodeSelectionChanged(int)));
 
-	m_pPreviousNodePushButton = new QPushButton("<<");
+	// Previous node
+	m_pPreviousNodePushButton = new QPushButton("<");
 	m_pPreviousNodePushButton->setStatusTip("Select previous node");
 	m_pPreviousNodePushButton->setToolTip("Select previous node");
-	m_pPreviousNodePushButton->setFixedWidth(30);
+	m_pPreviousNodePushButton->setFixedWidth(20);
 	m_pPreviousNodePushButton->setFixedHeight(20);
 	m_pPreviousNodePushButton->updateGeometry();
 	m_pSelectionLayout->addWidget(m_pPreviousNodePushButton, 0, 1);
 
 	connect(m_pPreviousNodePushButton, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
 
-	m_pNextNodePushButton = new QPushButton(">>");
+	// Next node
+	m_pNextNodePushButton = new QPushButton(">");
 	m_pNextNodePushButton->setStatusTip("Select next node");
 	m_pNextNodePushButton->setToolTip("Select next node");
-	m_pNextNodePushButton->setFixedWidth(30);
+	m_pNextNodePushButton->setFixedWidth(20);
 	m_pNextNodePushButton->setFixedHeight(20);
 	m_pSelectionLayout->addWidget(m_pNextNodePushButton, 0, 2);
 	
 	connect(m_pNextNodePushButton, SIGNAL(pressed()), this, SLOT(OnNextNode()));
+
+	// Delete node
+	m_pDeleteNodePushButton = new QPushButton("X");
+	m_pDeleteNodePushButton->setStatusTip("Delete selected node");
+	m_pDeleteNodePushButton->setToolTip("Delete selected node");
+	m_pDeleteNodePushButton->setFixedWidth(20);
+	m_pDeleteNodePushButton->setFixedHeight(20);
+	m_pSelectionLayout->addWidget(m_pDeleteNodePushButton, 0, 3);
+	
+	connect(m_pDeleteNodePushButton, SIGNAL(pressed()), this, SLOT(OnDeleteNode()));
 
 	// Position
 	m_pPositionLabel = new QLabel("Position");
@@ -138,6 +151,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	// Respond to addition and removal of nodes
 	connect(&gTransferFunction, SIGNAL(NodeAdd(QNode*)), this, SLOT(OnNodeAdd(QNode*)));
 	connect(&gTransferFunction, SIGNAL(NodeRemove(QNode*)), this, SLOT(OnNodeRemove(QNode*)));
+	connect(&gTransferFunction, SIGNAL(NodeRemoved(QNode*)), this, SLOT(OnNodeRemoved(QNode*)));
 }
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
@@ -150,11 +164,28 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 	{
 		setEnabled(true);
 
+		// Suspend signals
+		m_pPositionSlider->blockSignals(true);
+		m_pPositionSpinBox->blockSignals(true);
+
+		m_pPositionSlider->setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_pPositionSlider->setValue(pNode->GetPosition());
+		m_pPositionSpinBox->setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_pPositionSpinBox->setValue(pNode->GetPosition());
+
+		// Allow signals again
+		m_pPositionSlider->blockSignals(false);
+		m_pPositionSpinBox->blockSignals(false);
+
+		// Suspend signals
+		m_pOpacitySlider->blockSignals(true);
+		m_pOpacitySpinBox->blockSignals(true);
+
 		m_pOpacitySlider->setValue(100.0f * pNode->GetOpacity());
 
-		// Restrict the node's position
-		m_pPositionSlider->setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_pPositionSpinBox->setRange(pNode->GetMinX(), pNode->GetMaxX());
+		// Allow signals again
+		m_pOpacitySlider->blockSignals(false);
+		m_pOpacitySpinBox->blockSignals(false);
 
 		// Obtain current node index
 		const int CurrentNodeIndex = gTransferFunction.GetNodeIndex(pNode);
@@ -166,10 +197,12 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		const bool EnablePrevious	= CurrentNodeIndex > 0;
 		const bool EnableNext		= CurrentNodeIndex < gTransferFunction.m_Nodes.size() - 1;
 		const bool EnablePosition	= gTransferFunction.m_Nodes.front() != pNode && gTransferFunction.m_Nodes.back() != pNode;
-
-		// Selectively enable/disable previous/next buttons
+		const bool EnableDelete		= gTransferFunction.m_pSelectedNode ? (gTransferFunction.m_pSelectedNode != gTransferFunction.m_Nodes.front() && gTransferFunction.m_pSelectedNode != gTransferFunction.m_Nodes.back()) : false;
+		
+		// Enable/disable buttons
 		m_pPreviousNodePushButton->setEnabled(EnablePrevious);
 		m_pNextNodePushButton->setEnabled(EnableNext);
+		m_pDeleteNodePushButton->setEnabled(EnableDelete);
 
 		// Enable/disable position label, slider and spinbox
 		m_pPositionLabel->setEnabled(EnablePosition);
@@ -186,14 +219,6 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		m_pNextNodePushButton->setStatusTip(NextToolTip);
 		m_pNextNodePushButton->setToolTip(NextToolTip);
 
-		// Disconnect previous node
-		if (m_pLastSelectedNode)
-		{
-			disconnect(m_pLastSelectedNode, SIGNAL(PositionChanged(QNode*)), this, SLOT(OnNodePositionChanged(QNode*)));
-			disconnect(m_pLastSelectedNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
-			disconnect(m_pLastSelectedNode, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
-		}
-
 		// Setup connections
 		connect(pNode, SIGNAL(PositionChanged(QNode*)), this, SLOT(OnNodePositionChanged(QNode*)));
 		connect(pNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
@@ -201,6 +226,7 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 
 		// Chache last node
 		m_pLastSelectedNode = pNode;
+		/**/
 	}
 }
 
@@ -217,6 +243,14 @@ void QNodePropertiesWidget::OnPreviousNode(void)
 void QNodePropertiesWidget::OnNextNode(void)
 {
 	gTransferFunction.SelectNextNode();
+}
+
+void QNodePropertiesWidget::OnDeleteNode(void)
+{
+	if (!gTransferFunction.m_pSelectedNode)
+		return;
+
+	gTransferFunction.RemoveNode(gTransferFunction.m_pSelectedNode);
 }
 
 void QNodePropertiesWidget::OnTransferFunctionChanged(void)
@@ -279,8 +313,21 @@ void QNodePropertiesWidget::OnNodeAdd(QNode* pNode)
 
 void QNodePropertiesWidget::OnNodeRemove(QNode* pNode)
 {
-	/*
-	if (gTransferFunction.m_pSelectedNode)
-		gTransferFunction.m_pSelectedNode->SetOpacity(0.01f * Opacity);
-	*/
+	// Disconnect previous node
+	if (m_pLastSelectedNode)
+	{
+		disconnect(m_pLastSelectedNode, SIGNAL(PositionChanged(QNode*)), this, SLOT(OnNodePositionChanged(QNode*)));
+		disconnect(m_pLastSelectedNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
+		disconnect(m_pLastSelectedNode, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
+
+		m_pLastSelectedNode = NULL;
+	}
+}
+
+void QNodePropertiesWidget::OnNodeRemoved(QNode* pNode)
+{
+	m_pNodeSelectionComboBox->clear();
+
+	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
+		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
 }

@@ -3,28 +3,17 @@
 #include "TransferFunction.h"
 #include "NodeItem.h"
 
-// Compare two nodes
-bool CompareNodes(QNode* pNodeA, QNode* pNodeB)
-{
-	return pNodeA->GetPosition() < pNodeB->GetPosition();
-}
-
-// Compare two node items
-bool CompareNodeItems(QNodeItem* pNodeItemA, QNodeItem* pNodeItemB)
-{
-	return pNodeItemA->m_pNode->GetPosition() < pNodeItemB->m_pNode->GetPosition();
-}
-
 QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene) :
 	QGraphicsRectItem(pParent, pGraphicsScene),
 	m_BackgroundBrush(),
-	m_BackgroundPen()
+	m_BackgroundPen(),
+	m_GridLinesHorizontal(),
+	m_GridPenHorizontal(),
+	m_GridPenVertical()
 {
-	// Add polygon graphics item
-//	m_pPolygon = new QGraphicsPolygonItem;
-
-	// Ensure the item is drawn in the right order
-//	m_pPolygon->setZValue(500);
+	// Create polygon graphics item
+	m_pPolygon = new QGraphicsPolygonItem;
+	m_pPolygon->setParentItem(this);
 
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(210, 210, 210));
@@ -34,54 +23,21 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_BackgroundPen.setWidthF(0.5f);
 	m_BackgroundPen.setStyle(Qt::SolidLine);
 
-	// Create background rectangle
+	// Background styling
 	setBrush(m_BackgroundBrush);
 	setPen(m_BackgroundPen);
 
 	// Make sure this rectangle is drawn behind everything else
 	setZValue(0);
 
+	// Grid
+	m_GridPenHorizontal.setColor(QColor(100, 100, 100, 200));
+	m_GridPenHorizontal.setWidthF(0.5f);
+	m_GridPenVertical.setColor(QColor(100, 100, 100, 200));
+	m_GridPenVertical.setWidthF(0.5f);
+
 	// Update the canvas
 	Update();
-}
-
-void QTransferFunctionCanvas::mousePressEvent(QGraphicsSceneMouseEvent* pGraphicsSceneMouseEvent)
-{
-	QGraphicsRectItem::mousePressEvent(pGraphicsSceneMouseEvent);
-
-	// Get node item under cursor
-	QNodeItem* pNodeItem = dynamic_cast<QNodeItem*>(scene()->itemAt(pGraphicsSceneMouseEvent->pos()));
-
-	if (!pNodeItem)
-	{
-		// Add a new node if the user clicked the left button
-		if (pGraphicsSceneMouseEvent->button() == Qt::MouseButton::LeftButton)
-		{
-			QPointF TfPoint = SceneToTransferFunction(pGraphicsSceneMouseEvent->pos());
-
-			int R = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int G = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int B = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-
-			// Create new transfer function node
-			QNode* pNode = new QNode(TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
-
-			// Add to node list
-			gTransferFunction.AddNode(pNode);
-
-			// Select it immediately
-			SetSelectedNode(pNode);
-		}
-		else
-		{
-			// Other wise no node selection
-			SetSelectedNode(NULL);
-		}
-	}
-	else
-	{
-		SetSelectedNode(pNodeItem->m_pNode);
-	}
 }
 
 void QTransferFunctionCanvas::SetSelectedNode(QNode* pSelectedNode)
@@ -91,12 +47,12 @@ void QTransferFunctionCanvas::SetSelectedNode(QNode* pSelectedNode)
 
 void QTransferFunctionCanvas::Update(void)
 {
+	UpdateGrid();
 	UpdateHistogram();
 	UpdateNodes();
-	UpdateNodeRanges();
 	UpdateEdges();
 	UpdateGradient();
-//	UpdatePolygon();
+	UpdatePolygon();
 }
 
 void QTransferFunctionCanvas::UpdateGrid(void)
@@ -113,11 +69,14 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 
 	for (int i = 1; i < 10; i++)
 	{
-		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(QPointF(rect().left(), rect().top() + i * DeltaY), QPointF(rect().right(), rect().top() + i * DeltaY)));
+		// Create a new grid line
+		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
 
 		pLine->setPen(m_GridPenHorizontal);
+		pLine->setZValue(100);
+		pLine->setParentItem(this);
 
-		scene()->addItem(pLine);
+		// Add it to the list so we can remove them from the canvas when needed
 		m_GridLinesHorizontal.append(pLine);
 	}
 }
@@ -126,80 +85,69 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 {
 }
 
+void QTransferFunctionCanvas::UpdateNodes(void)
+{
+	// Remove old nodes
+	foreach(QNodeItem* pNodeItem, m_NodeItems)
+		scene()->removeItem(pNodeItem);
+
+	// Clear the node items list
+	m_NodeItems.clear();
+
+	// Create the node items
+	foreach(QNode* pNode, gTransferFunction.m_Nodes)
+	{
+		// Create new node item
+		QNodeItem* pNodeItem = new QNodeItem(NULL, pNode, this);
+
+		// Make it child of us
+		pNodeItem->setParentItem(this);
+
+		// Compute node center in canvas coordinates
+		QPointF NodeCenter = TransferFunctionToScene(QPointF(pNode->GetX(), pNode->GetY()));
+
+		// Set it's position
+		pNodeItem->setPos(NodeCenter);
+
+		// Make sure node items are rendered on top
+		pNodeItem->setZValue(50000);
+
+		// Add it to the list so we can remove them from the canvas when needed
+		m_NodeItems.append(pNodeItem);
+	}
+}
+
 void QTransferFunctionCanvas::UpdateEdges(void)
 {
 	// Remove old edges
-	foreach(QGraphicsLineItem* pLine, m_Edges)
+	foreach(QGraphicsLineItem* pLine, m_EdgeItems)
 		scene()->removeItem(pLine);
 
 	// Clear the edges list
-	m_Edges.clear();
+	m_EdgeItems.clear();
 
-	for (int i = 1; i < m_Nodes.size(); i++)
+	for (int i = 1; i < m_NodeItems.size(); i++)
 	{
-		QPointF PtFrom(m_Nodes[i - 1]->rect().center());
-		QPointF PtTo(m_Nodes[i]->rect().center());
+		QPointF PtFrom(m_NodeItems[i - 1]->pos());
+		QPointF PtTo(m_NodeItems[i]->pos());
 
 		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(PtFrom, PtTo));
 		
+		pLine->setParentItem(this);
+
 		// Set the pen
 		pLine->setPen(QPen(QColor(110, 110, 100), 0.5));
 
 		// Ensure the item is drawn in the right order
-		pLine->setZValue(800);
+		pLine->setZValue(300);
 
-		m_Edges.append(pLine);
-		scene()->addItem(pLine);
-	}
-}
-
-void QTransferFunctionCanvas::UpdateNodes(void)
-{
-	// Set the gradient stops
-	foreach(QNodeItem* pNodeGraphics, m_Nodes)
-	{
-		QPointF SceneCenter = TransferFunctionToScene(QPointF(pNodeGraphics->m_pNode->GetX(), pNodeGraphics->m_pNode->GetY()));
-
-//		Center.setX(rect().left() + rect().width() * pNodeGraphics->m_pNode->GetNormalizedX());
-//		Center.setY(rect().top() + rect().height() - (pNodeGraphics->m_pNode->GetOpacity() * rect().height()));
-		
-		pNodeGraphics->SetCenter(SceneCenter);
-	}
-}
-
-void QTransferFunctionCanvas::UpdateNodeRanges(void)
-{
-	if (gTransferFunction.m_Nodes.size() < 2)
-		return;
-
-	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
-	{
-		QNode* pNode = gTransferFunction.m_Nodes[i];
-
-		if (pNode == gTransferFunction.m_Nodes.front())
-		{
-			pNode->m_MinX = 0.0f;
-			pNode->m_MaxX = 0.0f;
-		}
-		else if (pNode == gTransferFunction.m_Nodes.back())
-		{
-			pNode->m_MinX = gTransferFunction.m_RangeMax;
-			pNode->m_MaxX = gTransferFunction.m_RangeMax;
-		}
-		else
-		{
-			QNode* pNodeLeft	= gTransferFunction.m_Nodes[i - 1];
-			QNode* pNodeRight	= gTransferFunction.m_Nodes[i + 1];
-
-			pNode->m_MinX = pNodeLeft->GetPosition();
-			pNode->m_MaxX = pNodeRight->GetPosition();
-		}
+		m_EdgeItems.append(pLine);
 	}
 }
 
 void QTransferFunctionCanvas::UpdateGradient(void)
 {
-	m_LinearGradient.setStart(rect().left(), rect().top());
+	m_LinearGradient.setStart(0, 0);
 	m_LinearGradient.setFinalStop(rect().right(), rect().top());
 
 	QGradientStops GradientStops;
@@ -212,7 +160,7 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 		// Clamp node opacity to obtain valid alpha for display
 		float Alpha = qMin(1.0f, qMax(0.0f, pNode->GetOpacity()));
 
-		Color.setAlphaF(0.2f);
+		Color.setAlphaF(0.5f);
 
 		// Add a new gradient stop
 		GradientStops.append(QGradientStop(pNode->GetNormalizedX(), Color));
@@ -226,34 +174,37 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 	QPolygonF Polygon;
 
 	// Set the gradient stops
-	for (int i = 0; i < m_Nodes.size(); i++)
+	for (int i = 0; i < m_NodeItems.size(); i++)
 	{
-		QNodeItem* pNodeGraphics = m_Nodes[i];
+		QNodeItem* pNodeItem = m_NodeItems[i];
 
 		// Compute polygon point in scene coordinates
-		QPointF ScenePoint = TransferFunctionToScene(QPointF(pNodeGraphics->m_pNode->GetX(), pNodeGraphics->m_pNode->GetY()));
+		QPointF ScenePoint = pNodeItem->pos();
 
-		if (pNodeGraphics == m_Nodes.front())
+//		ScenePoint.setY(rect().height());
+
+		if (pNodeItem == m_NodeItems.front())
 		{
 			QPointF CenterCopy = ScenePoint;
 
-			CenterCopy.setY(rect().bottom());
+			CenterCopy.setY(rect().height());
 
 			Polygon.append(CenterCopy);
 		}
 
 		Polygon.append(ScenePoint);
 
-		if (pNodeGraphics == m_Nodes.back())
+		if (pNodeItem == m_NodeItems.back())
 		{
 			QPointF CenterCopy = ScenePoint;
 
-			CenterCopy.setY(rect().bottom());
+			CenterCopy.setY(rect().height());
 
 			Polygon.append(CenterCopy);
 		}
 	}
 
+	m_pPolygon->setZValue(5000);
 	m_pPolygon->setPolygon(Polygon);
 	m_pPolygon->setBrush(QBrush(m_LinearGradient));
 	m_pPolygon->setPen(QPen(Qt::PenStyle::NoPen));
@@ -262,8 +213,8 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 // Maps from scene coordinates to transfer function coordinates
 QPointF QTransferFunctionCanvas::SceneToTransferFunction(const QPointF& ScenePoint)
 {
-	const float NormalizedX = (ScenePoint.x() - (float)rect().left()) / (float)rect().width();
-	const float NormalizedY = 1.0f - ((ScenePoint.y() - (float)rect().top()) / (float)rect().height());
+	const float NormalizedX = ScenePoint.x() / (float)rect().width();
+	const float NormalizedY = 1.0f - (ScenePoint.y() / (float)rect().height());
 
 	const float TfX = gTransferFunction.m_RangeMin + NormalizedX * gTransferFunction.m_Range;
 	const float TfY = NormalizedY;
@@ -312,97 +263,35 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	setRenderHint(QPainter::Antialiasing);
 
 	// Respond to changes in the transfer function
-//	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
+	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
 
 	// Create the transfer function canvas and add it to the scene
 	m_pTransferFunctionCanvas = new QTransferFunctionCanvas(NULL, m_pGraphicsScene);
-
-	/*
-	connect(m_pTransferFunction, SIGNAL(NodeAdd(QNode*)), this, SLOT(OnNodeAdd(QNode*)));
+	m_pTransferFunctionCanvas->translate(m_Margin, m_Margin);
 
 	// Respond to changes in node selection
-	connect(m_pTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
+	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
 
-	
-
-	// Add the polygon
-	scene()->addItem(m_pPolygon);
-
-	
-	// Create rectangle for outline
-	m_pOutline = new QGraphicsRectItem;
-	m_pOutline->setRect(rect());
-	m_pOutline->setBrush(QBrush(Qt::BrushStyle::NoBrush));
-	m_pOutline->setPen(QPen(Qt::darkGray));
-
-	// Ensure the item is drawn in the right order
-	m_pOutline->setZValue(1000);
-	
-
-	// Add the rectangle
-//	scene()->addItem(m_pOutline);
-
-	// Create canvas
-	m_pCanvas = new QGraphicsRectItem;
-	m_pCanvas->setRect(rect());
-	m_pCanvas->setBrush(QBrush(QColor(190, 190, 190)));
-	m_pCanvas->setPen(QPen(Qt::darkGray));
-
-	// Add the rectangle
-	scene()->addItem(m_pCanvas);
-
-	// Render
-	Update();
-	UpdateNodes();
-
-	// Configure pen
-	m_GridPenHorizontal.setStyle(Qt::PenStyle::DashLine);
-	m_GridPenHorizontal.setColor(QColor(75, 75, 75, 120));
-//	m_GridPenHorizontal.setWidthF(1.0f);
-
-	m_Text = new QGraphicsTextItem();
-	m_Text->setPos(rect().bottomLeft());
-	m_Text->setTextWidth(rect().width());
-	m_Text->setHtml("<center>Density</center>");
-*/
-//	scene()->addItem(m_Text);
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)
 {
-	// Base class
 	QGraphicsView::drawBackground(pPainter, Rectangle);
-//	setSceneRect(rect());
-//	centerOn(Rectangle.center());
 
 	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
 }
 
-void QTransferFunctionView::OnNodeAdd(QNode* pNode)
+void QTransferFunctionView::Update(void)
 {
-	
-	QNodeItem* pNodeItem = new QNodeItem(NULL, pNode, m_pTransferFunctionCanvas);
-	
-	// Ensure the item is drawn in the right order
-	pNodeItem->setZValue(900);
-
-	scene()->addItem(pNodeItem);
-
-	m_pTransferFunctionCanvas->m_Nodes.append(pNodeItem);
-	
-	qSort(m_pTransferFunctionCanvas->m_Nodes.begin(), m_pTransferFunctionCanvas->m_Nodes.end(), CompareNodeItems);
-	qSort(gTransferFunction.m_Nodes.begin(), gTransferFunction.m_Nodes.end(), CompareNodes);
-
 	m_pTransferFunctionCanvas->Update();
 }
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 {
-	/*
 	if (pNode)
 	{
 		// Deselect all nodes
-		foreach (QNodeItem* pNode, m_Nodes)
+		foreach (QNodeItem* pNode, m_pTransferFunctionCanvas->m_NodeItems)
 			pNode->setSelected(false);
 
 		// Obtain node index
@@ -411,14 +300,13 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 		// Select the node
 		if (NodeIndex >= 0)
 		{
-			m_Nodes[NodeIndex]->setSelected(true);
-			m_Nodes[NodeIndex]->update();
+	//		m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->setSelected(true);
+	//		m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->update();
 		}
 	}
 	else
 	{
 	}
-	*/
 }
 
 void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
@@ -427,13 +315,62 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 
 	setSceneRect(rect());
 
-	// Get new scene rectangle
-	QRectF NewRectangle = sceneRect();
+	QRectF CanvasRect = m_pTransferFunctionCanvas->rect();
 
-	// Apply the margins
-	NewRectangle.adjust(m_Margin, m_Margin, -m_Margin, -m_Margin);
+	CanvasRect.setWidth(rect().width() - 2.0f * m_Margin);
+	CanvasRect.setHeight(rect().height() - 2.0f * m_Margin);
 
-	// Update the transfer function canvas
-	m_pTransferFunctionCanvas->setRect(NewRectangle);
+	m_pTransferFunctionCanvas->setRect(CanvasRect);
 	m_pTransferFunctionCanvas->Update();
+}
+
+void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
+{
+	QGraphicsView::mousePressEvent(pEvent);
+
+	// Get node item under cursor
+	QNodeItem* pNodeItem = dynamic_cast<QNodeItem*>(scene()->itemAt(pEvent->posF()));
+
+	if (!pNodeItem)
+	{
+		// Add a new node if the user clicked the left button
+		if (pEvent->button() == Qt::MouseButton::LeftButton)
+		{
+			QPointF TfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(pEvent->pos());
+
+			int R = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
+			int G = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
+			int B = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
+
+			// Create new transfer function node
+			QNode* pNode = new QNode(TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
+
+			// Add to node list
+			gTransferFunction.AddNode(pNode);
+
+			// Redraw
+			m_pTransferFunctionCanvas->Update();
+
+			// Select it immediately
+//			m_pTransferFunctionCanvas->SetSelectedNode(pNode);
+		}
+		else
+		{
+			// Other wise no node selection
+			m_pTransferFunctionCanvas->SetSelectedNode(NULL);
+		}
+	}
+	else
+	{
+		if (pEvent->button() == Qt::MouseButton::LeftButton)
+		{
+			m_pTransferFunctionCanvas->SetSelectedNode(pNodeItem->m_pNode);
+		}
+		else if (pEvent->button() == Qt::MouseButton::RightButton)
+		{
+			// Remove transfer function node if not the first or last node
+			if (pNodeItem->m_pNode != gTransferFunction.m_Nodes.front() && pNodeItem->m_pNode != gTransferFunction.m_Nodes.back())
+				gTransferFunction.RemoveNode(pNodeItem->m_pNode);
+		}
+	}
 }

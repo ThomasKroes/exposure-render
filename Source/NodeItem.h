@@ -12,15 +12,7 @@ public:
 
 	void UpdateTooltip(void);
 	
-	QPointF GetCenter(void) const
-	{
-		return rect().center();
-	}
-
-	void SetCenter(const QPointF& Center)
-	{
-		setRect(QRectF(Center - 0.5f * QPointF(QNodeItem::m_Radius, QNodeItem::m_Radius), QSizeF(QNodeItem::m_Radius, QNodeItem::m_Radius)));
-	}
+	void setPos(const QPointF& Pos);
 
 protected:
 	virtual void				hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent);
@@ -29,7 +21,6 @@ protected:
 	virtual QVariant			itemChange(GraphicsItemChange Change, const QVariant& Value);
 	virtual void				mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent);
 	virtual void				mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent);
-	virtual void				paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL);
 
 public:
 	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;

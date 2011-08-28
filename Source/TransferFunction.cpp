@@ -3,6 +3,12 @@
 
 QTransferFunction gTransferFunction;
 
+// Compare two transfer function nodes by position
+bool CompareNodes(QNode* pNodeA, QNode* pNodeB)
+{
+	return pNodeA->GetPosition() < pNodeB->GetPosition();
+}
+
 QNode::QNode(const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable) :
 	QObject(),
 	m_Position(Position),
@@ -25,6 +31,7 @@ float QNode::GetNormalizedX(void) const
 
 void QNode::SetNormalizedX(const float& NormalizedX)
 {
+
 	SetPosition(gTransferFunction.m_RangeMin + (gTransferFunction.m_Range * NormalizedX));
 }
 
@@ -198,4 +205,72 @@ void QTransferFunction::SelectNextNode(void)
 int	QTransferFunction::GetNodeIndex(QNode* pNode)
 {
 	return m_Nodes.indexOf(pNode);
+}
+
+void QTransferFunction::AddNode(QNode* pNode)
+{
+	m_Nodes.append(pNode);
+
+	// Sort the transfer function nodes
+	qSort(gTransferFunction.m_Nodes.begin(), gTransferFunction.m_Nodes.end(), CompareNodes);
+
+	// Update node's range
+	UpdateNodeRanges();
+
+	// Emit
+	emit NodeAdd(m_Nodes.back());
+	emit FunctionChanged();
+
+	// Notify us when the node changes
+	connect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
+}
+
+void QTransferFunction::RemoveNode(QNode* pNode)
+{
+	// Let others know that we are about to remove a node
+	emit NodeRemove(pNode);
+
+	// Remove the connection
+	disconnect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
+
+	// Remove from list and memory
+	m_Nodes.remove(m_Nodes.indexOf(pNode));
+	delete pNode;
+
+	// Update node's range
+	UpdateNodeRanges();
+
+	// Let others know that we remove a node, and that the transfer function has changed
+	emit NodeRemoved(pNode);
+
+	// Emit
+	emit FunctionChanged();
+}
+
+void QTransferFunction::UpdateNodeRanges(void)
+{
+	// Compute the node ranges
+	for (int i = 0; i < m_Nodes.size(); i++)
+	{
+		QNode* pNode = gTransferFunction.m_Nodes[i];
+
+		if (pNode == gTransferFunction.m_Nodes.front())
+		{
+			pNode->m_MinX = 0.0f;
+			pNode->m_MaxX = 0.0f;
+		}
+		else if (pNode == gTransferFunction.m_Nodes.back())
+		{
+			pNode->m_MinX = gTransferFunction.m_RangeMax;
+			pNode->m_MaxX = gTransferFunction.m_RangeMax;
+		}
+		else
+		{
+			QNode* pNodeLeft	= gTransferFunction.m_Nodes[i - 1];
+			QNode* pNodeRight	= gTransferFunction.m_Nodes[i + 1];
+
+			pNode->m_MinX = pNodeLeft->GetPosition();
+			pNode->m_MaxX = pNodeRight->GetPosition();
+		}
+	}
 }

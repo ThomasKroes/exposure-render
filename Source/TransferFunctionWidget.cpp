@@ -39,4 +39,6 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	gTransferFunction.AddNode(new QNode(70.0f, 0.5f, QColor(255, 160, 30, 255)));
 	gTransferFunction.AddNode(new QNode(100.0f, 0.1f, QColor(55, 160, 255, 255)));
 	gTransferFunction.AddNode(new QNode(255.0f, 1.0f, QColor(10, 255, 0, 128), false));
+
+	m_pTransferFunctionView->m_pTransferFunctionCanvas->Update();
 }

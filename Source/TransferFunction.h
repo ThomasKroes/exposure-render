@@ -55,7 +55,6 @@ public:
 
 	QNode& operator = (const QNode& Other)			
 	{
-		m_pTransferFunction	= Other.m_pTransferFunction;
 		m_Position			= Other.m_Position;
 		m_Opacity			= Other.m_Opacity;
 		m_Color				= Other.m_Color;
@@ -74,7 +73,6 @@ signals:
 	void RangeChanged(QNode* pNode);
 
 public:
-	QTransferFunction*		m_pTransferFunction;
 	float					m_Position;
 	float					m_Opacity;
 	QColor					m_Color;
@@ -94,22 +92,14 @@ class QTransferFunction : public QObject
 public:
     QTransferFunction(QObject* pParent = NULL);
 
-	void AddNode(QNode* pNode)
-	{
-		m_Nodes.append(pNode);
-
-		// Emit
-		emit NodeAdd(m_Nodes.back());
-		emit FunctionChanged();
-
-		connect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
-	}
-
+	void	AddNode(QNode* pNode);
+	void	RemoveNode(QNode* pNode);
 	void	SetSelectedNode(QNode* pSelectedNode);
 	void	SetSelectedNode(const int& Index);
 	void	SelectPreviousNode(void);
 	void	SelectNextNode(void);
 	int		GetNodeIndex(QNode* pNode);
+	void	UpdateNodeRanges(void);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);
@@ -118,10 +108,11 @@ signals:
 	void	FunctionChanged(void);
 	void	NodeAdd(QNode* pNode);
 	void	NodeRemove(QNode* pNode);
+	void	NodeRemoved(QNode* pNode);
 	void	SelectionChanged(QNode* pNode);
 
 public:
-	QList<QNode*>		m_Nodes;
+	QVector<QNode*>		m_Nodes;
 	float				m_RangeMin;
 	float				m_RangeMax;
 	float				m_Range;

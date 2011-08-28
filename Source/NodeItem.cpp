@@ -3,7 +3,7 @@
 #include "TransferFunction.h"
 #include "TransferFunctionView.h"
 
-float	QNodeItem::m_Radius				= 10.0f;
+float	QNodeItem::m_Radius				= 4.0f;
 float	QNodeItem::m_RadiusHover		= 10.0f;
 float	QNodeItem::m_RadiusSelected		= 10.0f;
 QColor	QNodeItem::m_BackgroundColor	= QColor(230, 230, 230);
@@ -38,11 +38,6 @@ QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanv
 
 	// Tooltip
 	UpdateTooltip();
-
-	// Create node ID text item
-	m_pNodeID = new QGraphicsTextItem;
-//	m_pNodeID->setTextWidth();
-//	m_pNodeID->setTextHe();
 };
 
 void QNodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
@@ -88,55 +83,6 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 {
 	QPointF NewScenePoint = Value.toPointF();
  
-
-	/*
-	const QPointF Min = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MinX, 0.0f));
-	const QPointF Max = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->m_MaxX, 1.0f));
-
-	QPointF NewScenePoint, MouseNewScenePoint;
-
-	MouseNewScenePoint = m_pTransferFunctionView->m_pCanvas->mapFromScene(pEvent->scenePos().x(), pEvent->scenePos().y());
-
-	NewScenePoint.setX(qMin((float)Max.x(), qMax((float)MouseNewScenePoint.x(), (float)Min.x())));
-	NewScenePoint.setY(qMin((float)Max.y(), qMax((float)MouseNewScenePoint.y(), (float)Min.y())));
-
-	QPointF TfPoint = m_pTransferFunctionView->SceneToTf(NewScenePoint);
-
-	m_pNode->SetX(TfPoint.x());
-	m_pNode->SetY(TfPoint.y());
-	
-
-	if (Change == QGraphicsItem::ItemPositionChange)
-	{
-		QPointF SceneMinPt = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->GetMinX(), 0.0f));
-		QPointF SceneMaxPt = m_pTransferFunctionView->TfToScene(QPointF(m_pNode->GetMaxX(), 1.0f));
-
-		QRectF AllowedRect = scene()->sceneRect();//(SceneMinPt, SceneMaxPt);
-
-		QRectF rect = scene()->sceneRect();
-
-		if (AllowedRect.contains(NewScenePoint))
-		{
-//			return Value;
-		}
-		else
-		{
-			
-
-			// Keep the item inside the scene rect.
-             NewScenePoint.setX(qMin(rect.right(), qMax(NewScenePoint.x(), rect.left())));
-             NewScenePoint.setY(qMin(rect.bottom(), qMax(NewScenePoint.y(), rect.top())));
-             return NewScenePoint;
-
-
-			NewScenePoint.setX(qMin((float)SceneMaxPt.x(), qMax((float)NewScenePoint.x(), (float)SceneMinPt.x())));
-			NewScenePoint.setY(qMin((float)SceneMaxPt.y(), qMax((float)NewScenePoint.y(), (float)SceneMinPt.y())));
-
-			return NewScenePoint;
-		}
-	}
-*/
-
     if (Change == QGraphicsItem::ItemSelectedHasChanged)
 	{
 		if (isSelected())
@@ -169,23 +115,29 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
+	/*
 	m_LastPos = pEvent->scenePos();
 
 	QGraphicsItem::mouseMoveEvent(pEvent);
 
 	QPointF NewTfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(m_LastPos);
 
-		m_pNode->SetX(NewTfPoint.x());
-		m_pNode->SetY(NewTfPoint.y());
+	m_pNode->SetX(NewTfPoint.x());
+	m_pNode->SetY(NewTfPoint.y());
+	*/
 }
 
-void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
+void QNodeItem::setPos(const QPointF& Pos)
 {
-	pPainter->setPen(pen());
-	pPainter->setBrush(brush());
+	QGraphicsEllipseItem::setPos(Pos);
 
+	QRectF EllipseRect;
 
-	pPainter->drawEllipse(rect());
+	EllipseRect.setTopLeft(QPointF(-m_Radius, -m_Radius));
+	EllipseRect.setWidth(2.0f * m_Radius);
+	EllipseRect.setHeight(2.0f * m_Radius);
+
+	setRect(EllipseRect);
 }
 
 void QNodeItem::UpdateTooltip(void)
