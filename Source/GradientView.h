@@ -5,6 +5,21 @@
 class QTransferFunction;
 class QNode;
 
+class QGradientMarker : public QGraphicsLineItem
+{
+public:
+    QGradientMarker(QGraphicsItem* pParent);
+
+private:
+	QGraphicsRectItem*			m_pGradientRectangle;
+	QLinearGradient				m_LinearGradient;
+	QGraphicsPolygonItem*		m_PolygonTop;
+	QGraphicsPolygonItem*		m_PolygonBottom;
+	QSize						m_PolygonSize;
+	QBrush						m_Brush;
+	QPen						m_Pen;
+};
+
 class QGradientView : public QGraphicsView
 {
     Q_OBJECT
@@ -15,15 +30,19 @@ public:
 	void drawBackground(QPainter* pPainter, const QRectF& Rectangle);
 	void resizeEvent(QResizeEvent* pResizeEvent);
 
+	void UpdateGradientMarkers();
+
+	QPointF SceneToTf(const QPointF& ScenePoint);
+	QPointF TfToScene(const QPointF& TfPoint);
+
 private slots:
 	void Update(void);
-	void OnNodeAdd(QNode* pTransferFunctionNode);
-	void OnNodeRemove(QNode* pTransferFunctionNode);
 
 private:
-	QGraphicsScene*			m_pGraphicsScene;
-	QTransferFunction*		m_pTransferFunction;
-	QSizeF					m_CheckerSize;
-	QGraphicsRectItem*		m_pGradientRectangle;
-	QLinearGradient			m_LinearGradient;
+	QGraphicsScene*				m_pGraphicsScene;
+	QTransferFunction*			m_pTransferFunction;
+	QSizeF						m_CheckerSize;
+	QGraphicsRectItem*			m_pGradientRectangle;
+	QLinearGradient				m_LinearGradient;
+	QList<QGradientMarker*>		m_Markers;
 };

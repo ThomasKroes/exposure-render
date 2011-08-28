@@ -3,13 +3,51 @@
 #include "TransferFunction.h"
 #include "NodeItem.h"
 
+QGradientMarker::QGradientMarker(QGraphicsItem* pParent) :
+	QGraphicsLineItem(pParent),
+	m_pGradientRectangle(NULL),
+	m_LinearGradient(),
+	m_PolygonTop(NULL),
+	m_PolygonBottom(NULL),
+	m_PolygonSize(8, 4),
+	m_Brush(QBrush(QColor(255, 150, 10, 220))),
+	m_Pen(QBrush(QColor(70, 70, 70, 255)), 1.0f, Qt::PenStyle::SolidLine)
+{
+	// Create top polygon
+	QPolygonF PolygonTop;
+	PolygonTop.append(QPointF(-0.5f * m_PolygonSize.width(), 0.0f));
+	PolygonTop.append(QPointF(0.0f, m_PolygonSize.height()));
+	PolygonTop.append(QPointF(0.5f * m_PolygonSize.width(), 0.0f));
+
+	m_PolygonTop = new QGraphicsPolygonItem(this);
+	m_PolygonTop->setPolygon(PolygonTop);
+	m_PolygonTop->setBrush(m_Brush);
+	m_PolygonTop->setPen(m_Pen);
+
+	// Create bottom polygon
+	QPolygonF PolygonBottom;
+	PolygonBottom.append(QPointF(-0.5f * m_PolygonSize.width(), pParent->boundingRect().bottom()));
+	PolygonBottom.append(QPointF(0.0f, pParent->boundingRect().bottom() - m_PolygonSize.height()));
+	PolygonBottom.append(QPointF(0.5f * m_PolygonSize.width(), pParent->boundingRect().bottom()));
+
+	m_PolygonBottom = new QGraphicsPolygonItem(this);
+	m_PolygonBottom->setPolygon(PolygonBottom);
+	m_PolygonBottom->setBrush(m_Brush);
+	m_PolygonBottom->setPen(m_Pen);
+
+	setLine(QLineF(QPointF(0.0f, m_PolygonSize.height()), QPointF(0.0f, 20.0f - m_PolygonSize.height())));
+	setPen(m_Pen);
+	pen().setStyle(Qt::PenStyle::DashLine);
+}
+
 QGradientView::QGradientView(QWidget* pParent, QTransferFunction* pTransferFunction) :
 	QGraphicsView(pParent),
 	m_pGraphicsScene(NULL),
 	m_pTransferFunction(pTransferFunction),
 	m_CheckerSize(10, 10),
 	m_pGradientRectangle(NULL),
-	m_LinearGradient()
+	m_LinearGradient(),
+	m_Markers()
 {
 	// Dimensions
 	setFixedHeight(20);
@@ -63,19 +101,41 @@ void QGradientView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)
 			pPainter->drawRect(i * m_CheckerSize.width(), m_CheckerSize.height(), m_CheckerSize.width(), m_CheckerSize.height());
 		}
 	}
-	
-	// Set the gradient stops
-	foreach(QNode* pNode, m_pTransferFunction->m_Nodes)
-	{
-		pPainter->setPen(QPen(Qt::PenStyle::SolidLine));
-
-		pPainter->drawLine(QPointF(pNode->GetNormalizedX() * rect().width(), 0.0f), QPointF(pNode->GetNormalizedX() * rect().width(), 20.0f));
-	}
 }
 
 void QGradientView::resizeEvent(QResizeEvent* pResizeEvent)
 {
 	Update();
+}
+
+void QGradientView::UpdateGradientMarkers(void)
+{
+	// Remove old gradient markers
+	foreach(QGradientMarker* pMarker, m_Markers)
+		m_pGraphicsScene->removeItem(pMarker);
+
+	// Clear the marker list
+	m_Markers.clear();
+
+	// Create the gradient markers
+	foreach(QNode* pNode, m_pTransferFunction->m_Nodes)
+	{
+		// New marker object
+		QGradientMarker* pGradientMarker = new QGradientMarker(m_pGradientRectangle);
+		
+		// Position in scene coordinates, and add the marker to the scene
+		QPointF ScenePointTop		= TfToScene(QPointF(pNode->GetPosition(), 0.0f));
+		QPointF ScenePointBottom	= TfToScene(QPointF(pNode->GetPosition(), 1.0f));
+
+		// Set the line and pen
+		pGradientMarker->translate(ScenePointTop.x(), 0.0f);
+
+		// Make sure the markers are drawn on top of the other geometry
+		pGradientMarker->setZValue(1000);
+
+		// Add the marker to the list
+		m_Markers.append(pGradientMarker);
+	}
 }
 
 void QGradientView::Update(void)
@@ -92,12 +152,17 @@ void QGradientView::Update(void)
 	{
 		QColor Color = pTransferFunctionNode->GetColor();
 
-		// Clamp node opacity to obtain valid alpha for display
-		float Alpha = qMin(1.0f, qMax(0.0f, pTransferFunctionNode->GetOpacity()));
+		// Clamp node position to [0, 1]
+		const float GradientStopPosition = qMin(1.0f, qMax(0.0f, (pTransferFunctionNode->GetPosition() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range));
 
-		Color.setAlphaF(Alpha);
+		// Clamp node opacity to [0, 1]
+		const float GradientStopAlpha = qMin(1.0f, qMax(0.0f, pTransferFunctionNode->GetOpacity()));
 
-		GradientStops.append(QGradientStop((pTransferFunctionNode->GetPosition() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range, Color));
+		// Adjust color
+		Color.setAlphaF(GradientStopAlpha);
+
+		// Add the gradient stop
+		GradientStops.append(QGradientStop(GradientStopPosition, Color));
 	}
 
 	m_LinearGradient.setStops(GradientStops);
@@ -105,13 +170,28 @@ void QGradientView::Update(void)
 	m_pGradientRectangle->setRect(rect());
 	m_pGradientRectangle->setBrush(QBrush(m_LinearGradient));
 	m_pGradientRectangle->setPen(QPen(Qt::darkGray));
-//	m_pGradientRectangle->setVisible(false);
+
+	UpdateGradientMarkers();
 }
 
-void QGradientView::OnNodeAdd(QNode* pTransferFunctionNode)
+QPointF QGradientView::SceneToTf(const QPointF& ScenePoint)
 {
+	const float NormalizedX = (ScenePoint.x() - (float)rect().left()) / (float)rect().width();
+	const float NormalizedY = 1.0f - ((ScenePoint.y() - (float)rect().top()) / (float)rect().height());
+
+	const float TfX = m_pTransferFunction->m_RangeMin + NormalizedX * m_pTransferFunction->m_Range;
+	const float TfY = NormalizedY;
+
+	return QPointF(TfX, TfY);
 }
 
-void QGradientView::OnNodeRemove(QNode* pTransferFunctionNode)
+QPointF QGradientView::TfToScene(const QPointF& TfPoint)
 {
+	const float NormalizedX = (TfPoint.x() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
+	const float NormalizedY = 1.0f - TfPoint.y();
+
+	const float SceneX = rect().left() + NormalizedX * rect().width();
+	const float SceneY = rect().top() + NormalizedY * rect().height();
+
+	return QPointF(SceneX, SceneY);
 }

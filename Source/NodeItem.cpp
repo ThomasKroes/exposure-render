@@ -171,7 +171,7 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
-	QGraphicsItem::mouseMoveEvent(pEvent);
+//	QGraphicsItem::mouseMoveEvent(pEvent);
 
 	m_LastPos = pEvent->scenePos();
 

@@ -22,7 +22,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent, QTransferFunction
 	m_pPolygon(NULL),
 	m_pOutline(NULL),
 	m_pCanvas(NULL),
-	m_Margin(20.0f)
+	m_Margin(4.0f)
 {
 	// Dimensions
 //	setFixedHeight(170);
@@ -44,7 +44,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent, QTransferFunction
 	setScene(m_pGraphicsScene);
 
 	// Turn antialiasing on
-//	setRenderHint(QPainter::Antialiasing);
+	setRenderHint(QPainter::Antialiasing);
 
 	// Setup connections
 	connect(m_pTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
@@ -218,7 +218,7 @@ void QTransferFunctionView::UpdateNodes(void)
 //		Center.setX(m_EditRect.left() + m_EditRect.width() * pNodeGraphics->m_pNode->GetNormalizedX());
 //		Center.setY(m_EditRect.top() + m_EditRect.height() - (pNodeGraphics->m_pNode->GetOpacity() * m_EditRect.height()));
 		
-//		pNodeGraphics->SetCenter(SceneCenter);
+		pNodeGraphics->SetCenter(SceneCenter);
 	}
 
 	m_pOutline->setRect(m_EditRect);
@@ -269,7 +269,7 @@ void QTransferFunctionView::UpdateGradient(void)
 		// Clamp node opacity to obtain valid alpha for display
 		float Alpha = qMin(1.0f, qMax(0.0f, pNode->GetOpacity()));
 
-		Color.setAlphaF(0.9f);
+		Color.setAlphaF(0.2f);
 
 		// Add a new gradient stop
 		GradientStops.append(QGradientStop(pNode->GetNormalizedX(), Color));
