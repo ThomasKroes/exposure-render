@@ -2,10 +2,10 @@
 #include "NodePropertiesWidget.h"
 #include "TransferFunction.h"
 #include "NodeItem.h"
+#include "ColorSelectorWidget.h"
 
-QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent, QTransferFunction* pTransferFunction) :
+QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QWidget(pParent),
-	m_pTransferFunction(pTransferFunction),
 	m_pLastSelectedNode(NULL),
 	m_pMainLayout(NULL),
 	m_pSelectionLabel(NULL),
@@ -19,14 +19,11 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent, QTransferFunction
 	m_pOpacityLabel(NULL),
 	m_pOpacitySlider(NULL),
 	m_pOpacitySpinBox(NULL),
-	m_pColorLabel(NULL),
-	m_pColorComboBox(NULL),
+	m_pColorSelector(NULL),
 	m_pRoughnessLabel(NULL),
 	m_pRoughnessSlider(NULL),
 	m_pRoughnessSpinBox(NULL)
 {
-	setFixedHeight(100);
-	
 	// Node properties layout
 	m_pMainLayout = new QGridLayout();
 	m_pMainLayout->setAlignment(Qt::AlignTop);
@@ -107,11 +104,8 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent, QTransferFunction
 //	connect(m_pFocalDistanceSpinBox, SIGNAL(valueChanged(int)), m_pFocalDistanceSlider, SLOT(setValue(int)));
 
 	// Color
-	m_pColorLabel = new QLabel("Color");
-	m_pMainLayout->addWidget(m_pColorLabel, 3, 0);
-
-	m_pColorComboBox = new QComboBox;
-	m_pMainLayout->addWidget(m_pColorComboBox, 3, 1, 1, 2);
+	m_pColorSelector = new QColorSelectorWidget(this);
+	m_pMainLayout->addWidget(m_pColorSelector, 3, 0, 1, 3);
 
 	/*
 	// Roughness
@@ -139,11 +133,11 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent, QTransferFunction
 	connect(m_pOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnOpacityChanged(int)));
 
 	// Respond to changes in node selection
-	connect(m_pTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
+	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
 	
 	// Respond to addition and removal of nodes
-	connect(m_pTransferFunction, SIGNAL(NodeAdd(QNode*)), this, SLOT(OnNodeAdd(QNode*)));
-	connect(m_pTransferFunction, SIGNAL(NodeRemove(QNode*)), this, SLOT(OnNodeRemove(QNode*)));
+	connect(&gTransferFunction, SIGNAL(NodeAdd(QNode*)), this, SLOT(OnNodeAdd(QNode*)));
+	connect(&gTransferFunction, SIGNAL(NodeRemove(QNode*)), this, SLOT(OnNodeRemove(QNode*)));
 }
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
@@ -163,15 +157,15 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		m_pPositionSpinBox->setRange(pNode->GetMinX(), pNode->GetMaxX());
 
 		// Obtain current node index
-		const int CurrentNodeIndex = m_pTransferFunction->GetNodeIndex(pNode);
+		const int CurrentNodeIndex = gTransferFunction.GetNodeIndex(pNode);
 
 		// Reflect node selection change in node selection combo box
 		m_pNodeSelectionComboBox->setCurrentIndex(CurrentNodeIndex);
 
 		// Compute whether to enable/disable buttons
 		const bool EnablePrevious	= CurrentNodeIndex > 0;
-		const bool EnableNext		= CurrentNodeIndex < m_pTransferFunction->m_Nodes.size() - 1;
-		const bool EnablePosition	= m_pTransferFunction->m_Nodes.front() != pNode && m_pTransferFunction->m_Nodes.back() != pNode;
+		const bool EnableNext		= CurrentNodeIndex < gTransferFunction.m_Nodes.size() - 1;
+		const bool EnablePosition	= gTransferFunction.m_Nodes.front() != pNode && gTransferFunction.m_Nodes.back() != pNode;
 
 		// Selectively enable/disable previous/next buttons
 		m_pPreviousNodePushButton->setEnabled(EnablePrevious);
@@ -212,48 +206,48 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(const int& Index)
 {
-	m_pTransferFunction->SetSelectedNode(Index);
+	gTransferFunction.SetSelectedNode(Index);
 }
 
 void QNodePropertiesWidget::OnPreviousNode(void)
 {
-	m_pTransferFunction->SelectPreviousNode();
+	gTransferFunction.SelectPreviousNode();
 }
 
 void QNodePropertiesWidget::OnNextNode(void)
 {
-	m_pTransferFunction->SelectNextNode();
+	gTransferFunction.SelectNextNode();
 }
 
 void QNodePropertiesWidget::OnTransferFunctionChanged(void)
 {
-	if (m_pTransferFunction->m_pSelectedNode)
+	if (gTransferFunction.m_pSelectedNode)
 	{
-		m_pPositionSlider->setValue(m_pTransferFunction->m_pSelectedNode->GetPosition());
-//		m_pOpacitySlider->setValue(m_pTransferFunction->m_pSelectedNode->GetOpacity() * 100.0f);
+		m_pPositionSlider->setValue(gTransferFunction.m_pSelectedNode->GetPosition());
+//		m_pOpacitySlider->setValue(gTransferFunction.m_pSelectedNode->GetOpacity() * 100.0f);
 	}
 }
 
 void QNodePropertiesWidget::OnPositionChanged(const int& Position)
 {
-	if (m_pTransferFunction->m_pSelectedNode)
+	if (gTransferFunction.m_pSelectedNode)
 	{
-		m_pTransferFunction->m_pSelectedNode->SetPosition(Position);
+		gTransferFunction.m_pSelectedNode->SetPosition(Position);
 //		m_pPositionSlider->setValue(Position);
 	}
 }
 
 void QNodePropertiesWidget::OnOpacityChanged(const int& Opacity)
 {
-	if (m_pTransferFunction->m_pSelectedNode)
-		m_pTransferFunction->m_pSelectedNode->SetOpacity(0.01f * Opacity);
+	if (gTransferFunction.m_pSelectedNode)
+		gTransferFunction.m_pSelectedNode->SetOpacity(0.01f * Opacity);
 }
 
 void QNodePropertiesWidget::OnColorChanged(const QColor& Color)
 {
 	m_pNodeSelectionComboBox->clear();
 
-	for (int i = 0; i < m_pTransferFunction->m_Nodes.size(); i++)
+	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
 		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
 }
 
@@ -272,21 +266,21 @@ void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 void QNodePropertiesWidget::OnNodeColorChanged(QNode* pNode)
 {
 //	if (pNode)
-//		m_pTransferFunction->m_pSelectedNode->SetColor(pNode->GetColor());
+//		gTransferFunction.m_pSelectedNode->SetColor(pNode->GetColor());
 }
 
 void QNodePropertiesWidget::OnNodeAdd(QNode* pNode)
 {
 	m_pNodeSelectionComboBox->clear();
 
-	for (int i = 0; i < m_pTransferFunction->m_Nodes.size(); i++)
+	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
 		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
 }
 
 void QNodePropertiesWidget::OnNodeRemove(QNode* pNode)
 {
 	/*
-	if (m_pTransferFunction->m_pSelectedNode)
-		m_pTransferFunction->m_pSelectedNode->SetOpacity(0.01f * Opacity);
+	if (gTransferFunction.m_pSelectedNode)
+		gTransferFunction.m_pSelectedNode->SetOpacity(0.01f * Opacity);
 	*/
 }

@@ -6,18 +6,20 @@ class QTransferFunction;
 class QNodeItem;
 class QNode;
 
-class QTransferFunctionView : public QGraphicsView
+class QTransferFunctionCanvas : public QGraphicsRectItem, QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    QTransferFunctionView(QWidget* pParent, QTransferFunction* pTransferFunction);
+    QTransferFunctionCanvas(QGraphicsItem* pParent);
 
-	void	drawBackground(QPainter* pPainter, const QRectF& Rectangle);
+protected:
 	void	resizeEvent(QResizeEvent* pResizeEvent);
-	void	mousePressEvent ( QMouseEvent * event );
+	void	mousePressEvent(QGraphicsSceneMouseEvent* pGraphicsSceneMouseEvent);
+
+public slots:
 	void	SetSelectedNode(QNode* pSelectedNode);
-	void	UpdateCanvas(void);
+	void	Update(void);
 	void	UpdateGrid(void);
 	void	UpdateHistogram(void);
 	void	UpdateEdges(void);
@@ -25,32 +27,38 @@ public:
 	void	UpdateNodeRanges(void);
 	void	UpdateGradient(void);
 	void	UpdatePolygon(void);
-	
-	QPointF SceneToTf(const QPointF& ScenePoint);
-	QPointF TfToScene(const QPointF& TfPoint);
+
+	QPointF SceneToTransferFunction(const QPointF& ScenePoint);
+	QPointF TransferFunctionToScene(const QPointF& TfPoint);
+
+private:
+	QList<QNodeItem*>				m_Nodes;
+	QList<QGraphicsLineItem*>		m_Edges;
+	QGraphicsPolygonItem*			m_pPolygon;
+	QLinearGradient					m_LinearGradient;
+	QList<QGraphicsLineItem*>		m_GridLinesHorizontal;
+	QPen							m_GridPenHorizontal;
+};
+
+class QTransferFunctionView : public QGraphicsView
+{
+    Q_OBJECT
+
+public:
+    QTransferFunctionView(QWidget* pParent);
+
+	void	drawBackground(QPainter* pPainter, const QRectF& Rectangle);
+	void	mousePressEvent(QMouseEvent* pEvent);
 
 signals:
 	void SelectionChange(QNode* pTransferFunctionNode);
 
 private slots:
-	void Update(void);
 	void OnNodeAdd(QNode* pTransferFunctionNode);
 	void OnNodeSelectionChanged(QNode* pNode);
-	
 
 public:
-	QRectF							m_EditRect;
-	QGraphicsScene*					m_pGraphicsScene;
-	QTransferFunction*				m_pTransferFunction;
-	QList<QNodeItem*>				m_Nodes;
-	QList<QGraphicsLineItem*>		m_Edges;
-	QGraphicsPolygonItem*			m_pPolygon;
-	QCursor							m_Cursor;
-	QLinearGradient					m_LinearGradient;
-	QGraphicsRectItem*				m_pCanvas;
-	QGraphicsRectItem*				m_pOutline;
-	float							m_Margin;
-	QList<QGraphicsLineItem*>		m_GridLinesHorizontal;
-	QPen							m_GridPenHorizontal;
-	QGraphicsTextItem*				m_Text;
+	QGraphicsScene*				m_pGraphicsScene;
+	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
+	float						m_Margin;
 };

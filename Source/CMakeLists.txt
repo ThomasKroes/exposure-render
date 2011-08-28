@@ -1,5 +1,5 @@
 
-PROJECT(VolumeRendering)
+PROJECT(ExposureRender)
 
 FIND_PACKAGE(CUDA)
 
@@ -62,6 +62,7 @@ NodeItem.cpp
 TransferFunctionView.cpp
 GradientView.cpp
 NodePropertiesWidget.cpp
+ColorSelectorWidget.cpp
 VolumeTracer.cu
 )
 
@@ -100,6 +101,7 @@ NodeItem.h
 TransferFunctionView.h
 GradientView.h
 NodePropertiesWidget.h
+ColorSelectorWidget.h
 VolumeTracer.cuh
 )
 
@@ -136,10 +138,10 @@ IF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
   SET (SimpleViewSrcs ${SimpleViewSrcs} ${SimpleViewUI})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
-CUDA_ADD_EXECUTABLE(RealVol MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs}
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs}
 )
 
-TARGET_LINK_LIBRARIES(RealVol
+TARGET_LINK_LIBRARIES(ExposureRender
   QVTK
   ${QT_LIBRARIES}
   vtkRendering

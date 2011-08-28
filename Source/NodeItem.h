@@ -38,6 +38,7 @@ public:
 	QPointF						m_LastPos;
 	QPen						m_CachePen;
 	QBrush						m_CacheBrush;
+	QGraphicsTextItem*			m_pNodeID;
 
 	static float				m_Radius;
 	static float				m_RadiusHover;

@@ -104,6 +104,7 @@ CMainWindow::CMainWindow() :
 
 	connect(&m_Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
+	
 }
 
 CMainWindow::~CMainWindow(void)
@@ -417,7 +418,11 @@ void CMainWindow::Exit()
 
 void CMainWindow::About()
 {
-   QMessageBox::about(this, tr("About RealVol"),
-            tr("This application illustrates the concepts from the paper: <b>Raytraced lighting in direct volume rendering</b>\n"
-			"For more information visit: <b>graphics.tudelft.nl</b>"));
+	QColorDialog Dia(this);
+
+	Dia.exec();
+
+ //  QMessageBox::about(this, tr("About Exposure Render"),
+ //           tr("This application illustrates the concepts from the paper: <b>Raytraced lighting in direct volume rendering</b>\n"
+	//		"For more information visit: <b>graphics.tudelft.nl</b>"));
 }

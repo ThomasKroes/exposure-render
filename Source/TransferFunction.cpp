@@ -1,9 +1,10 @@
 
 #include "TransferFunction.h"
 
-QNode::QNode(QTransferFunction* pTransferFunction, const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable) :
+QTransferFunction gTransferFunction;
+
+QNode::QNode(QTransferFunction* gTransferFunction, const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable) :
 	QObject(),
-	m_pTransferFunction(pTransferFunction),
 	m_Position(Position),
 	m_Opacity(Opacity),
 	m_Color(Color),
@@ -19,12 +20,12 @@ QNode::QNode(QTransferFunction* pTransferFunction, const float& Position, const 
 
 float QNode::GetNormalizedX(void) const 
 {
-	return (GetPosition() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
+	return (GetPosition() - gTransferFunction.m_RangeMin) / gTransferFunction.m_Range;
 }
 
 void QNode::SetNormalizedX(const float& NormalizedX)
 {
-	SetPosition(m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedX));
+	SetPosition(gTransferFunction.m_RangeMin + (gTransferFunction.m_Range * NormalizedX));
 }
 
 float QNode::GetNormalizedY(void) const 

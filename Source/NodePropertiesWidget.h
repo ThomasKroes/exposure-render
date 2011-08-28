@@ -4,13 +4,14 @@
 
 class QTransferFunction;
 class QNode;
+class QColorSelectorWidget;
 
 class QNodePropertiesWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-	QNodePropertiesWidget(QWidget* pParent, QTransferFunction* pTransferFunction);
+	QNodePropertiesWidget(QWidget* pParent);
 
 private slots:
 	void OnNodeSelectionChanged(QNode* pNode);
@@ -28,7 +29,6 @@ private slots:
 	void OnTransferFunctionChanged(void);
 
 private:
-	QTransferFunction*		m_pTransferFunction;
 	QNode*					m_pLastSelectedNode;
 	QGridLayout*			m_pMainLayout;
 	QLabel*					m_pSelectionLabel;
@@ -42,8 +42,7 @@ private:
 	QLabel*					m_pOpacityLabel;
 	QSlider*				m_pOpacitySlider;
 	QSpinBox*				m_pOpacitySpinBox;
-	QLabel*					m_pColorLabel;
-	QComboBox*				m_pColorComboBox;
+	QColorSelectorWidget*	m_pColorSelector;
 	QLabel*					m_pRoughnessLabel;
 	QSlider*				m_pRoughnessSlider;
 	QSpinBox*				m_pRoughnessSpinBox;

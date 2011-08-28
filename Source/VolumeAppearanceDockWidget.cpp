@@ -25,6 +25,7 @@ QVolumeAppearancePresetsWidget::QVolumeAppearancePresetsWidget(QWidget* pParent)
 	m_pGridLayout->setColumnStretch(3, 1);
 	m_pGridLayout->setColumnStretch(4, 1);
 	m_pGridLayout->setColumnStretch(5, 1);
+	m_pGridLayout->setAlignment(Qt::AlignTop);
 
 	setLayout(m_pGridLayout);
 

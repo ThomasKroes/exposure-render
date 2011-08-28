@@ -14,7 +14,7 @@ public:
 		*this = Other;
 	};
 
-	QNode(QTransferFunction* pTransferFunction, const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable = true);
+	QNode(QTransferFunction* gTransferFunction, const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable = true);
 
 	bool operator < (const QNode& Other) const
 	{
@@ -128,3 +128,6 @@ public:
 	QNode*				m_pSelectedNode;
 	QLinearGradient		m_LinearGradient;
 };
+
+// Transfer function singleton
+extern QTransferFunction gTransferFunction;

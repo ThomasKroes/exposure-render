@@ -38,6 +38,11 @@ QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionView
 
 	// Tooltip
 	UpdateTooltip();
+
+	// Create node ID text item
+	m_pNodeID = new QGraphicsTextItem;
+//	m_pNodeID->setTextWidth();
+//	m_pNodeID->setTextHe();
 };
 
 void QNodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
@@ -171,9 +176,11 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
-//	QGraphicsItem::mouseMoveEvent(pEvent);
+	
 
 	m_LastPos = pEvent->scenePos();
+
+	QGraphicsItem::mouseMoveEvent(pEvent);
 
 	QPointF NewTfPoint = m_pTransferFunctionView->SceneToTf(m_LastPos);
 

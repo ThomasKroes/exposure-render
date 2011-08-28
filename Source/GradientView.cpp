@@ -40,10 +40,10 @@ QGradientMarker::QGradientMarker(QGraphicsItem* pParent) :
 	pen().setStyle(Qt::PenStyle::DashLine);
 }
 
-QGradientView::QGradientView(QWidget* pParent, QTransferFunction* pTransferFunction) :
+QGradientView::QGradientView(QWidget* pParent, QTransferFunction* gTransferFunction) :
 	QGraphicsView(pParent),
 	m_pGraphicsScene(NULL),
-	m_pTransferFunction(pTransferFunction),
+	m_pTransferFunction(gTransferFunction),
 	m_CheckerSize(10, 10),
 	m_pGradientRectangle(NULL),
 	m_LinearGradient(),
@@ -118,7 +118,7 @@ void QGradientView::UpdateGradientMarkers(void)
 	m_Markers.clear();
 
 	// Create the gradient markers
-	foreach(QNode* pNode, m_pTransferFunction->m_Nodes)
+	foreach(QNode* pNode, gTransferFunction.m_Nodes)
 	{
 		// New marker object
 		QGradientMarker* pGradientMarker = new QGradientMarker(m_pGradientRectangle);
@@ -148,12 +148,13 @@ void QGradientView::Update(void)
 	QGradientStops GradientStops;
 
 	// Set the gradient stops
-	foreach(QNode* pTransferFunctionNode, m_pTransferFunction->m_Nodes)
+	foreach(QNode* pTransferFunctionNode, gTransferFunction.m_Nodes)
 	{
+		// Get node color
 		QColor Color = pTransferFunctionNode->GetColor();
 
 		// Clamp node position to [0, 1]
-		const float GradientStopPosition = qMin(1.0f, qMax(0.0f, (pTransferFunctionNode->GetPosition() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range));
+		const float GradientStopPosition = qMin(1.0f, qMax(0.0f, (pTransferFunctionNode->GetPosition() - gTransferFunction.m_RangeMin) / gTransferFunction.m_Range));
 
 		// Clamp node opacity to [0, 1]
 		const float GradientStopAlpha = qMin(1.0f, qMax(0.0f, pTransferFunctionNode->GetOpacity()));
@@ -179,7 +180,7 @@ QPointF QGradientView::SceneToTf(const QPointF& ScenePoint)
 	const float NormalizedX = (ScenePoint.x() - (float)rect().left()) / (float)rect().width();
 	const float NormalizedY = 1.0f - ((ScenePoint.y() - (float)rect().top()) / (float)rect().height());
 
-	const float TfX = m_pTransferFunction->m_RangeMin + NormalizedX * m_pTransferFunction->m_Range;
+	const float TfX = gTransferFunction.m_RangeMin + NormalizedX * gTransferFunction.m_Range;
 	const float TfY = NormalizedY;
 
 	return QPointF(TfX, TfY);
@@ -187,7 +188,7 @@ QPointF QGradientView::SceneToTf(const QPointF& ScenePoint)
 
 QPointF QGradientView::TfToScene(const QPointF& TfPoint)
 {
-	const float NormalizedX = (TfPoint.x() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
+	const float NormalizedX = (TfPoint.x() - gTransferFunction.m_RangeMin) / gTransferFunction.m_Range;
 	const float NormalizedY = 1.0f - TfPoint.y();
 
 	const float SceneX = rect().left() + NormalizedX * rect().width();
