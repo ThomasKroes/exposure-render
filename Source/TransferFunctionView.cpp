@@ -9,7 +9,8 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_BackgroundPen(),
 	m_GridLinesHorizontal(),
 	m_GridPenHorizontal(),
-	m_GridPenVertical()
+	m_GridPenVertical(),
+	m_RealisticsGradient(false)
 {
 	// Create polygon graphics item
 	m_pPolygon = new QGraphicsPolygonItem;
@@ -147,26 +148,41 @@ void QTransferFunctionCanvas::UpdateEdges(void)
 
 void QTransferFunctionCanvas::UpdateGradient(void)
 {
-	m_LinearGradient.setStart(0, 0);
-	m_LinearGradient.setFinalStop(rect().right(), rect().top());
-
-	QGradientStops GradientStops;
-
-	// Set the gradient stops
-	foreach(QNode* pNode, gTransferFunction.m_Nodes)
+	if (m_RealisticsGradient)
 	{
-		QColor Color = pNode->GetColor();
+		m_LinearGradient.setStart(0, 0);
+		m_LinearGradient.setFinalStop(rect().right(), rect().top());
 
-		// Clamp node opacity to obtain valid alpha for display
-		float Alpha = qMin(1.0f, qMax(0.0f, pNode->GetOpacity()));
+		QGradientStops GradientStops;
 
-		Color.setAlphaF(0.5f);
+		// Set the gradient stops
+		foreach(QNode* pNode, gTransferFunction.m_Nodes)
+		{
+			QColor Color = pNode->GetColor();
 
-		// Add a new gradient stop
-		GradientStops.append(QGradientStop(pNode->GetNormalizedX(), Color));
+			// Clamp node opacity to obtain valid alpha for display
+			float Alpha = qMin(1.0f, qMax(0.0f, pNode->GetOpacity()));
+
+			Color.setAlphaF(0.1f);
+
+			// Add a new gradient stop
+			GradientStops.append(QGradientStop(pNode->GetNormalizedX(), Color));
+		}
+
+		m_LinearGradient.setStops(GradientStops);
 	}
+	else
+	{
+		m_LinearGradient.setStart(0, rect().bottom());
+		m_LinearGradient.setFinalStop(0, rect().top());
 
-	m_LinearGradient.setStops(GradientStops);
+		QGradientStops GradientStops;
+
+		GradientStops.append(QGradientStop(0, QColor(255, 255, 255, 0)));
+		GradientStops.append(QGradientStop(1, QColor(255, 255, 255, 255)));
+
+		m_LinearGradient.setStops(GradientStops);
+	}
 }
 
 void QTransferFunctionCanvas::UpdatePolygon(void)
@@ -204,9 +220,12 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 		}
 	}
 
+	
+
 	m_pPolygon->setZValue(5000);
 	m_pPolygon->setPolygon(Polygon);
 	m_pPolygon->setBrush(QBrush(m_LinearGradient));
+//	m_pPolygon->setBrush(QBrush(QColor(255, 255, 255, 120)));
 	m_pPolygon->setPen(QPen(Qt::PenStyle::NoPen));
 }
 
@@ -238,9 +257,11 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	QGraphicsView(pParent),
 	m_pGraphicsScene(NULL),
 	m_pTransferFunctionCanvas(NULL),
-	m_Margin(12.0f),
+	m_Margin(24.0f),
 	m_AxisLabelX(NULL),
-	m_AxisLabelY(NULL)
+	m_AxisLabelY(NULL),
+	m_pMinX(NULL),
+	m_pMaxX(NULL)
 {
 	// Dimensions
 	setFixedHeight(250);
@@ -270,7 +291,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	// Create the transfer function canvas and add it to the scene
 	m_pTransferFunctionCanvas = new QTransferFunctionCanvas(NULL, m_pGraphicsScene);
 	m_pTransferFunctionCanvas->translate(m_Margin, m_Margin);
-	m_pTransferFunctionCanvas->setVisible(false);
+//	m_pTransferFunctionCanvas->setVisible(false);
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
@@ -280,8 +301,16 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_pGraphicsScene->addItem(m_AxisLabelX);
 
 	// Y-axis label
-	m_AxisLabelY = new QAxisLabel(NULL, "Density");
-	m_pGraphicsScene->addItem(m_AxisLabelX);
+	m_AxisLabelY = new QAxisLabel(NULL, "Opacity");
+	m_pGraphicsScene->addItem(m_AxisLabelY);
+
+	// Min x label
+	m_pMinX = new QAxisLabel(NULL, QString::number(gTransferFunction.m_RangeMin));
+	m_pGraphicsScene->addItem(m_pMinX);
+	
+	// Max x label
+	m_pMaxX = new QAxisLabel(NULL, QString::number(gTransferFunction.m_RangeMax));
+	m_pGraphicsScene->addItem(m_pMaxX);
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)
@@ -289,9 +318,6 @@ void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rec
 	QGraphicsView::drawBackground(pPainter, Rectangle);
 
 	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
-
-
-	pPainter->drawText(rect(), Qt::AlignCenter, "Qt");
 }
 
 void QTransferFunctionView::Update(void)
@@ -313,8 +339,7 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 		// Select the node
 		if (NodeIndex >= 0)
 		{
-	//		m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->setSelected(true);
-	//		m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->update();
+//			m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->setSelected(true);
 		}
 	}
 	else
@@ -335,6 +360,36 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 
 	m_pTransferFunctionCanvas->setRect(CanvasRect);
 	m_pTransferFunctionCanvas->Update();
+
+	// Configure x-axis label
+	m_AxisLabelX->setRect(QRectF(0, 0, CanvasRect.width(), 12));
+	m_AxisLabelX->setX(m_Margin);
+	m_AxisLabelX->setY(m_Margin + 12 + CanvasRect.height());
+
+	// Configure y-axis label
+	m_AxisLabelY->setRect(QRectF(0, 0, CanvasRect.height(), 8));
+	m_AxisLabelY->setPos(0, m_Margin + CanvasRect.height());
+	m_AxisLabelY->setRotation(-90.0f);
+
+	// Min X
+	m_pMinX->setRect(QRectF(0, 0, 20, 12));
+	m_pMinX->setX(m_Margin - 10);
+	m_pMinX->setY(m_Margin + CanvasRect.height() + 2);
+
+	// Max X
+	m_pMaxX->setRect(QRectF(0, 0, 20, 12));
+	m_pMaxX->setX(m_Margin - 10 + CanvasRect.width());
+	m_pMaxX->setY(m_Margin + CanvasRect.height() + 2);
+
+	// Min Y
+//	m_pMinY->setRect(QRectF(0, 0, 20, 12));
+//	m_pMinY->setX(m_Margin - 10);
+//	m_pMinY->setY(m_Margin + CanvasRect.height() + 2);
+
+	// Max X
+//	m_pMaxY->setRect(QRectF(0, 0, 20, 12));
+//	m_pMaxY->setX(m_Margin - 10 + CanvasRect.width());
+//	m_pMaxY->setY(m_Margin + CanvasRect.height() + 2);
 }
 
 void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
@@ -365,7 +420,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			m_pTransferFunctionCanvas->Update();
 
 			// Select it immediately
-//			m_pTransferFunctionCanvas->SetSelectedNode(pNode);
+			m_pTransferFunctionCanvas->SetSelectedNode(pNode);
 		}
 		else
 		{

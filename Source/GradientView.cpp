@@ -10,8 +10,8 @@ QGradientMarker::QGradientMarker(QGraphicsItem* pParent) :
 	m_PolygonTop(NULL),
 	m_PolygonBottom(NULL),
 	m_PolygonSize(8, 4),
-	m_Brush(QBrush(QColor(255, 150, 10, 220))),
-	m_Pen(QBrush(QColor(70, 70, 70, 255)), 1.0f, Qt::PenStyle::SolidLine)
+	m_Brush(QBrush(QColor(150, 150, 150, 255))),
+	m_Pen(QBrush(QColor(90, 90, 90, 255)), 1.0f, Qt::PenStyle::SolidLine)
 {
 	// Create top polygon
 	QPolygonF PolygonTop;

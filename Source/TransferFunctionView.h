@@ -15,10 +15,13 @@ public:
 	{
 	}
 
-	void QAxisLabel::paintEvent(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL)
+	virtual void QAxisLabel::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL)
     {
-        pPainter->setPen(Qt::blue);
-        pPainter->setFont(QFont("Arial", 30));
+		// Experimental
+//		pPainter->fillRect(rect(), QBrush(QColor(150, 150, 150, 150)));
+
+		pPainter->setPen(QColor(75, 75, 75));
+        pPainter->setFont(QFont("Arial", 7));
         pPainter->drawText(rect(), Qt::AlignCenter, m_Text);
     }
 
@@ -57,7 +60,7 @@ protected:
 	QList<QGraphicsLineItem*>		m_EdgeItems;
 	QGraphicsPolygonItem*			m_pPolygon;
 	QLinearGradient					m_LinearGradient;
-	
+	bool							m_RealisticsGradient;
 
 	friend class QTransferFunctionView;
 };
@@ -83,4 +86,6 @@ public:
 	float						m_Margin;
 	QAxisLabel*					m_AxisLabelX;
 	QAxisLabel*					m_AxisLabelY;
+	QAxisLabel*					m_pMinX;
+	QAxisLabel*					m_pMaxX;
 };

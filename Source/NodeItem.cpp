@@ -104,6 +104,14 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
     return QGraphicsItem::itemChange(Change, Value);
 }
 
+void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
+{
+ 	pPainter->setPen(pen());
+ 	pPainter->setBrush(brush());
+ 
+ 	pPainter->drawEllipse(rect());
+ }
+
 void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 {
 	QGraphicsEllipseItem::mouseReleaseEvent(pEvent);
@@ -115,7 +123,7 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
-	/*
+	
 	m_LastPos = pEvent->scenePos();
 
 	QGraphicsItem::mouseMoveEvent(pEvent);
@@ -124,7 +132,7 @@ void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 
 	m_pNode->SetX(NewTfPoint.x());
 	m_pNode->SetY(NewTfPoint.y());
-	*/
+	/**/
 }
 
 void QNodeItem::setPos(const QPointF& Pos)
