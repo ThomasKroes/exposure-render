@@ -6,6 +6,25 @@ class QTransferFunction;
 class QNodeItem;
 class QNode;
 
+class QAxisLabel : public QGraphicsRectItem
+{
+public:
+    QAxisLabel(QGraphicsItem* pParent, const QString& Text) :
+		QGraphicsRectItem(pParent),
+		m_Text(Text)
+	{
+	}
+
+	void QAxisLabel::paintEvent(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL)
+    {
+        pPainter->setPen(Qt::blue);
+        pPainter->setFont(QFont("Arial", 30));
+        pPainter->drawText(rect(), Qt::AlignCenter, m_Text);
+    }
+
+	QString	m_Text;
+};
+
 class QTransferFunctionCanvas : public QGraphicsRectItem
 {
 public:
@@ -34,8 +53,6 @@ protected:
 	QList<QGraphicsLineItem*>		m_GridLinesHorizontal;
 	QPen							m_GridPenHorizontal;
 	QPen							m_GridPenVertical;
-
-
 	QList<QNodeItem*>				m_NodeItems;
 	QList<QGraphicsLineItem*>		m_EdgeItems;
 	QGraphicsPolygonItem*			m_pPolygon;
@@ -64,4 +81,6 @@ public:
 	QGraphicsScene*				m_pGraphicsScene;
 	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
 	float						m_Margin;
+	QAxisLabel*					m_AxisLabelX;
+	QAxisLabel*					m_AxisLabelY;
 };

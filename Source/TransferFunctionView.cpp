@@ -238,7 +238,9 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	QGraphicsView(pParent),
 	m_pGraphicsScene(NULL),
 	m_pTransferFunctionCanvas(NULL),
-	m_Margin(12.0f)
+	m_Margin(12.0f),
+	m_AxisLabelX(NULL),
+	m_AxisLabelY(NULL)
 {
 	// Dimensions
 	setFixedHeight(250);
@@ -268,10 +270,18 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	// Create the transfer function canvas and add it to the scene
 	m_pTransferFunctionCanvas = new QTransferFunctionCanvas(NULL, m_pGraphicsScene);
 	m_pTransferFunctionCanvas->translate(m_Margin, m_Margin);
+	m_pTransferFunctionCanvas->setVisible(false);
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
 
+	// X-axis label
+	m_AxisLabelX = new QAxisLabel(NULL, "Density");
+	m_pGraphicsScene->addItem(m_AxisLabelX);
+
+	// Y-axis label
+	m_AxisLabelY = new QAxisLabel(NULL, "Density");
+	m_pGraphicsScene->addItem(m_AxisLabelX);
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)
@@ -279,6 +289,9 @@ void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rec
 	QGraphicsView::drawBackground(pPainter, Rectangle);
 
 	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
+
+
+	pPainter->drawText(rect(), Qt::AlignCenter, "Qt");
 }
 
 void QTransferFunctionView::Update(void)
