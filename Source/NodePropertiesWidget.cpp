@@ -92,12 +92,14 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_pPositionSlider->setStatusTip("Node position");
 	m_pPositionSlider->setToolTip("Drag to change node position");
 	m_pPositionSlider->setRange(0, 100);
+	m_pPositionSlider->setSingleStep(1);
 	m_pMainLayout->addWidget(m_pPositionSlider, 1, 1);
 	
 	m_pPositionSpinBox = new QSpinBox;
-	m_pPositionSpinBox->setStatusTip("Node position");
-	m_pPositionSpinBox->setToolTip("Node position");
+	m_pPositionSpinBox->setStatusTip("Node Position");
+	m_pPositionSpinBox->setToolTip("Node Position");
     m_pPositionSpinBox->setRange(0, 100);
+	m_pPositionSpinBox->setSingleStep(1);
 	m_pMainLayout->addWidget(m_pPositionSpinBox, 1, 2);
 
 	// Opacity
@@ -105,40 +107,27 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_pMainLayout->addWidget(m_pOpacityLabel, 2, 0);
 
 	m_pOpacitySlider = new QSlider(Qt::Orientation::Horizontal);
+	m_pOpacitySlider->setStatusTip("Node Opacity");
+	m_pOpacitySlider->setToolTip("Node Opacity");
 	m_pOpacitySlider->setRange(0, 100);
+	m_pOpacitySlider->setSingleStep(1);
 	m_pMainLayout->addWidget(m_pOpacitySlider, 2, 1);
 	
 	m_pOpacitySpinBox = new QSpinBox;
+	m_pOpacitySpinBox->setStatusTip("Node Opacity");
+	m_pOpacitySpinBox->setToolTip("Node Opacity");
     m_pOpacitySpinBox->setRange(0, 100);
+	m_pOpacitySpinBox->setSingleStep(1);
 	m_pMainLayout->addWidget(m_pOpacitySpinBox, 2, 2);
 	
-//	connect(m_pFocalDistanceSlider, SIGNAL(valueChanged(int)), m_pFocalDistanceSpinBox, SLOT(setValue(int)));
-//	connect(m_pFocalDistanceSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFocalDistance(int)));
-//	connect(m_pFocalDistanceSpinBox, SIGNAL(valueChanged(int)), m_pFocalDistanceSlider, SLOT(setValue(int)));
-
 	// Color
 	m_pColorSelector = new QColorSelectorWidget(this);
 	m_pMainLayout->addWidget(m_pColorSelector, 3, 0, 1, 3);
 
-	/*
-	// Roughness
-	m_pRoughnessLabel = new QLabel("Roughness");
-	m_pMainLayout->addWidget(m_pRoughnessLabel, 4, 0);
-
-	m_pRoughnessSlider = new QSlider(Qt::Orientation::Horizontal);
-	m_pRoughnessSlider->setRange(0, 100);
-	m_pMainLayout->addWidget(m_pRoughnessSlider, 4, 1);
-	
-	m_pRoughnessSpinBox = new QSpinBox;
-    m_pRoughnessSpinBox->setRange(0, 100);
-	m_pMainLayout->addWidget(m_pRoughnessSpinBox, 4, 2);
-	*/
-	
 	// Setup connections for position
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), m_pPositionSpinBox, SLOT(setValue(int)));
 	connect(m_pPositionSpinBox, SIGNAL(valueChanged(int)), m_pPositionSlider, SLOT(setValue(int)));
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), this, SLOT(OnPositionChanged(int)));
-//	connect(m_pTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnTransferFunctionChanged()));
 
 	// Setup connections for opacity
 	connect(m_pOpacitySlider, SIGNAL(valueChanged(int)), m_pOpacitySpinBox, SLOT(setValue(int)));
@@ -253,22 +242,10 @@ void QNodePropertiesWidget::OnDeleteNode(void)
 	gTransferFunction.RemoveNode(gTransferFunction.m_pSelectedNode);
 }
 
-void QNodePropertiesWidget::OnTransferFunctionChanged(void)
-{
-	if (gTransferFunction.m_pSelectedNode)
-	{
-		m_pPositionSlider->setValue(gTransferFunction.m_pSelectedNode->GetPosition());
-//		m_pOpacitySlider->setValue(gTransferFunction.m_pSelectedNode->GetOpacity() * 100.0f);
-	}
-}
-
 void QNodePropertiesWidget::OnPositionChanged(const int& Position)
 {
 	if (gTransferFunction.m_pSelectedNode)
-	{
 		gTransferFunction.m_pSelectedNode->SetPosition(Position);
-//		m_pPositionSlider->setValue(Position);
-	}
 }
 
 void QNodePropertiesWidget::OnOpacityChanged(const int& Opacity)
@@ -288,13 +265,35 @@ void QNodePropertiesWidget::OnColorChanged(const QColor& Color)
 void QNodePropertiesWidget::OnNodePositionChanged(QNode* pNode)
 {
 	if (pNode)
+	{
+		// Prevent circular dependency
+		m_pPositionSlider->blockSignals(true);
+		m_pPositionSpinBox->blockSignals(true);
+
+		// Update values
 		m_pPositionSlider->setValue(pNode->GetPosition());
+		m_pPositionSpinBox->setValue(pNode->GetPosition());
+
+		m_pPositionSlider->blockSignals(false);
+		m_pPositionSpinBox->blockSignals(true);
+	}
 }
 
 void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 {
 	if (pNode)
-		m_pOpacitySlider->setValue(pNode->GetOpacity());
+	{
+		// Prevent circular dependency
+		m_pOpacitySlider->blockSignals(true);
+		m_pOpacitySpinBox->blockSignals(true);
+		
+		// Update values
+		m_pOpacitySlider->setValue(100.0f * pNode->GetOpacity());
+		m_pOpacitySpinBox->setValue(100.0f * pNode->GetOpacity());
+
+		m_pOpacitySlider->blockSignals(false);
+		m_pOpacitySpinBox->blockSignals(false);
+	}
 }
 
 void QNodePropertiesWidget::OnNodeColorChanged(QNode* pNode)

@@ -24,6 +24,26 @@ QNode::QNode(const float& Position, const float& Opacity, const QColor& Color, c
 {
 }
 
+float QNode::GetX(void) const
+{
+	return GetPosition();
+}
+
+void QNode::SetX(const float& X)
+{
+	SetPosition(X);
+}
+
+float QNode::GetY(void) const
+{
+	return GetOpacity();
+}
+
+void QNode::SetY(const float& Y)
+{
+	SetOpacity(Y);
+}
+
 float QNode::GetNormalizedX(void) const 
 {
 	return (GetPosition() - gTransferFunction.m_RangeMin) / gTransferFunction.m_Range;
@@ -45,14 +65,14 @@ void QNode::SetNormalizedY(const float& NormalizedY)
 	SetOpacity(NormalizedY);
 }
 
-float	QNode::GetPosition(void) const
+float QNode::GetPosition(void) const
 {
 	return m_Position;
 }
 
 void QNode::SetPosition(const float& Position)
 {
-	m_Position = Position; 
+	m_Position = qMin(m_MaxX, qMax(Position, m_MinX));
 	
 	emit NodeChanged(this);
 	emit PositionChanged(this);
@@ -65,10 +85,11 @@ float QNode::GetOpacity(void) const
 
 void QNode::SetOpacity(const float& Opacity)
 {
+	m_Opacity = qMin(m_MaxY, qMax(Opacity, m_MinY));
 	m_Opacity = Opacity;
 
 	emit NodeChanged(this);
-//	emit OpacityChanged(this);
+	emit OpacityChanged(this);
 }
 
 QColor QNode::GetColor(void) const
@@ -131,14 +152,28 @@ void QNode::SetMaxY(const float& MaxY)
 	emit RangeChanged(this);
 }
 
+bool QNode::InRange(const QPointF& Point)
+{
+	return Point.x() >= m_MinX && Point.x() <= m_MaxX && Point.y() >= m_MinY && Point.y() <= m_MaxY;
+}
+
+QPointF QNode::RestrictToRange(const QPointF& Point)
+{
+	QPointF NewPoint;
+
+	NewPoint.setX(qMin(m_MaxX, qMax((float)Point.x(), m_MinX)));
+	NewPoint.setY(qMin(m_MaxY, qMax((float)Point.y(), m_MinY)));
+
+	return NewPoint;
+}
+
 QTransferFunction::QTransferFunction(QObject* pParent) :
 	QObject(pParent),
 	m_Nodes(),
 	m_RangeMin(0.0f),
 	m_RangeMax(255.0f),
 	m_Range(m_RangeMax - m_RangeMin),
-	m_pSelectedNode(NULL),
-	m_LinearGradient()
+	m_pSelectedNode(NULL)
 {
 }
 
@@ -165,6 +200,8 @@ void QTransferFunction::SetSelectedNode(const int& Index)
 
 void QTransferFunction::OnNodeChanged(QNode* pNode)
 {
+	UpdateNodeRanges();
+
 	emit FunctionChanged();
 }
 
@@ -256,21 +293,21 @@ void QTransferFunction::UpdateNodeRanges(void)
 
 		if (pNode == gTransferFunction.m_Nodes.front())
 		{
-			pNode->m_MinX = 0.0f;
-			pNode->m_MaxX = 0.0f;
+			pNode->SetMinX(0.0f);
+			pNode->SetMaxX(0.0f);
 		}
 		else if (pNode == gTransferFunction.m_Nodes.back())
 		{
-			pNode->m_MinX = gTransferFunction.m_RangeMax;
-			pNode->m_MaxX = gTransferFunction.m_RangeMax;
+			pNode->SetMinX(gTransferFunction.m_RangeMax);
+			pNode->SetMaxX(gTransferFunction.m_RangeMax);
 		}
 		else
 		{
 			QNode* pNodeLeft	= gTransferFunction.m_Nodes[i - 1];
 			QNode* pNodeRight	= gTransferFunction.m_Nodes[i + 1];
 
-			pNode->m_MinX = pNodeLeft->GetPosition();
-			pNode->m_MaxX = pNodeRight->GetPosition();
+			pNode->SetMinX(pNodeLeft->GetPosition());
+			pNode->SetMaxX(pNodeRight->GetPosition());
 		}
 	}
 }

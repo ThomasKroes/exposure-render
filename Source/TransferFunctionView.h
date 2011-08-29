@@ -37,7 +37,7 @@ protected:
 	void	resizeEvent(QResizeEvent* pResizeEvent);
 
 public:
-	void	SetSelectedNode(QNode* pSelectedNode);
+//	void	SetHistogram();
 	void	Update(void);
 	void	UpdateBackground(void);
 	void	UpdateGrid(void);
@@ -61,6 +61,7 @@ protected:
 	QGraphicsPolygonItem*			m_pPolygon;
 	QLinearGradient					m_LinearGradient;
 	bool							m_RealisticsGradient;
+	bool							m_AllowUpdateNodes;
 
 	int								m_BackgroundZ;
 	int								m_GridZ;
@@ -71,6 +72,7 @@ protected:
 	int								m_CrossHairZ;
 
 	friend class QTransferFunctionView;
+	friend class QNodeItem;
 };
 
 class QTransferFunctionView : public QGraphicsView

@@ -28,7 +28,6 @@ private slots:
 	void OnNodeAdd(QNode* pNode);
 	void OnNodeRemove(QNode* pNode);
 	void OnNodeRemoved(QNode* pNode);
-	void OnTransferFunctionChanged(void);
 
 private:
 	QNode*					m_pLastSelectedNode;

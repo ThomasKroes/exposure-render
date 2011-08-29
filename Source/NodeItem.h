@@ -31,6 +31,7 @@ public:
 	QPen						m_CachePen;
 	QBrush						m_CacheBrush;
 	QGraphicsTextItem*			m_pNodeID;
+	bool						m_SuspendUpdate;
 
 	static float				m_Radius;
 	static float				m_RadiusHover;

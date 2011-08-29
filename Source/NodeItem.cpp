@@ -22,7 +22,8 @@ QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanv
 	m_Cursor(),
 	m_LastPos(),
 	m_CachePen(),
-	m_CacheBrush()
+	m_CacheBrush(),
+	m_SuspendUpdate(false)
 {
 	// Styling
 	setBrush(QBrush(QNodeItem::m_BackgroundColor));
@@ -83,6 +84,31 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 {
 	QPointF NewScenePoint = Value.toPointF();
  
+	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionChange)
+	{
+		QPointF NodeRangeMin = m_pTransferFunctionCanvas->TransferFunctionToScene(QPointF(m_pNode->GetMinX(), m_pNode->GetMinY()));
+		QPointF NodeRangeMax = m_pTransferFunctionCanvas->TransferFunctionToScene(QPointF(m_pNode->GetMaxX(), m_pNode->GetMaxY()));
+
+		NewScenePoint.setX(qMin(NodeRangeMax.x(), qMax(NewScenePoint.x(), NodeRangeMin.x())));
+		NewScenePoint.setY(qMin(NodeRangeMin.y(), qMax(NewScenePoint.y(), NodeRangeMax.y())));
+
+		return NewScenePoint;
+	}
+
+	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionHasChanged)
+	{
+		QPointF NewTfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(NewScenePoint);
+
+		m_pTransferFunctionCanvas->m_AllowUpdateNodes = false;
+
+		m_pNode->SetX(NewTfPoint.x());
+		m_pNode->SetY(NewTfPoint.y());
+
+		m_pTransferFunctionCanvas->m_AllowUpdateNodes = true;
+
+		return NewScenePoint;
+	}
+
     if (Change == QGraphicsItem::ItemSelectedHasChanged)
 	{
 		if (isSelected())
@@ -123,16 +149,7 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 {
-	
-	m_LastPos = pEvent->scenePos();
-
 	QGraphicsItem::mouseMoveEvent(pEvent);
-
-	QPointF NewTfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(m_LastPos);
-
-	m_pNode->SetX(NewTfPoint.x());
-	m_pNode->SetY(NewTfPoint.y());
-	/**/
 }
 
 void QNodeItem::setPos(const QPointF& Pos)

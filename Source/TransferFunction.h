@@ -16,24 +16,15 @@ public:
 
 	QNode(const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable = true);
 
-	bool operator < (const QNode& Other) const
-	{
-		return GetPosition() > Other.GetPosition();
-    }
-
 public:
-	// From 2D
-	float	GetX(void) const								{	return GetPosition();					}
-	void	SetX(const float& X)							{	SetPosition(X);							}
-	float	GetY(void) const								{	return GetOpacity();					}
-	void	SetY(const float& Y)							{	SetOpacity(Y);							}
-	
+	float	GetX(void) const;
+	void	SetX(const float& X);
+	float	GetY(void) const;
+	void	SetY(const float& Y);
 	float	GetNormalizedX(void) const;
 	void	SetNormalizedX(const float& NormalizedX);
 	float	GetNormalizedY(void) const;
 	void	SetNormalizedY(const float& NormalizedY);
-
-
 	float	GetPosition(void) const;
 	void	SetPosition(const float& Position);
 	float	GetOpacity(void) const;
@@ -52,6 +43,8 @@ public:
 	void	SetMinY(const float& MinY);
 	float	GetMaxY(void) const;
 	void	SetMaxY(const float& MaxY);
+	bool	InRange(const QPointF& Point);
+	QPointF	RestrictToRange(const QPointF& Point);
 
 	QNode& operator = (const QNode& Other)			
 	{
@@ -117,7 +110,6 @@ public:
 	float				m_RangeMax;
 	float				m_Range;
 	QNode*				m_pSelectedNode;
-	QLinearGradient		m_LinearGradient;
 };
 
 // Transfer function singleton

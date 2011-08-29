@@ -11,6 +11,7 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_GridPenHorizontal(),
 	m_GridPenVertical(),
 	m_RealisticsGradient(false),
+	m_AllowUpdateNodes(true),
 	m_BackgroundZ(0),
 	m_GridZ(100),
 	m_HistogramZ(200),
@@ -47,11 +48,6 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	// Update the canvas
 	Update();
-}
-
-void QTransferFunctionCanvas::SetSelectedNode(QNode* pSelectedNode)
-{
-	gTransferFunction.SetSelectedNode(pSelectedNode);
 }
 
 void QTransferFunctionCanvas::Update(void)
@@ -100,6 +96,9 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 
 void QTransferFunctionCanvas::UpdateNodes(void)
 {
+	if (!m_AllowUpdateNodes)
+		return;
+
 	// Remove old nodes
 	foreach(QNodeItem* pNodeItem, m_NodeItems)
 		scene()->removeItem(pNodeItem);
@@ -119,8 +118,12 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 		// Compute node center in canvas coordinates
 		QPointF NodeCenter = TransferFunctionToScene(QPointF(pNode->GetX(), pNode->GetY()));
 
-		// Set it's position
+		pNodeItem->m_SuspendUpdate = true;
+
+		// Set node position
 		pNodeItem->setPos(NodeCenter);
+
+		pNodeItem->m_SuspendUpdate = false;
 
 		// Make sure node items are rendered on top
 		pNodeItem->setZValue(m_NodeZ);
@@ -338,7 +341,7 @@ void QTransferFunctionView::Update(void)
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 {
-	if (pNode)
+	if (m_pTransferFunctionCanvas && pNode)
 	{
 		// Deselect all nodes
 		foreach (QNodeItem* pNode, m_pTransferFunctionCanvas->m_NodeItems)
@@ -348,9 +351,9 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 		const int NodeIndex = gTransferFunction.GetNodeIndex(pNode);
 
 		// Select the node
-		if (NodeIndex >= 0)
+		if (NodeIndex >= 0 && NodeIndex < m_pTransferFunctionCanvas->m_NodeItems.size())
 		{
-//			m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->setSelected(true);
+			m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->setSelected(true);
 		}
 	}
 	else
@@ -433,19 +436,19 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			m_pTransferFunctionCanvas->Update();
 
 			// Select it immediately
-			m_pTransferFunctionCanvas->SetSelectedNode(pNode);
+			gTransferFunction.SetSelectedNode(pNode);
 		}
 		else
 		{
 			// Other wise no node selection
-			m_pTransferFunctionCanvas->SetSelectedNode(NULL);
+			gTransferFunction.SetSelectedNode(NULL);
 		}
 	}
 	else
 	{
 		if (pEvent->button() == Qt::MouseButton::LeftButton)
 		{
-			m_pTransferFunctionCanvas->SetSelectedNode(pNodeItem->m_pNode);
+			gTransferFunction.SetSelectedNode(pNodeItem->m_pNode);
 		}
 		else if (pEvent->button() == Qt::MouseButton::RightButton)
 		{
