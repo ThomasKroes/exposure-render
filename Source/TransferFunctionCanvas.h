@@ -25,6 +25,7 @@ public:
 	QPointF TransferFunctionToScene(const QPointF& TfPoint);
 
 protected:
+	QGraphicsRectItem*				m_pBackgroundRectangle;
 	QBrush							m_BackgroundBrush;
 	QPen							m_BackgroundPen;
 	QList<QGraphicsLineItem*>		m_GridLinesHorizontal;
@@ -33,7 +34,8 @@ protected:
 	QGraphicsPolygonItem*			m_pPolygon;
 	QLinearGradient					m_PolygonGradient;
 	QGraphicsPolygonItem*			m_pHistogram;
-
+	QGraphicsLineItem*				m_CrossHairH;
+	QGraphicsLineItem*				m_CrossHairV;
 	bool							m_RealisticsGradient;
 	bool							m_AllowUpdateNodes;
 

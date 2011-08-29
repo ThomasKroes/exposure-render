@@ -6,7 +6,7 @@ class QTransferFunction;
 class QNode;
 class QColorSelectorWidget;
 
-class QNodePropertiesWidget : public QWidget
+class QNodePropertiesWidget : public QGroupBox
 {
     Q_OBJECT
 

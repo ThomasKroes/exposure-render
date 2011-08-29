@@ -37,6 +37,8 @@ public:
 	static float				m_RadiusHover;
 	static float				m_RadiusSelected;
 	static QColor				m_BackgroundColor;
+	static QColor				m_BackgroundColorHover;
+	static QColor				m_BackgroundColorSelected;
 	static QColor				m_TextColor;
 	static float				m_PenWidth;
 	static float				m_PenWidthHover;

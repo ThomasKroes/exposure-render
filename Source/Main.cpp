@@ -2,11 +2,14 @@
 #include <QtGui>
 
 #include "MainWindow.h"
+#include "TransferFunction.h"
 
 #include "cutil_inline.h"
 
 int main(int ArgumentCount, char* pArgv[])
 {
+	qRegisterMetaType<QTransferFunction>("QTransferFunction");
+
 	// Create the application
     QApplication Application(ArgumentCount, pArgv);
 

@@ -1,19 +1,18 @@
 
 #include "TransferFunctionWidget.h"
 #include "TransferFunctionView.h"
-#include "NodePropertiesWidget.h"
 #include "GradientView.h"
 
 QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_pMainLayout(NULL),
 	m_pTransferFunction(NULL),
-	m_pTransferFunctionView(NULL),
-	m_pGradientView(NULL),
-	m_pNodePropertiesWidget(NULL)
+	m_pTransferFunctionView(NULL)
 {
+	// Title, status and tooltip
 	setTitle("Transfer Function");
 	setToolTip("Transfer function properties");
+	setStatusTip("Transfer function properties");
 
 	// Create main layout
 	m_pMainLayout = new QGridLayout();
@@ -27,17 +26,8 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_pTransferFunctionView = new QTransferFunctionView(this);
 	m_pMainLayout->addWidget(m_pTransferFunctionView);
 
-	// Gradient view
-	m_pGradientView = new QGradientView(this);
-	m_pMainLayout->addWidget(m_pGradientView);
-
-	// Node properties
-	m_pNodePropertiesWidget = new QNodePropertiesWidget(this);
-	m_pMainLayout->addWidget(m_pNodePropertiesWidget);
-
-	
-	gTransferFunction.AddNode(new QNode(0.0f, 0.0f, QColor(255, 255, 255, 128), false));
-	gTransferFunction.AddNode(new QNode(70.0f, 0.5f, QColor(255, 255, 255, 255)));
-	gTransferFunction.AddNode(new QNode(100.0f, 0.1f, QColor(255, 255, 255, 255)));
-	gTransferFunction.AddNode(new QNode(255.0f, 1.0f, QColor(255, 255, 255, 128), false));
+	gTransferFunction.AddNode(0.0f, 0.0f, QColor(255, 255, 255, 128));
+	gTransferFunction.AddNode(70.0f, 0.5f, QColor(255, 255, 255, 255));
+	gTransferFunction.AddNode(100.0f, 0.1f, QColor(255, 255, 255, 255));
+	gTransferFunction.AddNode(255.0f, 1.0f, QColor(255, 255, 255, 128));
 }

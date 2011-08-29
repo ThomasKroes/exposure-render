@@ -5,6 +5,7 @@
 
 QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene) :
 	QGraphicsRectItem(pParent, pGraphicsScene),
+	m_pBackgroundRectangle(NULL),
 	m_BackgroundBrush(),
 	m_BackgroundPen(),
 	m_GridLinesHorizontal(),
@@ -37,19 +38,16 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_pHistogram->setPen(QPen(QBrush(QColor(100, 10, 10, 150)), 0.5f));
 
 	// Background styling
-	m_BackgroundBrush.setColor(QColor(210, 210, 210));
+	m_BackgroundBrush.setColor(QColor(Qt::gray));
 	m_BackgroundBrush.setStyle(Qt::BrushStyle::SolidPattern);
-	m_BackgroundPen.setColor(QColor(90, 90, 90));
-	m_BackgroundPen.setJoinStyle(Qt::MiterJoin);
-	m_BackgroundPen.setWidthF(0.5f);
-	m_BackgroundPen.setStyle(Qt::SolidLine);
-
-	// Background styling
-	setBrush(m_BackgroundBrush);
-	setPen(m_BackgroundPen);
 
 	// Make sure the background rectangle is drawn behind everything else
 	setZValue(m_BackgroundZ);
+
+	m_pBackgroundRectangle = new QGraphicsRectItem(this);
+	m_pBackgroundRectangle->setZValue(10);
+	m_pBackgroundRectangle->setPen(Qt::NoPen);
+	m_pBackgroundRectangle->setBrush(Qt::gray);
 
 	// Grid
 	m_GridPenHorizontal.setColor(QColor(100, 100, 100, 200));
@@ -68,6 +66,8 @@ void QTransferFunctionCanvas::Update(void)
 	UpdateEdges();
 	UpdateGradient();
 	UpdatePolygon();
+
+	m_pBackgroundRectangle->setRect(rect());
 }
 
 void QTransferFunctionCanvas::UpdateGrid(void)
@@ -160,7 +160,7 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 		pNodeItem->setParentItem(this);
 
 		// Compute node center in canvas coordinates
-		QPointF NodeCenter = TransferFunctionToScene(QPointF(pNode->GetX(), pNode->GetY()));
+		QPointF NodeCenter = TransferFunctionToScene(QPointF(pNode->GetPosition(), pNode->GetOpacity()));
 
 		pNodeItem->m_SuspendUpdate = true;
 
@@ -196,7 +196,7 @@ void QTransferFunctionCanvas::UpdateEdges(void)
 		pLine->setParentItem(this);
 
 		// Set the pen
-		pLine->setPen(QPen(QColor(110, 110, 100), 0.5));
+		pLine->setPen(QPen(QColor(240, 160, 30), 1.2f));
 
 		// Ensure the item is drawn in the right order
 		pLine->setZValue(m_EdgeZ);
@@ -222,7 +222,7 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 			// Clamp node opacity to obtain valid alpha for display
 			float Alpha = qMin(1.0f, qMax(0.0f, pNode->GetOpacity()));
 
-			Color.setAlphaF(0.1f);
+			Color.setAlphaF(0.5f * Alpha);
 
 			// Add a new gradient stop
 			GradientStops.append(QGradientStop(pNode->GetNormalizedX(), Color));
@@ -237,8 +237,8 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 
 		QGradientStops GradientStops;
 
-		GradientStops.append(QGradientStop(0, QColor(255, 255, 255, 0)));
-		GradientStops.append(QGradientStop(1, QColor(255, 255, 255, 255)));
+		GradientStops.append(QGradientStop(0, QColor(230, 230, 230, 0)));
+		GradientStops.append(QGradientStop(1, QColor(230, 230, 230, 220)));
 
 		m_PolygonGradient.setStops(GradientStops);
 	}

@@ -3,17 +3,19 @@
 #include "TransferFunction.h"
 #include "TransferFunctionCanvas.h"
 
-float	QNodeItem::m_Radius				= 4.0f;
-float	QNodeItem::m_RadiusHover		= 10.0f;
-float	QNodeItem::m_RadiusSelected		= 10.0f;
-QColor	QNodeItem::m_BackgroundColor	= QColor(230, 230, 230);
-QColor	QNodeItem::m_TextColor			= QColor(20, 20, 20);
-float	QNodeItem::m_PenWidth			= 1.5f;
-float	QNodeItem::m_PenWidthHover		= 1.5f;
-float	QNodeItem::m_PenWidthSelected	= 1.5f;
-QColor	QNodeItem::m_PenColor			= QColor(160, 160, 160);
-QColor	QNodeItem::m_PenColorHover		= QColor(50, 50, 50);
-QColor	QNodeItem::m_PenColorSelected	= QColor(200, 50, 50);
+float	QNodeItem::m_Radius						= 4.0f;
+float	QNodeItem::m_RadiusHover				= 4.0f;
+float	QNodeItem::m_RadiusSelected				= 4.0f;
+QColor	QNodeItem::m_BackgroundColor			= QColor(230, 230, 230);
+QColor	QNodeItem::m_BackgroundColorHover		= QColor(240, 160, 30);
+QColor	QNodeItem::m_BackgroundColorSelected	= QColor(240, 160, 30);
+QColor	QNodeItem::m_TextColor					= QColor(20, 20, 20);
+float	QNodeItem::m_PenWidth					= 1.3f;
+float	QNodeItem::m_PenWidthHover				= 1.3f;
+float	QNodeItem::m_PenWidthSelected			= 1.3f;
+QColor	QNodeItem::m_PenColor					= QColor(240, 160, 30);
+QColor	QNodeItem::m_PenColorHover				= QColor(200, 30, 45);
+QColor	QNodeItem::m_PenColorSelected			= QColor(200, 30, 45);
 
 QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanvas* pTransferFunctionCanvas) :
 	QGraphicsEllipseItem(pParent),
@@ -50,11 +52,12 @@ void QNodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
 		return;
 
 	// Change the cursor shape
-	m_Cursor.setShape(Qt::CursorShape::PointingHandCursor);
-	setCursor(m_Cursor);
+//	m_Cursor.setShape(Qt::CursorShape::PointingHandCursor);
+//	setCursor(m_Cursor);
 
-	// Modify pen
+	// Modify pen and brush
 	setPen(QPen(QNodeItem::m_PenColorHover, QNodeItem::m_PenWidthHover));
+	setBrush(QBrush(QNodeItem::m_BackgroundColorHover));
 }
 
 void QNodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
@@ -66,11 +69,12 @@ void QNodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
 		return;
 
 	// Change the cursor shape back to normal
-	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
-	setCursor(m_Cursor);
+//	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
+//	setCursor(m_Cursor);
 
-	// Modify pen
+	// Modify pen and brush
 	setPen(QPen(QNodeItem::m_PenColor, QNodeItem::m_PenWidth));
+	setBrush(QBrush(QNodeItem::m_BackgroundColor));
 }
 
 QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
@@ -94,8 +98,8 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 
 		m_pTransferFunctionCanvas->m_AllowUpdateNodes = false;
 
-		m_pNode->SetX(NewTfPoint.x());
-		m_pNode->SetY(NewTfPoint.y());
+		m_pNode->SetPosition(NewTfPoint.x());
+		m_pNode->SetOpacity(NewTfPoint.y());
 
 		m_pTransferFunctionCanvas->m_AllowUpdateNodes = true;
 
@@ -111,6 +115,7 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 			m_CacheBrush	= brush();
 
 			setPen(QPen(QNodeItem::m_PenColorSelected, QNodeItem::m_PenWidthSelected));
+			setBrush(QBrush(QNodeItem::m_BackgroundColorSelected));
 		}
 		else
 		{
@@ -129,6 +134,8 @@ void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
  	pPainter->setBrush(brush());
  
  	pPainter->drawEllipse(rect());
+//	pPainter->setFont(QFont("Arial", 6, 3));
+//	pPainter->drawText(rect(), Qt::AlignCenter, "1");
 }
 
 void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
@@ -137,8 +144,16 @@ void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
 
 	if (pEvent->button() == Qt::MouseButton::LeftButton)
 	{
-		m_Cursor.setShape(Qt::CursorShape::SizeAllCursor);
-		setCursor(m_Cursor);
+		if (m_pNode == gTransferFunction.m_Nodes.front() || m_pNode == gTransferFunction.m_Nodes.back())
+		{
+			m_Cursor.setShape(Qt::CursorShape::SizeVerCursor);
+			setCursor(m_Cursor);
+		}
+		else
+		{
+			m_Cursor.setShape(Qt::CursorShape::SizeAllCursor);
+			setCursor(m_Cursor);
+		}
 	}
 }
 

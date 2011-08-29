@@ -5,7 +5,7 @@
 #include "ColorSelectorWidget.h"
 
 QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
-	QWidget(pParent),
+	QGroupBox(pParent),
 	m_pLastSelectedNode(NULL),
 	m_pMainLayout(NULL),
 	m_pSelectionLabel(NULL),
@@ -25,10 +25,15 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_pRoughnessSlider(NULL),
 	m_pRoughnessSpinBox(NULL)
 {
+	// Title, status and tooltip
+	setTitle("Node Properties");
+	setToolTip("Node Properties");
+	setStatusTip("Node Properties");
+
 	// Node properties layout
 	m_pMainLayout = new QGridLayout();
 	m_pMainLayout->setAlignment(Qt::AlignTop);
-	m_pMainLayout->setContentsMargins(0, 0, 0, 0);
+//	m_pMainLayout->setContentsMargins(0, 0, 0, 0);
 
 	setLayout(m_pMainLayout);
 
@@ -120,9 +125,11 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_pOpacitySpinBox->setSingleStep(1);
 	m_pMainLayout->addWidget(m_pOpacitySpinBox, 2, 2);
 	
+	/*
 	// Color
 	m_pColorSelector = new QColorSelectorWidget(this);
 	m_pMainLayout->addWidget(m_pColorSelector, 3, 0, 1, 3);
+	*/
 
 	// Setup connections for position
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), m_pPositionSpinBox, SLOT(setValue(int)));
@@ -141,6 +148,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	connect(&gTransferFunction, SIGNAL(NodeAdd(QNode*)), this, SLOT(OnNodeAdd(QNode*)));
 	connect(&gTransferFunction, SIGNAL(NodeRemove(QNode*)), this, SLOT(OnNodeRemove(QNode*)));
 	connect(&gTransferFunction, SIGNAL(NodeRemoved(QNode*)), this, SLOT(OnNodeRemoved(QNode*)));
+	
 }
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)

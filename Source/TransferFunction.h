@@ -12,6 +12,19 @@ public:
 	{
 	}
 
+	QHistogram::QHistogram(const QHistogram& Other)
+	{
+		*this = Other;
+	};
+
+	QHistogram& operator = (const QHistogram& Other)			
+	{
+		m_Bins	= Other.m_Bins;
+		m_Max	= Other.m_Max;
+
+		return *this;
+	}
+
 	QList<int>		m_Bins;
 	int				m_Max;
 };
@@ -26,13 +39,21 @@ public:
 		*this = Other;
 	};
 
-	QNode(const float& Position, const float& Opacity, const QColor& Color, const bool& Deletable = true);
+	QNode(QTransferFunction* pTransferFunction, const float& Position, const float& Opacity, const QColor& Color);
 
-public:
-	float	GetX(void) const;
-	void	SetX(const float& X);
-	float	GetY(void) const;
-	void	SetY(const float& Y);
+	QNode& operator = (const QNode& Other)			
+	{
+		m_Position	= Other.m_Position;
+		m_Opacity	= Other.m_Opacity;
+		m_Color		= Other.m_Color;
+		m_MinX		= Other.m_MinX;
+		m_MaxX		= Other.m_MaxX;
+		m_MinY		= Other.m_MinY;
+		m_MaxY		= Other.m_MaxY;
+
+		return *this;
+	}
+
 	float	GetNormalizedX(void) const;
 	void	SetNormalizedX(const float& NormalizedX);
 	float	GetNormalizedY(void) const;
@@ -43,10 +64,6 @@ public:
 	void	SetOpacity(const float& Opacity);
 	QColor	GetColor(void) const;
 	void	SetColor(const QColor& Color);
-	bool	GetAllowMoveH(void) const;
-	void	SetAllowMoveH(const bool& AllowMoveH);
-	bool	GetAllowMoveV(void) const;
-	void	SetAllowMoveV(const bool& AllowMoveV);
 	float	GetMinX(void) const;
 	void	SetMinX(const float& MinX);
 	float	GetMaxX(void) const;
@@ -56,19 +73,6 @@ public:
 	float	GetMaxY(void) const;
 	void	SetMaxY(const float& MaxY);
 	bool	InRange(const QPointF& Point);
-	QPointF	RestrictToRange(const QPointF& Point);
-
-	QNode& operator = (const QNode& Other)			
-	{
-		m_Position			= Other.m_Position;
-		m_Opacity			= Other.m_Opacity;
-		m_Color				= Other.m_Color;
-		m_Deletable			= Other.m_Deletable;
-		m_AllowMoveH		= Other.m_AllowMoveH;
-		m_AllowMoveV		= Other.m_AllowMoveV;
-
-		return *this;
-	}
 
 signals:
 	void NodeChanged(QNode* pNode);
@@ -78,16 +82,14 @@ signals:
 	void RangeChanged(QNode* pNode);
 
 public:
-	float					m_Position;
-	float					m_Opacity;
-	QColor					m_Color;
-	bool					m_Deletable;
-	bool					m_AllowMoveH;
-	bool					m_AllowMoveV;
-	float					m_MinX;
-	float					m_MaxX;
-	float					m_MinY;
-	float					m_MaxY;
+	QTransferFunction*	m_pTransferFunction;
+	float				m_Position;
+	float				m_Opacity;
+	QColor				m_Color;
+	float				m_MinX;
+	float				m_MaxX;
+	float				m_MinY;
+	float				m_MaxY;
 };
 
 class QTransferFunction : public QObject
@@ -95,8 +97,29 @@ class QTransferFunction : public QObject
     Q_OBJECT
 
 public:
-    QTransferFunction(QObject* pParent = NULL);
+    QTransferFunction(QObject* pParent = NULL, const QString& Name = "Default");
 
+	QTransferFunction::QTransferFunction(const QTransferFunction& Other)
+	{
+		*this = Other;
+	};
+
+	QTransferFunction& operator = (const QTransferFunction& Other)			
+	{
+		m_Name				= Other.m_Name;
+		m_Nodes				= Other.m_Nodes;
+		m_RangeMin			= Other.m_RangeMin;
+		m_RangeMax			= Other.m_RangeMax;
+		m_Range				= Other.m_Range;
+		m_pSelectedNode		= Other.m_pSelectedNode;
+		m_Histogram			= Other.m_Histogram;
+
+		return *this;
+	}
+
+	QString	GetName(void) const;
+	void	SetName(const QString& Name);
+	void	AddNode(const float& Position, const float& Opacity, const QColor& Color);
 	void	AddNode(QNode* pNode);
 	void	RemoveNode(QNode* pNode);
 	void	SetSelectedNode(QNode* pSelectedNode);
@@ -119,6 +142,7 @@ signals:
 	void	HistogramChanged(void);
 
 public:
+	QString				m_Name;
 	QVector<QNode*>		m_Nodes;
 	float				m_RangeMin;
 	float				m_RangeMax;
@@ -126,6 +150,8 @@ public:
 	QNode*				m_pSelectedNode;
 	QHistogram			m_Histogram;
 };
+
+Q_DECLARE_METATYPE(QTransferFunction)
 
 // Transfer function singleton
 extern QTransferFunction gTransferFunction;

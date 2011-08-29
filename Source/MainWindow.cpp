@@ -199,7 +199,7 @@ void CMainWindow::CreateDockWindows()
     m_pViewMenu->addAction(m_pLightingDockWidget->toggleViewAction());
 
 	// Appearance dock widget
-    m_pVolumeAppearanceDockWidget = new CVolumeAppearanceDockWidget(this);
+    m_pVolumeAppearanceDockWidget = new QVolumeAppearanceDockWidget(this);
 	m_pVolumeAppearanceDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::LeftDockWidgetArea, m_pVolumeAppearanceDockWidget);
     m_pViewMenu->addAction(m_pVolumeAppearanceDockWidget->toggleViewAction());

@@ -2,51 +2,32 @@
 
 #include <QtGui>
 
-class CVolumeAppearanceDockWidget;
+class QVolumeAppearanceDockWidget;
 class QTransferFunctionWidget;
+class QTransferFunctionPresetsWidget;
+class QNodePropertiesWidget;
 
-class QVolumeAppearancePresetsWidget : public QGroupBox
+class QVolumeAppearanceWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    QVolumeAppearancePresetsWidget(QWidget* pParent = NULL);
-
-private:
-	void CreateActions(void);
+    QVolumeAppearanceWidget(QWidget* pParent = NULL);
 
 protected:
-	QGridLayout*	m_pGridLayout;
-	QLabel*			m_pNameLabel;
-	QComboBox*		m_pPresetNameComboBox;
-	QPushButton*	m_pLoadPresetPushButton;
-	QPushButton*	m_pSavePresetPushButton;
-	QPushButton*	m_pRemovePresetPushButton;
-	QPushButton*	m_pRenamePresetPushButton;
-
-    QWidgetAction*	m_pLoadAction;
-};
-
-class CVolumeAppearanceWidget : public QWidget
-{
-    Q_OBJECT
-
-public:
-    CVolumeAppearanceWidget(QWidget* pParent = NULL);
-
-protected:
-	QVBoxLayout*						m_pMainLayout;
-	QVolumeAppearancePresetsWidget*		m_pVolumeAppearancePresetsWidget;
+	QGridLayout*						m_pMainLayout;
 	QTransferFunctionWidget*			m_pTransferFunctionWidget;
+	QTransferFunctionPresetsWidget*		m_pVolumeAppearancePresetsWidget;
+	QNodePropertiesWidget*				m_pNodePropertiesWidget;
 };
 
-class CVolumeAppearanceDockWidget : public QDockWidget
+class QVolumeAppearanceDockWidget : public QDockWidget
 {
     Q_OBJECT
 
 public:
-    CVolumeAppearanceDockWidget(QWidget* pParent = NULL);
+    QVolumeAppearanceDockWidget(QWidget* pParent = NULL);
 
 protected:
-	CVolumeAppearanceWidget*	m_pVolumeAppearanceWidget;
+	QVolumeAppearanceWidget*	m_pVolumeAppearanceWidget;
 };

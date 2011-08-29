@@ -21,6 +21,4 @@ protected:
 	QGridLayout*				m_pMainLayout;
 	QTransferFunction*			m_pTransferFunction;
 	QTransferFunctionView*		m_pTransferFunctionView;
-	QGradientView*				m_pGradientView;
-	QNodePropertiesWidget*		m_pNodePropertiesWidget;
 };

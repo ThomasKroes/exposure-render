@@ -2,6 +2,7 @@
 #include "TransferFunction.h"
 #include "TransferFunctionView.h"
 #include "TransferFunctionCanvas.h"
+#include "TransferFunctionGradient.h"
 #include "NodeItem.h"
 #include "Scene.h"
 
@@ -9,11 +10,13 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	QGraphicsView(pParent),
 	m_pGraphicsScene(NULL),
 	m_pTransferFunctionCanvas(NULL),
-	m_Margin(24.0f),
+	m_pTransferFunctionGradient(NULL),
+	m_MarginTop(10.0f),
+	m_MarginBottom(35.0f),
+	m_MarginLeft(15.0f),
+	m_MarginRight(10.0f),
 	m_AxisLabelX(NULL),
-	m_AxisLabelY(NULL),
-	m_pMinX(NULL),
-	m_pMaxX(NULL)
+	m_AxisLabelY(NULL)
 {
 	// Dimensions
 	setFixedHeight(250);
@@ -42,11 +45,16 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 
 	// Create the transfer function canvas and add it to the scene
 	m_pTransferFunctionCanvas = new QTransferFunctionCanvas(NULL, m_pGraphicsScene);
-	m_pTransferFunctionCanvas->translate(m_Margin, m_Margin);
+	m_pTransferFunctionCanvas->translate(m_MarginLeft, m_MarginTop);
+
+	m_pTransferFunctionGradient = new QTransferFunctionGradient(NULL, m_pGraphicsScene);
+	m_pTransferFunctionGradient->translate(m_MarginLeft, rect().bottom() - m_MarginBottom + 8);
+
 //	m_pTransferFunctionCanvas->setVisible(false);
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
+	connect(&gTransferFunction, SIGNAL(HistogramChanged(void)), this, SLOT(OnHistogramChanged(void)));
 
 	// X-axis label
 	m_AxisLabelX = new QAxisLabel(NULL, "Density");
@@ -55,14 +63,6 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	// Y-axis label
 	m_AxisLabelY = new QAxisLabel(NULL, "Opacity");
 	m_pGraphicsScene->addItem(m_AxisLabelY);
-
-	// Min x label
-	m_pMinX = new QAxisLabel(NULL, QString::number(gTransferFunction.m_RangeMin));
-	m_pGraphicsScene->addItem(m_pMinX);
-	
-	// Max x label
-	m_pMaxX = new QAxisLabel(NULL, QString::number(gTransferFunction.m_RangeMax));
-	m_pGraphicsScene->addItem(m_pMaxX);
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)
@@ -75,6 +75,7 @@ void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rec
 void QTransferFunctionView::Update(void)
 {
 	m_pTransferFunctionCanvas->Update();
+	m_pTransferFunctionGradient->Update();
 
 	if (gpScene == NULL)
 		return;
@@ -133,42 +134,34 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 
 	QRectF CanvasRect = m_pTransferFunctionCanvas->rect();
 
-	CanvasRect.setWidth(rect().width() - 2.0f * m_Margin);
-	CanvasRect.setHeight(rect().height() - 2.0f * m_Margin);
+	CanvasRect.setWidth(rect().width() - m_MarginLeft - m_MarginRight);
+	CanvasRect.setHeight(rect().height() - m_MarginTop - m_MarginBottom);
 
 	m_pTransferFunctionCanvas->setRect(CanvasRect);
 	m_pTransferFunctionCanvas->Update();
 	m_pTransferFunctionCanvas->UpdateHistogram();
 
+	// Update transfer function gradient
+	QRectF GradientRect = m_pTransferFunctionCanvas->rect();
+
+	GradientRect.setWidth(rect().width() - m_MarginLeft - m_MarginRight);
+	GradientRect.setHeight(12);
+
+	m_pTransferFunctionGradient->setRect(GradientRect);
+	m_pTransferFunctionGradient->Update();
+
+
 	// Configure x-axis label
 	m_AxisLabelX->setRect(QRectF(0, 0, CanvasRect.width(), 12));
-	m_AxisLabelX->setX(m_Margin);
-	m_AxisLabelX->setY(m_Margin + 12 + CanvasRect.height());
+	m_AxisLabelX->setX(m_MarginLeft);
+	m_AxisLabelX->setY(m_MarginTop + CanvasRect.height() + 23);
+	m_AxisLabelX->m_Text = "Intensity: [" + QString::number(gTransferFunction.m_RangeMin) + ", " + QString::number(gTransferFunction.m_RangeMax) + "]";
 
 	// Configure y-axis label
 	m_AxisLabelY->setRect(QRectF(0, 0, CanvasRect.height(), 8));
-	m_AxisLabelY->setPos(0, m_Margin + CanvasRect.height());
+	m_AxisLabelY->setPos(0, m_MarginTop + CanvasRect.height());
 	m_AxisLabelY->setRotation(-90.0f);
-
-	// Min X
-	m_pMinX->setRect(QRectF(0, 0, 20, 12));
-	m_pMinX->setX(m_Margin - 10);
-	m_pMinX->setY(m_Margin + CanvasRect.height() + 2);
-
-	// Max X
-	m_pMaxX->setRect(QRectF(0, 0, 20, 12));
-	m_pMaxX->setX(m_Margin - 10 + CanvasRect.width());
-	m_pMaxX->setY(m_Margin + CanvasRect.height() + 2);
-
-	// Min Y
-//	m_pMinY->setRect(QRectF(0, 0, 20, 12));
-//	m_pMinY->setX(m_Margin - 10);
-//	m_pMinY->setY(m_Margin + CanvasRect.height() + 2);
-
-	// Max X
-//	m_pMaxY->setRect(QRectF(0, 0, 20, 12));
-//	m_pMaxY->setX(m_Margin - 10 + CanvasRect.width());
-//	m_pMaxY->setY(m_Margin + CanvasRect.height() + 2);
+	m_AxisLabelX->m_Text = "Opacity (%): [0 - 100]";
 }
 
 void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
@@ -181,10 +174,10 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 	if (!pNodeItem)
 	{
 		// Add a new node if the user clicked the left button
-		if (pEvent->button() == Qt::MouseButton::LeftButton && m_pTransferFunctionCanvas->rect().contains(pEvent->posF() - QPointF(m_Margin, m_Margin)))
+		if (pEvent->button() == Qt::MouseButton::LeftButton && m_pTransferFunctionCanvas->rect().contains(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop)))
 		{
 			// Convert picked position to transfer function coordinates
-			QPointF TfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(pEvent->posF() - QPointF(m_Margin, m_Margin));
+			QPointF TfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop));
 
 			// Generate random color
 			int R = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
@@ -192,7 +185,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			int B = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 
 			// Create new transfer function node
-			QNode* pNode = new QNode(TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
+			QNode* pNode = new QNode(&gTransferFunction, TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
 
 			// Add to node list
 			gTransferFunction.AddNode(pNode);
