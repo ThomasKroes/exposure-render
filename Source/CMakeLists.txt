@@ -63,6 +63,7 @@ GradientView.cpp
 NodePropertiesWidget.cpp
 ColorSelectorWidget.cpp
 TransferFunctionCanvas.cpp
+TransferFunctionPresetsWidget.cpp
 VolumeTracer.cu
 )
 
@@ -102,6 +103,7 @@ GradientView.h
 NodePropertiesWidget.h
 ColorSelectorWidget.h
 TransferFunctionCanvas.h
+TransferFunctionPresetsWidget.h
 VolumeTracer.cuh
 )
 

@@ -1,9 +1,7 @@
 
-#include "VolumeAppearanceDockWidget.h"
-#include "TransferFunctionWidget.h"
-#include "MainWindow.h"
+#include "TransferFunctionPresetsWidget.h"
 
-QVolumeAppearancePresetsWidget::QVolumeAppearancePresetsWidget(QWidget* pParent) :
+QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_pGridLayout(NULL),
 	m_pNameLabel(NULL),
@@ -68,7 +66,7 @@ QVolumeAppearancePresetsWidget::QVolumeAppearancePresetsWidget(QWidget* pParent)
 	*/
 }
 
-void QVolumeAppearancePresetsWidget::CreateActions(void)
+void QTransferFunctionPresetsWidget::CreateActions(void)
 {
 	m_pLoadAction = new QWidgetAction(this);
     m_pLoadAction->setStatusTip(tr("Load an existing transfer function"));
@@ -77,36 +75,4 @@ void QVolumeAppearancePresetsWidget::CreateActions(void)
 	m_pLoadPresetPushButton->addAction(m_pLoadAction);
 	gpMainWindow->m_pFileMenu->addAction(m_pLoadAction);
 
-}
-
-CVolumeAppearanceWidget::CVolumeAppearanceWidget(QWidget* pParent) :
-	QWidget(pParent),
-	m_pMainLayout(NULL),
-	m_pVolumeAppearancePresetsWidget(NULL)
-{
-	// Create vertical layout
-	m_pMainLayout = new QVBoxLayout();
-	m_pMainLayout->setAlignment(Qt::AlignTop);
-	setLayout(m_pMainLayout);
-
-	// Volume appearance presets widget
-	m_pVolumeAppearancePresetsWidget = new QVolumeAppearancePresetsWidget(this);
-	m_pMainLayout->addWidget(m_pVolumeAppearancePresetsWidget);
-
-	// Transfer function widget
-	m_pTransferFunctionWidget = new QTransferFunctionWidget(this);
-	m_pMainLayout->addWidget(m_pTransferFunctionWidget);
-	
-}
-
-CVolumeAppearanceDockWidget::CVolumeAppearanceDockWidget(QWidget *parent) :
-	QDockWidget(parent),
-	m_pVolumeAppearanceWidget(NULL)
-{
-	setWindowTitle("Appearance");
-	setToolTip("Volume Appearance");
-
-	m_pVolumeAppearanceWidget = new CVolumeAppearanceWidget(this);
-
-	setWidget(m_pVolumeAppearanceWidget);
 }
