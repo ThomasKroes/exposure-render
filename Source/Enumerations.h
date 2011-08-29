@@ -199,7 +199,7 @@ enum EDirty
 	FocusDirty				= 0x01000,
 	LightsDirty				= 0x02000,
 	BenchmarkDirty			= 0x04000,
-	TriangleMeshDirty		= 0x08000,
+	TransferFunctionDirty	= 0x08000,
 	AnimationDirty			= 0x10000,
 };
 

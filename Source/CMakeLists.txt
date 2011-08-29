@@ -36,7 +36,6 @@ MainWindow.cpp
 TransferFunctionWidget.cpp 
 LightingDockWidget.cpp 
 VolumeAppearanceDockWidget.cpp
-PieceWiseFunction.cpp
 Camera.cpp
 Filter.cpp
 Flags.cpp
@@ -63,6 +62,7 @@ TransferFunctionView.cpp
 GradientView.cpp
 NodePropertiesWidget.cpp
 ColorSelectorWidget.cpp
+TransferFunctionCanvas.cpp
 VolumeTracer.cu
 )
 
@@ -72,7 +72,6 @@ MainWindow.h
 TransferFunctionWidget.h 
 LightingDockWidget.h 
 VolumeAppearanceDockWidget.h
-PieceWiseFunction.h
 Camera.h
 Defines.h
 Dll.h
@@ -102,6 +101,7 @@ TransferFunctionView.h
 GradientView.h
 NodePropertiesWidget.h
 ColorSelectorWidget.h
+TransferFunctionCanvas.h
 VolumeTracer.cuh
 )
 

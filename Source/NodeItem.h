@@ -15,12 +15,13 @@ public:
 	void setPos(const QPointF& Pos);
 
 protected:
-	virtual void				hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent);
-	virtual void				hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent);
-	virtual QVariant			itemChange(GraphicsItemChange Change, const QVariant& Value);
-	virtual void				mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent);
-	virtual void				mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent);
-	virtual void				paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
+	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent);
+	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent);
+	virtual QVariant itemChange(GraphicsItemChange Change, const QVariant& Value);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent* pEvent);
+	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent);
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent);
+	virtual void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
 
 public:
 	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;

@@ -178,7 +178,7 @@ void CRenderThread::run()
 		}
 
 		// Restart the rendering when when the camera, lights and render params are dirty
-		if (Scene.m_DirtyFlags.HasFlag(CameraDirty | LightsDirty | RenderParamsDirty))
+		if (Scene.m_DirtyFlags.HasFlag(CameraDirty | LightsDirty | RenderParamsDirty | TransferFunctionDirty))
 		{
 			// Reset buffers to black
 			cudaMemset(m_pDevAccEstXyz, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));

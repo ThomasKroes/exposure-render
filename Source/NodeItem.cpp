@@ -1,7 +1,7 @@
 
 #include "NodeItem.h"
 #include "TransferFunction.h"
-#include "TransferFunctionView.h"
+#include "TransferFunctionCanvas.h"
 
 float	QNodeItem::m_Radius				= 4.0f;
 float	QNodeItem::m_RadiusHover		= 10.0f;
@@ -129,7 +129,18 @@ void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
  	pPainter->setBrush(brush());
  
  	pPainter->drawEllipse(rect());
- }
+}
+
+void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
+{
+	QGraphicsItem::mousePressEvent(pEvent);
+
+	if (pEvent->button() == Qt::MouseButton::LeftButton)
+	{
+		m_Cursor.setShape(Qt::CursorShape::SizeAllCursor);
+		setCursor(m_Cursor);
+	}
+}
 
 void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 {

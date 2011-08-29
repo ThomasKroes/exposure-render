@@ -164,7 +164,7 @@ bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataV
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
 	Histogram->SetInputConnection(ImageResample->GetOutputPort());
-	Histogram->SetComponentExtent(0, 255, 0, 0, 0, 0);
+	Histogram->SetComponentExtent(0, 1024, 0, 0, 0, 0);
 	Histogram->SetComponentOrigin(0, 0, 0);
 	Histogram->SetComponentSpacing(1, 0, 0);
 	Histogram->IgnoreZeroOn();
