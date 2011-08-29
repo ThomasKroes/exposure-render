@@ -11,15 +11,15 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_pGraphicsScene(NULL),
 	m_pTransferFunctionCanvas(NULL),
 	m_pTransferFunctionGradient(NULL),
-	m_MarginTop(10.0f),
-	m_MarginBottom(35.0f),
+	m_MarginTop(8.0f),
+	m_MarginBottom(36.0f),
 	m_MarginLeft(15.0f),
-	m_MarginRight(10.0f),
+	m_MarginRight(8.0f),
 	m_AxisLabelX(NULL),
 	m_AxisLabelY(NULL)
 {
 	// Dimensions
-	setFixedHeight(250);
+	setFixedHeight(300);
 
 	// Styling
 	setFrameShadow(Sunken);
@@ -154,14 +154,14 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 	// Configure x-axis label
 	m_AxisLabelX->setRect(QRectF(0, 0, CanvasRect.width(), 12));
 	m_AxisLabelX->setX(m_MarginLeft);
-	m_AxisLabelX->setY(m_MarginTop + CanvasRect.height() + 23);
+	m_AxisLabelX->setY(m_MarginTop + CanvasRect.height() + 25);
 	m_AxisLabelX->m_Text = "Intensity: [" + QString::number(gTransferFunction.m_RangeMin) + ", " + QString::number(gTransferFunction.m_RangeMax) + "]";
 
 	// Configure y-axis label
 	m_AxisLabelY->setRect(QRectF(0, 0, CanvasRect.height(), 8));
 	m_AxisLabelY->setPos(0, m_MarginTop + CanvasRect.height());
 	m_AxisLabelY->setRotation(-90.0f);
-	m_AxisLabelX->m_Text = "Opacity (%): [0 - 100]";
+	m_AxisLabelY->m_Text = "Opacity (%): [0 - 100]";
 }
 
 void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)

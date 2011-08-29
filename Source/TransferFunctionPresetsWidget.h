@@ -65,13 +65,13 @@ public:
 private:
 
 protected:
-	QGridLayout*				m_pGridLayout;
-	QLabel*						m_pNameLabel;
-	QComboBox*					m_pPresetNameComboBox;
-	QPushButton*				m_pLoadPresetPushButton;
-	QPushButton*				m_pSavePresetPushButton;
-	QPushButton*				m_pRemovePresetPushButton;
-	QPushButton*				m_pRenamePresetPushButton;
-	QListWidget*					m_pTable;
-	QStandardItemModel			m_Model;
+	QGridLayout*		m_pGridLayout;
+	QLabel*				m_pNameLabel;
+	QLineEdit*			m_pPresetNameEdit;
+	QPushButton*		m_pLoadPresetsPushButton;
+	QPushButton*		m_pSavePresetPushButton;
+	QPushButton*		m_pSavePresetsPushButton;
+	QPushButton*		m_pRemovePresetPushButton;
+	QListWidget*		m_pTable;
+	QStandardItemModel	m_Model;
 };

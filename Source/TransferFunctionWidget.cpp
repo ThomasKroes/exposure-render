@@ -1,7 +1,6 @@
 
 #include "TransferFunctionWidget.h"
 #include "TransferFunctionView.h"
-#include "GradientView.h"
 
 QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -26,8 +25,6 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_pTransferFunctionView = new QTransferFunctionView(this);
 	m_pMainLayout->addWidget(m_pTransferFunctionView);
 
-	gTransferFunction.AddNode(0.0f, 0.0f, QColor(255, 255, 255, 128));
-	gTransferFunction.AddNode(70.0f, 0.5f, QColor(255, 255, 255, 255));
-	gTransferFunction.AddNode(100.0f, 0.1f, QColor(255, 255, 255, 255));
-	gTransferFunction.AddNode(255.0f, 1.0f, QColor(255, 255, 255, 128));
+	gTransferFunction.AddNode(0.0f, 0.0f, QColor(255, 0, 0, 0));
+	gTransferFunction.AddNode(255.0f, 1.0f, QColor(0, 255, 0, 255));
 }

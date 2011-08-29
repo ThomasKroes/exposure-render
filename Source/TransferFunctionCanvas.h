@@ -11,6 +11,8 @@ class QTransferFunctionCanvas : public QGraphicsRectItem
 public:
     QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene);
 
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent);
+
 public:
 	void Update(void);
 	void UpdateBackground(void);
@@ -20,6 +22,7 @@ public:
 	void UpdateNodes(void);
 	void UpdateGradient(void);
 	void UpdatePolygon(void);
+	void UpdateCrossHairs(void);
 
 	QPointF SceneToTransferFunction(const QPointF& ScenePoint);
 	QPointF TransferFunctionToScene(const QPointF& TfPoint);

@@ -14,6 +14,8 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_pPolygon(NULL),
 	m_PolygonGradient(),
 	m_pHistogram(NULL),
+	m_CrossHairH(NULL),
+	m_CrossHairV(NULL),
 	m_RealisticsGradient(false),
 	m_AllowUpdateNodes(true),
 	m_NodeItems(),
@@ -37,6 +39,16 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_pHistogram->setBrush(QColor(200, 20, 20, 50));
 	m_pHistogram->setPen(QPen(QBrush(QColor(100, 10, 10, 150)), 0.5f));
 
+	// Horizontal cross hair
+	m_CrossHairH = new QGraphicsLineItem(this);
+	m_CrossHairH->setPen(QPen(Qt::darkGray));
+	m_CrossHairH->setZValue(m_CrossHairZ);
+
+	// Horizontal cross hair
+	m_CrossHairV = new QGraphicsLineItem(this);
+	m_CrossHairV->setPen(QPen(Qt::darkGray));
+	m_CrossHairV->setZValue(m_CrossHairZ);
+
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(Qt::gray));
 	m_BackgroundBrush.setStyle(Qt::BrushStyle::SolidPattern);
@@ -50,13 +62,29 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_pBackgroundRectangle->setBrush(Qt::gray);
 
 	// Grid
-	m_GridPenHorizontal.setColor(QColor(100, 100, 100, 200));
-	m_GridPenHorizontal.setWidthF(0.5f);
+	QVector<qreal> dashes;
+	dashes << 13 << 13;
+
+	m_GridPenHorizontal.setColor(QColor(100, 100, 100, 100));
+	m_GridPenHorizontal.setWidthF(0.6f);
+	m_GridPenHorizontal.setStyle(Qt::PenStyle::DashLine);
+	m_GridPenHorizontal.setDashPattern(dashes);
+
 	m_GridPenVertical.setColor(QColor(100, 100, 100, 200));
-	m_GridPenVertical.setWidthF(0.5f);
+	m_GridPenVertical.setWidthF(0.6f);
+	m_GridPenVertical.setStyle(Qt::PenStyle::SolidLine);
+//	m_GridPenVertical.setDashPattern(dashes);
 
 	// Update the canvas
 	Update();
+}
+
+void QTransferFunctionCanvas::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
+{
+	QGraphicsRectItem::mouseMoveEvent(pEvent);
+
+	m_CrossHairH->setPos(QPointF(pEvent->pos().x(), 0));
+	m_CrossHairV->setPos(QPointF(0, pEvent->pos().y()));
 }
 
 void QTransferFunctionCanvas::Update(void)
@@ -66,6 +94,7 @@ void QTransferFunctionCanvas::Update(void)
 	UpdateEdges();
 	UpdateGradient();
 	UpdatePolygon();
+	UpdateCrossHairs();
 
 	m_pBackgroundRectangle->setRect(rect());
 }
@@ -73,7 +102,7 @@ void QTransferFunctionCanvas::Update(void)
 void QTransferFunctionCanvas::UpdateGrid(void)
 {
 	// Horizontal grid lines
-	const float DeltaY = 0.1f * rect().height();
+	const float DeltaY = 0.2f * rect().height();
 
 	// Remove old horizontal grid lines
 	foreach(QGraphicsLineItem* pLine, m_GridLinesHorizontal)
@@ -82,12 +111,33 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 	// Clear the edges list
 	m_GridLinesHorizontal.clear();
 
-	for (int i = 1; i < 10; i++)
+	for (int i = 1; i < 5; i++)
 	{
 		// Create a new grid line
 		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
 
 		pLine->setPen(m_GridPenHorizontal);
+
+		// Depth ordering
+		pLine->setZValue(m_GridZ);
+
+		// Set parent
+		pLine->setParentItem(this);
+
+		// Add it to the list so we can remove them from the canvas when needed
+		m_GridLinesHorizontal.append(pLine);
+	}
+
+	float GridInterval = 50.0f;
+
+	int Num = ceilf(rect().width() / GridInterval);
+
+	for (int i = 0; i < Num; i++)
+	{
+		// Create a new grid line
+		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(i * GridInterval, 0.0f, i * GridInterval, rect().height()));
+
+		pLine->setPen(m_GridPenVertical);
 
 		// Depth ordering
 		pLine->setZValue(m_GridZ);
@@ -285,6 +335,15 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 
 	// Give the polygon a gradient brush
 	m_pPolygon->setBrush(QBrush(m_PolygonGradient));
+}
+
+void QTransferFunctionCanvas::UpdateCrossHairs(void)
+{
+	// Horizontal cross hair
+	m_CrossHairH->setLine(QLineF(rect().topLeft(), rect().bottomLeft()));
+
+	// Vertical cross hair
+	m_CrossHairV->setLine(QLineF(rect().topLeft(), rect().topRight()));
 }
 
 // Maps from scene coordinates to transfer function coordinates

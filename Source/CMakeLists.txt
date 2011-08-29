@@ -59,7 +59,6 @@ VtkWidget.cpp
 Scene.cpp
 NodeItem.cpp
 TransferFunctionView.cpp
-GradientView.cpp
 NodePropertiesWidget.cpp
 ColorSelectorWidget.cpp
 TransferFunctionCanvas.cpp
@@ -100,7 +99,6 @@ VtkWidget.h
 Scene.h
 NodeItem.h
 TransferFunctionView.h
-GradientView.h
 NodePropertiesWidget.h
 ColorSelectorWidget.h
 TransferFunctionCanvas.h

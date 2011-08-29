@@ -49,11 +49,11 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	QGroupBox(pParent),
 	m_pGridLayout(NULL),
 	m_pNameLabel(NULL),
-	m_pPresetNameComboBox(NULL),
-	m_pLoadPresetPushButton(NULL),
+	m_pPresetNameEdit(NULL),
+	m_pLoadPresetsPushButton(NULL),
+	m_pSavePresetsPushButton(NULL),
 	m_pSavePresetPushButton(NULL),
 	m_pRemovePresetPushButton(NULL),
-	m_pRenamePresetPushButton(NULL),
 	m_Model(100, 1)
 {
 	// Title, status and tooltip
@@ -62,7 +62,7 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	setStatusTip("Transfer Function Presets");
 
 //	setFixedHeight(150);
-	setFixedWidth(150);
+	setFixedWidth(200);
 
 	// Create grid layout
 	m_pGridLayout = new QGridLayout();
@@ -77,58 +77,40 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	m_pTable = new QListWidget();
 	m_pTable->setCaption("asdasd");
 	m_pTable->setAlternatingRowColors(true);
-	m_pTable->addItem("asd");
-	m_pTable->addItem("asd");
-	m_pTable->addItem("asd");
-	m_pTable->addItem("asd");
-	/*
-	m_pTable->setColumnCount(2);
-	m_pTable->setColumnWidth(0, 15);
-	m_pTable->setColumnWidth(1, 15);
-	
-	m_pTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
-	m_pTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
-	
+	m_pTable->addItem("Bonsai");
+	m_pTable->addItem("Engine");
+	m_pTable->addItem("Manix");
 
-	m_pTable->verticalHeader()->hide();
+	m_pGridLayout->addWidget(m_pTable, 0, 0, 1, 5);
 
-//	m_pTable->setItem(0, 0, new QTableWidgetItem("Bonsai"));
+	m_pPresetNameEdit = new QLineEdit(this);
+	m_pGridLayout->addWidget(m_pPresetNameEdit, 1, 0);
 
-	m_pTable->horizontalHeader()->setStretchLastSection(true);
-	
-//	m_Model.setParent(this);
+	m_pLoadPresetsPushButton = new QPushButton("L");
+	m_pLoadPresetsPushButton->setToolTip("Load presets from files");
+	m_pLoadPresetsPushButton->setStatusTip("Load transfer function presets from file");
+	m_pLoadPresetsPushButton->setFixedWidth(20);
+	m_pLoadPresetsPushButton->setFixedHeight(20);
+	m_pGridLayout->addWidget(m_pLoadPresetsPushButton, 1, 1);
 
-	m_pTable->setModel(&m_Model);
-	*/
+	m_pSavePresetsPushButton = new QPushButton("S");
+	m_pSavePresetsPushButton->setToolTip("Save presets to file");
+	m_pSavePresetsPushButton->setStatusTip("Save transfer function presets to file");
+	m_pSavePresetsPushButton->setFixedWidth(20);
+	m_pSavePresetsPushButton->setFixedHeight(20);
+	m_pGridLayout->addWidget(m_pSavePresetsPushButton, 1, 2);
 
-	m_pGridLayout->addWidget(m_pTable, 0, 0);
-
-
-	/*
-	m_pPresetNameComboBox = new QComboBox(this);
-	m_pPresetNameComboBox->addItem("Medical");
-	m_pPresetNameComboBox->addItem("Engineering");
-	m_pPresetNameComboBox->setEditable(true);
-	m_pGridLayout->addWidget(m_pPresetNameComboBox, 0, 1);
-
-	m_pLoadPresetPushButton = new QPushButton("");
-	m_pLoadPresetPushButton->setFixedWidth(20);
-	m_pLoadPresetPushButton->setFixedHeight(20);
-	m_pGridLayout->addWidget(m_pLoadPresetPushButton, 0, 2);
-
-	m_pSavePresetPushButton = new QPushButton(">");
+	m_pSavePresetPushButton = new QPushButton("S");
+	m_pSavePresetPushButton->setToolTip("Save Preset");
+	m_pSavePresetPushButton->setStatusTip("Save transfer function preset");
 	m_pSavePresetPushButton->setFixedWidth(20);
 	m_pSavePresetPushButton->setFixedHeight(20);
-	m_pGridLayout->addWidget(m_pSavePresetPushButton, 0, 3);
+	m_pGridLayout->addWidget(m_pSavePresetPushButton, 1, 3);
 
-	m_pRemovePresetPushButton = new QPushButton("-");
+	m_pRemovePresetPushButton = new QPushButton("R");
+	m_pRemovePresetPushButton->setToolTip("Remove Preset");
+	m_pRemovePresetPushButton->setStatusTip("Remove transfer function preset");
 	m_pRemovePresetPushButton->setFixedWidth(20);
 	m_pRemovePresetPushButton->setFixedHeight(20);
-	m_pGridLayout->addWidget(m_pRemovePresetPushButton, 0, 4);
-
-	m_pRenamePresetPushButton = new QPushButton(".");
-	m_pRenamePresetPushButton->setFixedWidth(20);
-	m_pRenamePresetPushButton->setFixedHeight(20);
-	m_pGridLayout->addWidget(m_pRenamePresetPushButton, 0, 5);
-	*/
+	m_pGridLayout->addWidget(m_pRemovePresetPushButton, 1, 4);
 }
