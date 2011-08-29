@@ -8,9 +8,9 @@ float	QNodeItem::m_RadiusHover		= 10.0f;
 float	QNodeItem::m_RadiusSelected		= 10.0f;
 QColor	QNodeItem::m_BackgroundColor	= QColor(230, 230, 230);
 QColor	QNodeItem::m_TextColor			= QColor(20, 20, 20);
-float	QNodeItem::m_PenWidth			= 1.7f;
-float	QNodeItem::m_PenWidthHover		= 1.7f;
-float	QNodeItem::m_PenWidthSelected	= 1.7f;
+float	QNodeItem::m_PenWidth			= 1.5f;
+float	QNodeItem::m_PenWidthHover		= 1.5f;
+float	QNodeItem::m_PenWidthSelected	= 1.5f;
 QColor	QNodeItem::m_PenColor			= QColor(160, 160, 160);
 QColor	QNodeItem::m_PenColorHover		= QColor(50, 50, 50);
 QColor	QNodeItem::m_PenColorSelected	= QColor(200, 50, 50);
@@ -53,6 +53,7 @@ void QNodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
 	m_Cursor.setShape(Qt::CursorShape::PointingHandCursor);
 	setCursor(m_Cursor);
 
+	// Modify pen
 	setPen(QPen(QNodeItem::m_PenColorHover, QNodeItem::m_PenWidthHover));
 }
 
@@ -68,16 +69,8 @@ void QNodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
 	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
 	setCursor(m_Cursor);
 
+	// Modify pen
 	setPen(QPen(QNodeItem::m_PenColor, QNodeItem::m_PenWidth));
-}
-
-void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
-{
-	QGraphicsEllipseItem::mousePressEvent(pEvent);
-
-	// Change the cursor shape to normal
-	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
-	setCursor(m_Cursor);
 }
 
 QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
@@ -121,9 +114,9 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 		}
 		else
 		{
-			// Restore pold pen and brush
-			setPen(m_CachePen);
-			setBrush(m_CacheBrush);
+			// Restore normal pen and brush
+			setPen(QPen(QNodeItem::m_PenColor, QNodeItem::m_PenWidth));
+			setBrush(QBrush(QNodeItem::m_BackgroundColor));
 		}
 	}
 

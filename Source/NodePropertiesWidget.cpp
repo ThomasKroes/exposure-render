@@ -179,8 +179,12 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		// Obtain current node index
 		const int CurrentNodeIndex = gTransferFunction.GetNodeIndex(pNode);
 
+		m_pNodeSelectionComboBox->blockSignals(true);
+
 		// Reflect node selection change in node selection combo box
-		m_pNodeSelectionComboBox->setCurrentIndex(CurrentNodeIndex);
+//		m_pNodeSelectionComboBox->setCurrentIndex(CurrentNodeIndex);
+
+		m_pNodeSelectionComboBox->blockSignals(false);
 
 		// Compute whether to enable/disable buttons
 		const bool EnablePrevious	= CurrentNodeIndex > 0;
@@ -221,7 +225,7 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(const int& Index)
 {
-	gTransferFunction.SetSelectedNode(Index);
+//	gTransferFunction.SetSelectedNode(Index);
 }
 
 void QNodePropertiesWidget::OnPreviousNode(void)

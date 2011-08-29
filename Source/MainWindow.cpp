@@ -309,9 +309,13 @@ void CMainWindow::LoadFile(const QString& FileName)
 
 	// Load the VTK volume
 	if (LoadVtkVolume(FileName.toAscii().data(), gpScene, gpRenderThread->m_pImageDataVolume))
+	{
 		gpRenderThread->m_Loaded = true;
+	}
 	else
+	{
 		return;
+	}
 
 	// Force the render thread to allocate the necessary buffers, do not remove this line
 	gpScene->m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);

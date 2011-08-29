@@ -241,6 +241,9 @@ void QTransferFunction::SelectNextNode(void)
 
 int	QTransferFunction::GetNodeIndex(QNode* pNode)
 {
+	if (pNode == NULL)
+		return -1;
+
 	return m_Nodes.indexOf(pNode);
 }
 
@@ -310,4 +313,18 @@ void QTransferFunction::UpdateNodeRanges(void)
 			pNode->SetMaxX(pNodeRight->GetPosition());
 		}
 	}
+}
+
+void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
+{
+	m_Histogram.m_Bins.clear();
+
+	for (int i = 0; i < NoBins; i++)
+	{
+		if (pBins[i] > m_Histogram.m_Max)
+			m_Histogram.m_Max = pBins[i];
+	}
+
+	for (int i = 0; i < NoBins; i++)
+		m_Histogram.m_Bins.append(pBins[i]);
 }

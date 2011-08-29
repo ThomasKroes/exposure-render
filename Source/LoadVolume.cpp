@@ -1,19 +1,20 @@
 
-#include "LoadVolume.h"
-#include "RenderThread.h"
-
-// VTK includes
-#include	<vtkSmartPointer.h>
-#include	<vtkMetaImageReader.h>
-#include	<vtkImageCast.h>
-#include	<vtkImageResample.h>
-#include	<vtkImageData.h>
-#include	<vtkImageGradientMagnitude.h>
-#include	<vtkCallbackCommand.h>
-
-// Loader settings
 #include "LoadSettingsDialog.h"
 #include "MainWindow.h"
+#include "LoadVolume.h"
+#include "RenderThread.h"
+#include "TransferFunction.h"
+
+// VTK includes
+#include <vtkSmartPointer.h>
+#include <vtkMetaImageReader.h>
+#include <vtkImageCast.h>
+#include <vtkImageResample.h>
+#include <vtkImageData.h>
+#include <vtkImageGradientMagnitude.h>
+#include <vtkCallbackCommand.h>
+#include <vtkImageAccumulate.h>
+#include <vtkIntArray.h>
 
 QProgressDialog* gpProgressDialog = NULL;
 
@@ -159,24 +160,19 @@ bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataV
 	pScene->m_NoVoxels				= pScene->m_Resolution.m_NoElements;
 	pScene->m_BoundingBox.m_MinP	= Vec3f(0.0f);
 	pScene->m_BoundingBox.m_MaxP	= Vec3f(Resolution.x / Max, Resolution.y / Max, Resolution.z / Max);
-/**/
-//	char ByteSizeVolume[255];
 
-//	const float VolumeSize = (float)(pImageDataVolume->GetActualMemorySize() * 1000) / powf(1024.0f, 2.0f);
-
-//	sprintf_s(ByteSizeVolume, "%0.2f", VolumeSize);
-//	gStatistics.Add("Volume", ByteSizeVolume, "Mb");
+	// Build the histogram
+	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
+	Histogram->SetInputConnection(ImageResample->GetOutputPort());
+	Histogram->SetComponentExtent(0, 255, 0, 0, 0, 0);
+	Histogram->SetComponentOrigin(0, 0, 0);
+	Histogram->SetComponentSpacing(1, 0, 0);
+	Histogram->IgnoreZeroOn();
+	Histogram->Update();
+ 
+	// Update the histogram in the transfer function
+	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
 	
-//	gCudaTotalMemorySize += VolumeSize;
-
-//	double Range[2];
-
-//	ImageData->GetScalarRange(Range);
-	
-//	gMaxD = Range[1];
-
-//	BindVolumeData((short*)pImageDataResampled->GetScalarPointer(), gResolution);
-
 	// Delete progress dialog
 	gpProgressDialog->close();
 	delete gpProgressDialog;

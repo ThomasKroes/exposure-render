@@ -17,7 +17,6 @@ public:
 protected:
 	virtual void				hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent);
 	virtual void				hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent);
-	virtual void				mousePressEvent(QGraphicsSceneMouseEvent* pEvent);
 	virtual QVariant			itemChange(GraphicsItemChange Change, const QVariant& Value);
 	virtual void				mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent);
 	virtual void				mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent);

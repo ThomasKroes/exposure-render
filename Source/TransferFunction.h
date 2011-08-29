@@ -4,6 +4,18 @@
 
 class QTransferFunction;
 
+class QHistogram : public QGraphicsPolygonItem
+{
+public:
+    QHistogram(QGraphicsItem* pParent = NULL) :
+		QGraphicsPolygonItem(pParent)
+	{
+	}
+
+	QList<int>		m_Bins;
+	int				m_Max;
+};
+
 class QNode : public QObject
 {
 	Q_OBJECT
@@ -93,6 +105,7 @@ public:
 	void	SelectNextNode(void);
 	int		GetNodeIndex(QNode* pNode);
 	void	UpdateNodeRanges(void);
+	void	SetHistogram(const int* pBins, const int& NoBins);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);
@@ -103,6 +116,7 @@ signals:
 	void	NodeRemove(QNode* pNode);
 	void	NodeRemoved(QNode* pNode);
 	void	SelectionChanged(QNode* pNode);
+	void	HistogramChanged(void);
 
 public:
 	QVector<QNode*>		m_Nodes;
@@ -110,6 +124,7 @@ public:
 	float				m_RangeMax;
 	float				m_Range;
 	QNode*				m_pSelectedNode;
+	QHistogram			m_Histogram;
 };
 
 // Transfer function singleton

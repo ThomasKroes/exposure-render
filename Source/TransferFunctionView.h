@@ -37,7 +37,6 @@ protected:
 	void	resizeEvent(QResizeEvent* pResizeEvent);
 
 public:
-//	void	SetHistogram();
 	void	Update(void);
 	void	UpdateBackground(void);
 	void	UpdateGrid(void);
@@ -59,6 +58,7 @@ protected:
 	QList<QNodeItem*>				m_NodeItems;
 	QList<QGraphicsLineItem*>		m_EdgeItems;
 	QGraphicsPolygonItem*			m_pPolygon;
+	QGraphicsPolygonItem*			m_pHistogram;
 	QLinearGradient					m_LinearGradient;
 	bool							m_RealisticsGradient;
 	bool							m_AllowUpdateNodes;
@@ -88,6 +88,7 @@ public:
 
 private slots:
 	void OnNodeSelectionChanged(QNode* pNode);
+	void OnHistogramChanged(void);
 	void Update(void);
 
 public:

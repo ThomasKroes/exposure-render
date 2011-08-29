@@ -8,6 +8,36 @@
 #include "Flags.h"
 #include "Statistics.h"
 
+#define MAX_NO_BINS 256
+
+class CHistogram
+{
+public:
+	CHistogram(void)
+	{
+		memset(m_Bins, 0, MAX_NO_BINS * sizeof(int));
+		m_NoBins = MAX_NO_BINS;
+	}
+
+	CHistogram(const int* pBins, const int& NoBins)
+	{
+		SetBins(pBins, NoBins);
+	}
+
+	void SetBins(const int* pBins, const int& NoBins)
+	{
+		if (pBins == NULL)
+			return;
+
+		memcpy(m_Bins, pBins, NoBins * sizeof(int));
+		m_NoBins = NoBins;
+	}
+
+private:
+	int		m_Bins[MAX_NO_BINS];
+	int		m_NoBins;
+};
+
 class CScene
 {
 public:

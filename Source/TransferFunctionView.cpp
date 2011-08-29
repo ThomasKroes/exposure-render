@@ -3,6 +3,8 @@
 #include "TransferFunction.h"
 #include "NodeItem.h"
 
+#include <math.h>
+
 QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene) :
 	QGraphicsRectItem(pParent, pGraphicsScene),
 	m_BackgroundBrush(),
@@ -12,6 +14,7 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_GridPenVertical(),
 	m_RealisticsGradient(false),
 	m_AllowUpdateNodes(true),
+	m_pHistogram(NULL),
 	m_BackgroundZ(0),
 	m_GridZ(100),
 	m_HistogramZ(200),
@@ -24,6 +27,11 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_pPolygon = new QGraphicsPolygonItem;
 	m_pPolygon->setParentItem(this);
 	m_pPolygon->setPen(QPen(Qt::PenStyle::NoPen));
+
+	// Histogram
+	m_pHistogram = new QGraphicsPolygonItem;
+	m_pHistogram->setParentItem(this);
+	m_pHistogram->setPen(QPen(Qt::PenStyle::NoPen));
 
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(210, 210, 210));
@@ -53,7 +61,6 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 void QTransferFunctionCanvas::Update(void)
 {
 	UpdateGrid();
-	UpdateHistogram();
 	UpdateNodes();
 	UpdateEdges();
 	UpdateGradient();
@@ -92,6 +99,43 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 
 void QTransferFunctionCanvas::UpdateHistogram(void)
 {
+	QPolygonF Polygon;
+
+	// Set the gradient stops
+	for (int i = 0; i < gTransferFunction.m_Histogram.m_Bins.size(); i++)
+	{
+		// Compute polygon point in scene coordinates
+		QPointF ScenePoint = TransferFunctionToScene(QPointF(i, logf((float)gTransferFunction.m_Histogram.m_Bins[i]) / logf((float)gTransferFunction.m_Histogram.m_Max)));
+
+		if (i == 0)
+		{
+			QPointF CenterCopy = ScenePoint;
+
+			CenterCopy.setY(rect().height());
+
+			Polygon.append(CenterCopy);
+		}
+
+		Polygon.append(ScenePoint);
+
+		if (i == (gTransferFunction.m_Histogram.m_Bins.size() - 1))
+		{
+			QPointF CenterCopy = ScenePoint;
+
+			CenterCopy.setY(rect().height());
+
+			Polygon.append(CenterCopy);
+		}
+	}
+
+	// Depth order
+	m_pHistogram->setZValue(m_HistogramZ);
+
+	// Update the polygon geometry
+	m_pHistogram->setPolygon(Polygon);
+
+	// Give the polygon a gradient brush
+	m_pHistogram->setBrush(QBrush(QColor(200, 30, 30, 50)));
 }
 
 void QTransferFunctionCanvas::UpdateNodes(void)
@@ -341,12 +385,12 @@ void QTransferFunctionView::Update(void)
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 {
-	if (m_pTransferFunctionCanvas && pNode)
-	{
-		// Deselect all nodes
-		foreach (QNodeItem* pNode, m_pTransferFunctionCanvas->m_NodeItems)
-			pNode->setSelected(false);
+	// Deselect all nodes
+	foreach (QNodeItem* pNode, m_pTransferFunctionCanvas->m_NodeItems)
+		pNode->setSelected(false);
 
+	if (pNode)
+	{
 		// Obtain node index
 		const int NodeIndex = gTransferFunction.GetNodeIndex(pNode);
 
@@ -356,9 +400,11 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 			m_pTransferFunctionCanvas->m_NodeItems[NodeIndex]->setSelected(true);
 		}
 	}
-	else
-	{
-	}
+}
+
+void QTransferFunctionView::OnHistogramChanged(void)
+{
+	m_pTransferFunctionCanvas->UpdateHistogram();
 }
 
 void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
@@ -374,6 +420,7 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 
 	m_pTransferFunctionCanvas->setRect(CanvasRect);
 	m_pTransferFunctionCanvas->Update();
+	m_pTransferFunctionCanvas->UpdateHistogram();
 
 	// Configure x-axis label
 	m_AxisLabelX->setRect(QRectF(0, 0, CanvasRect.width(), 12));
@@ -438,10 +485,11 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			// Select it immediately
 			gTransferFunction.SetSelectedNode(pNode);
 		}
-		else
+
+		if (pEvent->button() == Qt::MouseButton::RightButton)
 		{
 			// Other wise no node selection
-			gTransferFunction.SetSelectedNode(NULL);
+			gTransferFunction.SetSelectedNode((QNode*)NULL);
 		}
 	}
 	else
