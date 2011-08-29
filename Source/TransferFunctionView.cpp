@@ -10,11 +10,19 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_GridLinesHorizontal(),
 	m_GridPenHorizontal(),
 	m_GridPenVertical(),
-	m_RealisticsGradient(false)
+	m_RealisticsGradient(false),
+	m_BackgroundZ(0),
+	m_GridZ(100),
+	m_HistogramZ(200),
+	m_EdgeZ(300),
+	m_PolygonZ(400),
+	m_NodeZ(500),
+	m_CrossHairZ(600)
 {
 	// Create polygon graphics item
 	m_pPolygon = new QGraphicsPolygonItem;
 	m_pPolygon->setParentItem(this);
+	m_pPolygon->setPen(QPen(Qt::PenStyle::NoPen));
 
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(210, 210, 210));
@@ -28,8 +36,8 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	setBrush(m_BackgroundBrush);
 	setPen(m_BackgroundPen);
 
-	// Make sure this rectangle is drawn behind everything else
-	setZValue(0);
+	// Make sure the background rectangle is drawn behind everything else
+	setZValue(m_BackgroundZ);
 
 	// Grid
 	m_GridPenHorizontal.setColor(QColor(100, 100, 100, 200));
@@ -74,7 +82,11 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
 
 		pLine->setPen(m_GridPenHorizontal);
-		pLine->setZValue(100);
+
+		// Depth ordering
+		pLine->setZValue(m_GridZ);
+
+		// Set parent
 		pLine->setParentItem(this);
 
 		// Add it to the list so we can remove them from the canvas when needed
@@ -111,7 +123,7 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 		pNodeItem->setPos(NodeCenter);
 
 		// Make sure node items are rendered on top
-		pNodeItem->setZValue(50000);
+		pNodeItem->setZValue(m_NodeZ);
 
 		// Add it to the list so we can remove them from the canvas when needed
 		m_NodeItems.append(pNodeItem);
@@ -140,7 +152,7 @@ void QTransferFunctionCanvas::UpdateEdges(void)
 		pLine->setPen(QPen(QColor(110, 110, 100), 0.5));
 
 		// Ensure the item is drawn in the right order
-		pLine->setZValue(300);
+		pLine->setZValue(m_EdgeZ);
 
 		m_EdgeItems.append(pLine);
 	}
@@ -197,8 +209,6 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 		// Compute polygon point in scene coordinates
 		QPointF ScenePoint = pNodeItem->pos();
 
-//		ScenePoint.setY(rect().height());
-
 		if (pNodeItem == m_NodeItems.front())
 		{
 			QPointF CenterCopy = ScenePoint;
@@ -220,13 +230,14 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 		}
 	}
 
-	
+	// Depth order
+	m_pPolygon->setZValue(m_PolygonZ);
 
-	m_pPolygon->setZValue(5000);
+	// Update the polygon geometry
 	m_pPolygon->setPolygon(Polygon);
+
+	// Give the polygon a gradient brush
 	m_pPolygon->setBrush(QBrush(m_LinearGradient));
-//	m_pPolygon->setBrush(QBrush(QColor(255, 255, 255, 120)));
-	m_pPolygon->setPen(QPen(Qt::PenStyle::NoPen));
 }
 
 // Maps from scene coordinates to transfer function coordinates
@@ -404,8 +415,10 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 		// Add a new node if the user clicked the left button
 		if (pEvent->button() == Qt::MouseButton::LeftButton)
 		{
-			QPointF TfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(pEvent->pos());
+			// Convert picked position to transfer function coordinates
+			QPointF TfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(pEvent->posF() - QPointF(m_Margin, m_Margin));
 
+			// Generate random color
 			int R = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 			int G = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 			int B = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);

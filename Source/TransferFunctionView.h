@@ -62,6 +62,14 @@ protected:
 	QLinearGradient					m_LinearGradient;
 	bool							m_RealisticsGradient;
 
+	int								m_BackgroundZ;
+	int								m_GridZ;
+	int								m_HistogramZ;
+	int								m_EdgeZ;
+	int								m_PolygonZ;
+	int								m_NodeZ;
+	int								m_CrossHairZ;
+
 	friend class QTransferFunctionView;
 };
 
