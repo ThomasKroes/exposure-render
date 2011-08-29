@@ -38,7 +38,7 @@ QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanv
 
 	// We are going to catch hover events
 	setAcceptHoverEvents(true);
-
+	
 	// Tooltip
 	UpdateTooltip();
 };

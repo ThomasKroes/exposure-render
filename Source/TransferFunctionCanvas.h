@@ -11,7 +11,10 @@ class QTransferFunctionCanvas : public QGraphicsRectItem
 public:
     QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene);
 
-	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent);
+protected:
+	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent);
+	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent);
+	virtual void hoverMoveEvent(QGraphicsSceneHoverEvent* pEvent);
 
 public:
 	void Update(void);
@@ -39,6 +42,7 @@ protected:
 	QGraphicsPolygonItem*			m_pHistogram;
 	QGraphicsLineItem*				m_CrossHairH;
 	QGraphicsLineItem*				m_CrossHairV;
+	QGraphicsTextItem*				m_CrossHairText;
 	bool							m_RealisticsGradient;
 	bool							m_AllowUpdateNodes;
 

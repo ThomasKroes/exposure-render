@@ -62,7 +62,7 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	setStatusTip("Transfer Function Presets");
 
 //	setFixedHeight(150);
-	setFixedWidth(200);
+	setFixedWidth(250);
 
 	// Create grid layout
 	m_pGridLayout = new QGridLayout();

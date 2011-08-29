@@ -38,7 +38,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	setScene(m_pGraphicsScene);
 
 	// Turn antialiasing on
-	setRenderHint(QPainter::Antialiasing);
+//	setRenderHint(QPainter::Antialiasing);
 
 	// Respond to changes in the transfer function
 	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
@@ -92,11 +92,13 @@ void QTransferFunctionView::Update(void)
 		gpScene->m_TransferFunctions.m_Ks.m_P[i] = pNode->GetPosition();
 		gpScene->m_TransferFunctions.m_Kt.m_P[i] = pNode->GetPosition();
 
-		float Col = pNode->GetOpacity() * ((float)pNode->GetColor().red() / 255.0f);
+		float ColR = pNode->GetOpacity() * ((float)pNode->GetColor().red() / 255.0f);
+		float ColG = pNode->GetOpacity() * ((float)pNode->GetColor().green() / 255.0f);
+		float ColB = pNode->GetOpacity() * ((float)pNode->GetColor().blue() / 255.0f);
 
-		gpScene->m_TransferFunctions.m_Kd.m_C[i] = CColorRgbHdr(Col, Col, Col);
-		gpScene->m_TransferFunctions.m_Ks.m_C[i] = CColorRgbHdr(Col, Col, Col);
-		gpScene->m_TransferFunctions.m_Kt.m_C[i] = CColorRgbHdr(Col, Col, Col);
+		gpScene->m_TransferFunctions.m_Kd.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
+		gpScene->m_TransferFunctions.m_Ks.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
+		gpScene->m_TransferFunctions.m_Kt.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
 	}
 
 	gpScene->m_DirtyFlags.SetFlag(TransferFunctionDirty);

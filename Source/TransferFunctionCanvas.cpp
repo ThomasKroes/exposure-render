@@ -41,13 +41,17 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	// Horizontal cross hair
 	m_CrossHairH = new QGraphicsLineItem(this);
-	m_CrossHairH->setPen(QPen(Qt::darkGray));
+	m_CrossHairH->setPen(QPen(Qt::darkGray, 0.2f));
 	m_CrossHairH->setZValue(m_CrossHairZ);
 
 	// Horizontal cross hair
 	m_CrossHairV = new QGraphicsLineItem(this);
-	m_CrossHairV->setPen(QPen(Qt::darkGray));
+	m_CrossHairV->setPen(QPen(Qt::darkGray, 0.2f));
 	m_CrossHairV->setZValue(m_CrossHairZ);
+
+	// Cross hair text
+	m_CrossHairText = new QGraphicsTextItem(this);
+	m_CrossHairText->setZValue(m_CrossHairZ);
 
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(Qt::gray));
@@ -77,14 +81,51 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	// Update the canvas
 	Update();
+
+	// We are going to catch hover events
+	setAcceptHoverEvents(true);
 }
 
-void QTransferFunctionCanvas::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
+void QTransferFunctionCanvas::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
 {
-	QGraphicsRectItem::mouseMoveEvent(pEvent);
+	QGraphicsRectItem::hoverEnterEvent(pEvent);
+
+	// Don't overwrite styling when selected
+	if (isSelected())
+		return;
+
+	// Show crosshair
+	m_CrossHairH->setVisible(true);
+	m_CrossHairV->setVisible(true);
+	m_CrossHairText->setVisible(true);
+}
+
+void QTransferFunctionCanvas::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
+{
+	QGraphicsRectItem::hoverLeaveEvent(pEvent);
+
+	// Don't overwrite styling when selected
+	if (isSelected())
+		return;
+
+	// Hide crosshair
+	m_CrossHairH->setVisible(false);
+	m_CrossHairV->setVisible(false);
+	m_CrossHairText->setVisible(false);
+}
+
+void QTransferFunctionCanvas::hoverMoveEvent(QGraphicsSceneHoverEvent* pEvent)
+{
+	QGraphicsRectItem::hoverMoveEvent(pEvent);
+
+	// Don't overwrite styling when selected
+	if (isSelected())
+		return;
 
 	m_CrossHairH->setPos(QPointF(pEvent->pos().x(), 0));
 	m_CrossHairV->setPos(QPointF(0, pEvent->pos().y()));
+	m_CrossHairText->setPos(pEvent->pos());
+	m_CrossHairText->setPlainText("[" + QString::number(pEvent->pos().x()) + ", " + QString::number(pEvent->pos().y()) + "]");
 }
 
 void QTransferFunctionCanvas::Update(void)
