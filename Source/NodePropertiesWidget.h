@@ -4,7 +4,6 @@
 
 class QTransferFunction;
 class QNode;
-class QColorSelectorWidget;
 
 class QNodePropertiesWidget : public QGroupBox
 {
@@ -35,22 +34,20 @@ private:
 	void SetupColorUI(void);
 
 private:
-	QNode*					m_pLastSelectedNode;
-	QGridLayout*			m_pMainLayout;
-	QLabel*					m_pSelectionLabel;
-	QGridLayout*			m_pSelectionLayout;
-	QComboBox*				m_pNodeSelectionComboBox;
-	QPushButton*			m_pPreviousNodePushButton;
-	QPushButton*			m_pNextNodePushButton;
-	QPushButton*			m_pDeleteNodePushButton;
-	QLabel*					m_pIntensityLabel;
-	QSlider*				m_pIntensitySlider;
-	QSpinBox*				m_pIntensitySpinBox;
-	QLabel*					m_pOpacityLabel;
-	QSlider*				m_pOpacitySlider;
-	QSpinBox*				m_pOpacitySpinBox;
-	QColorSelectorWidget*	m_pColorSelector;
-	QLabel*					m_pRoughnessLabel;
-	QSlider*				m_pRoughnessSlider;
-	QSpinBox*				m_pRoughnessSpinBox;
+	QGridLayout				m_MainLayout;
+	QLabel					m_SelectionLabel;
+	QGridLayout				m_SelectionLayout;
+	QComboBox				m_NodeSelection;
+	QPushButton				m_PreviousNode;
+	QPushButton				m_NextNode;
+	QPushButton				m_DeleteNode;
+	QLabel					m_IntensityLabel;
+	QSlider					m_IntensitySlider;
+	QSpinBox				m_IntensitySpinBox;
+	QLabel					m_OpacityLabel;
+	QSlider					m_OpacitySlider;
+	QSpinBox				m_OpacitySpinBox;
+	QLabel					m_RoughnessLabel;
+	QSlider					m_RoughnessSlider;
+	QSpinBox				m_RoughnessSpinBox;
 };

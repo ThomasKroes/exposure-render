@@ -6,143 +6,129 @@
 
 QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QGroupBox(pParent),
-	m_pLastSelectedNode(NULL),
-	m_pMainLayout(NULL),
-	m_pSelectionLabel(NULL),
-	m_pSelectionLayout(NULL),
-	m_pNodeSelectionComboBox(NULL),
-	m_pPreviousNodePushButton(NULL),
-	m_pNextNodePushButton(NULL),
-	m_pDeleteNodePushButton(NULL),
-	m_pIntensityLabel(NULL),
-	m_pIntensitySlider(NULL),
-	m_pIntensitySpinBox(NULL),
-	m_pOpacityLabel(NULL),
-	m_pOpacitySlider(NULL),
-	m_pOpacitySpinBox(NULL),
-	m_pColorSelector(NULL),
-	m_pRoughnessLabel(NULL),
-	m_pRoughnessSlider(NULL),
-	m_pRoughnessSpinBox(NULL)
+	m_MainLayout(),
+	m_SelectionLabel(),
+	m_SelectionLayout(),
+	m_NodeSelection(),
+	m_PreviousNode(),
+	m_NextNode(),
+	m_DeleteNode(),
+	m_IntensityLabel(),
+	m_IntensitySlider(),
+	m_IntensitySpinBox(),
+	m_OpacityLabel(),
+	m_OpacitySlider(),
+	m_OpacitySpinBox(),
+	m_RoughnessLabel(),
+	m_RoughnessSlider(),
+	m_RoughnessSpinBox()
 {
-	// Dimensions
-//	setFixedHeight(150);
-//	setFixedWidth(250);
-
-	// Set size policy to minimum
-//	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-
 	// Title, status and tooltip
 	setTitle("Node Properties");
 	setToolTip("Node Properties");
 	setStatusTip("Node Properties");
 
-	// Node properties layout
-	m_pMainLayout = new QGridLayout();
-	m_pMainLayout->setAlignment(Qt::AlignTop);
-//	m_pMainLayout->setContentsMargins(0, 0, 0, 0);
+	// Main layout
+	m_MainLayout.setAlignment(Qt::AlignTop);
+//	m_pMainLayout.setContentsMargins(0, 0, 0, 0);
 
-	setLayout(m_pMainLayout);
+	setLayout(&m_MainLayout);
 
 	setAlignment(Qt::AlignTop);
 
-	// Node selection
-	m_pSelectionLabel = new QLabel("Selection");
-	m_pSelectionLabel->setStatusTip("Node selection");
-	m_pSelectionLabel->setToolTip("Node selection");
-	m_pMainLayout->addWidget(m_pSelectionLabel, 0, 0);
+	// Selection
+	m_SelectionLabel.setText("Selection");
+	m_SelectionLabel.setStatusTip("Node selection");
+	m_SelectionLabel.setToolTip("Node selection");
+	m_MainLayout.addWidget(&m_SelectionLabel, 0, 0);
 
-	m_pSelectionLayout = new QGridLayout();
-	m_pSelectionLayout->setAlignment(Qt::AlignTop);
-	m_pSelectionLayout->setContentsMargins(0, 0, 0, 0);
+	m_SelectionLayout.setAlignment(Qt::AlignTop);
+	m_SelectionLayout.setContentsMargins(0, 0, 0, 0);
 	
-	m_pMainLayout->addLayout(m_pSelectionLayout, 0, 1, 1, 2);
+	m_MainLayout.addLayout(&m_SelectionLayout, 0, 1, 1, 2);
 
-	m_pNodeSelectionComboBox = new QComboBox;
-	m_pNodeSelectionComboBox->setStatusTip("Node selection");
-	m_pNodeSelectionComboBox->setToolTip("Node selection");
-	m_pSelectionLayout->addWidget(m_pNodeSelectionComboBox, 0, 0);
+	m_NodeSelection.setStatusTip("Node selection");
+	m_NodeSelection.setToolTip("Node selection");
+	m_SelectionLayout.addWidget(&m_NodeSelection, 0, 0);
 
-	connect(m_pNodeSelectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnNodeSelectionChanged(int)));
+	connect(&m_NodeSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(OnNodeSelectionChanged(int)));
 
 	// Previous node
-	m_pPreviousNodePushButton = new QPushButton("<");
-	m_pPreviousNodePushButton->setStatusTip("Select previous node");
-	m_pPreviousNodePushButton->setToolTip("Select previous node");
-	m_pPreviousNodePushButton->setFixedWidth(20);
-	m_pPreviousNodePushButton->setFixedHeight(20);
-	m_pPreviousNodePushButton->updateGeometry();
-	m_pSelectionLayout->addWidget(m_pPreviousNodePushButton, 0, 1);
+	m_PreviousNode.setText("<");
+	m_PreviousNode.setStatusTip("Select previous node");
+	m_PreviousNode.setToolTip("Select previous node");
+	m_PreviousNode.setFixedWidth(20);
+	m_PreviousNode.setFixedHeight(20);
+	m_PreviousNode.updateGeometry();
+	m_SelectionLayout.addWidget(&m_PreviousNode, 0, 1);
 
-	connect(m_pPreviousNodePushButton, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
+	connect(&m_PreviousNode, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
 
 	// Next node
-	m_pNextNodePushButton = new QPushButton(">");
-	m_pNextNodePushButton->setStatusTip("Select next node");
-	m_pNextNodePushButton->setToolTip("Select next node");
-	m_pNextNodePushButton->setFixedWidth(20);
-	m_pNextNodePushButton->setFixedHeight(20);
-	m_pSelectionLayout->addWidget(m_pNextNodePushButton, 0, 2);
+	m_NextNode.setText(">");
+	m_NextNode.setStatusTip("Select next node");
+	m_NextNode.setToolTip("Select next node");
+	m_NextNode.setFixedWidth(20);
+	m_NextNode.setFixedHeight(20);
+	m_SelectionLayout.addWidget(&m_NextNode, 0, 2);
 	
-	connect(m_pNextNodePushButton, SIGNAL(pressed()), this, SLOT(OnNextNode()));
+	connect(&m_NextNode, SIGNAL(pressed()), this, SLOT(OnNextNode()));
 
 	// Delete node
-	m_pDeleteNodePushButton = new QPushButton("X");
-	m_pDeleteNodePushButton->setStatusTip("Delete selected node");
-	m_pDeleteNodePushButton->setToolTip("Delete selected node");
-	m_pDeleteNodePushButton->setFixedWidth(20);
-	m_pDeleteNodePushButton->setFixedHeight(20);
-	m_pSelectionLayout->addWidget(m_pDeleteNodePushButton, 0, 3);
+	m_DeleteNode.setText("X");
+	m_DeleteNode.setStatusTip("Delete selected node");
+	m_DeleteNode.setToolTip("Delete selected node");
+	m_DeleteNode.setFixedWidth(20);
+	m_DeleteNode.setFixedHeight(20);
+	m_SelectionLayout.addWidget(&m_DeleteNode, 0, 3);
 	
-	connect(m_pDeleteNodePushButton, SIGNAL(pressed()), this, SLOT(OnDeleteNode()));
+	connect(&m_DeleteNode, SIGNAL(pressed()), this, SLOT(OnDeleteNode()));
 
 	// Position
-	m_pIntensityLabel = new QLabel("Position");
-	m_pIntensityLabel->setStatusTip("Node position");
-	m_pIntensityLabel->setToolTip("Node position");
-	m_pMainLayout->addWidget(m_pIntensityLabel, 1, 0);
+	m_IntensityLabel.setText("Position");
+	m_IntensityLabel.setStatusTip("Node position");
+	m_IntensityLabel.setToolTip("Node position");
+	m_MainLayout.addWidget(&m_IntensityLabel, 1, 0);
 
-	m_pIntensitySlider = new QSlider(Qt::Orientation::Horizontal);
-	m_pIntensitySlider->setStatusTip("Node position");
-	m_pIntensitySlider->setToolTip("Drag to change node position");
-	m_pIntensitySlider->setRange(0, 100);
-	m_pIntensitySlider->setSingleStep(1);
-	m_pMainLayout->addWidget(m_pIntensitySlider, 1, 1);
+	m_IntensitySlider.setOrientation(Qt::Orientation::Horizontal);
+	m_IntensitySlider.setStatusTip("Node position");
+	m_IntensitySlider.setToolTip("Drag to change node position");
+	m_IntensitySlider.setRange(0, 100);
+	m_IntensitySlider.setSingleStep(1);
+	m_MainLayout.addWidget(&m_IntensitySlider, 1, 1);
 	
-	m_pIntensitySpinBox = new QSpinBox;
-	m_pIntensitySpinBox->setStatusTip("Node Position");
-	m_pIntensitySpinBox->setToolTip("Node Position");
-    m_pIntensitySpinBox->setRange(0, 100);
-	m_pIntensitySpinBox->setSingleStep(1);
-	m_pMainLayout->addWidget(m_pIntensitySpinBox, 1, 2);
+	m_IntensitySpinBox.setStatusTip("Node Position");
+	m_IntensitySpinBox.setToolTip("Node Position");
+    m_IntensitySpinBox.setRange(0, 100);
+	m_IntensitySpinBox.setSingleStep(1);
+	m_MainLayout.addWidget(&m_IntensitySpinBox, 1, 2);
 
 	// Opacity
-	m_pOpacityLabel = new QLabel("Opacity");
-	m_pMainLayout->addWidget(m_pOpacityLabel, 2, 0);
+	m_OpacityLabel.setText("Opacity");
+	m_MainLayout.addWidget(&m_OpacityLabel, 2, 0);
 
-	m_pOpacitySlider = new QSlider(Qt::Orientation::Horizontal);
-	m_pOpacitySlider->setStatusTip("Node Opacity");
-	m_pOpacitySlider->setToolTip("Node Opacity");
-	m_pOpacitySlider->setRange(0, 100);
-	m_pOpacitySlider->setSingleStep(1);
-	m_pMainLayout->addWidget(m_pOpacitySlider, 2, 1);
+	m_OpacitySlider.setOrientation(Qt::Orientation::Horizontal);
+	m_OpacitySlider.setStatusTip("Node Opacity");
+	m_OpacitySlider.setToolTip("Node Opacity");
+	m_OpacitySlider.setRange(0, 100);
+	m_OpacitySlider.setSingleStep(1);
+	m_MainLayout.addWidget(&m_OpacitySlider, 2, 1);
 	
-	m_pOpacitySpinBox = new QSpinBox;
-	m_pOpacitySpinBox->setStatusTip("Node Opacity");
-	m_pOpacitySpinBox->setToolTip("Node Opacity");
-    m_pOpacitySpinBox->setRange(0, 100);
-	m_pOpacitySpinBox->setSingleStep(1);
-	m_pMainLayout->addWidget(m_pOpacitySpinBox, 2, 2);
+	m_OpacitySpinBox.setStatusTip("Node Opacity");
+	m_OpacitySpinBox.setToolTip("Node Opacity");
+    m_OpacitySpinBox.setRange(0, 100);
+	m_OpacitySpinBox.setSingleStep(1);
+	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 2);
 	
 	// Setup connections for position
-	connect(m_pIntensitySlider, SIGNAL(valueChanged(int)), m_pIntensitySpinBox, SLOT(setValue(int)));
-	connect(m_pIntensitySpinBox, SIGNAL(valueChanged(int)), m_pIntensitySlider, SLOT(setValue(int)));
-	connect(m_pIntensitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnIntensityChanged(int)));
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(int)), &m_IntensitySpinBox, SLOT(setValue(int)));
+	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(int)), &m_IntensitySlider, SLOT(setValue(int)));
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnIntensityChanged(int)));
 
 	// Setup connections for opacity
-	connect(m_pOpacitySlider, SIGNAL(valueChanged(int)), m_pOpacitySpinBox, SLOT(setValue(int)));
-	connect(m_pOpacitySpinBox, SIGNAL(valueChanged(int)), m_pOpacitySlider, SLOT(setValue(int)));
-	connect(m_pOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnOpacityChanged(int)));
+	connect(&m_OpacitySlider, SIGNAL(valueChanged(int)), &m_OpacitySpinBox, SLOT(setValue(int)));
+	connect(&m_OpacitySpinBox, SIGNAL(valueChanged(int)), &m_OpacitySlider, SLOT(setValue(int)));
+	connect(&m_OpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnOpacityChanged(int)));
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
@@ -169,18 +155,15 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		{
 			QNode& Node = gTransferFunction.GetNode(i);
 
-			disconnect(&Node, SIGNAL(PositionChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
+			disconnect(&Node, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
 			disconnect(&Node, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
 			disconnect(&Node, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
 		}
 
 		// Setup connections
-		connect(pNode, SIGNAL(PositionChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
+		connect(pNode, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
 		connect(pNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
 		connect(pNode, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
-
-		// Cache last node
-		m_pLastSelectedNode = pNode;
 	}
 }
 
@@ -222,10 +205,10 @@ void QNodePropertiesWidget::OnOpacityChanged(const int& Opacity)
 
 void QNodePropertiesWidget::OnColorChanged(const QColor& Color)
 {
-	m_pNodeSelectionComboBox->clear();
+	m_NodeSelection.clear();
 
 	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
-		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
+		m_NodeSelection.addItem("Node " + QString::number(i + 1));
 }
 
 void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
@@ -238,15 +221,15 @@ void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 	if (pNode)
 	{
 		// Prevent circular dependency
-		m_pOpacitySlider->blockSignals(true);
-		m_pOpacitySpinBox->blockSignals(true);
+		m_OpacitySlider.blockSignals(true);
+		m_OpacitySpinBox.blockSignals(true);
 		
 		// Update values
-		m_pOpacitySlider->setValue(100.0f * pNode->GetOpacity());
-		m_pOpacitySpinBox->setValue(100.0f * pNode->GetOpacity());
+		m_OpacitySlider.setValue(100.0f * pNode->GetOpacity());
+		m_OpacitySpinBox.setValue(100.0f * pNode->GetOpacity());
 
-		m_pOpacitySlider->blockSignals(false);
-		m_pOpacitySpinBox->blockSignals(false);
+		m_OpacitySlider.blockSignals(false);
+		m_OpacitySpinBox.blockSignals(false);
 	}
 }
 
@@ -267,17 +250,17 @@ void QNodePropertiesWidget::SetupSelectionUI(void)
 	if (pNode && NodeIndex >= 0)
 	{
 		// Prevent circular dependency
-		m_pNodeSelectionComboBox->blockSignals(true);
+		m_NodeSelection.blockSignals(true);
 
-		m_pNodeSelectionComboBox->clear();
+		m_NodeSelection.clear();
 
 		for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
-			m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
+			m_NodeSelection.addItem("Node " + QString::number(i + 1));
 
 		// Reflect node selection change in node selection combo box
-		m_pNodeSelectionComboBox->setCurrentIndex(NodeIndex);
+		m_NodeSelection.setCurrentIndex(NodeIndex);
 
-		m_pNodeSelectionComboBox->blockSignals(false);
+		m_NodeSelection.blockSignals(false);
 
 		// Decide whether to enable/disable UI items
 		const bool EnablePrevious	= NodeIndex > 0;
@@ -285,19 +268,19 @@ void QNodePropertiesWidget::SetupSelectionUI(void)
 		const bool EnableDelete		= gTransferFunction.GetSelectedNode() ? (NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1) : false;
 
 		// Enable/disable buttons
-		m_pPreviousNodePushButton->setEnabled(EnablePrevious);
-		m_pNextNodePushButton->setEnabled(EnableNext);
-		m_pDeleteNodePushButton->setEnabled(EnableDelete);
+		m_PreviousNode.setEnabled(EnablePrevious);
+		m_NextNode.setEnabled(EnableNext);
+		m_DeleteNode.setEnabled(EnableDelete);
 
 		// Create tooltip strings
 		QString PreviousToolTip = EnablePrevious ? "Select node " + QString::number(NodeIndex) : "No previous node";
 		QString NextToolTip		= EnableNext ? "Select node " + QString::number(NodeIndex + 2) : "No next node";
 
 		// Update push button tooltips
-		m_pPreviousNodePushButton->setStatusTip(PreviousToolTip);
-		m_pPreviousNodePushButton->setToolTip(PreviousToolTip);
-		m_pNextNodePushButton->setStatusTip(NextToolTip);
-		m_pNextNodePushButton->setToolTip(NextToolTip);
+		m_PreviousNode.setStatusTip(PreviousToolTip);
+		m_PreviousNode.setToolTip(PreviousToolTip);
+		m_NextNode.setStatusTip(NextToolTip);
+		m_NextNode.setToolTip(NextToolTip);
 	}
 }
 
@@ -315,29 +298,29 @@ void QNodePropertiesWidget::SetupIntensityUI(void)
 		const bool Enable = NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1;
 
 		// Enable
-		m_pIntensityLabel->setEnabled(Enable);
-		m_pIntensitySlider->setEnabled(Enable);
-		m_pIntensitySpinBox->setEnabled(Enable);
+		m_IntensityLabel.setEnabled(Enable);
+		m_IntensitySlider.setEnabled(Enable);
+		m_IntensitySpinBox.setEnabled(Enable);
 
 		// Prevent circular dependency
-		m_pIntensitySlider->blockSignals(true);
-		m_pIntensitySpinBox->blockSignals(true);
+		m_IntensitySlider.blockSignals(true);
+		m_IntensitySpinBox.blockSignals(true);
 
 		// Update values
-		m_pIntensitySlider->setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_pIntensitySlider->setValue(pNode->GetIntensity());
-		m_pIntensitySpinBox->setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_pIntensitySpinBox->setValue(pNode->GetIntensity());
+		m_IntensitySlider.setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_IntensitySlider.setValue(pNode->GetIntensity());
+		m_IntensitySpinBox.setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_IntensitySpinBox.setValue(pNode->GetIntensity());
 
-		m_pIntensitySlider->blockSignals(false);
-		m_pIntensitySpinBox->blockSignals(true);
+		m_IntensitySlider.blockSignals(false);
+		m_IntensitySpinBox.blockSignals(true);
 	}
 	else
 	{
 		// Enable
-		m_pIntensityLabel->setEnabled(false);
-		m_pIntensitySlider->setEnabled(false);
-		m_pIntensitySpinBox->setEnabled(false);
+		m_IntensityLabel.setEnabled(false);
+		m_IntensitySlider.setEnabled(false);
+		m_IntensitySpinBox.setEnabled(false);
 	}
 }
 
@@ -349,29 +332,29 @@ void QNodePropertiesWidget::SetupOpacityUI(void)
 	if (pNode)
 	{
 		// Enable
-		m_pOpacityLabel->setEnabled(true);
-		m_pOpacitySlider->setEnabled(true);
-		m_pOpacitySpinBox->setEnabled(true);
+		m_OpacityLabel.setEnabled(true);
+		m_OpacitySlider.setEnabled(true);
+		m_OpacitySpinBox.setEnabled(true);
 
 		// Prevent circular dependency
-		m_pOpacitySlider->blockSignals(true);
-		m_pOpacitySpinBox->blockSignals(true);
+		m_OpacitySlider.blockSignals(true);
+		m_OpacitySpinBox.blockSignals(true);
 
 		// Update values
-		m_pOpacitySlider->setRange(100.0f * pNode->GetMinY(), 100.0f * pNode->GetMaxY());
-		m_pOpacitySlider->setValue(100.0f * pNode->GetOpacity());
-		m_pOpacitySpinBox->setRange(100.0f * pNode->GetMinY(), 100.0f * pNode->GetMaxY());
-		m_pOpacitySpinBox->setValue(100.0f * pNode->GetOpacity());
+		m_OpacitySlider.setRange(100.0f * pNode->GetMinY(), 100.0f * pNode->GetMaxY());
+		m_OpacitySlider.setValue(100.0f * pNode->GetOpacity());
+		m_OpacitySpinBox.setRange(100.0f * pNode->GetMinY(), 100.0f * pNode->GetMaxY());
+		m_OpacitySpinBox.setValue(100.0f * pNode->GetOpacity());
 
-		m_pOpacitySlider->blockSignals(false);
-		m_pOpacitySpinBox->blockSignals(true);
+		m_OpacitySlider.blockSignals(false);
+		m_OpacitySpinBox.blockSignals(true);
 	}
 	else
 	{
 		// Enable
-		m_pOpacityLabel->setEnabled(false);
-		m_pOpacitySlider->setEnabled(false);
-		m_pOpacitySpinBox->setEnabled(false);
+		m_OpacityLabel.setEnabled(false);
+		m_OpacitySlider.setEnabled(false);
+		m_OpacitySpinBox.setEnabled(false);
 	}
 }
 

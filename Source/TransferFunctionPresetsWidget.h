@@ -55,5 +55,5 @@ protected:
 	QPushButton				m_SavePresets;
 	QPushButton				m_Dummy;
 	QListWidget				m_PresetList;
-	QTransferFunctionList*	m_pTransferFunctions;
+	QTransferFunctionList	m_TransferFunctions;
 };

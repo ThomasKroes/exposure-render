@@ -88,7 +88,7 @@ public:
 
 signals:
 	void NodeChanged(QNode* pNode);
-	void PositionChanged(QNode* pNode);
+	void IntensityChanged(QNode* pNode);
 	void OpacityChanged(QNode* pNode);
 	void ColorChanged(QNode* pNode);
 	void RangeChanged(QNode* pNode);

@@ -12,7 +12,7 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	m_SavePresets(),
 	m_Dummy(),
 	m_PresetList(),
-	m_pTransferFunctions(NULL)
+	m_TransferFunctions()
 {
 	// Title, status and tooltip
 	setTitle("Presets");
@@ -22,9 +22,6 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	CreateUI();
 	CreateConnections();
 
-	// Create new list
-	m_pTransferFunctions = new QTransferFunctionList;
-
 	// Load transfer function presets from file
 	LoadPresetsFromFile();
 }
@@ -33,8 +30,6 @@ QTransferFunctionPresetsWidget::~QTransferFunctionPresetsWidget(void)
 {
 	// Save transfer function presets to file
 	SavePresetsToFile();
-
-	delete m_pTransferFunctions;
 }
 
 void QTransferFunctionPresetsWidget::CreateUI(void)
@@ -106,6 +101,7 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 
 	// Dummy
 	m_Dummy.setParent(this);
+	m_Dummy.setVisible(false);
 	m_Dummy.setText("Dummy");
 	m_Dummy.setToolTip("Dummy");
 	m_Dummy.setStatusTip("Dummy");
@@ -180,10 +176,10 @@ void QTransferFunctionPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath)
 		QTransferFunction TransferFunction;
 
 		// Append the transfer function
-		m_pTransferFunctions->append(TransferFunction);
+		m_TransferFunctions.append(TransferFunction);
 
 		// Load the preset into it
-		m_pTransferFunctions->back().ReadXML(TransferFunctionNode.toElement());
+		m_TransferFunctions.back().ReadXML(TransferFunctionNode.toElement());
 	}
 
 	XmlFile.close();
@@ -228,9 +224,9 @@ void QTransferFunctionPresetsWidget::SavePresetsToFile(const bool& ChoosePath)
 
 	QDomElement Presets = DOM.createElement("Presets");
 	
-	for (int i = 0; i < m_pTransferFunctions->size(); i++)
+	for (int i = 0; i < m_TransferFunctions.size(); i++)
 	{
-		(*m_pTransferFunctions)[i].WriteXML(DOM, Presets);
+		m_TransferFunctions[i].WriteXML(DOM, Presets);
 	}
 
 	DOM.appendChild(Presets);
@@ -249,10 +245,10 @@ void QTransferFunctionPresetsWidget::UpdatePresetsList(void)
 {
 	m_PresetList.clear();
 
-	for (int i = 0; i < m_pTransferFunctions->size(); i++)
+	for (int i = 0; i < m_TransferFunctions.size(); i++)
 	{
 		// Create new list item
-		QPresetItem* pListWidgetItem = new QPresetItem(&m_PresetList, &(*m_pTransferFunctions)[i]);
+		QPresetItem* pListWidgetItem = new QPresetItem(&m_PresetList, &m_TransferFunctions[i]);
 
 		pListWidgetItem->setFlags(pListWidgetItem->flags() | Qt::ItemIsEditable);
 
@@ -290,21 +286,21 @@ void QTransferFunctionPresetsWidget::OnLoadPreset(void)
 	if (CurrentRow < 0)
 		return;
 
-	gTransferFunction = m_pTransferFunctions->at(CurrentRow);
+	gTransferFunction = m_TransferFunctions.at(CurrentRow);
 }
 
 void QTransferFunctionPresetsWidget::OnSavePreset(void)
 {
-	for (int i = 0; i < m_pTransferFunctions->size(); i++)
+	for (int i = 0; i < m_TransferFunctions.size(); i++)
 	{
-		if (m_pTransferFunctions->at(i).GetName() == m_PresetName.text())
-			m_pTransferFunctions->removeAt(i);
+		if (m_TransferFunctions.at(i).GetName() == m_PresetName.text())
+			m_TransferFunctions.removeAt(i);
 	}
 
 	QTransferFunction Preset = gTransferFunction;
 
 	Preset.SetName(m_PresetName.text());
-	m_pTransferFunctions->append(Preset);
+	m_TransferFunctions.append(Preset);
 
 	UpdatePresetsList();
 }
@@ -317,7 +313,7 @@ void QTransferFunctionPresetsWidget::OnRemovePreset(void)
 	if (CurrentRow < 0)
 		return;
 
-	m_pTransferFunctions->removeAt(CurrentRow);
+	m_TransferFunctions.removeAt(CurrentRow);
 
 	UpdatePresetsList();
 }
@@ -325,7 +321,7 @@ void QTransferFunctionPresetsWidget::OnRemovePreset(void)
 void QTransferFunctionPresetsWidget::OnLoadPresets(void)
 {
 	// Clear the current list of presets
-	m_pTransferFunctions->clear();
+	m_TransferFunctions.clear();
 
 	// Load the presets, asking for a location
 	LoadPresetsFromFile(true);

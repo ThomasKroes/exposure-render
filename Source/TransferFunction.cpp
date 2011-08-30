@@ -53,7 +53,7 @@ void QNode::SetIntensity(const float& Position)
 	m_Intensity = qMin(m_MaxX, qMax(Position, m_MinX));
 	
 	emit NodeChanged(this);
-	emit PositionChanged(this);
+	emit IntensityChanged(this);
 }
 
 float QNode::GetOpacity(void) const
@@ -359,8 +359,7 @@ int	QTransferFunction::GetNodeIndex(QNode* pNode)
 	if (pNode == NULL)
 		return -1;
 	
-	return 0;
-//	return m_Nodes.indexOf(*pNode);
+	return m_Nodes.indexOf(*pNode);
 }
 
 void QTransferFunction::AddNode(const float& Position, const float& Opacity, const QColor& Color)
@@ -453,7 +452,7 @@ void QTransferFunction::UpdateNodeRanges(void)
 	for (int i = 0; i < m_Nodes.size(); i++)
 		m_Nodes[i].m_ID = i;
 
-	qDebug("Updated node ranges");
+//	qDebug("Updated node ranges");
 }
 
 const QNodeList& QTransferFunction::GetNodes(void) const
@@ -516,6 +515,8 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 
 	// Allow events again
 	blockSignals(false);
+
+	UpdateNodeRanges();
 
 	qDebug() << m_Name << "transfer function preset loaded";
 
