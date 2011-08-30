@@ -496,8 +496,8 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 	blockSignals(true);
 
 	SetName(Parent.attribute("Name", "Failed"));
-	SetRangeMin(Parent.attribute("RangeMin", "Failed").toFloat());
-	SetRangeMax(Parent.attribute("RangeMax", "Failed").toFloat());
+	SetRangeMin(Parent.attribute("RangeMin", "Failed").toInt());
+	SetRangeMax(Parent.attribute("RangeMax", "Failed").toInt());
 
 	QDomElement Nodes = Parent.firstChild().toElement();
 

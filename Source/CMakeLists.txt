@@ -55,8 +55,17 @@ SET(SimpleViewSrcs
 	LoadSettingsDialog.cpp
 	VtkWidget.cpp
 	Scene.cpp
-	NodeItem.cpp
 	ColorSelectorWidget.cpp
+
+	TransferFunction.cpp
+	TransferFunctionCanvas.cpp
+	TransferFunctionView.cpp
+	TransferFunctionPresetsWidget.cpp
+	TransferFunctionGradient.cpp
+	TransferFunctionWidget.cpp
+	NodePropertiesWidget.cpp
+	NodeItem.cpp
+	VolumeAppearanceDockWidget.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
@@ -86,8 +95,17 @@ SET(SimpleViewHeaders
 	LoadSettingsDialog.h
 	VtkWidget.h
 	Scene.h
-	NodeItem.h
 	ColorSelectorWidget.h
+
+	TransferFunction.h
+	TransferFunctionCanvas.h
+	TransferFunctionView.h
+	TransferFunctionPresetsWidget.h
+	TransferFunctionGradient.h
+	TransferFunctionWidget.h
+	NodePropertiesWidget.h
+	NodeItem.h
+	VolumeAppearanceDockWidget.h
 )
 
 SET(SimpleViewResources Icons/icons.qrc)
@@ -111,55 +129,54 @@ SOURCE_GROUP("Generated" FILES
 )
 
 # Group sources related to the transfer function editor together
-SET(TransferFunctionSources
-	TransferFunction.h
-	TransferFunction.cpp
-	TransferFunctionCanvas.h
-	TransferFunctionCanvas.cpp
-	TransferFunctionView.h
-	TransferFunctionView.cpp
-	TransferFunctionPresetsWidget.h
-	TransferFunctionPresetsWidget.cpp
-	TransferFunctionGradient.h
-	TransferFunctionGradient.cpp
-	TransferFunctionWidget.h
-	TransferFunctionWidget.cpp
-	NodePropertiesWidget.h
-	NodePropertiesWidget.cpp
-	VolumeAppearanceDockWidget.h
-	VolumeAppearanceDockWidget.cpp
+SET(TransferFunctionHeaders
+	
+)
+
+SET(TransferFunctionSrcs
+	
 )
 
 # Make the group
 SOURCE_GROUP("Transfer Function" FILES
-	${TransferFunctionSources}
+	${TransferFunctionHeaders}
+	${TransferFunctionSrcs}
 )
 
 # Group sources related to Cuda together
+SET(CudaHeaders
+	VolumeTracer.cuh
+	VolumeTracer.cu
+)
+
 SET(CudaSources
 	VolumeTracer.cuh
 	VolumeTracer.cu
 )
 
 # Make the group
-SOURCE_GROUP("Cuda Kernels" FILES
+SOURCE_GROUP("Cuda Kernelfs" FILES
+	${CudaHeaders}
 	${CudaSources}
 )
 
 ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
-SET_SOURCE_FILES_PROPERTIES(${SimpleViewSrcs} PROPERTIES
-                            OBJECT_DEPENDS "${UISrcs}")
+SET_SOURCE_FILES_PROPERTIES(${SimpleViewSrcs} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${CudaHeaders} ${CudaSources} PROPERTIES OBJECT_DEPENDS "${UISrcs}")
 
 # It's nice to have the ui in the windows project file...just double click on it
 # and designer comes up on that ui file :)
 IF (${CMAKE_BUILD_TOOL} MATCHES "msdev")
-  SET (SimpleViewSrcs ${SimpleViewSrcs} ${SimpleViewUI})
+  SET (SimpleViewSrcs ${SimpleViewSrcs} ${SimpleViewUI} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${CudaSources})
+  SET (TransferFunctionHeaders ${TransferFunctionHeaders})
+  SET (TransferFunctionSrcs ${TransferFunctionSrcs})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "msdev")
 IF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
-  SET (SimpleViewSrcs ${SimpleViewSrcs} ${SimpleViewUI})
+  SET (SimpleViewSrcs ${SimpleViewSrcs} ${SimpleViewUI} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${CudaSources})
+  SET (TransferFunctionHeaders ${TransferFunctionHeaders})
+  SET (TransferFunctionSrcs ${TransferFunctionSrcs})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionSources} ${CudaSources}
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${CudaHeaders} ${CudaSources}
 )
 
 TARGET_LINK_LIBRARIES(ExposureRender

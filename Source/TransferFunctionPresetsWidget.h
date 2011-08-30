@@ -41,6 +41,7 @@ protected slots:
 	void OnSavePreset(void);
 	void OnLoadPresets(void);
 	void OnSavePresets(void);
+	void OnDummy(void);
 	void OnPresetNameChanged(const QString& Text);
 	void OnPresetItemChanged(QListWidgetItem* pWidgetItem);
 
@@ -52,6 +53,7 @@ protected:
 	QPushButton				m_RemovePreset;
 	QPushButton				m_LoadPresets;
 	QPushButton				m_SavePresets;
+	QPushButton				m_Dummy;
 	QListWidget				m_PresetList;
-	QTransferFunctionList	m_TransferFunctions;
+	QTransferFunctionList*	m_pTransferFunctions;
 };
