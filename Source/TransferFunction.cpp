@@ -297,6 +297,8 @@ void QTransferFunction::SetSelectedNode(const int& Index)
 	if (m_Nodes.size() <= 0)
 		return;
 
+	qDebug("Node %d is being selected", Index);
+
 	// Compute new index
 	const int NewIndex = qMin(m_Nodes.size(), qMax(0, Index));
 
@@ -378,7 +380,7 @@ void QTransferFunction::AddNode(const QNode& Node)
 	// Cache node
 	QNode& CacheNode = m_Nodes.back();
 
-	// Sort the transfer function nodes
+	// Sort the transfer function nodes based on intensity
 	qSort(m_Nodes.begin(), m_Nodes.end(), CompareNodes);
 
 	// Notify us when the node changes

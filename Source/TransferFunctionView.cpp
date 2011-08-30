@@ -19,7 +19,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_AxisLabelY(NULL)
 {
 	// Set the size policy, making sure the widget fits nicely in the layout
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+//	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// Styling
 	setFrameShadow(Sunken);
@@ -194,7 +194,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			m_pTransferFunctionCanvas->Update();
 
 			// Select it immediately
-//			gTransferFunction.SetSelectedNode(NewNode);
+			gTransferFunction.SetSelectedNode(&NewNode);
 		}
 
 		if (pEvent->button() == Qt::MouseButton::RightButton)

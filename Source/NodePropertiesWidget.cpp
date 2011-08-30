@@ -132,6 +132,13 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
+
+	SetupSelectionUI();
+	SetupIntensityUI();
+	SetupOpacityUI();
+	SetupColorUI();
+
+	OnNodeSelectionChanged(NULL);
 }
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)

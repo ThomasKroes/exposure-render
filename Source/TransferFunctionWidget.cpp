@@ -8,7 +8,7 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_TransferFunctionView()
 {
 	// Set the size policy, making sure the widget fits nicely in the layout
-	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// Title, status and tooltip
 	setTitle("Transfer Function");

@@ -11,7 +11,7 @@ class QTransferFunctionWidget : public QGroupBox
 public:
     QTransferFunctionWidget(QWidget* pParent = NULL);
 
-	virtual QSize sizeHint() const { return QSize(10, 300); }
+	virtual QSize sizeHint() const { return QSize(10, 10); }
 
 protected:
 	QGridLayout				m_MainLayout;
