@@ -253,7 +253,7 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 		pNodeItem->setParentItem(this);
 
 		// Compute node center in canvas coordinates
-		QPointF NodeCenter = TransferFunctionToScene(QPointF(pNode->GetPosition(), pNode->GetOpacity()));
+		QPointF NodeCenter = TransferFunctionToScene(QPointF(pNode->GetIntensity(), pNode->GetOpacity()));
 
 		pNodeItem->m_SuspendUpdate = true;
 
@@ -318,7 +318,7 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 			Color.setAlphaF(0.5f * Alpha);
 
 			// Add a new gradient stop
-			GradientStops.append(QGradientStop(pNode->GetNormalizedX(), Color));
+			GradientStops.append(QGradientStop(pNode->GetNormalizedIntensity(), Color));
 		}
 
 		m_PolygonGradient.setStops(GradientStops);

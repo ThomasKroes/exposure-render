@@ -80,17 +80,17 @@ void QTransferFunctionView::Update(void)
 	if (gpScene == NULL)
 		return;
 
-	gpScene->m_TransferFunctions.m_Kd.m_NoNodes = gTransferFunction.m_Nodes.size();
-	gpScene->m_TransferFunctions.m_Ks.m_NoNodes = gTransferFunction.m_Nodes.size();
-	gpScene->m_TransferFunctions.m_Kt.m_NoNodes = gTransferFunction.m_Nodes.size();
+	gpScene->m_TransferFunctions.m_Kd.m_NoNodes = gTransferFunction.GetNodes().size();
+	gpScene->m_TransferFunctions.m_Ks.m_NoNodes = gTransferFunction.GetNodes().size();
+	gpScene->m_TransferFunctions.m_Kt.m_NoNodes = gTransferFunction.GetNodes().size();
 
-	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
+	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 	{
-		QNode* pNode = gTransferFunction.m_Nodes[i];
+		QNode* pNode = gTransferFunction.GetNodes()[i];
 
-		gpScene->m_TransferFunctions.m_Kd.m_P[i] = pNode->GetPosition();
-		gpScene->m_TransferFunctions.m_Ks.m_P[i] = pNode->GetPosition();
-		gpScene->m_TransferFunctions.m_Kt.m_P[i] = pNode->GetPosition();
+		gpScene->m_TransferFunctions.m_Kd.m_P[i] = pNode->GetIntensity();
+		gpScene->m_TransferFunctions.m_Ks.m_P[i] = pNode->GetIntensity();
+		gpScene->m_TransferFunctions.m_Kt.m_P[i] = pNode->GetIntensity();
 
 		float ColR = pNode->GetOpacity() * ((float)pNode->GetColor().red() / 255.0f);
 		float ColG = pNode->GetOpacity() * ((float)pNode->GetColor().green() / 255.0f);
@@ -158,7 +158,7 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 	m_AxisLabelX->setRect(QRectF(0, 0, CanvasRect.width(), 12));
 	m_AxisLabelX->setX(m_MarginLeft);
 	m_AxisLabelX->setY(m_MarginTop + CanvasRect.height() + 25);
-	m_AxisLabelX->m_Text = "Intensity: [" + QString::number(gTransferFunction.m_RangeMin) + ", " + QString::number(gTransferFunction.m_RangeMax) + "]";
+	m_AxisLabelX->m_Text = "Intensity: [" + QString::number(gTransferFunction.GetRangeMin()) + ", " + QString::number(gTransferFunction.GetRangeMax()) + "]";
 
 	// Configure y-axis label
 	m_AxisLabelY->setRect(QRectF(0, 0, CanvasRect.height(), 8));
@@ -215,7 +215,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 		else if (pEvent->button() == Qt::MouseButton::RightButton)
 		{
 			// Remove transfer function node if not the first or last node
-			if (pNodeItem->m_pNode != gTransferFunction.m_Nodes.front() && pNodeItem->m_pNode != gTransferFunction.m_Nodes.back())
+			if (pNodeItem->m_pNode != gTransferFunction.GetNodes().front() && pNodeItem->m_pNode != gTransferFunction.GetNodes().back())
 				gTransferFunction.RemoveNode(pNodeItem->m_pNode);
 		}
 	}

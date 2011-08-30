@@ -45,7 +45,7 @@ public:
 	
 	QNode& operator = (const QNode& Other)			
 	{
-		m_Position	= Other.m_Position;
+		m_Intensity	= Other.m_Intensity;
 		m_Opacity	= Other.m_Opacity;
 		m_Color		= Other.m_Color;
 		m_MinX		= Other.m_MinX;
@@ -56,12 +56,12 @@ public:
 		return *this;
 	}
 
-	float	GetNormalizedX(void) const;
-	void	SetNormalizedX(const float& NormalizedX);
-	float	GetNormalizedY(void) const;
-	void	SetNormalizedY(const float& NormalizedY);
-	float	GetPosition(void) const;
-	void	SetPosition(const float& Position);
+	float	GetNormalizedIntensity(void) const;
+	void	SetNormalizedIntensity(const float& NormalizedX);
+	float	GetNormalizedOpacity(void) const;
+	void	SetNormalizedOpacity(const float& NormalizedY);
+	float	GetIntensity(void) const;
+	void	SetIntensity(const float& Position);
 	float	GetOpacity(void) const;
 	void	SetOpacity(const float& Opacity);
 	QColor	GetColor(void) const;
@@ -87,7 +87,7 @@ signals:
 
 public:
 	QTransferFunction*	m_pTransferFunction;
-	float				m_Position;
+	float				m_Intensity;
 	float				m_Opacity;
 	QColor				m_Color;
 	float				m_MinX;
@@ -131,20 +131,28 @@ public:
 		return *this;
 	}
 
-	QString	GetName(void) const;
-	void	SetName(const QString& Name);
-	void	AddNode(const float& Position, const float& Opacity, const QColor& Color);
-	void	AddNode(QNode* pNode);
-	void	RemoveNode(QNode* pNode);
-	void	SetSelectedNode(QNode* pSelectedNode);
-	void	SetSelectedNode(const int& Index);
-	void	SelectPreviousNode(void);
-	void	SelectNextNode(void);
-	int		GetNodeIndex(QNode* pNode);
-	void	UpdateNodeRanges(void);
-	void	SetHistogram(const int* pBins, const int& NoBins);
-	void	ReadXML(QDomElement& Parent);
-	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	void					AddNode(const float& Position, const float& Opacity, const QColor& Color);
+	void					AddNode(QNode* pNode);
+	void RemoveNode(const QNode* pNode);
+	QString					GetName(void) const;
+	void					SetName(const QString& Name);
+	float					GetRangeMin(void) const;
+	void					SetRangeMin(const float& RangeMin);
+	float					GetRangeMax(void) const;
+	void					SetRangeMax(const float& RangeMax);
+	float					GetRange(void) const;
+	void					UpdateNodeRanges(void);
+	const QVector<QNode*>&	GetNodes(void) const;
+	void					SetSelectedNode(QNode* pSelectedNode);
+	void					SetSelectedNode(const int& Index);
+	const QNode*			GetSelectedNode(void);
+	void					SelectPreviousNode(void);
+	void					SelectNextNode(void);
+	int						GetNodeIndex(QNode* pNode);
+	const QHistogram&		GetHistogram(void) const;		
+	void					SetHistogram(const int* pBins, const int& NoBins);
+	void					ReadXML(QDomElement& Parent);
+	void					WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);
@@ -157,7 +165,7 @@ signals:
 	void	SelectionChanged(QNode* pNode);
 	void	HistogramChanged(void);
 
-public:
+protected:
 	QString				m_Name;
 	QVector<QNode*>		m_Nodes;
 	float				m_RangeMin;
@@ -165,6 +173,8 @@ public:
 	float				m_Range;
 	QNode*				m_pSelectedNode;
 	QHistogram			m_Histogram;
+
+	friend class QNode;
 };
 
 Q_DECLARE_METATYPE(QTransferFunction)

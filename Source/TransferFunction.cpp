@@ -6,51 +6,50 @@ QTransferFunction gTransferFunction;
 // Compare two transfer function nodes by position
 bool CompareNodes(QNode* pNodeA, QNode* pNodeB)
 {
-	return pNodeA->GetPosition() < pNodeB->GetPosition();
+	return pNodeA->GetIntensity() < pNodeB->GetIntensity();
 }
 
-QNode::QNode(QTransferFunction* pTransferFunction, const float& Position, const float& Opacity, const QColor& Color) :
+QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const float& Opacity, const QColor& Color) :
 	QObject(pTransferFunction),
 	m_pTransferFunction(pTransferFunction),
-	m_Position(Position),
+	m_Intensity(Intensity),
 	m_Opacity(Opacity),
 	m_Color(Color),
 	m_MinX(0.0f),
-	m_MaxX(255.0f),
+	m_MaxX(0.0f),
 	m_MinY(0.0f),
 	m_MaxY(1.0f)
 {
 }
 
-float QNode::GetNormalizedX(void) const 
+float QNode::GetNormalizedIntensity(void) const 
 {
-	return (GetPosition() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
+	return (GetIntensity() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
 }
 
-void QNode::SetNormalizedX(const float& NormalizedX)
+void QNode::SetNormalizedIntensity(const float& NormalizedIntensity)
 {
-
-	SetPosition(m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedX));
+	SetIntensity(m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedIntensity));
 }
 
-float QNode::GetNormalizedY(void) const 
+float QNode::GetNormalizedOpacity(void) const 
 {
 	return GetOpacity();
 }
 
-void QNode::SetNormalizedY(const float& NormalizedY)
+void QNode::SetNormalizedOpacity(const float& NormalizedOpacity)
 {
-	SetOpacity(NormalizedY);
+	SetOpacity(NormalizedOpacity);
 }
 
-float QNode::GetPosition(void) const
+float QNode::GetIntensity(void) const
 {
-	return m_Position;
+	return m_Intensity;
 }
 
-void QNode::SetPosition(const float& Position)
+void QNode::SetIntensity(const float& Position)
 {
-	m_Position = qMin(m_MaxX, qMax(Position, m_MinX));
+	m_Intensity = qMin(m_MaxX, qMax(Position, m_MinX));
 	
 	emit NodeChanged(this);
 	emit PositionChanged(this);
@@ -137,9 +136,10 @@ bool QNode::InRange(const QPointF& Point)
 
 void QNode::ReadXML(QDomElement& Parent)
 {
-	const float NormalizedIntensity = Parent.firstChildElement("Intensity").nodeValue().toFloat();
+	const float NormalizedIntensity = Parent.firstChildElement("NormalizedIntensity").nodeValue().toFloat();
 
-	m_Position = m_pTransferFunction->m_RangeMin + NormalizedIntensity * m_pTransferFunction->m_Range;
+	// Set intensity from normalized intensity
+	SetNormalizedIntensity(NormalizedIntensity);
 	
 	QDomElement Kd = Parent.firstChildElement("Kd");
 
@@ -155,8 +155,8 @@ void QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	Parent.appendChild(Node);
 
 	// Intensity
-	QDomElement Intensity = DOM.createElement("Intensity");
-	Intensity.setAttribute("Value", m_Position);
+	QDomElement Intensity = DOM.createElement("NormalizedIntensity");
+	Intensity.setAttribute("Value", GetNormalizedIntensity());
 	Node.appendChild(Intensity);
 
 	// Kd
@@ -209,6 +209,28 @@ void QTransferFunction::SetName(const QString& Name)
 	m_Name = Name;
 }
 
+float QTransferFunction::GetRangeMin(void) const
+{
+	return m_RangeMin;
+}
+
+void QTransferFunction::SetRangeMin(const float& RangeMin)
+{
+	m_RangeMin = RangeMin;
+	UpdateNodeRanges();
+}
+
+float QTransferFunction::GetRangeMax(void) const
+{
+	return m_RangeMax;
+}
+
+void QTransferFunction::SetRangeMax(const float& RangeMax)
+{
+	m_RangeMax = RangeMax;
+	UpdateNodeRanges();
+}
+
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
 {
 	m_pSelectedNode = pSelectedNode;
@@ -228,6 +250,11 @@ void QTransferFunction::SetSelectedNode(const int& Index)
 
 	// Notify others that our selection has changed
 	emit SelectionChanged(m_pSelectedNode);
+}
+
+const QNode* QTransferFunction::GetSelectedNode(void)
+{
+	return m_pSelectedNode;
 }
 
 void QTransferFunction::OnNodeChanged(QNode* pNode)
@@ -346,10 +373,20 @@ void QTransferFunction::UpdateNodeRanges(void)
 			QNode* pNodeLeft	= gTransferFunction.m_Nodes[i - 1];
 			QNode* pNodeRight	= gTransferFunction.m_Nodes[i + 1];
 
-			pNode->SetMinX(pNodeLeft->GetPosition());
-			pNode->SetMaxX(pNodeRight->GetPosition());
+			pNode->SetMinX(pNodeLeft->GetIntensity());
+			pNode->SetMaxX(pNodeRight->GetIntensity());
 		}
 	}
+}
+
+const QVector<QNode*>& QTransferFunction::GetNodes(void) const
+{
+	return m_Nodes;
+}
+
+const QHistogram& QTransferFunction::GetHistogram(void) const
+{
+	return m_Histogram;
 }
 
 void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
@@ -407,3 +444,7 @@ void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 		pNode->WriteXML(DOM, Nodes);
 	}
 }
+
+
+
+

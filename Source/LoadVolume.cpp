@@ -138,9 +138,8 @@ bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataV
 	pScene->m_IntensityRange.m_Min	= (float)Range[0];
 	pScene->m_IntensityRange.m_Max	= (float)Range[1];
 
-	gTransferFunction.m_RangeMin = (float)Range[0];
-	gTransferFunction.m_RangeMax = (float)Range[1];
-	gTransferFunction.m_Range = (float)Range[1] - (float)Range[0];
+	gTransferFunction.SetRangeMin((float)Range[0]);
+	gTransferFunction.SetRangeMax((float)Range[1]);
 
 	int* pExtent = pImageDataVolume->GetExtent();
 	

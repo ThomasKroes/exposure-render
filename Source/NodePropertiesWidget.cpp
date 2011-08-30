@@ -166,9 +166,9 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		m_pPositionSpinBox->blockSignals(true);
 
 		m_pPositionSlider->setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_pPositionSlider->setValue(pNode->GetPosition());
+		m_pPositionSlider->setValue(pNode->GetIntensity());
 		m_pPositionSpinBox->setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_pPositionSpinBox->setValue(pNode->GetPosition());
+		m_pPositionSpinBox->setValue(pNode->GetIntensity());
 
 		// Allow signals again
 		m_pPositionSlider->blockSignals(false);
@@ -196,9 +196,9 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 
 		// Compute whether to enable/disable buttons
 		const bool EnablePrevious	= CurrentNodeIndex > 0;
-		const bool EnableNext		= CurrentNodeIndex < gTransferFunction.m_Nodes.size() - 1;
-		const bool EnablePosition	= gTransferFunction.m_Nodes.front() != pNode && gTransferFunction.m_Nodes.back() != pNode;
-		const bool EnableDelete		= gTransferFunction.m_pSelectedNode ? (gTransferFunction.m_pSelectedNode != gTransferFunction.m_Nodes.front() && gTransferFunction.m_pSelectedNode != gTransferFunction.m_Nodes.back()) : false;
+		const bool EnableNext		= CurrentNodeIndex < gTransferFunction.GetNodes().size() - 1;
+		const bool EnablePosition	= gTransferFunction.GetNodes().front() != pNode && gTransferFunction.GetNodes().back() != pNode;
+		const bool EnableDelete		= gTransferFunction.GetSelectedNode() ? (gTransferFunction.GetSelectedNode() != gTransferFunction.GetNodes().front() && gTransferFunction.GetSelectedNode() != gTransferFunction.GetNodes().back()) : false;
 		
 		// Enable/disable buttons
 		m_pPreviousNodePushButton->setEnabled(EnablePrevious);
@@ -225,9 +225,8 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 		connect(pNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
 		connect(pNode, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
 
-		// Chache last node
+		// Cache last node
 		m_pLastSelectedNode = pNode;
-		/**/
 	}
 }
 
@@ -248,16 +247,16 @@ void QNodePropertiesWidget::OnNextNode(void)
 
 void QNodePropertiesWidget::OnDeleteNode(void)
 {
-	if (!gTransferFunction.m_pSelectedNode)
+	if (!gTransferFunction.GetSelectedNode())
 		return;
 
-	gTransferFunction.RemoveNode(gTransferFunction.m_pSelectedNode);
+	gTransferFunction.RemoveNode(gTransferFunction.GetSelectedNode());
 }
 
 void QNodePropertiesWidget::OnPositionChanged(const int& Position)
 {
-	if (gTransferFunction.m_pSelectedNode)
-		gTransferFunction.m_pSelectedNode->SetPosition(Position);
+	if (gTransferFunction.GetSelectedNode())
+		gTransferFunction.m_pSelectedNode->SetIntensity(Position);
 }
 
 void QNodePropertiesWidget::OnOpacityChanged(const int& Opacity)
@@ -283,8 +282,8 @@ void QNodePropertiesWidget::OnNodePositionChanged(QNode* pNode)
 		m_pPositionSpinBox->blockSignals(true);
 
 		// Update values
-		m_pPositionSlider->setValue(pNode->GetPosition());
-		m_pPositionSpinBox->setValue(pNode->GetPosition());
+		m_pPositionSlider->setValue(pNode->GetIntensity());
+		m_pPositionSpinBox->setValue(pNode->GetIntensity());
 
 		m_pPositionSlider->blockSignals(false);
 		m_pPositionSpinBox->blockSignals(true);

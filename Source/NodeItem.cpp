@@ -98,7 +98,7 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 
 		m_pTransferFunctionCanvas->m_AllowUpdateNodes = false;
 
-		m_pNode->SetPosition(NewTfPoint.x());
+		m_pNode->SetIntensity(NewTfPoint.x());
 		m_pNode->SetOpacity(NewTfPoint.y());
 
 		m_pTransferFunctionCanvas->m_AllowUpdateNodes = true;
@@ -144,7 +144,7 @@ void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
 
 	if (pEvent->button() == Qt::MouseButton::LeftButton)
 	{
-		if (m_pNode == gTransferFunction.m_Nodes.front() || m_pNode == gTransferFunction.m_Nodes.back())
+		if (m_pNode == gTransferFunction.GetNodes().front() || m_pNode == gTransferFunction.GetNodes().back())
 		{
 			m_Cursor.setShape(Qt::CursorShape::SizeVerCursor);
 			setCursor(m_Cursor);
@@ -199,7 +199,7 @@ void QNodeItem::UpdateTooltip(void)
 		ToolTipString.append("</tr>");
 		ToolTipString.append("<tr>");
 			ToolTipString.append("<td>Position</td><td> : </td>");
-			ToolTipString.append("<td>" + QString::number(m_pNode->GetPosition()) + "</td>");
+			ToolTipString.append("<td>" + QString::number(m_pNode->GetIntensity()) + "</td>");
 		ToolTipString.append("</tr>");
 		ToolTipString.append("<tr>");
 			ToolTipString.append("<td>Opacity</td><td> : </td>");
