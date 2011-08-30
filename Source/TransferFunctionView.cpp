@@ -86,15 +86,15 @@ void QTransferFunctionView::Update(void)
 
 	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 	{
-		QNode* pNode = gTransferFunction.GetNodes()[i];
+		QNode& Node = gTransferFunction.GetNode(i);
 
-		gpScene->m_TransferFunctions.m_Kd.m_P[i] = pNode->GetIntensity();
-		gpScene->m_TransferFunctions.m_Ks.m_P[i] = pNode->GetIntensity();
-		gpScene->m_TransferFunctions.m_Kt.m_P[i] = pNode->GetIntensity();
+		gpScene->m_TransferFunctions.m_Kd.m_P[i] = Node.GetIntensity();
+		gpScene->m_TransferFunctions.m_Ks.m_P[i] = Node.GetIntensity();
+		gpScene->m_TransferFunctions.m_Kt.m_P[i] = Node.GetIntensity();
 
-		float ColR = pNode->GetOpacity() * ((float)pNode->GetColor().red() / 255.0f);
-		float ColG = pNode->GetOpacity() * ((float)pNode->GetColor().green() / 255.0f);
-		float ColB = pNode->GetOpacity() * ((float)pNode->GetColor().blue() / 255.0f);
+		float ColR = Node.GetOpacity() * ((float)Node.GetColor().red() / 255.0f);
+		float ColG = Node.GetOpacity() * ((float)Node.GetColor().green() / 255.0f);
+		float ColB = Node.GetOpacity() * ((float)Node.GetColor().blue() / 255.0f);
 
 		gpScene->m_TransferFunctions.m_Kd.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
 		gpScene->m_TransferFunctions.m_Ks.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
@@ -188,16 +188,16 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			int B = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 
 			// Create new transfer function node
-			QNode* pNode = new QNode(&gTransferFunction, TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
+			QNode NewNode(&gTransferFunction, TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
 
 			// Add to node list
-			gTransferFunction.AddNode(pNode);
+			gTransferFunction.AddNode(NewNode);
 
 			// Redraw
 			m_pTransferFunctionCanvas->Update();
 
 			// Select it immediately
-			gTransferFunction.SetSelectedNode(pNode);
+//			gTransferFunction.SetSelectedNode(NewNode);
 		}
 
 		if (pEvent->button() == Qt::MouseButton::RightButton)
@@ -214,8 +214,10 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 		}
 		else if (pEvent->button() == Qt::MouseButton::RightButton)
 		{
+			const int Index = gTransferFunction.GetNodes().indexOf(*pNodeItem->m_pNode);
+
 			// Remove transfer function node if not the first or last node
-			if (pNodeItem->m_pNode != gTransferFunction.GetNodes().front() && pNodeItem->m_pNode != gTransferFunction.GetNodes().back())
+			if (Index != 0 && Index != gTransferFunction.GetNodes().size() - 1)
 				gTransferFunction.RemoveNode(pNodeItem->m_pNode);
 		}
 	}

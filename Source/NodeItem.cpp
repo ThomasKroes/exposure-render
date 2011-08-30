@@ -144,7 +144,7 @@ void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
 
 	if (pEvent->button() == Qt::MouseButton::LeftButton)
 	{
-		if (m_pNode == gTransferFunction.GetNodes().front() || m_pNode == gTransferFunction.GetNodes().back())
+		if (/*gTransferFunction.GetNodes().indexOf(*m_pNode) == 0 || */gTransferFunction.GetNodes().indexOf(*m_pNode) == gTransferFunction.GetNodes().size() - 1)
 		{
 			m_Cursor.setShape(Qt::CursorShape::SizeVerCursor);
 			setCursor(m_Cursor);

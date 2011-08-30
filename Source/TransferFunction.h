@@ -52,8 +52,14 @@ public:
 		m_MaxX		= Other.m_MaxX;
 		m_MinY		= Other.m_MinY;
 		m_MaxY		= Other.m_MaxY;
+		m_GUID		= Other.m_GUID;
 
 		return *this;
+	}
+
+	bool operator == (const QNode& Other) const
+	{
+		return GetGUID() == Other.GetGUID();
 	}
 
 	float	GetNormalizedIntensity(void) const;
@@ -75,6 +81,7 @@ public:
 	float	GetMaxY(void) const;
 	void	SetMaxY(const float& MaxY);
 	bool	InRange(const QPointF& Point);
+	QString	GetGUID(void) const;
 	void	ReadXML(QDomElement& Parent);
 	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
@@ -85,7 +92,7 @@ signals:
 	void ColorChanged(QNode* pNode);
 	void RangeChanged(QNode* pNode);
 
-public:
+private:
 	QTransferFunction*	m_pTransferFunction;
 	float				m_Intensity;
 	float				m_Opacity;
@@ -94,7 +101,10 @@ public:
 	float				m_MaxX;
 	float				m_MinY;
 	float				m_MaxY;
+	QUuid				m_GUID;
 };
+
+typedef QList<QNode> QNodeList;
 
 class QTransferFunction : public QObject
 {
@@ -131,28 +141,29 @@ public:
 		return *this;
 	}
 
-	void					AddNode(const float& Position, const float& Opacity, const QColor& Color);
-	void					AddNode(QNode* pNode);
-	void RemoveNode(const QNode* pNode);
-	QString					GetName(void) const;
-	void					SetName(const QString& Name);
-	float					GetRangeMin(void) const;
-	void					SetRangeMin(const float& RangeMin);
-	float					GetRangeMax(void) const;
-	void					SetRangeMax(const float& RangeMax);
-	float					GetRange(void) const;
-	void					UpdateNodeRanges(void);
-	const QVector<QNode*>&	GetNodes(void) const;
-	void					SetSelectedNode(QNode* pSelectedNode);
-	void					SetSelectedNode(const int& Index);
-	const QNode*			GetSelectedNode(void);
-	void					SelectPreviousNode(void);
-	void					SelectNextNode(void);
-	int						GetNodeIndex(QNode* pNode);
-	const QHistogram&		GetHistogram(void) const;		
-	void					SetHistogram(const int* pBins, const int& NoBins);
-	void					ReadXML(QDomElement& Parent);
-	void					WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	void				AddNode(const float& Position, const float& Opacity, const QColor& Color);
+	void				AddNode(const QNode& pNode);
+	void				RemoveNode(QNode* pNode);
+	QString				GetName(void) const;
+	void				SetName(const QString& Name);
+	float				GetRangeMin(void) const;
+	void				SetRangeMin(const float& RangeMin);
+	float				GetRangeMax(void) const;
+	void				SetRangeMax(const float& RangeMax);
+	float				GetRange(void) const;
+	void				UpdateNodeRanges(void);
+	const QNodeList&	GetNodes(void) const;
+	QNode&				GetNode(const int& Index);
+	void				SetSelectedNode(QNode* pSelectedNode);
+	void				SetSelectedNode(const int& Index);
+	QNode*				GetSelectedNode(void);
+	void				SelectPreviousNode(void);
+	void				SelectNextNode(void);
+	int					GetNodeIndex(QNode* pNode);
+	const QHistogram&	GetHistogram(void) const;		
+	void				SetHistogram(const int* pBins, const int& NoBins);
+	void				ReadXML(QDomElement& Parent);
+	void				WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);
@@ -166,13 +177,13 @@ signals:
 	void	HistogramChanged(void);
 
 protected:
-	QString				m_Name;
-	QVector<QNode*>		m_Nodes;
-	float				m_RangeMin;
-	float				m_RangeMax;
-	float				m_Range;
-	QNode*				m_pSelectedNode;
-	QHistogram			m_Histogram;
+	QString		m_Name;
+	QNodeList	m_Nodes;
+	float		m_RangeMin;
+	float		m_RangeMax;
+	float		m_Range;
+	QNode*		m_pSelectedNode;
+	QHistogram	m_Histogram;
 
 	friend class QNode;
 };

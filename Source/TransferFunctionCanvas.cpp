@@ -198,10 +198,10 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 	QPolygonF Polygon;
 
 	// Set the gradient stops
-	for (int i = 0; i < gTransferFunction.m_Histogram.m_Bins.size(); i++)
+	for (int i = 0; i < gTransferFunction.GetHistogram().m_Bins.size(); i++)
 	{
 		// Compute polygon point in scene coordinates
-		QPointF ScenePoint = TransferFunctionToScene(QPointF(i, logf((float)gTransferFunction.m_Histogram.m_Bins[i]) / logf(1.5f * (float)gTransferFunction.m_Histogram.m_Max)));
+		QPointF ScenePoint = TransferFunctionToScene(QPointF(i, logf((float)gTransferFunction.GetHistogram().m_Bins[i]) / logf(1.5f * (float)gTransferFunction.GetHistogram().m_Max)));
 
 		if (i == 0)
 		{
@@ -214,7 +214,7 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 
 		Polygon.append(ScenePoint);
 
-		if (i == (gTransferFunction.m_Histogram.m_Bins.size() - 1))
+		if (i == (gTransferFunction.GetHistogram().m_Bins.size() - 1))
 		{
 			QPointF CenterCopy = ScenePoint;
 
@@ -243,17 +243,18 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 	// Clear the node items list
 	m_NodeItems.clear();
 
-	// Create the node items
-	foreach(QNode* pNode, gTransferFunction.m_Nodes)
+	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 	{
+		QNode& Node = gTransferFunction.GetNode(i);
+
 		// Create new node item
-		QNodeItem* pNodeItem = new QNodeItem(NULL, pNode, this);
+		QNodeItem* pNodeItem = new QNodeItem(NULL, &Node, this);
 
 		// Make it child of us
 		pNodeItem->setParentItem(this);
 
 		// Compute node center in canvas coordinates
-		QPointF NodeCenter = TransferFunctionToScene(QPointF(pNode->GetIntensity(), pNode->GetOpacity()));
+		QPointF NodeCenter = TransferFunctionToScene(QPointF(Node.GetIntensity(), Node.GetOpacity()));
 
 		pNodeItem->m_SuspendUpdate = true;
 
@@ -307,18 +308,19 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 
 		QGradientStops GradientStops;
 
-		// Set the gradient stops
-		foreach(QNode* pNode, gTransferFunction.m_Nodes)
+		for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 		{
-			QColor Color = pNode->GetColor();
+			const QNode& Node = gTransferFunction.GetNode(i);
+
+			QColor Color = Node.GetColor();
 
 			// Clamp node opacity to obtain valid alpha for display
-			float Alpha = qMin(1.0f, qMax(0.0f, pNode->GetOpacity()));
+			float Alpha = qMin(1.0f, qMax(0.0f, Node.GetOpacity()));
 
 			Color.setAlphaF(0.5f * Alpha);
 
 			// Add a new gradient stop
-			GradientStops.append(QGradientStop(pNode->GetNormalizedIntensity(), Color));
+			GradientStops.append(QGradientStop(Node.GetNormalizedIntensity(), Color));	
 		}
 
 		m_PolygonGradient.setStops(GradientStops);
@@ -395,7 +397,7 @@ QPointF QTransferFunctionCanvas::SceneToTransferFunction(const QPointF& ScenePoi
 	const float NormalizedX = ScenePoint.x() / (float)rect().width();
 	const float NormalizedY = 1.0f - (ScenePoint.y() / (float)rect().height());
 
-	const float TfX = gTransferFunction.m_RangeMin + NormalizedX * gTransferFunction.m_Range;
+	const float TfX = gTransferFunction.GetRangeMin() + NormalizedX * gTransferFunction.GetRange();
 	const float TfY = NormalizedY;
 
 	return QPointF(TfX, TfY);
@@ -404,7 +406,7 @@ QPointF QTransferFunctionCanvas::SceneToTransferFunction(const QPointF& ScenePoi
 // Maps from transfer function coordinates to scene coordinates
 QPointF QTransferFunctionCanvas::TransferFunctionToScene(const QPointF& TfPoint)
 {
-	const float NormalizedX = (TfPoint.x() - gTransferFunction.m_RangeMin) / gTransferFunction.m_Range;
+	const float NormalizedX = (TfPoint.x() - gTransferFunction.GetRangeMin()) / gTransferFunction.GetRange();
 	const float NormalizedY = 1.0f - TfPoint.y();
 
 	const float SceneX = NormalizedX * rect().width();

@@ -125,12 +125,6 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_pOpacitySpinBox->setSingleStep(1);
 	m_pMainLayout->addWidget(m_pOpacitySpinBox, 2, 2);
 	
-	/*
-	// Color
-	m_pColorSelector = new QColorSelectorWidget(this);
-	m_pMainLayout->addWidget(m_pColorSelector, 3, 0, 1, 3);
-	*/
-
 	// Setup connections for position
 	connect(m_pPositionSlider, SIGNAL(valueChanged(int)), m_pPositionSpinBox, SLOT(setValue(int)));
 	connect(m_pPositionSpinBox, SIGNAL(valueChanged(int)), m_pPositionSlider, SLOT(setValue(int)));
@@ -194,11 +188,13 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 
 		m_pNodeSelectionComboBox->blockSignals(false);
 
+		const int NodeIndex = gTransferFunction.GetNodes().indexOf(*gTransferFunction.GetSelectedNode());
+
 		// Compute whether to enable/disable buttons
 		const bool EnablePrevious	= CurrentNodeIndex > 0;
 		const bool EnableNext		= CurrentNodeIndex < gTransferFunction.GetNodes().size() - 1;
-		const bool EnablePosition	= gTransferFunction.GetNodes().front() != pNode && gTransferFunction.GetNodes().back() != pNode;
-		const bool EnableDelete		= gTransferFunction.GetSelectedNode() ? (gTransferFunction.GetSelectedNode() != gTransferFunction.GetNodes().front() && gTransferFunction.GetSelectedNode() != gTransferFunction.GetNodes().back()) : false;
+		const bool EnablePosition	= NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1;
+		const bool EnableDelete		= gTransferFunction.GetSelectedNode() ? (NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1) : false;
 		
 		// Enable/disable buttons
 		m_pPreviousNodePushButton->setEnabled(EnablePrevious);
@@ -256,20 +252,20 @@ void QNodePropertiesWidget::OnDeleteNode(void)
 void QNodePropertiesWidget::OnPositionChanged(const int& Position)
 {
 	if (gTransferFunction.GetSelectedNode())
-		gTransferFunction.m_pSelectedNode->SetIntensity(Position);
+		gTransferFunction.GetSelectedNode()->SetIntensity(Position);
 }
 
 void QNodePropertiesWidget::OnOpacityChanged(const int& Opacity)
 {
-	if (gTransferFunction.m_pSelectedNode)
-		gTransferFunction.m_pSelectedNode->SetOpacity(0.01f * Opacity);
+	if (gTransferFunction.GetSelectedNode())
+		gTransferFunction.GetSelectedNode()->SetOpacity(0.01f * Opacity);
 }
 
 void QNodePropertiesWidget::OnColorChanged(const QColor& Color)
 {
 	m_pNodeSelectionComboBox->clear();
 
-	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
+	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
 }
 
@@ -317,7 +313,7 @@ void QNodePropertiesWidget::OnNodeAdd(QNode* pNode)
 {
 	m_pNodeSelectionComboBox->clear();
 
-	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
+	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
 }
 
@@ -338,6 +334,6 @@ void QNodePropertiesWidget::OnNodeRemoved(QNode* pNode)
 {
 	m_pNodeSelectionComboBox->clear();
 
-	for (int i = 0; i < gTransferFunction.m_Nodes.size(); i++)
+	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 		m_pNodeSelectionComboBox->addItem("Node " + QString::number(i + 1));
 }

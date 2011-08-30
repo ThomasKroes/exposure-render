@@ -4,9 +4,9 @@
 QTransferFunction gTransferFunction;
 
 // Compare two transfer function nodes by position
-bool CompareNodes(QNode* pNodeA, QNode* pNodeB)
+bool CompareNodes(QNode NodeA, QNode NodeB)
 {
-	return pNodeA->GetIntensity() < pNodeB->GetIntensity();
+	return NodeA.GetIntensity() < NodeB.GetIntensity();
 }
 
 QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const float& Opacity, const QColor& Color) :
@@ -20,6 +20,7 @@ QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const
 	m_MinY(0.0f),
 	m_MaxY(1.0f)
 {
+	m_GUID.createUuid();
 }
 
 float QNode::GetNormalizedIntensity(void) const 
@@ -134,6 +135,11 @@ bool QNode::InRange(const QPointF& Point)
 	return Point.x() >= m_MinX && Point.x() <= m_MaxX && Point.y() >= m_MinY && Point.y() <= m_MaxY;
 }
 
+QString QNode::GetGUID(void) const
+{
+	return m_GUID.toString();
+}
+
 void QNode::ReadXML(QDomElement& Parent)
 {
 	const float NormalizedIntensity = Parent.firstChildElement("NormalizedIntensity").nodeValue().toFloat();
@@ -216,8 +222,8 @@ float QTransferFunction::GetRangeMin(void) const
 
 void QTransferFunction::SetRangeMin(const float& RangeMin)
 {
-	m_RangeMin = RangeMin;
-	UpdateNodeRanges();
+	m_RangeMin	= RangeMin;
+	m_Range		= GetRange();
 }
 
 float QTransferFunction::GetRangeMax(void) const
@@ -227,8 +233,13 @@ float QTransferFunction::GetRangeMax(void) const
 
 void QTransferFunction::SetRangeMax(const float& RangeMax)
 {
-	m_RangeMax = RangeMax;
-	UpdateNodeRanges();
+	m_RangeMax	= RangeMax;
+	m_Range		= GetRange();
+}
+
+float QTransferFunction::GetRange(void) const
+{
+	return m_RangeMax - m_RangeMin;
 }
 
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
@@ -246,13 +257,13 @@ void QTransferFunction::SetSelectedNode(const int& Index)
 	const int NewIndex = qMin(m_Nodes.size(), qMax(0, Index));
 
 	// Set selected node
-	m_pSelectedNode = m_Nodes[NewIndex];
+	m_pSelectedNode = &m_Nodes[NewIndex];
 
 	// Notify others that our selection has changed
 	emit SelectionChanged(m_pSelectedNode);
 }
 
-const QNode* QTransferFunction::GetSelectedNode(void)
+QNode* QTransferFunction::GetSelectedNode(void)
 {
 	return m_pSelectedNode;
 }
@@ -278,7 +289,7 @@ void QTransferFunction::SelectPreviousNode(void)
 	const int NewIndex = qMin(m_Nodes.size() - 1, qMax(0, Index - 1));
 
 	// Set selected node
-	SetSelectedNode(m_Nodes[NewIndex]);
+	SetSelectedNode(&m_Nodes[NewIndex]);
 }
 
 void QTransferFunction::SelectNextNode(void)
@@ -295,38 +306,39 @@ void QTransferFunction::SelectNextNode(void)
 	const int NewIndex = qMin(m_Nodes.size() - 1, qMax(0, Index + 1));
 
 	// Set selected node
-	SetSelectedNode(m_Nodes[NewIndex]);
+	SetSelectedNode(&m_Nodes[NewIndex]);
 }
 
 int	QTransferFunction::GetNodeIndex(QNode* pNode)
 {
 	if (pNode == NULL)
 		return -1;
-
-	return m_Nodes.indexOf(pNode);
+	
+	return 0;
+//	return m_Nodes.indexOf(*pNode);
 }
 
 void QTransferFunction::AddNode(const float& Position, const float& Opacity, const QColor& Color)
 {
-	AddNode(new QNode(this, Position, Opacity, Color));
+	AddNode(QNode(this, Position, Opacity, Color));
 }
 
-void QTransferFunction::AddNode(QNode* pNode)
+void QTransferFunction::AddNode(const QNode& Node)
 {
-	m_Nodes.append(pNode);
+	m_Nodes.append(Node);
 
 	// Sort the transfer function nodes
-	qSort(gTransferFunction.m_Nodes.begin(), gTransferFunction.m_Nodes.end(), CompareNodes);
+	qSort(m_Nodes.begin(), m_Nodes.end(), CompareNodes);
 
 	// Update node's range
 	UpdateNodeRanges();
 
 	// Emit
-	emit NodeAdd(m_Nodes.back());
+	emit NodeAdd(&m_Nodes.back());
 	emit FunctionChanged();
 
 	// Notify us when the node changes
-	connect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
+	connect(&Node, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)
@@ -338,7 +350,7 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 	disconnect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 
 	// Remove from list and memory
-	m_Nodes.remove(m_Nodes.indexOf(pNode));
+	m_Nodes.remove(*pNode);
 	delete pNode;
 
 	// Update node's range
@@ -356,32 +368,37 @@ void QTransferFunction::UpdateNodeRanges(void)
 	// Compute the node ranges
 	for (int i = 0; i < m_Nodes.size(); i++)
 	{
-		QNode* pNode = gTransferFunction.m_Nodes[i];
+		QNode& Node = m_Nodes[i];
 
-		if (pNode == gTransferFunction.m_Nodes.front())
+		if (i == 0)
 		{
-			pNode->SetMinX(0.0f);
-			pNode->SetMaxX(0.0f);
+			Node.SetMinX(0.0f);
+			Node.SetMaxX(0.0f);
 		}
-		else if (pNode == gTransferFunction.m_Nodes.back())
+		else if (i == (m_Nodes.size() - 1))
 		{
-			pNode->SetMinX(gTransferFunction.m_RangeMax);
-			pNode->SetMaxX(gTransferFunction.m_RangeMax);
+			Node.SetMinX(m_RangeMax);
+			Node.SetMaxX(m_RangeMax);
 		}
 		else
 		{
-			QNode* pNodeLeft	= gTransferFunction.m_Nodes[i - 1];
-			QNode* pNodeRight	= gTransferFunction.m_Nodes[i + 1];
+			QNode& NodeLeft		= m_Nodes[i - 1];
+			QNode& NodeRight	= m_Nodes[i + 1];
 
-			pNode->SetMinX(pNodeLeft->GetIntensity());
-			pNode->SetMaxX(pNodeRight->GetIntensity());
+			Node.SetMinX(NodeLeft.GetIntensity());
+			Node.SetMaxX(NodeRight.GetIntensity());
 		}
 	}
 }
 
-const QVector<QNode*>& QTransferFunction::GetNodes(void) const
+const QNodeList& QTransferFunction::GetNodes(void) const
 {
 	return m_Nodes;
+}
+
+QNode& QTransferFunction::GetNode(const int& Index)
+{
+	return m_Nodes[Index];
 }
 
 const QHistogram& QTransferFunction::GetHistogram(void) const
@@ -439,12 +456,8 @@ void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	QDomElement Nodes = DOM.createElement("Nodes");
 	Root.appendChild(Nodes);
 
-	foreach (QNode* pNode, m_Nodes)
+	for (int i = 0; i < m_Nodes.size(); i++)
 	{
-		pNode->WriteXML(DOM, Nodes);
+		m_Nodes[i].WriteXML(DOM, Nodes);
 	}
 }
-
-
-
-
