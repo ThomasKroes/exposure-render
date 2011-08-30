@@ -32,80 +32,62 @@ INCLUDE_DIRECTORIES(
 
 # Set your files and resources here  
 SET(SimpleViewSrcs 
-Main.cpp 
-MainWindow.cpp 
-TransferFunctionWidget.cpp 
-LightingDockWidget.cpp 
-VolumeAppearanceDockWidget.cpp
-Camera.cpp
-Filter.cpp
-Flags.cpp
-Geometry.cpp
-Light.cpp
-MonteCarlo.cpp
-Random.cpp
-Spectrum.cpp
-Statistics.cpp
-TransferFunction.cpp
-Volume.cpp
-VolumePoint.cpp
-StatisticsDockWidget.cpp
-CameraDockWidget.cpp
-LoadVolume.cpp
-InteractorStyleRealisticCamera.cpp
-RenderThread.cpp
-SettingsDockWidget.cpp
-LoadSettingsDialog.cpp
-VtkWidget.cpp
-Scene.cpp
-NodeItem.cpp
-TransferFunctionView.cpp
-NodePropertiesWidget.cpp
-ColorSelectorWidget.cpp
-TransferFunctionCanvas.cpp
-TransferFunctionPresetsWidget.cpp
-TransferFunctionGradient.cpp
-VolumeTracer.cu
+	Main.cpp 
+	MainWindow.cpp 
+	LightingDockWidget.cpp 
+	Camera.cpp
+	Filter.cpp
+	Flags.cpp
+	Geometry.cpp
+	Light.cpp
+	MonteCarlo.cpp
+	Random.cpp
+	Spectrum.cpp
+	Statistics.cpp
+	Volume.cpp
+	VolumePoint.cpp
+	StatisticsDockWidget.cpp
+	CameraDockWidget.cpp
+	LoadVolume.cpp
+	InteractorStyleRealisticCamera.cpp
+	RenderThread.cpp
+	SettingsDockWidget.cpp
+	LoadSettingsDialog.cpp
+	VtkWidget.cpp
+	Scene.cpp
+	NodeItem.cpp
+	ColorSelectorWidget.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
 SET(SimpleViewHeaders 
-MainWindow.h 
-TransferFunctionWidget.h 
-LightingDockWidget.h 
-VolumeAppearanceDockWidget.h
-Camera.h
-Defines.h
-Dll.h
-Enumerations.h
-Exception.h
-Filter.h
-Flags.h
-Geometry.h
-Light.h
-MonteCarlo.h
-Random.h
-Spectrum.h
-Statistics.h
-TransferFunction.h
-VolumePoint.h
-StatisticsDockWidget.h
-CameraDockWidget.h
-LoadVolume.h
-InteractorStyleRealisticCamera.h
-RenderThread.h
-SettingsDockWidget.h
-LoadSettingsDialog.h
-VtkWidget.h
-Scene.h
-NodeItem.h
-TransferFunctionView.h
-NodePropertiesWidget.h
-ColorSelectorWidget.h
-TransferFunctionCanvas.h
-TransferFunctionPresetsWidget.h
-TransferFunctionGradient.h
-VolumeTracer.cuh
+	MainWindow.h 
+	LightingDockWidget.h 
+	Camera.h
+	Defines.h
+	Dll.h
+	Enumerations.h
+	Exception.h
+	Filter.h
+	Flags.h
+	Geometry.h
+	Light.h
+	MonteCarlo.h
+	Random.h
+	Spectrum.h
+	Statistics.h
+	VolumePoint.h
+	StatisticsDockWidget.h
+	CameraDockWidget.h
+	LoadVolume.h
+	InteractorStyleRealisticCamera.h
+	RenderThread.h
+	SettingsDockWidget.h
+	LoadSettingsDialog.h
+	VtkWidget.h
+	Scene.h
+	NodeItem.h
+	ColorSelectorWidget.h
 )
 
 SET(SimpleViewResources Icons/icons.qrc)
@@ -128,6 +110,42 @@ SOURCE_GROUP("Generated" FILES
   ${RCS_SOURCES}
 )
 
+# Group sources related to the transfer function editor together
+SET(TransferFunctionSources
+	TransferFunction.h
+	TransferFunction.cpp
+	TransferFunctionCanvas.h
+	TransferFunctionCanvas.cpp
+	TransferFunctionView.h
+	TransferFunctionView.cpp
+	TransferFunctionPresetsWidget.h
+	TransferFunctionPresetsWidget.cpp
+	TransferFunctionGradient.h
+	TransferFunctionGradient.cpp
+	TransferFunctionWidget.h
+	TransferFunctionWidget.cpp
+	NodePropertiesWidget.h
+	NodePropertiesWidget.cpp
+	VolumeAppearanceDockWidget.h
+	VolumeAppearanceDockWidget.cpp
+)
+
+# Make the group
+SOURCE_GROUP("Transfer Function" FILES
+	${TransferFunctionSources}
+)
+
+# Group sources related to Cuda together
+SET(CudaSources
+	VolumeTracer.cuh
+	VolumeTracer.cu
+)
+
+# Make the group
+SOURCE_GROUP("Cuda Kernels" FILES
+	${CudaSources}
+)
+
 ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
 SET_SOURCE_FILES_PROPERTIES(${SimpleViewSrcs} PROPERTIES
                             OBJECT_DEPENDS "${UISrcs}")
@@ -141,7 +159,7 @@ IF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
   SET (SimpleViewSrcs ${SimpleViewSrcs} ${SimpleViewUI})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs}
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionSources} ${CudaSources}
 )
 
 TARGET_LINK_LIBRARIES(ExposureRender
@@ -151,7 +169,6 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkGraphics
   vtkIO
   vtkCommon
-  vtkInfovis
   vtkViews
 )
 

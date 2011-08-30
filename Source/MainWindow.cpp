@@ -196,7 +196,7 @@ void CMainWindow::CreateDockWindows()
 
 	// Appearance dock widget
 	m_VolumeAppearanceDockWidget.setParent(this);
-	m_VolumeAppearanceDockWidget.setEnabled(false);
+//	m_VolumeAppearanceDockWidget.setEnabled(false);
 	m_VolumeAppearanceDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::LeftDockWidgetArea, &m_VolumeAppearanceDockWidget);
     m_pViewMenu->addAction(m_VolumeAppearanceDockWidget.toggleViewAction());
