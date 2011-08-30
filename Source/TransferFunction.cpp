@@ -18,9 +18,9 @@ QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const
 	m_MinX(0.0f),
 	m_MaxX(0.0f),
 	m_MinY(0.0f),
-	m_MaxY(1.0f)
+	m_MaxY(1.0f),
+	m_ID(0)
 {
-	m_GUID.createUuid();
 }
 
 float QNode::GetNormalizedIntensity(void) const 
@@ -135,17 +135,20 @@ bool QNode::InRange(const QPointF& Point)
 	return Point.x() >= m_MinX && Point.x() <= m_MaxX && Point.y() >= m_MinY && Point.y() <= m_MaxY;
 }
 
-QString QNode::GetGUID(void) const
+int QNode::GetID(void) const
 {
-	return m_GUID.toString();
+	return m_ID;
 }
 
 void QNode::ReadXML(QDomElement& Parent)
 {
-	const float NormalizedIntensity = Parent.firstChildElement("NormalizedIntensity").nodeValue().toFloat();
+	// Intensity
+	const float NormalizedIntensity = Parent.firstChildElement("NormalizedIntensity").attribute("Value").toFloat();
+	m_Intensity = m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedIntensity);
 
-	// Set intensity from normalized intensity
-	SetNormalizedIntensity(NormalizedIntensity);
+	// Opacity
+	const float NormalizedOpacity = Parent.firstChildElement("NormalizedOpacity").attribute("Value").toFloat();
+	m_Opacity = NormalizedOpacity;
 	
 	QDomElement Kd = Parent.firstChildElement("Kd");
 
@@ -162,8 +165,15 @@ void QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	// Intensity
 	QDomElement Intensity = DOM.createElement("NormalizedIntensity");
-	Intensity.setAttribute("Value", GetNormalizedIntensity());
+	const float NormalizedIntensity = GetNormalizedIntensity();
+	Intensity.setAttribute("Value", NormalizedIntensity);
 	Node.appendChild(Intensity);
+
+	// Opacity
+	QDomElement Opacity = DOM.createElement("NormalizedOpacity");
+	const float NormalizedOpacity = GetNormalizedOpacity();
+	Opacity.setAttribute("Value", NormalizedOpacity);
+	Node.appendChild(Opacity);
 
 	// Kd
 	QDomElement Kd = DOM.createElement("Kd");
@@ -197,12 +207,41 @@ QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	m_pSelectedNode(NULL),
 	m_Histogram()
 {
+}
+
+QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other)			
+{
 	blockSignals(true);
 
-	AddNode(0.0f, 0.0f, Qt::black);
-	AddNode(1.0f, 1.0f, Qt::white);
+	m_Name			= Other.m_Name;
+	m_Nodes			= Other.m_Nodes;
+	m_RangeMin		= Other.m_RangeMin;
+	m_RangeMax		= Other.m_RangeMax;
+	m_Range			= Other.m_Range;
+	m_pSelectedNode	= Other.m_pSelectedNode;
+	m_Histogram		= Other.m_Histogram;
 
+	for (int i = 0; i < m_Nodes.size(); i++)
+	{
+		// Notify us when the node changes
+		connect(&m_Nodes[i], SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
+	}
+
+	// Allow events to be fired
 	blockSignals(false);
+
+	// Inform others that our node count has changed
+	emit NodeCountChanged();
+
+	// Update node's range
+	UpdateNodeRanges();
+
+	// Notify others that the function has changed selection has changed
+	emit FunctionChanged();
+
+	SetSelectedNode(NULL);
+
+	return *this;
 }
 
 QString	QTransferFunction::GetName(void) const
@@ -244,6 +283,11 @@ float QTransferFunction::GetRange(void) const
 
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
 {
+	if (pSelectedNode == NULL)
+		qDebug("Selection cleared");
+	else
+		qDebug("Node %d is being selected", pSelectedNode->GetID());
+
 	m_pSelectedNode = pSelectedNode;
 	emit SelectionChanged(m_pSelectedNode);
 }
@@ -270,6 +314,7 @@ QNode* QTransferFunction::GetSelectedNode(void)
 
 void QTransferFunction::OnNodeChanged(QNode* pNode)
 {
+	// Update node's range
 	UpdateNodeRanges();
 
 	emit FunctionChanged();
@@ -280,7 +325,7 @@ void QTransferFunction::SelectPreviousNode(void)
 	if (!m_pSelectedNode)
 		return;
 
-	int Index = GetNodeIndex(m_pSelectedNode);
+	int Index = m_Nodes.indexOf(*GetSelectedNode());
 
 	if (Index < 0)
 		return;
@@ -297,7 +342,7 @@ void QTransferFunction::SelectNextNode(void)
 	if (!m_pSelectedNode)
 		return;
 
-	int Index = GetNodeIndex(m_pSelectedNode);
+	int Index = m_Nodes.indexOf(*GetSelectedNode());
 
 	if (Index < 0)
 		return;
@@ -325,42 +370,57 @@ void QTransferFunction::AddNode(const float& Position, const float& Opacity, con
 
 void QTransferFunction::AddNode(const QNode& Node)
 {
+	// Inform others that our node count is about to change
+	emit NodeCountChange();
+
+	// Add the node to the list
 	m_Nodes.append(Node);
+
+	// Cache node
+	QNode& CacheNode = m_Nodes.back();
 
 	// Sort the transfer function nodes
 	qSort(m_Nodes.begin(), m_Nodes.end(), CompareNodes);
 
-	// Update node's range
-	UpdateNodeRanges();
+	// Notify us when the node changes
+	connect(&CacheNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 
-	// Emit
-	emit NodeAdd(&m_Nodes.back());
+	// Inform others that the transfer function has changed
 	emit FunctionChanged();
 
-	// Notify us when the node changes
-	connect(&Node, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
+	// Inform others that our node count has changed
+	emit NodeCountChanged();
+
+	// Compute node index
+	const int NodeIndex = m_Nodes.indexOf(CacheNode);
+
+	// Select the last node that was added
+	SetSelectedNode(NodeIndex);
+
+	qDebug("Added a node");
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)
 {
-	// Let others know that we are about to remove a node
-	emit NodeRemove(pNode);
+	// Inform others that our node count is about to change
+	emit NodeCountChange();
 
 	// Remove the connection
 	disconnect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 
 	// Remove from list and memory
 	m_Nodes.remove(*pNode);
-	delete pNode;
 
 	// Update node's range
 	UpdateNodeRanges();
 
-	// Let others know that we remove a node, and that the transfer function has changed
-	emit NodeRemoved(pNode);
-
-	// Emit
+	// Inform others that the transfer function has changed
 	emit FunctionChanged();
+
+	// Inform others that our node count has changed
+	emit NodeCountChanged();
+
+	qDebug("Removed a node");
 }
 
 void QTransferFunction::UpdateNodeRanges(void)
@@ -389,6 +449,11 @@ void QTransferFunction::UpdateNodeRanges(void)
 			Node.SetMaxX(NodeRight.GetIntensity());
 		}
 	}
+
+	for (int i = 0; i < m_Nodes.size(); i++)
+		m_Nodes[i].m_ID = i;
+
+	qDebug("Updated node ranges");
 }
 
 const QNodeList& QTransferFunction::GetNodes(void) const
@@ -421,24 +486,41 @@ void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
 
 	// Inform other that the histogram has changed
 	emit HistogramChanged();
+
+	qDebug("Histogram was set");
 }
 
 void QTransferFunction::ReadXML(QDomElement& Parent)
 {
-	m_Name		= Parent.attribute("Name", "Failed");
-	m_RangeMin	= Parent.attribute("RangeMin", "Failed").toFloat();
-	m_RangeMax	= Parent.attribute("RangeMax", "Failed").toFloat();
-	m_Range		= Parent.attribute("Range", "Failed").toFloat();
+	// Don't fire events during loading
+	blockSignals(true);
+
+	SetName(Parent.attribute("Name", "Failed"));
+	SetRangeMin(Parent.attribute("RangeMin", "Failed").toFloat());
+	SetRangeMax(Parent.attribute("RangeMax", "Failed").toFloat());
+
+	QDomElement Nodes = Parent.firstChild().toElement();
 
 	// Read child nodes
-	for (int i = 0; i < Parent.childNodes().count(); i++)
+	for (QDomNode DomNode = Nodes.firstChild(); !DomNode.isNull(); DomNode = DomNode.nextSibling())
 	{
 		// Create new node
 		QNode Node(this);
 
 		// Load preset into it
-		Node.ReadXML(Parent.childNodes().at(i).toElement());
+		Node.ReadXML(DomNode.toElement());
+
+		// Add the node to the list
+		AddNode(Node);
 	}
+
+	// Allow events again
+	blockSignals(false);
+
+	qDebug() << m_Name << "transfer function preset loaded";
+
+	// Inform others that the transfer function has changed
+	emit FunctionChanged();
 }
 
 void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -450,7 +532,6 @@ void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	Root.setAttribute("Name", m_Name);
 	Root.setAttribute("RangeMin", m_RangeMin);
 	Root.setAttribute("RangeMax", m_RangeMax);
-	Root.setAttribute("Range", m_Range);
 
 	// Nodes
 	QDomElement Nodes = DOM.createElement("Nodes");
@@ -460,4 +541,8 @@ void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	{
 		m_Nodes[i].WriteXML(DOM, Nodes);
 	}
+
+	qDebug() << m_Name << "transfer function preset saved";
 }
+
+

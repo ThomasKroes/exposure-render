@@ -8,20 +8,51 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	m_LoadPreset(),
 	m_SavePreset(),
 	m_RemovePreset(),
-	m_RenamePreset(),
 	m_LoadPresets(),
 	m_SavePresets(),
 	m_PresetList(),
 	m_TransferFunctions()
 {
+	// Dimensions
+//	setFixedHeight(300);
+//	setFixedWidth(250);
+
+	// Set size policy to minimum
+//	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
 	// Title, status and tooltip
-	setTitle("Transfer Function Presets");
+	setTitle("Presets");
 	setToolTip("Transfer Function Presets");
 	setStatusTip("Transfer Function Presets");
 
-//	setFixedHeight(150);
-	setFixedWidth(250);
+	CreateUI();
+	CreateConnections();
 
+	// Load transfer function presets from file
+	LoadPresetsFromFile();
+}
+
+QTransferFunctionPresetsWidget::~QTransferFunctionPresetsWidget(void)
+{
+	// Save transfer function presets to file
+	SavePresetsToFile();
+}
+
+void QTransferFunctionPresetsWidget::CreateConnections(void)
+{
+	connect(&m_LoadPreset, SIGNAL(clicked()), this, SLOT(OnLoadPreset()));
+	connect(&m_SavePreset, SIGNAL(clicked()), this, SLOT(OnSavePreset()));
+	connect(&m_PresetName, SIGNAL(returnPressed()), this, SLOT(OnSavePreset()));
+	connect(&m_RemovePreset, SIGNAL(clicked()), this, SLOT(OnRemovePreset()));
+	connect(&m_LoadPresets, SIGNAL(clicked()), this, SLOT(OnLoadPresets()));
+	connect(&m_SavePresets, SIGNAL(clicked()), this, SLOT(OnSavePresets()));
+	connect(&m_PresetList, SIGNAL(itemSelectionChanged()), this, SLOT(OnPresetSelectionChanged()));
+	connect(&m_PresetName, SIGNAL(textChanged(const QString&)), this, SLOT(OnPresetNameChanged(const QString&)));
+	connect(&m_PresetList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(OnPresetItemChanged(QListWidgetItem*)));
+}
+
+void QTransferFunctionPresetsWidget::CreateUI(void)
+{
 	// Create grid layout
 	m_GridLayout.setAlignment(Qt::AlignTop);
 
@@ -32,89 +63,66 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	m_PresetList.setParent(this);
 	m_PresetList.setSelectionMode(QAbstractItemView::SingleSelection);
 	m_PresetList.setAlternatingRowColors(true);
-	m_PresetList.addItem("Bonsai");
-	m_PresetList.addItem("Engine");
-	m_PresetList.addItem("Manix");
-	m_GridLayout.addWidget(&m_PresetList, 0, 0, 1, 7);
+	m_PresetList.setSortingEnabled(true);
+
+	m_GridLayout.addWidget(&m_PresetList, 1, 0, 5, 1);
 
 	// Name edit
 	m_PresetName.setParent(this);
-	m_GridLayout.addWidget(&m_PresetName, 1, 0);
+	m_GridLayout.addWidget(&m_PresetName, 0, 0);
 
 	// Load preset
 	m_LoadPreset.setParent(this);
-	m_LoadPreset.setText("L");
+	m_LoadPreset.setText("Load");
 	m_LoadPreset.setToolTip("Load preset");
 	m_LoadPreset.setStatusTip("Load transfer function preset");
-	m_LoadPreset.setFixedWidth(20);
+//	m_LoadPreset.setFixedWidth(20);
 	m_LoadPreset.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_LoadPreset, 1, 1);
+	m_GridLayout.addWidget(&m_LoadPreset, 0, 1);
 
 	// Save Preset
 	m_SavePreset.setParent(this);
-	m_SavePreset.setText("S");
+	m_SavePreset.setEnabled(false);
+	m_SavePreset.setText("Save");
 	m_SavePreset.setToolTip("Save Preset");
 	m_SavePreset.setStatusTip("Save transfer function preset");
-	m_SavePreset.setFixedWidth(20);
+//	m_SavePreset.setFixedWidth(20);
 	m_SavePreset.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_SavePreset, 1, 2);
+	m_GridLayout.addWidget(&m_SavePreset, 1, 1);
 
 	// Remove preset
 	m_RemovePreset.setParent(this);
-	m_RemovePreset.setText("R");
+	m_RemovePreset.setEnabled(false);
+	m_RemovePreset.setText("Remove");
 	m_RemovePreset.setToolTip("Remove Preset");
 	m_RemovePreset.setStatusTip("Remove transfer function preset");
-	m_RemovePreset.setFixedWidth(20);
+//	m_RemovePreset.setFixedWidth(20);
 	m_RemovePreset.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_RemovePreset, 1, 3);
-
-	// Rename preset
-	m_RenamePreset.setParent(this);
-	m_RenamePreset.setText("R");
-	m_RenamePreset.setToolTip("Rename Preset");
-	m_RenamePreset.setStatusTip("Rename transfer function preset");
-	m_RenamePreset.setFixedWidth(20);
-	m_RenamePreset.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_RenamePreset, 1, 4);
+	m_GridLayout.addWidget(&m_RemovePreset, 2, 1);
 
 	// Load presets
 	m_LoadPresets.setParent(this);
-	m_LoadPresets.setText("L");
+	m_LoadPresets.setText("From File");
 	m_LoadPresets.setToolTip("Load presets from files");
 	m_LoadPresets.setStatusTip("Load transfer function presets from file");
-	m_LoadPresets.setFixedWidth(20);
+//	m_LoadPresets.setFixedWidth(20);
 	m_LoadPresets.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_LoadPresets, 1, 5);
+	m_GridLayout.addWidget(&m_LoadPresets, 3, 1);
 
 	// Save presets
 	m_SavePresets.setParent(this);
-	m_SavePresets.setText("S");
+	m_SavePresets.setText("To File");
 	m_SavePresets.setToolTip("Save presets to file");
 	m_SavePresets.setStatusTip("Save transfer function presets to file");
-	m_SavePresets.setFixedWidth(20);
+//	m_SavePresets.setFixedWidth(20);
 	m_SavePresets.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_SavePresets, 1, 6);
-
-	// Load transfer function presets from file
-	LoadPresetsFromFile();
-
-	// Setup connections
-	connect(&m_LoadPreset, SIGNAL(clicked()), this, SLOT(OnLoadPreset()));
-	connect(&m_SavePreset, SIGNAL(clicked()), this, SLOT(OnSavePreset()));
-	connect(&m_RemovePreset, SIGNAL(clicked()), this, SLOT(OnRemovePreset()));
-	connect(&m_RenamePreset, SIGNAL(clicked()), this, SLOT(OnRenamePreset()));
-	connect(&m_LoadPresets, SIGNAL(clicked()), this, SLOT(OnLoadPresets()));
-	connect(&m_SavePresets, SIGNAL(clicked()), this, SLOT(OnSavePresets()));
+	m_GridLayout.addWidget(&m_SavePresets, 4, 1);
 }
 
-QTransferFunctionPresetsWidget::~QTransferFunctionPresetsWidget(void)
+void QTransferFunctionPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath)
 {
-	// Save transfer function presets to file
-	SavePresetsToFile();
-}
+	qDebug("Loading transfer function presets from file");
 
-void QTransferFunctionPresetsWidget::LoadPresetsFromFile(void)
-{
 	// XML file containing transfer function presets
 	QFile XmlFile;
 
@@ -122,7 +130,15 @@ void QTransferFunctionPresetsWidget::LoadPresetsFromFile(void)
 	QString CurrentPath = QDir::currentPath();
 
 	// Set the file name
-	XmlFile.setFileName(CurrentPath + "/TransferFunctionPresets.xml");
+	if (ChoosePath)
+	{
+		// Create open file dialog
+		XmlFile.setFileName(QFileDialog::getOpenFileName(this, tr("Load transfer function presets from file"), "", tr("XML Files (*.xml)")));
+	}
+	else
+	{
+		XmlFile.setFileName(CurrentPath + "/TransferFunctionPresets.xml");
+	}
 	
 	// Open the XML file
 	if (!XmlFile.open(QIODevice::ReadOnly))
@@ -167,8 +183,10 @@ void QTransferFunctionPresetsWidget::LoadPresetsFromFile(void)
 	UpdatePresetsList();
 }
 
-void QTransferFunctionPresetsWidget::SavePresetsToFile(void)
+void QTransferFunctionPresetsWidget::SavePresetsToFile(const bool& ChoosePath)
 {
+	qDebug("Saving transfer function presets to file");
+
 	// XML file containing transfer function presets
 	QFile XmlFile;
 
@@ -176,7 +194,15 @@ void QTransferFunctionPresetsWidget::SavePresetsToFile(void)
 	QString CurrentPath = QDir::currentPath();
 
 	// Set the file name
-	XmlFile.setFileName(CurrentPath + "/TransferFunctionPresets.xml");
+	if (ChoosePath)
+	{
+		// Create open file dialog
+		XmlFile.setFileName(QFileDialog::getSaveFileName(this, tr("Save transfer function presets to file"), "", tr("XML Files (*.xml)")));
+	}
+	else
+	{
+		XmlFile.setFileName(CurrentPath + "/TransferFunctionPresets.xml");
+	}
 	
 	// Open the XML file
 	if (!XmlFile.open(QIODevice::WriteOnly ))
@@ -214,14 +240,37 @@ void QTransferFunctionPresetsWidget::UpdatePresetsList(void)
 {
 	m_PresetList.clear();
 
-	foreach (QTransferFunction TransferFunction, m_TransferFunctions)
+	for (int i = 0; i < m_TransferFunctions.size(); i++)
 	{
 		// Create new list item
-		QListWidgetItem* pListWidgetItem = new QListWidgetItem(TransferFunction.GetName());
+		QPresetItem* pListWidgetItem = new QPresetItem(&m_PresetList, &m_TransferFunctions[i]);
+
+		pListWidgetItem->setFlags(pListWidgetItem->flags() | Qt::ItemIsEditable);
 
 		// Add the item
 		m_PresetList.addItem(pListWidgetItem);
 	}
+
+	// Get current row
+	int CurrentRow = m_PresetList.currentRow();
+
+	m_RemovePreset.setEnabled(CurrentRow >= 0);
+	m_LoadPreset.setEnabled(CurrentRow >= 0);
+	m_SavePresets.setEnabled(m_PresetList.count() > 0);
+}
+
+void QTransferFunctionPresetsWidget::OnPresetSelectionChanged(void)
+{
+	// Get current row
+	int CurrentRow = m_PresetList.currentRow();
+
+	m_LoadPreset.setEnabled(CurrentRow >= 0);
+	m_RemovePreset.setEnabled(CurrentRow >= 0);
+
+	if (CurrentRow < 0)
+		return;
+
+	m_PresetName.setText(m_PresetList.currentItem()->text());
 }
 
 void QTransferFunctionPresetsWidget::OnLoadPreset(void)
@@ -237,22 +286,60 @@ void QTransferFunctionPresetsWidget::OnLoadPreset(void)
 
 void QTransferFunctionPresetsWidget::OnSavePreset(void)
 {
+	for (int i = 0; i < m_TransferFunctions.size(); i++)
+	{
+		if (m_TransferFunctions[i].GetName() == m_PresetName.text())
+			m_TransferFunctions.removeAt(i);
+	}
+
+	QTransferFunction Preset = gTransferFunction;
+
+	Preset.SetName(m_PresetName.text());
+	m_TransferFunctions.append(Preset);
+
+	UpdatePresetsList();
 }
 
 void QTransferFunctionPresetsWidget::OnRemovePreset(void)
 {
-}
+	// Get current row
+	const int CurrentRow = m_PresetList.currentRow();
 
-void QTransferFunctionPresetsWidget::OnRenamePreset(void)
-{
+	if (CurrentRow < 0)
+		return;
+
+	m_TransferFunctions.removeAt(CurrentRow);
+
+	UpdatePresetsList();
 }
 
 void QTransferFunctionPresetsWidget::OnLoadPresets(void)
 {
-}
+	// Clear the current list of presets
+	m_TransferFunctions.clear();
 
+	// Load the presets, asking for a location
+	LoadPresetsFromFile(true);
+}
 
 void QTransferFunctionPresetsWidget::OnSavePresets(void)
 {
+	// Clear the current list of presets
+	m_TransferFunctions.clear();
+
+	// Save the presets, asking for a location
+	SavePresetsToFile(true);
 }
 
+void QTransferFunctionPresetsWidget::OnPresetNameChanged(const QString& Text)
+{
+	m_SavePreset.setEnabled(Text.length() > 0);
+}
+
+void QTransferFunctionPresetsWidget::OnPresetItemChanged(QListWidgetItem* pWidgetItem)
+{
+	QPresetItem* pPresetItem = dynamic_cast<QPresetItem*>(pWidgetItem);
+
+	if (pPresetItem)
+		pPresetItem->m_pTransferFunction->SetName(pWidgetItem->text());
+}

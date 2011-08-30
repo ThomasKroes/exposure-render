@@ -12,14 +12,16 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_pTransferFunctionCanvas(NULL),
 	m_pTransferFunctionGradient(NULL),
 	m_MarginTop(8.0f),
-	m_MarginBottom(36.0f),
+	m_MarginBottom(42.0f),
 	m_MarginLeft(15.0f),
 	m_MarginRight(8.0f),
 	m_AxisLabelX(NULL),
 	m_AxisLabelY(NULL)
 {
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 	// Dimensions
-	setFixedHeight(300);
+//	setFixedHeight(300);
 
 	// Styling
 	setFrameShadow(Sunken);
@@ -48,9 +50,6 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_pTransferFunctionCanvas->translate(m_MarginLeft, m_MarginTop);
 
 	m_pTransferFunctionGradient = new QTransferFunctionGradient(NULL, m_pGraphicsScene);
-	m_pTransferFunctionGradient->translate(m_MarginLeft, rect().bottom() - m_MarginBottom + 8);
-
-//	m_pTransferFunctionCanvas->setVisible(false);
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
@@ -148,20 +147,20 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 	QRectF GradientRect = m_pTransferFunctionCanvas->rect();
 
 	GradientRect.setWidth(rect().width() - m_MarginLeft - m_MarginRight);
-	GradientRect.setHeight(12);
+	GradientRect.setHeight(18);
 
 	m_pTransferFunctionGradient->setRect(GradientRect);
+	m_pTransferFunctionGradient->setPos(m_MarginLeft, CanvasRect.height() + 15);
 	m_pTransferFunctionGradient->Update();
-
 
 	// Configure x-axis label
 	m_AxisLabelX->setRect(QRectF(0, 0, CanvasRect.width(), 12));
 	m_AxisLabelX->setX(m_MarginLeft);
-	m_AxisLabelX->setY(m_MarginTop + CanvasRect.height() + 25);
+	m_AxisLabelX->setY(m_MarginTop + CanvasRect.height() + 31);
 	m_AxisLabelX->m_Text = "Intensity: [" + QString::number(gTransferFunction.GetRangeMin()) + ", " + QString::number(gTransferFunction.GetRangeMax()) + "]";
 
 	// Configure y-axis label
-	m_AxisLabelY->setRect(QRectF(0, 0, CanvasRect.height(), 8));
+	m_AxisLabelY->setRect(QRectF(0, 0, CanvasRect.height(), 9));
 	m_AxisLabelY->setPos(0, m_MarginTop + CanvasRect.height());
 	m_AxisLabelY->setRotation(-90.0f);
 	m_AxisLabelY->m_Text = "Opacity (%): [0 - 100]";

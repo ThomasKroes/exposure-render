@@ -2,13 +2,7 @@
 
 #include <QtGui>
 
-#include "TransferFunction.h"
-
-class QTransferFunction;
-class QTransferFunctionView;
-class QGradientView;
-class QNodeItem;
-class QNodePropertiesWidget;
+#include "TransferFunctionView.h"
 
 class QTransferFunctionWidget : public QGroupBox
 {
@@ -17,8 +11,9 @@ class QTransferFunctionWidget : public QGroupBox
 public:
     QTransferFunctionWidget(QWidget* pParent = NULL);
 
+	virtual QSize sizeHint() const { return QSize(10, 300); }
+
 protected:
-	QGridLayout*				m_pMainLayout;
-	QTransferFunction*			m_pTransferFunction;
-	QTransferFunctionView*		m_pTransferFunctionView;
+	QGridLayout				m_MainLayout;
+	QTransferFunctionView	m_TransferFunctionView;
 };

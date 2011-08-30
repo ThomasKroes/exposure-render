@@ -20,7 +20,7 @@ public:
 	virtual void QAxisLabel::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL)
     {
 		pPainter->setPen(QColor(50, 50, 50));
-        pPainter->setFont(QFont("Arial", 7, 2));
+        pPainter->setFont(QFont("Arial", 7));
         pPainter->drawText(rect(), Qt::AlignCenter, m_Text);
     }
 
@@ -32,7 +32,7 @@ class QTransferFunctionView : public QGraphicsView
     Q_OBJECT
 
 public:
-    QTransferFunctionView(QWidget* pParent);
+    QTransferFunctionView(QWidget* pParent = NULL);
 
 	void drawBackground(QPainter* pPainter, const QRectF& Rectangle);
 	void resizeEvent(QResizeEvent* pResizeEvent);

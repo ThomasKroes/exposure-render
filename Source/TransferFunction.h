@@ -45,21 +45,22 @@ public:
 	
 	QNode& operator = (const QNode& Other)			
 	{
-		m_Intensity	= Other.m_Intensity;
-		m_Opacity	= Other.m_Opacity;
-		m_Color		= Other.m_Color;
-		m_MinX		= Other.m_MinX;
-		m_MaxX		= Other.m_MaxX;
-		m_MinY		= Other.m_MinY;
-		m_MaxY		= Other.m_MaxY;
-		m_GUID		= Other.m_GUID;
+		m_pTransferFunction	= Other.m_pTransferFunction;
+		m_Intensity			= Other.m_Intensity;
+		m_Opacity			= Other.m_Opacity;
+		m_Color				= Other.m_Color;
+		m_MinX				= Other.m_MinX;
+		m_MaxX				= Other.m_MaxX;
+		m_MinY				= Other.m_MinY;
+		m_MaxY				= Other.m_MaxY;
+		m_ID				= Other.m_ID;
 
 		return *this;
 	}
 
 	bool operator == (const QNode& Other) const
 	{
-		return GetGUID() == Other.GetGUID();
+		return m_ID == Other.m_ID;
 	}
 
 	float	GetNormalizedIntensity(void) const;
@@ -81,7 +82,7 @@ public:
 	float	GetMaxY(void) const;
 	void	SetMaxY(const float& MaxY);
 	bool	InRange(const QPointF& Point);
-	QString	GetGUID(void) const;
+	int		GetID(void) const;
 	void	ReadXML(QDomElement& Parent);
 	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
@@ -92,7 +93,7 @@ signals:
 	void ColorChanged(QNode* pNode);
 	void RangeChanged(QNode* pNode);
 
-private:
+protected:
 	QTransferFunction*	m_pTransferFunction;
 	float				m_Intensity;
 	float				m_Opacity;
@@ -101,7 +102,9 @@ private:
 	float				m_MaxX;
 	float				m_MinY;
 	float				m_MaxY;
-	QUuid				m_GUID;
+	int					m_ID;
+
+	friend class QTransferFunction;
 };
 
 typedef QList<QNode> QNodeList;
@@ -118,29 +121,8 @@ public:
 		*this = Other;
 	};
 
-	QTransferFunction& operator = (const QTransferFunction& Other)			
-	{
-		blockSignals(true);
-
-		m_Name			= Other.m_Name;
-		m_Nodes			= Other.m_Nodes;
-		m_RangeMin		= Other.m_RangeMin;
-		m_RangeMax		= Other.m_RangeMax;
-		m_Range			= Other.m_Range;
-		m_pSelectedNode	= Other.m_pSelectedNode;
-		m_Histogram		= Other.m_Histogram;
-
-		blockSignals(true);
-
-		// Notify others that the function has changed selection has changed
-		emit FunctionChanged();
-
-		// Notify others that our selection has changed
-		emit SelectionChanged(m_pSelectedNode);
-
-		return *this;
-	}
-
+	QTransferFunction& operator = (const QTransferFunction& Other);			
+	
 	void				AddNode(const float& Position, const float& Opacity, const QColor& Color);
 	void				AddNode(const QNode& pNode);
 	void				RemoveNode(QNode* pNode);
@@ -170,10 +152,9 @@ private slots:
 
 signals:
 	void	FunctionChanged(void);
-	void	NodeAdd(QNode* pNode);
-	void	NodeRemove(QNode* pNode);
-	void	NodeRemoved(QNode* pNode);
 	void	SelectionChanged(QNode* pNode);
+	void	NodeCountChange();
+	void	NodeCountChanged();
 	void	HistogramChanged(void);
 
 protected:
@@ -188,7 +169,7 @@ protected:
 	friend class QNode;
 };
 
-Q_DECLARE_METATYPE(QTransferFunction)
+typedef QList<QTransferFunction> QTransferFunctionList;
 
 // Transfer function singleton
 extern QTransferFunction gTransferFunction;
