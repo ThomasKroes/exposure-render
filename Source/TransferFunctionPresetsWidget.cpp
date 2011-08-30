@@ -13,11 +13,7 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 	m_PresetList(),
 	m_TransferFunctions()
 {
-	// Dimensions
-//	setFixedHeight(300);
-//	setFixedWidth(250);
-
-	// Set size policy to minimum
+	// Set the size policy, making sure the widget fits nicely in the layout
 //	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
 	// Title, status and tooltip

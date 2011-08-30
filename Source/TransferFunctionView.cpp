@@ -18,10 +18,8 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_AxisLabelX(NULL),
 	m_AxisLabelY(NULL)
 {
+	// Set the size policy, making sure the widget fits nicely in the layout
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-	// Dimensions
-//	setFixedHeight(300);
 
 	// Styling
 	setFrameShadow(Sunken);
