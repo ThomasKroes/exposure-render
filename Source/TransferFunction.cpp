@@ -383,6 +383,10 @@ void QTransferFunction::AddNode(const QNode& Node)
 	// Sort the transfer function nodes based on intensity
 	qSort(m_Nodes.begin(), m_Nodes.end(), CompareNodes);
 
+	// Update ID's
+	for (int i = 0; i < m_Nodes.size(); i++)
+		m_Nodes[i].m_ID = i;
+
 	// Notify us when the node changes
 	connect(&CacheNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 
@@ -411,6 +415,10 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 
 	// Remove from list and memory
 	m_Nodes.remove(*pNode);
+
+	// Update ID's
+	for (int i = 0; i < m_Nodes.size(); i++)
+		m_Nodes[i].m_ID = i;
 
 	// Update node's range
 	UpdateNodeRanges();
@@ -450,9 +458,6 @@ void QTransferFunction::UpdateNodeRanges(void)
 			Node.SetMaxX(NodeRight.GetIntensity());
 		}
 	}
-
-	for (int i = 0; i < m_Nodes.size(); i++)
-		m_Nodes[i].m_ID = i;
 
 //	qDebug("Updated node ranges");
 }
