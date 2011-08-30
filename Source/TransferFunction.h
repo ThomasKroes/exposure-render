@@ -110,13 +110,23 @@ public:
 
 	QTransferFunction& operator = (const QTransferFunction& Other)			
 	{
-		m_Name				= Other.m_Name;
-		m_Nodes				= Other.m_Nodes;
-		m_RangeMin			= Other.m_RangeMin;
-		m_RangeMax			= Other.m_RangeMax;
-		m_Range				= Other.m_Range;
-		m_pSelectedNode		= Other.m_pSelectedNode;
-		m_Histogram			= Other.m_Histogram;
+		blockSignals(true);
+
+		m_Name			= Other.m_Name;
+		m_Nodes			= Other.m_Nodes;
+		m_RangeMin		= Other.m_RangeMin;
+		m_RangeMax		= Other.m_RangeMax;
+		m_Range			= Other.m_Range;
+		m_pSelectedNode	= Other.m_pSelectedNode;
+		m_Histogram		= Other.m_Histogram;
+
+		blockSignals(true);
+
+		// Notify others that the function has changed selection has changed
+		emit FunctionChanged();
+
+		// Notify others that our selection has changed
+		emit SelectionChanged(m_pSelectedNode);
 
 		return *this;
 	}

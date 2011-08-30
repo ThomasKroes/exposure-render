@@ -201,6 +201,7 @@ void CMainWindow::CreateDockWindows()
 
 	// Statistics dock widget
 	m_StatisticsDockWidget.setParent(this);
+	m_StatisticsDockWidget.setVisible(false);
 	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::LeftDockWidgetArea, &m_StatisticsDockWidget);
     m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());

@@ -137,15 +137,15 @@ bool QNode::InRange(const QPointF& Point)
 
 void QNode::ReadXML(QDomElement& Parent)
 {
-	m_Position = Parent.firstChildElement("Intensity").nodeValue().toFloat();
+	const float NormalizedIntensity = Parent.firstChildElement("Intensity").nodeValue().toFloat();
+
+	m_Position = m_pTransferFunction->m_RangeMin + NormalizedIntensity * m_pTransferFunction->m_Range;
 	
 	QDomElement Kd = Parent.firstChildElement("Kd");
 
 	m_Color.setRed(Kd.attribute("R").toInt());
 	m_Color.setGreen(Kd.attribute("G").toInt());
 	m_Color.setBlue(Kd.attribute("B").toInt());
-
-	
 }
 
 void QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -371,6 +371,11 @@ void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
 
 void QTransferFunction::ReadXML(QDomElement& Parent)
 {
+	m_Name		= Parent.attribute("Name", "Failed");
+	m_RangeMin	= Parent.attribute("RangeMin", "Failed").toFloat();
+	m_RangeMax	= Parent.attribute("RangeMax", "Failed").toFloat();
+	m_Range		= Parent.attribute("Range", "Failed").toFloat();
+
 	// Read child nodes
 	for (int i = 0; i < Parent.childNodes().count(); i++)
 	{
@@ -389,6 +394,9 @@ void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	Parent.appendChild(Root);
 
 	Root.setAttribute("Name", m_Name);
+	Root.setAttribute("RangeMin", m_RangeMin);
+	Root.setAttribute("RangeMax", m_RangeMax);
+	Root.setAttribute("Range", m_Range);
 
 	// Nodes
 	QDomElement Nodes = DOM.createElement("Nodes");
