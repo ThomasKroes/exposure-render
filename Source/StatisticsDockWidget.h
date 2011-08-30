@@ -2,12 +2,12 @@
 
 #include <QtGui>
 
-class CStatisticsWidget : public QWidget
+class QStatisticsWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    CStatisticsWidget(QWidget* pParent = NULL);
+    QStatisticsWidget(QWidget* pParent = NULL);
 
 private slots:
 	void update(void);
@@ -50,13 +50,13 @@ private:
 	QLabel*			m_pDensityRange;
 };
 
-class CStatisticsDockWidget : public QDockWidget
+class QStatisticsDockWidget : public QDockWidget
 {
     Q_OBJECT
 
 public:
-    CStatisticsDockWidget(QWidget* pParent = 0);
+    QStatisticsDockWidget(QWidget* pParent = 0);
 
 private:
-	CStatisticsWidget*	m_pStatisticsWidget;
+	QStatisticsWidget	m_StatisticsWidget;
 };

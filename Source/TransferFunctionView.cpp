@@ -38,7 +38,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	setScene(m_pGraphicsScene);
 
 	// Turn antialiasing on
-//	setRenderHint(QPainter::Antialiasing);
+	setRenderHint(QPainter::Antialiasing);
 
 	// Respond to changes in the transfer function
 	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
@@ -141,6 +141,7 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 
 	m_pTransferFunctionCanvas->setRect(CanvasRect);
 	m_pTransferFunctionCanvas->Update();
+	m_pTransferFunctionCanvas->UpdateGrid();
 	m_pTransferFunctionCanvas->UpdateHistogram();
 
 	// Update transfer function gradient

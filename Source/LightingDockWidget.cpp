@@ -298,7 +298,7 @@ void CLightingWidget::SetHeight(const int& Height)
 	gpScene->m_DirtyFlags.SetFlag(LightsDirty);
 }
 
-CLightingDockWidget::CLightingDockWidget(QWidget* pParent) :
+QLightingDockWidget::QLightingDockWidget(QWidget* pParent) :
 	QDockWidget(pParent),
 	m_pLightingWidget(NULL)
 {

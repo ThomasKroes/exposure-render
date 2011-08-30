@@ -2,7 +2,7 @@
 #include "StatisticsDockWidget.h"
 #include "MainWindow.h"
 
-CStatisticsWidget::CStatisticsWidget(QWidget* pParent) :
+QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_pMainLayout(NULL),
 	m_pPerformanceGroupBox(NULL),
@@ -206,11 +206,11 @@ CStatisticsWidget::CStatisticsWidget(QWidget* pParent) :
 	m_Timer.start(10.0);
 }
 
-void CStatisticsWidget::Default(void)
+void QStatisticsWidget::Default(void)
 {
 }
 
-void CStatisticsWidget::update(void)
+void QStatisticsWidget::update(void)
 {
 	if (gpRenderThread && gpRenderThread->Loaded())
 	{
@@ -244,14 +244,12 @@ void CStatisticsWidget::update(void)
 	QWidget::update();
 }
 
-CStatisticsDockWidget::CStatisticsDockWidget(QWidget* pParent) :
+QStatisticsDockWidget::QStatisticsDockWidget(QWidget* pParent) :
 	QDockWidget(pParent),
-	m_pStatisticsWidget(NULL)
+	m_StatisticsWidget()
 {
 	setWindowTitle("Statistics");
 	setToolTip("Rendering statistics");
 
-	m_pStatisticsWidget = new CStatisticsWidget(this);
-
-	setWidget(m_pStatisticsWidget);
+	setWidget(&m_StatisticsWidget);
 }

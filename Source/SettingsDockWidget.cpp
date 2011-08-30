@@ -215,7 +215,7 @@ CSettingsWidget::CSettingsWidget(QWidget* pParent) :
 	m_pMainLayout->addWidget(m_pKernelSettingsWidget);
 }
 
-CSettingsDockWidget::CSettingsDockWidget(QWidget* pParent) :
+QSettingsDockWidget::QSettingsDockWidget(QWidget* pParent) :
 	QDockWidget(pParent),
 	m_pSettingsWidget(NULL)
 {

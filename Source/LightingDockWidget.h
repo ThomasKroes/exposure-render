@@ -59,12 +59,12 @@ protected:
 	QAction*		m_pSaveLightsAction;
 };
 
-class CLightingDockWidget : public QDockWidget
+class QLightingDockWidget : public QDockWidget
 {
     Q_OBJECT
 
 public:
-    CLightingDockWidget(QWidget *parent = 0);
+    QLightingDockWidget(QWidget *parent = 0);
 
 private:
 	CLightingWidget*	m_pLightingWidget;

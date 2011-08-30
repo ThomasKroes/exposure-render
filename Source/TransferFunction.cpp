@@ -135,6 +135,52 @@ bool QNode::InRange(const QPointF& Point)
 	return Point.x() >= m_MinX && Point.x() <= m_MaxX && Point.y() >= m_MinY && Point.y() <= m_MaxY;
 }
 
+void QNode::ReadXML(QDomElement& Parent)
+{
+	m_Position = Parent.firstChildElement("Intensity").nodeValue().toFloat();
+	
+	QDomElement Kd = Parent.firstChildElement("Kd");
+
+	m_Color.setRed(Kd.attribute("R").toInt());
+	m_Color.setGreen(Kd.attribute("G").toInt());
+	m_Color.setBlue(Kd.attribute("B").toInt());
+
+	
+}
+
+void QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+{
+	// Node
+	QDomElement Node = DOM.createElement("Node");
+	Parent.appendChild(Node);
+
+	// Intensity
+	QDomElement Intensity = DOM.createElement("Intensity");
+	Intensity.setAttribute("Value", m_Position);
+	Node.appendChild(Intensity);
+
+	// Kd
+	QDomElement Kd = DOM.createElement("Kd");
+	Kd.setAttribute("R", m_Color.red());
+	Kd.setAttribute("G", m_Color.green());
+	Kd.setAttribute("B", m_Color.blue());
+	Node.appendChild(Kd);
+
+	// Kt
+	QDomElement Kt = DOM.createElement("Kt");
+	Kt.setAttribute("R", m_Color.red());
+	Kt.setAttribute("G", m_Color.green());
+	Kt.setAttribute("B", m_Color.blue());
+	Node.appendChild(Kt);
+
+	// Ks
+	QDomElement Ks = DOM.createElement("Ks");
+	Ks.setAttribute("R", m_Color.red());
+	Ks.setAttribute("G", m_Color.green());
+	Ks.setAttribute("B", m_Color.blue());
+	Node.appendChild(Ks);
+}
+
 QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	QObject(pParent),
 	m_Name(Name),
@@ -146,6 +192,9 @@ QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	m_Histogram()
 {
 	blockSignals(true);
+
+	AddNode(0.0f, 0.0f, Qt::black);
+	AddNode(1.0f, 1.0f, Qt::white);
 
 	blockSignals(false);
 }
@@ -318,4 +367,35 @@ void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
 
 	// Inform other that the histogram has changed
 	emit HistogramChanged();
+}
+
+void QTransferFunction::ReadXML(QDomElement& Parent)
+{
+	// Read child nodes
+	for (int i = 0; i < Parent.childNodes().count(); i++)
+	{
+		// Create new node
+		QNode Node(this);
+
+		// Load preset into it
+		Node.ReadXML(Parent.childNodes().at(i).toElement());
+	}
+}
+
+void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+{
+	// Create transfer function preset root element
+	QDomElement Root = DOM.createElement("Preset");
+	Parent.appendChild(Root);
+
+	Root.setAttribute("Name", m_Name);
+
+	// Nodes
+	QDomElement Nodes = DOM.createElement("Nodes");
+	Root.appendChild(Nodes);
+
+	foreach (QNode* pNode, m_Nodes)
+	{
+		pNode->WriteXML(DOM, Nodes);
+	}
 }

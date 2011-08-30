@@ -295,7 +295,7 @@ CCameraWidget::CCameraWidget(QWidget* pParent) :
 	m_pMainLayout->addWidget(m_pFocusWidget);
 }
 
-CCameraDockWidget::CCameraDockWidget(QWidget* pParent) :
+QCameraDockWidget::QCameraDockWidget(QWidget* pParent) :
 	QDockWidget(pParent),
 	m_pCameraWidget(NULL)
 {

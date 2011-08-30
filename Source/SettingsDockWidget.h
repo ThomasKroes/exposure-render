@@ -62,12 +62,12 @@ private:
 	CKernelSettingsWidget*		m_pKernelSettingsWidget;
 };
 
-class CSettingsDockWidget : public QDockWidget
+class QSettingsDockWidget : public QDockWidget
 {
 	Q_OBJECT
 
 public:
-    CSettingsDockWidget(QWidget* pParent = NULL);
+    QSettingsDockWidget(QWidget* pParent = NULL);
 
 private:
 	

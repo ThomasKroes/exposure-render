@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+#include <QtXml\qdom.h>
+
 class QTransferFunction;
 
 class QHistogram : public QGraphicsPolygonItem
@@ -39,8 +41,8 @@ public:
 		*this = Other;
 	};
 
-	QNode(QTransferFunction* pTransferFunction, const float& Position, const float& Opacity, const QColor& Color);
-
+	QNode(QTransferFunction* pTransferFunction, const float& Position = 0.0f, const float& Opacity = 0.0f, const QColor& Color = Qt::black);
+	
 	QNode& operator = (const QNode& Other)			
 	{
 		m_Position	= Other.m_Position;
@@ -73,6 +75,8 @@ public:
 	float	GetMaxY(void) const;
 	void	SetMaxY(const float& MaxY);
 	bool	InRange(const QPointF& Point);
+	void	ReadXML(QDomElement& Parent);
+	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
 	void NodeChanged(QNode* pNode);
@@ -129,6 +133,8 @@ public:
 	int		GetNodeIndex(QNode* pNode);
 	void	UpdateNodeRanges(void);
 	void	SetHistogram(const int* pBins, const int& NoBins);
+	void	ReadXML(QDomElement& Parent);
+	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);

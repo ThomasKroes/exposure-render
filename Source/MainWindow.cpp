@@ -2,12 +2,7 @@
 #include <QtGui>
 
 #include "MainWindow.h"
-#include "TransferFunctionWidget.h"
-#include "LightingDockWidget.h"
-#include "VolumeAppearanceDockWidget.h"
-#include "StatisticsDockWidget.h"
-#include "CameraDockWidget.h"
-#include "SettingsDockWidget.h"
+
 #include "VtkWidget.h"
 #include "LoadVolume.h"
 
@@ -69,11 +64,11 @@ CMainWindow::CMainWindow() :
     m_pHelpMenu(NULL),
     m_pFileToolBar(NULL),
 	m_pVtkWidget(NULL),
-	m_pLightingDockWidget(NULL),
-	m_pVolumeAppearanceDockWidget(NULL),
-	m_pStatisticsDockWidget(NULL),
-	m_pCameraDockWidget(NULL),
-	m_pSettingsDockWidget(NULL),
+	m_LightingDockWidget(),
+	m_VolumeAppearanceDockWidget(),
+	m_StatisticsDockWidget(),
+	m_CameraDockWidget(),
+	m_SettingsDockWidget(),
     m_pOpenAct(NULL),
 	m_pCloseAct(NULL),
     m_pExitAct(NULL),
@@ -193,34 +188,34 @@ void CMainWindow::CreateStatusBar()
 void CMainWindow::CreateDockWindows()
 {
 	// Lighting dock widget
-    m_pLightingDockWidget = new CLightingDockWidget(this);
-    m_pLightingDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::RightDockWidgetArea, m_pLightingDockWidget);
-    m_pViewMenu->addAction(m_pLightingDockWidget->toggleViewAction());
+    m_LightingDockWidget.setParent(this);
+    m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::RightDockWidgetArea, &m_LightingDockWidget);
+    m_pViewMenu->addAction(m_LightingDockWidget.toggleViewAction());
 
 	// Appearance dock widget
-    m_pVolumeAppearanceDockWidget = new QVolumeAppearanceDockWidget(this);
-	m_pVolumeAppearanceDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-	addDockWidget(Qt::LeftDockWidgetArea, m_pVolumeAppearanceDockWidget);
-    m_pViewMenu->addAction(m_pVolumeAppearanceDockWidget->toggleViewAction());
+	m_VolumeAppearanceDockWidget.setParent(this);
+	m_VolumeAppearanceDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::LeftDockWidgetArea, &m_VolumeAppearanceDockWidget);
+    m_pViewMenu->addAction(m_VolumeAppearanceDockWidget.toggleViewAction());
 
 	// Statistics dock widget
-    m_pStatisticsDockWidget = new CStatisticsDockWidget(this);
-	m_pStatisticsDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::LeftDockWidgetArea, m_pStatisticsDockWidget);
-    m_pViewMenu->addAction(m_pStatisticsDockWidget->toggleViewAction());
+	m_StatisticsDockWidget.setParent(this);
+	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::LeftDockWidgetArea, &m_StatisticsDockWidget);
+    m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());
 
 	// Camera dock widget
-    m_pCameraDockWidget = new CCameraDockWidget(this);
-	m_pCameraDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    addDockWidget(Qt::RightDockWidgetArea, m_pCameraDockWidget);
-    m_pViewMenu->addAction(m_pCameraDockWidget->toggleViewAction());
+    m_CameraDockWidget.setParent(this);
+	m_CameraDockWidget.setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    addDockWidget(Qt::RightDockWidgetArea, &m_CameraDockWidget);
+    m_pViewMenu->addAction(m_CameraDockWidget.toggleViewAction());
 
 	// Settings dock widget
-    m_pSettingsDockWidget = new CSettingsDockWidget(this);
-	m_pSettingsDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::RightDockWidgetArea, m_pSettingsDockWidget);
-    m_pViewMenu->addAction(m_pSettingsDockWidget->toggleViewAction());
+    m_SettingsDockWidget.setParent(this);
+	m_SettingsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::RightDockWidgetArea, &m_SettingsDockWidget);
+    m_pViewMenu->addAction(m_SettingsDockWidget.toggleViewAction());
 }
 
 void CMainWindow::UpdateRecentFileActions(void)

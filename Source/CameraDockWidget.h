@@ -94,12 +94,12 @@ private:
 	CFocusWidget*		m_pFocusWidget;
 };
 
-class CCameraDockWidget : public QDockWidget
+class QCameraDockWidget : public QDockWidget
 {
     Q_OBJECT
 
 public:
-    CCameraDockWidget(QWidget* pParent = NULL);
+    QCameraDockWidget(QWidget* pParent = NULL);
 
 private:
 	CCameraWidget*	m_pCameraWidget;

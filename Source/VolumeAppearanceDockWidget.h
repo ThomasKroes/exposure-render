@@ -2,10 +2,11 @@
 
 #include <QtGui>
 
+#include "TransferFunctionWidget.h"
+#include "TransferFunctionPresetsWidget.h"
+#include "NodePropertiesWidget.h"
+
 class QVolumeAppearanceDockWidget;
-class QTransferFunctionWidget;
-class QTransferFunctionPresetsWidget;
-class QNodePropertiesWidget;
 
 class QVolumeAppearanceWidget : public QWidget
 {
@@ -15,10 +16,10 @@ public:
     QVolumeAppearanceWidget(QWidget* pParent = NULL);
 
 protected:
-	QGridLayout*						m_pMainLayout;
-	QTransferFunctionWidget*			m_pTransferFunctionWidget;
-	QTransferFunctionPresetsWidget*		m_pVolumeAppearancePresetsWidget;
-	QNodePropertiesWidget*				m_pNodePropertiesWidget;
+	QGridLayout							m_MainLayout;
+	QTransferFunctionWidget				m_TransferFunctionWidget;
+	QTransferFunctionPresetsWidget		m_VolumeAppearancePresetsWidget;
+	QNodePropertiesWidget				m_NodePropertiesWidget;
 };
 
 class QVolumeAppearanceDockWidget : public QDockWidget
@@ -29,5 +30,5 @@ public:
     QVolumeAppearanceDockWidget(QWidget* pParent = NULL);
 
 protected:
-	QVolumeAppearanceWidget*	m_pVolumeAppearanceWidget;
+	QVolumeAppearanceWidget		m_VolumeAppearanceWidget;
 };

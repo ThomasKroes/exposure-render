@@ -1,43 +1,39 @@
 
 #include "VolumeAppearanceDockWidget.h"
-#include "TransferFunctionPresetsWidget.h"
-#include "TransferFunctionWidget.h"
-#include "NodePropertiesWidget.h"
 #include "MainWindow.h"
 
 QVolumeAppearanceWidget::QVolumeAppearanceWidget(QWidget* pParent) :
 	QWidget(pParent),
-	m_pMainLayout(NULL),
-	m_pVolumeAppearancePresetsWidget(NULL),
-	m_pTransferFunctionWidget(NULL),
-	m_pNodePropertiesWidget(NULL)
+	m_MainLayout(),
+	m_VolumeAppearancePresetsWidget(),
+	m_TransferFunctionWidget(),
+	m_NodePropertiesWidget()
 {
-	// Create vertical layout
-	m_pMainLayout = new QGridLayout();
-	m_pMainLayout->setAlignment(Qt::AlignTop);
-	setLayout(m_pMainLayout);
+	// Create main layout
+	m_MainLayout.setAlignment(Qt::AlignTop);
+	setLayout(&m_MainLayout);
 
 	// Transfer function widget
-	m_pTransferFunctionWidget = new QTransferFunctionWidget(this);
-	m_pMainLayout->addWidget(m_pTransferFunctionWidget, 0, 0, 1, 2);
+	m_TransferFunctionWidget.setParent(this);
+	m_MainLayout.addWidget(&m_TransferFunctionWidget, 0, 0, 1, 2);
 	
 	// Volume appearance presets widget
-	m_pVolumeAppearancePresetsWidget = new QTransferFunctionPresetsWidget(this);
-	m_pMainLayout->addWidget(m_pVolumeAppearancePresetsWidget, 1, 0);
+	m_VolumeAppearancePresetsWidget.setParent(this);
+	m_MainLayout.addWidget(&m_VolumeAppearancePresetsWidget, 1, 0);
 
 	// Node properties widget
-	m_pNodePropertiesWidget = new QNodePropertiesWidget(this);
-	m_pMainLayout->addWidget(m_pNodePropertiesWidget, 1, 1);
+	m_NodePropertiesWidget.setParent(this);
+	m_MainLayout.addWidget(&m_NodePropertiesWidget, 1, 1);
 }
 
 QVolumeAppearanceDockWidget::QVolumeAppearanceDockWidget(QWidget *parent) :
 	QDockWidget(parent),
-	m_pVolumeAppearanceWidget(NULL)
+	m_VolumeAppearanceWidget()
 {
 	setWindowTitle("Appearance");
 	setToolTip("Volume Appearance");
 
-	m_pVolumeAppearanceWidget = new QVolumeAppearanceWidget(this);
+	m_VolumeAppearanceWidget.setParent(this);
 
-	setWidget(m_pVolumeAppearanceWidget);
+	setWidget(&m_VolumeAppearanceWidget);
 }

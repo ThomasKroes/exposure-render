@@ -8,8 +8,6 @@
 
 int main(int ArgumentCount, char* pArgv[])
 {
-	qRegisterMetaType<QTransferFunction>("QTransferFunction");
-
 	// Create the application
     QApplication Application(ArgumentCount, pArgv);
 
@@ -23,6 +21,8 @@ int main(int ArgumentCount, char* pArgv[])
     gpMainWindow->show();
 
 	int Result = Application.exec();
+
+	delete gpMainWindow;
 
 	// Remove render thread
 	if (gpRenderThread)

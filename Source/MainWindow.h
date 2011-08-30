@@ -22,6 +22,13 @@
 // Render thread
 #include "RenderThread.h"
 
+// Dock widgets
+#include "LightingDockWidget.h"
+#include "VolumeAppearanceDockWidget.h"
+#include "StatisticsDockWidget.h"
+#include "CameraDockWidget.h"
+#include "SettingsDockWidget.h"
+
 // Render thread
 extern CRenderThread* gpRenderThread;
 
@@ -85,11 +92,11 @@ private:
 	CVtkWidget*							m_pVtkWidget;
 
 	// Dock widgets
-	QDockWidget*						m_pLightingDockWidget;
-	QDockWidget*						m_pVolumeAppearanceDockWidget;
-	QDockWidget*						m_pStatisticsDockWidget;
-	QDockWidget*						m_pCameraDockWidget;
-	QDockWidget*						m_pSettingsDockWidget;
+	QLightingDockWidget					m_LightingDockWidget;
+	QVolumeAppearanceDockWidget			m_VolumeAppearanceDockWidget;
+	QStatisticsDockWidget				m_StatisticsDockWidget;
+	QCameraDockWidget					m_CameraDockWidget;
+	QSettingsDockWidget					m_SettingsDockWidget;
 
 	// Actions
     QAction*							m_pOpenAct;

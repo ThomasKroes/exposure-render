@@ -11,7 +11,7 @@ class QNodePropertiesWidget : public QGroupBox
     Q_OBJECT
 
 public:
-	QNodePropertiesWidget(QWidget* pParent);
+	QNodePropertiesWidget(QWidget* pParent = NULL);
 
 private slots:
 	void OnNodeSelectionChanged(QNode* pNode);
