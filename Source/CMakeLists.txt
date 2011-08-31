@@ -50,6 +50,7 @@ SET(SimpleViewSrcs
 	Statistics.cpp
 	VolumePoint.cpp
 	StatisticsDockWidget.cpp
+	StatisticsWidget.cpp
 	CameraDockWidget.cpp
 	LoadVolume.cpp
 	InteractorStyleRealisticCamera.cpp
@@ -94,6 +95,7 @@ SET(SimpleViewHeaders
 	Statistics.h
 	VolumePoint.h
 	StatisticsDockWidget.h
+	StatisticsWidget.h
 	CameraDockWidget.h
 	LoadVolume.h
 	InteractorStyleRealisticCamera.h

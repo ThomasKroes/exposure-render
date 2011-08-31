@@ -56,6 +56,10 @@ private slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
 	
+signals:
+	void RenderBegin(void);
+	void RenderEnd(void);
+
 private:
     void								CreateActions(void);
     void								CreateMenus(void);

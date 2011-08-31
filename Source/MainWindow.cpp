@@ -77,6 +77,9 @@ CMainWindow::CMainWindow() :
 	m_pSeparatorAction(NULL),
 	m_Timer()
 {
+	// Set singleton pointer
+	gpMainWindow = this;
+
 	// Create VTK rendering window
 	m_pVtkWidget = new CVtkWidget();
 	setCentralWidget(m_pVtkWidget);
@@ -202,6 +205,7 @@ void CMainWindow::CreateDockWindows()
     m_pViewMenu->addAction(m_VolumeAppearanceDockWidget.toggleViewAction());
 
 	// Statistics dock widget
+	m_StatisticsDockWidget.Init();
 	m_StatisticsDockWidget.setParent(this);
 	m_StatisticsDockWidget.setEnabled(false);
 	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -323,10 +327,9 @@ void CMainWindow::LoadFile(const QString& FileName)
 	gThreadAlive = true;
 	gpRenderThread->start();
 
+	// Let us know when the rendering begins and ends
 	connect(gpRenderThread, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-//	gpRenderThread->setPriority(QThread::Priority::LowestPriority);
-
-	
+	connect(gpRenderThread, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 }
 
 void CMainWindow::SetupRenderView(void)
@@ -424,13 +427,9 @@ void CMainWindow::Exit()
 
 void CMainWindow::About()
 {
-	QColorDialog Dia(this);
-
-	Dia.exec();
-
- //  QMessageBox::about(this, tr("About Exposure Render"),
- //           tr("This application illustrates the concepts from the paper: <b>Raytraced lighting in direct volume rendering</b>\n"
-	//		"For more information visit: <b>graphics.tudelft.nl</b>"));
+	QMessageBox::about(this, tr("About Exposure Render"),
+		tr("This application illustrates the concepts from the paper: <b>Raytraced lighting in direct volume rendering</b>\n"
+		"For more information visit: <b>graphics.tudelft.nl</b>"));
 }
 
 void CMainWindow::OnRenderBegin(void)
@@ -442,6 +441,8 @@ void CMainWindow::OnRenderBegin(void)
 	m_StatisticsDockWidget.setEnabled(true);
 	m_CameraDockWidget.setEnabled(true);
 	m_SettingsDockWidget.setEnabled(true);
+
+	emit RenderBegin();
 }
 
 void CMainWindow::OnRenderEnd(void)
@@ -453,4 +454,6 @@ void CMainWindow::OnRenderEnd(void)
 	m_StatisticsDockWidget.setEnabled(false);
 	m_CameraDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setEnabled(false);
+
+	emit RenderEnd();
 }
