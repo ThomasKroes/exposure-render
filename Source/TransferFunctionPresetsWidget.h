@@ -46,7 +46,7 @@ protected slots:
 	void OnPresetItemChanged(QListWidgetItem* pWidgetItem);
 
 protected:
-	QGridLayout				m_GridLayout;
+	QGridLayout				m_MainLayout;
 	QLineEdit				m_PresetName;
 	QPushButton				m_LoadPreset;
 	QPushButton				m_SavePreset;

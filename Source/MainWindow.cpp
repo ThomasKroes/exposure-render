@@ -189,7 +189,7 @@ void CMainWindow::CreateDockWindows()
 {
 	// Lighting dock widget
     m_LightingDockWidget.setParent(this);
-	m_LightingDockWidget.setEnabled(false);
+	m_LightingDockWidget.setEnabled(true);
     m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_LightingDockWidget);
     m_pViewMenu->addAction(m_LightingDockWidget.toggleViewAction());

@@ -9,15 +9,10 @@ class CVtkWidget : public QWidget
 
 public:
     CVtkWidget(QWidget* pParent = NULL);
-	QVTKWidget* GetQtVtkWidget(void) { return m_pQtVtkWidget; };
+	
+	QVTKWidget*		GetQtVtkWidget(void);
 
 private:
-	QVTKWidget*		m_pQtVtkWidget;
-	QVBoxLayout*	m_pMainLayout;
-	QHBoxLayout*	m_pTopLayout;
-	QHBoxLayout*	m_pBottomLayout;
-
-	QLabel*			m_pZoomLabel;
-	QSlider*		m_pZoomSlider;
-	QComboBox*		m_pZoomComboBox;
+	QGridLayout		m_MainLayout;
+	QVTKWidget		m_QtVtkWidget;
 };

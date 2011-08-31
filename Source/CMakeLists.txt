@@ -33,8 +33,12 @@ INCLUDE_DIRECTORIES(
 # Set your files and resources here  
 SET(SimpleViewSrcs 
 	Main.cpp 
-	MainWindow.cpp 
+	MainWindow.cpp
+	LightingSettingsWidget.cpp 
 	LightingDockWidget.cpp 
+	LightsWidget.cpp
+	LightingPresetsWidget.cpp
+	LightingWidget.cpp
 	Camera.cpp
 	Filter.cpp
 	Flags.cpp
@@ -44,7 +48,6 @@ SET(SimpleViewSrcs
 	Random.cpp
 	Spectrum.cpp
 	Statistics.cpp
-	Volume.cpp
 	VolumePoint.cpp
 	StatisticsDockWidget.cpp
 	CameraDockWidget.cpp
@@ -61,7 +64,7 @@ SET(SimpleViewSrcs
 	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
 	TransferFunctionPresetsWidget.cpp
-	TransferFunctionGradient.cpp
+	#TransferFunctionGradient.cpp
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
 	NodeItem.cpp
@@ -70,8 +73,12 @@ SET(SimpleViewSrcs
 
 SET(SimpleViewUI SimpleView.ui)
 SET(SimpleViewHeaders 
-	MainWindow.h 
-	LightingDockWidget.h 
+	MainWindow.h
+	LightingSettingsWidget.h
+	LightingDockWidget.h
+	LightsWidget.h
+	LightingPresetsWidget.h
+	LightingWidget.h
 	Camera.h
 	Defines.h
 	Dll.h
@@ -101,7 +108,7 @@ SET(SimpleViewHeaders
 	TransferFunctionCanvas.h
 	TransferFunctionView.h
 	TransferFunctionPresetsWidget.h
-	TransferFunctionGradient.h
+	#TransferFunctionGradient.h
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
 	NodeItem.h

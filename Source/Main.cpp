@@ -14,7 +14,7 @@ int main(int ArgumentCount, char* pArgv[])
 	// Adjust style
 	Application.setStyle("plastique");
 	Application.setOrganizationName("TU Delft");
-	Application.setApplicationName("RealVol");
+	Application.setApplicationName("Exposure");
 
 	// Show the main window
 	gpMainWindow = new CMainWindow();

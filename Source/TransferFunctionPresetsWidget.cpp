@@ -3,7 +3,7 @@
 
 QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
-	m_GridLayout(),
+	m_MainLayout(),
 	m_PresetName(),
 	m_LoadPreset(),
 	m_SavePreset(),
@@ -34,11 +34,9 @@ QTransferFunctionPresetsWidget::~QTransferFunctionPresetsWidget(void)
 
 void QTransferFunctionPresetsWidget::CreateUI(void)
 {
-	// Create grid layout
-	m_GridLayout.setAlignment(Qt::AlignTop);
-
 	// Assign layout
-	setLayout(&m_GridLayout);
+	m_MainLayout.setAlignment(Qt::AlignTop);
+	setLayout(&m_MainLayout);
 
 	// Presets list
 	m_PresetList.setParent(this);
@@ -46,11 +44,11 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 	m_PresetList.setAlternatingRowColors(true);
 	m_PresetList.setSortingEnabled(true);
 
-	m_GridLayout.addWidget(&m_PresetList, 1, 0, 6, 1);
+	m_MainLayout.addWidget(&m_PresetList, 1, 0, 6, 1);
 
 	// Name edit
 	m_PresetName.setParent(this);
-	m_GridLayout.addWidget(&m_PresetName, 0, 0);
+	m_MainLayout.addWidget(&m_PresetName, 0, 0);
 
 	// Load preset
 	m_LoadPreset.setParent(this);
@@ -59,7 +57,7 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 	m_LoadPreset.setStatusTip("Load transfer function preset");
 	m_LoadPreset.setFixedWidth(60);
 	m_LoadPreset.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_LoadPreset, 0, 1);
+	m_MainLayout.addWidget(&m_LoadPreset, 0, 1);
 
 	// Save Preset
 	m_SavePreset.setParent(this);
@@ -69,7 +67,7 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 	m_SavePreset.setStatusTip("Save transfer function preset");
 	m_SavePreset.setFixedWidth(60);
 	m_SavePreset.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_SavePreset, 1, 1);
+	m_MainLayout.addWidget(&m_SavePreset, 1, 1);
 
 	// Remove preset
 	m_RemovePreset.setParent(this);
@@ -79,7 +77,7 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 	m_RemovePreset.setStatusTip("Remove transfer function preset");
 	m_RemovePreset.setFixedWidth(60);
 	m_RemovePreset.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_RemovePreset, 2, 1);
+	m_MainLayout.addWidget(&m_RemovePreset, 2, 1);
 
 	// Load presets
 	m_LoadPresets.setParent(this);
@@ -88,7 +86,7 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 	m_LoadPresets.setStatusTip("Load transfer function presets from file");
 	m_LoadPresets.setFixedWidth(60);
 	m_LoadPresets.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_LoadPresets, 3, 1);
+	m_MainLayout.addWidget(&m_LoadPresets, 3, 1);
 
 	// Save presets
 	m_SavePresets.setParent(this);
@@ -97,7 +95,7 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 	m_SavePresets.setStatusTip("Save transfer function presets to file");
 	m_SavePresets.setFixedWidth(60);
 	m_SavePresets.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_SavePresets, 4, 1);
+	m_MainLayout.addWidget(&m_SavePresets, 4, 1);
 
 	// Dummy
 	m_Dummy.setParent(this);
@@ -107,7 +105,7 @@ void QTransferFunctionPresetsWidget::CreateUI(void)
 	m_Dummy.setStatusTip("Dummy");
 	m_Dummy.setFixedWidth(60);
 	m_Dummy.setFixedHeight(20);
-	m_GridLayout.addWidget(&m_Dummy, 5, 1);
+	m_MainLayout.addWidget(&m_Dummy, 5, 1);
 }
 
 void QTransferFunctionPresetsWidget::CreateConnections(void)
