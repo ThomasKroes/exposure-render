@@ -53,7 +53,9 @@ private slots:
 	void Exit();
     void About();
 	void OnTimer();
-
+	void OnRenderBegin(void);
+	void OnRenderEnd(void);
+	
 private:
     void								CreateActions(void);
     void								CreateMenus(void);

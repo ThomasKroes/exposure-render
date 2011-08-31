@@ -27,13 +27,12 @@ public:
 	void		SetTheta(const float& Theta);
 	float		GetPhi(void) const;
 	void		SetPhi(const float& Phi);
-
 	float		GetWidth(void) const;
 	void		SetWidth(const float& Width);
-
 	float		GetHeight(void) const;
 	void		SetHeight(const float& Height);
-
+	bool		GetLockSize(void) const;
+	void		SetLockSize(const bool& LockSize);
 	float		GetDistance(void) const;
 	void		SetDistance(const float& Distance);
 	QColor		GetColor(void) const;
@@ -43,7 +42,7 @@ public:
 
 signals:
 	void LightPropertiesChanged(QLight*);
-
+	
 protected:
 	QString		m_Name;
 	float		m_Theta;
@@ -51,6 +50,7 @@ protected:
 	float		m_Distance;
 	float		m_Width;
 	float		m_Height;
+	bool		m_LockSize;
 	QColor		m_Color;
 	float		m_Intensity;
 

@@ -3,48 +3,24 @@
 #include "MainWindow.h"
 
 QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
-	QWidget(pParent),
-	m_pMainLayout(NULL),
-	m_pPerformanceGroupBox(NULL),
-	m_pPerformanceLayout(NULL),
-	m_pTracerFPS(NULL),
-	m_pVtkFPS(NULL),
-	m_pMemoryGroupBox(NULL),
-	m_pMemoryLayout(NULL),
-	m_pSizeRandomStates(NULL),
-	m_pSizeAccEstXyz(NULL),
-	m_pSizeEstFrameXyz(NULL),
-	m_pSizeEstFrameBlurXyz(NULL),
-	m_pSizeEstRgbLdr(NULL),
-	m_pMiscellaneousGroupBox(NULL),
-	m_pMiscellaneousLayout(NULL),
-	m_pNoIterations(NULL),
-	m_pVolumeGroupBox(NULL),
-	m_pVolumeLayout(NULL),
-	m_pFile(NULL),
-	m_pBoundingBox(NULL),
-	m_pResolutionX(NULL),
-	m_pResolutionY(NULL),
-	m_pResolutionZ(NULL),
-	m_pSpacingX(NULL),
-	m_pSpacingY(NULL),
-	m_pSpacingZ(NULL),
-	m_pScaleX(NULL),
-	m_pScaleY(NULL),
-	m_pScaleZ(NULL),
-	m_pVolumeSize(NULL),
-	m_pNoVoxels(NULL),
-	m_pDensityRange(NULL)
+	QGroupBox(pParent),
+	m_MainLayout(),
+	m_Tree()
 {
-	setEnabled(false);
+	// Title, status and tooltip
+	setTitle("Statistics");
+	setToolTip("Statistics");
+	setStatusTip("Statistics");
 
-	m_pMainLayout = new QVBoxLayout(this);
-	m_pMainLayout->setAlignment(Qt::AlignTop);
+	// Set main layout
+	m_MainLayout.setAlignment(Qt::AlignTop);
+	setLayout(&m_MainLayout);
 
+	/*
 	// Performance
 	m_pPerformanceGroupBox = new QGroupBox(this);
 	m_pPerformanceGroupBox->setTitle("Performance");
-	m_pMainLayout->addWidget(m_pPerformanceGroupBox);
+	m_MainLayout->addWidget(m_pPerformanceGroupBox);
 
 	// Align
 	m_pPerformanceLayout = new QGridLayout(m_pPerformanceGroupBox);
@@ -69,7 +45,7 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	// Memory
 	m_pMemoryGroupBox = new QGroupBox(this);
 	m_pMemoryGroupBox->setTitle("Memory");
-	m_pMainLayout->addWidget(m_pMemoryGroupBox);
+	m_MainLayout->addWidget(m_pMemoryGroupBox);
 
 	// Align
 	m_pMemoryLayout = new QGridLayout(m_pMemoryGroupBox);
@@ -112,7 +88,7 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	// Miscellaneous
 	m_pMiscellaneousGroupBox = new QGroupBox(this);
 	m_pMiscellaneousGroupBox->setTitle("Miscellaneous");
-	m_pMainLayout->addWidget(m_pMiscellaneousGroupBox);
+	m_MainLayout->addWidget(m_pMiscellaneousGroupBox);
 
 	// Align
 	m_pMiscellaneousLayout = new QGridLayout(m_pMiscellaneousGroupBox);
@@ -131,7 +107,7 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	// Miscellaneous
 	m_pVolumeGroupBox = new QGroupBox(this);
 	m_pVolumeGroupBox->setTitle("Volume");
-	m_pMainLayout->addWidget(m_pVolumeGroupBox);
+	m_MainLayout->addWidget(m_pVolumeGroupBox);
 
 	// Align
 	m_pVolumeLayout = new QGridLayout(m_pVolumeGroupBox);
@@ -204,12 +180,10 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	// Create, comnfigure and start timer
 	connect(&m_Timer, SIGNAL(timeout()), this, SLOT(update()));
 	m_Timer.start(10.0);
+	*/
 }
 
-void QStatisticsWidget::Default(void)
-{
-}
-
+/*
 void QStatisticsWidget::update(void)
 {
 	if (gpRenderThread && gpRenderThread->Loaded())
@@ -242,6 +216,22 @@ void QStatisticsWidget::update(void)
 	}
 
 	QWidget::update();
+}
+*/
+
+void QStatisticsWidget::OnUpdateFPS(void)
+{
+
+}
+
+void QStatisticsWidget::OnRenderBegin(void)
+{
+
+}
+
+void QStatisticsWidget::OnRenderEnd(void)
+{
+
 }
 
 QStatisticsDockWidget::QStatisticsDockWidget(QWidget* pParent) :

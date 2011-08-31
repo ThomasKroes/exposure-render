@@ -2,7 +2,7 @@
 
 #include <QtGui>
 
-class QStatisticsWidget : public QWidget
+class QStatisticsWidget : public QGroupBox
 {
     Q_OBJECT
 
@@ -10,14 +10,17 @@ public:
     QStatisticsWidget(QWidget* pParent = NULL);
 
 private slots:
-	void update(void);
+	void OnUpdateFPS(void);
+	void OnRenderBegin(void);
+	void OnRenderEnd(void);
 
 private:
 	void Default(void);
 
-	QTimer	m_Timer;
+	QGridLayout		m_MainLayout;
+	QTreeWidget		m_Tree;
 
-	QVBoxLayout*	m_pMainLayout;
+	/*
 	QGroupBox*		m_pPerformanceGroupBox;
 	QGridLayout*	m_pPerformanceLayout;
 	QLabel*			m_pTracerFPS;
@@ -48,6 +51,7 @@ private:
 	QLabel*			m_pVolumeSize;
 	QLabel*			m_pNoVoxels;
 	QLabel*			m_pDensityRange;
+	*/
 };
 
 class QStatisticsDockWidget : public QDockWidget

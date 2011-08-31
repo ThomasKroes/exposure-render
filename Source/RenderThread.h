@@ -16,6 +16,8 @@ extern bool gThreadAlive;
 
 class CRenderThread : public QThread
 {
+	Q_OBJECT
+
 public:
 	CRenderThread(const QString& FileName, QObject* pParent = 0);
 	virtual ~CRenderThread(void);
@@ -46,4 +48,9 @@ public:
 
 	// Host image buffers
 	unsigned char*			m_pImageCanvas;
+
+signals:
+	void RenderBegin(void);
+	void RenderEnd(void);
+	void UpdateFPS(const float& FPS);
 };

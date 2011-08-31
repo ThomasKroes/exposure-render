@@ -15,6 +15,8 @@ QString QLight::GetName(void)
 void QLight::SetName(const QString& Name)
 {
 	m_Name = Name;
+
+	emit LightPropertiesChanged(this);
 }
 
 float QLight::GetTheta(void) const
@@ -63,6 +65,16 @@ void QLight::SetHeight(const float& Height)
 	m_Height = Height;
 
 	emit LightPropertiesChanged(this);
+}
+
+bool QLight::GetLockSize(void) const
+{
+	return m_LockSize;
+}
+
+void QLight::SetLockSize(const bool& LockSize)
+{
+	m_LockSize = LockSize;
 }
 
 float QLight::GetDistance(void) const

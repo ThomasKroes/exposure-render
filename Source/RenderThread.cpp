@@ -129,6 +129,9 @@ void CRenderThread::run()
 	// Allocate CUDA memory for scene
 	cudaMalloc((void**)&m_pDevScene, sizeof(CScene));
 
+	// Let others know that we are starting with rendering
+	emit RenderBegin();
+
 	while (gThreadAlive)
 	{
 		// CUDA time for profiling
@@ -205,6 +208,9 @@ void CRenderThread::run()
 		cudaMemcpy(m_pRenderImage, m_pDevEstRgbLdr, 3 * Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char), cudaMemcpyDeviceToHost);
 
 		gpScene->m_FPS.AddDuration(1000.0f / CudaTimer.StopTimer());
+
+		// Inform other about our performance
+		emit UpdateFPS(gpScene->m_FPS.m_FilteredDuration);
 	}
 
 	// Free CUDA buffers
@@ -226,4 +232,7 @@ void CRenderThread::run()
 
 	// Free render image buffer
 	free(m_pRenderImage);
+
+	// Let others know that we have stopped rendering
+	emit RenderEnd();
 }

@@ -44,7 +44,7 @@ public:
 
 public slots:
 	void OnLightSelectionChanged(QLight* pLight);
-	void OnLockHeight(const int& State);
+	void OnLockSize(const int& LockHeight);
 	void OnThetaChanged(const int& Theta);
 	void OnPhiChanged(const int& Phi);
 	void OnDistanceChanged(const int& Distance);
@@ -70,9 +70,10 @@ protected:
 	QLabel				m_HeightLabel;
 	QSlider				m_HeightSlider;
 	QSpinBox			m_HeightSpinBox;
-	QCheckBox			m_LockHeightCheckBox;
+	QCheckBox			m_LockSizeCheckBox;
 	QLabel				m_ColorLabel;
 	QColorPushButton	m_ColorButton;
+	QGridLayout			m_ColorLayout;
 	QLabel				m_IntensityLabel;
 	QSlider				m_IntensitySlider;
 	QSpinBox			m_IntensitySpinBox;

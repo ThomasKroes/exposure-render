@@ -189,14 +189,14 @@ void CMainWindow::CreateDockWindows()
 {
 	// Lighting dock widget
     m_LightingDockWidget.setParent(this);
-	m_LightingDockWidget.setEnabled(true);
+	m_LightingDockWidget.setEnabled(false);
     m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_LightingDockWidget);
     m_pViewMenu->addAction(m_LightingDockWidget.toggleViewAction());
 
 	// Appearance dock widget
 	m_VolumeAppearanceDockWidget.setParent(this);
-//	m_VolumeAppearanceDockWidget.setEnabled(false);
+	m_VolumeAppearanceDockWidget.setEnabled(false);
 	m_VolumeAppearanceDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::LeftDockWidgetArea, &m_VolumeAppearanceDockWidget);
     m_pViewMenu->addAction(m_VolumeAppearanceDockWidget.toggleViewAction());
@@ -204,7 +204,6 @@ void CMainWindow::CreateDockWindows()
 	// Statistics dock widget
 	m_StatisticsDockWidget.setParent(this);
 	m_StatisticsDockWidget.setEnabled(false);
-	m_StatisticsDockWidget.setVisible(false);
 	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::LeftDockWidgetArea, &m_StatisticsDockWidget);
     m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());
@@ -323,6 +322,8 @@ void CMainWindow::LoadFile(const QString& FileName)
 
 	gThreadAlive = true;
 	gpRenderThread->start();
+
+	connect(gpRenderThread, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 //	gpRenderThread->setPriority(QThread::Priority::LowestPriority);
 
 	
@@ -430,4 +431,26 @@ void CMainWindow::About()
  //  QMessageBox::about(this, tr("About Exposure Render"),
  //           tr("This application illustrates the concepts from the paper: <b>Raytraced lighting in direct volume rendering</b>\n"
 	//		"For more information visit: <b>graphics.tudelft.nl</b>"));
+}
+
+void CMainWindow::OnRenderBegin(void)
+{
+	qDebug("Rendering started");
+
+	m_LightingDockWidget.setEnabled(true);
+	m_VolumeAppearanceDockWidget.setEnabled(true);
+	m_StatisticsDockWidget.setEnabled(true);
+	m_CameraDockWidget.setEnabled(true);
+	m_SettingsDockWidget.setEnabled(true);
+}
+
+void CMainWindow::OnRenderEnd(void)
+{
+	qDebug("Rendering ended");
+
+	m_LightingDockWidget.setEnabled(false);
+	m_VolumeAppearanceDockWidget.setEnabled(false);
+	m_StatisticsDockWidget.setEnabled(false);
+	m_CameraDockWidget.setEnabled(false);
+	m_SettingsDockWidget.setEnabled(false);
 }
