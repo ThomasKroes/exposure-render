@@ -7,10 +7,11 @@
 #include "cutil_inline.h"
 #include "curand_kernel.h"
 
-// VTK
-#include <vtkImageData.h>
+#include "Statistics.h"
 
-#include "Scene.h"
+class vtkImageData;
+class CScene;
+class CColorXyz;
 
 extern bool gThreadAlive;
 
@@ -32,7 +33,6 @@ public:
 	bool					m_Loaded;
 	QMutex					m_Mutex;
     QWaitCondition			m_Condition;
-	CStatistics				m_Statistics;
 	int						m_N;
 	unsigned char*			m_pRenderImage;
 
@@ -49,8 +49,17 @@ public:
 	// Host image buffers
 	unsigned char*			m_pImageCanvas;
 
+	int	m_SizeVolume;
+	int m_SizeHdrAccumulationBuffer;
+	int m_SizeHdrFrameBuffer;
+	int m_SizeHdrBlurFrameBuffer;
+	int m_SizeLdrFrameBuffer;
+
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);
-	void UpdateFPS(const float& FPS);
+	void MemoryAllocate(void);
+	void MemoryFree(void);
+	void PreFrame(void);
+	void PostFrame(void);
 };

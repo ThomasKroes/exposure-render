@@ -1,12 +1,10 @@
 
 #include "RenderThread.h"
 #include "LoadVolume.h"
+#include "Scene.h"
 
 // CUDA
 #include "VolumeTracer.cuh"
-
-// Qt
-#include <QtGui>
 
 // VTK
 #include <vtkImageData.h>
@@ -78,7 +76,6 @@ CRenderThread::CRenderThread(const QString& FileName, QObject* pParent) :
 	m_Loaded(false),
 	m_Mutex(),
     m_Condition(),
-	m_Statistics(),
 	m_N(0),
 	m_pRenderImage(NULL),
 	m_pImageDataVolume(NULL),
@@ -88,7 +85,12 @@ CRenderThread::CRenderThread(const QString& FileName, QObject* pParent) :
 	m_pDevEstFrameXyz(NULL),
 	m_pDevEstFrameBlurXyz(NULL),
 	m_pDevEstRgbLdr(NULL),
-	m_pImageCanvas(NULL)
+	m_pImageCanvas(NULL),
+	m_SizeVolume(0),
+	m_SizeHdrAccumulationBuffer(0),
+	m_SizeHdrFrameBuffer(0),
+	m_SizeHdrBlurFrameBuffer(0),
+	m_SizeLdrFrameBuffer(0)
 {
 }
 
@@ -134,6 +136,9 @@ void CRenderThread::run()
 
 	while (gThreadAlive)
 	{
+		// Let others know we are starting with a new frame
+		emit PreFrame();
+
 		// CUDA time for profiling
 		CCudaTimer CudaTimer;
 
@@ -154,18 +159,18 @@ void CRenderThread::run()
 			memset(m_pRenderImage, 0, 3 * gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char));
 			
 			// Compute size of the CUDA buffers
-			const int SizeRandomStates		= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(curandStateXORWOW_t);
-			const int SizeAccEstXyz			= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz);
-			const int SizeEstFrameXyz		= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz);
-			const int SizeEstFrameBlurXyz	= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz);
-			const int SizeEstRgbLdr			= 3 * gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char);
+			m_SizeVolume				= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(curandStateXORWOW_t);
+			m_SizeHdrAccumulationBuffer	= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz);
+			m_SizeHdrFrameBuffer		= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz);
+			m_SizeHdrBlurFrameBuffer	= gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz);
+			m_SizeLdrFrameBuffer		= 3 * gpScene->m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char);
 
 			// Allocate device buffers
-			cudaMalloc((void**)&m_pDevRandomStates, SizeRandomStates);
-			cudaMalloc((void**)&m_pDevAccEstXyz, SizeAccEstXyz);
-			cudaMalloc((void**)&m_pDevEstFrameXyz, SizeEstFrameXyz);
-			cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeEstFrameBlurXyz);
-			cudaMalloc((void**)&m_pDevEstRgbLdr, SizeEstRgbLdr);
+			cudaMalloc((void**)&m_pDevRandomStates, m_SizeVolume);
+			cudaMalloc((void**)&m_pDevAccEstXyz, m_SizeHdrAccumulationBuffer);
+			cudaMalloc((void**)&m_pDevEstFrameXyz, m_SizeHdrFrameBuffer);
+			cudaMalloc((void**)&m_pDevEstFrameBlurXyz, m_SizeHdrBlurFrameBuffer);
+			cudaMalloc((void**)&m_pDevEstRgbLdr, m_SizeLdrFrameBuffer);
 			
 			// Setup the CUDA random number generator
 			SetupRNG(&Scene, m_pDevScene, m_pDevRandomStates);
@@ -178,6 +183,9 @@ void CRenderThread::run()
 
 			// Reset no. iterations
 			m_N = 0.0f;
+
+			// Inform others about the memory allocations
+			emit MemoryAllocate();
 		}
 
 		// Restart the rendering when when the camera, lights and render params are dirty
@@ -209,8 +217,8 @@ void CRenderThread::run()
 
 		gpScene->m_FPS.AddDuration(1000.0f / CudaTimer.StopTimer());
 
-		// Inform other about our performance
-		emit UpdateFPS(gpScene->m_FPS.m_FilteredDuration);
+		// Let others know we are finished with a frame
+		emit PostFrame();
 	}
 
 	// Free CUDA buffers
@@ -220,6 +228,7 @@ void CRenderThread::run()
 	cudaFree(m_pDevEstFrameXyz);
 	cudaFree(m_pDevEstFrameBlurXyz);
 	cudaFree(m_pDevEstRgbLdr);
+
 	m_pDevRandomStates		= NULL;
 	m_pDevAccEstXyz			= NULL;
 	m_pDevEstFrameXyz		= NULL;

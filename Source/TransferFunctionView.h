@@ -19,6 +19,9 @@ public:
 
 	virtual void QAxisLabel::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL)
     {
+		// Use anti aliasing
+		pPainter->setRenderHints(QPainter::Antialiasing);
+
 		pPainter->setPen(QColor(50, 50, 50));
         pPainter->setFont(QFont("Arial", 7));
         pPainter->drawText(rect(), Qt::AlignCenter, m_Text);

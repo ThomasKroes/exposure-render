@@ -27,7 +27,7 @@ void QColorPushButton::paintEvent(QPaintEvent* pPaintEvent)
 	Painter.setRenderHints(QPainter::Antialiasing);
 
 	// Rectangle styling
-	Painter.setBrush(QBrush(m_Color));
+	Painter.setBrush(QBrush(isEnabled() ? m_Color : Qt::gray));
 	Painter.setPen(QPen(Qt::darkGray));
 
 	// Draw

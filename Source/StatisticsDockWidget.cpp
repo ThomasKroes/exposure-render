@@ -4,12 +4,11 @@
 
 QStatisticsDockWidget::QStatisticsDockWidget(QWidget* pParent) :
 	QDockWidget(pParent),
+	m_MainLayout(),
 	m_StatisticsWidget()
 {
 	setWindowTitle("Statistics");
 	setToolTip("Rendering statistics");
-
-	m_StatisticsWidget.setParent(this);
 
 	setWidget(&m_StatisticsWidget);
 }

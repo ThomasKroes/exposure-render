@@ -14,5 +14,6 @@ public:
 	void Init(void);
 
 private:
+	QGridLayout			m_MainLayout;
 	QStatisticsWidget	m_StatisticsWidget;
 };

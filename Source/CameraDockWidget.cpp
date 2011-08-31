@@ -1,7 +1,7 @@
 
 #include "CameraDockWidget.h"
-#include "RenderThread.h"
 #include "MainWindow.h"
+#include "Scene.h"
 
 CFilmWidget::CFilmWidget(QWidget* pParent) :
 	QGroupBox(pParent),

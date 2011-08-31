@@ -2,7 +2,7 @@
 #include "TransferFunction.h"
 #include "TransferFunctionView.h"
 #include "TransferFunctionCanvas.h"
-// #include "TransferFunctionGradient.h"
+#include "TransferFunctionGradient.h"
 #include "NodeItem.h"
 #include "Scene.h"
 
@@ -47,7 +47,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_pTransferFunctionCanvas = new QTransferFunctionCanvas(NULL, m_pGraphicsScene);
 	m_pTransferFunctionCanvas->translate(m_MarginLeft, m_MarginTop);
 
-//	m_pTransferFunctionGradient = new QTransferFunctionGradient(NULL, m_pGraphicsScene);
+	m_pTransferFunctionGradient = new QTransferFunctionGradient(NULL, m_pGraphicsScene);
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
@@ -72,7 +72,7 @@ void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rec
 void QTransferFunctionView::Update(void)
 {
 	m_pTransferFunctionCanvas->Update();
-//	m_pTransferFunctionGradient->Update();
+	m_pTransferFunctionGradient->Update();
 
 	if (gpScene == NULL)
 		return;
@@ -147,9 +147,9 @@ void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
 	GradientRect.setWidth(rect().width() - m_MarginLeft - m_MarginRight);
 	GradientRect.setHeight(18);
 
-//	m_pTransferFunctionGradient->setRect(GradientRect);
-//	m_pTransferFunctionGradient->setPos(m_MarginLeft, CanvasRect.height() + 15);
-//	m_pTransferFunctionGradient->Update();
+	m_pTransferFunctionGradient->setRect(GradientRect);
+	m_pTransferFunctionGradient->setPos(m_MarginLeft, CanvasRect.height() + 15);
+	m_pTransferFunctionGradient->Update();
 
 	// Configure x-axis label
 	m_AxisLabelX->setRect(QRectF(0, 0, CanvasRect.width(), 12));

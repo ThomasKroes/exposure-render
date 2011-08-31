@@ -1,6 +1,6 @@
 
 #include "InteractorStyleRealisticCamera.h"
-#include "RenderThread.h"
+#include "Scene.h"
 
 // Mouse button flags
 CFlags gMouseButtonFlags;

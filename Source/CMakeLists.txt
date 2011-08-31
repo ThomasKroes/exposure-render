@@ -65,7 +65,7 @@ SET(SimpleViewSrcs
 	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
 	TransferFunctionPresetsWidget.cpp
-	#TransferFunctionGradient.cpp
+	TransferFunctionGradient.cpp
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
 	NodeItem.cpp
@@ -110,7 +110,7 @@ SET(SimpleViewHeaders
 	TransferFunctionCanvas.h
 	TransferFunctionView.h
 	TransferFunctionPresetsWidget.h
-	#TransferFunctionGradient.h
+	TransferFunctionGradient.h
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
 	NodeItem.h

@@ -5,6 +5,7 @@
 
 #include "VtkWidget.h"
 #include "LoadVolume.h"
+#include "Scene.h"
 
 CRenderThread* gpRenderThread = NULL;
 
