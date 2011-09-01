@@ -3,95 +3,6 @@
 #include "LightsWidget.h"
 #include "RenderThread.h"
 
-QColorPushButton::QColorPushButton(QWidget* pParent) :
-	QPushButton(pParent),
-	m_Margin(5),
-	m_Radius(4),
-	m_Color(Qt::blue)
-{
-}
-
-void QColorPushButton::paintEvent(QPaintEvent* pPaintEvent)
-{
-	QPushButton::paintEvent(pPaintEvent);
-
-	QPainter Painter(this);
-
-	// Get button rectangle
-	QRect ColorRectangle = pPaintEvent->rect();
-
-	// Deflate it
-	ColorRectangle.adjust(m_Margin, m_Margin, -m_Margin, -m_Margin);
-
-	// Use anti aliasing
-	Painter.setRenderHints(QPainter::Antialiasing);
-
-	// Rectangle styling
-	Painter.setBrush(QBrush(isEnabled() ? m_Color : Qt::gray));
-	Painter.setPen(QPen(Qt::darkGray));
-
-	// Draw
-	Painter.drawRoundedRect(ColorRectangle, m_Radius, Qt::SizeMode::AbsoluteSize);
-
-//	int Grey = (float)(m_Color.red() + m_Color.green() + m_Color.blue()) / 3.0f;
-
-	// Draw text
-//	Painter.setFont(QFont("Arial", 15));
-//	Painter.setPen(QPen(QColor(255 - Grey, 255 - Grey, 255 - Grey)));
-//	Painter.drawText(ColorRectangle, Qt::AlignCenter, "...");
-}
-
-void QColorPushButton::mousePressEvent(QMouseEvent* pEvent)
-{
-	QColorDialog ColorDialog;
-
-	connect(&ColorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
-
-	ColorDialog.exec();
-
-	disconnect(&ColorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
-}
-
-int QColorPushButton::GetMargin(void) const
-{
-	return m_Margin;
-}
-
-void QColorPushButton::SetMargin(const int& Margin)
-{
-	m_Margin = m_Margin;
-	update();
-}
-
-int QColorPushButton::GetRadius(void) const
-{
-	return m_Radius;
-}
-
-void QColorPushButton::SetRadius(const int& Radius)
-{
-	m_Radius = m_Radius;
-	update();
-}
-
-QColor QColorPushButton::GetColor(void) const
-{
-	return m_Color;
-}
-
-void QColorPushButton::SetColor(const QColor& Color)
-{
-	m_Color = Color;
-	update();
-}
-
-void QColorPushButton::OnCurrentColorChanged(const QColor& Color)
-{
-	SetColor(Color);
-
-	emit currentColorChanged(m_Color);
-}
-
 QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_MainLayout(),
@@ -223,8 +134,6 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addLayout(&m_ColorLayout, 7, 1);
 	
 	m_ColorButton.setText("...");
-	m_ColorButton.setFixedWidth(80);
-	m_ColorButton.setFixedHeight(22);
 	m_ColorButton.setStatusTip("Pick a color");
 	m_ColorButton.setToolTip("Pick a color");
 	m_ColorLayout.addWidget(&m_ColorButton, 0, 0);
@@ -274,8 +183,18 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		m_WidthSlider.setRange(0, 100);
 
 		// Height
+
 		m_HeightSlider.setValue(m_pSelectedLight->GetHeight() * 10.0f);
 		m_HeightSlider.setRange(0, 100);
+		
+		/*
+		QPropertyAnimation animation(&m_HeightSlider, "value");
+		animation.setDuration(10);
+		animation.setStartValue(m_HeightSlider.value());
+		animation.setEndValue(m_pSelectedLight->GetHeight());
+
+		animation.start();
+		*/
 
 		// Lock size
 		m_LockSizeCheckBox.setChecked(m_pSelectedLight->GetLockSize());

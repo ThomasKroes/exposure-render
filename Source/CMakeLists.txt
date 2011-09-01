@@ -39,6 +39,7 @@ SET(SimpleViewSrcs
 	LightsWidget.cpp
 	LightingPresetsWidget.cpp
 	LightingWidget.cpp
+	BackgroundIlluminationWidget.cpp
 	Camera.cpp
 	Filter.cpp
 	Flags.cpp
@@ -59,8 +60,7 @@ SET(SimpleViewSrcs
 	LoadSettingsDialog.cpp
 	VtkWidget.cpp
 	Scene.cpp
-	ColorSelectorWidget.cpp
-
+	ColorButtonWidget.cpp
 	TransferFunction.cpp
 	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
@@ -70,6 +70,7 @@ SET(SimpleViewSrcs
 	NodePropertiesWidget.cpp
 	NodeItem.cpp
 	VolumeAppearanceDockWidget.cpp
+	PresetsWidget.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
@@ -80,6 +81,7 @@ SET(SimpleViewHeaders
 	LightsWidget.h
 	LightingPresetsWidget.h
 	LightingWidget.h
+	BackgroundIlluminationWidget.h
 	Camera.h
 	Defines.h
 	Dll.h
@@ -104,8 +106,7 @@ SET(SimpleViewHeaders
 	LoadSettingsDialog.h
 	VtkWidget.h
 	Scene.h
-	ColorSelectorWidget.h
-
+	ColorButtonWidget.h
 	TransferFunction.h
 	TransferFunctionCanvas.h
 	TransferFunctionView.h
@@ -115,6 +116,7 @@ SET(SimpleViewHeaders
 	NodePropertiesWidget.h
 	NodeItem.h
 	VolumeAppearanceDockWidget.h
+	PresetsWidget.h
 )
 
 SET(SimpleViewResources Icons/icons.qrc)

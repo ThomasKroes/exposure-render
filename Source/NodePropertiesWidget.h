@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+#include "ColorButtonWidget.h"
+
 class QTransferFunction;
 class QNode;
 
@@ -12,7 +14,7 @@ class QNodePropertiesWidget : public QGroupBox
 public:
 	QNodePropertiesWidget(QWidget* pParent = NULL);
 
-	virtual QSize sizeHint() const { return QSize(150, 300); }
+	virtual QSize sizeHint() const { return QSize(10, 10); }
 
 private slots:
 	void OnNodeSelectionChanged(QNode* pNode);
@@ -47,6 +49,9 @@ private:
 	QLabel					m_OpacityLabel;
 	QSlider					m_OpacitySlider;
 	QSpinBox				m_OpacitySpinBox;
+	QColorPushButton		m_KdColor;
+	QColorPushButton		m_KsColor;
+	QColorPushButton		m_KtColor;
 	QLabel					m_RoughnessLabel;
 	QSlider					m_RoughnessSlider;
 	QSpinBox				m_RoughnessSpinBox;

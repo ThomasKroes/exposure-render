@@ -23,6 +23,7 @@ public slots:
 	void OnMemoryFree(void);
 	void OnPreFrame(void);
 	void OnPostFrame(void);
+	void ExpandAll(const bool& Expand);
 
 private:
 	QGridLayout		m_MainLayout;

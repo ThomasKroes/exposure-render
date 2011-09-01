@@ -19,8 +19,6 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_MainLayout.setAlignment(Qt::AlignTop);
 	setLayout(&m_MainLayout);
 
-	// Transfer function view
-	m_TransferFunctionView.setParent(this);
 	m_MainLayout.addWidget(&m_TransferFunctionView);
 
 	gTransferFunction.AddNode(0.0f, 0.0f, QColor(255, 0, 0, 0));

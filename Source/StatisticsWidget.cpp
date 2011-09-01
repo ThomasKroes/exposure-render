@@ -124,11 +124,13 @@ void QStatisticsWidget::OnRenderBegin(void)
 	UpdateStatistic("Scale", "[" + QString::number(gpScene->m_Scale.x) + ", " + QString::number(gpScene->m_Scale.y) + ", " + QString::number(gpScene->m_Scale.z) + "]");
 	UpdateStatistic("No. Voxels", QString::number(gpScene->m_NoVoxels));
 	UpdateStatistic("Density Range", "[" + QString::number(gpScene->m_IntensityRange.m_Min) + " - " + QString::number(gpScene->m_IntensityRange.m_Max) + "]");
+
+	ExpandAll(true);
 }
 
 void QStatisticsWidget::OnRenderEnd(void)
 {
-
+	ExpandAll(false);
 }
 
 void QStatisticsWidget::OnMemoryAllocate(void)
@@ -151,4 +153,14 @@ void QStatisticsWidget::OnPostFrame(void)
 {
 	UpdateStatistic("Tracer FPS", QString::number(gpScene->m_FPS.m_FilteredDuration, 'f'));
 	UpdateStatistic("No. Iterations", QString::number(gpRenderThread->m_N));
+}
+
+void QStatisticsWidget::ExpandAll(const bool& Expand)
+{
+	QList<QTreeWidgetItem*> Items = m_Tree.findItems("*", Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard, 0);
+
+	foreach (QTreeWidgetItem* pItem, Items)
+	{
+		pItem->setExpanded(Expand);
+	}
 }

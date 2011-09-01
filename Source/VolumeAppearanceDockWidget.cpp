@@ -13,17 +13,9 @@ QVolumeAppearanceWidget::QVolumeAppearanceWidget(QWidget* pParent) :
 	m_MainLayout.setAlignment(Qt::AlignTop);
 	setLayout(&m_MainLayout);
 
-	// Transfer function widget
-	m_TransferFunctionWidget.setParent(this);
-	m_MainLayout.addWidget(&m_TransferFunctionWidget, 0, 0, 1, 2);
-	
-	// Volume appearance presets widget
-	m_VolumeAppearancePresetsWidget.setParent(this);
-	m_MainLayout.addWidget(&m_VolumeAppearancePresetsWidget, 1, 0);
-
-	// Node properties widget
-	m_NodePropertiesWidget.setParent(this);
-	m_MainLayout.addWidget(&m_NodePropertiesWidget, 1, 1);
+	m_MainLayout.addWidget(&m_TransferFunctionWidget, 0, 0);
+	m_MainLayout.addWidget(&m_NodePropertiesWidget, 1, 0);
+	m_MainLayout.addWidget(&m_VolumeAppearancePresetsWidget, 2, 0);
 }
 
 QVolumeAppearanceDockWidget::QVolumeAppearanceDockWidget(QWidget *parent) :

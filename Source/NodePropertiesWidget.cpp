@@ -2,7 +2,6 @@
 #include "NodePropertiesWidget.h"
 #include "TransferFunction.h"
 #include "NodeItem.h"
-#include "ColorSelectorWidget.h"
 
 QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -19,6 +18,9 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacityLabel(),
 	m_OpacitySlider(),
 	m_OpacitySpinBox(),
+	m_KdColor(),
+	m_KsColor(),
+	m_KtColor(),
 	m_RoughnessLabel(),
 	m_RoughnessSlider(),
 	m_RoughnessSpinBox()
@@ -120,6 +122,18 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySpinBox.setSingleStep(1);
 	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 2);
 	
+	// Kd
+	m_MainLayout.addWidget(new QLabel("Kd"), 3, 0);
+	m_MainLayout.addWidget(&m_KdColor, 3, 1);
+
+	// Ks
+	m_MainLayout.addWidget(new QLabel("Ks"), 4, 0);
+	m_MainLayout.addWidget(&m_KsColor, 4, 1);
+
+	// Kt
+	m_MainLayout.addWidget(new QLabel("Kt"), 5, 0);
+	m_MainLayout.addWidget(&m_KtColor, 5, 1);
+
 	// Setup connections for position
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(int)), &m_IntensitySpinBox, SLOT(setValue(int)));
 	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(int)), &m_IntensitySlider, SLOT(setValue(int)));
