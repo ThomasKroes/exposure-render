@@ -312,41 +312,214 @@ KERNEL void KrnlRenderVolume(CScene* pDevScene, curandStateXORWOW_t* pDevRandomS
 }
 
 
-
-
-
-/*
-// Find the nearest non-empty voxel in the volume
-DEV bool NearestIntersection(CRay& R, const float& StepSize, const float& U, float& MinT, float& MaxT)
+struct CVolumeMaterial
 {
-	// Intersect the eye ray with bounding box, if it does not intersect then return the environment
-	if (!IntersectBox(R.m_O, R.m_D, gScene.m_Volume.m_MinP, gScene.m_Volume.m_MaxP, MinT, MaxT))
-		return false;
-
-	bool EyeEmpty = true;
-
-	MinT += U * StepSize;
-
-	// Step through the volume and stop as soon as we come across a non-empty voxel
-	while (MinT < MaxT)
+	Vec3f		m_N;
+	CColorXyz	m_Kd;
+	CColorXyz	m_Ks;
+	float		m_Ni;
+	float		m_Ns;
+	
+	HOD void Init(const Vec3f& N, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ni, const float& Ns)
 	{
-		if (gScene.m_Volume.Tr(FetchDensity(R(MinT))) > 0.0f)
+		m_N		= N;
+		m_Kd	= Kd;
+		m_Ks	= Ks;
+		m_Ni	= Ni;
+		m_Ns	= Ns;
+	}
+
+	HOD void BlinnSampleF(const Vec3f& Wo, Vec3f& Wi, Vec2f& U, float& Pdf)
+	{
+		// Compute sampled half-angle vector $\wh$ for Blinn distribution
+		float costheta = powf(U.x, 1.f / (m_Ns + 1));
+		float sintheta = sqrtf(max(0.f, 1.f - costheta*costheta));
+		float phi = U.y * 2.f * PI_F;
+		
+		Vec3f wh = SphericalDirection(sintheta, costheta, phi);
+		
+		if (!SameHemisphere(Wo, wh))
+			wh = -wh;
+
+		// Compute incident direction by reflecting about $\wh$
+		Wi = -Wo + 2.f * Dot(Wo, wh) * wh;
+
+		// Compute PDF for $\wi$ from Blinn distribution
+		float blinn_pdf = ((m_Ns + 1.f) * powf(costheta, m_Ns)) / (2.f * PI_F * 4.f * Dot(Wo, wh));
+
+		if (Dot(Wo, wh) <= 0.f) 
+			blinn_pdf = 0.f;
+
+		Pdf = blinn_pdf;
+	}
+
+	HOD float BlinnD(const Vec3f& Wh)
+	{
+		float costhetah = AbsCosTheta(Wh);
+		return (m_Ns + 2) * INV_TWO_PI_F * powf(costhetah, m_Ns);
+	}
+
+	HOD float BlinnPdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		Vec3f wh = Normalize(Wo + Wi);
+		float costheta = AbsCosTheta(wh);
+		// Compute PDF for $\wi$ from Blinn distribution
+		
+		float blinn_pdf = ((m_Ns + 1.f) * powf(costheta, m_Ns)) / (2.f * PI_F * 4.f * Dot(Wo, wh));
+		
+		if (Dot(Wo, wh) <= 0.f) 
+			blinn_pdf = 0.f;
+
+		return blinn_pdf;
+	}
+
+	HOD CColorXyz SchlickFresnel(const float& CosTheta)
+	{
+		return m_Ks + powf(1.0f - CosTheta, 5.0f) * (SPEC_WHITE - m_Ks);
+	}
+
+	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		if (!SameHemisphere(Wo, Wi)) 
+			return SPEC_BLACK;
+
+		CColorXyz diffuse = (28.0f / (23.0f * PI_F)) * m_Kd * (SPEC_WHITE - m_Ks) * (1.0f - powf(1.0f - 0.5f * AbsCosTheta(Wi), 5.0f)) * (1.0f - powf(1.0f - 0.5f * AbsCosTheta(Wo), 5.0f));
+		Vec3f wh = Wi + Wo;
+		
+		if (wh.x == 0. && wh.y == 0. && wh.z == 0.) 
+			return SPEC_BLACK;
+
+		wh = Normalize(wh);
+		
+		CColorXyz specular = BlinnD(wh) / (4.f * AbsDot(Wi, wh) * max(AbsCosTheta(Wi), AbsCosTheta(Wo))) * 	SchlickFresnel(Dot(Wi, wh));
+		
+		return diffuse + specular;
+	}
+
+	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, Vec2f U, float& Pdf)
+	{
+		if (U.x < .5)
 		{
-			EyeEmpty = false;
-			break;
+			U.x = 2.f * U.x;
+			
+			Wi = CosineWeightedHemisphere(U);
+			
+			if (Wo.z < 0.0f)
+				Wi.z *= -1.f;
 		}
 		else
 		{
-			MinT += StepSize;
+			U.x = 2.f * (U.x - .5f);
+			
+			BlinnSampleF(Wo, Wi, U, Pdf);
+			
+			if (!SameHemisphere(Wo, Wi)) 
+				return SPEC_BLACK;
 		}
+		
+		Pdf = this->Pdf(Wo, Wi);
+
+		return F(Wo, Wi);
 	}
 
-	if (EyeEmpty)
-		return false;
+	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		if (!SameHemisphere(Wo, Wi)) 
+			return 0.f;
 
-	return true;
+		return .5f * (AbsCosTheta(Wi) * INV_PI_F + BlinnPdf(Wo, Wi));
+	}
+};
+
+struct CVolumeMatLambert
+{
+	Vec3f		m_N;
+	CColorXyz	m_Kd;
+	
+	HOD void Init(const Vec3f& N, const CColorXyz& Kd)
+	{
+		m_N		= N;
+		m_Kd	= Kd;
+	}
+
+	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		return m_Kd * INV_PI_F;
+	}
+
+	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, Vec2f U, float& Pdf)
+	{
+		Wi = CosineWeightedHemisphere(U);
+		
+		Pdf = this->Pdf(Wo, Wi);
+
+		return F(Wo, Wi);
+	}
+
+	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		if (!SameHemisphere(Wo, Wi)) 
+			return 0.f;
+
+		return Wi.z * INV_PI_F;
+	}
+};
+
+
+// Computes the attenuation through the volume
+DEV inline CColorXyz TransmittanceRM(CScene* pDevScene, CCudaRNG& RNG, CRay& R,const float& StepSize)
+{
+	// Near and far intersections with volume axis aligned bounding box
+	float NearT = 0.0f, FarT = 0.0f;
+
+	// Intersect with volume axis aligned bounding box
+	if (!pDevScene->m_BoundingBox.Intersect(R, &NearT, &FarT))
+		return SPEC_BLACK;
+
+	// Clamp to near plane if necessary
+	if (NearT < 0.0f) 
+		NearT = 0.0f;     
+
+	CColorXyz Lt = SPEC_WHITE;
+
+	NearT += RNG.Get1() * StepSize;
+
+	// Accumulate
+	while (NearT < R.m_MaxT)
+	{
+		// Determine sample point
+		const Vec3f SP = R(NearT);
+
+		// Fetch density
+		const short D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (SP.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (SP.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (SP.z / pDevScene->m_BoundingBox.m_MaxP.z)));
+		
+		// We ignore air density
+		if (D == 0)
+		{
+			// Increase extent
+			NearT += StepSize;
+			continue;
+		}
+
+		// Get shadow opacity
+		const float	Opacity = pDevScene->m_TransferFunctions.m_Kt.F(D).r;
+
+		if (Opacity > 0.0f)
+		{
+			// Compute eye transmittance
+			Lt *= expf(-(Opacity * StepSize));
+
+			// Exit if eye transmittance is very small
+			if (Lt.y() < 0.1f)
+				break;
+		}
+
+		// Increase extent
+		NearT += StepSize;
+	}
+
+	return Lt;
 }
-*/
 
 
 // Trace volume with single scattering
@@ -378,17 +551,14 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	if (!pDevScene->m_BoundingBox.Intersect(Re, &MinT, &MaxT))
 	{
 		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = SPEC_BLACK;
-	}
-	else
-	{
-		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = SPEC_WHITE;
+		return;
 	}
 
 	// Eye attenuation (Le), accumulated color through volume (Lv), unattenuated light from light source (Li), attenuated light from light source (Ld), and BSDF value (F)
-	CColorXyz PathThroughput	= SPEC_WHITE;
-	CColorXyz Li				= SPEC_BLACK;
-	CColorXyz Lv				= SPEC_BLACK;
-	CColorXyz F					= SPEC_BLACK;
+	CColorXyz Ltr	= SPEC_WHITE;
+	CColorXyz Li	= SPEC_BLACK;
+	CColorXyz Lv	= SPEC_BLACK;
+	CColorXyz F		= SPEC_BLACK;
 
 	int NoScatteringEvents = 0, RussianRouletteDepth = 2; 
 
@@ -401,66 +571,74 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	// Eye point (Pe), light sample point (Pl), Gradient (G), normalized gradient (Gn), reversed eye direction (Wo), incident direction (Wi), new direction (W)
 	Vec3f Pe, Pl, G, Gn, Wo, Wi, W;
 
+	// Distance along eye ray (Te), step size (Ss), density (D)
+	float Ss = 0.2f, Te = MinT + RNG.Get1() * Ss, D = 0.0f;
+
 	// Choose color component to sample
 	int CC1 = floorf(RNG.Get1() * 3.0f);
 
+	bool Hit = false;
 
-	/*
 	// Walk along the eye ray with ray marching
-	while (EyeT < MaxT)
+	while (Te < MaxT)
 	{
 		// Determine new point on eye ray
-		EyeP[TID] = EyeRay[TID](EyeT);
+		Pe = Re(Te);
 
 		// Increase parametric range
-		EyeT += StepSize;
+		Te += Ss;
 
 		// Fetch density
-		const short Density = FetchDensity(EyeP[TID]);
+		const short D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (Pe.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (Pe.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (Pe.z / pDevScene->m_BoundingBox.m_MaxP.z)));
 
 		// We ignore air density
-		if (Density == 0)
+		if (D == 0.0f)
 			continue;
 
 		// Get opacity at eye point
-		const float		Tr = gScene.m_Volume.Tr(Density);
-		const Spectrum	Ke = gScene.m_Volume.Ke(Density);
+		const float Tr = pDevScene->m_TransferFunctions.m_Kt.F(D).r;
+//		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission
-		EyeTr += Ke;
+//		Ltr += Ke;
 
 		// Compute outgoing direction
-		const Vec3f Wo = Normalize(-EyeRay[TID].m_D);
+//		const Vec3f Wo = Normalize(-Re.m_D);
 
 		// Obtain normal
-		Normal[TID] = ComputeGradient(EyeP[TID], Wo);
+//		Gn = ComputeGradient(Pe, Wo);
 
 		// Exit if air, or not within hemisphere
-		if (Tr < 0.01f)// || Dot(Wo, Normal[TID]) < 0.0f)
+		if (Tr < 0.01f)
 			continue;
 
+		Vec3f Pl(150, 150, 150);
+
+		Rl.m_O = Pl;
+		Rl.m_D = Normalize((Vec3f(0.0f) - Pl));
+		Rl.m_MinT = 0.0f;
+		Rl.m_MaxT = (Vec3f(0.0f) - Pl).Length();
+
+		CColorXyz T = TransmittanceRM(pDevScene, RNG, Rl, Ss);
 		// Estimate direct light at eye point
-	 	L += EyeTr * UniformSampleOneLight(Wo, EyeP[TID] + Normal[TID] * gScene.m_Volume.m_RayEpsilon, Normal[TID], Rnd, StepSize);
-		
+//	 	Lv += EyeTr * UniformSampleOneLight(Wo, EyeP[TID] + Normal[TID] * gScene.m_Volume.m_RayEpsilon, Normal[TID], Rnd, StepSize);
+		Lv += Ltr * T * SPEC_WHITE;
+
 		// Compute eye transmittance
-		EyeTr *= expf(-(Tr * StepSize));
+		Ltr *= expf(-(Tr * Ss));
 
 		// Exit if eye transmittance is very small
 // 		if (EyeTr.y() < gScene.m_Volume.m_TauThreshold)
 // 			break;
 
-		if (EyeTr.y() < 0.1f)
+		if (Ltr.y() < 0.1f)
 		{
 // 			EyeTr = 
 			break;
 		}
 	}
 
-	// Intersect with lights
-//    	L += EyeTr * gScene.m_Lights.Le(EyeRay[TID].m_O, EyeRay[TID].m_D, EyeT, INF_MAX, gScene.m_Materials, gScene.m_Textures, gScene.m_Bitmaps);
-
- 	AddSample(gScene.m_pSamples[SID].m_Sc.m_ImageXY, PID, L);
-	*/
+	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = Lv;
 }
 
 

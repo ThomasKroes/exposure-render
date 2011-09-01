@@ -5,6 +5,13 @@
 QLight::QLight(QObject* pParent) :
 	QObject(pParent)
 {
+	SetName("Undefined");
+	SetTheta(RandomFloat() * TWO_RAD_F);
+	SetPhi(RandomFloat() * RAD_F);
+	SetWidth(0.5f);
+	SetHeight(0.5f);
+	SetDistance(1.0f);
+	SetIntensity(1.0f);
 }
 
 QString QLight::GetName(void)

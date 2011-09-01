@@ -1662,3 +1662,8 @@ public:
 		return *this;
 	}
 };
+
+inline float RandomFloat(void)
+{
+	return (float)rand() / RAND_MAX;
+}
