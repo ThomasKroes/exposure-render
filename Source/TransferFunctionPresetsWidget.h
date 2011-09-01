@@ -11,8 +11,10 @@ class QTransferFunctionPresetsWidget : public QPresetsWidget
 public:
     QTransferFunctionPresetsWidget(QWidget* pParent = NULL);
 	
-	virtual void LoadPresetsFromFile(const bool& ChoosePath = false);
-	virtual void SavePresetsToFile(const bool& ChoosePath = false);
+	virtual void LoadPresets(QDomElement& Root);
+	virtual void SavePresets(QDomDocument& DomDoc, QDomElement& Root);
+	virtual void LoadPreset(QPresetXML* pPreset);
+	virtual void SavePreset(const QString& Name);
 
 protected slots:
 	/*

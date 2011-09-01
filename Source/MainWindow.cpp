@@ -371,11 +371,6 @@ void CMainWindow::SetupRenderView(void)
 	m_pRenderWindow->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_pTimerCallback);
 	m_pRenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyPressEvent, m_pKeyPressCallback);
 	m_pRenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyReleaseEvent, m_pKeyReleaseCallback);
-
-	// Create a timer
-//	m_pRenderWindow->GetInteractor()->CreateRepeatingTimer(10.0f);
-
-	m_Timer.start(1000.0f / 30.0f);
 }
 
 void CMainWindow::OnTimer(void)
@@ -450,6 +445,9 @@ void CMainWindow::OnRenderBegin(void)
 	// Scale
 	m_pSceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
+	// Start the timer
+	m_Timer.start(1000.0f / 30.0f);
+
 	emit RenderBegin();
 }
 
@@ -472,6 +470,8 @@ void CMainWindow::OnRenderEnd(void)
 	m_pImageImport = NULL;
 	m_pImageActor = NULL;
 
+	// Stop the timer
+	m_Timer.stop();
 
 	emit RenderEnd();
 }

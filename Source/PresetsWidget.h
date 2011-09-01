@@ -28,19 +28,22 @@ public:
 
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 
-	virtual void LoadPresetsFromFile(const bool& ChoosePath = false) = 0;
-	virtual void SavePresetsToFile(const bool& ChoosePath = false) = 0;
+	virtual void LoadPresetsFromFile(const bool& ChoosePath = false);
+	virtual void SavePresetsToFile(const bool& ChoosePath = false);
+	virtual void LoadPresets(QDomElement& Root) = 0;
+	virtual void SavePresets(QDomDocument& DomDoc, QDomElement& Root) = 0;
+	virtual void LoadPreset(QPresetXML* pPreset);
+	virtual void SavePreset(const QString& Name);
 
 protected slots:
 	virtual void CreateConnections(void);
 	virtual void CreateUI(void);
 	virtual void UpdatePresetsList(void);
-	virtual void OnPresetSelectionChanged(void);
-	virtual void OnLoadPreset(void);
-	virtual void OnRemovePreset(void);
-	virtual void OnSavePreset(void);
 	virtual void OnLoadPresets(void);
 	virtual void OnSavePresets(void);
+	virtual void OnLoadPreset(void);
+	virtual void OnSavePreset(void);
+	virtual void OnRemovePreset(void);
 	virtual void OnDummy(void);
 	virtual void OnPresetNameChanged(const QString& Text);
 	virtual void OnPresetItemChanged(QListWidgetItem* pWidgetItem);

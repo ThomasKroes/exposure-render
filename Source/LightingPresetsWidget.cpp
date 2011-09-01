@@ -3,7 +3,7 @@
 #include "RenderThread.h"
 
 QLightingPresetsWidget::QLightingPresetsWidget(QWidget* pParent) :
-	QPresetsWidget("LightingPresets", pParent)
+	QPresetsWidget("LightingPresets.xml", pParent)
 {
 	// Title, status and tooltip
 	setTitle("Presets");
@@ -11,12 +11,41 @@ QLightingPresetsWidget::QLightingPresetsWidget(QWidget* pParent) :
 	setStatusTip("Lighting Presets");
 }
 
-void QLightingPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath /*= false*/)
+void QLightingPresetsWidget::LoadPresets(QDomElement& Root)
 {
+	QPresetsWidget::LoadPresets(Root);
 
+	/*
+	QDomNodeList Presets = DomRoot.elementsByTagName("Preset");
+
+	for (int i = 0; i < Presets.count(); i++)
+	{
+		QDomNode TransferFunctionNode = Presets.item(i);
+
+		// Create new transfer function
+		QTransferFunction* pTransferFunction = new QTransferFunction();
+
+		// Append the transfer function
+		m_TransferFunctions.append(pTransferFunction);
+
+		// Load the preset into it
+		m_TransferFunctions.back()->ReadXML(TransferFunctionNode.toElement());
+	}
+	*/
 }
 
-void QLightingPresetsWidget::SavePresetsToFile(const bool& ChoosePath /*= false*/)
+void QLightingPresetsWidget::SavePresets(QDomDocument& DomDoc, QDomElement& Root)
 {
+	QPresetsWidget::SavePresets(DomDoc, Root);
 
+	/*
+	QDomElement Presets = DOM.createElement("Presets");
+
+	for (int i = 0; i < m_Presets.size(); i++)
+	{
+		m_Presets[i]->WriteXML(DOM, Presets);
+	}
+
+	DOM.appendChild(Presets);
+	*/
 }
