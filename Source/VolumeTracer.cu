@@ -311,6 +311,191 @@ KERNEL void KrnlRenderVolume(CScene* pDevScene, curandStateXORWOW_t* pDevRandomS
 	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X].c[CC1] = Lv.c[CC1] / fmaxf(1.0f, NoScatteringEvents);
 }
 
+
+
+
+
+/*
+// Find the nearest non-empty voxel in the volume
+DEV bool NearestIntersection(CRay& R, const float& StepSize, const float& U, float& MinT, float& MaxT)
+{
+	// Intersect the eye ray with bounding box, if it does not intersect then return the environment
+	if (!IntersectBox(R.m_O, R.m_D, gScene.m_Volume.m_MinP, gScene.m_Volume.m_MaxP, MinT, MaxT))
+		return false;
+
+	bool EyeEmpty = true;
+
+	MinT += U * StepSize;
+
+	// Step through the volume and stop as soon as we come across a non-empty voxel
+	while (MinT < MaxT)
+	{
+		if (gScene.m_Volume.Tr(FetchDensity(R(MinT))) > 0.0f)
+		{
+			EyeEmpty = false;
+			break;
+		}
+		else
+		{
+			MinT += StepSize;
+		}
+	}
+
+	if (EyeEmpty)
+		return false;
+
+	return true;
+}
+*/
+
+
+// Trace volume with single scattering
+KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
+{
+	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
+	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
+
+	// Compute sample ID
+	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
+
+	// Exit if beyond kernel boundaries
+	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.Width() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.Height())
+		return;
+
+	// Init random number generator
+	CCudaRNG RNG(&pDevRandomStates[SID]);
+
+	// Eye ray (Re), Light ray (Rl)
+	CRay Re, Rl;
+
+	// Generate the camera ray
+	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
+
+	// Distance towards nearest intersection with bounding box (MinT), distance to furthest intersection with bounding box (MaxT)
+	float MinT = 0.0f, MaxT = INF_MAX;
+
+	// Early ray termination if ray does not intersect with bounding box
+	if (!pDevScene->m_BoundingBox.Intersect(Re, &MinT, &MaxT))
+	{
+		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = SPEC_BLACK;
+	}
+	else
+	{
+		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = SPEC_WHITE;
+	}
+
+	// Eye attenuation (Le), accumulated color through volume (Lv), unattenuated light from light source (Li), attenuated light from light source (Ld), and BSDF value (F)
+	CColorXyz PathThroughput	= SPEC_WHITE;
+	CColorXyz Li				= SPEC_BLACK;
+	CColorXyz Lv				= SPEC_BLACK;
+	CColorXyz F					= SPEC_BLACK;
+
+	int NoScatteringEvents = 0, RussianRouletteDepth = 2; 
+
+	Re.m_MinT	= 0.0f;
+	Re.m_MaxT	= RAY_MAX;
+
+	// Continue probability (Pc) Light probability (LightPdf) Bsdf probability (BsdfPdf)
+	float Pc = 0.5f, LightPdf = 1.0f, BsdfPdf = 1.0f;
+
+	// Eye point (Pe), light sample point (Pl), Gradient (G), normalized gradient (Gn), reversed eye direction (Wo), incident direction (Wi), new direction (W)
+	Vec3f Pe, Pl, G, Gn, Wo, Wi, W;
+
+	// Choose color component to sample
+	int CC1 = floorf(RNG.Get1() * 3.0f);
+
+
+	/*
+	// Walk along the eye ray with ray marching
+	while (EyeT < MaxT)
+	{
+		// Determine new point on eye ray
+		EyeP[TID] = EyeRay[TID](EyeT);
+
+		// Increase parametric range
+		EyeT += StepSize;
+
+		// Fetch density
+		const short Density = FetchDensity(EyeP[TID]);
+
+		// We ignore air density
+		if (Density == 0)
+			continue;
+
+		// Get opacity at eye point
+		const float		Tr = gScene.m_Volume.Tr(Density);
+		const Spectrum	Ke = gScene.m_Volume.Ke(Density);
+		
+		// Add emission
+		EyeTr += Ke;
+
+		// Compute outgoing direction
+		const Vec3f Wo = Normalize(-EyeRay[TID].m_D);
+
+		// Obtain normal
+		Normal[TID] = ComputeGradient(EyeP[TID], Wo);
+
+		// Exit if air, or not within hemisphere
+		if (Tr < 0.01f)// || Dot(Wo, Normal[TID]) < 0.0f)
+			continue;
+
+		// Estimate direct light at eye point
+	 	L += EyeTr * UniformSampleOneLight(Wo, EyeP[TID] + Normal[TID] * gScene.m_Volume.m_RayEpsilon, Normal[TID], Rnd, StepSize);
+		
+		// Compute eye transmittance
+		EyeTr *= expf(-(Tr * StepSize));
+
+		// Exit if eye transmittance is very small
+// 		if (EyeTr.y() < gScene.m_Volume.m_TauThreshold)
+// 			break;
+
+		if (EyeTr.y() < 0.1f)
+		{
+// 			EyeTr = 
+			break;
+		}
+	}
+
+	// Intersect with lights
+//    	L += EyeTr * gScene.m_Lights.Le(EyeRay[TID].m_O, EyeRay[TID].m_D, EyeT, INF_MAX, gScene.m_Materials, gScene.m_Textures, gScene.m_Bitmaps);
+
+ 	AddSample(gScene.m_pSamples[SID].m_Sc.m_ImageXY, PID, L);
+	*/
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Traces the volume
 void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 {
@@ -318,7 +503,8 @@ void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRa
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Width() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Height() / (float)KernelBlock.y));
 	
 	// Execute kernel
-	KrnlRenderVolume<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);
+//	KrnlRenderVolume<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);
+	KrnlSS<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);
 }
 
 KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D Resolution, CGaussianFilter GaussianFilter)

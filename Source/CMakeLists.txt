@@ -156,15 +156,19 @@ SOURCE_GROUP("Transfer Function" FILES
 SET(CudaHeaders
 	VolumeTracer.cuh
 	VolumeTracer.cu
+	VolumeTracerBackup.cuh
+	VolumeTracerBackup.cu
 )
 
 SET(CudaSources
 	VolumeTracer.cuh
 	VolumeTracer.cu
+	VolumeTracerBackup.cuh
+	VolumeTracerBackup.cu
 )
 
 # Make the group
-SOURCE_GROUP("Cuda Kernelfs" FILES
+SOURCE_GROUP("Cuda Kernels" FILES
 	${CudaHeaders}
 	${CudaSources}
 )
