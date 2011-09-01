@@ -16,23 +16,13 @@ int main(int ArgumentCount, char* pArgv[])
 	Application.setOrganizationName("TU Delft");
 	Application.setApplicationName("Exposure");
 
+	CMainWindow MainWindow;
+
 	// Show the main window
-	gpMainWindow = new CMainWindow();
-    gpMainWindow->show();
+	gpMainWindow = &MainWindow;
+    MainWindow.show();
 
 	int Result = Application.exec();
 
-	delete gpMainWindow;
-
-	// Remove render thread
-	if (gpRenderThread)
-	{
-		gThreadAlive = false;
-		gpRenderThread->terminate();
-		while(!gpRenderThread->isFinished()){}
-		delete gpRenderThread;
-		gpRenderThread = NULL;
-	}
-
-    return Result;
+	return Result;
 }

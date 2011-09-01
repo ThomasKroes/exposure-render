@@ -12,8 +12,6 @@
 // Scene singleton
 CScene* gpScene = NULL;
 
-bool gThreadAlive = false;
-
 bool InitializeCuda(void)
 {
 	if (cudaSetDevice(cutGetMaxGflopsDeviceId()) != cudaSuccess)
@@ -73,9 +71,6 @@ private:
 CRenderThread::CRenderThread(const QString& FileName, QObject* pParent) :
 	QThread(pParent),
 	m_FileName(FileName),
-	m_Loaded(false),
-	m_Mutex(),
-    m_Condition(),
 	m_N(0),
 	m_pRenderImage(NULL),
 	m_pImageDataVolume(NULL),
@@ -90,17 +85,13 @@ CRenderThread::CRenderThread(const QString& FileName, QObject* pParent) :
 	m_SizeHdrAccumulationBuffer(0),
 	m_SizeHdrFrameBuffer(0),
 	m_SizeHdrBlurFrameBuffer(0),
-	m_SizeLdrFrameBuffer(0)
+	m_SizeLdrFrameBuffer(0),
+	m_Abort(false)
 {
 }
 
 CRenderThread::~CRenderThread(void)
 {
-    m_Mutex.lock();
-    m_Condition.wakeOne();
-    m_Mutex.unlock();
-
-    wait();
 }
 
 void CRenderThread::run()
@@ -135,7 +126,7 @@ void CRenderThread::run()
 	// Let others know that we are starting with rendering
 	emit RenderBegin();
 
-	while (gThreadAlive)
+	while (!m_Abort)
 	{
 		// Let others know we are starting with a new frame
 		emit PreFrame();
@@ -180,7 +171,7 @@ void CRenderThread::run()
 			cudaMemset(m_pDevAccEstXyz, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
 			cudaMemset(m_pDevEstFrameXyz, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
 			cudaMemset(m_pDevEstFrameBlurXyz, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
-			cudaMemset(m_pDevEstRgbLdr, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
+			cudaMemset(m_pDevEstRgbLdr, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorRgbLdr));
 
 			// Reset no. iterations
 			m_N = 0.0f;
@@ -196,7 +187,7 @@ void CRenderThread::run()
 			cudaMemset(m_pDevAccEstXyz, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
 			cudaMemset(m_pDevEstFrameXyz, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
 			cudaMemset(m_pDevEstFrameBlurXyz, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
-			cudaMemset(m_pDevEstRgbLdr, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
+			cudaMemset(m_pDevEstRgbLdr, 0, Scene.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorRgbLdr));
 
 			// Reset no. iterations
 			m_N = 0.0f;
@@ -245,4 +236,10 @@ void CRenderThread::run()
 
 	// Let others know that we have stopped rendering
 	emit RenderEnd();
+}
+
+void CRenderThread::OnCloseRenderThread(void)
+{
+	qDebug("Closing render thread");
+	m_Abort = true;
 }

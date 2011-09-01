@@ -66,26 +66,31 @@ bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataV
 //	gpProgressDialog->setWindowFlags(Qt::Popup);
 //	gpProgressDialog->show();
 
-	// Create progress callback
-	vtkSmartPointer<vtkCallbackCommand> ProgressCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-
 	// Create meta image reader
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
+
+	// Exit if the reader can't read the file
+	if (!MetaImageReader->CanReadFile(pFile))
+		return false;
+
+	// Create progress callback
+	vtkSmartPointer<vtkCallbackCommand> ProgressCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 
 	// Set callback
 	ProgressCallback->SetCallback (OnProgress);
 	ProgressCallback->SetClientData(MetaImageReader);
 
 	// Progress handling
-	MetaImageReader->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
+//	MetaImageReader->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
 
 	MetaImageReader->SetFileName(pFile);
+
 	MetaImageReader->Update();
 
 	vtkSmartPointer<vtkImageCast> pImageCast = vtkImageCast::New();
-
+pImageCast->SetOutputScalarTypeToShort();
 	pImageCast->SetInput(MetaImageReader->GetOutput());
-	pImageCast->SetOutputScalarTypeToShort();
+	
 	pImageCast->Update();
 
 	pImageDataVolume = pImageCast->GetOutput();

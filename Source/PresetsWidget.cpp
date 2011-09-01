@@ -22,15 +22,6 @@ QPresetsWidget::QPresetsWidget(const QString& PresetFileName, QWidget* pParent /
 
 	CreateUI();
 	CreateConnections();
-
-	// Load transfer function presets from file
-	LoadPresetsFromFile();
-}
-
-QPresetsWidget::~QPresetsWidget(void)
-{
-	// Save transfer function presets to file
-	SavePresetsToFile();
 }
 
 void QPresetsWidget::CreateUI(void)
@@ -89,16 +80,19 @@ void QPresetsWidget::CreateConnections(void)
 {
 	connect(&m_LoadPreset, SIGNAL(clicked()), this, SLOT(OnLoadPreset()));
 	connect(&m_SavePreset, SIGNAL(clicked()), this, SLOT(OnSavePreset()));
-	connect(&m_PresetName, SIGNAL(returnPressed()), this, SLOT(OnSavePreset()));
 	connect(&m_RemovePreset, SIGNAL(clicked()), this, SLOT(OnRemovePreset()));
 	connect(&m_LoadPresets, SIGNAL(clicked()), this, SLOT(OnLoadPresets()));
 	connect(&m_SavePresets, SIGNAL(clicked()), this, SLOT(OnSavePresets()));
 	connect(&m_PresetName, SIGNAL(editTextChanged(const QString&)), this, SLOT(OnPresetNameChanged(const QString&)));
+
+	connect(qApp, SIGNAL(aboutToQuit ()), this, SLOT(OnApplicationAboutToExit()));
 }
 
 void QPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath)
 {
-	qDebug("Loading transfer function presets from file");
+	return;
+
+	qDebug("Loading presets from file");
 
 	// XML file containing transfer function presets
 	QFile XmlFile;
@@ -110,7 +104,7 @@ void QPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath)
 	if (ChoosePath)
 	{
 		// Create open file dialog
-		XmlFile.setFileName(QFileDialog::getOpenFileName(this, "Load" + m_PresetFileName + "from file", "", tr("XML Files (*.xml)")));
+		XmlFile.setFileName(QFileDialog::getOpenFileName(this, "Load preset from file", "", tr("XML Files (*.xml)")));
 	}
 	else
 	{
@@ -125,7 +119,7 @@ void QPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath)
 	}
 
 	// Document object model for XML
-	QDomDocument DOM(m_PresetFileName);
+	QDomDocument DOM;
 
 	// Parse file content into DOM
 	if (!DOM.setContent(&XmlFile))
@@ -138,8 +132,8 @@ void QPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath)
 	// Obtain document root node
 	QDomElement DomRoot = DOM.documentElement();
 
-	LoadPresets(DomRoot);
-
+	this->LoadPresets(DomRoot);
+	
 	XmlFile.close();
 
 	// Update the presets list
@@ -148,7 +142,11 @@ void QPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath)
 
 void QPresetsWidget::SavePresetsToFile(const bool& ChoosePath)
 {
-	qDebug("Saving transfer function presets to file");
+	return;
+
+	qDebug("Saving presets to file");
+
+	return;
 
 	// XML file containing transfer function presets
 	QFile XmlFile;
@@ -160,7 +158,7 @@ void QPresetsWidget::SavePresetsToFile(const bool& ChoosePath)
 	if (ChoosePath)
 	{
 		// Create open file dialog
-		XmlFile.setFileName(QFileDialog::getSaveFileName(this, "Save" + m_PresetFileName + "to file", "", tr("XML Files (*.xml)")));
+		XmlFile.setFileName(QFileDialog::getSaveFileName(this, "Save preset to file", "", tr("XML Files (*.xml)")));
 	}
 	else
 	{
@@ -175,12 +173,12 @@ void QPresetsWidget::SavePresetsToFile(const bool& ChoosePath)
 	}
 
 	// Document object model for XML
-	QDomDocument DOM(m_PresetFileName);
+	QDomDocument DOM;
 
 	// Write each transfer function to the file
 	QDomElement DomRoot = DOM.documentElement();
 
-	SavePresets(DOM, DomRoot);
+	this->SavePresets(DOM, DomRoot);
 
 	// Create text stream
 	QTextStream TextStream(&XmlFile);
@@ -194,18 +192,22 @@ void QPresetsWidget::SavePresetsToFile(const bool& ChoosePath)
 
 void QPresetsWidget::LoadPresets(QDomElement& Root)
 {
+	this->LoadPresets(Root);
 }
 
 void QPresetsWidget::SavePresets(QDomDocument& DomDoc, QDomElement& Root)
 {
+	SavePresets(DomDoc, Root);
 }
 
 void QPresetsWidget::LoadPreset(QPresetXML* pPreset)
 {
+	LoadPreset(pPreset);
 }
 
 void QPresetsWidget::SavePreset(const QString& Name)
 {
+	SavePreset(Name);
 }
 
 void QPresetsWidget::UpdatePresetsList(void)
@@ -226,12 +228,12 @@ void QPresetsWidget::OnLoadPreset(void)
 
 	QVariant Variant = m_PresetName.itemData(m_PresetName.currentIndex());
 
-	LoadPreset((QPresetXML*)Variant.value<void*>());
+	this->LoadPreset((QPresetXML*)Variant.value<void*>());
 }
 
 void QPresetsWidget::OnSavePreset(void)
 {
-	SavePreset(m_PresetName.lineEdit()->text());
+	this->SavePreset(m_PresetName.lineEdit()->text());
 }
 
 void QPresetsWidget::OnRemovePreset(void)
@@ -283,6 +285,7 @@ void QPresetsWidget::OnPresetItemChanged(QListWidgetItem* pWidgetItem)
 //		((QTransferFunction*)pPresetItem->m_pData)->SetName(pWidgetItem->text());
 }
 
-
-
-
+void QPresetsWidget::OnApplicationAboutToExit(void)
+{
+	SavePresetsToFile();
+}

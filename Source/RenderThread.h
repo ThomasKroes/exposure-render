@@ -13,8 +13,6 @@ class vtkImageData;
 class CScene;
 class CColorXyz;
 
-extern bool gThreadAlive;
-
 class CRenderThread : public QThread
 {
 	Q_OBJECT
@@ -24,15 +22,11 @@ public:
 	virtual ~CRenderThread(void);
 
 	void run();
-	bool Loaded(void) const { return m_Loaded; }
 	QString FileName(void) const { return m_FileName; }
 	int NoIterations(void) const { return m_N; }
 	unsigned char* RenderImage(void) const { return m_pRenderImage; }
 
 	QString					m_FileName;
-	bool					m_Loaded;
-	QMutex					m_Mutex;
-    QWaitCondition			m_Condition;
 	int						m_N;
 	unsigned char*			m_pRenderImage;
 
@@ -55,6 +49,8 @@ public:
 	int m_SizeHdrBlurFrameBuffer;
 	int m_SizeLdrFrameBuffer;
 
+	bool m_Abort;
+
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);
@@ -62,4 +58,7 @@ signals:
 	void MemoryFree(void);
 	void PreFrame(void);
 	void PostFrame(void);
+
+public slots:
+	void OnCloseRenderThread(void);
 };

@@ -103,10 +103,7 @@ void QStatisticsWidget::UpdateStatistic(const QString& Property, const QString& 
 
 void QStatisticsWidget::OnRenderBegin(void)
 {
-	// Create the necessary connections so that we can present up to date statistics
-	connect(gpRenderThread, SIGNAL(MemoryAllocate()), this, SLOT(OnMemoryAllocate()));
-	connect(gpRenderThread, SIGNAL(MemoryFree()), this, SLOT(OnMemoryFree()));
-	connect(gpRenderThread, SIGNAL(PreFrame()), this, SLOT(OnPreFrame()));
+	// We want to be notified when a frame has completed
 	connect(gpRenderThread, SIGNAL(PostFrame()), this, SLOT(OnPostFrame()));
 
 	// Memory
@@ -125,11 +122,16 @@ void QStatisticsWidget::OnRenderBegin(void)
 	UpdateStatistic("No. Voxels", QString::number(gpScene->m_NoVoxels));
 	UpdateStatistic("Density Range", "[" + QString::number(gpScene->m_IntensityRange.m_Min) + " - " + QString::number(gpScene->m_IntensityRange.m_Max) + "]");
 
+	// Expand all tree items
 	ExpandAll(true);
 }
 
 void QStatisticsWidget::OnRenderEnd(void)
 {
+	// We want to be notified when a frame has completed
+	disconnect(gpRenderThread, SIGNAL(PostFrame()), this, SLOT(OnPostFrame()));
+
+	// Collapse all tree items
 	ExpandAll(false);
 }
 
@@ -151,7 +153,7 @@ void QStatisticsWidget::OnPreFrame(void)
 
 void QStatisticsWidget::OnPostFrame(void)
 {
-	UpdateStatistic("Tracer FPS", QString::number(gpScene->m_FPS.m_FilteredDuration, 'f'));
+//	UpdateStatistic("Tracer FPS", QString::number(gpScene->m_FPS.m_FilteredDuration, 'f', 2));
 	UpdateStatistic("No. Iterations", QString::number(gpRenderThread->m_N));
 }
 

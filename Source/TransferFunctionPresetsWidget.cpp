@@ -12,7 +12,7 @@ QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent)
 
 void QTransferFunctionPresetsWidget::LoadPresets(QDomElement& Root)
 {
-	QPresetsWidget::LoadPresets(Root);
+//	QPresetsWidget::LoadPresets(Root);
 
 	QDomNodeList Presets = Root.elementsByTagName("Preset");
 
@@ -33,7 +33,7 @@ void QTransferFunctionPresetsWidget::LoadPresets(QDomElement& Root)
 
 void QTransferFunctionPresetsWidget::SavePresets(QDomDocument& DomDoc, QDomElement& Root)
 {
-	QPresetsWidget::SavePresets(DomDoc, Root);
+//	QPresetsWidget::SavePresets(DomDoc, Root);
 
 	QDomElement Presets = DomDoc.createElement("Presets");
 

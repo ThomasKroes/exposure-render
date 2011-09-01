@@ -24,14 +24,13 @@ class QPresetsWidget : public QGroupBox
 
 public:
     QPresetsWidget(const QString& PresetFileName, QWidget* pParent = NULL);
-	virtual ~QPresetsWidget(void);
 
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 
 	virtual void LoadPresetsFromFile(const bool& ChoosePath = false);
 	virtual void SavePresetsToFile(const bool& ChoosePath = false);
-	virtual void LoadPresets(QDomElement& Root) = 0;
-	virtual void SavePresets(QDomDocument& DomDoc, QDomElement& Root) = 0;
+	virtual void LoadPresets(QDomElement& Root);
+	virtual void SavePresets(QDomDocument& DomDoc, QDomElement& Root);
 	virtual void LoadPreset(QPresetXML* pPreset);
 	virtual void SavePreset(const QString& Name);
 
@@ -47,6 +46,7 @@ protected slots:
 	virtual void OnDummy(void);
 	virtual void OnPresetNameChanged(const QString& Text);
 	virtual void OnPresetItemChanged(QListWidgetItem* pWidgetItem);
+	virtual void OnApplicationAboutToExit(void);
 
 protected:
 	QString			m_PresetFileName;

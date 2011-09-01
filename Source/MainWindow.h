@@ -59,6 +59,7 @@ private slots:
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);
+	void CloseRenderThread(void);
 
 private:
     void								CreateActions(void);

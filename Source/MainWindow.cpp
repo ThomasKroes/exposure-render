@@ -1,6 +1,4 @@
 
-#include <QtGui>
-
 #include "MainWindow.h"
 
 #include "VtkWidget.h"
@@ -102,12 +100,11 @@ CMainWindow::CMainWindow() :
 	setWindowFilePath(QString());
 
 	connect(&m_Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-
-	
 }
 
 CMainWindow::~CMainWindow(void)
 {
+	emit CloseRenderThread();
 }
 
 void CMainWindow::CreateActions(void)
@@ -187,6 +184,7 @@ void CMainWindow::CreateToolBars()
 void CMainWindow::CreateStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
+	statusBar()->setSizeGripEnabled(true);
 }
 
 void CMainWindow::CreateDockWindows()
@@ -308,29 +306,22 @@ void CMainWindow::LoadFile(const QString& FileName)
 	// Create new volume
 	gpScene = new CScene;
 
-	// Create new render thread and run it
+	// Create new render thread
 	gpRenderThread = new CRenderThread(FileName, this);
-	
 
 	// Load the VTK volume
-	if (LoadVtkVolume(FileName.toAscii().data(), gpScene, gpRenderThread->m_pImageDataVolume))
-	{
-		gpRenderThread->m_Loaded = true;
-	}
-	else
-	{
+	if (!LoadVtkVolume(FileName.toAscii().data(), gpScene, gpRenderThread->m_pImageDataVolume))
 		return;
-	}
 
 	// Force the render thread to allocate the necessary buffers, do not remove this line
 	gpScene->m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
 
-	gThreadAlive = true;
 	gpRenderThread->start();
 
 	// Let us know when the rendering begins and ends
 	connect(gpRenderThread, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(gpRenderThread, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(this, SIGNAL(CloseRenderThread()), gpRenderThread, SLOT(OnCloseRenderThread()));
 }
 
 void CMainWindow::SetupRenderView(void)
@@ -395,6 +386,7 @@ void CMainWindow::OnTimer(void)
 
 void CMainWindow::Close()
 {
+	emit CloseRenderThread();
 }
 
 void CMainWindow::Exit()
@@ -446,7 +438,7 @@ void CMainWindow::OnRenderBegin(void)
 	m_pSceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
 	// Start the timer
-	m_Timer.start(1000.0f / 30.0f);
+	m_Timer.start(1000.0f / 60.0f);
 
 	emit RenderBegin();
 }
@@ -475,3 +467,5 @@ void CMainWindow::OnRenderEnd(void)
 
 	emit RenderEnd();
 }
+
+
