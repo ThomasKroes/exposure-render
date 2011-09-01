@@ -11,12 +11,13 @@ class QTransferFunctionPresetsWidget : public QPresetsWidget
 public:
     QTransferFunctionPresetsWidget(QWidget* pParent = NULL);
 	
+	virtual void LoadPresetsFromFile(const bool& ChoosePath = false);
+	virtual void SavePresetsToFile(const bool& ChoosePath = false);
+
 protected slots:
 	/*
 	void CreateConnections(void);
 	void CreateUI(void);
-	void LoadPresetsFromFile(const bool& ChoosePath = false);
-	void SavePresetsToFile(const bool& ChoosePath = false);
 	void UpdatePresetsList(void);
 	void OnPresetSelectionChanged(void);
 	void OnLoadPreset(void);

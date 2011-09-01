@@ -2,12 +2,22 @@
 #include "TransferFunctionPresetsWidget.h"
 
 QTransferFunctionPresetsWidget::QTransferFunctionPresetsWidget(QWidget* pParent) :
-	QPresetsWidget(pParent)
+	QPresetsWidget("TransferFunctionPresets", pParent)
 {
 	// Title, status and tooltip
 	setTitle("Presets");
 	setToolTip("Transfer Function Presets");
 	setStatusTip("Transfer Function Presets");
+}
+
+void QTransferFunctionPresetsWidget::LoadPresetsFromFile(const bool& ChoosePath /*= false*/)
+{
+
+}
+
+void QTransferFunctionPresetsWidget::SavePresetsToFile(const bool& ChoosePath /*= false*/)
+{
+
 }
 
 /*

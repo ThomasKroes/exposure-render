@@ -2,7 +2,7 @@
 
 #include <QtGui>
 
-#include <QtXml\qdom.h>
+#include "Preset.h"
 
 class QTransferFunction;
 
@@ -31,7 +31,7 @@ public:
 	int				m_Max;
 };
 
-class QNode : public QObject
+class QNode : public QPresetXML
 {
 	Q_OBJECT
 
@@ -109,7 +109,7 @@ protected:
 
 typedef QList<QNode> QNodeList;
 
-class QTransferFunction : public QObject
+class QTransferFunction : public QPresetXML
 {
     Q_OBJECT
 

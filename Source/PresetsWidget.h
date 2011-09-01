@@ -23,35 +23,36 @@ class QPresetsWidget : public QGroupBox
     Q_OBJECT
 
 public:
-    QPresetsWidget(QWidget* pParent = NULL);
-	~QPresetsWidget(void);
+    QPresetsWidget(const QString& PresetFileName, QWidget* pParent = NULL);
+	virtual ~QPresetsWidget(void);
 
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 
+	virtual void LoadPresetsFromFile(const bool& ChoosePath = false) = 0;
+	virtual void SavePresetsToFile(const bool& ChoosePath = false) = 0;
+
 protected slots:
-	void CreateConnections(void);
-	void CreateUI(void);
-	void LoadPresetsFromFile(const bool& ChoosePath = false);
-	void SavePresetsToFile(const bool& ChoosePath = false);
-	void UpdatePresetsList(void);
-	void OnPresetSelectionChanged(void);
-	void OnLoadPreset(void);
-	void OnRemovePreset(void);
-	void OnSavePreset(void);
-	void OnLoadPresets(void);
-	void OnSavePresets(void);
-	void OnDummy(void);
-	void OnPresetNameChanged(const QString& Text);
-	void OnPresetItemChanged(QListWidgetItem* pWidgetItem);
+	virtual void CreateConnections(void);
+	virtual void CreateUI(void);
+	virtual void UpdatePresetsList(void);
+	virtual void OnPresetSelectionChanged(void);
+	virtual void OnLoadPreset(void);
+	virtual void OnRemovePreset(void);
+	virtual void OnSavePreset(void);
+	virtual void OnLoadPresets(void);
+	virtual void OnSavePresets(void);
+	virtual void OnDummy(void);
+	virtual void OnPresetNameChanged(const QString& Text);
+	virtual void OnPresetItemChanged(QListWidgetItem* pWidgetItem);
 
 protected:
-	QGridLayout				m_MainLayout;
-	QComboBox				m_PresetName;
-	QPushButton				m_LoadPreset;
-	QPushButton				m_SavePreset;
-	QPushButton				m_RemovePreset;
-	QPushButton				m_LoadPresets;
-	QPushButton				m_SavePresets;
-	QPushButton				m_Dummy;
-	QTransferFunctionList	m_TransferFunctions;
+	QString			m_PresetFileName;
+	QGridLayout		m_MainLayout;
+	QComboBox		m_PresetName;
+	QPushButton		m_LoadPreset;
+	QPushButton		m_SavePreset;
+	QPushButton		m_RemovePreset;
+	QPushButton		m_LoadPresets;
+	QPushButton		m_SavePresets;
+	QPresetList		m_Presets;
 };

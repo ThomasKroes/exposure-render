@@ -10,7 +10,7 @@ bool CompareNodes(QNode NodeA, QNode NodeB)
 }
 
 QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const float& Opacity, const QColor& Color) :
-	QObject(pTransferFunction),
+	QPresetXML(pTransferFunction),
 	m_pTransferFunction(pTransferFunction),
 	m_Intensity(Intensity),
 	m_Opacity(Opacity),
@@ -198,7 +198,7 @@ void QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 }
 
 QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
-	QObject(pParent),
+	QPresetXML(pParent),
 	m_Name(Name),
 	m_Nodes(),
 	m_RangeMin(0.0f),

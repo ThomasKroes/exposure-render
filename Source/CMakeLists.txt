@@ -71,6 +71,7 @@ SET(SimpleViewSrcs
 	NodeItem.cpp
 	VolumeAppearanceDockWidget.cpp
 	PresetsWidget.cpp
+	Preset.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
@@ -117,6 +118,7 @@ SET(SimpleViewHeaders
 	NodeItem.h
 	VolumeAppearanceDockWidget.h
 	PresetsWidget.h
+	Preset.h
 )
 
 SET(SimpleViewResources Icons/icons.qrc)

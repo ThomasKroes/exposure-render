@@ -13,6 +13,9 @@ public:
 
 	virtual QSize sizeHint() const { return QSize(200, 200); }
 
+	virtual void LoadPresetsFromFile(const bool& ChoosePath = false);
+	virtual void SavePresetsToFile(const bool& ChoosePath = false);
+
 private slots:
 
 protected:
