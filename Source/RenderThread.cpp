@@ -119,6 +119,7 @@ void CRenderThread::run()
 		return;
 	}
 
+	gpScene->m_Camera.m_Film.m_Resolution.Set(Vec2i(800, 600));
 	gpScene->m_Camera.m_Aperture.m_Size = 0.01f;
 	gpScene->m_Camera.m_Focus.m_FocalDistance = (gpScene->m_Camera.m_Target - gpScene->m_Camera.m_From).Length();
 	gpScene->m_Camera.m_SceneBoundingBox = gpScene->m_BoundingBox;

@@ -335,34 +335,15 @@ void CMainWindow::LoadFile(const QString& FileName)
 
 void CMainWindow::SetupRenderView(void)
 {
-	// Create and configure image importer
-	m_pImageImport = vtkImageImport::New();
-	m_pImageImport->SetDataSpacing(1, 1, 1);
-	m_pImageImport->SetDataOrigin(0, 0, 0);
-	m_pImageImport->SetImportVoidPointer((void*)malloc(3 * 512 * 512 * sizeof(unsigned char)));//gpRenderThread->RenderImage());
-	m_pImageImport->SetWholeExtent(0, 512 - 1, 0, 512 - 1, 0, 0);
-	m_pImageImport->SetDataExtentToWholeExtent();
-	m_pImageImport->SetDataScalarTypeToUnsignedChar();
-	m_pImageImport->SetNumberOfScalarComponents(3);
-	m_pImageImport->Update();
-
-	// Create and configure background image actor
-	m_pImageActor = vtkImageActor::New();
-	m_pImageActor->SetInterpolate(1);
-	m_pImageActor->SetInput(m_pImageImport->GetOutput());
-	m_pImageActor->SetScale(2, -2, -2);
-	m_pImageActor->VisibilityOn();
-
 	// Create and configure scene renderer
 	m_pSceneRenderer = vtkRenderer::New();
 	m_pSceneRenderer->SetBackground(0.4, 0.4, 0.43);
 	m_pSceneRenderer->SetBackground2(0.6, 0.6, 0.6);
 	m_pSceneRenderer->SetGradientBackground(true);
-//	m_pSceneRenderer->GetActiveCamera()->SetPosition(1.0, 1.0, 1.0);
-//	m_pSceneRenderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
-//	m_pSceneRenderer->GetActiveCamera()->SetRoll(0.0);
-	m_pSceneRenderer->AddActor(m_pImageActor);
-
+	m_pSceneRenderer->GetActiveCamera()->SetPosition(0.0, 0.0, 1.0);
+	m_pSceneRenderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
+	m_pSceneRenderer->GetActiveCamera()->ParallelProjectionOn();
+	
 	// Get render window and configure
 	m_pRenderWindow = m_pVtkWidget->GetQtVtkWidget()->GetRenderWindow();
 	m_pRenderWindow->AddRenderer(m_pSceneRenderer);
@@ -443,6 +424,32 @@ void CMainWindow::OnRenderBegin(void)
 	m_CameraDockWidget.setEnabled(true);
 	m_SettingsDockWidget.setEnabled(true);
 
+//	CResolution2D FilmResolution = gpScene->m_Camera.m_Film.m_Resolution;
+
+	// Create and configure image importer
+	m_pImageImport = vtkImageImport::New();
+	m_pImageImport->SetDataSpacing(1, 1, 1);
+	m_pImageImport->SetDataOrigin(-400, -300, 0);
+	m_pImageImport->SetImportVoidPointer((void*)malloc(3 * 800 * 600 * sizeof(unsigned char)));
+	m_pImageImport->SetWholeExtent(0, 800 - 1, 0, 600 - 1, 0, 0);
+	m_pImageImport->SetDataExtentToWholeExtent();
+	m_pImageImport->SetDataScalarTypeToUnsignedChar();
+	m_pImageImport->SetNumberOfScalarComponents(3);
+	m_pImageImport->Update();
+
+	// Create and configure background image actor
+	m_pImageActor = vtkImageActor::New();
+	m_pImageActor->SetInterpolate(1);
+	m_pImageActor->SetInput(m_pImageImport->GetOutput());
+	m_pImageActor->SetScale(1, -1, -1);
+	m_pImageActor->VisibilityOn();
+
+	// Add the image actor
+	m_pSceneRenderer->AddActor(m_pImageActor);
+
+	// Scale
+	m_pSceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
+
 	emit RenderBegin();
 }
 
@@ -455,6 +462,16 @@ void CMainWindow::OnRenderEnd(void)
 	m_StatisticsDockWidget.setEnabled(false);
 	m_CameraDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setEnabled(false);
+
+	m_pImageImport->Delete();
+
+	m_pSceneRenderer->RemoveActor(m_pImageActor);
+
+	m_pImageActor->Delete();
+
+	m_pImageImport = NULL;
+	m_pImageActor = NULL;
+
 
 	emit RenderEnd();
 }
