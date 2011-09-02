@@ -14,35 +14,14 @@ void QTransferFunctionPresetsWidget::LoadPresets(QDomElement& Root)
 {
 //	QPresetsWidget::LoadPresets(Root);
 
-	QDomNodeList Presets = Root.elementsByTagName("Preset");
-
-	for (int i = 0; i < Presets.count(); i++)
-	{
-		QDomNode TransferFunctionNode = Presets.item(i);
-
-		// Create new transfer function
-		QTransferFunction* pTransferFunction = new QTransferFunction();
-
-		// Append the transfer function
-		m_Presets.append(pTransferFunction);
-
-		// Load the preset into it
-		m_Presets.back()->ReadXML(TransferFunctionNode.toElement());
-	}
+	
 }
 
 void QTransferFunctionPresetsWidget::SavePresets(QDomDocument& DomDoc, QDomElement& Root)
 {
 //	QPresetsWidget::SavePresets(DomDoc, Root);
 
-	QDomElement Presets = DomDoc.createElement("Presets");
-
-	for (int i = 0; i < m_Presets.size(); i++)
-	{
-		m_Presets[i]->WriteXML(DomDoc, Presets);
-	}
-
-	Root.appendChild(Presets);
+	
 }
 
 void QTransferFunctionPresetsWidget::LoadPreset(QPresetXML* pPreset)
@@ -62,7 +41,7 @@ void QTransferFunctionPresetsWidget::SavePreset(const QString& Name)
 	QTransferFunction* pTransferFunctionCopy = new QTransferFunction(gTransferFunction);
 
 	// Add it to the presets list
-	m_Presets.append(pTransferFunctionCopy);
+	m_PresetItems.append(pTransferFunctionCopy);
 
 	// And update the UI
 	UpdatePresetsList();

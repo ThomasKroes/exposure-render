@@ -37,7 +37,6 @@ SET(SimpleViewSrcs
 	LightingSettingsWidget.cpp 
 	LightingDockWidget.cpp 
 	LightsWidget.cpp
-	LightingPresetsWidget.cpp
 	LightingWidget.cpp
 	BackgroundIlluminationWidget.cpp
 	Camera.cpp
@@ -64,7 +63,6 @@ SET(SimpleViewSrcs
 	TransferFunction.cpp
 	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
-	TransferFunctionPresetsWidget.cpp
 	TransferFunctionGradient.cpp
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
@@ -80,7 +78,6 @@ SET(SimpleViewHeaders
 	LightingSettingsWidget.h
 	LightingDockWidget.h
 	LightsWidget.h
-	LightingPresetsWidget.h
 	LightingWidget.h
 	BackgroundIlluminationWidget.h
 	Camera.h
@@ -111,7 +108,6 @@ SET(SimpleViewHeaders
 	TransferFunction.h
 	TransferFunctionCanvas.h
 	TransferFunctionView.h
-	TransferFunctionPresetsWidget.h
 	TransferFunctionGradient.h
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
