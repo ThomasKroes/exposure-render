@@ -4,10 +4,10 @@
 QLightingWidget::QLightingWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
-	m_LightingPresetsWidget(),
-	m_LightSettingsWidget(),
 	m_LightsWidget(),
-	m_BackgroundIlluminationWidget()
+	m_LightSettingsWidget(),
+	m_BackgroundIlluminationWidget(),
+	m_LightingPresetsWidget("LightingPresets.xml", this)
 {
 	// Apply main layout
 	setLayout(&m_MainLayout);

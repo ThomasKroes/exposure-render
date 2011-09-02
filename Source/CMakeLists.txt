@@ -38,6 +38,7 @@ SET(SimpleViewSrcs
 	LightingDockWidget.cpp 
 	LightsWidget.cpp
 	LightingWidget.cpp
+	Lighting.cpp
 	BackgroundIlluminationWidget.cpp
 	Camera.cpp
 	Filter.cpp
@@ -79,6 +80,7 @@ SET(SimpleViewHeaders
 	LightingDockWidget.h
 	LightsWidget.h
 	LightingWidget.h
+	Lighting.h
 	BackgroundIlluminationWidget.h
 	Camera.h
 	Defines.h

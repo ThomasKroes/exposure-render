@@ -2,10 +2,11 @@
 
 #include <QtGui>
 
-#include "LightingPresetsWidget.h"
-#include "LightingSettingsWidget.h"
 #include "LightsWidget.h"
+#include "LightingSettingsWidget.h"
+#include "PresetsWidget.h"
 #include "BackgroundIlluminationWidget.h"
+#include "Lighting.h"
 
 class QLightingWidget : public QWidget
 {
@@ -16,8 +17,9 @@ public:
 
 protected:
 	QGridLayout						m_MainLayout;
-	QLightingPresetsWidget			m_LightingPresetsWidget;
 	QLightSettingsWidget			m_LightSettingsWidget;
 	QLightsWidget					m_LightsWidget;
 	QBackgroundIlluminationWidget	m_BackgroundIlluminationWidget;
+	QPresetsWidget					m_LightingPresetsWidget;
+	QPresets<QLighting>				m_Presets;
 };
