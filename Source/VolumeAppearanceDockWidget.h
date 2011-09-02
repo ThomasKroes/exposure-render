@@ -15,13 +15,17 @@ class QVolumeAppearanceWidget : public QWidget
 
 public:
     QVolumeAppearanceWidget(QWidget* pParent = NULL);
+	
+public slots:
+	void OnLoadPreset(const QString& Name);
+	void OnSavePreset(const QString& Name);
 
 protected:
-	QGridLayout					m_MainLayout;
-	QTransferFunctionWidget		m_TransferFunctionWidget;
-	QPresetsWidget				m_PresetsWidget;
-	QNodePropertiesWidget		m_NodePropertiesWidget;
-	QTemplateWidget<QTransferFunction> m_Test;
+	QGridLayout							m_MainLayout;
+	QTransferFunctionWidget				m_TransferFunctionWidget;
+	QPresetsWidget						m_PresetsWidget;
+	QNodePropertiesWidget				m_NodePropertiesWidget;
+	QTemplateWidget<QTransferFunction>	m_Presets;
 };
 
 class QVolumeAppearanceDockWidget : public QDockWidget
