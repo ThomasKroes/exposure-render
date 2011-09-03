@@ -6,6 +6,11 @@
 
 #define MB 1024.0f * 1024.0f
 
+QString FormatVector(const Vec3f& Vector, const int& Precision = 2)
+{
+	return "[" + QString::number(Vector.x, 'f', Precision) + ", " + QString::number(Vector.y, 'f', Precision) + ", " + QString::number(Vector.z, 'f', Precision) + "]";
+}
+
 QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
@@ -75,6 +80,16 @@ void QStatisticsWidget::PopulateTree(void)
 	AddItem(pVolume, "Scale");
 	AddItem(pVolume, "No. Voxels");
 	AddItem(pVolume, "Density Range");
+
+	// Volume
+	QTreeWidgetItem* pCamera = AddItem(NULL, "Camera");
+
+	AddItem(pCamera, "Resolution", "", "Pixels");
+	AddItem(pCamera, "Position");
+	AddItem(pCamera, "Target");
+	AddItem(pCamera, "Up Vector");
+	AddItem(pCamera, "Aperture Size");
+	AddItem(pCamera, "Field Of View");
 }
 
 QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value, const QString& Unit)
@@ -155,6 +170,14 @@ void QStatisticsWidget::OnPostFrame(void)
 {
 //	UpdateStatistic("Tracer FPS", QString::number(gpScene->m_FPS.m_FilteredDuration, 'f', 2));
 	UpdateStatistic("No. Iterations", QString::number(gpRenderThread->m_N));
+
+	// Camera
+	UpdateStatistic("Resolution", QString::number(gpScene->m_Camera.m_Film.m_Resolution.m_XY.x) + " x " + QString::number(gpScene->m_Camera.m_Film.m_Resolution.m_XY.y));
+	UpdateStatistic("Position", FormatVector(gpScene->m_Camera.m_From));
+	UpdateStatistic("Target", FormatVector(gpScene->m_Camera.m_Target));
+	UpdateStatistic("Up Vector", FormatVector(gpScene->m_Camera.m_Up));
+	UpdateStatistic("Aperture Size", QString::number(gpScene->m_Camera.m_Aperture.m_Size, 'f', 2));
+	UpdateStatistic("Field Of View", QString::number(gpScene->m_Camera.m_FovV, 'f', 2));
 }
 
 void QStatisticsWidget::ExpandAll(const bool& Expand)
