@@ -9,7 +9,7 @@ class QColorPushButton : public QPushButton
 public:
 	QColorPushButton(QWidget* pParent = NULL);
 
-	virtual QSize sizeHint() const { return QSize(130, 20); }
+	virtual QSize sizeHint() const;
 	virtual void paintEvent(QPaintEvent* pPaintEvent);
 	virtual void mousePressEvent(QMouseEvent* pEvent);
 

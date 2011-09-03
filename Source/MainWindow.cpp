@@ -87,7 +87,7 @@ CMainWindow::CMainWindow() :
 	CreateMenus();
 	CreateToolBars();
 	CreateStatusBar();
-	CreateDockWindows();
+	SetupDockingWidgets();
 
     setUnifiedTitleAndToolBarOnMac(true);
 
@@ -187,7 +187,7 @@ void CMainWindow::CreateStatusBar()
 	statusBar()->setSizeGripEnabled(true);
 }
 
-void CMainWindow::CreateDockWindows()
+void CMainWindow::SetupDockingWidgets()
 {
 	// Lighting dock widget
     m_LightingDockWidget.setParent(this);
@@ -197,7 +197,6 @@ void CMainWindow::CreateDockWindows()
     m_pViewMenu->addAction(m_LightingDockWidget.toggleViewAction());
 
 	// Appearance dock widget
-	m_VolumeAppearanceDockWidget.setParent(this);
 	m_VolumeAppearanceDockWidget.setEnabled(false);
 	m_VolumeAppearanceDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::LeftDockWidgetArea, &m_VolumeAppearanceDockWidget);

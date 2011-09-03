@@ -11,6 +11,8 @@ int main(int ArgumentCount, char* pArgv[])
 	// Create the application
     QApplication Application(ArgumentCount, pArgv);
 
+	Q_INIT_RESOURCE(icons);
+
 	// Adjust style
 	Application.setStyle("plastique");
 	Application.setOrganizationName("TU Delft");

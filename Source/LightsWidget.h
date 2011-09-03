@@ -101,6 +101,7 @@ protected:
 	QLineEdit		m_LightName;
 	QPushButton		m_AddLight;
 	QPushButton		m_RemoveLight;
+	QPushButton		m_RenameLight;
 
 	friend class QLightingWidget;
 };

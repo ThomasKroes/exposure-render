@@ -127,7 +127,8 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_LightList(),
 	m_LightName(),
 	m_AddLight(),
-	m_RemoveLight()
+	m_RemoveLight(),
+	m_RenameLight()
 {
 	// Title, status and tooltip
 	setTitle("Lights");
@@ -143,30 +144,35 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_LightList.setSelectionMode(QAbstractItemView::SingleSelection);
 	m_LightList.setAlternatingRowColors(true);
 	m_LightList.setSortingEnabled(true);
-	m_MainLayout.addWidget(&m_LightList, 0, 0, 1, 3);
+	m_MainLayout.addWidget(&m_LightList, 0, 0, 1, 4);
 
 	// Light name
+	m_LightName.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_LightName, 1, 0);
 
 	// Add light
-	m_AddLight.setParent(this);
-	m_AddLight.setEnabled(false);
-	m_AddLight.setText("Add");
+	m_AddLight.setIcon(QIcon(":/Images/light-bulb--plus.png"));
 	m_AddLight.setToolTip("Add light");
 	m_AddLight.setStatusTip("Add a new light to the scene");
-	m_AddLight.setFixedWidth(20);
-	m_AddLight.setFixedHeight(20);
+	m_AddLight.setFixedWidth(22);
+	m_AddLight.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_AddLight, 1, 1);
 
 	// Remove light
-	m_RemoveLight.setParent(this);
-	m_RemoveLight.setEnabled(false);
-	m_RemoveLight.setText("Remove");
+	m_RemoveLight.setIcon(QIcon(":/Images/light-bulb--minus.png"));
 	m_RemoveLight.setToolTip("Remove light");
 	m_RemoveLight.setStatusTip("Remove a light from the scene");
-	m_RemoveLight.setFixedWidth(20);
-	m_RemoveLight.setFixedHeight(20);
+	m_RemoveLight.setFixedWidth(22);
+	m_RemoveLight.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_RemoveLight, 1, 2);
+
+	// Rename light
+	m_RenameLight.setIcon(QIcon(":/Images/light-bulb--pencil.png"));
+	m_RenameLight.setToolTip("Rename light");
+	m_RenameLight.setStatusTip("Rename a light from the scene");
+	m_RenameLight.setFixedWidth(22);
+	m_RenameLight.setFixedHeight(22);
+	m_MainLayout.addWidget(&m_RenameLight, 1, 3);
 
 	connect(&m_LightList, SIGNAL(itemSelectionChanged()), this, SLOT(OnLightSelectionChanged()));
 	connect(&m_AddLight, SIGNAL(clicked()), this, SLOT(OnAddLight()));

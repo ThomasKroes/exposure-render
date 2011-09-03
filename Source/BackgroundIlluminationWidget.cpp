@@ -49,10 +49,13 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	// Texture
 	m_MainLayout.addWidget(new QLabel("Texture"), 2, 0);
 
+	// Path
+	m_TextureFilePath.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_TextureFilePath, 2, 1, 1, 2);
 
-	m_LoadTexture.setFixedHeight(20);
-	m_LoadTexture.setText("...");
+	m_LoadTexture.setIcon(QIcon(":/Images/folder-open-image.png"));
+	m_LoadTexture.setFixedWidth(22);
+	m_LoadTexture.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_LoadTexture, 2, 3);
 
 //	connect(&m_ThetaSlider, SIGNAL(valueChanged(int)), &m_ThetaSpinBox, SLOT(setValue(int)));

@@ -1,12 +1,32 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-  <qresource prefix="/Icons">
+  <qresource prefix="/Images">
     <!-- Typical file operations. -->
     <file>fileopen.png</file>
     <file>filesave.png</file>
     <file>print.png</file>
 
-    <!-- Help -->
-    <file>help.png</file>
+    
+    <file>disk--plus.png</file>
+    <file>star--arrow.png</file>
+    <file>star--plus.png</file>
+    <file>star--pencil.png</file>
+    <file>star--minus.png</file>
+    <file>table-import.png</file>
+    <file>table-export.png</file>
+
+    <!-- Lighting -->
+    <file>light-bulb--plus.png</file>
+    <file>light-bulb--minus.png</file>
+    <file>light-bulb--pencil.png</file>
+
+    <!-- Node Properties -->
+    <file>arrow.png</file>
+    <file>arrow-180.png</file>
+    <file>bin.png</file>
+
+    <!-- Miscellaneous -->
+    <file>folder-open-image.png</file>
+    
   </qresource>
 </RCC>

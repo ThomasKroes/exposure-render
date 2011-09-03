@@ -66,7 +66,7 @@ private:
     void								CreateMenus(void);
     void								CreateToolBars(void);
     void								CreateStatusBar(void);
-    void								CreateDockWindows(void);
+    void								SetupDockingWidgets(void);
 	void								UpdateRecentFileActions(void);
 	QString								StrippedName(const QString& FullFileName);
 	void								SetCurrentFile(const QString& FileName);
