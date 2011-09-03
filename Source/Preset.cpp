@@ -23,3 +23,18 @@ void QPresetXML::SetName(const QString& Name)
 {
 	m_Name = Name;
 }
+
+void QPresetXML::ReadXML(QDomElement& Parent)
+{
+	SetName(Parent.attribute("Name"));
+}
+
+QDomElement QPresetXML::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+{
+	QDomElement Preset = DOM.createElement("Preset");
+	Preset.setAttribute("Name", GetName());
+
+	Parent.appendChild(Preset);
+
+	return Preset;
+}

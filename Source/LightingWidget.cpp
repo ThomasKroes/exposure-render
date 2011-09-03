@@ -17,8 +17,6 @@ QLightingWidget::QLightingWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_LightSettingsWidget, 1, 0);
 	m_MainLayout.addWidget(&m_BackgroundIlluminationWidget, 2, 0);
 	m_MainLayout.addWidget(&m_PresetsWidget);
-	
-	m_PresetsWidget.m_Presets.append(QLighting());
 
 	// Connections
 	connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
@@ -28,8 +26,14 @@ QLightingWidget::QLightingWidget(QWidget* pParent) :
 
 void QLightingWidget::OnLoadPreset(const QString& Name)
 {
+	gLighting = m_PresetsWidget.GetPreset(Name);
 }
 
 void QLightingWidget::OnSavePreset(const QString& Name)
 {
+	QLighting Preset(gLighting);
+	Preset.SetName(Name);
+
+	// Add the preset
+	m_PresetsWidget.AddPreset(Preset);
 }

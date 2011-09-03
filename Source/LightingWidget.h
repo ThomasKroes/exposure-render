@@ -24,5 +24,5 @@ protected:
 	QLightsWidget					m_LightsWidget;
 	QLightSettingsWidget			m_LightSettingsWidget;
 	QBackgroundIlluminationWidget	m_BackgroundIlluminationWidget;
-	QTemplateWidget<QLighting>		m_PresetsWidget;
+	QPresetsWidget<QLighting>		m_PresetsWidget;
 };

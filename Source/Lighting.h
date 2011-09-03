@@ -18,9 +18,14 @@ public:
 
 	QLighting& QLighting::operator=(const QLighting& Other)
 	{
+		QPresetXML::operator=(Other);
+
 		return *this;
 	}
 
-	void	ReadXML(QDomElement& Parent);
-	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	void		ReadXML(QDomElement& Parent);
+	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 };
+
+// Lighting singleton
+extern QLighting gLighting;

@@ -5,7 +5,7 @@
 #include "TransferFunctionWidget.h"
 #include "PresetsWidget.h"
 #include "NodePropertiesWidget.h"
-
+#include "TransferFunction.h"
 
 class QVolumeAppearanceDockWidget;
 
@@ -24,7 +24,7 @@ protected:
 	QGridLayout							m_MainLayout;
 	QTransferFunctionWidget				m_TransferFunctionWidget;
 	QNodePropertiesWidget				m_NodePropertiesWidget;
-	QTemplateWidget<QTransferFunction>	m_PresetsWidget;
+	QPresetsWidget<QTransferFunction>	m_PresetsWidget;
 };
 
 class QVolumeAppearanceDockWidget : public QDockWidget

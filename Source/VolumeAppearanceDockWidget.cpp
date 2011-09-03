@@ -32,7 +32,8 @@ void QVolumeAppearanceWidget::OnSavePreset(const QString& Name)
 	QTransferFunction Preset(gTransferFunction);
 	Preset.SetName(Name);
 
-	m_PresetsWidget.m_Presets.append(Preset);
+	// Add the preset
+	m_PresetsWidget.AddPreset(Preset);
 }
 
 QVolumeAppearanceDockWidget::QVolumeAppearanceDockWidget(QWidget *parent) :

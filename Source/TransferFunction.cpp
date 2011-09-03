@@ -157,7 +157,7 @@ void QNode::ReadXML(QDomElement& Parent)
 	m_Color.setBlue(Kd.attribute("B").toInt());
 }
 
-void QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 {
 	// Node
 	QDomElement Node = DOM.createElement("Node");
@@ -195,11 +195,12 @@ void QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	Ks.setAttribute("G", m_Color.green());
 	Ks.setAttribute("B", m_Color.blue());
 	Node.appendChild(Ks);
+
+	return Node;
 }
 
 QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	QPresetXML(pParent),
-	m_Name(Name),
 	m_Nodes(),
 	m_RangeMin(0.0f),
 	m_RangeMax(255.0f),
@@ -211,9 +212,10 @@ QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 
 QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other)			
 {
+	QPresetXML::operator=(Other);
+
 	blockSignals(true);
 
-	m_Name			= Other.m_Name;
 	m_Nodes			= Other.m_Nodes;
 	m_RangeMin		= Other.m_RangeMin;
 	m_RangeMax		= Other.m_RangeMax;
@@ -242,16 +244,6 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 	SetSelectedNode(NULL);
 
 	return *this;
-}
-
-QString	QTransferFunction::GetName(void) const
-{
-	return m_Name;
-}
-
-void QTransferFunction::SetName(const QString& Name)
-{
-	m_Name = Name;
 }
 
 float QTransferFunction::GetRangeMin(void) const
@@ -498,10 +490,11 @@ void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
 
 void QTransferFunction::ReadXML(QDomElement& Parent)
 {
+	QPresetXML::ReadXML(Parent);
+
 	// Don't fire events during loading
 	blockSignals(true);
 
-	SetName(Parent.attribute("Name", "Failed"));
 	SetRangeMin(Parent.attribute("RangeMin", "Failed").toInt());
 	SetRangeMax(Parent.attribute("RangeMax", "Failed").toInt());
 
@@ -525,32 +518,25 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 
 	UpdateNodeRanges();
 
-	qDebug() << m_Name << "transfer function preset loaded";
-
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
 }
 
-void QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 {
 	// Create transfer function preset root element
-	QDomElement Root = DOM.createElement("Preset");
-	Parent.appendChild(Root);
+	QDomElement Preset = QPresetXML::WriteXML(DOM, Parent);
 
-	Root.setAttribute("Name", m_Name);
-	Root.setAttribute("RangeMin", m_RangeMin);
-	Root.setAttribute("RangeMax", m_RangeMax);
+	Parent.appendChild(Preset);
+	Preset.setAttribute("RangeMin", m_RangeMin);
+	Preset.setAttribute("RangeMax", m_RangeMax);
 
 	// Nodes
 	QDomElement Nodes = DOM.createElement("Nodes");
-	Root.appendChild(Nodes);
+	Preset.appendChild(Nodes);
 
 	for (int i = 0; i < m_Nodes.size(); i++)
-	{
 		m_Nodes[i].WriteXML(DOM, Nodes);
-	}
 
-	qDebug() << m_Name << "transfer function preset saved";
+	return Preset;
 }
-
-

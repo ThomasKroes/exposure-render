@@ -63,28 +63,28 @@ public:
 		return m_ID == Other.m_ID;
 	}
 
-	float	GetNormalizedIntensity(void) const;
-	void	SetNormalizedIntensity(const float& NormalizedX);
-	float	GetNormalizedOpacity(void) const;
-	void	SetNormalizedOpacity(const float& NormalizedY);
-	float	GetIntensity(void) const;
-	void	SetIntensity(const float& Position);
-	float	GetOpacity(void) const;
-	void	SetOpacity(const float& Opacity);
-	QColor	GetColor(void) const;
-	void	SetColor(const QColor& Color);
-	float	GetMinX(void) const;
-	void	SetMinX(const float& MinX);
-	float	GetMaxX(void) const;
-	void	SetMaxX(const float& MaxX);
-	float	GetMinY(void) const;
-	void	SetMinY(const float& MinY);
-	float	GetMaxY(void) const;
-	void	SetMaxY(const float& MaxY);
-	bool	InRange(const QPointF& Point);
-	int		GetID(void) const;
-	void	ReadXML(QDomElement& Parent);
-	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	float		GetNormalizedIntensity(void) const;
+	void		SetNormalizedIntensity(const float& NormalizedX);
+	float		GetNormalizedOpacity(void) const;
+	void		SetNormalizedOpacity(const float& NormalizedY);
+	float		GetIntensity(void) const;
+	void		SetIntensity(const float& Position);
+	float		GetOpacity(void) const;
+	void		SetOpacity(const float& Opacity);
+	QColor		GetColor(void) const;
+	void		SetColor(const QColor& Color);
+	float		GetMinX(void) const;
+	void		SetMinX(const float& MinX);
+	float		GetMaxX(void) const;
+	void		SetMaxX(const float& MaxX);
+	float		GetMinY(void) const;
+	void		SetMinY(const float& MinY);
+	float		GetMaxY(void) const;
+	void		SetMaxY(const float& MaxY);
+	bool		InRange(const QPointF& Point);
+	int			GetID(void) const;
+	void		ReadXML(QDomElement& Parent);
+	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
 	void NodeChanged(QNode* pNode);
@@ -126,8 +126,6 @@ public:
 	void				AddNode(const float& Position, const float& Opacity, const QColor& Color);
 	void				AddNode(const QNode& pNode);
 	void				RemoveNode(QNode* pNode);
-	QString				GetName(void) const;
-	void				SetName(const QString& Name);
 	float				GetRangeMin(void) const;
 	void				SetRangeMin(const float& RangeMin);
 	float				GetRangeMax(void) const;
@@ -145,7 +143,7 @@ public:
 	const QHistogram&	GetHistogram(void) const;		
 	void				SetHistogram(const int* pBins, const int& NoBins);
 	void				ReadXML(QDomElement& Parent);
-	void				WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	QDomElement			WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);
@@ -158,13 +156,12 @@ signals:
 	void	HistogramChanged(void);
 
 protected:
-	QString		m_Name;
-	QNodeList	m_Nodes;
-	float		m_RangeMin;
-	float		m_RangeMax;
-	float		m_Range;
-	QNode*		m_pSelectedNode;
-	QHistogram	m_Histogram;
+	QNodeList		m_Nodes;
+	float			m_RangeMin;
+	float			m_RangeMax;
+	float			m_Range;
+	QNode*			m_pSelectedNode;
+	QHistogram		m_Histogram;
 
 	friend class QNode;
 };

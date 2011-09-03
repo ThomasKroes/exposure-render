@@ -23,12 +23,17 @@ public:
 
 	QCamera& QCamera::operator=(const QCamera& Other)
 	{
+		QPresetXML::operator=(Other);
+		
 		return *this;
 	}
 
-	void	ReadXML(QDomElement& Parent);
-	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	void			ReadXML(QDomElement& Parent);
+	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 };
+
+// Camera singleton
+extern QCamera gCamera;
 
 class CCameraWidget : public QWidget
 {
@@ -37,11 +42,15 @@ class CCameraWidget : public QWidget
 public:
     CCameraWidget(QWidget* pParent = NULL);
 
+public slots:
+	void OnLoadPreset(const QString& Name);
+	void OnSavePreset(const QString& Name);
+
 private:
 	QGridLayout					m_MainLayout;
 	CFilmWidget					m_FilmWidget;
 	CApertureWidget				m_ApertureWidget;
 	CProjectionWidget			m_ProjectionWidget;
 	CFocusWidget				m_FocusWidget;
-	QTemplateWidget<QCamera>	m_PresetsWidget;
+	QPresetsWidget<QCamera>		m_PresetsWidget;
 };

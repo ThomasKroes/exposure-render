@@ -4,8 +4,6 @@
 #include <QtXml\qdom.h>
 
 #include "Preset.h"
-#include "TransferFunction.h"
-#include "Lighting.h"
 
 class QTestWidget : public QGroupBox
 {
@@ -176,16 +174,16 @@ protected:
 };
 
 template <class T>
-class QTemplateWidget : public QTestWidget
+class QPresetsWidget : public QTestWidget
 {
 public:
-	QTemplateWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
+	QPresetsWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
 		QTestWidget(pParent, InternalName, UserInterfaceName)
 	{
 		LoadPresets(false);
 	}
 
-	virtual ~QTemplateWidget(void)
+	virtual ~QPresetsWidget(void)
 	{
 		SavePresets(false);
 	}
@@ -230,9 +228,9 @@ public:
 		QString CurrentPath = QDir::currentPath();
 
 		// File name + extension
-		QString FileName = m_InternalName + ".xml";
+		QString FileName = m_InternalName + "Presets.xml";
 
-		qDebug("Loading " + m_UserInterfaceName + " presets from file: " + CurrentPath + "/" + FileName);
+		qDebug(QString("Loading " + m_UserInterfaceName + " presets from file: " + CurrentPath + "/" + FileName).toAscii());
 
 		// Set the file name
 		if (ChoosePath)
@@ -248,7 +246,7 @@ public:
 		// Open the XML file for reading
 		if (!XmlFile.open(QIODevice::ReadOnly))
 		{
-			qDebug("Failed to open file for reading: " + XmlFile.errorString());
+			qDebug(QString("Failed to open file for reading: " + XmlFile.errorString()).toAscii());
 			return;
 		}
 
@@ -296,9 +294,9 @@ public:
 		QString CurrentPath = QDir::currentPath();
 
 		// File name + extension
-		QString FileName = m_InternalName + ".xml";
+		QString FileName = m_InternalName + "Presets.xml";
 
-		qDebug("Saving " + m_UserInterfaceName + " presets to file: " + CurrentPath + "/" + FileName);
+		qDebug(QString("Saving " + m_UserInterfaceName + " presets to file: " + CurrentPath + "/" + FileName).toAscii());
 
 		// Set the file name
 		if (ChoosePath)
@@ -314,7 +312,7 @@ public:
 		// Open the XML file for writing
 		if (!XmlFile.open(QIODevice::WriteOnly ))
 		{
-			qDebug("Failed to open file for writing: " + XmlFile.errorString());
+			qDebug(QString("Failed to open file for writing: " + XmlFile.errorString()).toAscii());
 			return;
 		}
 
@@ -352,13 +350,12 @@ public:
 		UpdatePresetsList();
 	};
 
-	void SavePreset(T Preset)
+	void AddPreset(T Preset)
 	{
-		for (int i = 0; i < m_Presets.size(); i++)
-		{
-			if (Preset.GetName() == m_Presets[i].GetName())
+		m_Presets.append(Preset);
 
-		}
+		// Update GUI
+		UpdatePresetsList();
 	}
 
 	T GetPreset(const QString& Name)
