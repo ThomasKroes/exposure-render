@@ -275,10 +275,10 @@ float QTransferFunction::GetRange(void) const
 
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
 {
-	if (pSelectedNode == NULL)
-		qDebug("Selection cleared");
-	else
-		qDebug("Node %d is being selected", pSelectedNode->GetID());
+// 	if (pSelectedNode == NULL)
+// 		qDebug("Selection cleared");
+// 	else
+// 		qDebug("Node %d is being selected", pSelectedNode->GetID());
 
 	m_pSelectedNode = pSelectedNode;
 	emit SelectionChanged(m_pSelectedNode);
@@ -289,7 +289,7 @@ void QTransferFunction::SetSelectedNode(const int& Index)
 	if (m_Nodes.size() <= 0)
 		return;
 
-	qDebug("Node %d is being selected", Index);
+// 	qDebug("Node %d is being selected", Index);
 
 	// Compute new index
 	const int NewIndex = qMin(m_Nodes.size(), qMax(0, Index));
@@ -394,7 +394,7 @@ void QTransferFunction::AddNode(const QNode& Node)
 	// Select the last node that was added
 	SetSelectedNode(NodeIndex);
 
-	qDebug("Added a node");
+// 	qDebug("Added a node");
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)
@@ -421,7 +421,7 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 	// Inform others that our node count has changed
 	emit NodeCountChanged();
 
-	qDebug("Removed a node");
+// 	qDebug("Removed a node");
 }
 
 void QTransferFunction::UpdateNodeRanges(void)
@@ -485,7 +485,7 @@ void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
 	// Inform other that the histogram has changed
 	emit HistogramChanged();
 
-	qDebug("Histogram was set");
+// 	qDebug("Histogram was set");
 }
 
 void QTransferFunction::ReadXML(QDomElement& Parent)

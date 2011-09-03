@@ -98,8 +98,16 @@ void QTestWidget::OnRenamePreset(void)
 	if (m_PresetName.currentIndex() < 0 || m_PresetName.lineEdit()->text().isEmpty())
 		return;
 
+	QInputDialog InputDialog;
+
+	InputDialog.setTextValue(m_PresetName.lineEdit()->text());
+	InputDialog.setLabelText("Name");
+	InputDialog.setWindowIcon(QIcon(":/Images/pencil-field.png"));
+
+	InputDialog.exec();
+
 	// Get new name
-	QString Name = QInputDialog::getText(this, "Rename Preset", "Name", QLineEdit::Normal, m_PresetName.lineEdit()->text());
+	QString Name = InputDialog.textValue();
 
 	// Rename
 	if (!Name.isEmpty())

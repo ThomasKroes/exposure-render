@@ -55,6 +55,8 @@ void QColorPushButton::mousePressEvent(QMouseEvent* pEvent)
 
 	connect(&ColorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
 
+	ColorDialog.setWindowIcon(QIcon(":/Images/color--pencil.png"));
+
 	ColorDialog.exec();
 
 	disconnect(&ColorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
@@ -106,3 +108,4 @@ QFloatSlider::QFloatSlider(QWidget* pParent /*= NULL*/) :
 {
 
 }
+

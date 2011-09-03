@@ -180,7 +180,7 @@ pImageCast->SetOutputScalarTypeToShort();
 	Histogram->Update();
  
 	// Update the histogram in the transfer function
-	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
+//	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
 	
 	// Delete progress dialog
 	gpProgressDialog->close();

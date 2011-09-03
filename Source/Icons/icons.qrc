@@ -27,6 +27,8 @@
 
     <!-- Miscellaneous -->
     <file>folder-open-image.png</file>
+    <file>color--pencil.png</file>
+    <file>pencil-field.png</file>
     
   </qresource>
 </RCC>

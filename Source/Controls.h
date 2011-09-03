@@ -44,3 +44,4 @@ private slots:
 private:
 	float	m_Factor;
 };
+
