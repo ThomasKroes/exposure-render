@@ -15,11 +15,14 @@ class QLightingWidget : public QWidget
 public:
     QLightingWidget(QWidget* pParent = NULL);
 
+public slots:
+	void OnLoadPreset(const QString& Name);
+	void OnSavePreset(const QString& Name);
+
 protected:
 	QGridLayout						m_MainLayout;
 	QLightSettingsWidget			m_LightSettingsWidget;
 	QLightsWidget					m_LightsWidget;
 	QBackgroundIlluminationWidget	m_BackgroundIlluminationWidget;
-	QPresetsWidget					m_LightingPresetsWidget;
-	QPresets<QLighting>				m_Presets;
+	QTemplateWidget<QLighting>		m_PresetsWidget;
 };

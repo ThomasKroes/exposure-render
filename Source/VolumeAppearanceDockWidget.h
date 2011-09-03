@@ -23,9 +23,8 @@ public slots:
 protected:
 	QGridLayout							m_MainLayout;
 	QTransferFunctionWidget				m_TransferFunctionWidget;
-//	QPresetsWidget						m_PresetsWidget;
 	QNodePropertiesWidget				m_NodePropertiesWidget;
-	QTemplateWidget<QTransferFunction>	m_Presets;
+	QTemplateWidget<QTransferFunction>	m_PresetsWidget;
 };
 
 class QVolumeAppearanceDockWidget : public QDockWidget

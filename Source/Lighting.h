@@ -2,7 +2,9 @@
 
 #include <QtGui>
 
-class QLighting : public QObject
+#include "Preset.h"
+
+class QLighting : public QPresetXML
 {
 	Q_OBJECT
 
@@ -18,4 +20,7 @@ public:
 	{
 		return *this;
 	}
+
+	void	ReadXML(QDomElement& Parent);
+	void	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 };

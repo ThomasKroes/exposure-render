@@ -5,119 +5,22 @@
 
 #include "Preset.h"
 #include "TransferFunction.h"
-
-class QPresetItem : public QListWidgetItem
-{
-public:
-	QPresetItem(QListWidget* pListWidget, const QString& Name, void* pData) :
-		QListWidgetItem(pListWidget),
-		m_pData(pData)
-	{
-		setText(Name);
-	}
-
-	void* m_pData;
-};
-
-template <class T>
-class QPresets
-{
-public:
-	void Add(T Preset)
-	{
-		m_Presets.append(Preset);
-	}
-
-	void Remove(T Preset)
-	{
-		m_Presets.remove(Preset);
-	}
-
-	void LoadPresetsFromFile(const bool& ChoosePath = false)
-	{
-
-	}
-
-	void SavePresetsFromFile(const bool& ChoosePath = false)
-	{
-
-	}
-
-protected slots:
-
-protected:
-	QList<T>		m_Presets;
-};
-
-class QPresetsWidget : public QGroupBox
-{
-    Q_OBJECT
-
-public:
-	QPresetsWidget(const QString& PresetFileName = "", QWidget* pParent = NULL);
-
-	void CreateUI(void);
-
-	void CreateConnections(void);
-
-	void LoadPresetsFromFile(const bool& ChoosePath = false);
-
-	void SavePresetsToFile(const bool& ChoosePath = false);
-
-	void LoadPresets(QDomElement& Root);
-
-	void SavePresets(QDomDocument& DomDoc, QDomElement& Root);
-
-	void LoadPreset(QPresetXML* pPreset);
-
-	void SavePreset(const QString& Name);
-
-	void UpdatePresetsList(void);
-
-	void OnLoadPreset(void);
-
-	void OnSavePreset(void);
-
-	void OnRemovePreset(void);
-
-	void OnLoadPresets(void);
-
-	void OnSavePresets(void);
-
-	void OnPresetNameChanged(const QString& Text);
-
-	void OnPresetItemChanged(QListWidgetItem* pWidgetItem);
-
-	void OnApplicationAboutToExit(void);
-
-	virtual QSize sizeHint() const { return QSize(10, 10); }
-
-protected slots:
-
-protected:
-	QString			m_PresetFileName;
-	QGridLayout		m_MainLayout;
-	QComboBox		m_PresetName;
-	QPushButton		m_LoadPreset;
-	QPushButton		m_SavePreset;
-	QPushButton		m_RenamePreset;
-	QPushButton		m_RemovePreset;
-	QPushButton		m_LoadPresets;
-	QPushButton		m_SavePresets;
-	QPresetList		m_PresetItems;
-};
+#include "Lighting.h"
 
 class QTestWidget : public QGroupBox
 {
 	Q_OBJECT
 
 public:
-	QTestWidget(void)
+	QTestWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
+		QGroupBox(pParent),
+		m_InternalName(InternalName),
+		m_UserInterfaceName(UserInterfaceName)
 	{
 		// Title, status and tooltip
 		setTitle("Presets");
-		setToolTip("Presets");
-		setStatusTip("Presets");
+		setToolTip(UserInterfaceName.toLower() + " presets");
+		setStatusTip(UserInterfaceName + " presets");
 
 		// Assign layout
 		setLayout(&m_MainLayout);
@@ -128,48 +31,48 @@ public:
 
 		// Load preset
 		m_LoadPreset.setText("L");
-		m_LoadPreset.setToolTip("Load preset");
-		m_LoadPreset.setStatusTip("Load transfer function preset");
+		m_LoadPreset.setToolTip("Load " + m_UserInterfaceName.toLower() + " preset");
+		m_LoadPreset.setStatusTip("Load " + m_UserInterfaceName.toLower() + " preset");
 		m_LoadPreset.setFixedWidth(20);
 		m_LoadPreset.setFixedHeight(20);
 		m_MainLayout.addWidget(&m_LoadPreset, 0, 1);
 
 		// Save Preset
 		m_SavePreset.setText("S");
-		m_SavePreset.setToolTip("Save Preset");
-		m_SavePreset.setStatusTip("Save transfer function preset");
+		m_SavePreset.setToolTip("Save " + m_UserInterfaceName.toLower() + " Preset");
+		m_SavePreset.setStatusTip("Save " + m_UserInterfaceName.toLower() + " preset");
 		m_SavePreset.setFixedWidth(20);
 		m_SavePreset.setFixedHeight(20);
 		m_MainLayout.addWidget(&m_SavePreset, 0, 2);
 
 		// Rename Preset
 		m_RenamePreset.setText("S");
-		m_RenamePreset.setToolTip("Rename Preset");
-		m_RenamePreset.setStatusTip("Rename transfer function preset");
+		m_RenamePreset.setToolTip("Rename " + m_UserInterfaceName.toLower() + " Preset");
+		m_RenamePreset.setStatusTip("Rename " + m_UserInterfaceName.toLower() + " preset");
 		m_RenamePreset.setFixedWidth(20);
 		m_RenamePreset.setFixedHeight(20);
 		m_MainLayout.addWidget(&m_RenamePreset, 0, 3);
 
 		// Remove preset
 		m_RemovePreset.setText("R");
-		m_RemovePreset.setToolTip("Remove Preset");
-		m_RemovePreset.setStatusTip("Remove transfer function preset");
+		m_RemovePreset.setToolTip("Remove " + m_UserInterfaceName.toLower() + " Preset");
+		m_RemovePreset.setStatusTip("Remove " + m_UserInterfaceName.toLower() + " preset");
 		m_RemovePreset.setFixedWidth(20);
 		m_RemovePreset.setFixedHeight(20);
 		m_MainLayout.addWidget(&m_RemovePreset, 0, 4);
 
 		// Load presets
 		m_LoadPresets.setText("LF");
-		m_LoadPresets.setToolTip("Load presets from files");
-		m_LoadPresets.setStatusTip("Load transfer function presets from file");
+		m_LoadPresets.setToolTip("Load " + m_UserInterfaceName.toLower() + " presets from file");
+		m_LoadPresets.setStatusTip("Load " + m_UserInterfaceName.toLower() + " presets from file");
 		m_LoadPresets.setFixedWidth(20);
 		m_LoadPresets.setFixedHeight(20);
 		m_MainLayout.addWidget(&m_LoadPresets, 0, 5);
 
 		// Save presets
 		m_SavePresets.setText("SF");
-		m_SavePresets.setToolTip("Save presets to file");
-		m_SavePresets.setStatusTip("Save transfer function presets to file");
+		m_SavePresets.setToolTip("Save " + m_UserInterfaceName.toLower() + " presets to file");
+		m_SavePresets.setStatusTip("Save " + m_UserInterfaceName.toLower() + " presets to file");
 		m_SavePresets.setFixedWidth(20);
 		m_SavePresets.setFixedHeight(20);
 		m_MainLayout.addWidget(&m_SavePresets, 0, 6);
@@ -259,6 +162,8 @@ signals:
 	void SavePreset(const QString& Name);
 
 protected:
+	QString			m_InternalName;
+	QString			m_UserInterfaceName;
 	QGridLayout		m_MainLayout;
 	QComboBox		m_PresetName;
 	QPushButton		m_LoadPreset;
@@ -274,10 +179,15 @@ template <class T>
 class QTemplateWidget : public QTestWidget
 {
 public:
-	QTemplateWidget(const QString& Name) :
-		QTestWidget(),
-		m_Name(Name)
+	QTemplateWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
+		QTestWidget(pParent, InternalName, UserInterfaceName)
 	{
+		LoadPresets(false);
+	}
+
+	virtual ~QTemplateWidget(void)
+	{
+		SavePresets(false);
 	}
 
 	void UpdatePresetsList(void)
@@ -322,7 +232,7 @@ public:
 		QString CurrentPath = QDir::currentPath();
 
 		// File name + extension
-		QString FileName = m_Name + ".xml";
+		QString FileName = m_InternalName + ".xml";
 
 		// Set the file name
 		if (ChoosePath)
@@ -388,7 +298,7 @@ public:
 		QString CurrentPath = QDir::currentPath();
 
 		// File name + extension
-		QString FileName = m_Name + ".xml";
+		QString FileName = m_InternalName + ".xml";
 
 		// Set the file name
 		if (ChoosePath)
@@ -409,7 +319,7 @@ public:
 		}
 
 		// Document object model for XML
-		QDomDocument DOM("Presets");
+		QDomDocument DOM(m_InternalName);
 
 		// Document root
 		QDomElement Root = DOM.documentElement();
@@ -451,12 +361,17 @@ public:
 		}
 	}
 
-	T GetPreset(void)
+	T GetPreset(const QString& Name)
 	{
-		T Test;
-		return Test;
+		for (int i = 0; i < m_Presets.size(); i++)
+		{
+			if (m_Presets[i].GetName() == Name)
+				return m_Presets[i];
+		}
+
+		T Preset;
+		return Preset;
 	}
 
-	QString		m_Name;
 	QList<T>	m_Presets;
 };
