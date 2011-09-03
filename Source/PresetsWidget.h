@@ -118,7 +118,7 @@ public:
 		if (ChoosePath)
 		{
 			// Create open file dialog
-			XmlFile.setFileName(QFileDialog::getOpenFileName(this, "Load " + m_UserInterfaceName + " preset from file", "", tr("XML Files (*.xml)")));
+			XmlFile.setFileName(GetOpenFileName("Load " + m_UserInterfaceName + " presets from file", "XML Preset Files (*.xml)"));
 		}
 		else
 		{
@@ -184,7 +184,7 @@ public:
 		if (ChoosePath)
 		{
 			// Create open file dialog
-			XmlFile.setFileName(QFileDialog::getSaveFileName(this, "Save " + m_UserInterfaceName + " preset to file", "", tr("XML Files (*.xml)")));
+			XmlFile.setFileName(GetSaveFileName("Save " + m_UserInterfaceName + " presets to file", "XML Preset Files (*.xml)"));
 		}
 		else
 		{

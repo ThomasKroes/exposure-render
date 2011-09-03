@@ -46,7 +46,7 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	m_Tree.setHeaderLabels(ColumnNames);
 
 	// Configure headers
-	m_Tree.header()->setResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
+//	m_Tree.header()->setResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
 //	m_Tree.header()->setResizeMode(1, QHeaderView::ResizeMode::ResizeToContents);
 //	m_Tree.header()->setResizeMode(2, QHeaderView::ResizeMode::ResizeToContents);
 	m_Tree.header()->setWindowIcon(QIcon(":/Images/table-export.png"));
@@ -58,12 +58,14 @@ void QStatisticsWidget::PopulateTree(void)
 {
 	// Performance
 	QTreeWidgetItem* pPerformance = AddItem(NULL, "Performance");
+	pPerformance->setIcon(0, QIcon(":/Images/alarm-clock.png"));
 
 	AddItem(pPerformance, "Tracer FPS", "", "Frames/Sec.");
 	AddItem(pPerformance, "No. Iterations", "", "Iterations");
 
 	// Memory
 	QTreeWidgetItem* pMemory = AddItem(NULL, "Memory");
+	pMemory->setIcon(0, QIcon(":/Images/memory.png"));
 
 	AddItem(pMemory, "Volume (Cuda)", "", "MB");
 	AddItem(pMemory, "HDR Accumulation Buffer (Cuda)", "", "MB");
@@ -73,6 +75,7 @@ void QStatisticsWidget::PopulateTree(void)
 
 	// Volume
 	QTreeWidgetItem* pVolume = AddItem(NULL, "Volume");
+	pVolume->setIcon(0, QIcon(":/Images/grid.png"));
 
 	AddItem(pVolume, "File", "");
 	AddItem(pVolume, "Bounding Box");
@@ -82,8 +85,9 @@ void QStatisticsWidget::PopulateTree(void)
 	AddItem(pVolume, "No. Voxels");
 	AddItem(pVolume, "Density Range");
 
-	// Volume
+	// Camera
 	QTreeWidgetItem* pCamera = AddItem(NULL, "Camera");
+	pCamera->setIcon(0, QIcon(":/Images/camera.png"));
 
 	AddItem(pCamera, "Resolution", "", "Pixels");
 	AddItem(pCamera, "Position");

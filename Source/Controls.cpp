@@ -109,3 +109,31 @@ QFloatSlider::QFloatSlider(QWidget* pParent /*= NULL*/) :
 
 }
 
+
+QString GetOpenFileName(const QString& Caption, const QString& Filter)
+{
+	QFileDialog FileDialog;
+
+	FileDialog.setWindowTitle(Caption);
+	FileDialog.setFilter(Filter);
+	FileDialog.setOption(QFileDialog::Option::DontUseNativeDialog, true);
+	FileDialog.setWindowIcon(QIcon(":/Images/folder-open-document.png"));
+
+	FileDialog.exec();
+
+	return FileDialog.selectedFiles().value(0);
+}
+
+QString GetSaveFileName(const QString& Caption, const QString& Filter)
+{
+	QFileDialog FileDialog;
+	
+	FileDialog.setWindowTitle(Caption);
+	FileDialog.setFilter(Filter);
+	FileDialog.setOption(QFileDialog::Option::DontUseNativeDialog, true);
+	FileDialog.setWindowIcon(QIcon(":/Images/disk.png"));
+
+	FileDialog.exec();
+
+	return FileDialog.selectedFiles().value(0);
+}

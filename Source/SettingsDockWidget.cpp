@@ -15,8 +15,8 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	m_pBackwardLabel(NULL)
 {
 	setTitle("Tracer");
-	setToolTip("Tracer settings");
-
+	setTitle("Tracer Properties");
+	
 	// Create grid layout
 	m_pGridLayout = new QGridLayout();
 	m_pGridLayout->setColSpacing(0, 70);
@@ -219,8 +219,9 @@ QSettingsDockWidget::QSettingsDockWidget(QWidget* pParent) :
 	QDockWidget(pParent),
 	m_pSettingsWidget(NULL)
 {
-	setWindowTitle("Settings");
-	setToolTip("Volume tracer settings");
+	setWindowTitle("Tracer Settings");
+	setToolTip("<img src=':/Images/gear.png'><div>Tracer Properties</div>");
+	setWindowIcon(QIcon(":/Images/gear.png"));
 
 	m_pSettingsWidget = new CSettingsWidget(this);
 	

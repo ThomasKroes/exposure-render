@@ -45,3 +45,5 @@ private:
 	float	m_Factor;
 };
 
+QString GetOpenFileName(const QString& Caption, const QString& Filter);
+QString GetSaveFileName(const QString& Caption, const QString& Filter);

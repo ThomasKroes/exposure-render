@@ -7,7 +7,8 @@ QLightingDockWidget::QLightingDockWidget(QWidget* pParent) :
 {
 	// Window title and tooltip
 	setWindowTitle("Lighting");
-	setToolTip("Lighting configuration");
+	setToolTip("<img src=':/Images/light-bulb.png'><div>Lighting Properties</div>");
+	setWindowIcon(QIcon(":/Images/light-bulb.png"));
 
 	// Apply widget
 	setWidget(&m_LightingWidget);

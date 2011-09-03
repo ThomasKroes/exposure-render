@@ -286,7 +286,7 @@ QString CMainWindow::StrippedName(const QString& FullFileName)
 void CMainWindow::Open()
 {
 	// Create open file dialog
-    QString FileName = QFileDialog::getOpenFileName(this, tr("Open volume"), "", tr("Volume Files (*.mhd)"));
+    QString FileName = GetOpenFileName("Open volume", "Meta Image Volume Files (*.mhd)");
 
 	SetCurrentFile(FileName);
 

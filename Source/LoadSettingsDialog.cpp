@@ -26,6 +26,7 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 	resize(400, 100);
 
 	setWindowTitle("Import settings");
+	setWindowIcon(QIcon(":/Images/gear.png"));
 
 	// Create main layout
 	m_pMainLayout = new QVBoxLayout(this);

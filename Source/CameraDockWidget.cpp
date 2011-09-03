@@ -8,7 +8,8 @@ QCameraDockWidget::QCameraDockWidget(QWidget* pParent) :
 	m_CameraWidget()
 {
 	setWindowTitle("Camera");
-	setToolTip("Camera settings");
+	setToolTip("<img src=':/Images/camera.png'><div>Camera Properties</div>");
+	setWindowIcon(QIcon(":/Images/camera.png"));
 
 	setWidget(&m_CameraWidget);
 }
