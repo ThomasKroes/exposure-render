@@ -2,7 +2,7 @@
 
 #include <QtGui>
 
-#include "ColorButtonWidget.h"
+#include "Controls.h"
 
 class QTransferFunction;
 class QNode;

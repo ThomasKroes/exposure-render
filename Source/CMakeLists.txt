@@ -65,7 +65,6 @@ SET(SimpleViewSrcs
 	LoadSettingsDialog.cpp
 	VtkWidget.cpp
 	Scene.cpp
-	ColorButtonWidget.cpp
 	TransferFunction.cpp
 	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
@@ -76,6 +75,7 @@ SET(SimpleViewSrcs
 	VolumeAppearanceDockWidget.cpp
 	PresetsWidget.cpp
 	Preset.cpp
+	Controls.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
@@ -116,7 +116,6 @@ SET(SimpleViewHeaders
 	LoadSettingsDialog.h
 	VtkWidget.h
 	Scene.h
-	ColorButtonWidget.h
 	TransferFunction.h
 	TransferFunctionCanvas.h
 	TransferFunctionView.h
@@ -127,6 +126,7 @@ SET(SimpleViewHeaders
 	VolumeAppearanceDockWidget.h
 	PresetsWidget.h
 	Preset.h
+	Controls.h
 )
 
 SET(SimpleViewResources Icons/icons.qrc)

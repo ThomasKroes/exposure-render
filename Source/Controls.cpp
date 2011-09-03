@@ -1,8 +1,8 @@
 
-#include "ColorButtonWidget.h"
+#include "Controls.h"
 
 QColorPushButton::QColorPushButton(QWidget* pParent) :
-	QPushButton(pParent),
+QPushButton(pParent),
 	m_Margin(5),
 	m_Radius(5),
 	m_Color(Qt::gray)
@@ -93,4 +93,11 @@ void QColorPushButton::OnCurrentColorChanged(const QColor& Color)
 	SetColor(Color);
 
 	emit currentColorChanged(m_Color);
+}
+
+QFloatSlider::QFloatSlider(QWidget* pParent /*= NULL*/) :
+	QSlider(pParent),
+	m_Factor(10000.0f)
+{
+
 }
