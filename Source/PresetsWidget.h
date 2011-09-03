@@ -19,7 +19,7 @@ public:
 	{
 		// Title, status and tooltip
 		setTitle("Presets");
-		setToolTip(UserInterfaceName.toLower() + " presets");
+		setToolTip(UserInterfaceName + " presets");
 		setStatusTip(UserInterfaceName + " presets");
 
 		// Assign layout
@@ -220,8 +220,6 @@ public:
 
 	void LoadPresets(const bool& ChoosePath)
 	{
-		qDebug("QTemplateWidget::LoadPresets");
-
 		// Clear presets list
 		m_Presets.clear();
 
@@ -234,21 +232,23 @@ public:
 		// File name + extension
 		QString FileName = m_InternalName + ".xml";
 
+		qDebug("Loading " + m_UserInterfaceName + " presets from file: " + CurrentPath + "/" + FileName);
+
 		// Set the file name
 		if (ChoosePath)
 		{
 			// Create open file dialog
-			XmlFile.setFileName(QFileDialog::getOpenFileName(this, "Load preset from file", "", tr("XML Files (*.xml)")));
+			XmlFile.setFileName(QFileDialog::getOpenFileName(this, "Load " + m_UserInterfaceName + " preset from file", "", tr("XML Files (*.xml)")));
 		}
 		else
 		{
 			XmlFile.setFileName(CurrentPath + "/" + FileName);
 		}
 
-		// Open the XML file
+		// Open the XML file for reading
 		if (!XmlFile.open(QIODevice::ReadOnly))
 		{
-			qDebug("Failed to open file for reading.");
+			qDebug("Failed to open file for reading: " + XmlFile.errorString());
 			return;
 		}
 
@@ -289,8 +289,6 @@ public:
 
 	void SavePresets(const bool& ChoosePath)
 	{
-		qDebug("QTemplateWidget::SavePresets");
-
 		// XML file containing transfer function presets
 		QFile XmlFile;
 
@@ -300,21 +298,23 @@ public:
 		// File name + extension
 		QString FileName = m_InternalName + ".xml";
 
+		qDebug("Saving " + m_UserInterfaceName + " presets to file: " + CurrentPath + "/" + FileName);
+
 		// Set the file name
 		if (ChoosePath)
 		{
 			// Create open file dialog
-			XmlFile.setFileName(QFileDialog::getSaveFileName(this, "Save preset to file", "", tr("XML Files (*.xml)")));
+			XmlFile.setFileName(QFileDialog::getSaveFileName(this, "Save " + m_UserInterfaceName + " preset to file", "", tr("XML Files (*.xml)")));
 		}
 		else
 		{
 			XmlFile.setFileName(CurrentPath + "/" + FileName);
 		}
 
-		// Open the XML file
+		// Open the XML file for writing
 		if (!XmlFile.open(QIODevice::WriteOnly ))
 		{
-			qDebug("Failed to open file for writing.");
+			qDebug("Failed to open file for writing: " + XmlFile.errorString());
 			return;
 		}
 

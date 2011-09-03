@@ -52,7 +52,12 @@ SET(SimpleViewSrcs
 	VolumePoint.cpp
 	StatisticsDockWidget.cpp
 	StatisticsWidget.cpp
+	CameraWidget.cpp
 	CameraDockWidget.cpp
+	FilmWidget.cpp
+	ApertureWidget.cpp
+	ProjectionWidget.cpp
+	FocusWidget.cpp
 	LoadVolume.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
@@ -98,7 +103,12 @@ SET(SimpleViewHeaders
 	VolumePoint.h
 	StatisticsDockWidget.h
 	StatisticsWidget.h
+	CameraWidget.h
 	CameraDockWidget.h
+	FilmWidget.h
+	ApertureWidget.h
+	ProjectionWidget.h
+	FocusWidget.h
 	LoadVolume.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h

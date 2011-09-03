@@ -4,8 +4,8 @@
 
 #include "LightsWidget.h"
 #include "LightingSettingsWidget.h"
-#include "PresetsWidget.h"
 #include "BackgroundIlluminationWidget.h"
+#include "PresetsWidget.h"
 #include "Lighting.h"
 
 class QLightingWidget : public QWidget
@@ -21,8 +21,8 @@ public slots:
 
 protected:
 	QGridLayout						m_MainLayout;
-	QLightSettingsWidget			m_LightSettingsWidget;
 	QLightsWidget					m_LightsWidget;
+	QLightSettingsWidget			m_LightSettingsWidget;
 	QBackgroundIlluminationWidget	m_BackgroundIlluminationWidget;
 	QTemplateWidget<QLighting>		m_PresetsWidget;
 };
