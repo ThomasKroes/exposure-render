@@ -7,7 +7,7 @@ QVolumeAppearanceWidget::QVolumeAppearanceWidget(QWidget* pParent) :
 	m_MainLayout(),
 	m_TransferFunctionWidget(),
 	m_NodePropertiesWidget(),
-	m_PresetsWidget("AppearancePresets.xml", this),
+//	m_PresetsWidget("AppearancePresets.xml", this),
 	m_Presets("Appearance")
 {
 	// Create main layout

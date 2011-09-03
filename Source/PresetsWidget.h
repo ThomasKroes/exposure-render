@@ -100,6 +100,7 @@ protected:
 	QComboBox		m_PresetName;
 	QPushButton		m_LoadPreset;
 	QPushButton		m_SavePreset;
+	QPushButton		m_RenamePreset;
 	QPushButton		m_RemovePreset;
 	QPushButton		m_LoadPresets;
 	QPushButton		m_SavePresets;
@@ -141,13 +142,21 @@ public:
 		m_SavePreset.setFixedHeight(20);
 		m_MainLayout.addWidget(&m_SavePreset, 0, 2);
 
+		// Rename Preset
+		m_RenamePreset.setText("S");
+		m_RenamePreset.setToolTip("Rename Preset");
+		m_RenamePreset.setStatusTip("Rename transfer function preset");
+		m_RenamePreset.setFixedWidth(20);
+		m_RenamePreset.setFixedHeight(20);
+		m_MainLayout.addWidget(&m_RenamePreset, 0, 3);
+
 		// Remove preset
 		m_RemovePreset.setText("R");
 		m_RemovePreset.setToolTip("Remove Preset");
 		m_RemovePreset.setStatusTip("Remove transfer function preset");
 		m_RemovePreset.setFixedWidth(20);
 		m_RemovePreset.setFixedHeight(20);
-		m_MainLayout.addWidget(&m_RemovePreset, 0, 3);
+		m_MainLayout.addWidget(&m_RemovePreset, 0, 4);
 
 		// Load presets
 		m_LoadPresets.setText("LF");
@@ -155,7 +164,7 @@ public:
 		m_LoadPresets.setStatusTip("Load transfer function presets from file");
 		m_LoadPresets.setFixedWidth(20);
 		m_LoadPresets.setFixedHeight(20);
-		m_MainLayout.addWidget(&m_LoadPresets, 0, 4);
+		m_MainLayout.addWidget(&m_LoadPresets, 0, 5);
 
 		// Save presets
 		m_SavePresets.setText("SF");
@@ -163,15 +172,15 @@ public:
 		m_SavePresets.setStatusTip("Save transfer function presets to file");
 		m_SavePresets.setFixedWidth(20);
 		m_SavePresets.setFixedHeight(20);
-		m_MainLayout.addWidget(&m_SavePresets, 0, 5);
+		m_MainLayout.addWidget(&m_SavePresets, 0, 6);
 
 		// Connections
 		connect(&m_LoadPreset, SIGNAL(clicked()), this, SLOT(OnLoadPreset()));
 		connect(&m_SavePreset, SIGNAL(clicked()), this, SLOT(OnSavePreset()));
+		connect(&m_RenamePreset, SIGNAL(clicked()), this, SLOT(OnRenamePreset()));
 		connect(&m_RemovePreset, SIGNAL(clicked()), this, SLOT(OnRemovePreset()));
 		connect(&m_LoadPresets, SIGNAL(clicked()), this, SLOT(OnLoadPresets()));
 		connect(&m_SavePresets, SIGNAL(clicked()), this, SLOT(OnSavePresets()));
-		connect(&m_PresetName, SIGNAL(editTextChanged(const QString&)), this, SLOT(OnEditTextChanged(const QString&)));
 		connect(&m_PresetName, SIGNAL(currentIndexChanged(int)), this, SLOT(OnCurrentIndexChanged(int)));
 	}
 
@@ -208,6 +217,16 @@ public slots:
 		emit SavePreset(m_PresetName.lineEdit()->text());
 	}
 
+	void OnRenamePreset(void)
+	{
+		if (m_PresetName.currentIndex() < 0 || m_PresetName.lineEdit()->text().length() <= 0)
+			return;
+
+		QString Name = QInputDialog::getText(this, "Rename Preset", "Name", QLineEdit::Normal, m_PresetName.lineEdit()->text());
+
+		this->RenamePreset(m_PresetName.currentIndex(), Name);
+	}
+
 	void OnRemovePreset(void)
 	{
 		this->RemovePreset();
@@ -221,14 +240,6 @@ public slots:
 	void OnLoadPresets(void)
 	{
 		this->LoadPresets(true);
-	}
-
-	void OnEditTextChanged(const QString& Name)
-	{
-		if (m_PresetName.currentIndex() <= 0)
-			return;
-
-		this->RenamePreset(m_PresetName.currentIndex(), Name);
 	}
 
 	void OnCurrentIndexChanged(int Index)
@@ -252,6 +263,7 @@ protected:
 	QComboBox		m_PresetName;
 	QPushButton		m_LoadPreset;
 	QPushButton		m_SavePreset;
+	QPushButton		m_RenamePreset;
 	QPushButton		m_RemovePreset;
 	QPushButton		m_LoadPresets;
 	QPushButton		m_SavePresets;
@@ -421,7 +433,7 @@ public:
 		XmlFile.close();
 	};
 	
-	virtual void RenamePreset(const int& Index, const QString& Name)
+	void RenamePreset(const int& Index, const QString& Name)
 	{
 		// Rename
 		m_Presets[Index].SetName(Name);
