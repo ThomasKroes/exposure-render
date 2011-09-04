@@ -52,5 +52,5 @@ void CCameraWidget::OnSavePreset(const QString& Name)
 	Preset.SetName(Name);
 
 	// Add the preset
-	m_PresetsWidget.AddPreset(Preset);
+	m_PresetsWidget.SavePreset(Preset);
 }

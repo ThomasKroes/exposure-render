@@ -2,62 +2,7 @@
 
 #include <QtGui>
 
-class QLight : public QObject
-{
-	Q_OBJECT
-
-public:
-	QLight(QObject* pParent = NULL);
-
-	QLight::QLight(const QLight& Other)
-	{
-		*this = Other;
-	};
-
-	QLight& QLight::operator=(const QLight& Other)
-	{
-		m_Name = Other.m_Name;
-
-		return *this;
-	}
-
-	QString		GetName(void);
-	void		SetName(const QString& Name);
-	float		GetTheta(void) const;
-	void		SetTheta(const float& Theta);
-	float		GetPhi(void) const;
-	void		SetPhi(const float& Phi);
-	float		GetWidth(void) const;
-	void		SetWidth(const float& Width);
-	float		GetHeight(void) const;
-	void		SetHeight(const float& Height);
-	bool		GetLockSize(void) const;
-	void		SetLockSize(const bool& LockSize);
-	float		GetDistance(void) const;
-	void		SetDistance(const float& Distance);
-	QColor		GetColor(void) const;
-	void		SetColor(const QColor& Color);
-	float		GetIntensity(void) const;
-	void		SetIntensity(const float& Intensity);
-
-signals:
-	void LightPropertiesChanged(QLight*);
-	
-protected:
-	QString		m_Name;
-	float		m_Theta;
-	float		m_Phi;
-	float		m_Distance;
-	float		m_Width;
-	float		m_Height;
-	bool		m_LockSize;
-	QColor		m_Color;
-	float		m_Intensity;
-
-	friend class QLightItem;
-};
-
-typedef QList<QLight> QLightList;
+#include "Lighting.h"
 
 class QLightItem : public QListWidgetItem
 {
@@ -66,7 +11,7 @@ public:
 		QListWidgetItem(pListWidget),
 		m_pLight(pLight)
 	  {
-		  setText(pLight->m_Name);
+		  setText(pLight->GetName());
 	  }
 
 	  QLight*	m_pLight;
@@ -88,7 +33,6 @@ protected slots:
 	void OnLightItemChanged(QListWidgetItem* pWidgetItem);
 	void OnAddLight(void);
 	void OnRemoveLight(void);
-	void OnLightPropertiesChanged(QLight* pLight);
 
 signals:
 	void LightSelectionChanged(QLight*);
@@ -96,12 +40,11 @@ signals:
 
 protected:
 	QGridLayout		m_MainLayout;
-	QLightList		m_Lights;
 	QListWidget		m_LightList;
 	QLineEdit		m_LightName;
 	QPushButton		m_AddLight;
 	QPushButton		m_RemoveLight;
 	QPushButton		m_RenameLight;
-
+	
 	friend class QLightingWidget;
 };

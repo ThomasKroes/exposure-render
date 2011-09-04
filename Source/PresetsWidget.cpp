@@ -15,7 +15,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	setLayout(&m_MainLayout);
 
 	// Name edit
-	m_PresetName.setEditable(true);
+	m_PresetName.setEditable(false);
 	m_PresetName.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_PresetName, 0, 0);
 
@@ -79,28 +79,33 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 
 void QTestWidget::OnLoadPreset(void)
 {
-	if (m_PresetName.lineEdit()->text().length() <= 0)
+	if (m_PresetName.currentText().isEmpty())
 		return;
 
-	emit LoadPreset(m_PresetName.lineEdit()->text());
+	emit LoadPreset(m_PresetName.currentText());
 }
 
 void QTestWidget::OnSavePreset(void)
 {
-	if (m_PresetName.lineEdit()->text().length() <= 0)
-		return;
+	QInputDialog InputDialog;
 
-	emit SavePreset(m_PresetName.lineEdit()->text());
+	InputDialog.setTextValue("");
+	InputDialog.setLabelText("Name");
+	InputDialog.setWindowIcon(QIcon(":/Images/pencil-field.png"));
+
+	InputDialog.exec();
+
+	emit SavePreset(InputDialog.textValue());
 }
 
 void QTestWidget::OnRenamePreset(void)
 {
-	if (m_PresetName.currentIndex() < 0 || m_PresetName.lineEdit()->text().isEmpty())
+	if (m_PresetName.currentText().isEmpty())
 		return;
 
 	QInputDialog InputDialog;
 
-	InputDialog.setTextValue(m_PresetName.lineEdit()->text());
+	InputDialog.setTextValue(m_PresetName.currentText());
 	InputDialog.setLabelText("Name");
 	InputDialog.setWindowIcon(QIcon(":/Images/pencil-field.png"));
 

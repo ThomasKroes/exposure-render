@@ -1,129 +1,9 @@
 
 #include "LightsWidget.h"
-#include "Scene.h"
-
-QLight::QLight(QObject* pParent) :
-	QObject(pParent)
-{
-	SetName("Undefined");
-	SetTheta(RandomFloat() * TWO_RAD_F);
-	SetPhi(RandomFloat() * RAD_F);
-	SetWidth(0.5f);
-	SetHeight(0.5f);
-	SetDistance(1.0f);
-	SetIntensity(1.0f);
-}
-
-QString QLight::GetName(void)
-{
-	return m_Name;
-}
-
-void QLight::SetName(const QString& Name)
-{
-	m_Name = Name;
-
-	emit LightPropertiesChanged(this);
-}
-
-float QLight::GetTheta(void) const
-{
-	return m_Theta;
-}
-
-void QLight::SetTheta(const float& Theta)
-{
-	m_Theta = Theta;
-
-	emit LightPropertiesChanged(this);
-}
-
-float QLight::GetPhi(void) const
-{
-	return m_Phi;
-}
-
-void QLight::SetPhi(const float& Phi)
-{
-	m_Phi = Phi;
-
-	emit LightPropertiesChanged(this);
-}
-
-float QLight::GetWidth(void) const
-{
-	return m_Width;
-}
-
-void QLight::SetWidth(const float& Width)
-{
-	m_Width = Width;
-
-	emit LightPropertiesChanged(this);
-}
-
-float QLight::GetHeight(void) const
-{
-	return m_Height;
-}
-
-void QLight::SetHeight(const float& Height)
-{
-	m_Height = Height;
-
-	emit LightPropertiesChanged(this);
-}
-
-bool QLight::GetLockSize(void) const
-{
-	return m_LockSize;
-}
-
-void QLight::SetLockSize(const bool& LockSize)
-{
-	m_LockSize = LockSize;
-}
-
-float QLight::GetDistance(void) const
-{
-	return m_Distance;
-}
-
-void QLight::SetDistance(const float& Distance)
-{
-	m_Distance = Distance;
-
-	emit LightPropertiesChanged(this);
-}
-
-QColor QLight::GetColor(void) const
-{
-	return m_Color;
-}
-
-void QLight::SetColor(const QColor& Color)
-{
-	m_Color = Color;
-
-	emit LightPropertiesChanged(this);
-}
-
-float QLight::GetIntensity(void) const
-{
-	return m_Intensity;
-}
-
-void QLight::SetIntensity(const float& Intensity)
-{
-	m_Intensity = Intensity;
-
-	emit LightPropertiesChanged(this);
-}
 
 QLightsWidget::QLightsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_MainLayout(),
-	m_Lights(),
 	m_LightList(),
 	m_LightName(),
 	m_AddLight(),
@@ -140,7 +20,6 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	setLayout(&m_MainLayout);
 
 	// Lights list
-//	m_LightList.setParent(this);
 	m_LightList.setSelectionMode(QAbstractItemView::SingleSelection);
 	m_LightList.setAlternatingRowColors(true);
 	m_LightList.setSortingEnabled(true);
@@ -174,21 +53,22 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_RenameLight.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_RenameLight, 1, 3);
 
-	connect(&m_LightList, SIGNAL(itemSelectionChanged()), this, SLOT(OnLightSelectionChanged()));
-	connect(&m_AddLight, SIGNAL(clicked()), this, SLOT(OnAddLight()));
-	connect(&m_RemoveLight, SIGNAL(clicked()), this, SLOT(OnRemoveLight()));
-	connect(&m_LightName, SIGNAL(textChanged(const QString&)), this, SLOT(OnPresetNameChanged(const QString&)));
-	connect(&m_LightList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(OnLightItemChanged(QListWidgetItem*)));
+ 	connect(&m_LightList, SIGNAL(itemSelectionChanged()), this, SLOT(OnLightSelectionChanged()));
+ 	connect(&m_AddLight, SIGNAL(clicked()), this, SLOT(OnAddLight()));
+ 	connect(&m_RemoveLight, SIGNAL(clicked()), this, SLOT(OnRemoveLight()));
+ 	connect(&m_LightName, SIGNAL(textChanged(const QString&)), this, SLOT(OnPresetNameChanged(const QString&)));
+ 	connect(&m_LightList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(OnLightItemChanged(QListWidgetItem*)));
+	connect(&gLighting, SIGNAL(LightingChanged()), this, SLOT(UpdateLightList()));
 }
 
 void QLightsWidget::UpdateLightList(void)
 {
 	m_LightList.clear();
 
-	for (int i = 0; i < m_Lights.size(); i++)
+	for (int i = 0; i < gLighting.m_Lights.size(); i++)
 	{
 		// Create new list item
-		QLightItem* pLightItem = new QLightItem(&m_LightList, &m_Lights[i]);
+		QLightItem* pLightItem = new QLightItem(&m_LightList, &gLighting.m_Lights[i]);
 
 		pLightItem->setFlags(pLightItem->flags() | Qt::ItemIsEditable);
 
@@ -242,7 +122,7 @@ void QLightsWidget::OnAddLight(void)
 	QLight NewLight;
 	NewLight.SetName(m_LightName.text());
 
-	m_Lights.append(NewLight);
+	gLighting.AddLight(NewLight);
 
 	UpdateLightList();
 }
@@ -255,37 +135,7 @@ void QLightsWidget::OnRemoveLight(void)
 	if (CurrentRow < 0)
 		return;
 
-	m_Lights.removeAt(CurrentRow);
+	gLighting.m_Lights.removeAt(CurrentRow);
 
 	UpdateLightList();
-}
-
-void QLightsWidget::OnLightPropertiesChanged(QLight* pLight)
-{
-	if (m_Lights.isEmpty())
-		return;
-
-	gpScene->m_Lights.m_NoLights = m_Lights.size();
-
-	for (int i = 0; i < m_Lights.size(); i++)
-	{
-		QLight& Light = m_Lights[i];
-
-		CLight NewLight;
-
-		NewLight.m_Theta	= Light.GetTheta();
-		NewLight.m_Phi		= Light.GetPhi();
-		NewLight.m_Distance	= Light.GetDistance();
-		NewLight.m_Width	= Light.GetWidth();
-		NewLight.m_Height	= Light.GetHeight();
-		NewLight.m_Color.r	= Light.GetColor().red() * Light.GetIntensity();
-		NewLight.m_Color.g	= Light.GetColor().green() * Light.GetIntensity();
-		NewLight.m_Color.b	= Light.GetColor().blue() * Light.GetIntensity();
-
-		gpScene->m_Lights.m_Lights[i] = NewLight;
-	}
-
-	// Flag the lights as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(LightsDirty);
-
 }

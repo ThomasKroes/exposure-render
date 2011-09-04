@@ -142,6 +142,8 @@ int QNode::GetID(void) const
 
 void QNode::ReadXML(QDomElement& Parent)
 {
+	QPresetXML::ReadXML(Parent);
+
 	// Intensity
 	const float NormalizedIntensity = Parent.firstChildElement("NormalizedIntensity").attribute("Value").toFloat();
 	m_Intensity = m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedIntensity);
@@ -162,6 +164,8 @@ QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	// Node
 	QDomElement Node = DOM.createElement("Node");
 	Parent.appendChild(Node);
+
+	QPresetXML::WriteXML(DOM, Node);
 
 	// Intensity
 	QDomElement Intensity = DOM.createElement("NormalizedIntensity");
@@ -504,13 +508,13 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 	for (QDomNode DomNode = Nodes.firstChild(); !DomNode.isNull(); DomNode = DomNode.nextSibling())
 	{
 		// Create new node
-		QNode Node(this);
+		QNode Light(this);
 
 		// Load preset into it
-		Node.ReadXML(DomNode.toElement());
+		Light.ReadXML(DomNode.toElement());
 
 		// Add the node to the list
-		AddNode(Node);
+		AddNode(Light);
 	}
 
 	// Allow events again
@@ -524,8 +528,11 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 
 QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 {
-	// Create transfer function preset root element
-	QDomElement Preset = QPresetXML::WriteXML(DOM, Parent);
+	// Preset
+	QDomElement Preset = DOM.createElement("Preset");
+	Parent.appendChild(Preset);
+
+	QPresetXML::WriteXML(DOM, Preset);
 
 	Parent.appendChild(Preset);
 	Preset.setAttribute("RangeMin", m_RangeMin);

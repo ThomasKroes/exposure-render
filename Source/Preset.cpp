@@ -31,10 +31,6 @@ void QPresetXML::ReadXML(QDomElement& Parent)
 
 QDomElement QPresetXML::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 {
-	QDomElement Preset = DOM.createElement("Preset");
-	Preset.setAttribute("Name", GetName());
-
-	Parent.appendChild(Preset);
-
-	return Preset;
+	Parent.setAttribute("Name", GetName());
+	return Parent;
 }

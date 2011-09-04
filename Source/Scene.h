@@ -151,7 +151,7 @@ public:
 		m_IntensityRange		= Other.m_IntensityRange;
 		m_KernelSize			= Other.m_KernelSize;
 		m_FPS					= Other.m_FPS;
-		m_Lights				= Other.m_Lights;
+		m_Lighting				= Other.m_Lighting;
 
 		return *this;
 	}
@@ -172,7 +172,7 @@ public:
 	CRange				m_IntensityRange;
 	Vec2f				m_KernelSize;
 	CEvent				m_FPS;
-	CLights				m_Lights;
+	CLighting			m_Lighting;
 };
 
 extern CScene* gpScene;

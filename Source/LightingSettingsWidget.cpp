@@ -42,7 +42,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	setLayout(&m_MainLayout);
 
 	// Theta
-	m_ThetaLabel.setText("Theta");
+	m_ThetaLabel.setText("Longitude");
 	m_MainLayout.addWidget(&m_ThetaLabel, 0, 0);
 
 	m_ThetaSlider.setOrientation(Qt::Orientation::Horizontal);
@@ -60,7 +60,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	connect(&m_ThetaSlider, SIGNAL(valueChanged(double)), this, SLOT(OnThetaChanged(double)));
 
 	// Phi
-	m_PhiLabel.setText("Phi");
+	m_PhiLabel.setText("Latitude");
 	m_MainLayout.addWidget(&m_PhiLabel, 1, 0);
 
 	m_PhiSlider.setOrientation(Qt::Orientation::Horizontal);

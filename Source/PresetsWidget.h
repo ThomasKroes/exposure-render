@@ -85,6 +85,28 @@ public:
 		}
 	}
 
+	void SavePreset(T Preset)
+	{
+		for (int i = 0; i < m_Presets.size(); i++)
+		{
+			if (m_Presets[i].GetName() == Preset.GetName())
+			{
+				int Result = QMessageBox::question(this, "Preset already exists", "Overwrite?", QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+				
+				if (Result == QMessageBox::No)
+					return;
+
+				m_Presets[i] = Preset;
+				return;
+			}
+		}
+
+		m_Presets.append(Preset);
+
+		// Update GUI
+		UpdatePresetsList();
+	}
+
 	void RemovePreset(void)
 	{
 		// Get selected row index
@@ -231,14 +253,6 @@ public:
 		// Update GUI
 		UpdatePresetsList();
 	};
-
-	void AddPreset(T Preset)
-	{
-		m_Presets.append(Preset);
-
-		// Update GUI
-		UpdatePresetsList();
-	}
 
 	T GetPreset(const QString& Name)
 	{

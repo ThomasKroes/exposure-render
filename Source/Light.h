@@ -37,15 +37,15 @@ public:
 	}
 };
 
-class CLights
+class CLighting
 {
 public:
-	CLights(void) :
+	CLighting(void) :
 		m_NoLights(0)
 	{
 	}
 
-	HOD CLights& operator=(const CLights& Other)
+	HOD CLighting& operator=(const CLighting& Other)
 	{
 		for (int i = 0; i < m_NoLights; i++)
 		{
