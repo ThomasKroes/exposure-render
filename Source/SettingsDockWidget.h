@@ -14,16 +14,12 @@ private slots:
 	void SetPhase(const int& Phase);
 
 private:
-	QGridLayout*	m_pGridLayout;
-	QComboBox*		m_pRenderTypeComboBox;
-	QLabel*			m_pNoBouncesLabel;
-	QSlider*		m_pNoBouncesSlider;
-	QSpinBox*		m_pNoBouncesSpinBox;
-	QLabel*			m_pScatteringLabel;
-	QGridLayout*	m_pScatteringLayout;
-	QLabel*			m_pForwardLabel;
-	QSlider*		m_pPhaseSlider;
-	QLabel*			m_pBackwardLabel;
+	QGridLayout		m_MainLayout;
+	QComboBox		m_RenderTypeComboBox;
+	QSlider			m_NoBouncesSlider;
+	QSpinBox		m_NoBouncesSpinBox;
+	QGridLayout		m_ScatteringLayout;
+	QSlider			m_PhaseSlider;
 };
 
 class CKernelSettingsWidget : public QGroupBox
@@ -39,14 +35,12 @@ private slots:
 	void LockKernelHeight(const int& Lock);
 
 private:
-	QGridLayout*	m_pGridLayout;
-	QLabel*			m_pKernelWidthLabel;
-	QSlider*		m_pKernelWidthSlider;
-	QSpinBox*		m_pKernelWidthSpinBox;
-	QLabel*			m_pKernelHeightLabel;
-	QSlider*		m_pKernelHeightSlider;
-	QSpinBox*		m_pKernelHeightSpinBox;
-	QCheckBox*		m_pLockKernelHeightCheckBox;
+	QGridLayout		m_MainLayout;
+	QSlider			m_KernelWidthSlider;
+	QSpinBox		m_KernelWidthSpinBox;
+	QSlider			m_KernelHeightSlider;
+	QSpinBox		m_KernelHeightSpinBox;
+	QCheckBox		m_LockKernelHeightCheckBox;
 };
 
 class CSettingsWidget : public QWidget
@@ -57,9 +51,9 @@ public:
     CSettingsWidget(QWidget* pParent = NULL);
 
 private:
-	QVBoxLayout*				m_pMainLayout;
-	CTracerSettingsWidget*		m_pTracerSettingsWidget;
-	CKernelSettingsWidget*		m_pKernelSettingsWidget;
+	QGridLayout				m_MainLayout;
+	CTracerSettingsWidget	m_TracerSettingsWidget;
+	CKernelSettingsWidget	m_KernelSettingsWidget;
 };
 
 class QSettingsDockWidget : public QDockWidget
@@ -71,5 +65,5 @@ public:
 
 private:
 	
-	CSettingsWidget*	m_pSettingsWidget;
+	CSettingsWidget		m_SettingsWidget;
 };

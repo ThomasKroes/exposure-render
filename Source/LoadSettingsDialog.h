@@ -30,21 +30,21 @@ private slots:
 	void Clicked(QAbstractButton* pButton);
 
 private:
-	QVBoxLayout*		m_pMainLayout;
-	QGroupBox*			m_pResampleGroupBox;
-	QGridLayout*		m_pResampleLayout;
-	QLabel*				m_pResampleXLabel;
-	QSlider*			m_pResampleXSlider;
-	QSpinBox*			m_pResampleXSpinBox;
-	QLabel*				m_pResampleYLabel;
-	QSlider*			m_pResampleYSlider;
-	QSpinBox*			m_pResampleYSpinBox;
-	QCheckBox*			m_pLockYCheckBox;
-	QLabel*				m_pResampleZLabel;
-	QSlider*			m_pResampleZSlider;
-	QSpinBox*			m_pResampleZSpinBox;
-	QCheckBox*			m_pLockZCheckBox;
-	QDialogButtonBox*	m_pDialogButtons;
+	QGridLayout			m_MainLayout;
+	QGroupBox			m_ResampleGroupBox;
+	QGridLayout			m_ResampleLayout;
+	QLabel				m_ResampleXLabel;
+	QSlider				m_ResampleXSlider;
+	QSpinBox			m_ResampleXSpinBox;
+	QLabel				m_ResampleYLabel;
+	QSlider				m_ResampleYSlider;
+	QSpinBox			m_ResampleYSpinBox;
+	QCheckBox			m_LockYCheckBox;
+	QLabel				m_ResampleZLabel;
+	QSlider				m_ResampleZSlider;
+	QSpinBox			m_ResampleZSpinBox;
+	QCheckBox			m_LockZCheckBox;
+	QDialogButtonBox	m_DialogButtons;
 
 	bool				m_Resample;
 	float				m_ResampleX;

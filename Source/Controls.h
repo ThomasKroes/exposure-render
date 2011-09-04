@@ -38,11 +38,33 @@ class QFloatSlider : public QSlider
 
 public:
     QFloatSlider(QWidget* pParent = NULL);
+	
+	float GetValue(void) const;
+	void SetValue(const float& Value);
+	void SetValueAnimated(const float& Value);
 
 private slots:
 
 private:
 	float	m_Factor;
+	float	m_Value;
+};
+
+class QDoubleSpinner : public QDoubleSpinBox
+{
+	Q_OBJECT
+
+public:
+
+	QDoubleSpinner(QWidget* pParent = NULL){};
+
+	virtual QSize sizeHint() const;
+
+	virtual QString textFromValue(int Value) const;
+
+private slots:
+
+private:
 };
 
 QString GetOpenFileName(const QString& Caption, const QString& Filter);

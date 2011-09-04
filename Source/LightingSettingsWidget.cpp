@@ -53,6 +53,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_ThetaSlider, 0, 1);
 	
     m_ThetaSpinBox.setRange(-360, 360);
+	m_ThetaSpinBox.setSuffix(" deg");
 	m_MainLayout.addWidget(&m_ThetaSpinBox, 0, 2);
 	
 	connect(&m_ThetaSlider, SIGNAL(valueChanged(int)), &m_ThetaSpinBox, SLOT(setValue(int)));
@@ -70,6 +71,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_PhiSlider, 1, 1);
 	
     m_PhiSpinBox.setRange(-90, 90);
+	m_PhiSpinBox.setSuffix(" deg");
 	m_MainLayout.addWidget(&m_PhiSpinBox, 1, 2);
 	
 	connect(&m_PhiSlider, SIGNAL(valueChanged(int)), &m_PhiSpinBox, SLOT(setValue(int)));
@@ -181,12 +183,12 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		// Width
 		m_WidthSlider.setValue(m_pSelectedLight->GetWidth() * 10.0f);
 		m_WidthSlider.setRange(0, 100);
-
+		m_WidthSlider.SetValueAnimated(100.0f);
 		// Height
 
 //		m_HeightSlider.setValue(m_pSelectedLight->GetHeight() * 10.0f);
 		m_HeightSlider.setRange(0, 100);
-		
+		m_HeightSlider.SetValueAnimated(100.0f);
 		m_HeightSlider.blockSignals(true);
 
 		QPropertyAnimation animation(&m_HeightSlider, "value");
@@ -209,6 +211,8 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		// Intensity
 		m_IntensitySlider.setValue(m_pSelectedLight->GetIntensity() * 10.0f);
 		m_IntensitySlider.setRange(0, 100);
+
+		m_IntensitySlider.SetValueAnimated(100.0f);
 	}
 	else
 	{

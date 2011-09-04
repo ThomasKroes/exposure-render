@@ -109,6 +109,34 @@ QFloatSlider::QFloatSlider(QWidget* pParent /*= NULL*/) :
 
 }
 
+float QFloatSlider::GetValue(void) const
+{
+	return m_Value;
+}
+
+void QFloatSlider::SetValue(const float& Value)
+{
+
+}
+
+void QFloatSlider::SetValueAnimated(const float& Value)
+{
+//	blockSignals(true);
+	
+
+	QPropertyAnimation ValueAnimation(this, "value");
+
+	ValueAnimation.setDuration(1000);
+
+	setRange(0, 100);
+
+	ValueAnimation.setStartValue(0);
+	ValueAnimation.setEndValue(100);
+	ValueAnimation.setEasingCurve(QEasingCurve::InOutElastic);
+	ValueAnimation.start(QAbstractAnimation::DeleteWhenStopped);
+
+//	blockSignals(false);
+}
 
 QString GetOpenFileName(const QString& Caption, const QString& Filter)
 {
@@ -136,4 +164,14 @@ QString GetSaveFileName(const QString& Caption, const QString& Filter)
 	FileDialog.exec();
 
 	return FileDialog.selectedFiles().value(0);
+}
+
+QSize QDoubleSpinner::sizeHint() const
+{
+	return QSize(100, 20);
+}
+
+QString QDoubleSpinner::textFromValue(int Value) const
+{
+	return QString::number(Value, 'f', GetPrecision());
 }
