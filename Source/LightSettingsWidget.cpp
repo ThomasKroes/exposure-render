@@ -186,6 +186,12 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		m_WidthSlider.setValue(m_pSelectedLight->GetWidth());
 		m_HeightSlider.setValue(m_pSelectedLight->GetHeight());
 
+		QPropertyAnimation animation(&m_WidthSlider, "value");
+		animation.setDuration(1000);
+		animation.setStartValue(m_WidthSlider.value());
+		animation.setEndValue(100.0);
+
+		animation.start();
 
 		// Lock size
 		m_LockSizeCheckBox.setChecked(m_pSelectedLight->GetLockSize());

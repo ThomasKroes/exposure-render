@@ -16,13 +16,13 @@ public:
 		m_pState	= pState;
 	}
 
-	DEV void Init(curandStateXORWOW_t* pState)
+	HOD void Init(curandStateXORWOW_t* pState)
 	{
 		m_State		= *pState;
 		m_pState	= pState;
 	}
 
-	DEV ~CCudaRNG()
+	HOD ~CCudaRNG()
 	{
 		*m_pState = m_State;
 	}

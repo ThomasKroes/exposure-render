@@ -28,7 +28,7 @@ public:
 
 	virtual ~CEvent(void) {};
 
-	CEvent& CEvent::operator=(const CEvent& Other)
+	HOD CEvent& CEvent::operator=(const CEvent& Other)
 	{
 		strcpy_s(m_Name, Other.m_Name);
 
@@ -80,46 +80,6 @@ class CScene
 public:
 	CScene(void)
 	{
-		m_Light.m_Distance	= 1.5f;
-		m_Light.m_Theta		= 0.0f;
-		m_Light.m_Phi		= 0.0f;
-		m_Light.m_Size		= 1.0f;
-
-		m_TransferFunctions.m_Kd.m_NoNodes	= 4;
-		m_TransferFunctions.m_Kd.m_P[0]		= 0.0f;
-		m_TransferFunctions.m_Kd.m_P[1]		= 30.0f;
-		m_TransferFunctions.m_Kd.m_P[2]		= 40.0f;
-		m_TransferFunctions.m_Kd.m_P[3]		= 255.0f;
-
-		m_TransferFunctions.m_Kd.m_C[0]		= CColorRgbHdr(0.01f);
-		m_TransferFunctions.m_Kd.m_C[1]		= CColorRgbHdr(0.01f);
-		m_TransferFunctions.m_Kd.m_C[2]		= CColorRgbHdr(1.0f);
-		m_TransferFunctions.m_Kd.m_C[3]		= CColorRgbHdr(1.0f);
-
-		m_TransferFunctions.m_Ks.m_NoNodes	= 4;
-		m_TransferFunctions.m_Ks.m_P[0]		= 0.0f;
-		m_TransferFunctions.m_Ks.m_P[1]		= 30.0f;
-		m_TransferFunctions.m_Ks.m_P[2]		= 40.0f;
-		m_TransferFunctions.m_Ks.m_P[3]		= 255.0f;
-
-		m_TransferFunctions.m_Ks.m_C[0]		= CColorRgbHdr(0.01f);
-		m_TransferFunctions.m_Ks.m_C[1]		= CColorRgbHdr(0.01f);
-		m_TransferFunctions.m_Ks.m_C[2]		= CColorRgbHdr(1.0f);
-		m_TransferFunctions.m_Ks.m_C[3]		= CColorRgbHdr(1.0f);
-
-		m_TransferFunctions.m_Kt.m_NoNodes	= 4;
-		m_TransferFunctions.m_Kt.m_P[0]		= 0.0f;
-		m_TransferFunctions.m_Kt.m_P[1]		= 30.0f;
-		m_TransferFunctions.m_Kt.m_P[2]		= 40.0f;
-		m_TransferFunctions.m_Kt.m_P[3]		= 255.0f;
-
-		m_TransferFunctions.m_Kt.m_C[0]		= CColorRgbHdr(0.01f);
-		m_TransferFunctions.m_Kt.m_C[1]		= CColorRgbHdr(0.01f);
-		m_TransferFunctions.m_Kt.m_C[2]		= CColorRgbHdr(1.0f);
-		m_TransferFunctions.m_Kt.m_C[3]		= CColorRgbHdr(1.0f);
-		
-		
-
 		m_PhaseG = 0.0f;
 
 		m_MaxD = 255.0f;
@@ -136,7 +96,7 @@ public:
 	HOD CScene& operator = (const CScene& Other)			
 	{
 		m_Camera				= Other.m_Camera;
-		m_Light					= Other.m_Light;
+		m_Lighting				= Other.m_Lighting;
 		m_Resolution			= Other.m_Resolution;
 		m_DirtyFlags			= Other.m_DirtyFlags;
 		m_Spacing				= Other.m_Spacing;
@@ -151,13 +111,12 @@ public:
 		m_IntensityRange		= Other.m_IntensityRange;
 		m_KernelSize			= Other.m_KernelSize;
 		m_FPS					= Other.m_FPS;
-		m_Lighting				= Other.m_Lighting;
 
 		return *this;
 	}
 
 	CCamera				m_Camera;
-	CLight				m_Light;
+	CLighting			m_Lighting;
 	CResolution3D		m_Resolution;
 	CFlags				m_DirtyFlags;
 	Vec3f				m_Spacing;
@@ -172,7 +131,6 @@ public:
 	CRange				m_IntensityRange;
 	Vec2f				m_KernelSize;
 	CEvent				m_FPS;
-	CLighting			m_Lighting;
 };
 
 extern CScene* gpScene;

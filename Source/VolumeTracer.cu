@@ -3,6 +3,7 @@
 
 #include "Filter.h"
 #include "Scene.h"
+#include "Material.h"
 
 texture<short, 3, cudaReadModeNormalizedFloat>	gTexDensity;
 
@@ -66,6 +67,148 @@ void UnbindVolumeData(void)
 {
 	cudaFree(gpI);
 }
+
+
+
+/**/
+
+// Estimates direct lighting
+DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
+{
+	/*
+	if (Dot(Wo, N) < 0.0f)
+		return SPEC_BLACK;
+
+	// Accumulated radiance
+	CColorXyz Ld = SPEC_BLACK;
+	
+	// Radiance from light source
+	CColorXyz Li = SPEC_BLACK;
+
+	// Attenuation
+	CColorXyz Tr = SPEC_BLACK;
+
+	CBSDF Bsdf(N, Wo, pScene->m_Volume.Kd(FetchDensity(pScene, Pe)), pScene->m_Volume.Ks(FetchDensity(pScene, Pe)), pScene->m_Volume.Ni(FetchDensity(pScene, Pe)), pScene->m_Volume.Ns(FetchDensity(pScene, Pe)));
+	// Light/shadow ray
+	CRay R; 
+
+	// Light probability
+	float LightPdf = 1.0f, BsdfPdf = 1.0f;
+	
+	// Incident light direction
+	Vec3f Wi;
+
+	CColorXyz F = SPEC_BLACK;
+	
+	CSurfacePoint SPe, SPl;
+
+	SPe.m_P		= Pe;
+	SPe.m_Ng	= N; 
+
+	// Sample the light source
+ 	Li = Light.SampleL(SPe, SPl, LS, LightPdf, pScene->m_RenderParams.m_RayEpsilon, pScene->m_Mesh.m_pVi, pScene->m_Mesh.m_pV, pScene->m_Mesh.m_pVNi, pScene->m_Mesh.m_pVN, pScene->m_Materials, pScene->m_Textures, pScene->m_Bitmaps);
+	
+	R.m_O		= SPl.m_P;
+	R.m_D		= Normalize(SPe.m_P - SPl.m_P);
+	R.m_MinT	= 0.0f;
+	R.m_MaxT	= (SPl.m_P - SPe.m_P).Length();
+	
+	Wi = -R.m_D; 
+
+	F = Bsdf.F(Wo, Wi); 
+
+	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
+//	BsdfPdf = Dot(Wi, N);
+
+	// Sample the light with MIS
+	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
+	{
+		// Compute tau
+		const CColorXyz Tr = Transmittance(pScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+		
+		// Attenuation due to volume
+		Li *= Tr;
+
+		// Compute MIS weight
+		const float Weight = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+ 
+		// Add contribution
+		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
+	}
+	*/
+
+	/*
+	// Sample the BRDF with MIS
+	F = Bsdf.SampleF(Wo, Wi, BsdfPdf, LS.m_BsdfSample);
+	
+//	Wi = CosineWeightedHemisphere(Rnd.Get2(), N);
+
+//	BsdfPdf = Dot(Wi, N);
+
+	CLight* pNearestLight = NULL;
+
+	Vec2f UV;
+
+	if (!F.IsBlack())
+	{
+		float MaxT = INF_MAX;
+
+		// Compute virtual light point
+		const Vec3f Pl = Pe + (MaxT * Wi);
+
+		if (NearestLight(pScene, Pe, Wi, 0.0f, MaxT, pNearestLight, NULL, &UV, &LightPdf))
+		{
+			if (LightPdf > 0.0f && BsdfPdf > 0.0f) 
+			{
+				// Add light contribution from BSDF sampling
+				const float Weight = PowerHeuristic(1.0f, BsdfPdf, 1.0f, LightPdf);
+				 
+				// Get exitant radiance from light source
+				Li = pNearestLight->Le(UV, pScene->m_Materials, pScene->m_Textures, pScene->m_Bitmaps);
+
+				if (!Li.IsBlack())
+				{
+					// Scale incident radiance by attenuation through volume
+					Tr = Transmittance(pScene, Pe, Wi, 1.0f, StepSize, Rnd);
+
+					// Attenuation due to volume
+					Li *= Tr;
+
+					// Contribute
+					Ld += F * Li * AbsDot(Wi, N) * Weight / BsdfPdf;
+				}
+			}
+		}
+	}
+	*/
+
+	return SPEC_WHITE;
+}
+
+// Uniformly samples one light
+DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
+{
+	// Determine no. lights
+	const int NumLights = pDevScene->m_Lighting.m_NoLights;
+
+ 	if (NumLights == 0)
+ 		return SPEC_BLACK;
+
+	CLightingSample LS;
+
+	// Create light sampler
+	LS.LargeStep(Rnd);
+
+	// Choose which light to sample
+	const int WhichLight = (int)floorf(LS.m_LightNum * (float)NumLights);
+
+	// Get the light
+	CLight& Light = pDevScene->m_Lighting.m_Lights[WhichLight];
+
+	// Return estimated direct light
+	return (float)NumLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
+}
+
 
 HOD float PhaseHG(const Vec3f& W, const Vec3f& Wp, float G)
 {
@@ -263,7 +406,7 @@ KERNEL void KrnlRenderVolume(CScene* pDevScene, curandStateXORWOW_t* pDevRandomS
 
 
 
-			Pl = pDevScene->m_BoundingBox.GetCenter() + pDevScene->m_Light.m_Distance * Vec3f(sinf(pDevScene->m_Light.m_Theta), sinf(pDevScene->m_Light.m_Phi), cosf(pDevScene->m_Light.m_Theta));
+//			Pl = pDevScene->m_BoundingBox.GetCenter() + pDevScene->m_Light.m_Distance * Vec3f(sinf(pDevScene->m_Light.m_Theta), sinf(pDevScene->m_Light.m_Phi), cosf(pDevScene->m_Light.m_Theta));
 //			Pl = pBoundingBox->GetCenter() + UniformSampleSphere(RNG.Get2()) * Vec3f(1000.0f);
 
 			// LightPdf = powf((Pe - Pl).Length(), 2.0f);
