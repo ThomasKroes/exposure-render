@@ -13,7 +13,7 @@ public:
 
 private slots:
 	void SetFocusType(const int& FocusType);
-	void SetFocalDistance(const int& FocalDistance);
+	void SetFocalDistance(const double& FocalDistance);
 
 private:
 	QGridLayout		m_GridLayout;

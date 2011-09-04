@@ -1,8 +1,8 @@
 
-#include "VolumeAppearanceDockWidget.h"
+#include "AppearanceDockWidget.h"
 #include "MainWindow.h"
 
-QVolumeAppearanceWidget::QVolumeAppearanceWidget(QWidget* pParent) :
+QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
 	m_TransferFunctionWidget(),
@@ -22,12 +22,12 @@ QVolumeAppearanceWidget::QVolumeAppearanceWidget(QWidget* pParent) :
 	connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
 }
 
-void QVolumeAppearanceWidget::OnLoadPreset(const QString& Name)
+void QAppearanceWidget::OnLoadPreset(const QString& Name)
 {
 	gTransferFunction = m_PresetsWidget.GetPreset(Name);
 }
 
-void QVolumeAppearanceWidget::OnSavePreset(const QString& Name)
+void QAppearanceWidget::OnSavePreset(const QString& Name)
 {
 	QTransferFunction Preset(gTransferFunction);
 	Preset.SetName(Name);

@@ -72,7 +72,7 @@ SET(SimpleViewSrcs
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
 	NodeItem.cpp
-	VolumeAppearanceDockWidget.cpp
+	AppearanceDockWidget.cpp
 	PresetsWidget.cpp
 	Preset.cpp
 	Controls.cpp
@@ -123,7 +123,7 @@ SET(SimpleViewHeaders
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
 	NodeItem.h
-	VolumeAppearanceDockWidget.h
+	AppearanceDockWidget.h
 	PresetsWidget.h
 	Preset.h
 	Controls.h

@@ -9,6 +9,7 @@ class QStatisticsWidget : public QWidget
 public:
     QStatisticsWidget(QWidget* pParent = NULL);
 
+	QSize sizeHint() const;
 	void Init(void);
 
 private:
@@ -24,7 +25,7 @@ public slots:
 	void OnPreFrame(void);
 	void OnPostFrame(void);
 	void ExpandAll(const bool& Expand);
-
+	
 private:
 	QGridLayout		m_MainLayout;
 	QGroupBox		m_Group;

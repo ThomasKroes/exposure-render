@@ -7,14 +7,14 @@
 #include "NodePropertiesWidget.h"
 #include "TransferFunction.h"
 
-class QVolumeAppearanceDockWidget;
+class QAppearanceDockWidget;
 
-class QVolumeAppearanceWidget : public QWidget
+class QAppearanceWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    QVolumeAppearanceWidget(QWidget* pParent = NULL);
+    QAppearanceWidget(QWidget* pParent = NULL);
 	
 public slots:
 	void OnLoadPreset(const QString& Name);
@@ -27,13 +27,13 @@ protected:
 	QPresetsWidget<QTransferFunction>	m_PresetsWidget;
 };
 
-class QVolumeAppearanceDockWidget : public QDockWidget
+class QAppearanceDockWidget : public QDockWidget
 {
     Q_OBJECT
 
 public:
-    QVolumeAppearanceDockWidget(QWidget* pParent = NULL);
+    QAppearanceDockWidget(QWidget* pParent = NULL);
 
 protected:
-	QVolumeAppearanceWidget		m_VolumeAppearanceWidget;
+	QAppearanceWidget		m_VolumeAppearanceWidget;
 };

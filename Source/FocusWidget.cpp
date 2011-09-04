@@ -40,9 +40,9 @@ CFocusWidget::CFocusWidget(QWidget* pParent) :
     m_FocalDistanceSpinBox.setRange(0.0, 1000000.0);
 	m_GridLayout.addWidget(&m_FocalDistanceSpinBox, 6, 2);
 	
-	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(int)), &m_FocalDistanceSpinBox, SLOT(setValue(int)));
-	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFocalDistance(int)));
-	connect(&m_FocalDistanceSpinBox, SIGNAL(valueChanged(int)), &m_FocalDistanceSlider, SLOT(setValue(int)));
+	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), &m_FocalDistanceSpinBox, SLOT(setValue(double)));
+	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFocalDistance(double)));
+	connect(&m_FocalDistanceSpinBox, SIGNAL(valueChanged(double)), &m_FocalDistanceSlider, SLOT(setValue(double)));
 }
 
 void CFocusWidget::SetFocusType(const int& FocusType)
@@ -56,7 +56,7 @@ void CFocusWidget::SetFocusType(const int& FocusType)
 	gpScene->m_DirtyFlags.SetFlag(CameraDirty);
 }
 
-void CFocusWidget::SetFocalDistance(const int& FocalDistance)
+void CFocusWidget::SetFocalDistance(const double& FocalDistance)
 {
 	if (!gpScene)
 		return;

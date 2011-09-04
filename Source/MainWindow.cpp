@@ -223,6 +223,8 @@ void CMainWindow::SetupDockingWidgets()
 	tabifyDockWidget(&m_AppearanceDockWidget, &m_LightingDockWidget);
 	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);
 	tabifyDockWidget(&m_CameraDockWidget, &m_SettingsDockWidget);
+
+	m_AppearanceDockWidget.raise();
 }
 
 void CMainWindow::UpdateRecentFileActions(void)
