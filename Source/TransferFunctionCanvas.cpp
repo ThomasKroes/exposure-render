@@ -22,8 +22,8 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_Histogram(),
 	m_RealisticsGradient(false),
 	m_AllowUpdateNodes(true),
-	m_NodeItems(),
-	m_EdgeItems(),
+	m_Nodes(),
+	m_Edges(),
 	m_BackgroundZ(0),
 	m_GridZ(100),
 	m_HistogramZ(200),
@@ -74,6 +74,18 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	setAcceptHoverEvents(true);
 }
 
+QTransferFunctionCanvas::~QTransferFunctionCanvas(void)
+{
+	for (int i = 0; i < m_GridLines.size(); i++)
+		scene()->removeItem(m_GridLines[i]);
+
+	for (int i = 0; i < m_Nodes.size(); i++)
+		scene()->removeItem(m_Nodes[i]);
+
+	for (int i = 0; i < m_Edges.size(); i++)
+		scene()->removeItem(m_Edges[i]);
+}
+
 void QTransferFunctionCanvas::Update(void)
 {
 	UpdateNodes();
@@ -86,22 +98,23 @@ void QTransferFunctionCanvas::Update(void)
 
 void QTransferFunctionCanvas::UpdateGrid(void)
 {
-	// Horizontal grid lines
-	const float DeltaY = 0.2f * rect().height();
+	for (int i = 0; i < m_GridLines.size(); i++)
+		scene()->removeItem(m_GridLines[i]);
 
 	// Clear the edges list
 	m_GridLines.clear();
 
+	// Horizontal grid lines
+	const float DeltaY = 0.2f * rect().height();
+
 	for (int i = 1; i < 5; i++)
 	{
-		m_GridLines.append(QGridLine(this));
+		QGridLine* pGridLine = new QGridLine(this);
+		m_GridLines.append(pGridLine);
 
-		QGridLine& GridLine = m_GridLines.back();
-
-		GridLine.setLine(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
-		GridLine.setPen(m_GridPenHorizontal);
-		GridLine.setZValue(m_GridZ);
-		GridLine.setParentItem(this);
+		pGridLine->setLine(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
+		pGridLine->setPen(m_GridPenHorizontal);
+		pGridLine->setZValue(m_GridZ);
 	}
 
 	float GridInterval = 50.0f;
@@ -110,14 +123,12 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 
 	for (int i = 0; i < Num; i++)
 	{
-		m_GridLines.append(QGridLine(this));
+		QGridLine* pGridLine = new QGridLine(this);
+		m_GridLines.append(pGridLine);
 
-		QGridLine& GridLine = m_GridLines.back();
-
-		GridLine.setLine(QLineF(i * GridInterval, 0.0f, i * GridInterval, rect().height()));
-		GridLine.setPen(m_GridPenVertical);
-		GridLine.setZValue(m_GridZ);
-		GridLine.setParentItem(this);
+		pGridLine->setLine(QLineF(i * GridInterval, 0.0f, i * GridInterval, rect().height()));
+		pGridLine->setPen(m_GridPenVertical);
+		pGridLine->setZValue(m_GridZ);
 	}
 }
 
@@ -164,49 +175,54 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 	if (!m_AllowUpdateNodes)
 		return;
 
-	// Clear the node items list
-	m_NodeItems.clear();
+	for (int i = 0; i < m_Nodes.size(); i++)
+		scene()->removeItem(m_Nodes[i]);
 
+	// Clear the node items list
+	m_Nodes.clear();
+
+	// Reserve
+	m_Nodes.reserve(gTransferFunction.GetNodes().size());
+	
 	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 	{
 		QNode& Node = gTransferFunction.GetNode(i);
 
-		m_NodeItems.append(QNodeItem(this, &Node));
+		QNodeItem* pNodeItem = new QNodeItem(this, &Node);
+		m_Nodes.append(pNodeItem);
 
-		QNodeItem& NodeItem = m_NodeItems.back();
-		
 		// Compute node center in canvas coordinates
 		QPointF NodeCenter = TransferFunctionToScene(QPointF(Node.GetIntensity(), Node.GetOpacity()));
 
-		NodeItem.setZValue(m_NodeZ);
-		NodeItem.setParentItem(this);
-
-		NodeItem.m_SuspendUpdate = true;
+		pNodeItem->setZValue(m_NodeZ);
 		
-		NodeItem.setPos(NodeCenter);
-
-		NodeItem.m_SuspendUpdate = false;
+		pNodeItem->m_SuspendUpdate = true;
+		
+		pNodeItem->setPos(NodeCenter);
+		
+		pNodeItem->m_SuspendUpdate = false;
 	}
 }
 
 void QTransferFunctionCanvas::UpdateEdges(void)
 {
+	for (int i = 0; i < m_Edges.size(); i++)
+		scene()->removeItem(m_Edges[i]);
+
 	// Clear the edges list
-	m_EdgeItems.clear();
+	m_Edges.clear();
 
-	for (int i = 1; i < m_NodeItems.size(); i++)
+	for (int i = 1; i < m_Nodes.size(); i++)
 	{
-		QPointF PtFrom(m_NodeItems[i - 1].pos());
-		QPointF PtTo(m_NodeItems[i].pos());
+		QPointF PtFrom(m_Nodes[i - 1]->pos());
+		QPointF PtTo(m_Nodes[i]->pos());
 
-		m_EdgeItems.append(QEdgeItem(this));
+		QEdgeItem* pEdge = new QEdgeItem(this);
+		m_Edges.append(pEdge);
 
-		QEdgeItem& Line = m_EdgeItems.back();
-
-		Line.setLine(QLineF(PtFrom, PtTo));		
-		Line.setParentItem(this);
-		Line.setPen(QPen(QColor(240, 160, 30), 1.2f));
-		Line.setZValue(m_EdgeZ);
+		pEdge->setLine(QLineF(PtFrom, PtTo));		
+		pEdge->setPen(QPen(QColor(240, 160, 30), 1.2f));
+		pEdge->setZValue(m_EdgeZ);
 	}
 }
 
@@ -255,12 +271,12 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 	QPolygonF Polygon;
 
 	// Set the gradient stops
-	for (int i = 0; i < m_NodeItems.size(); i++)
+	for (int i = 0; i < m_Nodes.size(); i++)
 	{
-		QNodeItem& NodeItem = m_NodeItems[i];
+		QNodeItem* pNodeItem = m_Nodes[i];
 
 		// Compute polygon point in scene coordinates
-		QPointF ScenePoint = NodeItem.pos();
+		QPointF ScenePoint = pNodeItem->pos();
 
 		if (i == 0)
 		{
@@ -273,7 +289,7 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 
 		Polygon.append(ScenePoint);
 
-		if (i == m_NodeItems.size() - 1)
+		if (i == m_Nodes.size() - 1)
 		{
 			QPointF CenterCopy = ScenePoint;
 
@@ -316,5 +332,7 @@ QPointF QTransferFunctionCanvas::TransferFunctionToScene(const QPointF& TfPoint)
 
 	return QPointF(SceneX, SceneY);
 }
+
+
 
 

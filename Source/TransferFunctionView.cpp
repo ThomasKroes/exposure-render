@@ -100,8 +100,8 @@ void QTransferFunctionView::Update(void)
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* Node)
 {
 	// Deselect all nodes
-	for (int i = 0; i < m_TransferFunctionCanvas.m_NodeItems.size(); i++)
-		m_TransferFunctionCanvas.m_NodeItems[i].setSelected(false);
+	for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
+		m_TransferFunctionCanvas.m_Nodes[i]->setSelected(false);
 
 	if (Node)
 	{
@@ -109,9 +109,9 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* Node)
 		const int NodeIndex = gTransferFunction.GetNodeIndex(Node);
 
 		// Select the node
-		if (NodeIndex >= 0 && NodeIndex < m_TransferFunctionCanvas.m_NodeItems.size())
+		if (NodeIndex >= 0 && NodeIndex < m_TransferFunctionCanvas.m_Nodes.size())
 		{
-			m_TransferFunctionCanvas.m_NodeItems[NodeIndex].setSelected(true);
+			m_TransferFunctionCanvas.m_Nodes[NodeIndex]->setSelected(true);
 		}
 	}
 }

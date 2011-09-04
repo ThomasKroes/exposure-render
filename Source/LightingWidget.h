@@ -3,7 +3,7 @@
 #include <QtGui>
 
 #include "LightsWidget.h"
-#include "LightingSettingsWidget.h"
+#include "LightSettingsWidget.h"
 #include "BackgroundIlluminationWidget.h"
 #include "PresetsWidget.h"
 #include "Lighting.h"

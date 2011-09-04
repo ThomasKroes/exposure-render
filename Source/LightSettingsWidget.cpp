@@ -1,5 +1,5 @@
 
-#include "LightingSettingsWidget.h"
+#include "LightSettingsWidget.h"
 #include "LightsWidget.h"
 #include "RenderThread.h"
 

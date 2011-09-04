@@ -34,7 +34,7 @@ INCLUDE_DIRECTORIES(
 SET(SimpleViewSrcs 
 	Main.cpp 
 	MainWindow.cpp
-	LightingSettingsWidget.cpp 
+	LightSettingsWidget.cpp 
 	LightingDockWidget.cpp 
 	LightsWidget.cpp
 	LightingWidget.cpp
@@ -82,7 +82,7 @@ SET(SimpleViewSrcs
 SET(SimpleViewUI SimpleView.ui)
 SET(SimpleViewHeaders 
 	MainWindow.h
-	LightingSettingsWidget.h
+	LightSettingsWidget.h
 	LightingDockWidget.h
 	LightsWidget.h
 	LightingWidget.h

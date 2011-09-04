@@ -31,6 +31,7 @@ class QTransferFunctionCanvas : public QGraphicsRectItem
 {
 public:
     QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene);
+	virtual ~QTransferFunctionCanvas(void);
 
 public:
 	void Update(void);
@@ -49,7 +50,7 @@ protected:
 	QGraphicsRectItem		m_BackgroundRectangle;
 	QBrush					m_BackgroundBrush;
 	QPen					m_BackgroundPen;
-	QList<QGridLine>		m_GridLines;
+	QList<QGridLine*>		m_GridLines;
 	QPen					m_GridPenHorizontal;
 	QPen					m_GridPenVertical;
 	QGraphicsPolygonItem	m_Polygon;
@@ -59,8 +60,8 @@ protected:
 	bool					m_AllowUpdateNodes;
 
 	// Nodes and edges
-	QList<QNodeItem>		m_NodeItems;
-	QList<QEdgeItem>		m_EdgeItems;
+	QList<QNodeItem*>		m_Nodes;
+	QList<QEdgeItem*>		m_Edges;
 
 	// Depth ordering
 	int						m_BackgroundZ;
