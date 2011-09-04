@@ -34,7 +34,7 @@ int main(int ArgumentCount, char* pArgv[])
 	gpMainWindow = &MainWindow;
     MainWindow.show();
 
-	SplashScreen.finish(&MainWindow);
+//	SplashScreen.finish(&MainWindow);
 
 	int Result = Application.exec();
 

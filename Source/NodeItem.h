@@ -8,7 +8,26 @@ class QTransferFunctionCanvas;
 class QNodeItem : public QGraphicsEllipseItem
 {
 public:
-	QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanvas* pTransferFunctionCanvas);
+	QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode);
+
+	QNodeItem::QNodeItem(const QNodeItem& Other)
+	{
+		*this = Other;
+	};
+
+	QNodeItem& operator = (const QNodeItem& Other)			
+	{
+		m_pTransferFunctionCanvas	= Other.m_pTransferFunctionCanvas;
+		m_pNode						= Other.m_pNode;
+		m_Cursor					= Other.m_Cursor;
+		m_LastPos					= Other.m_LastPos;
+		m_CachePen					= Other.m_CachePen;
+		m_CacheBrush				= Other.m_CacheBrush;
+		m_pNodeID					= Other.m_pNodeID;
+		m_SuspendUpdate				= Other.m_SuspendUpdate;
+
+		return *this;
+	}
 
 	void UpdateTooltip(void);
 	

@@ -76,6 +76,7 @@ SET(SimpleViewSrcs
 	PresetsWidget.cpp
 	Preset.cpp
 	Controls.cpp
+	EdgeItem.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
@@ -127,6 +128,7 @@ SET(SimpleViewHeaders
 	PresetsWidget.h
 	Preset.h
 	Controls.h
+	EdgeItem.h
 )
 
 SET(SimpleViewResources Icons/icons.qrc)

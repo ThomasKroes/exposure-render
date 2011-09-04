@@ -3,19 +3,23 @@
 #include "TransferFunction.h"
 #include "NodeItem.h"
 
+QGridLine::QGridLine(QTransferFunctionCanvas* pTransferFunctionCanvas) :
+	QGraphicsLineItem(pTransferFunctionCanvas),
+	m_pTransferFunctionCanvas(pTransferFunctionCanvas)
+{
+}
+
 QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene) :
 	QGraphicsRectItem(pParent, pGraphicsScene),
-	m_pBackgroundRectangle(NULL),
+	m_BackgroundRectangle(),
 	m_BackgroundBrush(),
 	m_BackgroundPen(),
-	m_GridLinesHorizontal(),
+	m_GridLines(),
 	m_GridPenHorizontal(),
 	m_GridPenVertical(),
-	m_pPolygon(NULL),
+	m_Polygon(),
 	m_PolygonGradient(),
-	m_pHistogram(NULL),
-	m_CrossHairH(NULL),
-	m_CrossHairV(NULL),
+	m_Histogram(),
 	m_RealisticsGradient(false),
 	m_AllowUpdateNodes(true),
 	m_NodeItems(),
@@ -29,32 +33,13 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_CrossHairZ(600)
 {
 	// Create polygon graphics item
-	m_pPolygon = new QGraphicsPolygonItem;
-	m_pPolygon->setParentItem(this);
-	m_pPolygon->setPen(QPen(Qt::PenStyle::NoPen));
+	m_Polygon.setParentItem(this);
+	m_Polygon.setPen(QPen(Qt::PenStyle::NoPen));
 
 	// Histogram
-	m_pHistogram = new QGraphicsPolygonItem;
-	m_pHistogram->setParentItem(this);
-	m_pHistogram->setBrush(QColor(200, 20, 20, 50));
-	m_pHistogram->setPen(QPen(QBrush(QColor(100, 10, 10, 150)), 0.5f));
-
-	// Horizontal cross hair
-	m_CrossHairH = new QGraphicsLineItem(this);
-	m_CrossHairH->setPen(QPen(Qt::darkGray, 0.2f));
-	m_CrossHairH->setZValue(m_CrossHairZ);
-	m_CrossHairH->setVisible(false);
-
-	// Horizontal cross hair
-	m_CrossHairV = new QGraphicsLineItem(this);
-	m_CrossHairV->setPen(QPen(Qt::darkGray, 0.2f));
-	m_CrossHairV->setZValue(m_CrossHairZ);
-	m_CrossHairV->setVisible(false);
-
-	// Cross hair text
-	m_CrossHairText = new QGraphicsTextItem(this);
-	m_CrossHairText->setZValue(m_CrossHairZ);
-	m_CrossHairText->setVisible(false);
+	m_Histogram.setParentItem(this);
+	m_Histogram.setBrush(QColor(200, 20, 20, 50));
+	m_Histogram.setPen(QPen(QBrush(QColor(100, 10, 10, 150)), 0.5f));
 
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(Qt::gray));
@@ -63,10 +48,10 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	// Make sure the background rectangle is drawn behind everything else
 	setZValue(m_BackgroundZ);
 
-	m_pBackgroundRectangle = new QGraphicsRectItem(this);
-	m_pBackgroundRectangle->setZValue(10);
-	m_pBackgroundRectangle->setPen(Qt::NoPen);
-	m_pBackgroundRectangle->setBrush(Qt::gray);
+	m_BackgroundRectangle.setParentItem(this);
+	m_BackgroundRectangle.setZValue(10);
+	m_BackgroundRectangle.setPen(Qt::NoPen);
+	m_BackgroundRectangle.setBrush(Qt::gray);
 
 	// Grid
 	QVector<qreal> dashes;
@@ -89,57 +74,14 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	setAcceptHoverEvents(true);
 }
 
-void QTransferFunctionCanvas::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
-{
-	QGraphicsRectItem::hoverEnterEvent(pEvent);
-
-	// Don't overwrite styling when selected
-	if (isSelected())
-		return;
-
-	// Show crosshair
-//	m_CrossHairH->setVisible(true);
-//	m_CrossHairV->setVisible(true);
-//	m_CrossHairText->setVisible(true);
-}
-
-void QTransferFunctionCanvas::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
-{
-	QGraphicsRectItem::hoverLeaveEvent(pEvent);
-
-	// Don't overwrite styling when selected
-	if (isSelected())
-		return;
-
-	// Hide crosshair
-//	m_CrossHairH->setVisible(false);
-//	m_CrossHairV->setVisible(false);
-//	m_CrossHairText->setVisible(false);
-}
-
-void QTransferFunctionCanvas::hoverMoveEvent(QGraphicsSceneHoverEvent* pEvent)
-{
-	QGraphicsRectItem::hoverMoveEvent(pEvent);
-
-	// Don't overwrite styling when selected
-	if (isSelected())
-		return;
-
-//	m_CrossHairH->setPos(QPointF(pEvent->pos().x(), 0));
-//	m_CrossHairV->setPos(QPointF(0, pEvent->pos().y()));
-//	m_CrossHairText->setPos(pEvent->pos());
-//	m_CrossHairText->setPlainText("[" + QString::number(pEvent->pos().x()) + ", " + QString::number(pEvent->pos().y()) + "]");
-}
-
 void QTransferFunctionCanvas::Update(void)
 {
 	UpdateNodes();
 	UpdateEdges();
 	UpdateGradient();
 	UpdatePolygon();
-	UpdateCrossHairs();
 
-	m_pBackgroundRectangle->setRect(rect());
+	m_BackgroundRectangle.setRect(rect());
 }
 
 void QTransferFunctionCanvas::UpdateGrid(void)
@@ -147,28 +89,19 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 	// Horizontal grid lines
 	const float DeltaY = 0.2f * rect().height();
 
-	// Remove old horizontal grid lines
-	foreach(QGraphicsLineItem* pLine, m_GridLinesHorizontal)
-		scene()->removeItem(pLine);
-
 	// Clear the edges list
-	m_GridLinesHorizontal.clear();
+	m_GridLines.clear();
 
 	for (int i = 1; i < 5; i++)
 	{
-		// Create a new grid line
-		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
+		m_GridLines.append(QGridLine(this));
 
-		pLine->setPen(m_GridPenHorizontal);
+		QGridLine& GridLine = m_GridLines.back();
 
-		// Depth ordering
-		pLine->setZValue(m_GridZ);
-
-		// Set parent
-		pLine->setParentItem(this);
-
-		// Add it to the list so we can remove them from the canvas when needed
-		m_GridLinesHorizontal.append(pLine);
+		GridLine.setLine(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
+		GridLine.setPen(m_GridPenHorizontal);
+		GridLine.setZValue(m_GridZ);
+		GridLine.setParentItem(this);
 	}
 
 	float GridInterval = 50.0f;
@@ -177,19 +110,14 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 
 	for (int i = 0; i < Num; i++)
 	{
-		// Create a new grid line
-		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(i * GridInterval, 0.0f, i * GridInterval, rect().height()));
+		m_GridLines.append(QGridLine(this));
 
-		pLine->setPen(m_GridPenVertical);
+		QGridLine& GridLine = m_GridLines.back();
 
-		// Depth ordering
-		pLine->setZValue(m_GridZ);
-
-		// Set parent
-		pLine->setParentItem(this);
-
-		// Add it to the list so we can remove them from the canvas when needed
-		m_GridLinesHorizontal.append(pLine);
+		GridLine.setLine(QLineF(i * GridInterval, 0.0f, i * GridInterval, rect().height()));
+		GridLine.setPen(m_GridPenVertical);
+		GridLine.setZValue(m_GridZ);
+		GridLine.setParentItem(this);
 	}
 }
 
@@ -225,20 +153,16 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 	}
 
 	// Depth order
-	m_pHistogram->setZValue(m_HistogramZ);
+	m_Histogram.setZValue(m_HistogramZ);
 
 	// Update the polygon geometry
-	m_pHistogram->setPolygon(Polygon);
+	m_Histogram.setPolygon(Polygon);
 }
 
 void QTransferFunctionCanvas::UpdateNodes(void)
 {
 	if (!m_AllowUpdateNodes)
 		return;
-
-	// Remove old nodes
-	foreach(QNodeItem* pNodeItem, m_NodeItems)
-		scene()->removeItem(pNodeItem);
 
 	// Clear the node items list
 	m_NodeItems.clear();
@@ -247,55 +171,42 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 	{
 		QNode& Node = gTransferFunction.GetNode(i);
 
-		// Create new node item
-		QNodeItem* pNodeItem = new QNodeItem(NULL, &Node, this);
+		m_NodeItems.append(QNodeItem(this, &Node));
 
-		// Make it child of us
-		pNodeItem->setParentItem(this);
-
+		QNodeItem& NodeItem = m_NodeItems.back();
+		
 		// Compute node center in canvas coordinates
 		QPointF NodeCenter = TransferFunctionToScene(QPointF(Node.GetIntensity(), Node.GetOpacity()));
 
-		pNodeItem->m_SuspendUpdate = true;
+		NodeItem.setZValue(m_NodeZ);
+		NodeItem.setParentItem(this);
 
-		// Set node position
-		pNodeItem->setPos(NodeCenter);
+		NodeItem.m_SuspendUpdate = true;
+		
+		NodeItem.setPos(NodeCenter);
 
-		pNodeItem->m_SuspendUpdate = false;
-
-		// Make sure node items are rendered on top
-		pNodeItem->setZValue(m_NodeZ);
-
-		// Add it to the list so we can remove them from the canvas when needed
-		m_NodeItems.append(pNodeItem);
+		NodeItem.m_SuspendUpdate = false;
 	}
 }
 
 void QTransferFunctionCanvas::UpdateEdges(void)
 {
-	// Remove old edges
-	foreach(QGraphicsLineItem* pLine, m_EdgeItems)
-		scene()->removeItem(pLine);
-
 	// Clear the edges list
 	m_EdgeItems.clear();
 
 	for (int i = 1; i < m_NodeItems.size(); i++)
 	{
-		QPointF PtFrom(m_NodeItems[i - 1]->pos());
-		QPointF PtTo(m_NodeItems[i]->pos());
+		QPointF PtFrom(m_NodeItems[i - 1].pos());
+		QPointF PtTo(m_NodeItems[i].pos());
 
-		QGraphicsLineItem* pLine = new QGraphicsLineItem(QLineF(PtFrom, PtTo));
-		
-		pLine->setParentItem(this);
+		m_EdgeItems.append(QEdgeItem(this));
 
-		// Set the pen
-		pLine->setPen(QPen(QColor(240, 160, 30), 1.2f));
+		QEdgeItem& Line = m_EdgeItems.back();
 
-		// Ensure the item is drawn in the right order
-		pLine->setZValue(m_EdgeZ);
-
-		m_EdgeItems.append(pLine);
+		Line.setLine(QLineF(PtFrom, PtTo));		
+		Line.setParentItem(this);
+		Line.setPen(QPen(QColor(240, 160, 30), 1.2f));
+		Line.setZValue(m_EdgeZ);
 	}
 }
 
@@ -346,12 +257,12 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 	// Set the gradient stops
 	for (int i = 0; i < m_NodeItems.size(); i++)
 	{
-		QNodeItem* pNodeItem = m_NodeItems[i];
+		QNodeItem& NodeItem = m_NodeItems[i];
 
 		// Compute polygon point in scene coordinates
-		QPointF ScenePoint = pNodeItem->pos();
+		QPointF ScenePoint = NodeItem.pos();
 
-		if (pNodeItem == m_NodeItems.front())
+		if (i == 0)
 		{
 			QPointF CenterCopy = ScenePoint;
 
@@ -362,7 +273,7 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 
 		Polygon.append(ScenePoint);
 
-		if (pNodeItem == m_NodeItems.back())
+		if (i == m_NodeItems.size() - 1)
 		{
 			QPointF CenterCopy = ScenePoint;
 
@@ -373,22 +284,13 @@ void QTransferFunctionCanvas::UpdatePolygon(void)
 	}
 
 	// Depth order
-	m_pPolygon->setZValue(m_PolygonZ);
+	m_Polygon.setZValue(m_PolygonZ);
 
 	// Update the polygon geometry
-	m_pPolygon->setPolygon(Polygon);
+	m_Polygon.setPolygon(Polygon);
 
 	// Give the polygon a gradient brush
-	m_pPolygon->setBrush(QBrush(m_PolygonGradient));
-}
-
-void QTransferFunctionCanvas::UpdateCrossHairs(void)
-{
-	// Horizontal cross hair
-	m_CrossHairH->setLine(QLineF(rect().topLeft(), rect().bottomLeft()));
-
-	// Vertical cross hair
-	m_CrossHairV->setLine(QLineF(rect().topLeft(), rect().topRight()));
+	m_Polygon.setBrush(QBrush(m_PolygonGradient));
 }
 
 // Maps from scene coordinates to transfer function coordinates
@@ -414,3 +316,5 @@ QPointF QTransferFunctionCanvas::TransferFunctionToScene(const QPointF& TfPoint)
 
 	return QPointF(SceneX, SceneY);
 }
+
+

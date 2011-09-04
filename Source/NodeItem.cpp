@@ -17,8 +17,8 @@ QColor	QNodeItem::m_PenColor					= QColor(240, 160, 30);
 QColor	QNodeItem::m_PenColorHover				= QColor(200, 30, 45);
 QColor	QNodeItem::m_PenColorSelected			= QColor(200, 30, 45);
 
-QNodeItem::QNodeItem(QGraphicsItem* pParent, QNode* pNode, QTransferFunctionCanvas* pTransferFunctionCanvas) :
-	QGraphicsEllipseItem(pParent),
+QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode) :
+	QGraphicsEllipseItem(pTransferFunctionCanvas),
 	m_pTransferFunctionCanvas(pTransferFunctionCanvas),
 	m_pNode(pNode),
 	m_Cursor(),

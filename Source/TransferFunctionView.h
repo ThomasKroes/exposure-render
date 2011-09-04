@@ -2,11 +2,12 @@
 
 #include <QtGui>
 
+#include "TransferFunctionCanvas.h"
+#include "TransferFunctionGradient.h"
+
 class QTransferFunction;
 class QNodeItem;
 class QNode;
-class QTransferFunctionCanvas;
-class QTransferFunctionGradient;
 
 class QAxisLabel : public QGraphicsRectItem
 {
@@ -34,6 +35,8 @@ class QTransferFunctionView : public QGraphicsView
 {
     Q_OBJECT
 
+	Q_PROPERTY(QColor m_BackgroundColor READ GetBackgroundColor WRITE SetBackgroundColor)
+
 public:
     QTransferFunctionView(QWidget* pParent = NULL);
 
@@ -41,19 +44,25 @@ public:
 	void resizeEvent(QResizeEvent* pResizeEvent);
 	void mousePressEvent(QMouseEvent* pEvent);
 
+	QColor	GetBackgroundColor(void) const { return m_BackgroundColor; };
+	void	SetBackgroundColor(const QColor& BackgroundColor) { m_BackgroundColor = BackgroundColor; };
+
 private slots:
 	void OnNodeSelectionChanged(QNode* pNode);
 	void OnHistogramChanged(void);
 	void Update(void);
 
 public:
-	QGraphicsScene*				m_pGraphicsScene;
-	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
-	QTransferFunctionGradient*	m_pTransferFunctionGradient;
+	QGraphicsScene				m_GraphicsScene;
+	QTransferFunctionCanvas		m_TransferFunctionCanvas;
+	QTransferFunctionGradient	m_TransferFunctionGradient;
 	float						m_MarginTop;
 	float						m_MarginBottom;
 	float						m_MarginLeft;
 	float						m_MarginRight;
-	QAxisLabel*					m_AxisLabelX;
-	QAxisLabel*					m_AxisLabelY;
+	QAxisLabel					m_AxisLabelX;
+	QAxisLabel					m_AxisLabelY;
+
+	// Styling
+	QColor						m_BackgroundColor;
 };
