@@ -44,6 +44,7 @@ public:
 	double minimum() const;
 	void setMaximum(double Max);
 	double maximum() const;
+	double value() const;
 
 public slots:
 	void setValue(int value);

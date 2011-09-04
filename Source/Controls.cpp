@@ -154,6 +154,12 @@ double QDoubleSlider::maximum() const
 	return QSlider::maximum() / m_Multiplier;
 }
 
+double QDoubleSlider::value() const
+{
+	int Value = QSlider::value();
+	return (double)Value / m_Multiplier;
+}
+
 QString GetOpenFileName(const QString& Caption, const QString& Filter)
 {
 	QFileDialog FileDialog;

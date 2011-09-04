@@ -24,7 +24,6 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_LockSizeCheckBox(),
 	m_ColorLabel(),
 	m_ColorButton(),
-	m_ColorLayout(),
 	m_IntensityLabel(),
 	m_IntensitySlider(),
 	m_IntensitySpinBox(),
@@ -49,16 +48,16 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_ThetaSlider.setOrientation(Qt::Orientation::Horizontal);
     m_ThetaSlider.setFocusPolicy(Qt::StrongFocus);
     m_ThetaSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
-	m_ThetaSlider.setRange(-360, 360);
+	m_ThetaSlider.setRange(-360.0, 360.0);
 	m_MainLayout.addWidget(&m_ThetaSlider, 0, 1);
 	
-    m_ThetaSpinBox.setRange(-360, 360);
+    m_ThetaSpinBox.setRange(-360.0, 360.0);
 	m_ThetaSpinBox.setSuffix(" deg");
 	m_MainLayout.addWidget(&m_ThetaSpinBox, 0, 2);
 	
-	connect(&m_ThetaSlider, SIGNAL(valueChanged(int)), &m_ThetaSpinBox, SLOT(setValue(int)));
-	connect(&m_ThetaSpinBox, SIGNAL(valueChanged(int)), &m_ThetaSlider, SLOT(setValue(int)));
-	connect(&m_ThetaSlider, SIGNAL(valueChanged(int)), this, SLOT(OnThetaChanged(int)));
+	connect(&m_ThetaSlider, SIGNAL(valueChanged(double)), &m_ThetaSpinBox, SLOT(setValue(double)));
+	connect(&m_ThetaSpinBox, SIGNAL(valueChanged(double)), &m_ThetaSlider, SLOT(setValue(double)));
+	connect(&m_ThetaSlider, SIGNAL(valueChanged(double)), this, SLOT(OnThetaChanged(double)));
 
 	// Phi
 	m_PhiLabel.setText("Phi");
@@ -67,16 +66,16 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_PhiSlider.setOrientation(Qt::Orientation::Horizontal);
     m_PhiSlider.setFocusPolicy(Qt::StrongFocus);
     m_PhiSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
-	m_PhiSlider.setRange(-90, 90);
+	m_PhiSlider.setRange(-90.0, 90.0);
 	m_MainLayout.addWidget(&m_PhiSlider, 1, 1);
 	
-    m_PhiSpinBox.setRange(-90, 90);
+    m_PhiSpinBox.setRange(-90.0, 90.0);
 	m_PhiSpinBox.setSuffix(" deg");
 	m_MainLayout.addWidget(&m_PhiSpinBox, 1, 2);
 	
-	connect(&m_PhiSlider, SIGNAL(valueChanged(int)), &m_PhiSpinBox, SLOT(setValue(int)));
-	connect(&m_PhiSpinBox, SIGNAL(valueChanged(int)), &m_PhiSlider, SLOT(setValue(int)));
-	connect(&m_PhiSlider, SIGNAL(valueChanged(int)), this, SLOT(OnPhiChanged(int)));
+	connect(&m_PhiSlider, SIGNAL(valueChanged(double)), &m_PhiSpinBox, SLOT(setValue(double)));
+	connect(&m_PhiSpinBox, SIGNAL(valueChanged(double)), &m_PhiSlider, SLOT(setValue(double)));
+	connect(&m_PhiSlider, SIGNAL(valueChanged(double)), this, SLOT(OnPhiChanged(double)));
 
 	// Distance
 	m_DistanceLabel.setText("Distance");
@@ -85,14 +84,15 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_DistanceSlider.setOrientation(Qt::Orientation::Horizontal);
     m_DistanceSlider.setFocusPolicy(Qt::StrongFocus);
     m_DistanceSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_DistanceSlider.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_DistanceSlider, 2, 1);
 	
-    m_DistanceSpinBox.setRange(-90, 90);
+    m_DistanceSpinBox.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_DistanceSpinBox, 2, 2);
 	
-	connect(&m_DistanceSlider, SIGNAL(valueChanged(int)), &m_DistanceSpinBox, SLOT(setValue(int)));
-	connect(&m_DistanceSpinBox, SIGNAL(valueChanged(int)), &m_DistanceSlider, SLOT(setValue(int)));
-	connect(&m_DistanceSlider, SIGNAL(valueChanged(int)), this, SLOT(OnDistanceChanged(int)));
+	connect(&m_DistanceSlider, SIGNAL(valueChanged(double)), &m_DistanceSpinBox, SLOT(setValue(double)));
+	connect(&m_DistanceSpinBox, SIGNAL(valueChanged(double)), &m_DistanceSlider, SLOT(setValue(double)));
+	connect(&m_DistanceSlider, SIGNAL(valueChanged(double)), this, SLOT(OnDistanceChanged(double)));
 
 	// Width
 	m_WidthLabel.setText("Width");
@@ -101,13 +101,15 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_WidthSlider.setOrientation(Qt::Orientation::Horizontal);
     m_WidthSlider.setFocusPolicy(Qt::StrongFocus);
     m_WidthSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_WidthSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_WidthSlider, 3, 1);
 	
+	m_WidthSpinBox.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_WidthSpinBox, 3, 2);
 	
-	connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_WidthSpinBox, SLOT(setValue(int)));
-	connect(&m_WidthSpinBox, SIGNAL(valueChanged(int)), &m_WidthSlider, SLOT(setValue(int)));
-	connect(&m_WidthSlider, SIGNAL(valueChanged(int)), this, SLOT(OnWidthChanged(int)));
+	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_WidthSpinBox, SLOT(setValue(double)));
+	connect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_WidthSlider, SLOT(setValue(double)));
+	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), this, SLOT(OnWidthChanged(double)));
 
 	// Height
 	m_HeightLabel.setText("Height");
@@ -116,16 +118,18 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_HeightSlider.setOrientation(Qt::Orientation::Horizontal);
     m_HeightSlider.setFocusPolicy(Qt::StrongFocus);
     m_HeightSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_HeightSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_HeightSlider, 5, 1);
 	
+	m_HeightSpinBox.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_HeightSpinBox, 5, 2);
 	
 	m_LockSizeCheckBox.setText("Lock Size");
 	m_MainLayout.addWidget(&m_LockSizeCheckBox, 6, 1);
 
-	connect(&m_HeightSlider, SIGNAL(valueChanged(int)), &m_HeightSpinBox, SLOT(setValue(int)));
-	connect(&m_HeightSpinBox, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
-	connect(&m_HeightSlider, SIGNAL(valueChanged(int)), this, SLOT(OnHeightChanged(int)));
+	connect(&m_HeightSlider, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
+	connect(&m_HeightSpinBox, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
+	connect(&m_HeightSlider, SIGNAL(valueChanged(double)), this, SLOT(OnHeightChanged(double)));
 
 	connect(&m_LockSizeCheckBox, SIGNAL(stateChanged(int)), this, SLOT(OnLockSize(int)));
 	
@@ -133,31 +137,30 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_ColorLabel.setText("Color");
 	m_MainLayout.addWidget(&m_ColorLabel, 7, 0);
 
-	m_MainLayout.addLayout(&m_ColorLayout, 7, 1);
-	
 	m_ColorButton.setText("...");
 	m_ColorButton.setStatusTip("Pick a color");
 	m_ColorButton.setToolTip("Pick a color");
-	m_ColorLayout.addWidget(&m_ColorButton, 0, 0);
+	m_MainLayout.addWidget(&m_ColorButton, 7, 1);
 
 	connect(&m_ColorButton, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
 
 	// Intensity
 	m_IntensityLabel.setText("Intensity");
-	m_ColorLayout.addWidget(&m_IntensityLabel, 0, 1);
+	m_MainLayout.addWidget(&m_IntensityLabel, 8, 0);
 
 	m_IntensitySlider.setOrientation(Qt::Orientation::Horizontal);
     m_IntensitySlider.setFocusPolicy(Qt::StrongFocus);
     m_IntensitySlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_IntensitySlider.setSingleStep(1);
-	m_ColorLayout.addWidget(&m_IntensitySlider, 0, 2);
+	m_IntensitySlider.setRange(0.0, 1000.0);
+	m_MainLayout.addWidget(&m_IntensitySlider, 8, 1);
 	
-    m_IntensitySpinBox.setRange(0, 100);
-	m_MainLayout.addWidget(&m_IntensitySpinBox, 7, 2);
+    m_IntensitySpinBox.setRange(0.0, 1000.0);
+	m_MainLayout.addWidget(&m_IntensitySpinBox, 8, 2);
 	
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(int)), &m_IntensitySpinBox, SLOT(setValue(int)));
-	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(int)), &m_IntensitySlider, SLOT(setValue(int)));
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnIntensityChanged(int)));
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
+	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
 
 	OnLightSelectionChanged(NULL);
 }
@@ -177,28 +180,12 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		m_PhiSlider.setValue(m_pSelectedLight->GetPhi() * RAD_F);
 		
 		// Distance
-		m_DistanceSlider.setValue(m_pSelectedLight->GetDistance() * 10.0f);
-		m_DistanceSlider.setRange(0, 10000);
+		m_DistanceSlider.setValue(m_pSelectedLight->GetDistance());
 		
 		// Width
-		m_WidthSlider.setValue(m_pSelectedLight->GetWidth() * 10.0f);
-		m_WidthSlider.setRange(0, 100);
-		// Height
+		m_WidthSlider.setValue(m_pSelectedLight->GetWidth());
+		m_HeightSlider.setValue(m_pSelectedLight->GetHeight());
 
-//		m_HeightSlider.setValue(m_pSelectedLight->GetHeight() * 10.0f);
-		m_HeightSlider.setRange(0, 100);
-		m_HeightSlider.blockSignals(true);
-
-		QPropertyAnimation animation(&m_HeightSlider, "value");
-		animation.setDuration(1000);
-		animation.setStartValue(0);
-		animation.setEndValue(100);
-
-		animation.start();
-
-		m_HeightSlider.blockSignals(false);
-
-		/**/
 
 		// Lock size
 		m_LockSizeCheckBox.setChecked(m_pSelectedLight->GetLockSize());
@@ -207,9 +194,7 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		m_ColorButton.SetColor(m_pSelectedLight->GetColor());
 		
 		// Intensity
-		m_IntensitySlider.setValue(m_pSelectedLight->GetIntensity() * 10.0f);
-		m_IntensitySlider.setRange(0, 100);
-
+		m_IntensitySlider.setValue(m_pSelectedLight->GetIntensity());
 	}
 	else
 	{
@@ -230,19 +215,19 @@ void QLightSettingsWidget::OnLockSize(const int& LockSize)
 
 	if (LockSize)
 	{
-		connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
-		connect(&m_WidthSpinBox, SIGNAL(valueChanged(int)), &m_HeightSpinBox, SLOT(setValue(int)));
+		connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
+		connect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
 
-		m_HeightSlider.setValue(m_WidthSlider.value());
+		m_HeightSlider.setValue((double)m_WidthSlider.value());
 	}
 	else
 	{
-		disconnect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
-		disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(int)), &m_HeightSpinBox, SLOT(setValue(int)));
+ 		disconnect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
+ 		disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
 	}
 }
 
-void QLightSettingsWidget::OnThetaChanged(const int& Theta)
+void QLightSettingsWidget::OnThetaChanged(const double& Theta)
 {
 	if (!m_pSelectedLight)
 		return;
@@ -250,7 +235,7 @@ void QLightSettingsWidget::OnThetaChanged(const int& Theta)
 	m_pSelectedLight->SetTheta((float)Theta / RAD_F);
 }
 
-void QLightSettingsWidget::OnPhiChanged(const int& Phi)
+void QLightSettingsWidget::OnPhiChanged(const double& Phi)
 {
 	if (!m_pSelectedLight)
 		return;
@@ -258,28 +243,28 @@ void QLightSettingsWidget::OnPhiChanged(const int& Phi)
 	m_pSelectedLight->SetPhi((float)Phi / RAD_F);
 }
 
-void QLightSettingsWidget::OnDistanceChanged(const int& Distance)
+void QLightSettingsWidget::OnDistanceChanged(const double& Distance)
 {
 	if (!m_pSelectedLight)
 		return;
 
-	m_pSelectedLight->SetDistance(0.1f * (float)Distance);
+	m_pSelectedLight->SetDistance((float)Distance);
 }
 
-void QLightSettingsWidget::OnWidthChanged(const int& Width)
+void QLightSettingsWidget::OnWidthChanged(const double& Width)
 {
 	if (!m_pSelectedLight)
 		return;
 
-	m_pSelectedLight->SetWidth(0.1f * Width);
+	m_pSelectedLight->SetWidth(Width);
 }
 
-void QLightSettingsWidget::OnHeightChanged(const int& Height)
+void QLightSettingsWidget::OnHeightChanged(const double& Height)
 {
 	if (!m_pSelectedLight)
 		return;
 
-	m_pSelectedLight->SetHeight(0.1f * Height);
+	m_pSelectedLight->SetHeight(Height);
 }
 
 void QLightSettingsWidget::OnCurrentColorChanged(const QColor& Color)
@@ -292,10 +277,10 @@ void QLightSettingsWidget::OnCurrentColorChanged(const QColor& Color)
 	m_ColorButton.SetColor(Color);
 }
 
-void QLightSettingsWidget::OnIntensityChanged(const int& Intensity)
+void QLightSettingsWidget::OnIntensityChanged(const double& Intensity)
 {
 	if (!m_pSelectedLight)
 		return;
 
-	m_pSelectedLight->SetIntensity(0.1f * (float)Intensity);
+	m_pSelectedLight->SetIntensity((float)Intensity);
 }
