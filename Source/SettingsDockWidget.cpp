@@ -30,7 +30,7 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 
 	m_NoBouncesSlider.setOrientation(Qt::Orientation::Horizontal);
     m_NoBouncesSlider.setFocusPolicy(Qt::StrongFocus);
-    m_NoBouncesSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_NoBouncesSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_NoBouncesSlider.setRange(0, 10);
 	m_MainLayout.addWidget(&m_NoBouncesSlider, 1, 1);
 	
@@ -101,7 +101,7 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 
 	m_KernelWidthSlider.setOrientation(Qt::Orientation::Horizontal);
     m_KernelWidthSlider.setFocusPolicy(Qt::StrongFocus);
-    m_KernelWidthSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_KernelWidthSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_KernelWidthSlider.setRange(2, 64);
 	m_MainLayout.addWidget(&m_KernelWidthSlider, 3, 1);
 	
@@ -117,7 +117,7 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 
 	m_KernelHeightSlider.setOrientation(Qt::Orientation::Horizontal);
     m_KernelHeightSlider.setFocusPolicy(Qt::StrongFocus);
-    m_KernelHeightSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_KernelHeightSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_KernelHeightSlider.setRange(2, 64);
 	m_MainLayout.addWidget(&m_KernelHeightSlider, 4, 1);
 	

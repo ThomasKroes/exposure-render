@@ -32,22 +32,31 @@ private:
 	QColor	m_Color;
 };
 
-class QFloatSlider : public QSlider
+class QDoubleSlider : public QSlider
 {
     Q_OBJECT
 
 public:
-    QFloatSlider(QWidget* pParent = NULL);
+    QDoubleSlider(QWidget* pParent = NULL);
 	
-	float GetValue(void) const;
-	void SetValue(const float& Value);
-	void SetValueAnimated(const float& Value);
+	void setRange(double Min, double Max);
+	void setMinimum(double Min);
+	double minimum() const;
+	void setMaximum(double Max);
+	double maximum() const;
+
+public slots:
+	void setValue(int value);
+	void setValue(double Value);
 
 private slots:
 
+signals:
+	void valueChanged(double Value);
+	void rangeChanged(double Min, double Max);
+
 private:
-	float	m_Factor;
-	float	m_Value;
+	double	m_Multiplier;
 };
 
 class QDoubleSpinner : public QDoubleSpinBox
@@ -56,13 +65,14 @@ class QDoubleSpinner : public QDoubleSpinBox
 
 public:
 
-	QDoubleSpinner(QWidget* pParent = NULL){};
+	QDoubleSpinner(QWidget* pParent = NULL);;
 
 	virtual QSize sizeHint() const;
 
-	virtual QString textFromValue(int Value) const;
-
 private slots:
+
+signals:
+
 
 private:
 };

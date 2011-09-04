@@ -102,40 +102,56 @@ void QColorPushButton::OnCurrentColorChanged(const QColor& Color)
 	emit currentColorChanged(m_Color);
 }
 
-QFloatSlider::QFloatSlider(QWidget* pParent /*= NULL*/) :
+QDoubleSlider::QDoubleSlider(QWidget* pParent /*= NULL*/) :
 	QSlider(pParent),
-	m_Factor(10000.0f)
+	m_Multiplier(10000.0f)
 {
-
+	connect(this, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
 }
 
-float QFloatSlider::GetValue(void) const
+void QDoubleSlider::setValue(int Value)
 {
-	return m_Value;
+//	QSlider::setValue(Value);
+
+	emit valueChanged((double)Value / m_Multiplier);
 }
 
-void QFloatSlider::SetValue(const float& Value)
+void QDoubleSlider::setValue(double Value)
 {
+	QSlider::setValue(Value * m_Multiplier);
 
+	emit valueChanged(Value);
 }
 
-void QFloatSlider::SetValueAnimated(const float& Value)
+void QDoubleSlider::setRange(double Min, double Max)
 {
-//	blockSignals(true);
-	
+	QSlider::setRange(Min * m_Multiplier, Max * m_Multiplier);
 
-	QPropertyAnimation ValueAnimation(this, "value");
+	emit rangeChanged(Min, Max);
+}
 
-	ValueAnimation.setDuration(1000);
+void QDoubleSlider::setMinimum(double Min)
+{
+	QSlider::setMinimum(Min * m_Multiplier);
 
-	setRange(0, 100);
+	emit rangeChanged(minimum(), maximum());
+}
 
-	ValueAnimation.setStartValue(0);
-	ValueAnimation.setEndValue(100);
-	ValueAnimation.setEasingCurve(QEasingCurve::InOutElastic);
-	ValueAnimation.start(QAbstractAnimation::DeleteWhenStopped);
+double QDoubleSlider::minimum() const
+{
+	return QSlider::minimum() / m_Multiplier;
+}
 
-//	blockSignals(false);
+void QDoubleSlider::setMaximum(double Max)
+{
+	QSlider::setMaximum(Max * m_Multiplier);
+
+	emit rangeChanged(minimum(), maximum());
+}
+
+double QDoubleSlider::maximum() const
+{
+	return QSlider::maximum() / m_Multiplier;
 }
 
 QString GetOpenFileName(const QString& Caption, const QString& Filter)
@@ -171,7 +187,7 @@ QSize QDoubleSpinner::sizeHint() const
 	return QSize(100, 20);
 }
 
-QString QDoubleSpinner::textFromValue(int Value) const
+QDoubleSpinner::QDoubleSpinner(QWidget* pParent /*= NULL*/) :
+	QDoubleSpinBox(pParent)
 {
-	return QString::number(Value, 'f', GetPrecision());
 }

@@ -18,9 +18,9 @@ private slots:
 
 private:
 	QGridLayout		m_GridLayout;
-	QFloatSlider	m_FilmWidthSlider;
+	QDoubleSlider	m_FilmWidthSlider;
 	QSpinBox		m_FilmWidthSpinBox;
-	QFloatSlider	m_FilmHeightSlider;
+	QDoubleSlider	m_FilmHeightSlider;
 	QSpinBox		m_FilmHeightSpinBox;
 	QCheckBox		m_LockFilmHeightCheckBox;
 };

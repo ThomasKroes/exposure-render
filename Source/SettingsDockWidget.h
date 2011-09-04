@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+#include "Controls.h"
+
 class CTracerSettingsWidget : public QGroupBox
 {
     Q_OBJECT
@@ -16,10 +18,10 @@ private slots:
 private:
 	QGridLayout		m_MainLayout;
 	QComboBox		m_RenderTypeComboBox;
-	QSlider			m_NoBouncesSlider;
+	QDoubleSlider	m_NoBouncesSlider;
 	QSpinBox		m_NoBouncesSpinBox;
 	QGridLayout		m_ScatteringLayout;
-	QSlider			m_PhaseSlider;
+	QDoubleSlider	m_PhaseSlider;
 };
 
 class CKernelSettingsWidget : public QGroupBox
@@ -36,9 +38,9 @@ private slots:
 
 private:
 	QGridLayout		m_MainLayout;
-	QSlider			m_KernelWidthSlider;
+	QDoubleSlider	m_KernelWidthSlider;
 	QSpinBox		m_KernelWidthSpinBox;
-	QSlider			m_KernelHeightSlider;
+	QDoubleSlider	m_KernelHeightSlider;
 	QSpinBox		m_KernelHeightSpinBox;
 	QCheckBox		m_LockKernelHeightCheckBox;
 };

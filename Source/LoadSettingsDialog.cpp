@@ -28,6 +28,8 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 	setWindowTitle("Import settings");
 	setWindowIcon(QIcon(":/Images/gear.png"));
 
+	setLayout(&m_MainLayout);
+
 	// Create main layout
 	m_ResampleGroupBox.setTitle("Resampling");
 	m_ResampleGroupBox.setCheckable(true);
@@ -48,16 +50,17 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 
 	m_ResampleXSlider.setOrientation(Qt::Orientation::Horizontal);
     m_ResampleXSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ResampleXSlider.setTickPosition(QSlider::TickPosition::NoTicks);
-	m_ResampleXSlider.setRange(0, 100);
+    m_ResampleXSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_ResampleXSlider.setRange(0.0, 1.0);
 	m_ResampleLayout.addWidget(&m_ResampleXSlider, 0, 1);
 	
-    m_ResampleXSpinBox.setRange(0, 100);
+    m_ResampleXSpinBox.setRange(0.0, 1.0);
+	m_ResampleXSpinBox.setSingleStep(0.1);
 	m_ResampleLayout.addWidget(&m_ResampleXSpinBox, 0, 2);
 	
-	connect(&m_ResampleXSlider, SIGNAL(valueChanged(int)), &m_ResampleXSpinBox, SLOT(setValue(int)));
-	connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(int)), &m_ResampleXSlider, SLOT(setValue(int)));
-	connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(int)), this, SLOT(SetResampleX(int)));
+	connect(&m_ResampleXSlider, SIGNAL(valueChanged(double)), &m_ResampleXSpinBox, SLOT(setValue(double)));
+	connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), &m_ResampleXSlider, SLOT(setValue(double)));
+	connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), this, SLOT(SetResampleX(double)));
 
 	// Scaling y
 	m_ResampleYLabel.setText("Y Resample (%)");
@@ -65,19 +68,19 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 
 	m_ResampleYSlider.setOrientation(Qt::Orientation::Horizontal);
     m_ResampleYSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ResampleYSlider.setTickPosition(QSlider::TickPosition::NoTicks);
-	m_ResampleYSlider.setRange(0, 100);
+    m_ResampleYSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_ResampleYSlider.setRange(0.0, 1.0);
 	m_ResampleLayout.addWidget(&m_ResampleYSlider, 1, 1);
 	
-    m_ResampleYSpinBox.setRange(0, 100);
+    m_ResampleYSpinBox.setRange(0.0, 1.0);
 	m_ResampleLayout.addWidget(&m_ResampleYSpinBox, 1, 2);
 	
 	m_LockYCheckBox.setText("Lock");
 	m_ResampleLayout.addWidget(&m_LockYCheckBox, 1, 3);
 
-	connect(&m_ResampleYSlider, SIGNAL(valueChanged(int)), &m_ResampleYSpinBox, SLOT(setValue(int)));
-	connect(&m_ResampleYSpinBox, SIGNAL(valueChanged(int)), &m_ResampleYSlider, SLOT(setValue(int)));
-	connect(&m_ResampleYSpinBox, SIGNAL(valueChanged(int)), this, SLOT(SetResampleY(int)));
+	connect(&m_ResampleYSlider, SIGNAL(valueChanged(double)), &m_ResampleYSpinBox, SLOT(setValue(double)));
+	connect(&m_ResampleYSpinBox, SIGNAL(valueChanged(double)), &m_ResampleYSlider, SLOT(setValue(double)));
+	connect(&m_ResampleYSpinBox, SIGNAL(valueChanged(double)), this, SLOT(SetResampleY(double)));
 	connect(&m_LockYCheckBox, SIGNAL(stateChanged(int)), this, SLOT(LockY(int)));
 
 	// Scaling z
@@ -86,20 +89,20 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 
 	m_ResampleZSlider.setOrientation(Qt::Orientation::Horizontal);
     m_ResampleZSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ResampleZSlider.setTickPosition(QSlider::TickPosition::NoTicks);
-	m_ResampleZSlider.setRange(0, 100);
+    m_ResampleZSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_ResampleZSlider.setRange(0.0, 1.0);
 	m_ResampleLayout.addWidget(&m_ResampleZSlider, 2, 1);
 	
-    m_ResampleZSpinBox.setRange(0, 100);
+    m_ResampleZSpinBox.setRange(0.0, 1.0);
 	
 	m_ResampleLayout.addWidget(&m_ResampleZSpinBox, 2, 2);
 	
 	m_LockZCheckBox.setText("Lock");
 	m_ResampleLayout.addWidget(&m_LockZCheckBox, 2, 3);
 
-	connect(&m_ResampleZSlider, SIGNAL(valueChanged(int)), &m_ResampleZSpinBox, SLOT(setValue(int)));
-	connect(&m_ResampleZSpinBox, SIGNAL(valueChanged(int)), &m_ResampleZSlider, SLOT(setValue(int)));
-	connect(&m_ResampleZSlider, SIGNAL(valueChanged(int)), this, SLOT(SetResampleZ(int)));
+	connect(&m_ResampleZSlider, SIGNAL(valueChanged(double)), &m_ResampleZSpinBox, SLOT(setValue(double)));
+	connect(&m_ResampleZSpinBox, SIGNAL(valueChanged(double)), &m_ResampleZSlider, SLOT(setValue(double)));
+	connect(&m_ResampleZSlider, SIGNAL(valueChanged(double)), this, SLOT(SetResampleZ(double)));
 	connect(&m_LockZCheckBox, SIGNAL(stateChanged(int)), this, SLOT(LockZ(int)));
 	
 	// Dialog buttons
@@ -130,15 +133,15 @@ void CLoadSettingsDialog::LockY(const int& State)
 
 	if (State)
 	{
-		connect(&m_ResampleXSlider, SIGNAL(valueChanged(int)), &m_ResampleYSlider, SLOT(setValue(int)));
-		connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(int)), &m_ResampleYSpinBox, SLOT(setValue(int)));
+		connect(&m_ResampleXSlider, SIGNAL(valueChanged(double)), &m_ResampleYSlider, SLOT(setValue(double)));
+		connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), &m_ResampleYSpinBox, SLOT(setValue(double)));
 
 		m_ResampleYSlider.setValue(m_ResampleXSlider.value());
 	}
 	else
 	{
-		disconnect(&m_ResampleXSlider, SIGNAL(valueChanged(int)), &m_ResampleYSlider, SLOT(setValue(int)));
-		disconnect(&m_ResampleXSpinBox, SIGNAL(valueChanged(int)), &m_ResampleYSpinBox, SLOT(setValue(int)));
+		disconnect(&m_ResampleXSlider, SIGNAL(valueChanged(double)), &m_ResampleYSlider, SLOT(setValue(double)));
+		disconnect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), &m_ResampleYSpinBox, SLOT(setValue(double)));
 	}
 }
 
@@ -150,15 +153,15 @@ void CLoadSettingsDialog::LockZ(const int& State)
 
 	if (State)
 	{
-		connect(&m_ResampleXSlider, SIGNAL(valueChanged(int)), &m_ResampleZSlider, SLOT(setValue(int)));
-		connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(int)), &m_ResampleZSpinBox, SLOT(setValue(int)));
+		connect(&m_ResampleXSlider, SIGNAL(valueChanged(double)), &m_ResampleZSlider, SLOT(setValue(double)));
+		connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), &m_ResampleZSpinBox, SLOT(setValue(double)));
 
 		m_ResampleZSlider.setValue(m_ResampleXSlider.value());
 	}
 	else
 	{
-		disconnect(&m_ResampleXSlider, SIGNAL(valueChanged(int)), &m_ResampleZSlider, SLOT(setValue(int)));
-		disconnect(&m_ResampleXSpinBox, SIGNAL(valueChanged(int)), &m_ResampleZSpinBox, SLOT(setValue(int)));
+		disconnect(&m_ResampleXSlider, SIGNAL(valueChanged(double)), &m_ResampleZSlider, SLOT(setValue(double)));
+		disconnect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), &m_ResampleZSpinBox, SLOT(setValue(double)));
 	}
 }
 
@@ -167,19 +170,19 @@ void CLoadSettingsDialog::SetResample(const int& Resample)
 	m_Resample = Resample;
 }
 
-void CLoadSettingsDialog::SetResampleX(const int& ResampleX)
+void CLoadSettingsDialog::SetResampleX(const double& ResampleX)
 {
-	m_ResampleX = 0.01f * (float)ResampleX;
+	m_ResampleX = (float)ResampleX;
 }
 
-void CLoadSettingsDialog::SetResampleY(const int& ResampleY)
+void CLoadSettingsDialog::SetResampleY(const double& ResampleY)
 {
-	m_ResampleY = 0.01f * (float)ResampleY;
+	m_ResampleY = (float)ResampleY;
 }
 
-void CLoadSettingsDialog::SetResampleZ(const int& ResampleZ)
+void CLoadSettingsDialog::SetResampleZ(const double& ResampleZ)
 {
-	m_ResampleZ = 0.01f * (float)ResampleZ;
+	m_ResampleZ = (float)ResampleZ;
 }
 
 void CLoadSettingsDialog::Accept(void)

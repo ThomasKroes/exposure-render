@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+#include "Controls.h"
+
 class CLoadSettingsDialog : public QDialog
 {
 	Q_OBJECT
@@ -22,9 +24,9 @@ private slots:
 	void LockY(const int& State);
 	void LockZ(const int& State);
 	void SetResample(const int& Resample);
-	void SetResampleX(const int& ResampleX);
-	void SetResampleY(const int& ResampleY);
-	void SetResampleZ(const int& ResampleZ);
+	void SetResampleX(const double& ResampleX);
+	void SetResampleY(const double& ResampleY);
+	void SetResampleZ(const double& ResampleZ);
 	void Accept(void);
 	void Reject(void);
 	void Clicked(QAbstractButton* pButton);
@@ -34,15 +36,15 @@ private:
 	QGroupBox			m_ResampleGroupBox;
 	QGridLayout			m_ResampleLayout;
 	QLabel				m_ResampleXLabel;
-	QSlider				m_ResampleXSlider;
-	QSpinBox			m_ResampleXSpinBox;
+	QDoubleSlider		m_ResampleXSlider;
+	QDoubleSpinner		m_ResampleXSpinBox;
 	QLabel				m_ResampleYLabel;
-	QSlider				m_ResampleYSlider;
-	QSpinBox			m_ResampleYSpinBox;
+	QDoubleSlider		m_ResampleYSlider;
+	QDoubleSpinner		m_ResampleYSpinBox;
 	QCheckBox			m_LockYCheckBox;
 	QLabel				m_ResampleZLabel;
-	QSlider				m_ResampleZSlider;
-	QSpinBox			m_ResampleZSpinBox;
+	QDoubleSlider		m_ResampleZSlider;
+	QDoubleSpinner		m_ResampleZSpinBox;
 	QCheckBox			m_LockZCheckBox;
 	QDialogButtonBox	m_DialogButtons;
 

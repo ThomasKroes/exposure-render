@@ -20,7 +20,7 @@ CApertureWidget::CApertureWidget(QWidget* pParent) :
 
 	m_ApertureSizeSlider.setOrientation(Qt::Orientation::Horizontal);
     m_ApertureSizeSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ApertureSizeSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_ApertureSizeSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_GridLayout.addWidget(&m_ApertureSizeSlider, 3, 1);
 	
     m_ApertureSizeSpinBox.setRange(-100, 100);

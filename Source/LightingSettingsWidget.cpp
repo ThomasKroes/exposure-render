@@ -48,7 +48,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_ThetaSlider.setOrientation(Qt::Orientation::Horizontal);
     m_ThetaSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ThetaSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_ThetaSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_ThetaSlider.setRange(-360, 360);
 	m_MainLayout.addWidget(&m_ThetaSlider, 0, 1);
 	
@@ -66,7 +66,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_PhiSlider.setOrientation(Qt::Orientation::Horizontal);
     m_PhiSlider.setFocusPolicy(Qt::StrongFocus);
-    m_PhiSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_PhiSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_PhiSlider.setRange(-90, 90);
 	m_MainLayout.addWidget(&m_PhiSlider, 1, 1);
 	
@@ -84,7 +84,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_DistanceSlider.setOrientation(Qt::Orientation::Horizontal);
     m_DistanceSlider.setFocusPolicy(Qt::StrongFocus);
-    m_DistanceSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_DistanceSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_MainLayout.addWidget(&m_DistanceSlider, 2, 1);
 	
     m_DistanceSpinBox.setRange(-90, 90);
@@ -100,7 +100,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_WidthSlider.setOrientation(Qt::Orientation::Horizontal);
     m_WidthSlider.setFocusPolicy(Qt::StrongFocus);
-    m_WidthSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_WidthSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_MainLayout.addWidget(&m_WidthSlider, 3, 1);
 	
 	m_MainLayout.addWidget(&m_WidthSpinBox, 3, 2);
@@ -115,7 +115,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_HeightSlider.setOrientation(Qt::Orientation::Horizontal);
     m_HeightSlider.setFocusPolicy(Qt::StrongFocus);
-    m_HeightSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_HeightSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_MainLayout.addWidget(&m_HeightSlider, 5, 1);
 	
 	m_MainLayout.addWidget(&m_HeightSpinBox, 5, 2);
@@ -148,7 +148,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_IntensitySlider.setOrientation(Qt::Orientation::Horizontal);
     m_IntensitySlider.setFocusPolicy(Qt::StrongFocus);
-    m_IntensitySlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_IntensitySlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_IntensitySlider.setSingleStep(1);
 	m_ColorLayout.addWidget(&m_IntensitySlider, 0, 2);
 	
@@ -183,12 +183,10 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		// Width
 		m_WidthSlider.setValue(m_pSelectedLight->GetWidth() * 10.0f);
 		m_WidthSlider.setRange(0, 100);
-		m_WidthSlider.SetValueAnimated(100.0f);
 		// Height
 
 //		m_HeightSlider.setValue(m_pSelectedLight->GetHeight() * 10.0f);
 		m_HeightSlider.setRange(0, 100);
-		m_HeightSlider.SetValueAnimated(100.0f);
 		m_HeightSlider.blockSignals(true);
 
 		QPropertyAnimation animation(&m_HeightSlider, "value");
@@ -212,7 +210,6 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 		m_IntensitySlider.setValue(m_pSelectedLight->GetIntensity() * 10.0f);
 		m_IntensitySlider.setRange(0, 100);
 
-		m_IntensitySlider.SetValueAnimated(100.0f);
 	}
 	else
 	{

@@ -32,7 +32,7 @@ CFocusWidget::CFocusWidget(QWidget* pParent) :
 	m_FocalDistanceSlider.setOrientation(Qt::Orientation::Horizontal);
 	m_FocalDistanceSlider.setEnabled(false);
     m_FocalDistanceSlider.setFocusPolicy(Qt::StrongFocus);
-    m_FocalDistanceSlider.setTickPosition(QSlider::TickPosition::NoTicks);
+    m_FocalDistanceSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
 	m_GridLayout.addWidget(&m_FocalDistanceSlider, 6, 1);
 	
 	m_FocalDistanceSpinBox.setEnabled(false);
