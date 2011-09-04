@@ -15,13 +15,6 @@ QLight::QLight(QObject* pParent) :
 	m_Color(),
 	m_Intensity()
 {
-	SetName("Undefined");
-	SetTheta(RandomFloat() * TWO_RAD_F);
-	SetPhi(RandomFloat() * RAD_F);
-	SetWidth(0.5f);
-	SetHeight(0.5f);
-	SetDistance(1.0f);
-	SetIntensity(1.0f);
 }
 
 float QLight::GetTheta(void) const
@@ -191,10 +184,135 @@ QDomElement QLight::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	return Light;
 }
 
+QBackground::QBackground(QObject* pParent) :
+	QPresetXML(pParent),
+	m_Enable(true),
+	m_Color(Qt::white),
+	m_Intensity(100.0),
+	m_UseTexture(false),
+	m_File("")
+{
+}
+
+bool QBackground::GetEnabled(void) const
+{
+	return m_Enable;
+}
+
+void QBackground::SetEnabled(const bool& Enable)
+{
+	m_Enable = Enable;
+
+	emit BackgroundChanged();
+}
+
+QColor QBackground::GetColor(void) const
+{
+	return m_Color;
+}
+
+void QBackground::SetColor(const QColor& Color)
+{
+	m_Color = Color;
+
+	emit BackgroundChanged();
+}
+
+float QBackground::GetIntensity(void) const
+{
+	return m_Intensity;
+}
+
+void QBackground::SetIntensity(const float& Intensity)
+{
+	m_Intensity = Intensity;
+
+	emit BackgroundChanged();
+}
+
+bool QBackground::GetUseTexture(void) const
+{
+	return m_UseTexture;
+}
+
+void QBackground::SetUseTexture(const bool& Texture)
+{
+	m_UseTexture = Texture;
+
+	emit BackgroundChanged();
+}
+
+QString QBackground::GetFile(void) const
+{
+	return m_File;
+}
+
+void QBackground::SetFile(const QString& File)
+{
+	m_File = File;
+
+	emit BackgroundChanged();
+}
+
+void QBackground::ReadXML(QDomElement& Parent)
+{
+	QPresetXML::ReadXML(Parent);
+
+	SetEnabled(Parent.firstChildElement("Enable").attribute("Value").toInt());
+	
+	QDomElement Color = Parent.firstChildElement("Color");
+
+	SetColor(QColor(Color.attribute("R").toInt(), Color.attribute("G").toInt(), Color.attribute("B").toInt()));
+
+	SetIntensity(Parent.firstChildElement("Intensity").attribute("Value").toFloat());
+	SetUseTexture(Parent.firstChildElement("UseTexture").attribute("Value").toInt());
+	SetFile(Parent.firstChildElement("Height").attribute("Value"));
+}
+
+QDomElement QBackground::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+{
+	// Background
+	QDomElement Background = DOM.createElement("Background");
+	Parent.appendChild(Background);
+
+//	QPresetXML::WriteXML(DOM, Background);
+
+	// Enable
+	QDomElement Enable = DOM.createElement("Enable");
+	Enable.setAttribute("Value", m_Enable);
+	Background.appendChild(Enable);
+
+	// Color
+	QDomElement Color = DOM.createElement("Color");
+	Color.setAttribute("R", m_Color.red());
+	Color.setAttribute("G", m_Color.green());
+	Color.setAttribute("B", m_Color.blue());
+	Background.appendChild(Color);
+
+	// Intensity
+	QDomElement Intensity = DOM.createElement("Intensity");
+	Intensity.setAttribute("Value", m_Intensity);
+	Background.appendChild(Intensity);
+
+	// Use texture
+	QDomElement UseTexture = DOM.createElement("UseTexture");
+	UseTexture.setAttribute("Value", m_UseTexture);
+	Background.appendChild(UseTexture);
+
+	// File
+	QDomElement File = DOM.createElement("File");
+	File.setAttribute("Value", m_File);
+	Background.appendChild(File);
+
+	return Background;
+}
+
 QLighting::QLighting(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
-	m_Lights()
+	m_Lights(),
+	m_Background()
 {
+	connect(&m_Background, SIGNAL(BackgroundChanged()), this, SLOT(Update()));
 }
 
 void QLighting::ReadXML(QDomElement& Parent)
@@ -214,6 +332,9 @@ void QLighting::ReadXML(QDomElement& Parent)
 		// Load preset into it
 		m_Lights.back().ReadXML(DomNode.toElement());
 	}
+
+	QDomElement Background = Parent.firstChildElement("Background").toElement();
+	m_Background.ReadXML(Background);
 }
 
 QDomElement QLighting::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -229,11 +350,18 @@ QDomElement QLighting::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	for (int i = 0; i < m_Lights.size(); i++)
 		m_Lights[i].WriteXML(DOM, Lights);
-		
+	
+	m_Background.WriteXML(DOM, Preset);
+
 	return Preset;
 }
 
 void QLighting::OnLightPropertiesChanged(QLight* pLight)
+{
+	Update();
+}
+
+void QLighting::Update(void)
 {
 	if (gLighting.m_Lights.isEmpty())
 		return;
@@ -269,4 +397,7 @@ void QLighting::AddLight(QLight& Light)
 	connect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
 }
 
-
+QBackground& QLighting::Background(void)
+{
+	return m_Background;
+}

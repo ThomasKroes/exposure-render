@@ -13,9 +13,9 @@ QVolumeAppearanceWidget::QVolumeAppearanceWidget(QWidget* pParent) :
 	m_MainLayout.setAlignment(Qt::AlignTop);
 	setLayout(&m_MainLayout);
 
-	m_MainLayout.addWidget(&m_TransferFunctionWidget, 0, 0);
-	m_MainLayout.addWidget(&m_NodePropertiesWidget, 1, 0);
-	m_MainLayout.addWidget(&m_PresetsWidget);
+	m_MainLayout.addWidget(&m_TransferFunctionWidget, 1, 0);
+	m_MainLayout.addWidget(&m_NodePropertiesWidget, 2, 0);
+	m_MainLayout.addWidget(&m_PresetsWidget, 0, 0);
 
 	// Connections
 	connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
@@ -36,7 +36,7 @@ void QVolumeAppearanceWidget::OnSavePreset(const QString& Name)
 	m_PresetsWidget.SavePreset(Preset);
 }
 
-QVolumeAppearanceDockWidget::QVolumeAppearanceDockWidget(QWidget *parent) :
+QAppearanceDockWidget::QAppearanceDockWidget(QWidget *parent) :
 	QDockWidget(parent),
 	m_VolumeAppearanceWidget()
 {

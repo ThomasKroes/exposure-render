@@ -30,12 +30,12 @@ CCameraWidget::CCameraWidget(QWidget* pParent) :
 	m_MainLayout.setAlignment(Qt::AlignTop);
 	setLayout(&m_MainLayout);
 
+	m_MainLayout.addWidget(&m_PresetsWidget);
 	m_MainLayout.addWidget(&m_FilmWidget);
 	m_MainLayout.addWidget(&m_ApertureWidget);
 	m_MainLayout.addWidget(&m_ProjectionWidget);
 	m_MainLayout.addWidget(&m_FocusWidget);
-	m_MainLayout.addWidget(&m_PresetsWidget);
-
+	
 	// Connections
 	connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
 	connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));

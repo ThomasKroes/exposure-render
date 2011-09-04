@@ -24,7 +24,7 @@
 
 // Dock widgets
 #include "LightingDockWidget.h"
-#include "VolumeAppearanceDockWidget.h"
+#include "AppearanceDockWidget.h"
 #include "StatisticsDockWidget.h"
 #include "CameraDockWidget.h"
 #include "SettingsDockWidget.h"
@@ -100,7 +100,7 @@ private:
 
 	// Dock widgets
 	QLightingDockWidget					m_LightingDockWidget;
-	QVolumeAppearanceDockWidget			m_VolumeAppearanceDockWidget;
+	QAppearanceDockWidget				m_AppearanceDockWidget;
 	QStatisticsDockWidget				m_StatisticsDockWidget;
 	QCameraDockWidget					m_CameraDockWidget;
 	QSettingsDockWidget					m_SettingsDockWidget;

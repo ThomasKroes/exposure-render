@@ -20,15 +20,15 @@ public:
 	{
 		QPresetXML::operator=(Other);
 
-		m_Theta			= Other.m_Theta;
-		m_Phi			= Other.m_Phi;
-		m_Distance		= Other.m_Distance;
-		m_Width			= Other.m_Width;
-		m_Height		= Other.m_Height;
-		m_LockSize		= Other.m_LockSize;
-		m_Color			= Other.m_Color;
-		m_Intensity		= Other.m_Intensity;
-
+		m_Theta					= Other.m_Theta;
+		m_Phi					= Other.m_Phi;
+		m_Distance				= Other.m_Distance;
+		m_Width					= Other.m_Width;
+		m_Height				= Other.m_Height;
+		m_LockSize				= Other.m_LockSize;
+		m_Color					= Other.m_Color;
+		m_Intensity				= Other.m_Intensity;
+		
 		return *this;
 	}
 
@@ -64,11 +64,63 @@ protected:
 	bool		m_LockSize;
 	QColor		m_Color;
 	float		m_Intensity;
-
+	
 	friend class QLightItem;
 };
 
 typedef QList<QLight> QLightList;
+
+class QBackground : public QPresetXML
+{
+	Q_OBJECT
+
+public:
+	QBackground(QObject* pParent = NULL);
+
+	QBackground::QBackground(const QBackground& Other)
+	{
+		*this = Other;
+	};
+
+	QBackground& QBackground::operator=(const QBackground& Other)
+	{
+		QPresetXML::operator=(Other);
+
+		m_Enable		= Other.m_Enable;
+		m_Color			= Other.m_Color;
+		m_Intensity		= Other.m_Intensity;
+		m_UseTexture	= Other.m_UseTexture;
+		m_File			= Other.m_File;
+
+		emit BackgroundChanged();
+
+		return *this;
+	}
+
+	bool		GetEnabled(void) const;
+	void		SetEnabled(const bool& Enable);
+	QColor		GetColor(void) const;
+	void		SetColor(const QColor& Color);
+	float		GetIntensity(void) const;
+	void		SetIntensity(const float& Intensity);
+	bool		GetUseTexture(void) const;
+	void		SetUseTexture(const bool& UseTexture);
+	QString		GetFile(void) const;
+	void		SetFile(const QString& File);
+
+	void		ReadXML(QDomElement& Parent);
+	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
+
+signals:
+	void BackgroundChanged();
+
+protected:
+	bool		m_Enable;
+	QColor		m_Color;
+	float		m_Intensity;
+	bool		m_UseTexture;
+	QString		m_File;
+};
 
 class QLighting : public QPresetXML
 {
@@ -79,8 +131,6 @@ public:
 
 	QLighting::QLighting(const QLighting& Other)
 	{
-		m_Lights  = Other.m_Lights;
-
 		*this = Other;
 	};
 
@@ -88,7 +138,8 @@ public:
 	{
 		QPresetXML::operator=(Other);
 
-		m_Lights = Other.m_Lights;
+		m_Lights		= Other.m_Lights;
+		m_Background	= Other.m_Background;
 
 		emit LightingChanged();
 
@@ -98,15 +149,18 @@ public:
 	void		ReadXML(QDomElement& Parent);
 	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	void AddLight(QLight& Light);
-
+	QBackground& Background(void);
+	
 public slots:
 	void OnLightPropertiesChanged(QLight* pLight);
+	void Update(void);
 
 signals:
 	void LightingChanged(void);
-
+	
 protected:
-	QLightList	m_Lights;
+	QLightList		m_Lights;
+	QBackground		m_Background;
 
 	friend class QLightsWidget;
 };

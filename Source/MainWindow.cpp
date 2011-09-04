@@ -64,7 +64,7 @@ CMainWindow::CMainWindow() :
     m_pFileToolBar(NULL),
 	m_pVtkWidget(NULL),
 	m_LightingDockWidget(),
-	m_VolumeAppearanceDockWidget(),
+	m_AppearanceDockWidget(),
 	m_StatisticsDockWidget(),
 	m_CameraDockWidget(),
 	m_SettingsDockWidget(),
@@ -190,39 +190,39 @@ void CMainWindow::CreateStatusBar()
 void CMainWindow::SetupDockingWidgets()
 {
 	// Lighting dock widget
-    m_LightingDockWidget.setParent(this);
 	m_LightingDockWidget.setEnabled(false);
     m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_LightingDockWidget);
     m_pViewMenu->addAction(m_LightingDockWidget.toggleViewAction());
 
 	// Appearance dock widget
-	m_VolumeAppearanceDockWidget.setEnabled(false);
-	m_VolumeAppearanceDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
-	addDockWidget(Qt::LeftDockWidgetArea, &m_VolumeAppearanceDockWidget);
-    m_pViewMenu->addAction(m_VolumeAppearanceDockWidget.toggleViewAction());
+	m_AppearanceDockWidget.setEnabled(false);
+	m_AppearanceDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::LeftDockWidgetArea, &m_AppearanceDockWidget);
+    m_pViewMenu->addAction(m_AppearanceDockWidget.toggleViewAction());
 
 	// Statistics dock widget
 	m_StatisticsDockWidget.Init();
-	m_StatisticsDockWidget.setParent(this);
 	m_StatisticsDockWidget.setEnabled(false);
 	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::LeftDockWidgetArea, &m_StatisticsDockWidget);
     m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());
 
 	// Camera dock widget
-    m_CameraDockWidget.setParent(this);
 	m_CameraDockWidget.setEnabled(false);
-	m_CameraDockWidget.setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	m_CameraDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_CameraDockWidget);
     m_pViewMenu->addAction(m_CameraDockWidget.toggleViewAction());
 
 	// Settings dock widget
-    m_SettingsDockWidget.setParent(this);
 	m_SettingsDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_SettingsDockWidget);
     m_pViewMenu->addAction(m_SettingsDockWidget.toggleViewAction());
+
+	tabifyDockWidget(&m_AppearanceDockWidget, &m_LightingDockWidget);
+	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);
+	tabifyDockWidget(&m_CameraDockWidget, &m_SettingsDockWidget);
 }
 
 void CMainWindow::UpdateRecentFileActions(void)
@@ -405,7 +405,7 @@ void CMainWindow::OnRenderBegin(void)
 	qDebug("Rendering started");
 
 	m_LightingDockWidget.setEnabled(true);
-	m_VolumeAppearanceDockWidget.setEnabled(true);
+	m_AppearanceDockWidget.setEnabled(true);
 	m_StatisticsDockWidget.setEnabled(true);
 	m_CameraDockWidget.setEnabled(true);
 	m_SettingsDockWidget.setEnabled(true);
@@ -447,7 +447,7 @@ void CMainWindow::OnRenderEnd(void)
 	qDebug("Rendering ended");
 
 	m_LightingDockWidget.setEnabled(false);
-	m_VolumeAppearanceDockWidget.setEnabled(false);
+	m_AppearanceDockWidget.setEnabled(false);
 	m_StatisticsDockWidget.setEnabled(false);
 	m_CameraDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setEnabled(false);

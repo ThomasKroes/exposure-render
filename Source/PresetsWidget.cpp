@@ -95,6 +95,9 @@ void QTestWidget::OnSavePreset(void)
 
 	InputDialog.exec();
 
+	if (InputDialog.textValue().isEmpty())
+		return;
+
 	emit SavePreset(InputDialog.textValue());
 }
 
@@ -139,7 +142,7 @@ void QTestWidget::OnCurrentIndexChanged(int Index)
 	if (Index <= 0)
 		return;
 
-	if (m_PresetName.lineEdit()->text().length() > 0)
+	if (!m_PresetName.currentText().isEmpty())
 	{
 		m_LoadPreset.setEnabled(true);
 		m_SavePreset.setEnabled(true);

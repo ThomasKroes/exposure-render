@@ -95,13 +95,10 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_IntensitySlider.setOrientation(Qt::Orientation::Horizontal);
 	m_IntensitySlider.setStatusTip("Node position");
 	m_IntensitySlider.setToolTip("Drag to change node position");
-	m_IntensitySlider.setRange(0, 100);
-	m_IntensitySlider.setSingleStep(1);
 	m_MainLayout.addWidget(&m_IntensitySlider, 1, 1);
 	
 	m_IntensitySpinBox.setStatusTip("Node Position");
 	m_IntensitySpinBox.setToolTip("Node Position");
-    m_IntensitySpinBox.setRange(0, 100);
 	m_IntensitySpinBox.setSingleStep(1);
 	m_MainLayout.addWidget(&m_IntensitySpinBox, 1, 2);
 
@@ -112,14 +109,10 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySlider.setOrientation(Qt::Orientation::Horizontal);
 	m_OpacitySlider.setStatusTip("Node Opacity");
 	m_OpacitySlider.setToolTip("Node Opacity");
-	m_OpacitySlider.setRange(0, 100);
-	m_OpacitySlider.setSingleStep(1);
 	m_MainLayout.addWidget(&m_OpacitySlider, 2, 1);
 	
 	m_OpacitySpinBox.setStatusTip("Node Opacity");
 	m_OpacitySpinBox.setToolTip("Node Opacity");
-    m_OpacitySpinBox.setRange(0, 100);
-	m_OpacitySpinBox.setSingleStep(1);
 	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 2);
 	
 	// Kd
@@ -135,14 +128,14 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_KtColor, 5, 1);
 
 	// Setup connections for position
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(int)), &m_IntensitySpinBox, SLOT(setValue(int)));
-	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(int)), &m_IntensitySlider, SLOT(setValue(int)));
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnIntensityChanged(int)));
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
+	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
 
 	// Setup connections for opacity
-	connect(&m_OpacitySlider, SIGNAL(valueChanged(int)), &m_OpacitySpinBox, SLOT(setValue(int)));
-	connect(&m_OpacitySpinBox, SIGNAL(valueChanged(int)), &m_OpacitySlider, SLOT(setValue(int)));
-	connect(&m_OpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OnOpacityChanged(int)));
+	connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), &m_OpacitySpinBox, SLOT(setValue(double)));
+	connect(&m_OpacitySpinBox, SIGNAL(valueChanged(double)), &m_OpacitySlider, SLOT(setValue(double)));
+	connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnOpacityChanged(double)));
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
@@ -212,16 +205,16 @@ void QNodePropertiesWidget::OnDeleteNode(void)
 	gTransferFunction.RemoveNode(gTransferFunction.GetSelectedNode());
 }
 
-void QNodePropertiesWidget::OnIntensityChanged(const int& Position)
+void QNodePropertiesWidget::OnIntensityChanged(const double& Position)
 {
 	if (gTransferFunction.GetSelectedNode())
 		gTransferFunction.GetSelectedNode()->SetIntensity(Position);
 }
 
-void QNodePropertiesWidget::OnOpacityChanged(const int& Opacity)
+void QNodePropertiesWidget::OnOpacityChanged(const double& Opacity)
 {
 	if (gTransferFunction.GetSelectedNode())
-		gTransferFunction.GetSelectedNode()->SetOpacity(0.01f * Opacity);
+		gTransferFunction.GetSelectedNode()->SetOpacity(Opacity);
 }
 
 void QNodePropertiesWidget::OnColorChanged(const QColor& Color)
@@ -239,6 +232,8 @@ void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 
 void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 {
+	return;
+
 	if (pNode)
 	{
 		// Prevent circular dependency
@@ -246,8 +241,8 @@ void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 		m_OpacitySpinBox.blockSignals(true);
 		
 		// Update values
-		m_OpacitySlider.setValue(100.0f * pNode->GetOpacity());
-		m_OpacitySpinBox.setValue(100.0f * pNode->GetOpacity());
+		m_OpacitySlider.setValue(pNode->GetOpacity());
+		m_OpacitySpinBox.setValue(pNode->GetOpacity());
 
 		m_OpacitySlider.blockSignals(false);
 		m_OpacitySpinBox.blockSignals(false);
@@ -362,10 +357,10 @@ void QNodePropertiesWidget::SetupOpacityUI(void)
 		m_OpacitySpinBox.blockSignals(true);
 
 		// Update values
-		m_OpacitySlider.setRange(100.0f * pNode->GetMinY(), 100.0f * pNode->GetMaxY());
-		m_OpacitySlider.setValue(100.0f * pNode->GetOpacity());
-		m_OpacitySpinBox.setRange(100.0f * pNode->GetMinY(), 100.0f * pNode->GetMaxY());
-		m_OpacitySpinBox.setValue(100.0f * pNode->GetOpacity());
+		m_OpacitySlider.setRange(pNode->GetMinY(), pNode->GetMaxY());
+		m_OpacitySlider.setValue(pNode->GetOpacity());
+		m_OpacitySpinBox.setRange(pNode->GetMinY(), pNode->GetMaxY());
+		m_OpacitySpinBox.setValue(pNode->GetOpacity());
 
 		m_OpacitySlider.blockSignals(false);
 		m_OpacitySpinBox.blockSignals(true);

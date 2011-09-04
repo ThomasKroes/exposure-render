@@ -16,13 +16,18 @@ public:
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 
 public slots:
-	
+	void OnBackgroundIlluminationChanged(bool Checked);
+	void OnColorChanged(const QColor& Color);
+	void SetIntensity(double Intensity);
+	void OnUseTextureChanged(int UseTexture);
+	void OnLoadTexture(void);
+	void OnBackgroundChanged(void);
+
 protected:
 	QGridLayout			m_MainLayout;
 	QColorPushButton	m_Color;
-	QGridLayout			m_ColorLayout;
-	QSlider				m_IntensitySlider;
-	QSpinBox			m_IntensitySpinBox;
+	QDoubleSlider		m_IntensitySlider;
+	QDoubleSpinner		m_IntensitySpinBox;
 	QCheckBox			m_UseTexture;
 	QLineEdit			m_TextureFilePath;
 	QPushButton			m_LoadTexture;

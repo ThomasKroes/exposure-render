@@ -2,7 +2,7 @@
 #include "Controls.h"
 
 QColorPushButton::QColorPushButton(QWidget* pParent) :
-QPushButton(pParent),
+	QPushButton(pParent),
 	m_Margin(5),
 	m_Radius(9),
 	m_Color(Qt::gray)
@@ -190,7 +190,7 @@ QString GetSaveFileName(const QString& Caption, const QString& Filter)
 
 QSize QDoubleSpinner::sizeHint() const
 {
-	return QSize(100, 20);
+	return QSize(70, 20);
 }
 
 QDoubleSpinner::QDoubleSpinner(QWidget* pParent /*= NULL*/) :

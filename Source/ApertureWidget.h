@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+#include "Controls.h"
+
 class CApertureWidget : public QGroupBox
 {
     Q_OBJECT
@@ -10,10 +12,10 @@ public:
     CApertureWidget(QWidget* pParent = NULL);
 
 private slots:
-	void SetAperture(const int& Aperture);
+	void SetAperture(const double& Aperture);
 
 private:
 	QGridLayout		m_GridLayout;
-	QSlider			m_ApertureSizeSlider;
-	QSpinBox		m_ApertureSizeSpinBox;
+	QDoubleSlider	m_ApertureSizeSlider;
+	QDoubleSpinner	m_ApertureSizeSpinBox;
 };

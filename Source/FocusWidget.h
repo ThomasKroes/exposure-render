@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+#include "Controls.h"
+
 class CFocusWidget : public QGroupBox
 {
     Q_OBJECT
@@ -16,6 +18,6 @@ private slots:
 private:
 	QGridLayout		m_GridLayout;
 	QComboBox		m_FocusTypeComboBox;
-	QSlider			m_FocalDistanceSlider;
-	QSpinBox		m_FocalDistanceSpinBox;
+	QDoubleSlider	m_FocalDistanceSlider;
+	QDoubleSpinner	m_FocalDistanceSpinBox;
 };
