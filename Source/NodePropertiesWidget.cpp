@@ -126,12 +126,14 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 
 	// Diffuse Color
 	m_MainLayout.addWidget(new QLabel("Diffuse Color"), 3, 0);
+	m_DiffuseColor.setFixedWidth(120);
 	m_MainLayout.addWidget(&m_DiffuseColor, 3, 1);
 
 	connect(&m_DiffuseColor, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseColorChanged(const QColor&)));
 
 	// Specular Color
 	m_MainLayout.addWidget(new QLabel("Specular Color"), 4, 0);
+	m_SpecularColor.setFixedWidth(120);
 	m_MainLayout.addWidget(&m_SpecularColor, 4, 1);
 
 	connect(&m_SpecularColor, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularColorChanged(const QColor&)));

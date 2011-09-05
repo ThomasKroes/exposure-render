@@ -29,18 +29,20 @@ public:
 protected slots:
 	void UpdateLightList(void);
 	void OnLightSelectionChanged(void);
-	void OnPresetNameChanged(const QString& Text);
+	void OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight);
 	void OnLightItemChanged(QListWidgetItem* pWidgetItem);
 	void OnAddLight(void);
 	void OnRemoveLight(void);
+	void OnRenameLight(void);
+	void OnCopyLight(void);
 
 protected:
 	QGridLayout		m_MainLayout;
 	QListWidget		m_LightList;
-	QLineEdit		m_LightName;
 	QPushButton		m_AddLight;
 	QPushButton		m_RemoveLight;
 	QPushButton		m_RenameLight;
+	QPushButton		m_CopyLight;
 	
 	friend class QLightingWidget;
 };

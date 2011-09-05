@@ -36,5 +36,6 @@
     <file>palette.png</file>
     <file>application-list.png</file>
     <file>light-bulb.png</file>
+    <file>document-copy.png</file>
   </qresource>
 </RCC>

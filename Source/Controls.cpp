@@ -197,7 +197,7 @@ QString GetSaveFileName(const QString& Caption, const QString& Filter)
 
 QSize QDoubleSpinner::sizeHint() const
 {
-	return QSize(70, 20);
+	return QSize(90, 20);
 }
 
 QDoubleSpinner::QDoubleSpinner(QWidget* pParent /*= NULL*/) :
@@ -209,7 +209,18 @@ void QDoubleSpinner::setValue(double Value, bool BlockSignals)
 {
 	blockSignals(BlockSignals);
 
-//	QDoubleSpinBox::setValue(Value);
+	QDoubleSpinBox::setValue(Value);
 
 	blockSignals(false);
+}
+
+QInputDialogEx::QInputDialogEx(QWidget* pParent /*= NULL*/, Qt::WindowFlags Flags /*= 0*/) :
+	QInputDialog(pParent, Flags)
+{
+	setWindowIcon(QIcon(":/Images/pencil-field.png"));
+}
+
+QSize QInputDialogEx::sizeHint() const
+{
+	return QSize(350, 60);
 }

@@ -97,10 +97,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_WidthSlider.setOrientation(Qt::Orientation::Horizontal);
     m_WidthSlider.setFocusPolicy(Qt::StrongFocus);
     m_WidthSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
-	m_WidthSlider.setRange(0.0, 10.0);
+	m_WidthSlider.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_WidthSlider, 3, 1);
 	
-	m_WidthSpinBox.setRange(0.0, 10.0);
+	m_WidthSpinBox.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_WidthSpinBox, 3, 2);
 	
 	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_WidthSpinBox, SLOT(setValue(double)));
@@ -114,10 +114,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_HeightSlider.setOrientation(Qt::Orientation::Horizontal);
     m_HeightSlider.setFocusPolicy(Qt::StrongFocus);
     m_HeightSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
-	m_HeightSlider.setRange(0.0, 10.0);
+	m_HeightSlider.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_HeightSlider, 5, 1);
 	
-	m_HeightSpinBox.setRange(0.0, 10.0);
+	m_HeightSpinBox.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_HeightSpinBox, 5, 2);
 	
 	m_LockSizeCheckBox.setText("Lock Size");
@@ -127,13 +127,14 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	connect(&m_HeightSpinBox, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
 	connect(&m_HeightSlider, SIGNAL(valueChanged(double)), this, SLOT(OnHeightChanged(double)));
 
-	connect(&m_LockSizeCheckBox, SIGNAL(stateChanged(int)), this, SLOT(OnLockSize(int)));
+	connect(&m_LockSizeCheckBox, SIGNAL(stateChanged(int)), this, SLOT(OnLockSizeChanged(int)));
 	
 	// Color
 	m_ColorLabel.setText("Color");
 	m_MainLayout.addWidget(&m_ColorLabel, 7, 0);
 
 	m_ColorButton.setText("...");
+	m_ColorButton.setFixedWidth(120);
 	m_ColorButton.setStatusTip("Pick a color");
 	m_ColorButton.setToolTip("Pick a color");
 	m_MainLayout.addWidget(&m_ColorButton, 7, 1);
@@ -158,7 +159,9 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
 	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*, QLight*)), this, SLOT(OnLightSelectionChanged(QLight*, QLight*)));
-	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), this, SLOT(Update()));
+	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), &gLighting, SLOT(Update()));
+
+	OnLightSelectionChanged(NULL, NULL);
 }
 
 void QLightSettingsWidget::OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight)
@@ -186,6 +189,8 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pOldLight, QLight* pN
 		connect(pNewLight, SIGNAL(ColorChanged(QLight*)), this, SLOT(OnLightColorChanged(QLight*)));
 		connect(pNewLight, SIGNAL(IntensityChanged(QLight*)), this, SLOT(OnLightIntensityChanged(QLight*)));
 	}
+
+	setEnabled(pNewLight != NULL);
 
 	OnLightThetaChanged(pNewLight);
 	OnLightPhiChanged(pNewLight);
@@ -229,29 +234,12 @@ void QLightSettingsWidget::OnWidthChanged(const double& Width)
 	gLighting.GetSelectedLight()->SetWidth(Width);
 }
 
-void QLightSettingsWidget::OnLockSize(const int& LockSize)
+void QLightSettingsWidget::OnLockSizeChanged(int LockSize)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
 
 	gLighting.GetSelectedLight()->SetLockSize((bool)LockSize);
-
-	m_HeightLabel.setEnabled(!LockSize);
-	m_HeightSlider.setEnabled(!LockSize);
-	m_HeightSpinBox.setEnabled(!LockSize);
-
-	if (LockSize)
-	{
-		connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
-		connect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
-
-		m_HeightSlider.setValue((double)m_WidthSlider.value());
-	}
-	else
-	{
-		disconnect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
-		disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
-	}
 }
 
 void QLightSettingsWidget::OnHeightChanged(const double& Height)
@@ -342,16 +330,35 @@ void QLightSettingsWidget::OnLightWidthChanged(QLight* pLight)
 
 void QLightSettingsWidget::OnLightLockSizeChanged(QLight* pLight)
 {
-	const bool Enable = pLight != NULL;
+	bool Enable = true;
 
 	if (pLight)
 	{
 		m_LockSizeCheckBox.blockSignals(true);
 		m_LockSizeCheckBox.setChecked(pLight->GetLockSize());
 		m_LockSizeCheckBox.blockSignals(false);
+
+		const bool LockSize = pLight->GetLockSize();
+
+		if (LockSize)
+		{
+			connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
+			connect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
+
+			m_HeightSlider.setValue((double)m_WidthSlider.value());
+
+			Enable = false;
+		}
+		else
+		{
+			disconnect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
+			disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
+		}
 	}
 
-	m_LockSizeCheckBox.setEnabled(Enable);
+	m_HeightLabel.setEnabled(Enable);
+	m_HeightSlider.setEnabled(Enable);
+	m_HeightSpinBox.setEnabled(Enable);
 }
 
 void QLightSettingsWidget::OnLightHeightChanged(QLight* pLight)
@@ -378,6 +385,7 @@ void QLightSettingsWidget::OnLightColorChanged(QLight* pLight)
 		m_ColorButton.SetColor(pLight->GetColor(), true);
 	}
 
+	m_ColorLabel.setEnabled(Enable);
 	m_ColorButton.setEnabled(Enable);
 }
 

@@ -80,6 +80,11 @@ public:
 	void			ReadXML(QDomElement& Parent);
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	void			AddLight(QLight& Light);
+	void			RemoveLight(QLight* pLight);
+	void			RemoveLight(const int& Index);
+	void			CopyLight(QLight* pLight);
+	void			CopySelectedLight(void);
+	void			RenameLight(const int& Index, const QString& Name);
 	QBackground&	Background(void);
 	void			SetSelectedLight(QLight* pSelectedLight);
 	void			SetSelectedLight(const int& Index);

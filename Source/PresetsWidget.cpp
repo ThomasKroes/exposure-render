@@ -1,5 +1,6 @@
 
 #include "PresetsWidget.h"
+#include "Controls.h"
 
 QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
 	QGroupBox(pParent),
@@ -87,11 +88,10 @@ void QTestWidget::OnLoadPreset(void)
 
 void QTestWidget::OnSavePreset(void)
 {
-	QInputDialog InputDialog;
+	QInputDialogEx InputDialog;
 
-	InputDialog.setTextValue("");
+	InputDialog.setTextValue(m_PresetName.currentText());
 	InputDialog.setLabelText("Name");
-	InputDialog.setWindowIcon(QIcon(":/Images/pencil-field.png"));
 
 	InputDialog.exec();
 
@@ -106,11 +106,10 @@ void QTestWidget::OnRenamePreset(void)
 	if (m_PresetName.currentText().isEmpty())
 		return;
 
-	QInputDialog InputDialog;
+	QInputDialogEx InputDialog;
 
 	InputDialog.setTextValue(m_PresetName.currentText());
 	InputDialog.setLabelText("Name");
-	InputDialog.setWindowIcon(QIcon(":/Images/pencil-field.png"));
 
 	InputDialog.exec();
 

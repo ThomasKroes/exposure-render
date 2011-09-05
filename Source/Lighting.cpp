@@ -6,14 +6,14 @@ QLighting gLighting;
 
 QLight::QLight(QObject* pParent) :
 	QPresetXML(pParent),
-	m_Theta(),
-	m_Phi(),
-	m_Distance(),
-	m_Width(),
-	m_Height(),
-	m_LockSize(),
-	m_Color(),
-	m_Intensity()
+	m_Theta(0.0f),
+	m_Phi(0.0f),
+	m_Distance(10.0f),
+	m_Width(1.0f),
+	m_Height(1.0f),
+	m_LockSize(true),
+	m_Color(QColor(250, 231, 154)),
+	m_Intensity(100.0f)
 {
 }
 
@@ -107,6 +107,9 @@ bool QLight::GetLockSize(void) const
 void QLight::SetLockSize(const bool& LockSize)
 {
 	m_LockSize = LockSize;
+
+	emit LockSizeChanged(this);
+	emit LightPropertiesChanged(this);
 }
 
 float QLight::GetDistance(void) const
@@ -235,6 +238,7 @@ QLighting::~QLighting(void)
 
 QLighting::QLighting(const QLighting& Other)
 {
+	*this = Other;
 }
 
 QLighting& QLighting::operator=(const QLighting& Other)
@@ -341,9 +345,39 @@ void QLighting::Update(void)
 
 void QLighting::AddLight(QLight& Light)
 {
+	// Add to list
 	m_Lights.append(Light);
 
+	// Select
+	SetSelectedLight(&m_Lights.back());
+
+	// Connect
 	connect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
+
+	// Let others know the lighting has changed
+	emit LightingChanged();
+}
+
+void QLighting::RemoveLight(QLight* pLight)
+{
+	// Remove from light list
+	m_Lights.remove(*pLight);
+
+	m_pSelectedLight = NULL;
+
+	// Deselect
+	SetSelectedLight(NULL);
+
+	// Let others know the lighting has changed
+	emit LightingChanged();
+}
+
+void QLighting::RemoveLight(const int& Index)
+{
+	if (Index < 0 || Index >= m_Lights.size())
+		return;
+
+	RemoveLight(&m_Lights[Index]);
 }
 
 QBackground& QLighting::Background(void)
@@ -416,4 +450,37 @@ void QLighting::SelectNextLight(void)
 
 	// Set selected node
 	SetSelectedLight(&m_Lights[NewIndex]);
+}
+
+void QLighting::CopyLight(QLight* pLight)
+{
+	if (!pLight)
+		return;
+
+	QLight LightCopy = *pLight;
+
+	// Rename
+	LightCopy.SetName("Copy of " + pLight->GetName());
+
+	// Add
+	AddLight(LightCopy);
+
+	// Let others know the lighting has changed
+	emit LightingChanged();
+}
+
+void QLighting::CopySelectedLight(void)
+{
+	CopyLight(m_pSelectedLight);
+}
+
+void QLighting::RenameLight(const int& Index, const QString& Name)
+{
+	if (Index < 0 || Index >= m_Lights.size() || Name.isEmpty())
+		return;
+
+	m_Lights[Index].SetName(Name);
+
+	// Let others know the lighting has changed
+	emit LightingChanged();
 }

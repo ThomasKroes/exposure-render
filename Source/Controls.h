@@ -70,13 +70,14 @@ public:
 
 	virtual QSize sizeHint() const;
 	void setValue(double Value, bool BlockSignals = false);
+};
 
-private slots:
+class QInputDialogEx : public QInputDialog
+{
+public:
+	QInputDialogEx(QWidget* pParent = NULL, Qt::WindowFlags Flags = 0);
 
-signals:
-
-
-private:
+	virtual QSize sizeHint() const;
 };
 
 QString GetOpenFileName(const QString& Caption, const QString& Filter);

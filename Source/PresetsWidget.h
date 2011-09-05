@@ -91,7 +91,7 @@ public:
 		{
 			if (m_Presets[i].GetName() == Preset.GetName())
 			{
-				int Result = QMessageBox::question(this, "Preset already exists", "Overwrite?", QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+				int Result = QMessageBox::question(this, "Preset already exists", "Overwrite?", QMessageBox::Yes | QMessageBox::No);
 				
 				if (Result == QMessageBox::No)
 					return;
@@ -134,7 +134,7 @@ public:
 		// File name + extension
 		QString FileName = m_InternalName + "Presets.xml";
 
-		qDebug(QString("Loading " + m_UserInterfaceName + " presets from file: " + CurrentPath + "/" + FileName).toAscii());
+		qDebug(QString("Loading " + m_UserInterfaceName + " presets from file: " + FileName).toAscii());
 
 		// Set the file name
 		if (ChoosePath)
@@ -200,7 +200,7 @@ public:
 		// File name + extension
 		QString FileName = m_InternalName + "Presets.xml";
 
-		qDebug(QString("Saving " + m_UserInterfaceName + " presets to file: " + CurrentPath + "/" + FileName).toAscii());
+		qDebug(QString("Saving " + m_UserInterfaceName + " presets to file: " + FileName).toAscii());
 
 		// Set the file name
 		if (ChoosePath)

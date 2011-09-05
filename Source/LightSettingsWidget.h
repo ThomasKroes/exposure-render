@@ -22,7 +22,7 @@ public slots:
 	void OnPhiChanged(const double& Phi);
 	void OnDistanceChanged(const double& Distance);
 	void OnWidthChanged(const double& Width);
-	void OnLockSize(const int& LockHeight);
+	void OnLockSizeChanged(int LockSize);
 	void OnHeightChanged(const double& Height);
 	void OnCurrentColorChanged(const QColor& Color);
 	void OnIntensityChanged(const double& Intensity);
