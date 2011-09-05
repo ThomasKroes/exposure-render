@@ -1,5 +1,6 @@
 #pragma once
 
+// Qt
 #include <QtGui>
 
 // VTK
@@ -29,9 +30,6 @@
 #include "CameraDockWidget.h"
 #include "SettingsDockWidget.h"
 
-// Render thread
-extern CRenderThread* gpRenderThread;
-
 class QAction;
 class QListWidget;
 class QMenu;
@@ -47,19 +45,19 @@ public:
 	virtual ~CMainWindow(void);
 
 private slots:
-	void Open();
-	void OpenRecentFile();
-	void Close();
-	void Exit();
-    void About();
-	void OnTimer();
+	void Open(void);
+	void Open(QString FilePath);
+	void OpenRecentFile(void);
+	void Close(void);
+	void Exit(void);
+    void About(void);
+	void OnTimer(void);
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
 	
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);
-	void CloseRenderThread(void);
 
 private:
     void								CreateActions(void);
@@ -70,7 +68,6 @@ private:
 	void								UpdateRecentFileActions(void);
 	QString								StrippedName(const QString& FullFileName);
 	void								SetCurrentFile(const QString& FileName);
-	void								LoadFile(const QString& FileName);
 	void								SetupRenderView(void);
     QString								m_CurrentFile;
 

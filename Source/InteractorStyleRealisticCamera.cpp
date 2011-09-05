@@ -1,6 +1,6 @@
 
 #include "InteractorStyleRealisticCamera.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 // Mouse button flags
 CFlags gMouseButtonFlags;
@@ -69,26 +69,26 @@ void CInteractorStyleRealisticCamera::OnMouseWheelForward(void)
 {
 	vtkInteractorStyleUser::OnMouseWheelForward();
 
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.Zoom(-m_ZoomSpeed);
+	Scene()->m_Camera.Zoom(-m_ZoomSpeed);
 
 	// Flag the camera as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 };
 	
 void CInteractorStyleRealisticCamera::OnMouseWheelBackward(void)
 {
 	vtkInteractorStyleUser::OnMouseWheelBackward();
 
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.Zoom(m_ZoomSpeed);
+	Scene()->m_Camera.Zoom(m_ZoomSpeed);
 
 	// Flag the camera as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 };
 
 void CInteractorStyleRealisticCamera::OnMouseMove(void) 
@@ -96,10 +96,10 @@ void CInteractorStyleRealisticCamera::OnMouseMove(void)
 	// Forward events
 	vtkInteractorStyleUser::OnMouseMove();
 
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.m_Focus.m_FocalDistance = 1.0f;
+	Scene()->m_Camera.m_Focus.m_FocalDistance = 1.0f;
 
 	// Orbiting
 	if (gMouseButtonFlags.HasFlag(Left))
@@ -108,34 +108,34 @@ void CInteractorStyleRealisticCamera::OnMouseMove(void)
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			gpScene->m_Camera.m_Aperture.m_Size = max(0.0f, gpScene->m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
+			Scene()->m_Camera.m_Aperture.m_Size = max(0.0f, Scene()->m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 			// Flag the camera as dirty, this will restart the rendering
-			gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+			Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 		}
 		else if (GetCtrlKey())
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			gpScene->m_Camera.m_FovV = max(0.0f, gpScene->m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
+			Scene()->m_Camera.m_FovV = max(0.0f, Scene()->m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 			/// Flag the camera as dirty, this will restart the rendering
-			gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+			Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 		}
 		else
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			gpScene->m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / gpScene->m_Camera.m_Film.m_Resolution.Height()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / gpScene->m_Camera.m_Film.m_Resolution.Width()));
+			Scene()->m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.Height()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.Width()));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 			// Flag the camera as dirty, this will restart the rendering
-			gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+			Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 		}
 	}
 
@@ -144,12 +144,12 @@ void CInteractorStyleRealisticCamera::OnMouseMove(void)
 	{
 		GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-		gpScene->m_Camera.Pan(m_PanSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / gpScene->m_Camera.m_Film.m_Resolution.Height()), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / gpScene->m_Camera.m_Film.m_Resolution.Width()));
+		Scene()->m_Camera.Pan(m_PanSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.Height()), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.Width()));
 
 		GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 		// Flag the camera as dirty, this will restart the rendering
-		gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+		Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 	}
 
 	// Zooming
@@ -157,11 +157,11 @@ void CInteractorStyleRealisticCamera::OnMouseMove(void)
 	{
 		GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-		gpScene->m_Camera.Zoom(-0.000001f * m_ContinuousZoomSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
+		Scene()->m_Camera.Zoom(-0.000001f * m_ContinuousZoomSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
 
 		GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 		// Flag the camera as dirty, this will restart the rendering
-		gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+		Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 	}
 }

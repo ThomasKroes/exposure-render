@@ -51,6 +51,7 @@ void OnProgress(vtkObject* pCaller, long unsigned int EventId, void* pClientData
 
 bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataVolume)
 {
+	qDebug(QString("Loading volume " + QFileInfo(pFile).fileName()).toAscii());
 //	CLoadSettingsDialog LoadSettingsDialog;
 
 	// Make it a modal dialog

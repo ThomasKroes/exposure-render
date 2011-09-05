@@ -2,7 +2,7 @@
 #include "StatisticsWidget.h"
 #include "MainWindow.h"
 #include "Statistics.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 #define MB 1024.0f * 1024.0f
 
@@ -128,6 +128,9 @@ void QStatisticsWidget::UpdateStatistic(const QString& Property, const QString& 
 
 void QStatisticsWidget::OnRenderBegin(void)
 {
+	if (!gpRenderThread)
+		return;
+		
 	// We want to be notified when a frame has completed
 	connect(gpRenderThread, SIGNAL(PostFrame()), this, SLOT(OnPostFrame()));
 
@@ -140,12 +143,12 @@ void QStatisticsWidget::OnRenderBegin(void)
 
 	// Volume
 	UpdateStatistic("File", gpRenderThread->m_FileName);
-	UpdateStatistic("Bounding Box", "[" + QString::number(gpScene->m_BoundingBox.m_MinP.x) + ", " + QString::number(gpScene->m_BoundingBox.m_MinP.y) + ", " + QString::number(gpScene->m_BoundingBox.m_MinP.z) + "] - [" + QString::number(gpScene->m_BoundingBox.m_MaxP.x) + ", " + QString::number(gpScene->m_BoundingBox.m_MaxP.y) + ", " + QString::number(gpScene->m_BoundingBox.m_MaxP.z) + "]");
-	UpdateStatistic("Resolution", "[" + QString::number(gpScene->m_Resolution.m_XYZ.x) + ", " + QString::number(gpScene->m_Resolution.m_XYZ.y) + ", " + QString::number(gpScene->m_Resolution.m_XYZ.z) + "]");
-	UpdateStatistic("Spacing", "[" + QString::number(gpScene->m_Spacing.x) + ", " + QString::number(gpScene->m_Spacing.y) + ", " + QString::number(gpScene->m_Spacing.z) + "]");
-	UpdateStatistic("Scale", "[" + QString::number(gpScene->m_Scale.x) + ", " + QString::number(gpScene->m_Scale.y) + ", " + QString::number(gpScene->m_Scale.z) + "]");
-	UpdateStatistic("No. Voxels", QString::number(gpScene->m_NoVoxels));
-	UpdateStatistic("Density Range", "[" + QString::number(gpScene->m_IntensityRange.m_Min) + " - " + QString::number(gpScene->m_IntensityRange.m_Max) + "]");
+	UpdateStatistic("Bounding Box", "[" + QString::number(Scene()->m_BoundingBox.m_MinP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.z) + "] - [" + QString::number(Scene()->m_BoundingBox.m_MaxP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.z) + "]");
+	UpdateStatistic("Resolution", "[" + QString::number(Scene()->m_Resolution.m_XYZ.x) + ", " + QString::number(Scene()->m_Resolution.m_XYZ.y) + ", " + QString::number(Scene()->m_Resolution.m_XYZ.z) + "]");
+	UpdateStatistic("Spacing", "[" + QString::number(Scene()->m_Spacing.x) + ", " + QString::number(Scene()->m_Spacing.y) + ", " + QString::number(Scene()->m_Spacing.z) + "]");
+	UpdateStatistic("Scale", "[" + QString::number(Scene()->m_Scale.x) + ", " + QString::number(Scene()->m_Scale.y) + ", " + QString::number(Scene()->m_Scale.z) + "]");
+	UpdateStatistic("No. Voxels", QString::number(Scene()->m_NoVoxels));
+	UpdateStatistic("Density Range", "[" + QString::number(Scene()->m_IntensityRange.m_Min) + " - " + QString::number(Scene()->m_IntensityRange.m_Max) + "]");
 
 	// Expand all tree items
 	ExpandAll(true);
@@ -153,7 +156,7 @@ void QStatisticsWidget::OnRenderBegin(void)
 
 void QStatisticsWidget::OnRenderEnd(void)
 {
-	// We want to be notified when a frame has completed
+	// Do not receive signals anymore
 	disconnect(gpRenderThread, SIGNAL(PostFrame()), this, SLOT(OnPostFrame()));
 
 	// Collapse all tree items
@@ -178,16 +181,19 @@ void QStatisticsWidget::OnPreFrame(void)
 
 void QStatisticsWidget::OnPostFrame(void)
 {
-//	UpdateStatistic("Tracer FPS", QString::number(gpScene->m_FPS.m_FilteredDuration, 'f', 2));
+	if (!Scene())
+		return;
+
+	UpdateStatistic("Tracer FPS", QString::number(Scene()->m_FPS.m_FilteredDuration, 'f', 2));
 	UpdateStatistic("No. Iterations", QString::number(gpRenderThread->m_N));
 
 	// Camera
-	UpdateStatistic("Resolution", QString::number(gpScene->m_Camera.m_Film.m_Resolution.m_XY.x) + " x " + QString::number(gpScene->m_Camera.m_Film.m_Resolution.m_XY.y));
-	UpdateStatistic("Position", FormatVector(gpScene->m_Camera.m_From));
-	UpdateStatistic("Target", FormatVector(gpScene->m_Camera.m_Target));
-	UpdateStatistic("Up Vector", FormatVector(gpScene->m_Camera.m_Up));
-	UpdateStatistic("Aperture Size", QString::number(gpScene->m_Camera.m_Aperture.m_Size, 'f', 2));
-	UpdateStatistic("Field Of View", QString::number(gpScene->m_Camera.m_FovV, 'f', 2));
+	UpdateStatistic("Resolution", QString::number(Scene()->m_Camera.m_Film.m_Resolution.m_XY.x) + " x " + QString::number(Scene()->m_Camera.m_Film.m_Resolution.m_XY.y));
+	UpdateStatistic("Position", FormatVector(Scene()->m_Camera.m_From));
+	UpdateStatistic("Target", FormatVector(Scene()->m_Camera.m_Target));
+	UpdateStatistic("Up Vector", FormatVector(Scene()->m_Camera.m_Up));
+	UpdateStatistic("Aperture Size", QString::number(Scene()->m_Camera.m_Aperture.m_Size, 'f', 2));
+	UpdateStatistic("Field Of View", QString::number(Scene()->m_Camera.m_FovV, 'f', 2));
 }
 
 void QStatisticsWidget::ExpandAll(const bool& Expand)

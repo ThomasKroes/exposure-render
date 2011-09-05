@@ -2,7 +2,7 @@
 #include "TransferFunction.h"
 #include "TransferFunctionView.h"
 #include "NodeItem.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	QGraphicsView(pParent),
@@ -70,32 +70,32 @@ void QTransferFunctionView::Update(void)
 	m_TransferFunctionCanvas.Update();
 	m_TransferFunctionGradient.Update();
 
-	if (gpScene == NULL)
+	if (!Scene())
 		return;
 
-	gpScene->m_TransferFunctions.m_Opacity.m_NoNodes		= gTransferFunction.GetNodes().size();
-	gpScene->m_TransferFunctions.m_DiffuseColor.m_NoNodes	= gTransferFunction.GetNodes().size();
-	gpScene->m_TransferFunctions.m_SpecularColor.m_NoNodes	= gTransferFunction.GetNodes().size();
-	gpScene->m_TransferFunctions.m_Roughness.m_NoNodes		= gTransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Opacity.m_NoNodes		= gTransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_DiffuseColor.m_NoNodes	= gTransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_SpecularColor.m_NoNodes	= gTransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Roughness.m_NoNodes		= gTransferFunction.GetNodes().size();
 
 	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 	{
 		QNode& Node = gTransferFunction.GetNode(i);
 
 		// Positions
-		gpScene->m_TransferFunctions.m_Opacity.m_P[i]			= Node.GetIntensity();
-		gpScene->m_TransferFunctions.m_DiffuseColor.m_P[i]		= Node.GetIntensity();
-		gpScene->m_TransferFunctions.m_SpecularColor.m_P[i]		= Node.GetIntensity();
-		gpScene->m_TransferFunctions.m_Roughness.m_P[i]			= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_Opacity.m_P[i]			= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_DiffuseColor.m_P[i]		= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_SpecularColor.m_P[i]		= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_Roughness.m_P[i]			= Node.GetIntensity();
 		
 		// Colors
-		gpScene->m_TransferFunctions.m_Opacity.m_C[i]			= CColorRgbHdr(Node.GetOpacity());
-		gpScene->m_TransferFunctions.m_DiffuseColor.m_C[i]		= CColorRgbHdr(Node.GetDiffuseColor().redF(), Node.GetDiffuseColor().greenF(), Node.GetDiffuseColor().blueF());
-		gpScene->m_TransferFunctions.m_SpecularColor.m_C[i]		= CColorRgbHdr(Node.GetSpecularColor().redF(), Node.GetSpecularColor().greenF(), Node.GetSpecularColor().blueF());
-		gpScene->m_TransferFunctions.m_Roughness.m_C[i]			= CColorRgbHdr(Node.GetRoughness());
+		Scene()->m_TransferFunctions.m_Opacity.m_C[i]			= CColorRgbHdr(Node.GetOpacity());
+		Scene()->m_TransferFunctions.m_DiffuseColor.m_C[i]		= CColorRgbHdr(Node.GetDiffuseColor().redF(), Node.GetDiffuseColor().greenF(), Node.GetDiffuseColor().blueF());
+		Scene()->m_TransferFunctions.m_SpecularColor.m_C[i]		= CColorRgbHdr(Node.GetSpecularColor().redF(), Node.GetSpecularColor().greenF(), Node.GetSpecularColor().blueF());
+		Scene()->m_TransferFunctions.m_Roughness.m_C[i]			= CColorRgbHdr(Node.GetRoughness());
 	}
 
-	gpScene->m_DirtyFlags.SetFlag(TransferFunctionDirty);
+	Scene()->m_DirtyFlags.SetFlag(TransferFunctionDirty);
 }
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)

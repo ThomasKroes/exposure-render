@@ -5,8 +5,6 @@
 #include "LoadVolume.h"
 #include "Scene.h"
 
-CRenderThread* gpRenderThread = NULL;
-
 // Main window singleton
 CMainWindow* gpMainWindow = NULL;
 
@@ -104,7 +102,6 @@ CMainWindow::CMainWindow() :
 
 CMainWindow::~CMainWindow(void)
 {
-	emit CloseRenderThread();
 }
 
 void CMainWindow::CreateActions(void)
@@ -253,7 +250,7 @@ void CMainWindow::OpenRecentFile()
 	QAction* pAction = qobject_cast<QAction *>(sender());
 	
 	if (pAction)
-		LoadFile(pAction->data().toString());
+		Open(pAction->data().toString());
 }
 
 void CMainWindow::SetCurrentFile(const QString& FileName)
@@ -287,42 +284,36 @@ QString CMainWindow::StrippedName(const QString& FullFileName)
 
 void CMainWindow::Open()
 {
+	// Kill current rendering thread
+	KillRenderThread();
+
 	// Create open file dialog
     QString FileName = GetOpenFileName("Open volume", "Meta Image Volume Files (*.mhd)");
 
-	SetCurrentFile(FileName);
-
-	// Make string suitable for VTK
-	FileName.replace("/", "\\\\");
-
-	if (!FileName.isEmpty())
-		LoadFile(FileName);
+	// Open the file
+	Open(FileName);
 }
 
-void CMainWindow::LoadFile(const QString& FileName)
+void CMainWindow::Open(QString FilePath)
 {
-	// Status message
-	statusBar()->showMessage(tr("File loaded"), 2000);
+	// Window name update
+	SetCurrentFile(FilePath);
 
-	// Create new volume
-	gpScene = new CScene;
+	// Make string suitable for VTK
+	FilePath.replace("/", "\\\\");
 
-	// Create new render thread
-	gpRenderThread = new CRenderThread(FileName, this);
+	if (!FilePath.isEmpty())
+		StartRenderThread(FilePath);
+}
 
-	// Load the VTK volume
-	if (!LoadVtkVolume(FileName.toAscii().data(), gpScene, gpRenderThread->m_pImageDataVolume))
-		return;
+void CMainWindow::Close(void)
+{
+	KillRenderThread();
+}
 
-	// Force the render thread to allocate the necessary buffers, do not remove this line
-	gpScene->m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
-
-	gpRenderThread->start();
-
-	// Let us know when the rendering begins and ends
-	connect(gpRenderThread, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(gpRenderThread, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	connect(this, SIGNAL(CloseRenderThread()), gpRenderThread, SLOT(OnCloseRenderThread()));
+void CMainWindow::Exit(void)
+{
+	Close();
 }
 
 void CMainWindow::SetupRenderView(void)
@@ -367,12 +358,12 @@ void CMainWindow::SetupRenderView(void)
 
 void CMainWindow::OnTimer(void)
 {
-	if (!gpRenderThread || !gpRenderThread->RenderImage() | !gpScene)
+	if (!Scene())
 		return;
 	
-	m_pImageImport->SetDataExtent(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-	m_pImageImport->SetWholeExtent(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-	m_pImageActor->SetDisplayExtent(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+	m_pImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+	m_pImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+	m_pImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
 
 //	m_pImageImport->setup(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
 	m_pImageImport->Update();
@@ -383,16 +374,6 @@ void CMainWindow::OnTimer(void)
 // 	m_pImageActor->VisibilityOn();
 
 	m_pRenderWindow->GetInteractor()->Render();
-}
-
-void CMainWindow::Close()
-{
-	emit CloseRenderThread();
-}
-
-void CMainWindow::Exit()
-{
-	
 }
 
 void CMainWindow::About()
@@ -454,11 +435,11 @@ void CMainWindow::OnRenderEnd(void)
 	m_CameraDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setEnabled(false);
 
-	m_pImageImport->Delete();
+//	m_pImageImport->Delete();
 
 	m_pSceneRenderer->RemoveActor(m_pImageActor);
 
-	m_pImageActor->Delete();
+//	m_pImageActor->Delete();
 
 	m_pImageImport = NULL;
 	m_pImageActor = NULL;

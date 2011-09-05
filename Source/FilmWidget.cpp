@@ -74,22 +74,22 @@ void CFilmWidget::LockFilmHeight(const int& Lock)
 
 void CFilmWidget::SetFilmWidth(const int& FilmWidth)
 {
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.m_Film.m_Resolution.m_XY.x = FilmWidth;
+	Scene()->m_Camera.m_Film.m_Resolution.m_XY.x = FilmWidth;
 
 	// Flag the film resolution as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(FilmResolutionDirty);
+	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
 }
 
 void CFilmWidget::SetFilmHeight(const int& FilmHeight)
 {
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.m_Film.m_Resolution.m_XY.y = FilmHeight;
+	Scene()->m_Camera.m_Film.m_Resolution.m_XY.y = FilmHeight;
 
 	// Flag the film resolution as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(FilmResolutionDirty);
+	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
 }

@@ -132,5 +132,3 @@ public:
 	Vec2f				m_KernelSize;
 	CEvent				m_FPS;
 };
-
-extern CScene* gpScene;

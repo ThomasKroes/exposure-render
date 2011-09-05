@@ -1,7 +1,7 @@
 
 #include "ProjectionWidget.h"
 #include "MainWindow.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 CProjectionWidget::CProjectionWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -32,11 +32,11 @@ CProjectionWidget::CProjectionWidget(QWidget* pParent) :
 
 void CProjectionWidget::SetFieldOfView(const int& FieldOfView)
 {
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.m_FovV = FieldOfView;
+	Scene()->m_Camera.m_FovV = FieldOfView;
 
 	// Flag the camera as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 }

@@ -1,6 +1,6 @@
 
 #include "SettingsDockWidget.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -61,23 +61,23 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 
 void CTracerSettingsWidget::SetNoBounces(const int& NoBounces)
 {
-	if (gpScene)
+	if (Scene())
 	{
-		gpScene->m_MaxNoBounces	= NoBounces;
+		Scene()->m_MaxNoBounces	= NoBounces;
 		
 		// Flag the render params as dirty, this will restart the rendering
-		gpScene->m_DirtyFlags.SetFlag(RenderParamsDirty);
+		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 	}
 }
 
 void CTracerSettingsWidget::SetPhase(const int& Phase)
 {
-	if (gpScene)
+	if (Scene())
 	{
-		gpScene->m_PhaseG = 0.01f * (float)Phase;
+		Scene()->m_PhaseG = 0.01f * (float)Phase;
 		
 		// Flag the render params as dirty, this will restart the rendering
-		gpScene->m_DirtyFlags.SetFlag(RenderParamsDirty);
+		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 	}
 }
 
@@ -136,23 +136,23 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 
 void CKernelSettingsWidget::SetKernelWidth(const int& KernelWidth)
 {
-	if (gpScene)
+	if (Scene())
 	{
-		gpScene->m_KernelSize.x	= KernelWidth;
+		Scene()->m_KernelSize.x	= KernelWidth;
 		
 		// Flag the render params as dirty, this will restart the rendering
-		gpScene->m_DirtyFlags.SetFlag(RenderParamsDirty);
+		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 	}
 }
 
 void CKernelSettingsWidget::SetKernelHeight(const int& KernelHeight)
 {
-	if (gpScene)
+	if (Scene())
 	{
-		gpScene->m_KernelSize.y	= KernelHeight;
+		Scene()->m_KernelSize.y	= KernelHeight;
 		
 		// Flag the render params as dirty, this will restart the rendering
-		gpScene->m_DirtyFlags.SetFlag(RenderParamsDirty);
+		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 	}
 }
 

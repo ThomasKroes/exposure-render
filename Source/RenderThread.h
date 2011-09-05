@@ -8,6 +8,7 @@
 #include "curand_kernel.h"
 
 #include "Statistics.h"
+#include "Scene.h"
 
 class vtkImageData;
 class CScene;
@@ -31,6 +32,7 @@ public:
 	unsigned char*			m_pRenderImage;
 
 	vtkImageData*			m_pImageDataVolume;
+	CScene					m_Scene;
 
 	// CUDA allocations
 	CScene*					m_pDevScene;
@@ -62,3 +64,10 @@ signals:
 public slots:
 	void OnCloseRenderThread(void);
 };
+
+// Render thread
+extern CRenderThread* gpRenderThread;
+
+CScene* Scene(void);
+void StartRenderThread(const QString& FileName);
+void KillRenderThread(void);

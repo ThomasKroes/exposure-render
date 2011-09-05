@@ -1,7 +1,7 @@
 
 #include "FocusWidget.h"
 #include "MainWindow.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 CFocusWidget::CFocusWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -47,22 +47,22 @@ CFocusWidget::CFocusWidget(QWidget* pParent) :
 
 void CFocusWidget::SetFocusType(const int& FocusType)
 {
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.m_Focus.m_Type = (CFocus::EType)FocusType;
+	Scene()->m_Camera.m_Focus.m_Type = (CFocus::EType)FocusType;
 
 	// Flag the camera as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 }
 
 void CFocusWidget::SetFocalDistance(const double& FocalDistance)
 {
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.m_Focus.m_FocalDistance = FocalDistance;
+	Scene()->m_Camera.m_Focus.m_FocalDistance = FocalDistance;
 
 	// Flag the camera as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 }

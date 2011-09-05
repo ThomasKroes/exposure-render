@@ -1,6 +1,6 @@
 
 #include "Lighting.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 QLighting gLighting;
 
@@ -306,10 +306,10 @@ void QLighting::OnLightPropertiesChanged(QLight* pLight)
 
 void QLighting::Update(void)
 {
-	if (gpScene == NULL)
+	if (!Scene())
 		return;
 
-	gpScene->m_Lighting.Reset();
+	Scene()->m_Lighting.Reset();
 
 	if (Background().GetEnabled())
 	{
@@ -318,7 +318,7 @@ void QLighting::Update(void)
 		BackgroundLight.m_Type	= CLight::Background;
 		BackgroundLight.m_Color	= CColorRgbHdr(Background().GetColor().redF(), Background().GetColor().greenF(), Background().GetColor().blueF());
 
-		gpScene->m_Lighting.AddLight(BackgroundLight);
+		Scene()->m_Lighting.AddLight(BackgroundLight);
 	}
 
 	for (int i = 0; i < m_Lights.size(); i++)
@@ -337,10 +337,10 @@ void QLighting::Update(void)
 
 		AreaLight.Update();
 
-		gpScene->m_Lighting.AddLight(AreaLight);
+		Scene()->m_Lighting.AddLight(AreaLight);
 	}
 
-	gpScene->m_DirtyFlags.SetFlag(LightsDirty);
+	Scene()->m_DirtyFlags.SetFlag(LightsDirty);
 }
 
 void QLighting::AddLight(QLight& Light)

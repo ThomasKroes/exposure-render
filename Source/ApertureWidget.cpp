@@ -1,7 +1,7 @@
 
 #include "ApertureWidget.h"
 #include "MainWindow.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 CApertureWidget::CApertureWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -34,11 +34,11 @@ CApertureWidget::CApertureWidget(QWidget* pParent) :
 
 void CApertureWidget::SetAperture(const double& Aperture)
 {
-	if (!gpScene)
+	if (!Scene())
 		return;
 
-	gpScene->m_Camera.m_Aperture.m_Size = (float)Aperture;
+	Scene()->m_Camera.m_Aperture.m_Size = (float)Aperture;
 
 	// Flag the camera as dirty, this will restart the rendering
-	gpScene->m_DirtyFlags.SetFlag(CameraDirty);
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 }
