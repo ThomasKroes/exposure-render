@@ -51,18 +51,18 @@ void OnProgress(vtkObject* pCaller, long unsigned int EventId, void* pClientData
 
 bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataVolume)
 {
-	CLoadSettingsDialog LoadSettingsDialog;
+//	CLoadSettingsDialog LoadSettingsDialog;
 
 	// Make it a modal dialog
-	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
+//	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
 	 
 	// Show it
-	LoadSettingsDialog.exec();
+//	LoadSettingsDialog.exec();
 
 	// Create and configure progress dialog
-	gpProgressDialog = new QProgressDialog("Volume loading in progress", "Abort", 0, 100);
-	gpProgressDialog->setWindowTitle("Progress");
-	gpProgressDialog->setMinimumDuration(10);
+//	gpProgressDialog = new QProgressDialog("Volume loading in progress", "Abort", 0, 100);
+//	gpProgressDialog->setWindowTitle("Progress");
+//	gpProgressDialog->setMinimumDuration(10);
 //	gpProgressDialog->setWindowFlags(Qt::Popup);
 //	gpProgressDialog->show();
 
@@ -88,13 +88,15 @@ bool LoadVtkVolume(const char* pFile, CScene* pScene, vtkImageData*& pImageDataV
 	MetaImageReader->Update();
 
 	vtkSmartPointer<vtkImageCast> pImageCast = vtkImageCast::New();
-pImageCast->SetOutputScalarTypeToShort();
+
+	pImageCast->SetOutputScalarTypeToShort();
 	pImageCast->SetInput(MetaImageReader->GetOutput());
 	
 	pImageCast->Update();
 
 	pImageDataVolume = pImageCast->GetOutput();
 
+	/*
 //	if (LoadSettingsDialog.GetResample())
 //	{
 		// Create resampler
@@ -120,7 +122,7 @@ pImageCast->SetOutputScalarTypeToShort();
 
 		pImageDataVolume = ImageResample->GetOutput();
 //	}
-
+	*/
 	/*
 	// Create magnitude volume
 	vtkSmartPointer<vtkImageGradientMagnitude> ImageGradientMagnitude = vtkImageGradientMagnitude::New();
@@ -183,9 +185,9 @@ pImageCast->SetOutputScalarTypeToShort();
 //	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
 	
 	// Delete progress dialog
-	gpProgressDialog->close();
-	delete gpProgressDialog;
-	gpProgressDialog = NULL;
+//	gpProgressDialog->close();
+//	delete gpProgressDialog;
+//	gpProgressDialog = NULL;
 
 	return true;
 }
