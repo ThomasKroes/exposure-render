@@ -97,21 +97,18 @@ void QTransferFunctionView::Update(void)
 	gpScene->m_DirtyFlags.SetFlag(TransferFunctionDirty);
 }
 
-void QTransferFunctionView::OnNodeSelectionChanged(QNode* Node)
+void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 {
 	// Deselect all nodes
 	for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
 		m_TransferFunctionCanvas.m_Nodes[i]->setSelected(false);
 
-	if (Node)
+	if (pNode)
 	{
-		// Obtain node index
-		const int NodeIndex = gTransferFunction.GetNodeIndex(Node);
-
-		// Select the node
-		if (NodeIndex >= 0 && NodeIndex < m_TransferFunctionCanvas.m_Nodes.size())
+		for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
 		{
-			m_TransferFunctionCanvas.m_Nodes[NodeIndex]->setSelected(true);
+			if (m_TransferFunctionCanvas.m_Nodes[i]->m_pNode->GetID() == pNode->GetID())
+				m_TransferFunctionCanvas.m_Nodes[i]->setSelected(true);
 		}
 	}
 }

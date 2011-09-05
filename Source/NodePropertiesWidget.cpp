@@ -255,17 +255,14 @@ void QNodePropertiesWidget::OnRoughnessChanged(const double& Roughness)
 
 void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 {
-	// Obtain node index
-	const int NodeIndex = gTransferFunction.GetNodes().indexOf(*pNode);
-
-	const bool Enable = pNode && (NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1);
-
-	m_IntensityLabel.setEnabled(Enable);
-	m_IntensitySlider.setEnabled(Enable);
-	m_IntensitySpinBox.setEnabled(Enable);
+	bool Enable = false;
 
 	if (pNode)
 	{
+		const int NodeIndex = gTransferFunction.GetNodes().indexOf(*pNode);
+
+		Enable = pNode && (NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1);
+
 		m_IntensitySlider.blockSignals(true);
 		m_IntensitySpinBox.blockSignals(true);
 
@@ -282,6 +279,10 @@ void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 	else
 	{
 	}
+
+	m_IntensityLabel.setEnabled(Enable);
+	m_IntensitySlider.setEnabled(Enable);
+	m_IntensitySpinBox.setEnabled(Enable);
 }
 
 void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
@@ -364,6 +365,7 @@ void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
 		m_RoughnessSpinBox.blockSignals(true);
 
 		m_RoughnessSlider.setValue((double)pNode->GetRoughness());
+		m_RoughnessSpinBox.setValue((double)pNode->GetRoughness());
 
 		m_RoughnessSlider.blockSignals(false);
 		m_RoughnessSpinBox.blockSignals(false);
@@ -375,14 +377,13 @@ void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
 
 void QNodePropertiesWidget::SetupSelectionUI(void)
 {
-	// Obtain selected node pointer
 	QNode* pNode = gTransferFunction.GetSelectedNode();
 
-	// Obtain current node index
-	const int NodeIndex = gTransferFunction.GetNodes().indexOf(*gTransferFunction.GetSelectedNode());
-
-	if (pNode && NodeIndex >= 0)
+	if (pNode)
 	{
+		// Obtain current node index
+		const int NodeIndex = gTransferFunction.GetNodes().indexOf(*gTransferFunction.GetSelectedNode());
+
 		// Prevent circular dependency
 		m_NodeSelection.blockSignals(true);
 

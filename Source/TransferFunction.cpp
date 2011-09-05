@@ -164,6 +164,11 @@ bool QNode::InRange(const QPointF& Point)
 	return Point.x() >= m_MinX && Point.x() <= m_MaxX && Point.y() >= m_MinY && Point.y() <= m_MaxY;
 }
 
+int QNode::GetID(void) const
+{
+	return m_ID;
+}
+
 void QNode::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
@@ -310,11 +315,6 @@ float QTransferFunction::GetRange(void) const
 
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
 {
-// 	if (pSelectedNode == NULL)
-// 		qDebug("Selection cleared");
-// 	else
-// 		qDebug("Node %d is being selected", pSelectedNode->GetID());
-
 	m_pSelectedNode = pSelectedNode;
 	emit SelectionChanged(m_pSelectedNode);
 }
@@ -322,15 +322,17 @@ void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
 void QTransferFunction::SetSelectedNode(const int& Index)
 {
 	if (m_Nodes.size() <= 0)
-		return;
+	{
+		m_pSelectedNode = NULL;
+	}
+	else
+	{
+		// Compute new index
+		const int NewIndex = qMin(m_Nodes.size() - 1, qMax(0, Index));
 
-// 	qDebug("Node %d is being selected", Index);
-
-	// Compute new index
-	const int NewIndex = qMin(m_Nodes.size(), qMax(0, Index));
-
-	// Set selected node
-	m_pSelectedNode = &m_Nodes[NewIndex];
+		// Set selected node
+		m_pSelectedNode = &m_Nodes[NewIndex];
+	}
 
 	// Notify others that our selection has changed
 	emit SelectionChanged(m_pSelectedNode);
@@ -423,22 +425,22 @@ void QTransferFunction::AddNode(const QNode& Node)
 	// Inform others that our node count has changed
 	emit NodeCountChanged();
 
-	// Compute node index
-	const int NodeIndex = m_Nodes.indexOf(CacheNode);
-
-	// Select the last node that was added
-	SetSelectedNode(NodeIndex);
-
-// 	qDebug("Added a node");
+	SetSelectedNode(&m_Nodes.back());
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)
 {
+	if (!pNode)
+		return;
+
 	// Inform others that our node count is about to change
 	emit NodeCountChange();
 
 	// Remove the connection
 	disconnect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
+
+	// Node index of the to be removed node
+	int NodeIndex = m_Nodes.indexOf(*pNode);
 
 	// Remove from list and memory
 	m_Nodes.remove(*pNode);
@@ -450,13 +452,16 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 	// Update node's range
 	UpdateNodeRanges();
 
+	// Select the previous node
+	NodeIndex = qMax(0, NodeIndex - 1);
+
+	SetSelectedNode(NodeIndex);
+
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
 
 	// Inform others that our node count has changed
 	emit NodeCountChanged();
-
-// 	qDebug("Removed a node");
 }
 
 void QTransferFunction::UpdateNodeRanges(void)
@@ -485,8 +490,6 @@ void QTransferFunction::UpdateNodeRanges(void)
 			Node.SetMaxX(NodeRight.GetIntensity());
 		}
 	}
-
-//	qDebug("Updated node ranges");
 }
 
 const QNodeList& QTransferFunction::GetNodes(void) const
@@ -519,8 +522,6 @@ void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
 
 	// Inform other that the histogram has changed
 	emit HistogramChanged();
-
-// 	qDebug("Histogram was set");
 }
 
 void QTransferFunction::ReadXML(QDomElement& Parent)
