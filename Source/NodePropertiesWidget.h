@@ -24,16 +24,17 @@ private slots:
 	void OnDeleteNode(void);
 	void OnIntensityChanged(const double& Position);
 	void OnOpacityChanged(const double& Opacity);
-	void OnColorChanged(const QColor& Color);
+	void OnDiffuseColorChanged(const QColor& DiffuseColor);
+	void OnSpecularColorChanged(const QColor& Color);
+	void OnRoughnessChanged(const double& Roughness);
 	void OnNodeIntensityChanged(QNode* pNode);
 	void OnNodeOpacityChanged(QNode* pNode);
-	void OnNodeColorChanged(QNode* pNode);
+	void OnNodeDiffuseColorChanged(QNode* pNode);
+	void OnNodeSpecularColorChanged(QNode* pNode);
+	void OnNodeRoughnessChanged(QNode* pNode);
 
 private:
 	void SetupSelectionUI(void);
-	void SetupIntensityUI(void);
-	void SetupOpacityUI(void);
-	void SetupColorUI(void);
 
 private:
 	QGridLayout				m_MainLayout;
@@ -49,9 +50,8 @@ private:
 	QLabel					m_OpacityLabel;
 	QDoubleSlider			m_OpacitySlider;
 	QDoubleSpinner			m_OpacitySpinBox;
-	QColorPushButton		m_KdColor;
-	QColorPushButton		m_KsColor;
-	QColorPushButton		m_KtColor;
+	QColorPushButton		m_DiffuseColor;
+	QColorPushButton		m_SpecularColor;
 	QLabel					m_RoughnessLabel;
 	QDoubleSlider			m_RoughnessSlider;
 	QDoubleSpinner			m_RoughnessSpinBox;

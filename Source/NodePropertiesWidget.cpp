@@ -18,9 +18,8 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacityLabel(),
 	m_OpacitySlider(),
 	m_OpacitySpinBox(),
-	m_KdColor(),
-	m_KsColor(),
-	m_KtColor(),
+	m_DiffuseColor(),
+	m_SpecularColor(),
 	m_RoughnessLabel(),
 	m_RoughnessSlider(),
 	m_RoughnessSpinBox()
@@ -102,6 +101,10 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_IntensitySpinBox.setSingleStep(1);
 	m_MainLayout.addWidget(&m_IntensitySpinBox, 1, 2);
 
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
+	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
+	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
+
 	// Opacity
 	m_OpacityLabel.setText("Opacity");
 	m_MainLayout.addWidget(&m_OpacityLabel, 2, 0);
@@ -109,41 +112,53 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySlider.setOrientation(Qt::Orientation::Horizontal);
 	m_OpacitySlider.setStatusTip("Node Opacity");
 	m_OpacitySlider.setToolTip("Node Opacity");
+	m_OpacitySlider.setRange(0.0, 1.0);
 	m_MainLayout.addWidget(&m_OpacitySlider, 2, 1);
 	
 	m_OpacitySpinBox.setStatusTip("Node Opacity");
 	m_OpacitySpinBox.setToolTip("Node Opacity");
+	m_OpacitySpinBox.setRange(0.0, 1.0);
 	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 2);
 	
-	// Kd
-	m_MainLayout.addWidget(new QLabel("Kd"), 3, 0);
-	m_MainLayout.addWidget(&m_KdColor, 3, 1);
-
-	// Ks
-	m_MainLayout.addWidget(new QLabel("Ks"), 4, 0);
-	m_MainLayout.addWidget(&m_KsColor, 4, 1);
-
-	// Kt
-	m_MainLayout.addWidget(new QLabel("Kt"), 5, 0);
-	m_MainLayout.addWidget(&m_KtColor, 5, 1);
-
-	// Setup connections for position
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
-	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
-
-	// Setup connections for opacity
 	connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), &m_OpacitySpinBox, SLOT(setValue(double)));
 	connect(&m_OpacitySpinBox, SIGNAL(valueChanged(double)), &m_OpacitySlider, SLOT(setValue(double)));
 	connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnOpacityChanged(double)));
+
+	// Diffuse Color
+	m_MainLayout.addWidget(new QLabel("Diffuse Color"), 3, 0);
+	m_MainLayout.addWidget(&m_DiffuseColor, 3, 1);
+
+	connect(&m_DiffuseColor, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseColorChanged(const QColor&)));
+
+	// Specular Color
+	m_MainLayout.addWidget(new QLabel("Specular Color"), 4, 0);
+	m_MainLayout.addWidget(&m_SpecularColor, 4, 1);
+
+	connect(&m_SpecularColor, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularColorChanged(const QColor&)));
+
+	// Roughness
+	m_RoughnessLabel.setText("Roughness");
+	m_MainLayout.addWidget(&m_RoughnessLabel, 5, 0);
+
+	m_RoughnessSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_RoughnessSlider.setStatusTip("Roughness");
+	m_RoughnessSlider.setToolTip("Roughness");
+	m_RoughnessSlider.setRange(0.0f, 1000.0f);
+	m_MainLayout.addWidget(&m_RoughnessSlider, 5, 1);
+
+	m_RoughnessSpinBox.setStatusTip("Roughness");
+	m_RoughnessSpinBox.setToolTip("Roughness");
+	m_RoughnessSpinBox.setRange(0.0f, 1000.0f);
+	m_MainLayout.addWidget(&m_RoughnessSpinBox, 5, 2);
+
+	connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));
+	connect(&m_RoughnessSpinBox, SIGNAL(valueChanged(double)), &m_RoughnessSlider, SLOT(setValue(double)));
+	connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), this, SLOT(OnRoughnessChanged(double)));
 
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
 
 	SetupSelectionUI();
-	SetupIntensityUI();
-	SetupOpacityUI();
-	SetupColorUI();
 
 	OnNodeSelectionChanged(NULL);
 }
@@ -152,17 +167,10 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 {
 	if (!pNode)
 	{
-		setEnabled(false);
 	}
 	else
 	{
-		setEnabled(true);
-
 		SetupSelectionUI();
-		SetupIntensityUI();
-		SetupOpacityUI();
-		SetupColorUI();
-
 		
 		// Remove existing connections
 		for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
@@ -171,14 +179,24 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 
 			disconnect(&Node, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
 			disconnect(&Node, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
-			disconnect(&Node, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
+			disconnect(&Node, SIGNAL(DiffuseColorChanged(QNode*)), this, SLOT(OnNodeDiffuseColorChanged(QNode*)));
+			disconnect(&Node, SIGNAL(SpecularColorChanged(QNode*)), this, SLOT(OnNodeSpecularColorChanged(QNode*)));
+			disconnect(&Node, SIGNAL(RoughnessChanged(QNode*)), this, SLOT(OnNodeRoughnessChanged(QNode*)));
 		}
 
 		// Setup connections
 		connect(pNode, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
 		connect(pNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
-		connect(pNode, SIGNAL(ColorChanged(QNode*)), this, SLOT(OnNodeColorChanged(QNode*)));
+		connect(pNode, SIGNAL(DiffuseColorChanged(QNode*)), this, SLOT(OnNodeDiffuseColorChanged(QNode*)));
+		connect(pNode, SIGNAL(SpecularColorChanged(QNode*)), this, SLOT(OnNodeSpecularColorChanged(QNode*)));
+		connect(pNode, SIGNAL(RoughnessChanged(QNode*)), this, SLOT(OnNodeRoughnessChanged(QNode*)));
 	}
+
+	OnNodeIntensityChanged(pNode);
+	OnNodeOpacityChanged(pNode);
+	OnNodeDiffuseColorChanged(pNode);
+	OnNodeSpecularColorChanged(pNode);
+	OnNodeRoughnessChanged(pNode);
 }
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(const int& Index)
@@ -217,42 +235,142 @@ void QNodePropertiesWidget::OnOpacityChanged(const double& Opacity)
 		gTransferFunction.GetSelectedNode()->SetOpacity(Opacity);
 }
 
-void QNodePropertiesWidget::OnColorChanged(const QColor& Color)
+void QNodePropertiesWidget::OnDiffuseColorChanged(const QColor& DiffuseColor)
 {
-	m_NodeSelection.clear();
+	if (gTransferFunction.GetSelectedNode())
+		gTransferFunction.GetSelectedNode()->SetDiffuseColor(DiffuseColor);
+}
 
-	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
-		m_NodeSelection.addItem("Node " + QString::number(i + 1));
+void QNodePropertiesWidget::OnSpecularColorChanged(const QColor& SpecularColor)
+{
+	if (gTransferFunction.GetSelectedNode())
+		gTransferFunction.GetSelectedNode()->SetSpecularColor(SpecularColor);
+}
+
+void QNodePropertiesWidget::OnRoughnessChanged(const double& Roughness)
+{
+	if (gTransferFunction.GetSelectedNode())
+		gTransferFunction.GetSelectedNode()->SetRoughness(Roughness);
 }
 
 void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 {
-	SetupIntensityUI();
+	// Obtain node index
+	const int NodeIndex = gTransferFunction.GetNodes().indexOf(*pNode);
+
+	const bool Enable = pNode && (NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1);
+
+	m_IntensityLabel.setEnabled(Enable);
+	m_IntensitySlider.setEnabled(Enable);
+	m_IntensitySpinBox.setEnabled(Enable);
+
+	if (pNode)
+	{
+		m_IntensitySlider.blockSignals(true);
+		m_IntensitySpinBox.blockSignals(true);
+
+		m_IntensitySlider.setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_IntensitySlider.setValue(pNode->GetIntensity());
+		m_IntensitySpinBox.setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_IntensitySpinBox.setValue(pNode->GetIntensity());
+
+		m_IntensitySlider.setValue((double)pNode->GetIntensity());
+
+		m_IntensitySlider.blockSignals(false);
+		m_IntensitySpinBox.blockSignals(false);
+	}
+	else
+	{
+	}
 }
 
 void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 {
-	return;
+	const bool Enable = pNode != NULL;
+
+	m_OpacityLabel.setEnabled(Enable);
+	m_OpacitySlider.setEnabled(Enable);
+	m_OpacitySpinBox.setEnabled(Enable);
 
 	if (pNode)
 	{
-		// Prevent circular dependency
 		m_OpacitySlider.blockSignals(true);
 		m_OpacitySpinBox.blockSignals(true);
-		
-		// Update values
+
+		m_OpacitySlider.setRange(pNode->GetMinX(), pNode->GetMaxX());
 		m_OpacitySlider.setValue(pNode->GetOpacity());
+		m_OpacitySpinBox.setRange(pNode->GetMinX(), pNode->GetMaxX());
 		m_OpacitySpinBox.setValue(pNode->GetOpacity());
+
+		m_OpacitySlider.setValue((double)pNode->GetOpacity());
 
 		m_OpacitySlider.blockSignals(false);
 		m_OpacitySpinBox.blockSignals(false);
 	}
+	else
+	{
+	}
 }
 
-void QNodePropertiesWidget::OnNodeColorChanged(QNode* pNode)
+void QNodePropertiesWidget::OnNodeDiffuseColorChanged(QNode* pNode)
 {
-//	if (pNode)
-//		gTransferFunction.m_pSelectedNode->SetColor(pNode->GetColor());
+	const bool Enable = pNode != NULL;
+
+	m_DiffuseColor.setEnabled(Enable);
+
+	if (pNode)
+	{
+		m_DiffuseColor.blockSignals(true);
+
+		m_DiffuseColor.SetColor(pNode->GetDiffuseColor());
+
+		m_DiffuseColor.blockSignals(false);
+	}
+	else
+	{
+	}
+}
+
+void QNodePropertiesWidget::OnNodeSpecularColorChanged(QNode* pNode)
+{
+	const bool Enable = pNode != NULL;
+
+	m_SpecularColor.setEnabled(Enable);
+
+	if (pNode)
+	{
+		m_SpecularColor.blockSignals(true);
+
+		m_SpecularColor.SetColor(pNode->GetSpecularColor());
+
+		m_SpecularColor.blockSignals(false);
+	}
+	else
+	{
+	}
+}
+
+void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
+{
+	const bool Enable = pNode != NULL;
+
+	m_RoughnessLabel.setEnabled(Enable);
+	m_RoughnessSlider.setEnabled(Enable);
+	m_RoughnessSpinBox.setEnabled(Enable);
+
+	if (pNode)
+	{
+		m_RoughnessSlider.blockSignals(true);
+		m_RoughnessSpinBox.blockSignals(true);
+
+		m_RoughnessSlider.setValue((double)pNode->GetRoughness());
+
+		m_RoughnessSlider.blockSignals(false);
+		m_RoughnessSpinBox.blockSignals(false);
+	}
+	else
+	{
+	}
 }
 
 void QNodePropertiesWidget::SetupSelectionUI(void)
@@ -299,84 +417,3 @@ void QNodePropertiesWidget::SetupSelectionUI(void)
 		m_NextNode.setToolTip(NextToolTip);
 	}
 }
-
-void QNodePropertiesWidget::SetupIntensityUI(void)
-{
-	// Obtain selected node pointer
-	QNode* pNode = gTransferFunction.GetSelectedNode();
-
-	if (pNode)
-	{
-		// Obtain node index
-		const int NodeIndex = gTransferFunction.GetNodes().indexOf(*gTransferFunction.GetSelectedNode());
-
-		// Decide whether to enable the button
-		const bool Enable = NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1;
-
-		// Enable
-		m_IntensityLabel.setEnabled(Enable);
-		m_IntensitySlider.setEnabled(Enable);
-		m_IntensitySpinBox.setEnabled(Enable);
-
-		// Prevent circular dependency
-		m_IntensitySlider.blockSignals(true);
-		m_IntensitySpinBox.blockSignals(true);
-
-		// Update values
-		m_IntensitySlider.setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_IntensitySlider.setValue(pNode->GetIntensity());
-		m_IntensitySpinBox.setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_IntensitySpinBox.setValue(pNode->GetIntensity());
-
-		m_IntensitySlider.blockSignals(false);
-		m_IntensitySpinBox.blockSignals(true);
-	}
-	else
-	{
-		// Enable
-		m_IntensityLabel.setEnabled(false);
-		m_IntensitySlider.setEnabled(false);
-		m_IntensitySpinBox.setEnabled(false);
-	}
-}
-
-void QNodePropertiesWidget::SetupOpacityUI(void)
-{
-	// Obtain selected node pointer
-	QNode* pNode = gTransferFunction.GetSelectedNode();
-
-	if (pNode)
-	{
-		// Enable
-		m_OpacityLabel.setEnabled(true);
-		m_OpacitySlider.setEnabled(true);
-		m_OpacitySpinBox.setEnabled(true);
-
-		// Prevent circular dependency
-		m_OpacitySlider.blockSignals(true);
-		m_OpacitySpinBox.blockSignals(true);
-
-		// Update values
-		m_OpacitySlider.setRange(pNode->GetMinY(), pNode->GetMaxY());
-		m_OpacitySlider.setValue(pNode->GetOpacity());
-		m_OpacitySpinBox.setRange(pNode->GetMinY(), pNode->GetMaxY());
-		m_OpacitySpinBox.setValue(pNode->GetOpacity());
-
-		m_OpacitySlider.blockSignals(false);
-		m_OpacitySpinBox.blockSignals(true);
-	}
-	else
-	{
-		// Enable
-		m_OpacityLabel.setEnabled(false);
-		m_OpacitySlider.setEnabled(false);
-		m_OpacitySpinBox.setEnabled(false);
-	}
-}
-
-void QNodePropertiesWidget::SetupColorUI(void)
-{
-
-}
-
-

@@ -9,12 +9,14 @@ bool CompareNodes(QNode NodeA, QNode NodeB)
 	return NodeA.GetIntensity() < NodeB.GetIntensity();
 }
 
-QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const float& Opacity, const QColor& Color) :
+QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness) :
 	QPresetXML(pTransferFunction),
 	m_pTransferFunction(pTransferFunction),
 	m_Intensity(Intensity),
 	m_Opacity(Opacity),
-	m_Color(Color),
+	m_DiffuseColor(DiffuseColor),
+	m_SpecularColor(SpecularColor),
+	m_Roughness(Roughness),
 	m_MinX(0.0f),
 	m_MaxX(0.0f),
 	m_MinY(0.0f),
@@ -48,9 +50,9 @@ float QNode::GetIntensity(void) const
 	return m_Intensity;
 }
 
-void QNode::SetIntensity(const float& Position)
+void QNode::SetIntensity(const float& Intensity)
 {
-	m_Intensity = qMin(m_MaxX, qMax(Position, m_MinX));
+	m_Intensity = qMin(m_MaxX, qMax(Intensity, m_MinX));
 	
 	emit NodeChanged(this);
 	emit IntensityChanged(this);
@@ -70,16 +72,43 @@ void QNode::SetOpacity(const float& Opacity)
 	emit OpacityChanged(this);
 }
 
-QColor QNode::GetColor(void) const
+QColor QNode::GetDiffuseColor(void) const
 {
-	return m_Color;
+	return m_DiffuseColor;
 }
 
-void QNode::SetColor(const QColor& Color)
+void QNode::SetDiffuseColor(const QColor& DiffuseColor)
 {
-	m_Color = Color;
+	m_DiffuseColor = DiffuseColor;
 	
-	emit ColorChanged(this);
+	emit NodeChanged(this);
+	emit DiffuseColorChanged(this);
+}
+
+QColor QNode::GetSpecularColor(void) const
+{
+	return m_SpecularColor;
+}
+
+void QNode::SetSpecularColor(const QColor& SpecularColor)
+{
+	m_SpecularColor = SpecularColor;
+
+	emit NodeChanged(this);
+	emit SpecularColorChanged(this);
+}
+
+float QNode::GetRoughness(void) const
+{
+	return m_Roughness;
+}
+
+void QNode::SetRoughness(const float& Roughness)
+{
+	m_Roughness = Roughness;
+
+	emit NodeChanged(this);
+	emit RoughnessChanged(this);
 }
 
 float QNode::GetMinX(void) const
@@ -135,11 +164,6 @@ bool QNode::InRange(const QPointF& Point)
 	return Point.x() >= m_MinX && Point.x() <= m_MaxX && Point.y() >= m_MinY && Point.y() <= m_MaxY;
 }
 
-int QNode::GetID(void) const
-{
-	return m_ID;
-}
-
 void QNode::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
@@ -152,11 +176,20 @@ void QNode::ReadXML(QDomElement& Parent)
 	const float NormalizedOpacity = Parent.firstChildElement("NormalizedOpacity").attribute("Value").toFloat();
 	m_Opacity = NormalizedOpacity;
 	
-	QDomElement Kd = Parent.firstChildElement("Kd");
+	// Diffuse Color
+	QDomElement DiffuseColor = Parent.firstChildElement("DiffuseColor");
+	m_DiffuseColor.setRed(DiffuseColor.attribute("R").toInt());
+	m_DiffuseColor.setGreen(DiffuseColor.attribute("G").toInt());
+	m_DiffuseColor.setBlue(DiffuseColor.attribute("B").toInt());
 
-	m_Color.setRed(Kd.attribute("R").toInt());
-	m_Color.setGreen(Kd.attribute("G").toInt());
-	m_Color.setBlue(Kd.attribute("B").toInt());
+	// Specular Color
+	QDomElement SpecularColor = Parent.firstChildElement("SpecularColor");
+	m_SpecularColor.setRed(SpecularColor.attribute("R").toInt());
+	m_SpecularColor.setGreen(SpecularColor.attribute("G").toInt());
+	m_SpecularColor.setBlue(SpecularColor.attribute("B").toInt());
+
+	// Roughness
+	m_Roughness = Parent.firstChildElement("Roughness").attribute("Value").toFloat();
 }
 
 QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -179,26 +212,24 @@ QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	Opacity.setAttribute("Value", NormalizedOpacity);
 	Node.appendChild(Opacity);
 
-	// Kd
-	QDomElement Kd = DOM.createElement("Kd");
-	Kd.setAttribute("R", m_Color.red());
-	Kd.setAttribute("G", m_Color.green());
-	Kd.setAttribute("B", m_Color.blue());
-	Node.appendChild(Kd);
+	// Diffuse Color
+	QDomElement DiffuseColor = DOM.createElement("DiffuseColor");
+	DiffuseColor.setAttribute("R", m_DiffuseColor.red());
+	DiffuseColor.setAttribute("G", m_DiffuseColor.green());
+	DiffuseColor.setAttribute("B", m_DiffuseColor.blue());
+	Node.appendChild(DiffuseColor);
 
-	// Kt
-	QDomElement Kt = DOM.createElement("Kt");
-	Kt.setAttribute("R", m_Color.red());
-	Kt.setAttribute("G", m_Color.green());
-	Kt.setAttribute("B", m_Color.blue());
-	Node.appendChild(Kt);
+	// Specular Color
+	QDomElement SpecularColor = DOM.createElement("SpecularColor");
+	SpecularColor.setAttribute("R", m_SpecularColor.red());
+	SpecularColor.setAttribute("G", m_SpecularColor.green());
+	SpecularColor.setAttribute("B", m_SpecularColor.blue());
+	Node.appendChild(SpecularColor);
 
-	// Ks
-	QDomElement Ks = DOM.createElement("Ks");
-	Ks.setAttribute("R", m_Color.red());
-	Ks.setAttribute("G", m_Color.green());
-	Ks.setAttribute("B", m_Color.blue());
-	Node.appendChild(Ks);
+	// Roughness
+	QDomElement Roughness = DOM.createElement("Roughness");
+	Roughness.setAttribute("Value", m_Roughness);
+	Node.appendChild(Roughness);
 
 	return Node;
 }
@@ -360,9 +391,9 @@ int	QTransferFunction::GetNodeIndex(QNode* pNode)
 	return m_Nodes.indexOf(*pNode);
 }
 
-void QTransferFunction::AddNode(const float& Position, const float& Opacity, const QColor& Color)
+void QTransferFunction::AddNode(const float& Position, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness)
 {
-	AddNode(QNode(this, Position, Opacity, Color));
+	AddNode(QNode(this, Position, Opacity, DiffuseColor, SpecularColor, Roughness));
 }
 
 void QTransferFunction::AddNode(const QNode& Node)

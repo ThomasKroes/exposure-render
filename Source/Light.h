@@ -1,14 +1,9 @@
 #pragma once
 
-#include "Geometry.h"
-#include "Random.h"
 #include "MonteCarlo.h"
-
-
+#include "Sample.h"
 
 #define MAX_NO_LIGHTS 32
-
-
 
 class CSurfacePoint
 {

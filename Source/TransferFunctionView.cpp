@@ -20,8 +20,8 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 //	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	// Styling
-//	setFrameShadow(Sunken);
-//	setFrameShape(NoFrame);
+	setFrameShadow(Sunken);
+	setFrameShape(NoFrame);
 
 	setStyleSheet("border-color: red;");
 
@@ -85,9 +85,9 @@ void QTransferFunctionView::Update(void)
 		gpScene->m_TransferFunctions.m_Ks.m_P[i] = Node.GetIntensity();
 		gpScene->m_TransferFunctions.m_Kt.m_P[i] = Node.GetIntensity();
 
-		float ColR = Node.GetOpacity() * ((float)Node.GetColor().red() / 255.0f);
-		float ColG = Node.GetOpacity() * ((float)Node.GetColor().green() / 255.0f);
-		float ColB = Node.GetOpacity() * ((float)Node.GetColor().blue() / 255.0f);
+		float ColR = Node.GetOpacity() * ((float)Node.GetDiffuseColor().red() / 255.0f);
+		float ColG = Node.GetOpacity() * ((float)Node.GetDiffuseColor().green() / 255.0f);
+		float ColB = Node.GetOpacity() * ((float)Node.GetDiffuseColor().blue() / 255.0f);
 
 		gpScene->m_TransferFunctions.m_Kd.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
 		gpScene->m_TransferFunctions.m_Ks.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);

@@ -41,14 +41,16 @@ public:
 		*this = Other;
 	};
 
-	QNode(QTransferFunction* pTransferFunction, const float& Position = 0.0f, const float& Opacity = 0.0f, const QColor& Color = Qt::black);
+	QNode(QTransferFunction* pTransferFunction, const float& Intensity = 0.0f, const float& Opacity = 0.5f, const QColor& DiffuseColor = Qt::white, const QColor& SpecularColor = Qt::white, const float& Roughness = 100.0f);
 	
 	QNode& operator = (const QNode& Other)			
 	{
 		m_pTransferFunction	= Other.m_pTransferFunction;
 		m_Intensity			= Other.m_Intensity;
 		m_Opacity			= Other.m_Opacity;
-		m_Color				= Other.m_Color;
+		m_DiffuseColor		= Other.m_DiffuseColor;
+		m_SpecularColor		= Other.m_SpecularColor;
+		m_Roughness			= Other.m_Roughness;
 		m_MinX				= Other.m_MinX;
 		m_MaxX				= Other.m_MaxX;
 		m_MinY				= Other.m_MinY;
@@ -68,11 +70,15 @@ public:
 	float		GetNormalizedOpacity(void) const;
 	void		SetNormalizedOpacity(const float& NormalizedY);
 	float		GetIntensity(void) const;
-	void		SetIntensity(const float& Position);
+	void		SetIntensity(const float& Intensity);
 	float		GetOpacity(void) const;
 	void		SetOpacity(const float& Opacity);
-	QColor		GetColor(void) const;
-	void		SetColor(const QColor& Color);
+	QColor		GetDiffuseColor(void) const;
+	void		SetDiffuseColor(const QColor& DiffuseColor);
+	QColor		GetSpecularColor(void) const;
+	void		SetSpecularColor(const QColor& SpecularColor);
+	float		GetRoughness(void) const;
+	void		SetRoughness(const float& Roughness);
 	float		GetMinX(void) const;
 	void		SetMinX(const float& MinX);
 	float		GetMaxX(void) const;
@@ -90,14 +96,18 @@ signals:
 	void NodeChanged(QNode* pNode);
 	void IntensityChanged(QNode* pNode);
 	void OpacityChanged(QNode* pNode);
-	void ColorChanged(QNode* pNode);
+	void DiffuseColorChanged(QNode* pNode);
+	void SpecularColorChanged(QNode* pNode);
+	void RoughnessChanged(QNode* pNode);
 	void RangeChanged(QNode* pNode);
 
 protected:
 	QTransferFunction*	m_pTransferFunction;
 	float				m_Intensity;
 	float				m_Opacity;
-	QColor				m_Color;
+	QColor				m_DiffuseColor;
+	QColor				m_SpecularColor;
+	float				m_Roughness;
 	float				m_MinX;
 	float				m_MaxX;
 	float				m_MinY;
@@ -123,7 +133,7 @@ public:
 
 	QTransferFunction& operator = (const QTransferFunction& Other);			
 	
-	void				AddNode(const float& Position, const float& Opacity, const QColor& Color);
+	void				AddNode(const float& Position, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness);
 	void				AddNode(const QNode& pNode);
 	void				RemoveNode(QNode* pNode);
 	float				GetRangeMin(void) const;

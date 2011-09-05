@@ -188,9 +188,9 @@ void QNodeItem::UpdateTooltip(void)
 {
 	QString ToolTipString;
 
-	const QString R = QString::number(m_pNode->GetColor().red());
-	const QString G = QString::number(m_pNode->GetColor().green());
-	const QString B = QString::number(m_pNode->GetColor().blue());
+	const QString R = QString::number(m_pNode->GetDiffuseColor().red());
+	const QString G = QString::number(m_pNode->GetDiffuseColor().green());
+	const QString B = QString::number(m_pNode->GetDiffuseColor().blue());
 
 	ToolTipString.append("<table>");
 		ToolTipString.append("<tr>");

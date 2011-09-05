@@ -75,7 +75,7 @@ void UnbindVolumeData(void)
 // Estimates direct lighting
 DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
-	/*
+	
 	if (Dot(Wo, N) < 0.0f)
 		return SPEC_BLACK;
 
@@ -87,7 +87,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	// Attenuation
 	CColorXyz Tr = SPEC_BLACK;
-
+/*
 	CBSDF Bsdf(N, Wo, pScene->m_Volume.Kd(FetchDensity(pScene, Pe)), pScene->m_Volume.Ks(FetchDensity(pScene, Pe)), pScene->m_Volume.Ni(FetchDensity(pScene, Pe)), pScene->m_Volume.Ns(FetchDensity(pScene, Pe)));
 	// Light/shadow ray
 	CRay R; 

@@ -239,7 +239,7 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 		{
 			const QNode& Node = gTransferFunction.GetNode(i);
 
-			QColor Color = Node.GetColor();
+			QColor Color = Node.GetDiffuseColor();
 
 			// Clamp node opacity to obtain valid alpha for display
 			float Alpha = qMin(1.0f, qMax(0.0f, Node.GetOpacity()));
