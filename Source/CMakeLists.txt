@@ -41,6 +41,9 @@ SET(SimpleViewSrcs
 	LightsWidget.cpp
 	LightingWidget.cpp
 	Lighting.cpp
+
+	# Background
+	Background.cpp
 	BackgroundIlluminationWidget.cpp
 
 	# Transfer function editor
@@ -102,6 +105,9 @@ SET(SimpleViewHeaders
 	LightsWidget.h
 	LightingWidget.h
 	Lighting.h
+
+	# Background
+	Background.h
 	BackgroundIlluminationWidget.h
 
 	# Transfer function editor

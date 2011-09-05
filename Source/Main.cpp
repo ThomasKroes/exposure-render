@@ -11,13 +11,13 @@ int main(int ArgumentCount, char* pArgv[])
 	// Create the application
     QApplication Application(ArgumentCount, pArgv);
 
-	QSplashScreen SplashScreen;
-
-	SplashScreen.show();
-
-	Qt::Alignment TopRight = Qt::AlignRight | Qt::AlignTop;
-
-	SplashScreen.showMessage("Setting up main window", TopRight, Qt::white);
+// 	QSplashScreen SplashScreen;
+// 
+// 	SplashScreen.show();
+// 
+// 	Qt::Alignment TopRight = Qt::AlignRight | Qt::AlignTop;
+// 
+// 	SplashScreen.showMessage("Setting up main window", TopRight, Qt::white);
 	
 	Q_INIT_RESOURCE(icons);
 
@@ -28,7 +28,7 @@ int main(int ArgumentCount, char* pArgv[])
 
 	CMainWindow MainWindow;
 
-	SplashScreen.showMessage("Establishing connections", TopRight, Qt::white);
+//	SplashScreen.showMessage("Establishing connections", TopRight, Qt::white);
 
 	// Show the main window
 	gpMainWindow = &MainWindow;

@@ -158,6 +158,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
 	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*, QLight*)), this, SLOT(OnLightSelectionChanged(QLight*, QLight*)));
+	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), this, SLOT(Update()));
 }
 
 void QLightSettingsWidget::OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight)
@@ -201,7 +202,7 @@ void QLightSettingsWidget::OnThetaChanged(const double& Theta)
 	if (!gLighting.GetSelectedLight())
 		return;
 	
-	gLighting.GetSelectedLight()->SetTheta((float)Theta / RAD_F);
+	gLighting.GetSelectedLight()->SetTheta((float)Theta);
 }
 
 void QLightSettingsWidget::OnPhiChanged(const double& Phi)
@@ -209,7 +210,7 @@ void QLightSettingsWidget::OnPhiChanged(const double& Phi)
 	if (!gLighting.GetSelectedLight())
 		return;
 
-	gLighting.GetSelectedLight()->SetPhi((float)Phi / RAD_F);
+	gLighting.GetSelectedLight()->SetPhi((float)Phi);
 }
 
 void QLightSettingsWidget::OnDistanceChanged(const double& Distance)

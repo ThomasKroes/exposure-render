@@ -63,29 +63,29 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), this, SLOT(SetIntensity(double)));
 	connect(&m_UseTexture, SIGNAL(stateChanged(int)), this, SLOT(OnUseTextureChanged(int)));
 	connect(&m_LoadTexture, SIGNAL(clicked()), this, SLOT(OnLoadTexture()));
-	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), this, SLOT(OnBackgroundChanged()));
+// 	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), this, SLOT(OnBackgroundChanged()));
 
 	OnBackgroundChanged();
 }
 
 void QBackgroundIlluminationWidget::OnBackgroundIlluminationChanged(bool Checked)
 {
-	gLighting.Background().SetEnabled(Checked);
+//	gLighting.Background().SetEnabled(Checked);
 }
 
 void QBackgroundIlluminationWidget::OnColorChanged(const QColor& Color)
 {
-	gLighting.Background().SetColor(Color);
+//	gLighting.Background().SetColor(Color);
 }
 
 void QBackgroundIlluminationWidget::SetIntensity(double Intensity)
 {
-	gLighting.Background().SetIntensity(Intensity);
+//	gLighting.Background().SetIntensity(Intensity);
 }
 
 void QBackgroundIlluminationWidget::OnUseTextureChanged(int UseTexture)
 {
-	gLighting.Background().SetUseTexture(UseTexture);
+//	gLighting.Background().SetUseTexture(UseTexture);
 }
 
 void QBackgroundIlluminationWidget::OnLoadTexture(void)
