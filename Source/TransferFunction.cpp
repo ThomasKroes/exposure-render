@@ -538,8 +538,8 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 	// Don't fire events during loading
 	blockSignals(true);
 
-	SetRangeMin(Parent.attribute("RangeMin", "Failed").toInt());
-	SetRangeMax(Parent.attribute("RangeMax", "Failed").toInt());
+//	SetRangeMin(Parent.attribute("RangeMin", "Failed").toInt());
+//	SetRangeMax(Parent.attribute("RangeMax", "Failed").toInt());
 
 	QDomElement Nodes = Parent.firstChild().toElement();
 

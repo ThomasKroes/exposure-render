@@ -91,7 +91,7 @@ public:
 		{
 			if (m_Presets[i].GetName() == Preset.GetName())
 			{
-				int Result = QMessageBox::question(this, "Preset already exists", "Overwrite?", QMessageBox::Yes | QMessageBox::No);
+				int Result = QMessageBox::question(this, "Preset already exists            ", "Overwrite?", QMessageBox::Yes | QMessageBox::No);
 				
 				if (Result == QMessageBox::No)
 					return;

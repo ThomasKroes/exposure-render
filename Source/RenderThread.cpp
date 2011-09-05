@@ -220,6 +220,13 @@ void CRenderThread::run()
 		emit PostFrame();
 	}
 
+	// Let others know that we have stopped rendering
+	emit RenderEnd();
+
+	// Inform others when the rendering begins and ends
+	connect(this, SIGNAL(RenderEnd()), gpMainWindow, SLOT(OnRenderEnd()));
+	connect(this, SIGNAL(RenderBegin()), gpMainWindow, SLOT(OnRenderBegin()));
+
 	// Free CUDA buffers
 	cudaFree(m_pDevScene);
 	cudaFree(m_pDevRandomStates);
@@ -240,9 +247,6 @@ void CRenderThread::run()
 
 void CRenderThread::OnCloseRenderThread(void)
 {
-	// Let others know that we have stopped rendering
-	emit RenderEnd();
-
 	qDebug("Closing render thread");
 	m_Abort = true;
 }
@@ -282,8 +286,13 @@ void StartRenderThread(const QString& FileName)
 
 void KillRenderThread(void)
 {
+	if (!gpRenderThread)
+		return;
+
+	// Kill the render thread
 	gpRenderThread->OnCloseRenderThread();
 
+	// Wait for thread to end
 	gpRenderThread->wait();
 
 	// Remove the render thread
@@ -292,5 +301,3 @@ void KillRenderThread(void)
 
 	qDebug("Render thread killed");
 }
-
-

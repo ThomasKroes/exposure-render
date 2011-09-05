@@ -102,6 +102,7 @@ CMainWindow::CMainWindow() :
 
 CMainWindow::~CMainWindow(void)
 {
+	KillRenderThread();
 }
 
 void CMainWindow::CreateActions(void)
@@ -284,9 +285,6 @@ QString CMainWindow::StrippedName(const QString& FullFileName)
 
 void CMainWindow::Open()
 {
-	// Kill current rendering thread
-	KillRenderThread();
-
 	// Create open file dialog
     QString FileName = GetOpenFileName("Open volume", "Meta Image Volume Files (*.mhd)");
 
@@ -296,6 +294,9 @@ void CMainWindow::Open()
 
 void CMainWindow::Open(QString FilePath)
 {
+	// Kill current rendering thread
+	KillRenderThread();
+
 	// Window name update
 	SetCurrentFile(FilePath);
 
