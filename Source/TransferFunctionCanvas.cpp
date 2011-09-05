@@ -105,9 +105,9 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 	m_GridLines.clear();
 
 	// Horizontal grid lines
-	const float DeltaY = 0.2f * rect().height();
+	const float DeltaY = 0.1f * rect().height();
 
-	for (int i = 1; i < 5; i++)
+	for (int i = 1; i < 10; i++)
 	{
 		QGridLine* pGridLine = new QGridLine(this);
 		m_GridLines.append(pGridLine);

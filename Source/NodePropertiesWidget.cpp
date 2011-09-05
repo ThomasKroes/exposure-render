@@ -297,9 +297,9 @@ void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 		m_OpacitySlider.blockSignals(true);
 		m_OpacitySpinBox.blockSignals(true);
 
-		m_OpacitySlider.setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_OpacitySlider.setRange(pNode->GetMinY(), pNode->GetMaxY());
 		m_OpacitySlider.setValue(pNode->GetOpacity());
-		m_OpacitySpinBox.setRange(pNode->GetMinX(), pNode->GetMaxX());
+		m_OpacitySpinBox.setRange(pNode->GetMinY(), pNode->GetMaxY());
 		m_OpacitySpinBox.setValue(pNode->GetOpacity());
 
 		m_OpacitySlider.setValue((double)pNode->GetOpacity());
