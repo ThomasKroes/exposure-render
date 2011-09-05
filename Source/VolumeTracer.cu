@@ -188,10 +188,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 // Uniformly samples one light
 DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
-	// Determine no. lights
-	const int NumLights = pDevScene->m_Lighting.m_NoLights;
-
- 	if (NumLights == 0)
+ 	if (pDevScene->m_Lighting.m_NoLights == 0)
  		return SPEC_BLACK;
 
 	CLightingSample LS;
@@ -200,15 +197,14 @@ DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Ve
 	LS.LargeStep(Rnd);
 
 	// Choose which light to sample
-	const int WhichLight = (int)floorf(LS.m_LightNum * (float)NumLights);
+	const int WhichLight = (int)floorf(LS.m_LightNum * (float)pDevScene->m_Lighting.m_NoLights);
 
 	// Get the light
 	CLight& Light = pDevScene->m_Lighting.m_Lights[WhichLight];
 
 	// Return estimated direct light
-	return (float)NumLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
+	return (float)pDevScene->m_Lighting.m_NoLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
 }
-
 
 HOD float PhaseHG(const Vec3f& W, const Vec3f& Wp, float G)
 {

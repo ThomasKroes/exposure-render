@@ -1,84 +1,94 @@
 #pragma once
 
-#include "Dll.h"
-#include "Defines.h"
+#include "Geometry.h"
+#include "Random.h"
 
-class FIDELITY_RENDER_DLL CFlags
+class CLightSample
 {
-private:
-	long	m_Bits;
-
 public:
-	CFlags(void) :
-		m_Bits(0)
+	Vec2f m_Pos;
+	float m_Component;
+
+	HOD CLightSample(void)
 	{
+		m_Pos	 	= Vec2f(0.0f);
+		m_Component	= 0.0f;
 	}
 
-	CFlags(long b) :
-		m_Bits(b)
+	HOD CLightSample& CLightSample::operator=(const CLightSample& Other)
 	{
-	}
-
-	virtual ~CFlags(void)
-	{
-	};
-
-	HOD CFlags& CFlags::operator=(const CFlags& Other)
-	{
-		m_Bits = Other.m_Bits;
+		m_Pos	 	= Other.m_Pos;
+		m_Component = Other.m_Component;
 
 		return *this;
 	}
 
-	void SetFlag(const long Flag)
+	DEV void LargeStep(CCudaRNG& Rnd)
 	{
-		m_Bits |= Flag;
-	};
+		m_Pos		= Rnd.Get2();
+		m_Component	= Rnd.Get1();
+	}
+};
 
-	long Get(void)
-	{
-		return m_Bits;
-	};
+class CBsdfSample
+{
+public:
+	float	m_Component;
+	Vec2f	m_Dir;
 
-	void ClearFlag(const long Flag)
+	HOD CBsdfSample(void)
 	{
-		m_Bits &= ~Flag;
-	};
+		m_Component = 0.0f;
+		m_Dir 		= Vec2f(0.0f);
+	}
 
-	void ClearAllFlags(void)
+	HOD CBsdfSample(const float& Component, const Vec2f& Dir)
 	{
-		m_Bits = 0;
-	};
+		m_Component = Component;
+		m_Dir 		= Dir;
+	}
 
-	void SetConditional(const long Flag, const int YesNo)
+	HOD CBsdfSample& CBsdfSample::operator=(const CBsdfSample& Other)
 	{
-		YesNo ? SetFlag(Flag) : ClearFlag(Flag);
-	};
+		m_Component = Other.m_Component;
+		m_Dir 		= Other.m_Dir;
 
-	bool HasFlag(const long Flag) const
-	{
-		return (m_Bits & Flag) != 0;
-	};
+		return *this;
+	}
 
-	int All(const long Flag) const
+	DEV void LargeStep(CCudaRNG& Rnd)
 	{
-		return (m_Bits & Flag) == Flag;
-	};
+		m_Component	= Rnd.Get1();
+		m_Dir		= Rnd.Get2();
+	}
+};
 
-	int Not(const long Flag) const
-	{
-		return (m_Bits & Flag) == 0;
-	};
+class CLightingSample
+{
+public:
+	CBsdfSample		m_BsdfSample;
+	CLightSample 	m_LightSample;
+	float			m_LightNum;
 
-	void ToggleFlag(const long Flag)
+	HOD CLightingSample(void)
 	{
-		if (HasFlag(Flag))
-		{
-			ClearFlag(Flag);
-		}
-		else
-		{
-			SetFlag(Flag);
-		}
-	};
+		m_LightNum = 0.0f;
+	}
+
+	HOD CLightingSample& CLightingSample::operator=(const CLightingSample& Other)
+	{
+		m_BsdfSample	= Other.m_BsdfSample;
+		m_LightNum		= Other.m_LightNum;
+		m_LightSample	= Other.m_LightSample;
+
+		return *this;
+	}
+
+	DEV void LargeStep(CCudaRNG& Rnd)
+	{
+		m_BsdfSample.LargeStep(Rnd);
+		m_LightSample.LargeStep(Rnd);
+
+		m_LightNum = Rnd.Get1();
+	}
 };

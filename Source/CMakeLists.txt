@@ -34,13 +34,31 @@ INCLUDE_DIRECTORIES(
 SET(SimpleViewSrcs 
 	Main.cpp 
 	MainWindow.cpp
+	
+	# Lighting
 	LightSettingsWidget.cpp 
 	LightingDockWidget.cpp 
 	LightsWidget.cpp
 	LightingWidget.cpp
 	Lighting.cpp
 	BackgroundIlluminationWidget.cpp
+
+	# Transfer function editor
+	TransferFunction.cpp
+	TransferFunctionCanvas.cpp
+	TransferFunctionView.cpp
+	TransferFunctionGradient.cpp
+	TransferFunctionWidget.cpp
+	NodePropertiesWidget.cpp
+
+	# Camera
 	Camera.cpp
+	CameraDockWidget.cpp
+	FilmWidget.cpp
+	ApertureWidget.cpp
+	ProjectionWidget.cpp
+	FocusWidget.cpp
+	
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
@@ -53,11 +71,8 @@ SET(SimpleViewSrcs
 	StatisticsDockWidget.cpp
 	StatisticsWidget.cpp
 	CameraWidget.cpp
-	CameraDockWidget.cpp
-	FilmWidget.cpp
-	ApertureWidget.cpp
-	ProjectionWidget.cpp
-	FocusWidget.cpp
+	
+	
 	LoadVolume.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
@@ -65,12 +80,8 @@ SET(SimpleViewSrcs
 	LoadSettingsDialog.cpp
 	VtkWidget.cpp
 	Scene.cpp
-	TransferFunction.cpp
-	TransferFunctionCanvas.cpp
-	TransferFunctionView.cpp
-	TransferFunctionGradient.cpp
-	TransferFunctionWidget.cpp
-	NodePropertiesWidget.cpp
+
+	
 	NodeItem.cpp
 	AppearanceDockWidget.cpp
 	PresetsWidget.cpp
@@ -78,18 +89,38 @@ SET(SimpleViewSrcs
 	Controls.cpp
 	EdgeItem.cpp
 	Material.cpp
+	Sample.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
 SET(SimpleViewHeaders 
 	MainWindow.h
+
+	# Lighting
 	LightSettingsWidget.h
 	LightingDockWidget.h
 	LightsWidget.h
 	LightingWidget.h
 	Lighting.h
 	BackgroundIlluminationWidget.h
+
+	# Transfer function editor
+	TransferFunction.h
+	TransferFunctionCanvas.h
+	TransferFunctionView.h
+	TransferFunctionGradient.h
+	TransferFunctionWidget.h
+	NodePropertiesWidget.h
+
+	# Camera
 	Camera.h
+	CameraWidget.h
+	CameraDockWidget.h
+	FilmWidget.h
+	ApertureWidget.h
+	ProjectionWidget.h
+	FocusWidget.h
+
 	Defines.h
 	Dll.h
 	Enumerations.h
@@ -105,12 +136,9 @@ SET(SimpleViewHeaders
 	VolumePoint.h
 	StatisticsDockWidget.h
 	StatisticsWidget.h
-	CameraWidget.h
-	CameraDockWidget.h
-	FilmWidget.h
-	ApertureWidget.h
-	ProjectionWidget.h
-	FocusWidget.h
+	
+	
+	
 	LoadVolume.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
@@ -118,12 +146,8 @@ SET(SimpleViewHeaders
 	LoadSettingsDialog.h
 	VtkWidget.h
 	Scene.h
-	TransferFunction.h
-	TransferFunctionCanvas.h
-	TransferFunctionView.h
-	TransferFunctionGradient.h
-	TransferFunctionWidget.h
-	NodePropertiesWidget.h
+
+	
 	NodeItem.h
 	AppearanceDockWidget.h
 	PresetsWidget.h
@@ -131,6 +155,7 @@ SET(SimpleViewHeaders
 	Controls.h
 	EdgeItem.h
 	Material.h
+	Sample.h
 )
 
 SET(SimpleViewResources Icons/icons.qrc)
