@@ -1638,9 +1638,10 @@ public:
 class FIDELITY_RENDER_DLL CTransferFunctions
 {
 public:
-	CTransferFunction	m_Kt;
-	CTransferFunction	m_Kd;
-	CTransferFunction	m_Ks;
+	CTransferFunction	m_Opacity;
+	CTransferFunction	m_DiffuseColor;
+	CTransferFunction	m_SpecularColor;
+	CTransferFunction	m_Roughness;
 
 	// ToDo: Add description
 	HO CTransferFunctions(void)
@@ -1655,9 +1656,10 @@ public:
 	// ToDo: Add description
 	HOD CTransferFunctions& operator=(const CTransferFunctions& Other)
 	{
-		m_Kt	= Other.m_Kt;
-		m_Kd	= Other.m_Kd;
-		m_Ks	= Other.m_Ks;
+		m_Opacity		= Other.m_Opacity;
+		m_DiffuseColor	= Other.m_DiffuseColor;
+		m_SpecularColor	= Other.m_SpecularColor;
+		m_Roughness		= Other.m_Roughness;
 
 		return *this;
 	}

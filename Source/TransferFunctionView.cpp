@@ -73,25 +73,26 @@ void QTransferFunctionView::Update(void)
 	if (gpScene == NULL)
 		return;
 
-	gpScene->m_TransferFunctions.m_Kd.m_NoNodes = gTransferFunction.GetNodes().size();
-	gpScene->m_TransferFunctions.m_Ks.m_NoNodes = gTransferFunction.GetNodes().size();
-	gpScene->m_TransferFunctions.m_Kt.m_NoNodes = gTransferFunction.GetNodes().size();
+	gpScene->m_TransferFunctions.m_Opacity.m_NoNodes		= gTransferFunction.GetNodes().size();
+	gpScene->m_TransferFunctions.m_DiffuseColor.m_NoNodes	= gTransferFunction.GetNodes().size();
+	gpScene->m_TransferFunctions.m_SpecularColor.m_NoNodes	= gTransferFunction.GetNodes().size();
+	gpScene->m_TransferFunctions.m_Roughness.m_NoNodes		= gTransferFunction.GetNodes().size();
 
 	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
 	{
 		QNode& Node = gTransferFunction.GetNode(i);
 
-		gpScene->m_TransferFunctions.m_Kd.m_P[i] = Node.GetIntensity();
-		gpScene->m_TransferFunctions.m_Ks.m_P[i] = Node.GetIntensity();
-		gpScene->m_TransferFunctions.m_Kt.m_P[i] = Node.GetIntensity();
-
-		float ColR = Node.GetOpacity() * ((float)Node.GetDiffuseColor().red() / 255.0f);
-		float ColG = Node.GetOpacity() * ((float)Node.GetDiffuseColor().green() / 255.0f);
-		float ColB = Node.GetOpacity() * ((float)Node.GetDiffuseColor().blue() / 255.0f);
-
-		gpScene->m_TransferFunctions.m_Kd.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
-		gpScene->m_TransferFunctions.m_Ks.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
-		gpScene->m_TransferFunctions.m_Kt.m_C[i] = CColorRgbHdr(ColR, ColG, ColB);
+		// Positions
+		gpScene->m_TransferFunctions.m_Opacity.m_P[i]			= Node.GetIntensity();
+		gpScene->m_TransferFunctions.m_DiffuseColor.m_P[i]		= Node.GetIntensity();
+		gpScene->m_TransferFunctions.m_SpecularColor.m_P[i]		= Node.GetIntensity();
+		gpScene->m_TransferFunctions.m_Roughness.m_P[i]			= Node.GetIntensity();
+		
+		// Colors
+		gpScene->m_TransferFunctions.m_Opacity.m_C[i]			= CColorRgbHdr(Node.GetOpacity());
+		gpScene->m_TransferFunctions.m_DiffuseColor.m_C[i]		= CColorRgbHdr(Node.GetDiffuseColor().redF(), Node.GetDiffuseColor().greenF(), Node.GetDiffuseColor().blueF());
+		gpScene->m_TransferFunctions.m_SpecularColor.m_C[i]		= CColorRgbHdr(Node.GetSpecularColor().redF(), Node.GetSpecularColor().greenF(), Node.GetSpecularColor().blueF());
+		gpScene->m_TransferFunctions.m_Roughness.m_C[i]			= CColorRgbHdr(Node.GetRoughness());
 	}
 
 	gpScene->m_DirtyFlags.SetFlag(TransferFunctionDirty);
@@ -99,9 +100,10 @@ void QTransferFunctionView::Update(void)
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 {
+	/*
 	// Deselect all nodes
-	for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
-		m_TransferFunctionCanvas.m_Nodes[i]->setSelected(false);
+ 	for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
+ 		m_TransferFunctionCanvas.m_Nodes[i]->setSelected(false);
 
 	if (pNode)
 	{
@@ -111,6 +113,7 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 				m_TransferFunctionCanvas.m_Nodes[i]->setSelected(true);
 		}
 	}
+	*/
 }
 
 void QTransferFunctionView::OnHistogramChanged(void)
@@ -185,9 +188,6 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 
 			// Redraw
 			m_TransferFunctionCanvas.Update();
-
-			// Select it immediately
-			gTransferFunction.SetSelectedNode(&NewNode);
 		}
 
 		if (pEvent->button() == Qt::MouseButton::RightButton)

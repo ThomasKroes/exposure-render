@@ -26,6 +26,7 @@ void QLight::SetTheta(const float& Theta)
 {
 	m_Theta = Theta;
 
+	emit ThetaChanged(this);
 	emit LightPropertiesChanged(this);
 }
 
@@ -38,6 +39,7 @@ void QLight::SetPhi(const float& Phi)
 {
 	m_Phi = Phi;
 
+	emit PhiChanged(this);
 	emit LightPropertiesChanged(this);
 }
 
@@ -50,6 +52,7 @@ void QLight::SetWidth(const float& Width)
 {
 	m_Width = Width;
 
+	emit WidthChanged(this);
 	emit LightPropertiesChanged(this);
 }
 
@@ -62,6 +65,7 @@ void QLight::SetHeight(const float& Height)
 {
 	m_Height = Height;
 
+	emit HeightChanged(this);
 	emit LightPropertiesChanged(this);
 }
 
@@ -84,6 +88,7 @@ void QLight::SetDistance(const float& Distance)
 {
 	m_Distance = Distance;
 
+	emit DistanceChanged(this);
 	emit LightPropertiesChanged(this);
 }
 
@@ -96,6 +101,7 @@ void QLight::SetColor(const QColor& Color)
 {
 	m_Color = Color;
 
+	emit ColorChanged(this);
 	emit LightPropertiesChanged(this);
 }
 
@@ -108,6 +114,7 @@ void QLight::SetIntensity(const float& Intensity)
 {
 	m_Intensity = Intensity;
 
+	emit IntensityChanged(this);
 	emit LightPropertiesChanged(this);
 }
 
@@ -310,6 +317,7 @@ QDomElement QBackground::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 QLighting::QLighting(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
 	m_Lights(),
+	m_pSelectedLight(NULL),
 	m_Background()
 {
 	connect(&m_Background, SIGNAL(BackgroundChanged()), this, SLOT(Update()));
@@ -317,6 +325,8 @@ QLighting::QLighting(QObject* pParent /*= NULL*/) :
 
 void QLighting::ReadXML(QDomElement& Parent)
 {
+	SetSelectedLight(NULL);
+
 	QPresetXML::ReadXML(Parent);
 
 	QDomElement Lights = Parent.firstChild().toElement();
@@ -324,10 +334,10 @@ void QLighting::ReadXML(QDomElement& Parent)
 	// Read child nodes
 	for (QDomNode DomNode = Lights.firstChild(); !DomNode.isNull(); DomNode = DomNode.nextSibling())
 	{
-		// Create new node
-		QLight Preset(this);
+		// Create new light preset
+		QLight LightPreset(this);
 
-		m_Lights.append(Preset);
+		m_Lights.append(LightPreset);
 
 		// Load preset into it
 		m_Lights.back().ReadXML(DomNode.toElement());
@@ -335,6 +345,8 @@ void QLighting::ReadXML(QDomElement& Parent)
 
 	QDomElement Background = Parent.firstChildElement("Background").toElement();
 	m_Background.ReadXML(Background);
+
+	SetSelectedLight(0);
 }
 
 QDomElement QLighting::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -363,30 +375,40 @@ void QLighting::OnLightPropertiesChanged(QLight* pLight)
 
 void QLighting::Update(void)
 {
-	if (gLighting.m_Lights.isEmpty())
+	if (gpScene == NULL)
 		return;
 
-	gpScene->m_Lighting.m_NoLights = gLighting.m_Lights.size();
+	gpScene->m_Lighting.Reset();
 
-	for (int i = 0; i < gLighting.m_Lights.size(); i++)
+	if (Background().GetEnabled())
 	{
-		QLight& Light = gLighting.m_Lights[i];
+		CLight BackgroundLight;
 
-		CLight NewLight;
+		BackgroundLight.m_Type	= CLight::Background;
+		BackgroundLight.m_Color	= CColorRgbHdr(Background().GetColor().redF(), Background().GetColor().greenF(), Background().GetColor().blueF());
 
-		NewLight.m_Theta	= Light.GetTheta();
-		NewLight.m_Phi		= Light.GetPhi();
-		NewLight.m_Distance	= Light.GetDistance();
-		NewLight.m_Width	= Light.GetWidth();
-		NewLight.m_Height	= Light.GetHeight();
-		NewLight.m_Color.r	= Light.GetColor().red() * Light.GetIntensity();
-		NewLight.m_Color.g	= Light.GetColor().green() * Light.GetIntensity();
-		NewLight.m_Color.b	= Light.GetColor().blue() * Light.GetIntensity();
-
-		gpScene->m_Lighting.m_Lights[i] = NewLight;
+		gpScene->m_Lighting.AddLight(BackgroundLight);
 	}
 
-	// Flag the lights as dirty, this will restart the rendering
+	for (int i = 0; i < m_Lights.size(); i++)
+	{
+		QLight& Light = m_Lights[i];
+
+		CLight AreaLight;
+
+		AreaLight.m_Type		= CLight::Area;
+		AreaLight.m_Theta		= Light.GetTheta();
+		AreaLight.m_Phi			= Light.GetPhi();
+		AreaLight.m_Width		= Light.GetWidth();
+		AreaLight.m_Height		= Light.GetHeight();
+		AreaLight.m_Distance	= Light.GetDistance();
+		AreaLight.m_Color		= CColorRgbHdr(Light.GetColor().redF(), Light.GetColor().greenF(), Light.GetColor().blueF());
+
+		AreaLight.Update();
+
+		gpScene->m_Lighting.AddLight(AreaLight);
+	}
+
 	gpScene->m_DirtyFlags.SetFlag(LightsDirty);
 }
 
@@ -400,4 +422,71 @@ void QLighting::AddLight(QLight& Light)
 QBackground& QLighting::Background(void)
 {
 	return m_Background;
+}
+
+void QLighting::SetSelectedLight(QLight* pSelectedLight)
+{
+	QLight* pOldLight = m_pSelectedLight;
+	m_pSelectedLight = pSelectedLight;
+	emit LightSelectionChanged(pOldLight, m_pSelectedLight);
+}
+
+void QLighting::SetSelectedLight(const int& Index)
+{
+	QLight* pOldLight = m_pSelectedLight;
+
+	if (m_Lights.size() <= 0)
+	{
+		m_pSelectedLight = NULL;
+	}
+	else
+	{
+		// Compute new index
+		const int NewIndex = qMin(m_Lights.size() - 1, qMax(0, Index));
+
+		// Set selected node
+		m_pSelectedLight = &m_Lights[NewIndex];
+	}
+
+	// Notify others that our selection has changed
+	emit LightSelectionChanged(pOldLight, m_pSelectedLight);
+}
+
+QLight* QLighting::GetSelectedLight(void)
+{
+	return m_pSelectedLight;
+}
+
+void QLighting::SelectPreviousLight(void)
+{
+	if (!m_pSelectedLight)
+		return;
+
+	int Index = m_Lights.indexOf(*GetSelectedLight());
+
+	if (Index < 0)
+		return;
+
+	// Compute new index
+	const int NewIndex = qMin(m_Lights.size() - 1, qMax(0, Index - 1));
+
+	// Set selected node
+	SetSelectedLight(&m_Lights[NewIndex]);
+}
+
+void QLighting::SelectNextLight(void)
+{
+	if (!m_pSelectedLight)
+		return;
+
+	int Index = m_Lights.indexOf(*GetSelectedLight());
+
+	if (Index < 0)
+		return;
+
+	// Compute new index
+	const int NewIndex = qMin(m_Lights.size() - 1, qMax(0, Index + 1));
+
+	// Set selected node
+	SetSelectedLight(&m_Lights[NewIndex]);
 }

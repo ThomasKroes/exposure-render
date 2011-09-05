@@ -1,0 +1,34 @@
+<!DOCTYPE Lighting>
+<Presets>
+<Preset Name="Bonsai">
+<Lights>
+<Light Name="Key">
+<Theta Value="0"/>
+<Phi Value="0"/>
+<Distance Value="0"/>
+<Width Value="0"/>
+<Height Value="0"/>
+<LockSize Value="0"/>
+<Color G="255" R="255" B="0"/>
+<Intensity Value="0"/>
+</Light>
+<Light Name="SunLight">
+<Theta Value="0"/>
+<Phi Value="0"/>
+<Distance Value="19.5513"/>
+<Width Value="5.2885"/>
+<Height Value="5.2885"/>
+<LockSize Value="1"/>
+<Color G="170" R="255" B="127"/>
+<Intensity Value="1000"/>
+</Light>
+</Lights>
+<Background>
+<Enable Value="0"/>
+<Color G="170" R="85" B="255"/>
+<Intensity Value="100"/>
+<UseTexture Value="0"/>
+<File Value=""/>
+</Background>
+</Preset>
+</Presets>

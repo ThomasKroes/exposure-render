@@ -313,6 +313,14 @@ float QTransferFunction::GetRange(void) const
 	return m_RangeMax - m_RangeMin;
 }
 
+void QTransferFunction::OnNodeChanged(QNode* pNode)
+{
+	// Update node's range
+	UpdateNodeRanges();
+
+	emit FunctionChanged();
+}
+
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
 {
 	m_pSelectedNode = pSelectedNode;
@@ -341,14 +349,6 @@ void QTransferFunction::SetSelectedNode(const int& Index)
 QNode* QTransferFunction::GetSelectedNode(void)
 {
 	return m_pSelectedNode;
-}
-
-void QTransferFunction::OnNodeChanged(QNode* pNode)
-{
-	// Update node's range
-	UpdateNodeRanges();
-
-	emit FunctionChanged();
 }
 
 void QTransferFunction::SelectPreviousNode(void)
@@ -416,16 +416,23 @@ void QTransferFunction::AddNode(const QNode& Node)
 	for (int i = 0; i < m_Nodes.size(); i++)
 		m_Nodes[i].m_ID = i;
 
+	// Update ranges
+	UpdateNodeRanges();
+
 	// Notify us when the node changes
 	connect(&CacheNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
+
+	for (int i = 0; i < m_Nodes.size(); i++)
+	{
+		if (Node.GetIntensity() == m_Nodes[i].GetIntensity())
+			SetSelectedNode(&m_Nodes[i]);
+	}
 
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
 
 	// Inform others that our node count has changed
 	emit NodeCountChanged();
-
-	SetSelectedNode(&m_Nodes.back());
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)

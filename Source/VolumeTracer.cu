@@ -283,7 +283,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 		
 		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
 
-		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Kt.F(D)[Component] * pDevScene->m_TransferFunctions.m_Kd.F(D)[Component];
+		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Opacity.F(D)[Component] * pDevScene->m_TransferFunctions.m_DiffuseColor.F(D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -321,7 +321,7 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 		
 		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
 
-		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Kt.F(D)[Component] * pDevScene->m_TransferFunctions.m_Kd.F(D)[Component];
+		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Opacity.F(D)[Component] * pDevScene->m_TransferFunctions.m_DiffuseColor.F(D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -641,7 +641,7 @@ DEV inline CColorXyz TransmittanceRM(CScene* pDevScene, CCudaRNG& RNG, CRay& R,c
 		}
 
 		// Get shadow opacity
-		const float	Opacity = pDevScene->m_TransferFunctions.m_Kt.F(D).r;
+		const float	Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r;
 
 		if (Opacity > 0.0f)
 		{
@@ -735,7 +735,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			continue;
 
 		// Get opacity at eye point
-		const float Tr = pDevScene->m_TransferFunctions.m_Kt.F(D).r;
+		const float Tr = pDevScene->m_TransferFunctions.m_Opacity.F(D).r;
 //		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission

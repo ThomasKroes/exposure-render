@@ -401,6 +401,22 @@ public:
 		return *this;
 	}
 
+	void AddLight(const CLight& Light)
+	{
+		if (m_NoLights >= MAX_NO_LIGHTS)
+			return;
+
+		m_Lights[m_NoLights] = Light;
+
+		m_NoLights++;
+	}
+
+	void Reset(void)
+	{
+		m_NoLights = 0;
+		memset(m_Lights, 0 , MAX_NO_LIGHTS * sizeof(CLight));
+	}
+
 	CLight			m_Lights[MAX_NO_LIGHTS];
 	int				m_NoLights;
 };

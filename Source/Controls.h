@@ -18,13 +18,13 @@ public:
 	int		GetRadius(void) const;
 	void	SetRadius(const int& Radius);
 	QColor	GetColor(void) const;
-	void	SetColor(const QColor& Color);
+	void	SetColor(const QColor& Color, bool BlockSignals = false);
 
-	private slots:
-		void	OnCurrentColorChanged(const QColor& Color);
+private slots:
+	void	OnCurrentColorChanged(const QColor& Color);
 
 signals:
-		void currentColorChanged(const QColor&);
+	void currentColorChanged(const QColor&);
 
 private:
 	int		m_Margin;
@@ -48,7 +48,7 @@ public:
 
 public slots:
 	void setValue(int value);
-	void setValue(double Value);
+	void setValue(double Value, bool BlockSignals = false);
 
 private slots:
 
@@ -69,6 +69,7 @@ public:
 	QDoubleSpinner(QWidget* pParent = NULL);;
 
 	virtual QSize sizeHint() const;
+	void setValue(double Value, bool BlockSignals = false);
 
 private slots:
 

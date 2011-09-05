@@ -89,10 +89,14 @@ QColor QColorPushButton::GetColor(void) const
 	return m_Color;
 }
 
-void QColorPushButton::SetColor(const QColor& Color)
+void QColorPushButton::SetColor(const QColor& Color, bool BlockSignals)
 {
+	blockSignals(BlockSignals);
+
 	m_Color = Color;
 	update();
+
+	blockSignals(false);
 }
 
 void QColorPushButton::OnCurrentColorChanged(const QColor& Color)
@@ -111,16 +115,19 @@ QDoubleSlider::QDoubleSlider(QWidget* pParent /*= NULL*/) :
 
 void QDoubleSlider::setValue(int Value)
 {
-//	QSlider::setValue(Value);
-
 	emit valueChanged((double)Value / m_Multiplier);
 }
 
-void QDoubleSlider::setValue(double Value)
+void QDoubleSlider::setValue(double Value, bool BlockSignals)
 {
+	QSlider::blockSignals(BlockSignals);
+
 	QSlider::setValue(Value * m_Multiplier);
 
-	emit valueChanged(Value);
+ 	if (!BlockSignals)
+ 		emit valueChanged(Value);
+
+	QSlider::blockSignals(false);
 }
 
 void QDoubleSlider::setRange(double Min, double Max)
@@ -196,4 +203,13 @@ QSize QDoubleSpinner::sizeHint() const
 QDoubleSpinner::QDoubleSpinner(QWidget* pParent /*= NULL*/) :
 	QDoubleSpinBox(pParent)
 {
+}
+
+void QDoubleSpinner::setValue(double Value, bool BlockSignals)
+{
+	blockSignals(BlockSignals);
+
+//	QDoubleSpinBox::setValue(Value);
+
+	blockSignals(false);
 }

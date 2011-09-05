@@ -34,10 +34,6 @@ protected slots:
 	void OnAddLight(void);
 	void OnRemoveLight(void);
 
-signals:
-	void LightSelectionChanged(QLight*);
-	void LightCountChanged(void);
-
 protected:
 	QGridLayout		m_MainLayout;
 	QListWidget		m_LightList;

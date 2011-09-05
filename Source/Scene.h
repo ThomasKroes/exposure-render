@@ -28,7 +28,7 @@ public:
 
 	virtual ~CEvent(void) {};
 
-	HOD CEvent& CEvent::operator=(const CEvent& Other)
+	HO CEvent& CEvent::operator=(const CEvent& Other)
 	{
 		strcpy_s(m_Name, Other.m_Name);
 

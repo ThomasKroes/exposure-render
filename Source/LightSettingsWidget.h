@@ -16,15 +16,25 @@ public:
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 
 public slots:
-	void OnLightSelectionChanged(QLight* pLight);
-	void OnLockSize(const int& LockHeight);
+	void OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight);
+
 	void OnThetaChanged(const double& Theta);
 	void OnPhiChanged(const double& Phi);
 	void OnDistanceChanged(const double& Distance);
 	void OnWidthChanged(const double& Width);
+	void OnLockSize(const int& LockHeight);
 	void OnHeightChanged(const double& Height);
 	void OnCurrentColorChanged(const QColor& Color);
 	void OnIntensityChanged(const double& Intensity);
+
+	void OnLightThetaChanged(QLight* pLight);
+	void OnLightPhiChanged(QLight* pLight);
+	void OnLightDistanceChanged(QLight* pLight);
+	void OnLightWidthChanged(QLight* pLight);
+	void OnLightLockSizeChanged(QLight* pLight);
+	void OnLightHeightChanged(QLight* pLight);
+	void OnLightColorChanged(QLight* pLight);
+	void OnLightIntensityChanged(QLight* pLight);
 
 protected:
 	QGridLayout			m_MainLayout;
@@ -49,5 +59,4 @@ protected:
 	QLabel				m_IntensityLabel;
 	QDoubleSlider		m_IntensitySlider;
 	QDoubleSpinner		m_IntensitySpinBox;
-	QLight*				m_pSelectedLight;
 };

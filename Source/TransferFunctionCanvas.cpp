@@ -195,12 +195,18 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 		QPointF NodeCenter = TransferFunctionToScene(QPointF(Node.GetIntensity(), Node.GetOpacity()));
 
 		pNodeItem->setZValue(m_NodeZ);
-		
 		pNodeItem->m_SuspendUpdate = true;
-		
 		pNodeItem->setPos(NodeCenter);
-		
 		pNodeItem->m_SuspendUpdate = false;
+	}
+
+	if (gTransferFunction.GetSelectedNode())
+	{
+		for (int i = 0; i < m_Nodes.size(); i++)
+		{
+			if (m_Nodes[i]->m_pNode->GetID() == gTransferFunction.GetSelectedNode()->GetID())
+				m_Nodes[i]->setSelected(true);
+		}
 	}
 }
 

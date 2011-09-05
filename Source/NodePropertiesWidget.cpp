@@ -261,23 +261,13 @@ void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 	{
 		const int NodeIndex = gTransferFunction.GetNodes().indexOf(*pNode);
 
-		Enable = pNode && (NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1);
-
-		m_IntensitySlider.blockSignals(true);
-		m_IntensitySpinBox.blockSignals(true);
+		Enable = NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1;
 
 		m_IntensitySlider.setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_IntensitySlider.setValue(pNode->GetIntensity());
 		m_IntensitySpinBox.setRange(pNode->GetMinX(), pNode->GetMaxX());
-		m_IntensitySpinBox.setValue(pNode->GetIntensity());
 
-		m_IntensitySlider.setValue((double)pNode->GetIntensity());
-
-		m_IntensitySlider.blockSignals(false);
-		m_IntensitySpinBox.blockSignals(false);
-	}
-	else
-	{
+		m_IntensitySlider.setValue((double)pNode->GetIntensity(), true);
+		m_IntensitySpinBox.setValue(pNode->GetIntensity(), true);
 	}
 
 	m_IntensityLabel.setEnabled(Enable);
@@ -289,90 +279,57 @@ void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 {
 	const bool Enable = pNode != NULL;
 
+	if (pNode)
+	{
+		m_OpacitySlider.setRange(pNode->GetMinY(), pNode->GetMaxY());
+		m_OpacitySpinBox.setRange(pNode->GetMinY(), pNode->GetMaxY());
+
+		m_OpacitySlider.setValue((double)pNode->GetOpacity(), true);
+		m_OpacitySpinBox.setValue((double)pNode->GetOpacity(), true);
+	}
+
 	m_OpacityLabel.setEnabled(Enable);
 	m_OpacitySlider.setEnabled(Enable);
 	m_OpacitySpinBox.setEnabled(Enable);
-
-	if (pNode)
-	{
-		m_OpacitySlider.blockSignals(true);
-		m_OpacitySpinBox.blockSignals(true);
-
-		m_OpacitySlider.setRange(pNode->GetMinY(), pNode->GetMaxY());
-		m_OpacitySlider.setValue(pNode->GetOpacity());
-		m_OpacitySpinBox.setRange(pNode->GetMinY(), pNode->GetMaxY());
-		m_OpacitySpinBox.setValue(pNode->GetOpacity());
-
-		m_OpacitySlider.setValue((double)pNode->GetOpacity());
-
-		m_OpacitySlider.blockSignals(false);
-		m_OpacitySpinBox.blockSignals(false);
-	}
-	else
-	{
-	}
 }
 
 void QNodePropertiesWidget::OnNodeDiffuseColorChanged(QNode* pNode)
 {
 	const bool Enable = pNode != NULL;
 
-	m_DiffuseColor.setEnabled(Enable);
-
 	if (pNode)
 	{
-		m_DiffuseColor.blockSignals(true);
-
-		m_DiffuseColor.SetColor(pNode->GetDiffuseColor());
-
-		m_DiffuseColor.blockSignals(false);
+		m_DiffuseColor.SetColor(pNode->GetDiffuseColor(), true);
 	}
-	else
-	{
-	}
+
+	m_DiffuseColor.setEnabled(Enable);
 }
 
 void QNodePropertiesWidget::OnNodeSpecularColorChanged(QNode* pNode)
 {
 	const bool Enable = pNode != NULL;
 
-	m_SpecularColor.setEnabled(Enable);
-
 	if (pNode)
 	{
-		m_SpecularColor.blockSignals(true);
-
-		m_SpecularColor.SetColor(pNode->GetSpecularColor());
-
-		m_SpecularColor.blockSignals(false);
+		m_SpecularColor.SetColor(pNode->GetSpecularColor(), true);
 	}
-	else
-	{
-	}
+
+	m_SpecularColor.setEnabled(Enable);
 }
 
 void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
 {
 	const bool Enable = pNode != NULL;
 
+	if (pNode)
+	{
+		m_RoughnessSlider.setValue((double)pNode->GetRoughness(), true);
+		m_RoughnessSpinBox.setValue((double)pNode->GetRoughness(), true);
+	}
+
 	m_RoughnessLabel.setEnabled(Enable);
 	m_RoughnessSlider.setEnabled(Enable);
 	m_RoughnessSpinBox.setEnabled(Enable);
-
-	if (pNode)
-	{
-		m_RoughnessSlider.blockSignals(true);
-		m_RoughnessSpinBox.blockSignals(true);
-
-		m_RoughnessSlider.setValue((double)pNode->GetRoughness());
-		m_RoughnessSpinBox.setValue((double)pNode->GetRoughness());
-
-		m_RoughnessSlider.blockSignals(false);
-		m_RoughnessSpinBox.blockSignals(false);
-	}
-	else
-	{
-	}
 }
 
 void QNodePropertiesWidget::SetupSelectionUI(void)

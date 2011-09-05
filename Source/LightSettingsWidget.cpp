@@ -26,16 +26,12 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_ColorButton(),
 	m_IntensityLabel(),
 	m_IntensitySlider(),
-	m_IntensitySpinBox(),
-	m_pSelectedLight(NULL)
+	m_IntensitySpinBox()
 {
 	// Title, status and tooltip
 	setTitle("Light Settings");
 	setToolTip("Light Settings");
 	setStatusTip("Light Settings");
-
-	// Disable
-	setEnabled(false);
 
 	// Apply main layout
 	m_MainLayout.setAlignment(Qt::AlignTop);
@@ -161,59 +157,83 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
 	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
-
-	OnLightSelectionChanged(NULL);
+	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*, QLight*)), this, SLOT(OnLightSelectionChanged(QLight*, QLight*)));
 }
 
-void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
+void QLightSettingsWidget::OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight)
 {
-	m_pSelectedLight = pLight;
-
-	if (m_pSelectedLight)
+	if (pOldLight)
 	{
-		setEnabled(true);
-		setTitle("Light Settings");
-		setStatusTip("Light settings for " + m_pSelectedLight->GetName());
-		setToolTip("Light settings for " + m_pSelectedLight->GetName());
-
-		m_ThetaSlider.setValue(m_pSelectedLight->GetTheta() * RAD_F);
-		m_PhiSlider.setValue(m_pSelectedLight->GetPhi() * RAD_F);
-		
-		// Distance
-		m_DistanceSlider.setValue(m_pSelectedLight->GetDistance());
-		
-		// Width
-		m_WidthSlider.setValue(m_pSelectedLight->GetWidth());
-		m_HeightSlider.setValue(m_pSelectedLight->GetHeight());
-
-		QPropertyAnimation animation(&m_WidthSlider, "value");
-		animation.setDuration(1000);
-		animation.setStartValue(m_WidthSlider.value());
-		animation.setEndValue(100.0);
-
-		animation.start();
-
-		// Lock size
-		m_LockSizeCheckBox.setChecked(m_pSelectedLight->GetLockSize());
-		
-		// Color
-		m_ColorButton.SetColor(m_pSelectedLight->GetColor());
-		
-		// Intensity
-		m_IntensitySlider.setValue(m_pSelectedLight->GetIntensity());
+		disconnect(pOldLight, SIGNAL(ThetaChanged(QLight*)), this, SLOT(OnLightThetaChanged(QLight*)));
+		disconnect(pOldLight, SIGNAL(PhiChanged(QLight*)), this, SLOT(OnLightPhiChanged(QLight*)));
+		disconnect(pOldLight, SIGNAL(DistanceChanged(QLight*)), this, SLOT(OnLightDistanceChanged(QLight*)));
+		disconnect(pOldLight, SIGNAL(WidthChanged(QLight*)), this, SLOT(OnLightWidthChanged(QLight*)));
+		disconnect(pOldLight, SIGNAL(LockSizeChanged(QLight*)), this, SLOT(OnLightLockSizeChanged(QLight*)));
+		disconnect(pOldLight, SIGNAL(HeightChanged(QLight*)), this, SLOT(OnLightHeightChanged(QLight*)));
+		disconnect(pOldLight, SIGNAL(ColorChanged(QLight*)), this, SLOT(OnLightColorChanged(QLight*)));
+		disconnect(pOldLight, SIGNAL(IntensityChanged(QLight*)), this, SLOT(OnLightIntensityChanged(QLight*)));
 	}
-	else
+
+	if (pNewLight)
 	{
-		setEnabled(false);
+		connect(pNewLight, SIGNAL(ThetaChanged(QLight*)), this, SLOT(OnLightThetaChanged(QLight*)));
+		connect(pNewLight, SIGNAL(PhiChanged(QLight*)), this, SLOT(OnLightPhiChanged(QLight*)));
+		connect(pNewLight, SIGNAL(DistanceChanged(QLight*)), this, SLOT(OnLightDistanceChanged(QLight*)));
+		connect(pNewLight, SIGNAL(WidthChanged(QLight*)), this, SLOT(OnLightWidthChanged(QLight*)));
+		connect(pNewLight, SIGNAL(LockSizeChanged(QLight*)), this, SLOT(OnLightLockSizeChanged(QLight*)));
+		connect(pNewLight, SIGNAL(HeightChanged(QLight*)), this, SLOT(OnLightHeightChanged(QLight*)));
+		connect(pNewLight, SIGNAL(ColorChanged(QLight*)), this, SLOT(OnLightColorChanged(QLight*)));
+		connect(pNewLight, SIGNAL(IntensityChanged(QLight*)), this, SLOT(OnLightIntensityChanged(QLight*)));
 	}
+
+	OnLightThetaChanged(pNewLight);
+	OnLightPhiChanged(pNewLight);
+	OnLightDistanceChanged(pNewLight);
+	OnLightWidthChanged(pNewLight);
+	OnLightLockSizeChanged(pNewLight);
+	OnLightHeightChanged(pNewLight);
+	OnLightColorChanged(pNewLight);
+	OnLightIntensityChanged(pNewLight);
+}
+
+void QLightSettingsWidget::OnThetaChanged(const double& Theta)
+{
+	if (!gLighting.GetSelectedLight())
+		return;
+	
+	gLighting.GetSelectedLight()->SetTheta((float)Theta / RAD_F);
+}
+
+void QLightSettingsWidget::OnPhiChanged(const double& Phi)
+{
+	if (!gLighting.GetSelectedLight())
+		return;
+
+	gLighting.GetSelectedLight()->SetPhi((float)Phi / RAD_F);
+}
+
+void QLightSettingsWidget::OnDistanceChanged(const double& Distance)
+{
+	if (!gLighting.GetSelectedLight())
+		return;
+
+	gLighting.GetSelectedLight()->SetDistance((float)Distance);
+}
+
+void QLightSettingsWidget::OnWidthChanged(const double& Width)
+{
+	if (!gLighting.GetSelectedLight())
+		return;
+
+	gLighting.GetSelectedLight()->SetWidth(Width);
 }
 
 void QLightSettingsWidget::OnLockSize(const int& LockSize)
 {
-	if (!m_pSelectedLight)
+	if (!gLighting.GetSelectedLight())
 		return;
 
-	m_pSelectedLight->SetLockSize((bool)LockSize);
+	gLighting.GetSelectedLight()->SetLockSize((bool)LockSize);
 
 	m_HeightLabel.setEnabled(!LockSize);
 	m_HeightSlider.setEnabled(!LockSize);
@@ -228,65 +248,149 @@ void QLightSettingsWidget::OnLockSize(const int& LockSize)
 	}
 	else
 	{
- 		disconnect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
- 		disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
+		disconnect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
+		disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
 	}
-}
-
-void QLightSettingsWidget::OnThetaChanged(const double& Theta)
-{
-	if (!m_pSelectedLight)
-		return;
-	
-	m_pSelectedLight->SetTheta((float)Theta / RAD_F);
-}
-
-void QLightSettingsWidget::OnPhiChanged(const double& Phi)
-{
-	if (!m_pSelectedLight)
-		return;
-
-	m_pSelectedLight->SetPhi((float)Phi / RAD_F);
-}
-
-void QLightSettingsWidget::OnDistanceChanged(const double& Distance)
-{
-	if (!m_pSelectedLight)
-		return;
-
-	m_pSelectedLight->SetDistance((float)Distance);
-}
-
-void QLightSettingsWidget::OnWidthChanged(const double& Width)
-{
-	if (!m_pSelectedLight)
-		return;
-
-	m_pSelectedLight->SetWidth(Width);
 }
 
 void QLightSettingsWidget::OnHeightChanged(const double& Height)
 {
-	if (!m_pSelectedLight)
+	if (!gLighting.GetSelectedLight())
 		return;
 
-	m_pSelectedLight->SetHeight(Height);
+	gLighting.GetSelectedLight()->SetHeight(Height);
 }
 
 void QLightSettingsWidget::OnCurrentColorChanged(const QColor& Color)
 {
-	if (!m_pSelectedLight)
+	if (!gLighting.GetSelectedLight())
 		return;
 
-	m_pSelectedLight->SetColor(Color);
+	gLighting.GetSelectedLight()->SetColor(Color);
 
 	m_ColorButton.SetColor(Color);
 }
 
 void QLightSettingsWidget::OnIntensityChanged(const double& Intensity)
 {
-	if (!m_pSelectedLight)
+	if (!gLighting.GetSelectedLight())
 		return;
 
-	m_pSelectedLight->SetIntensity((float)Intensity);
+	gLighting.GetSelectedLight()->SetIntensity((float)Intensity);
+}
+
+void QLightSettingsWidget::OnLightThetaChanged(QLight* pLight)
+{
+	const bool Enable = pLight != NULL;
+
+	if (pLight)
+	{
+		m_ThetaSlider.setValue(pLight->GetTheta(), true);
+		m_ThetaSpinBox.setValue(pLight->GetTheta(), true);
+	}
+
+	m_ThetaLabel.setEnabled(Enable);
+	m_ThetaSlider.setEnabled(Enable);
+	m_ThetaSpinBox.setEnabled(Enable);
+}
+
+void QLightSettingsWidget::OnLightPhiChanged(QLight* pLight)
+{
+	const bool Enable = pLight != NULL;
+
+	if (pLight)
+	{
+		m_PhiSlider.setValue(pLight->GetPhi(), true);
+		m_PhiSpinBox.setValue(pLight->GetPhi(), true);
+	}
+
+	m_PhiLabel.setEnabled(Enable);
+	m_PhiSlider.setEnabled(Enable);
+	m_PhiSpinBox.setEnabled(Enable);
+}
+
+void QLightSettingsWidget::OnLightDistanceChanged(QLight* pLight)
+{
+	const bool Enable = pLight != NULL;
+
+	if (pLight)
+	{
+		m_DistanceSlider.setValue(pLight->GetDistance(), true);
+		m_DistanceSpinBox.setValue(pLight->GetDistance(), true);
+	}
+
+	m_DistanceLabel.setEnabled(Enable);
+	m_DistanceSlider.setEnabled(Enable);
+	m_DistanceSpinBox.setEnabled(Enable);
+}
+
+void QLightSettingsWidget::OnLightWidthChanged(QLight* pLight)
+{
+	const bool Enable = pLight != NULL;
+
+	if (pLight)
+	{
+		m_WidthSlider.setValue(pLight->GetWidth(), true);
+		m_WidthSpinBox.setValue(pLight->GetWidth(), true);
+	}
+
+	m_WidthLabel.setEnabled(Enable);
+	m_WidthSlider.setEnabled(Enable);
+	m_WidthSpinBox.setEnabled(Enable);
+}
+
+void QLightSettingsWidget::OnLightLockSizeChanged(QLight* pLight)
+{
+	const bool Enable = pLight != NULL;
+
+	if (pLight)
+	{
+		m_LockSizeCheckBox.blockSignals(true);
+		m_LockSizeCheckBox.setChecked(pLight->GetLockSize());
+		m_LockSizeCheckBox.blockSignals(false);
+	}
+
+	m_LockSizeCheckBox.setEnabled(Enable);
+}
+
+void QLightSettingsWidget::OnLightHeightChanged(QLight* pLight)
+{
+	bool Enable = pLight ? (pLight->GetLockSize() ? false : true) : false;
+
+	if (pLight)
+	{
+		m_HeightSlider.setValue(pLight->GetHeight(), true);
+		m_HeightSpinBox.setValue(pLight->GetHeight(), true);
+	}
+
+	m_HeightLabel.setEnabled(Enable);
+	m_HeightSlider.setEnabled(Enable);
+	m_HeightSpinBox.setEnabled(Enable);
+}
+
+void QLightSettingsWidget::OnLightColorChanged(QLight* pLight)
+{
+	bool Enable = pLight!= NULL;
+
+	if (pLight)
+	{
+		m_ColorButton.SetColor(pLight->GetColor(), true);
+	}
+
+	m_ColorButton.setEnabled(Enable);
+}
+
+void QLightSettingsWidget::OnLightIntensityChanged(QLight* pLight)
+{
+	const bool Enable = pLight!= NULL;
+
+	if (pLight)
+	{
+		m_IntensitySlider.setValue(pLight->GetIntensity(), true);
+		m_IntensitySpinBox.setValue(pLight->GetIntensity(), true);
+	}
+
+	m_IntensityLabel.setEnabled(Enable);
+	m_IntensitySlider.setEnabled(Enable);
+	m_IntensitySpinBox.setEnabled(Enable);
 }

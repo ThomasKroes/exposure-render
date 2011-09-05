@@ -102,7 +102,7 @@ void QBackgroundIlluminationWidget::OnBackgroundChanged(void)
 	m_Color.SetColor(gLighting.Background().GetColor());
 	
 	// Intensity
-	m_IntensitySlider.setValue((double)gLighting.Background().GetIntensity());
+	m_IntensitySlider.setValue((double)gLighting.Background().GetIntensity(), true);
 
 	// Use texture
 	m_TextureFilePath.setEnabled(gLighting.Background().GetEnabled() && gLighting.Background().GetUseTexture());

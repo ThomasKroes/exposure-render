@@ -1,0 +1,42 @@
+<!DOCTYPE Appearance>
+<Presets>
+<Preset Name="Bonsai" RangeMin="0" RangeMax="255">
+<Nodes>
+<Node Name="">
+<NormalizedIntensity Value="0"/>
+<NormalizedOpacity Value="0.897059"/>
+<DiffuseColor G="176" R="233" B="255"/>
+<SpecularColor G="255" R="255" B="255"/>
+<Roughness Value="100"/>
+</Node>
+<Node Name="">
+<NormalizedIntensity Value="0.215103"/>
+<NormalizedOpacity Value="0.6875"/>
+<DiffuseColor G="255" R="255" B="0"/>
+<SpecularColor G="255" R="255" B="255"/>
+<Roughness Value="562.069"/>
+</Node>
+<Node Name="">
+<NormalizedIntensity Value="0.540046"/>
+<NormalizedOpacity Value="0.944853"/>
+<DiffuseColor G="149" R="206" B="122"/>
+<SpecularColor G="255" R="255" B="255"/>
+<Roughness Value="100"/>
+</Node>
+<Node Name="">
+<NormalizedIntensity Value="0.78032"/>
+<NormalizedOpacity Value="0.665441"/>
+<DiffuseColor G="85" R="255" B="127"/>
+<SpecularColor G="255" R="255" B="255"/>
+<Roughness Value="100"/>
+</Node>
+<Node Name="">
+<NormalizedIntensity Value="1"/>
+<NormalizedOpacity Value="1"/>
+<DiffuseColor G="255" R="255" B="255"/>
+<SpecularColor G="255" R="255" B="255"/>
+<Roughness Value="100"/>
+</Node>
+</Nodes>
+</Preset>
+</Presets>

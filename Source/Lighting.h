@@ -32,6 +32,11 @@ public:
 		return *this;
 	}
 
+	bool operator == (const QLight& Other) const
+	{
+		return GetName() == Other.GetName();
+	}
+
 	float		GetTheta(void) const;
 	void		SetTheta(const float& Theta);
 	float		GetPhi(void) const;
@@ -54,6 +59,14 @@ public:
 
 signals:
 	void LightPropertiesChanged(QLight*);
+	void ThetaChanged(QLight*);
+	void PhiChanged(QLight*);
+	void DistanceChanged(QLight*);
+	void WidthChanged(QLight*);
+	void HeightChanged(QLight*);
+	void LockSizeChanged(QLight*);
+	void ColorChanged(QLight*);
+	void IntensityChanged(QLight*);
 
 protected:
 	float		m_Theta;
@@ -151,18 +164,27 @@ public:
 	void AddLight(QLight& Light);
 	QBackground& Background(void);
 	
+	void	SetSelectedLight(QLight* pSelectedLight);
+	void	SetSelectedLight(const int& Index);
+	QLight*	GetSelectedLight(void);
+	void	SelectPreviousLight(void);
+	void	SelectNextLight(void);
+
 public slots:
 	void OnLightPropertiesChanged(QLight* pLight);
 	void Update(void);
 
 signals:
 	void LightingChanged(void);
-	
+	void LightSelectionChanged(QLight*, QLight*);
+
 protected:
 	QLightList		m_Lights;
+	QLight*			m_pSelectedLight;
 	QBackground		m_Background;
 
 	friend class QLightsWidget;
+	friend class QLightingWidget;
 };
 
 // Lighting singleton

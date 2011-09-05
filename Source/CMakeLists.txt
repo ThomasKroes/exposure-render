@@ -243,6 +243,40 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkViews
 )
 
+INSTALL_FILES(/Presets CameraPresets.xml)
+INSTALL(TARGETS ExposureRender DESTINATION distance)
+
+INCLUDE(InstallRequiredSystemLibraries)
+
+#SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Exposure Render")
+#SET(CPACK_PACKAGE_VENDOR "TU Delft")
+#SET(CPACK_PACKAGE_DESCRIPTION_FILE "C:\\ExposureRender\\Build\\ReadMe.txt")
+#SET(CPACK_RESOURCE_FILE_LICENSE "C:\\ExposureRender\\Build\\Copyright.txt")
+#SET(CPACK_PACKAGE_VERSION_MAJOR "1")
+#SET(CPACK_PACKAGE_VERSION_MINOR "3")
+#SET(CPACK_PACKAGE_VERSION_PATCH "2")
+#SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}")
+
+# SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ExecWait '\\\"$INSTDIR\\\\vcredist_x86.exe\\\" /q:a)
+
+SET(CPACK_PACKAGE_ICON "c:\\WindowsMovieMaker.bmp")
+SET(CPACK_NSIS_DISPLAY_NAME "Exposure Render")
+SET(CPACK_NSIS_CONTACT "t.kroes@tudelft.nl")
+SET(CPACK_NSIS_HELP_LINK "http://graphics.tudelft.nl/")
+SET(CPACK_NSIS_URL_INFO_ABOUT "http://code.google.com/p/exposure-render/")
+SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "")
+SET(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
+
+
+ 
+INCLUDE(CPack)
+
+
+
+
+
+
+
 
 
 

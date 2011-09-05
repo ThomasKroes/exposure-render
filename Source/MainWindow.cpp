@@ -189,6 +189,7 @@ void CMainWindow::CreateStatusBar()
 
 void CMainWindow::SetupDockingWidgets()
 {
+	/*
 	// Lighting dock widget
 	m_LightingDockWidget.setEnabled(false);
     m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -225,6 +226,7 @@ void CMainWindow::SetupDockingWidgets()
 	tabifyDockWidget(&m_CameraDockWidget, &m_SettingsDockWidget);
 
 	m_AppearanceDockWidget.raise();
+	*/
 }
 
 void CMainWindow::UpdateRecentFileActions(void)
