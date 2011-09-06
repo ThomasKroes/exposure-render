@@ -369,7 +369,7 @@ void CMainWindow::OnTimer(void)
 //	m_pImageImport->setup(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
 	m_pImageImport->Update();
 	m_pImageImport->SetImportVoidPointer(NULL);
-	m_pImageImport->SetImportVoidPointer(gpRenderThread->RenderImage());
+	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
  	
 	m_pImageActor->SetInput(gpMainWindow->m_pImageImport->GetOutput());
 // 	m_pImageActor->VisibilityOn();
@@ -421,7 +421,7 @@ void CMainWindow::OnRenderBegin(void)
 	m_pSceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
 	// Start the timer
-	m_Timer.start(1000.0f / 60.0f);
+//	m_Timer.start(1000.0f / 60.0f);
 
 	emit RenderBegin();
 }

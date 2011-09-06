@@ -17,6 +17,6 @@ QStatisticsDockWidget::QStatisticsDockWidget(QWidget* pParent) :
 void QStatisticsDockWidget::Init(void)
 {
 	// Let us know when the rendering begins and ends
-	connect(gpMainWindow, SIGNAL(RenderBegin()), &m_StatisticsWidget, SLOT(OnRenderBegin()));
-	connect(gpMainWindow, SIGNAL(RenderEnd()), &m_StatisticsWidget, SLOT(OnRenderEnd()));
+// 	connect(gpMainWindow, SIGNAL(RenderBegin()), &m_StatisticsWidget, SLOT(OnRenderBegin()));
+// 	connect(gpMainWindow, SIGNAL(RenderEnd()), &m_StatisticsWidget, SLOT(OnRenderEnd()));
 }

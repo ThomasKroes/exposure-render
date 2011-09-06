@@ -14,19 +14,41 @@ class vtkImageData;
 class CScene;
 class CColorXyz;
 
+class CRenderStatus : public QObject
+{
+	Q_OBJECT
+
+public:
+
+signals:
+	void RenderBegin(void);
+	void RenderEnd(void);
+	void PreRenderFrame(void);
+	void PostRenderFrame(void);
+
+	friend class CRenderThread;
+};
+
+extern CRenderStatus gRenderStatus;
+
 class CRenderThread : public QThread
 {
 	Q_OBJECT
 
 public:
-	CRenderThread(const QString& FileName, QObject* pParent = 0);
+	CRenderThread(QObject* pParent = NULL);
 	virtual ~CRenderThread(void);
 
 	void run();
-	QString FileName(void) const { return m_FileName; }
-	int NoIterations(void) const { return m_N; }
-	unsigned char* RenderImage(void) const { return m_pRenderImage; }
 
+	QString			GetFileName(void) const;
+	int				GetNoIterations(void) const;
+	unsigned char*	GetRenderImage(void) const;
+	CScene*			GetScene(void);
+	bool			Load(QString& FileName);
+	void			Close(void);
+
+private:
 	QString					m_FileName;
 	int						m_N;
 	unsigned char*			m_pRenderImage;
@@ -45,6 +67,7 @@ public:
 	// Host image buffers
 	unsigned char*			m_pImageCanvas;
 
+public:
 	int	m_SizeVolume;
 	int m_SizeHdrAccumulationBuffer;
 	int m_SizeHdrFrameBuffer;
@@ -60,14 +83,11 @@ signals:
 	void MemoryFree(void);
 	void PreFrame(void);
 	void PostFrame(void);
-
-public slots:
-	void OnCloseRenderThread(void);
 };
 
 // Render thread
 extern CRenderThread* gpRenderThread;
 
 CScene* Scene(void);
-void StartRenderThread(const QString& FileName);
+void StartRenderThread(QString& FileName);
 void KillRenderThread(void);

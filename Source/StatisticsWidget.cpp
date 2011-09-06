@@ -52,6 +52,8 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	m_Tree.header()->setWindowIcon(QIcon(":/Images/table-export.png"));
 	
 	PopulateTree();
+
+	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 }
 
 QSize QStatisticsWidget::sizeHint() const
@@ -142,7 +144,7 @@ void QStatisticsWidget::OnRenderBegin(void)
 	UpdateStatistic("LDR Estimation Buffer (Cuda)", QString::number((float)gpRenderThread->m_SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2));
 
 	// Volume
-	UpdateStatistic("File", gpRenderThread->m_FileName);
+	UpdateStatistic("File", gpRenderThread->GetFileName());
 	UpdateStatistic("Bounding Box", "[" + QString::number(Scene()->m_BoundingBox.m_MinP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.z) + "] - [" + QString::number(Scene()->m_BoundingBox.m_MaxP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.z) + "]");
 	UpdateStatistic("Resolution", "[" + QString::number(Scene()->m_Resolution.m_XYZ.x) + ", " + QString::number(Scene()->m_Resolution.m_XYZ.y) + ", " + QString::number(Scene()->m_Resolution.m_XYZ.z) + "]");
 	UpdateStatistic("Spacing", "[" + QString::number(Scene()->m_Spacing.x) + ", " + QString::number(Scene()->m_Spacing.y) + ", " + QString::number(Scene()->m_Spacing.z) + "]");
@@ -185,7 +187,7 @@ void QStatisticsWidget::OnPostFrame(void)
 		return;
 
 	UpdateStatistic("Tracer FPS", QString::number(Scene()->m_FPS.m_FilteredDuration, 'f', 2));
-	UpdateStatistic("No. Iterations", QString::number(gpRenderThread->m_N));
+	UpdateStatistic("No. Iterations", QString::number(gpRenderThread->GetNoIterations()));
 
 	// Camera
 	UpdateStatistic("Resolution", QString::number(Scene()->m_Camera.m_Film.m_Resolution.m_XY.x) + " x " + QString::number(Scene()->m_Camera.m_Film.m_Resolution.m_XY.y));

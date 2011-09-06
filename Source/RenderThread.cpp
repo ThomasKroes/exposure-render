@@ -1,26 +1,45 @@
 
 #include "RenderThread.h"
-#include "LoadVolume.h"
 #include "Scene.h"
 #include "MainWindow.h"
-
-// Qt
-#include <QtGui>
 
 // CUDA
 #include "VolumeTracer.cuh"
 
 // VTK
+#include <vtkSmartPointer.h>
+#include <vtkMetaImageReader.h>
+#include <vtkImageCast.h>
+#include <vtkImageResample.h>
 #include <vtkImageData.h>
+#include <vtkImageGradientMagnitude.h>
+#include <vtkCallbackCommand.h>
+#include <vtkImageAccumulate.h>
+#include <vtkIntArray.h>
 
+// Render status singleton
+CRenderStatus gRenderStatus;
+
+// Render thread
 CRenderThread* gpRenderThread = NULL;
 
 bool InitializeCuda(void)
 {
-	if (cudaSetDevice(cutGetMaxGflopsDeviceId()) != cudaSuccess)
-		return false;
+	/*
+	// No CUDA enabled devices
+	int NoDevices = 0;
 
-	return true;
+	cudaError_t ErrorID = cudaGetDeviceCount(&NoDevices);
+
+	if (ErrorID != cudaSuccess)
+		throw QString("Unable to initialize CUDA");
+
+	// This function call returns 0 if there are no CUDA capable devices.
+	if (NoDevices == 0)
+		throw QString("There is no device supporting CUDA");
+	*/
+
+	return cudaSetDevice(cutGetMaxGflopsDeviceId()) == cudaSuccess;
 }
 
 class CCudaTimer
@@ -71,12 +90,45 @@ private:
 	cudaEvent_t 	m_EventStop;
 };
 
-CRenderThread::CRenderThread(const QString& FileName, QObject* pParent) :
+QProgressDialog* gpProgressDialog = NULL;
+
+void OnProgress(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* CallData)
+{
+	vtkMetaImageReader*			pMetaImageReader		= dynamic_cast<vtkMetaImageReader*>(pCaller);
+	vtkImageResample*			pImageResample			= dynamic_cast<vtkImageResample*>(pCaller);
+	vtkImageGradientMagnitude*	pImageGradientMagnitude	= dynamic_cast<vtkImageGradientMagnitude*>(pCaller);
+
+	if (gpProgressDialog)
+	{
+		gpProgressDialog->resize(400, 100);
+
+		if (pMetaImageReader)
+		{
+			gpProgressDialog->setLabelText("Loading volume");
+			gpProgressDialog->setValue((int)(pMetaImageReader->GetProgress() * 100.0));
+		}
+
+		if (pImageResample)
+		{
+			gpProgressDialog->setLabelText("Resampling volume");
+			gpProgressDialog->setValue((int)(pImageResample->GetProgress() * 100.0));
+		}
+
+		if (pImageGradientMagnitude)
+		{
+			gpProgressDialog->setLabelText("Creating gradient magnitude volume");
+			gpProgressDialog->setValue((int)(pImageGradientMagnitude->GetProgress() * 100.0));
+		}
+	}
+}
+
+CRenderThread::CRenderThread(QObject* pParent) :
 	QThread(pParent),
-	m_FileName(FileName),
+	m_FileName(),
 	m_N(0),
 	m_pRenderImage(NULL),
 	m_pImageDataVolume(NULL),
+	m_Scene(),
 	m_pDevScene(NULL),
 	m_pDevRandomStates(NULL),
 	m_pDevAccEstXyz(NULL),
@@ -99,23 +151,12 @@ CRenderThread::~CRenderThread(void)
 
 void CRenderThread::run()
 {
+	// Initialize CUDA and set the device
 	if (!InitializeCuda())
 	{
-		// Create message box, indicating that CUDA cannot be initialized
-		QMessageBox MessageBox(QMessageBox::Icon::Critical, "CUDA error", "Could not initialize CUDA, this application will now exit");
-
-		// Make it a modal message box
-		MessageBox.setWindowModality(Qt::WindowModal);
-
-		// Show it
-		MessageBox.exec();
-		
+		QMessageBox::critical(gpMainWindow, "An error has occured", "Unable to locate a CUDA capable device, with streaming architecture 1.1 or higher");
 		return;
 	}
-
-	// Inform others when the rendering begins and ends
-	connect(this, SIGNAL(RenderEnd()), gpMainWindow, SLOT(OnRenderEnd()));
-	connect(this, SIGNAL(RenderBegin()), gpMainWindow, SLOT(OnRenderBegin()));
 
 	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(800, 600));
 	m_Scene.m_Camera.m_Aperture.m_Size = 0.01f;
@@ -124,19 +165,27 @@ void CRenderThread::run()
 	m_Scene.m_Camera.SetViewMode(ViewModeFront);
 	m_Scene.m_Camera.Update();
 
+	// Force the render thread to allocate the necessary buffers, do not remove this line
+	m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
+
+//	short* pData = (short*)malloc(m_Scene.m_Resolution.m_NoElements * sizeof(short));
+	
 	// Bind the volume
 	BindVolumeData((short*)m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution);
+//	BindVolumeData(pData, m_Scene.m_Resolution);
+	
+//	free(pData);
 
 	// Allocate CUDA memory for scene
 	cudaMalloc((void**)&m_pDevScene, sizeof(CScene));
 
 	// Let others know that we are starting with rendering
-	emit RenderBegin();
-
+	emit gRenderStatus.RenderBegin();
+	
 	while (!m_Abort)
 	{
 		// Let others know we are starting with a new frame
-		emit PreFrame();
+		emit gRenderStatus.PreRenderFrame();
 
 		// CUDA time for profiling
 		CCudaTimer CudaTimer;
@@ -172,7 +221,7 @@ void CRenderThread::run()
 			cudaMalloc((void**)&m_pDevEstRgbLdr, m_SizeLdrFrameBuffer);
 			
 			// Setup the CUDA random number generator
-			SetupRNG(&SceneCopy, m_pDevScene, m_pDevRandomStates);
+//			SetupRNG(&SceneCopy, m_pDevScene, m_pDevRandomStates);
 			
 			// Reset buffers to black
 			cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
@@ -204,9 +253,9 @@ void CRenderThread::run()
 		m_Scene.m_DirtyFlags.ClearAllFlags();
 
 		// Execute the rendering kernels
-		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
-		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height()), 1.3f);
-		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
+ 		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
+ 		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height()), 1.3f);
+ 		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
 
 		// Increase the number of iterations performed so far
 		m_N++;
@@ -217,15 +266,11 @@ void CRenderThread::run()
 		m_Scene.m_FPS.AddDuration(1000.0f / CudaTimer.StopTimer());
 
 		// Let others know we are finished with a frame
-		emit PostFrame();
+		emit gRenderStatus.PostRenderFrame();
 	}
 
 	// Let others know that we have stopped rendering
-	emit RenderEnd();
-
-	// Inform others when the rendering begins and ends
-	connect(this, SIGNAL(RenderEnd()), gpMainWindow, SLOT(OnRenderEnd()));
-	connect(this, SIGNAL(RenderBegin()), gpMainWindow, SLOT(OnRenderBegin()));
+	emit gRenderStatus.RenderEnd();
 
 	// Free CUDA buffers
 	cudaFree(m_pDevScene);
@@ -245,43 +290,196 @@ void CRenderThread::run()
 	free(m_pRenderImage);
 }
 
-void CRenderThread::OnCloseRenderThread(void)
+void CRenderThread::Close(void)
 {
 	qDebug("Closing render thread");
 	m_Abort = true;
 }
 
+QString CRenderThread::GetFileName(void) const
+{
+	return m_FileName;
+}
+
+int CRenderThread::GetNoIterations(void) const
+{
+	return m_N;
+}
+
+unsigned char* CRenderThread::GetRenderImage(void) const
+{
+	return m_pRenderImage;
+}
+
+CScene* CRenderThread::GetScene(void)
+{
+	return &m_Scene;
+}
+
+bool CRenderThread::Load(QString& FileName)
+{
+	m_FileName = FileName;
+
+//	qDebug(QString("Loading volume " + QFileInfo(m_FileName).fileName()).toAscii());
+//	CLoadSettingsDialog LoadSettingsDialog;
+
+	// Make it a modal dialog
+//	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
+	 
+	// Show it
+//	LoadSettingsDialog.exec();
+
+	// Create and configure progress dialog
+//	gpProgressDialog = new QProgressDialog("Volume loading in progress", "Abort", 0, 100);
+//	gpProgressDialog->setWindowTitle("Progress");
+//	gpProgressDialog->setMinimumDuration(10);
+//	gpProgressDialog->setWindowFlags(Qt::Popup);
+//	gpProgressDialog->show();
+
+	// Create meta image reader
+	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
+
+	// Exit if the reader can't read the file
+	if (!MetaImageReader->CanReadFile(m_FileName.toAscii()))
+		return false;
+
+	// Create progress callback
+	vtkSmartPointer<vtkCallbackCommand> ProgressCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+
+	// Set callback
+	ProgressCallback->SetCallback (OnProgress);
+	ProgressCallback->SetClientData(MetaImageReader);
+
+	// Progress handling
+//	MetaImageReader->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
+
+	MetaImageReader->SetFileName(m_FileName.toAscii());
+
+	MetaImageReader->Update();
+
+	vtkSmartPointer<vtkImageCast> ImageCast = vtkImageCast::New();
+
+	ImageCast->SetOutputScalarTypeToShort();
+	ImageCast->SetInput(MetaImageReader->GetOutput());
+	
+	ImageCast->Update();
+
+	m_pImageDataVolume = ImageCast->GetOutput();
+
+	/*
+//	if (LoadSettingsDialog.GetResample())
+//	{
+		// Create resampler
+		vtkSmartPointer<vtkImageResample> ImageResample = vtkImageResample::New();
+
+		// Progress handling
+		ImageResample->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
+
+		ImageResample->SetInput(m_pImageDataVolume);
+
+		// Obtain resampling scales from dialog input
+		gm_Scene.m_Scale.x = LoadSettingsDialog.GetResampleX();
+		gm_Scene.m_Scale.y = LoadSettingsDialog.GetResampleY();
+		gm_Scene.m_Scale.z = LoadSettingsDialog.GetResampleZ();
+
+		// Apply scaling factors
+		ImageResample->SetAxisMagnificationFactor(0, gm_Scene.m_Scale.x);
+		ImageResample->SetAxisMagnificationFactor(1, gm_Scene.m_Scale.y);
+		ImageResample->SetAxisMagnificationFactor(2, gm_Scene.m_Scale.z);
+	
+		// Resample
+		ImageResample->Update();
+
+		m_pImageDataVolume = ImageResample->GetOutput();
+//	}
+	*/
+	/*
+	// Create magnitude volume
+	vtkSmartPointer<vtkImageGradientMagnitude> ImageGradientMagnitude = vtkImageGradientMagnitude::New();
+	
+	// Progress handling
+	ImageGradientMagnitude->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
+	
+	ImageGradientMagnitude->SetInput(pImageData);
+	ImageGradientMagnitude->Update();
+	*/
+
+	
+
+	m_Scene.m_MemorySize	= (float)m_pImageDataVolume->GetActualMemorySize() / 1024.0f;
+	
+
+	double Range[2];
+
+	m_pImageDataVolume->GetScalarRange(Range);
+
+	m_Scene.m_IntensityRange.m_Min	= (float)Range[0];
+	m_Scene.m_IntensityRange.m_Max	= (float)Range[1];
+
+	gTransferFunction.SetRangeMin((float)Range[0]);
+	gTransferFunction.SetRangeMax((float)Range[1]);
+
+	int* pExtent = m_pImageDataVolume->GetExtent();
+	
+	m_Scene.m_Resolution.m_XYZ.x = pExtent[1] + 1;
+	m_Scene.m_Resolution.m_XYZ.y = pExtent[3] + 1;
+	m_Scene.m_Resolution.m_XYZ.z = pExtent[5] + 1;
+	m_Scene.m_Resolution.Update();
+
+	double* pSpacing = m_pImageDataVolume->GetSpacing();
+
+	
+	m_Scene.m_Spacing.x = pSpacing[0];
+	m_Scene.m_Spacing.y = pSpacing[1];
+	m_Scene.m_Spacing.z = pSpacing[2];
+	
+
+	Vec3f Resolution = Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.m_XYZ.x, m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.m_XYZ.y, m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.m_XYZ.z);
+
+	float Max = Resolution.Max();
+
+	m_Scene.m_NoVoxels				= m_Scene.m_Resolution.m_NoElements;
+	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f);
+	m_Scene.m_BoundingBox.m_MaxP	= Vec3f(Resolution.x / Max, Resolution.y / Max, Resolution.z / Max);
+
+	// Build the histogram
+	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
+// 	Histogram->SetInputConnection(ImageResample->GetOutputPort());
+// 	Histogram->SetComponentExtent(0, 1024, 0, 0, 0, 0);
+// 	Histogram->SetComponentOrigin(0, 0, 0);
+// 	Histogram->SetComponentSpacing(1, 0, 0);
+// 	Histogram->IgnoreZeroOn();
+// 	Histogram->Update();
+ 
+	// Update the histogram in the transfer function
+//	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
+	
+	// Delete progress dialog
+//	gpProgressDialog->close();
+//	delete gpProgressDialog;
+//	gpProgressDialog = NULL;
+
+	return true;
+}
+
 CScene* Scene(void)
 {
 	if (gpRenderThread)
-		return &gpRenderThread->m_Scene;
+		return gpRenderThread->GetScene();
 
 	return NULL;
 }
 
-void StartRenderThread(const QString& FileName)
+void StartRenderThread(QString& FileName)
 {
 	// Create new render thread
-	gpRenderThread = new CRenderThread(FileName, NULL);
+	gpRenderThread = new CRenderThread(NULL);
 
-	// Load the VTK volume
-	if (!LoadVtkVolume(FileName.toAscii().data(), &gpRenderThread->m_Scene, gpRenderThread->m_pImageDataVolume))
-	{
-		qDebug("Unable to load VTK volume");
-		return;
-	}
-	else
-	{
-		qDebug("VTK volume loaded successfully");
-	}
-
-	// Force the render thread to allocate the necessary buffers, do not remove this line
-	gpRenderThread->m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
+	// Load the volume
+	gpRenderThread->Load(FileName);
 
 	// Start the render thread
 	gpRenderThread->start();
-
-	qDebug("Render thread started");
 }
 
 void KillRenderThread(void)
@@ -290,7 +488,7 @@ void KillRenderThread(void)
 		return;
 
 	// Kill the render thread
-	gpRenderThread->OnCloseRenderThread();
+	gpRenderThread->Close();
 
 	// Wait for thread to end
 	gpRenderThread->wait();
