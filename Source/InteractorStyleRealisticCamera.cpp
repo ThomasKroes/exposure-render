@@ -5,16 +5,16 @@
 // Mouse button flags
 CFlags gMouseButtonFlags;
 
-vtkStandardNewMacro(CInteractorStyleRealisticCamera);
+vtkStandardNewMacro(vtkRealisticCameraStyle);
 
-float CInteractorStyleRealisticCamera::m_OrbitSpeed				= 1000.0f;
-float CInteractorStyleRealisticCamera::m_PanSpeed				= 1000.0f;
-float CInteractorStyleRealisticCamera::m_ZoomSpeed				= 1000.0f;
-float CInteractorStyleRealisticCamera::m_ContinuousZoomSpeed	= 0.000001f;
-float CInteractorStyleRealisticCamera::m_ApertureSpeed			= 0.001f;
-float CInteractorStyleRealisticCamera::m_FovSpeed				= 0.5f;
+float vtkRealisticCameraStyle::m_OrbitSpeed				= 1000.0f;
+float vtkRealisticCameraStyle::m_PanSpeed				= 1000.0f;
+float vtkRealisticCameraStyle::m_ZoomSpeed				= 1000.0f;
+float vtkRealisticCameraStyle::m_ContinuousZoomSpeed	= 0.000001f;
+float vtkRealisticCameraStyle::m_ApertureSpeed			= 0.001f;
+float vtkRealisticCameraStyle::m_FovSpeed				= 0.5f;
 
-void CInteractorStyleRealisticCamera::OnLeftButtonDown(void) 
+void vtkRealisticCameraStyle::OnLeftButtonDown(void) 
 {
 	vtkInteractorStyleUser::OnLeftButtonDown();
 
@@ -23,7 +23,7 @@ void CInteractorStyleRealisticCamera::OnLeftButtonDown(void)
 	GetLastPos(m_OldPos[0], m_OldPos[1]);
 }
 
-void CInteractorStyleRealisticCamera::OnLeftButtonUp(void) 
+void vtkRealisticCameraStyle::OnLeftButtonUp(void) 
 {
 	vtkInteractorStyleUser::OnLeftButtonUp();
 
@@ -31,7 +31,7 @@ void CInteractorStyleRealisticCamera::OnLeftButtonUp(void)
 	GetLastPos(m_OldPos[0], m_OldPos[1]);
 }
 
-void CInteractorStyleRealisticCamera::OnRightButtonDown(void) 
+void vtkRealisticCameraStyle::OnRightButtonDown(void) 
 {
 	vtkInteractorStyleUser::OnRightButtonDown();
 		
@@ -40,7 +40,7 @@ void CInteractorStyleRealisticCamera::OnRightButtonDown(void)
 	GetLastPos(m_OldPos[0], m_OldPos[1]);
 }
 
-void CInteractorStyleRealisticCamera::OnRightButtonUp(void) 
+void vtkRealisticCameraStyle::OnRightButtonUp(void) 
 {
 	vtkInteractorStyleUser::OnRightButtonUp();
 
@@ -48,7 +48,7 @@ void CInteractorStyleRealisticCamera::OnRightButtonUp(void)
 	GetLastPos(m_OldPos[0], m_OldPos[1]);
 }
 
-void CInteractorStyleRealisticCamera::OnMiddleButtonDown(void) 
+void vtkRealisticCameraStyle::OnMiddleButtonDown(void) 
 {
 	vtkInteractorStyleUser::OnMiddleButtonDown();
 
@@ -57,7 +57,7 @@ void CInteractorStyleRealisticCamera::OnMiddleButtonDown(void)
 	GetLastPos(m_OldPos[0], m_OldPos[1]);
 }
 
-void CInteractorStyleRealisticCamera::OnMiddleButtonUp(void) 
+void vtkRealisticCameraStyle::OnMiddleButtonUp(void) 
 {
 	vtkInteractorStyleUser::OnMiddleButtonUp();
 
@@ -65,7 +65,7 @@ void CInteractorStyleRealisticCamera::OnMiddleButtonUp(void)
 	GetLastPos(m_OldPos[0], m_OldPos[1]);
 }
 
-void CInteractorStyleRealisticCamera::OnMouseWheelForward(void)
+void vtkRealisticCameraStyle::OnMouseWheelForward(void)
 {
 	vtkInteractorStyleUser::OnMouseWheelForward();
 
@@ -78,7 +78,7 @@ void CInteractorStyleRealisticCamera::OnMouseWheelForward(void)
 	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 };
 	
-void CInteractorStyleRealisticCamera::OnMouseWheelBackward(void)
+void vtkRealisticCameraStyle::OnMouseWheelBackward(void)
 {
 	vtkInteractorStyleUser::OnMouseWheelBackward();
 
@@ -91,7 +91,7 @@ void CInteractorStyleRealisticCamera::OnMouseWheelBackward(void)
 	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 };
 
-void CInteractorStyleRealisticCamera::OnMouseMove(void) 
+void vtkRealisticCameraStyle::OnMouseMove(void) 
 {
 	// Forward events
 	vtkInteractorStyleUser::OnMouseMove();

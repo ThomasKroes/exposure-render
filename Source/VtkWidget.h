@@ -16,6 +16,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkVolumeMapper.h>
+#include <vtkSmartPointer.h>
 
 // Interactor
 #include "InteractorStyleRealisticCamera.h"
@@ -40,18 +41,18 @@ public slots:
 private:
 	void SetupRenderView(void);
 
-	QGridLayout							m_MainLayout;
-	QVTKWidget							m_QtVtkWidget;
+	QGridLayout									m_MainLayout;
+	QVTKWidget									m_QtVtkWidget;
 
-	vtkImageImport*						m_pImageImport;
-	vtkImageActor*						m_pImageActor;
-	vtkInteractorStyleImage*			m_pInteractorStyleImage;
-	vtkRenderer*						m_pSceneRenderer;
-	vtkRenderWindow*					m_pRenderWindow;
-	vtkRenderWindowInteractor*			m_pRenderWindowInteractor;
-	vtkCallbackCommand*					m_pKeyPressCallback;
-	vtkCallbackCommand*					m_pKeyReleaseCallback;
-	CInteractorStyleRealisticCamera*	m_pInteractorStyleRealisticCamera;
+	vtkSmartPointer<vtkImageImport>				m_ImageImport;
+	vtkSmartPointer<vtkImageActor>				m_ImageActor;
+	vtkSmartPointer<vtkInteractorStyleImage>	m_InteractorStyleImage;
+	vtkSmartPointer<vtkRenderer>				m_SceneRenderer;
+	vtkSmartPointer<vtkRenderWindow>			m_RenderWindow;
+	vtkSmartPointer<vtkRenderWindowInteractor>	m_RenderWindowInteractor;
+	vtkSmartPointer<vtkCallbackCommand>			m_KeyPressCallback;
+	vtkSmartPointer<vtkCallbackCommand>			m_KeyReleaseCallback;
+	vtkSmartPointer<vtkRealisticCameraStyle>	m_InteractorStyleRealisticCamera;
 
-	QTimer								m_RenderLoopTimer;
+	QTimer										m_RenderLoopTimer;
 };

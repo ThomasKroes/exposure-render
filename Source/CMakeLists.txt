@@ -178,20 +178,59 @@ SOURCE_GROUP("Generated" FILES
   ${RCS_SOURCES}
 )
 
-# Group sources related to the transfer function editor together
-SET(TransferFunctionHeaders
-	
-)
-
+# Appearance sources
 SET(TransferFunctionSrcs
-	
+	AppearanceDockWidget.h
+	TransferFunction.h
+	TransferFunctionCanvas.h
+	TransferFunctionView.h
+	TransferFunctionGradient.h
+	TransferFunctionWidget.h
+	NodePropertiesWidget.h
+	AppearanceDockWidget.cpp
+	TransferFunction.cpp
+	TransferFunctionCanvas.cpp
+	TransferFunctionView.cpp
+	TransferFunctionGradient.cpp
+	TransferFunctionWidget.cpp
+	NodePropertiesWidget.cpp
 )
 
-# Make the group
-SOURCE_GROUP("Transfer Function" FILES
-	${TransferFunctionHeaders}
-	${TransferFunctionSrcs}
+# Make the appearance group
+SOURCE_GROUP("Transfer Function" FILES ${TransferFunctionSrcs})
+
+# Lighting sources
+SET(LightingSources
+	LightSettingsWidget.h
+	LightingDockWidget.h
+	LightsWidget.h
+	LightingWidget.h
+	Lighting.h
+	LightSettingsWidget.cpp 
+	LightingDockWidget.cpp 
+	LightsWidget.cpp
+	LightingWidget.cpp
+	Lighting.cpp
 )
+
+# Make the lighting group
+SOURCE_GROUP("Lighting" FILES ${LightingSources})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Group sources related to Cuda together
 SET(CudaHeaders
@@ -230,7 +269,7 @@ IF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
   SET (TransferFunctionSrcs ${TransferFunctionSrcs})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${CudaHeaders} ${CudaSources}
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${LightingSources} ${CudaHeaders} ${CudaSources}
 )
 
 TARGET_LINK_LIBRARIES(ExposureRender

@@ -169,7 +169,7 @@ void CRenderThread::run()
 		return;
 	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(800, 600));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
 	m_Scene.m_Camera.m_Aperture.m_Size = 0.01f;
 	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
 	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
@@ -179,13 +179,10 @@ void CRenderThread::run()
 	// Force the render thread to allocate the necessary buffers, do not remove this line
 	m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
 
-//	short* pData = (short*)malloc(m_Scene.m_Resolution.m_NoElements * sizeof(short));
-	
+	qDebug("Copying volume data to device");
+
 	// Bind the volume
 	BindVolumeData((short*)m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution);
-//	BindVolumeData(pData, m_Scene.m_Resolution);
-	
-//	free(pData);
 
 	// Allocate CUDA memory for scene
 	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));
@@ -260,7 +257,7 @@ void CRenderThread::run()
 			emit gRenderStatus.StatisticChanged("Memory [CUDA]", "LDR Estimation Buffer", QString::number(m_SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
 			
 			// Setup the CUDA random number generator
-			SetupRNG(&SceneCopy, m_pDevScene, m_pDevRandomStates);
+			SetupRNG(&m_Scene, m_pDevScene, m_pDevRandomStates);
 			
 			// Reset buffers to black
 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz)));
@@ -397,7 +394,10 @@ bool CRenderThread::Load(QString& FileName)
 
 	// Exit if the reader can't read the file
 	if (!MetaImageReader->CanReadFile(m_FileName.toAscii()))
+	{
+		qDebug(QString("Unable to read " + QFileInfo(FileName).fileName()).toAscii());
 		return false;
+	}
 
 	// Create progress callback
 	vtkSmartPointer<vtkCallbackCommand> ProgressCallback = vtkSmartPointer<vtkCallbackCommand>::New();
@@ -411,9 +411,13 @@ bool CRenderThread::Load(QString& FileName)
 
 	MetaImageReader->SetFileName(m_FileName.toAscii());
 
+	qDebug(QString("Loading " + QFileInfo(FileName).fileName()).toAscii());
+
 	MetaImageReader->Update();
 
 	vtkSmartPointer<vtkImageCast> ImageCast = vtkImageCast::New();
+
+	qDebug("Casting volume data type to short");
 
 	ImageCast->SetOutputScalarTypeToShort();
 	ImageCast->SetInput(MetaImageReader->GetOutput());

@@ -85,8 +85,8 @@ public:
 		m_MaxD = 255.0f;
 		m_MaxNoBounces = 1;
 
-		m_KernelSize.x = 32;
-		m_KernelSize.y = 16;
+		m_KernelSize.x = 8;
+		m_KernelSize.y = 8;
 	}
 
 	virtual ~CScene(void)

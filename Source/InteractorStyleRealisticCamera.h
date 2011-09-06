@@ -8,7 +8,7 @@
 #include "Camera.h"
 
 // Define interaction style for controlling a realistic camera
-class CInteractorStyleRealisticCamera : public vtkInteractorStyleUser
+class vtkRealisticCameraStyle : public vtkInteractorStyleUser
 {
 public:
 	enum EMouseButtonFlag
@@ -18,8 +18,8 @@ public:
 		Right	= 0x0004
 	};
 
-	static CInteractorStyleRealisticCamera* New();
-	vtkTypeMacro(CInteractorStyleRealisticCamera, vtkInteractorStyleUser);
+	static vtkRealisticCameraStyle* New();
+	vtkTypeMacro(vtkRealisticCameraStyle, vtkInteractorStyleUser);
 
 	virtual void OnLeftButtonDown(void);
 	virtual void OnLeftButtonUp(void);
