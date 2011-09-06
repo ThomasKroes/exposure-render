@@ -59,12 +59,12 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	m_GridPenHorizontal.setColor(QColor(100, 100, 100, 100));
 	m_GridPenHorizontal.setWidthF(0.6f);
-	m_GridPenHorizontal.setStyle(Qt::PenStyle::DashLine);
+	m_GridPenHorizontal.setStyle(Qt::DashLine);
 	m_GridPenHorizontal.setDashPattern(dashes);
 
 	m_GridPenVertical.setColor(QColor(100, 100, 100, 200));
 	m_GridPenVertical.setWidthF(0.6f);
-	m_GridPenVertical.setStyle(Qt::PenStyle::SolidLine);
+	m_GridPenVertical.setStyle(Qt::SolidLine);
 //	m_GridPenVertical.setDashPattern(dashes);
 
 	// Update the canvas

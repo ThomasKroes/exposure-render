@@ -37,7 +37,7 @@ void QColorPushButton::paintEvent(QPaintEvent* pPaintEvent)
 	Painter.setPen(QPen(isEnabled() ? QColor(25, 25, 25) : Qt::gray, 0.7));
 
 	// Draw
-	Painter.drawRoundedRect(ColorRectangle, m_Radius, Qt::SizeMode::AbsoluteSize);
+	Painter.drawRoundedRect(ColorRectangle, m_Radius, Qt::AbsoluteSize);
 
 	// Move rectangle to the right
 	ColorRectangle.setLeft(ColorRectangle.right() + 3);
@@ -173,7 +173,7 @@ QString GetOpenFileName(const QString& Caption, const QString& Filter)
 
 	FileDialog.setWindowTitle(Caption);
 	FileDialog.setFilter(Filter);
-	FileDialog.setOption(QFileDialog::Option::DontUseNativeDialog, true);
+	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 	FileDialog.setWindowIcon(QIcon(":/Images/folder-open-document.png"));
 
 	FileDialog.exec();
@@ -187,7 +187,7 @@ QString GetSaveFileName(const QString& Caption, const QString& Filter)
 	
 	FileDialog.setWindowTitle(Caption);
 	FileDialog.setFilter(Filter);
-	FileDialog.setOption(QFileDialog::Option::DontUseNativeDialog, true);
+	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 	FileDialog.setWindowIcon(QIcon(":/Images/disk.png"));
 
 	FileDialog.exec();

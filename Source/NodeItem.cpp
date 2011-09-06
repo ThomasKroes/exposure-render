@@ -142,16 +142,16 @@ void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
 {
 	QGraphicsItem::mousePressEvent(pEvent);
 
-	if (pEvent->button() == Qt::MouseButton::LeftButton)
+	if (pEvent->button() == Qt::LeftButton)
 	{
 		if (gTransferFunction.GetNodes().indexOf(*m_pNode) == 0 || gTransferFunction.GetNodes().indexOf(*m_pNode) == gTransferFunction.GetNodes().size() - 1)
 		{
-			m_Cursor.setShape(Qt::CursorShape::SizeVerCursor);
+			m_Cursor.setShape(Qt::SizeVerCursor);
 			setCursor(m_Cursor);
 		}
 		else
 		{
-			m_Cursor.setShape(Qt::CursorShape::SizeAllCursor);
+			m_Cursor.setShape(Qt::SizeAllCursor);
 			setCursor(m_Cursor);
 		}
 	}
@@ -162,7 +162,7 @@ void QNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
 	QGraphicsEllipseItem::mouseReleaseEvent(pEvent);
 
 	// Change the cursor shape to normal
-	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
+	m_Cursor.setShape(Qt::ArrowCursor);
 	setCursor(m_Cursor);
 }
 

@@ -170,7 +170,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 	if (!pNodeItem)
 	{
 		// Add a new node if the user clicked the left button
-		if (pEvent->button() == Qt::MouseButton::LeftButton && m_TransferFunctionCanvas.rect().contains(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop)))
+		if (pEvent->button() == Qt::LeftButton && m_TransferFunctionCanvas.rect().contains(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop)))
 		{
 			// Convert picked position to transfer function coordinates
 			QPointF TfPoint = m_TransferFunctionCanvas.SceneToTransferFunction(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop));
@@ -190,7 +190,7 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			m_TransferFunctionCanvas.Update();
 		}
 
-		if (pEvent->button() == Qt::MouseButton::RightButton)
+		if (pEvent->button() == Qt::RightButton)
 		{
 			// Other wise no node selection
 			gTransferFunction.SetSelectedNode((QNode*)NULL);
@@ -198,11 +198,11 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 	}
 	else
 	{
-		if (pEvent->button() == Qt::MouseButton::LeftButton)
+		if (pEvent->button() == Qt::LeftButton)
 		{
 			gTransferFunction.SetSelectedNode(pNodeItem->m_pNode);
 		}
-		else if (pEvent->button() == Qt::MouseButton::RightButton)
+		else if (pEvent->button() == Qt::RightButton)
 		{
 			const int Index = gTransferFunction.GetNodes().indexOf(*pNodeItem->m_pNode);
 

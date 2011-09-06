@@ -33,8 +33,10 @@ INCLUDE_DIRECTORIES(
 
 # Set your files and resources here  
 SET(SimpleViewSrcs 
-	Main.cpp 
+	
+	# Main
 	MainWindow.cpp
+	Main.cpp 
 	
 	# Lighting
 	LightSettingsWidget.cpp 
@@ -42,8 +44,6 @@ SET(SimpleViewSrcs
 	LightsWidget.cpp
 	LightingWidget.cpp
 	Lighting.cpp
-
-	# Background
 	Background.cpp
 	BackgroundIlluminationWidget.cpp
 
@@ -71,7 +71,11 @@ SET(SimpleViewSrcs
 	PresetsWidget.cpp
 	Preset.cpp
 
-
+	# Statistics
+	StatisticsDockWidget.cpp
+	StatisticsWidget.cpp
+	
+	# Core
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
@@ -81,28 +85,21 @@ SET(SimpleViewSrcs
 	Spectrum.cpp
 	Statistics.cpp
 	VolumePoint.cpp
-	StatisticsDockWidget.cpp
-	StatisticsWidget.cpp
-	
-	
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
 	SettingsDockWidget.cpp
 	LoadSettingsDialog.cpp
 	VtkWidget.cpp
 	Scene.cpp
-
-	
-	
-	
 	Controls.cpp
-	
 	Material.cpp
 	Sample.cpp
 )
 
 SET(SimpleViewUI SimpleView.ui)
 SET(SimpleViewHeaders 
+	
+	# Main
 	MainWindow.h
 
 	# Lighting
@@ -111,8 +108,6 @@ SET(SimpleViewHeaders
 	LightsWidget.h
 	LightingWidget.h
 	Lighting.h
-
-	# Background
 	Background.h
 	BackgroundIlluminationWidget.h
 
@@ -140,6 +135,11 @@ SET(SimpleViewHeaders
 	PresetsWidget.h
 	Preset.h
 
+	# Statistics
+	StatisticsDockWidget.h
+	StatisticsWidget.h
+	
+	# Core
 	Defines.h
 	Dll.h
 	Enumerations.h
@@ -153,9 +153,6 @@ SET(SimpleViewHeaders
 	Spectrum.h
 	Statistics.h
 	VolumePoint.h
-	StatisticsDockWidget.h
-	StatisticsWidget.h
-	
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
 	SettingsDockWidget.h
@@ -186,6 +183,16 @@ SOURCE_GROUP("Generated" FILES
   ${ResourceSrcs}
   ${RCS_SOURCES}
 )
+
+# Main sources
+SET(MainSources
+	MainWindow.h
+	MainWindow.cpp
+	Main.cpp
+)
+
+# Make the main group
+SOURCE_GROUP("Main" FILES ${MainSources})
 
 # Appearance sources
 SET(AppearanceSources
@@ -221,11 +228,15 @@ SET(LightingSources
 	LightsWidget.h
 	LightingWidget.h
 	Lighting.h
+	Background.h
+	BackgroundIlluminationWidget.h
 	LightSettingsWidget.cpp 
 	LightingDockWidget.cpp 
 	LightsWidget.cpp
 	LightingWidget.cpp
 	Lighting.cpp
+	Background.cpp
+	BackgroundIlluminationWidget.cpp
 )
 
 # Make the lighting group
@@ -263,26 +274,65 @@ SET(PresetsSources
 # Make the presets group
 SOURCE_GROUP("Presets" FILES ${PresetsSources})
 
-
-
-
-
-
-
-
-
-
-
-
-
-# Group sources related to Cuda together
-SET(CudaHeaders
-	VolumeTracer.cuh
-	VolumeTracer.cu
-	VolumeTracerBackup.cuh
-	VolumeTracerBackup.cu
+# Statistics sources
+SET(StatisticsSources
+	StatisticsDockWidget.h
+	StatisticsWidget.h
+	StatisticsDockWidget.cpp
+	StatisticsWidget.cpp
 )
 
+# Make the statistics group
+SOURCE_GROUP("Statistics" FILES ${StatisticsSources})
+	
+# Core sources
+SET(CoreSources
+	Defines.h
+	Dll.h
+	Enumerations.h
+	Exception.h
+	Filter.h
+	Flags.h
+	Geometry.h
+	Light.h
+	MonteCarlo.h
+	Random.h
+	Spectrum.h
+	Statistics.h
+	VolumePoint.h
+	InteractorStyleRealisticCamera.h
+	RenderThread.h
+	SettingsDockWidget.h
+	LoadSettingsDialog.h
+	VtkWidget.h
+	Scene.h
+	Controls.h
+	Material.h
+	Sample.h
+	Filter.cpp
+	Flags.cpp
+	Geometry.cpp
+	Light.cpp
+	MonteCarlo.cpp
+	Random.cpp
+	Spectrum.cpp
+	Statistics.cpp
+	VolumePoint.cpp
+	InteractorStyleRealisticCamera.cpp
+	RenderThread.cpp
+	SettingsDockWidget.cpp
+	LoadSettingsDialog.cpp
+	VtkWidget.cpp
+	Scene.cpp
+	Controls.cpp
+	Material.cpp
+	Sample.cpp
+)
+
+# Make the core group
+SOURCE_GROUP("Core" FILES ${CoreSources})
+
+# CUDA sources
 SET(CudaSources
 	VolumeTracer.cuh
 	VolumeTracer.cu
@@ -290,11 +340,8 @@ SET(CudaSources
 	VolumeTracerBackup.cu
 )
 
-# Make the group
-SOURCE_GROUP("Cuda Kernels" FILES
-	${CudaHeaders}
-	${CudaSources}
-)
+# Make the CUDA group
+SOURCE_GROUP("CUDA" FILES ${CudaSources})
 
 ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
 SET_SOURCE_FILES_PROPERTIES(${SimpleViewSrcs} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${CudaHeaders} ${CudaSources} PROPERTIES OBJECT_DEPENDS "${UISrcs}")

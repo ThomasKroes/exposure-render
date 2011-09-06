@@ -93,7 +93,7 @@ void QLightsWidget::UpdateLightList(void)
 	if (gLighting.GetSelectedLight())
 	{
 		const int Index = gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight());
-		m_LightList.setCurrentRow(Index, QItemSelectionModel::SelectionFlag::Select);
+		m_LightList.setCurrentRow(Index, QItemSelectionModel::Select);
 		m_LightList.setFocus();
 	}
 

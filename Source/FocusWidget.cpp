@@ -29,10 +29,9 @@ CFocusWidget::CFocusWidget(QWidget* pParent) :
 	// Focal distance
 	m_GridLayout.addWidget(new QLabel("Focal distance"), 6, 0);
 
-	m_FocalDistanceSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_FocalDistanceSlider.setOrientation(Qt::Horizontal);
 	m_FocalDistanceSlider.setEnabled(false);
-    m_FocalDistanceSlider.setFocusPolicy(Qt::StrongFocus);
-    m_FocalDistanceSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+    m_FocalDistanceSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_FocalDistanceSlider.setRange(0.0, 1000000.0);
 	m_GridLayout.addWidget(&m_FocalDistanceSlider, 6, 1);
 	
