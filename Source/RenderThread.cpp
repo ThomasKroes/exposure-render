@@ -2,6 +2,7 @@
 #include "RenderThread.h"
 #include "Scene.h"
 #include "MainWindow.h"
+#include "LoadSettingsDialog.h"
 
 // CUDA
 #include "VolumeTracer.cuh"
@@ -373,14 +374,13 @@ bool CRenderThread::Load(QString& FileName)
 {
 	m_FileName = FileName;
 
-//	qDebug(QString("Loading volume " + QFileInfo(m_FileName).fileName()).toAscii());
-//	CLoadSettingsDialog LoadSettingsDialog;
+	QLoadSettingsDialog LoadSettingsDialog;
 
 	// Make it a modal dialog
-//	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
+	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
 	 
 	// Show it
-//	LoadSettingsDialog.exec();
+	LoadSettingsDialog.exec();
 
 	// Create and configure progress dialog
 //	gpProgressDialog = new QProgressDialog("Volume loading in progress", "Abort", 0, 100);

@@ -106,7 +106,13 @@ void QStatisticsWidget::UpdateStatistic(const QString& Group, const QString& Nam
 	{
 		pGroup = AddItem(NULL, Group);
 		pGroup->setIcon(0, QIcon(Icon));
+		
+		QFont Font = pGroup->font(0);
+		Font.setBold(true);
 
+		pGroup->setFont(0, Font);
+		pGroup->setBackgroundColor(0, Qt::red);
+		
 		AddItem(pGroup, Name, Value, Unit, Icon);
 	}
 	else
@@ -159,7 +165,7 @@ void QStatisticsWidget::OnStatisticChanged(const QString& Group, const QString& 
 
 void QStatisticsWidget::ExpandAll(const bool& Expand)
 {
-	QList<QTreeWidgetItem*> Items = m_Tree.findItems("*", Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard, 0);
+	QList<QTreeWidgetItem*> Items = m_Tree.findItems("*", Qt::MatchRecursive | Qt::MatchWildcard, 0);
 
 	foreach (QTreeWidgetItem* pItem, Items)
 		pItem->setExpanded(Expand);
@@ -167,7 +173,7 @@ void QStatisticsWidget::ExpandAll(const bool& Expand)
 
 QTreeWidgetItem* QStatisticsWidget::FindItem(const QString& Name)
 {
-	QList<QTreeWidgetItem*> Items = m_Tree.findItems(Name, Qt::MatchFlag::MatchRecursive, 0);
+	QList<QTreeWidgetItem*> Items = m_Tree.findItems(Name, Qt::MatchRecursive, 0);
 
 	if (Items.size() <= 0)
 		return NULL;

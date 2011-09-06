@@ -18,9 +18,9 @@ CApertureWidget::CApertureWidget(QWidget* pParent) :
 	// Aperture size
 	m_GridLayout.addWidget(new QLabel("Size"), 3, 0);
 
-	m_ApertureSizeSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_ApertureSizeSlider.setOrientation(Qt::Horizontal);
     m_ApertureSizeSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ApertureSizeSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+    m_ApertureSizeSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_ApertureSizeSlider.setRange(0.0, 1.0);
 	m_GridLayout.addWidget(&m_ApertureSizeSlider, 3, 1);
 	

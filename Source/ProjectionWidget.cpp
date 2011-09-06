@@ -18,7 +18,7 @@ CProjectionWidget::CProjectionWidget(QWidget* pParent) :
 	// Field of view
 	m_GridLayout.addWidget(new QLabel("Field of view"), 4, 0);
 
-	m_FieldOfViewSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_FieldOfViewSlider.setOrientation(Qt::Horizontal);
 	m_FieldOfViewSlider.setRange(10, 200);
 	m_GridLayout.addWidget(&m_FieldOfViewSlider, 4, 1);
 	

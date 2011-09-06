@@ -28,9 +28,8 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	// No. bounces
 	m_MainLayout.addWidget(new QLabel("No. bounces"), 1, 0);
 
-	m_NoBouncesSlider.setOrientation(Qt::Orientation::Horizontal);
-    m_NoBouncesSlider.setFocusPolicy(Qt::StrongFocus);
-    m_NoBouncesSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_NoBouncesSlider.setOrientation(Qt::Horizontal);
+    m_NoBouncesSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_NoBouncesSlider.setRange(0, 10);
 	m_MainLayout.addWidget(&m_NoBouncesSlider, 1, 1);
 	
@@ -49,7 +48,7 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 
 	m_ScatteringLayout.addWidget(new QLabel("Backward"), 0, 0);
 
-	m_PhaseSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_PhaseSlider.setOrientation(Qt::Horizontal);
 	m_PhaseSlider.setRange(-100, 100);
 	m_PhaseSlider.setToolTip("Move slider to the left to increase <i>backward</i> scattering and right to increase <i>forward</i> scattering");
 	m_ScatteringLayout.addWidget(&m_PhaseSlider, 0, 1);
@@ -99,9 +98,9 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 	// Kernel width
 	m_MainLayout.addWidget(new QLabel("Kernel Width"), 3, 0);
 
-	m_KernelWidthSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_KernelWidthSlider.setOrientation(Qt::Horizontal);
     m_KernelWidthSlider.setFocusPolicy(Qt::StrongFocus);
-    m_KernelWidthSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+    m_KernelWidthSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_KernelWidthSlider.setRange(2, 64);
 	m_MainLayout.addWidget(&m_KernelWidthSlider, 3, 1);
 	
@@ -115,9 +114,9 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 	// Kernel height
 	m_MainLayout.addWidget(new QLabel("Kernel Height"), 4, 0);
 
-	m_KernelHeightSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_KernelHeightSlider.setOrientation(Qt::Horizontal);
     m_KernelHeightSlider.setFocusPolicy(Qt::StrongFocus);
-    m_KernelHeightSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+    m_KernelHeightSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_KernelHeightSlider.setRange(2, 64);
 	m_MainLayout.addWidget(&m_KernelHeightSlider, 4, 1);
 	

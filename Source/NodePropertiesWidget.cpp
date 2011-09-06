@@ -91,7 +91,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_IntensityLabel.setToolTip("Node position");
 	m_MainLayout.addWidget(&m_IntensityLabel, 1, 0);
 
-	m_IntensitySlider.setOrientation(Qt::Orientation::Horizontal);
+	m_IntensitySlider.setOrientation(Qt::Horizontal);
 	m_IntensitySlider.setStatusTip("Node position");
 	m_IntensitySlider.setToolTip("Drag to change node position");
 	m_MainLayout.addWidget(&m_IntensitySlider, 1, 1);
@@ -109,7 +109,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacityLabel.setText("Opacity");
 	m_MainLayout.addWidget(&m_OpacityLabel, 2, 0);
 
-	m_OpacitySlider.setOrientation(Qt::Orientation::Horizontal);
+	m_OpacitySlider.setOrientation(Qt::Horizontal);
 	m_OpacitySlider.setStatusTip("Node Opacity");
 	m_OpacitySlider.setToolTip("Node Opacity");
 	m_OpacitySlider.setRange(0.0, 1.0);
@@ -142,7 +142,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_RoughnessLabel.setText("Roughness");
 	m_MainLayout.addWidget(&m_RoughnessLabel, 5, 0);
 
-	m_RoughnessSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_RoughnessSlider.setOrientation(Qt::Horizontal);
 	m_RoughnessSlider.setStatusTip("Roughness");
 	m_RoughnessSlider.setToolTip("Roughness");
 	m_RoughnessSlider.setRange(0.0f, 1000.0f);

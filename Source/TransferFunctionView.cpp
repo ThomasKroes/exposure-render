@@ -26,8 +26,8 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	setStyleSheet("border-color: red;");
 
 	// Never show scrollbars
-	setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	// Status and tooltip
 	setStatusTip("Transfer function editor");

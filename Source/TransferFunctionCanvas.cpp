@@ -34,7 +34,7 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 {
 	// Create polygon graphics item
 	m_Polygon.setParentItem(this);
-	m_Polygon.setPen(QPen(Qt::PenStyle::NoPen));
+	m_Polygon.setPen(QPen(Qt::NoPen));
 
 	// Histogram
 	m_Histogram.setParentItem(this);
@@ -43,7 +43,7 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(Qt::gray));
-	m_BackgroundBrush.setStyle(Qt::BrushStyle::SolidPattern);
+	m_BackgroundBrush.setStyle(Qt::SolidPattern);
 
 	// Make sure the background rectangle is drawn behind everything else
 	setZValue(m_BackgroundZ);

@@ -1,7 +1,7 @@
 
 #include "LoadSettingsDialog.h"
 
-CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
+QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :
 	QDialog(pParent),
 	m_MainLayout(),
 	m_ResampleGroupBox(),
@@ -48,9 +48,8 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 	m_ResampleXLabel.setText("X Resample (%)");
 	m_ResampleLayout.addWidget(&m_ResampleXLabel, 0, 0);
 
-	m_ResampleXSlider.setOrientation(Qt::Orientation::Horizontal);
-    m_ResampleXSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ResampleXSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_ResampleXSlider.setOrientation(Qt::Horizontal);
+    m_ResampleXSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_ResampleXSlider.setRange(0.0, 1.0);
 	m_ResampleLayout.addWidget(&m_ResampleXSlider, 0, 1);
 	
@@ -66,9 +65,8 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 	m_ResampleYLabel.setText("Y Resample (%)");
 	m_ResampleLayout.addWidget(&m_ResampleYLabel, 1, 0);
 
-	m_ResampleYSlider.setOrientation(Qt::Orientation::Horizontal);
-    m_ResampleYSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ResampleYSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_ResampleYSlider.setOrientation(Qt::Horizontal);
+    m_ResampleYSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_ResampleYSlider.setRange(0.0, 1.0);
 	m_ResampleLayout.addWidget(&m_ResampleYSlider, 1, 1);
 	
@@ -87,9 +85,8 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 	m_ResampleZLabel.setText("Z Resample (%)");
 	m_ResampleLayout.addWidget(&m_ResampleZLabel, 2, 0);
 
-	m_ResampleZSlider.setOrientation(Qt::Orientation::Horizontal);
-    m_ResampleZSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ResampleZSlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_ResampleZSlider.setOrientation(Qt::Horizontal);
+    m_ResampleZSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_ResampleZSlider.setRange(0.0, 1.0);
 	m_ResampleLayout.addWidget(&m_ResampleZSlider, 2, 1);
 	
@@ -120,12 +117,12 @@ CLoadSettingsDialog::CLoadSettingsDialog(QWidget* pParent) :
 	SetToolTips();
 };
 
-bool CLoadSettingsDialog::GetResample(void)		{ return m_Resample;  }
-float CLoadSettingsDialog::GetResampleX(void)	{ return m_ResampleX; }
-float CLoadSettingsDialog::GetResampleY(void)	{ return m_ResampleY; }
-float CLoadSettingsDialog::GetResampleZ(void)	{ return m_ResampleZ; }
+bool QLoadSettingsDialog::GetResample(void)		{ return m_Resample;  }
+float QLoadSettingsDialog::GetResampleX(void)	{ return m_ResampleX; }
+float QLoadSettingsDialog::GetResampleY(void)	{ return m_ResampleY; }
+float QLoadSettingsDialog::GetResampleZ(void)	{ return m_ResampleZ; }
 
-void CLoadSettingsDialog::LockY(const int& State)
+void QLoadSettingsDialog::LockY(const int& State)
 {
 	m_ResampleYLabel.setEnabled(!State);
 	m_ResampleYSlider.setEnabled(!State);
@@ -145,7 +142,7 @@ void CLoadSettingsDialog::LockY(const int& State)
 	}
 }
 
-void CLoadSettingsDialog::LockZ(const int& State)
+void QLoadSettingsDialog::LockZ(const int& State)
 {
 	m_ResampleZLabel.setEnabled(!State);
 	m_ResampleZSlider.setEnabled(!State);
@@ -165,43 +162,43 @@ void CLoadSettingsDialog::LockZ(const int& State)
 	}
 }
 
-void CLoadSettingsDialog::SetResample(const int& Resample)
+void QLoadSettingsDialog::SetResample(const int& Resample)
 {
 	m_Resample = Resample;
 }
 
-void CLoadSettingsDialog::SetResampleX(const double& ResampleX)
+void QLoadSettingsDialog::SetResampleX(const double& ResampleX)
 {
 	m_ResampleX = (float)ResampleX;
 }
 
-void CLoadSettingsDialog::SetResampleY(const double& ResampleY)
+void QLoadSettingsDialog::SetResampleY(const double& ResampleY)
 {
 	m_ResampleY = (float)ResampleY;
 }
 
-void CLoadSettingsDialog::SetResampleZ(const double& ResampleZ)
+void QLoadSettingsDialog::SetResampleZ(const double& ResampleZ)
 {
 	m_ResampleZ = (float)ResampleZ;
 }
 
-void CLoadSettingsDialog::Accept(void)
+void QLoadSettingsDialog::Accept(void)
 {
 	accept();
 }
 
-void CLoadSettingsDialog::Reject(void)
+void QLoadSettingsDialog::Reject(void)
 {
 	reject();
 }
 
-void CLoadSettingsDialog::Clicked(QAbstractButton* pButton)
+void QLoadSettingsDialog::Clicked(QAbstractButton* pButton)
 {
 	if (pButton->text() == tr("Reset"))
 		Reset();
 }
 
-void CLoadSettingsDialog::Reset(void)
+void QLoadSettingsDialog::Reset(void)
 {
 	m_ResampleGroupBox.setChecked(m_Resample);
 	m_ResampleXSlider.setValue(m_ResampleX * 100.0f);
@@ -214,7 +211,7 @@ void CLoadSettingsDialog::Reset(void)
 	m_LockZCheckBox.setChecked(true);
 }
 
-void CLoadSettingsDialog::SetToolTips(void)
+void QLoadSettingsDialog::SetToolTips(void)
 {
 	m_ResampleGroupBox.setToolTip("Resample");
 	m_ResampleXLabel.setToolTip("Resample X");

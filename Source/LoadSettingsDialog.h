@@ -4,12 +4,12 @@
 
 #include "Controls.h"
 
-class CLoadSettingsDialog : public QDialog
+class QLoadSettingsDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-    CLoadSettingsDialog(QWidget* pParent = NULL);
+    QLoadSettingsDialog(QWidget* pParent = NULL);
 
 public:
 	bool GetResample(void);

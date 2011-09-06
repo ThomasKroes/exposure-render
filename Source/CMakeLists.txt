@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.8)
 
 PROJECT(ExposureRender)
 
@@ -46,13 +47,16 @@ SET(SimpleViewSrcs
 	Background.cpp
 	BackgroundIlluminationWidget.cpp
 
-	# Transfer function editor
+	# Appearance
 	TransferFunction.cpp
 	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
 	TransferFunctionGradient.cpp
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
+	AppearanceDockWidget.cpp
+	NodeItem.cpp
+	EdgeItem.cpp
 
 	# Camera
 	Camera.cpp
@@ -61,7 +65,13 @@ SET(SimpleViewSrcs
 	ApertureWidget.cpp
 	ProjectionWidget.cpp
 	FocusWidget.cpp
-	
+	CameraWidget.cpp
+
+	# Presets
+	PresetsWidget.cpp
+	Preset.cpp
+
+
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
@@ -73,7 +83,7 @@ SET(SimpleViewSrcs
 	VolumePoint.cpp
 	StatisticsDockWidget.cpp
 	StatisticsWidget.cpp
-	CameraWidget.cpp
+	
 	
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
@@ -82,12 +92,11 @@ SET(SimpleViewSrcs
 	VtkWidget.cpp
 	Scene.cpp
 
-	NodeItem.cpp
-	AppearanceDockWidget.cpp
-	PresetsWidget.cpp
-	Preset.cpp
+	
+	
+	
 	Controls.cpp
-	EdgeItem.cpp
+	
 	Material.cpp
 	Sample.cpp
 )
@@ -107,13 +116,16 @@ SET(SimpleViewHeaders
 	Background.h
 	BackgroundIlluminationWidget.h
 
-	# Transfer function editor
+	# Appearance
 	TransferFunction.h
 	TransferFunctionCanvas.h
 	TransferFunctionView.h
 	TransferFunctionGradient.h
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
+	AppearanceDockWidget.h
+	NodeItem.h
+	EdgeItem.h
 
 	# Camera
 	Camera.h
@@ -123,6 +135,10 @@ SET(SimpleViewHeaders
 	ApertureWidget.h
 	ProjectionWidget.h
 	FocusWidget.h
+
+	# Presets
+	PresetsWidget.h
+	Preset.h
 
 	Defines.h
 	Dll.h
@@ -146,14 +162,7 @@ SET(SimpleViewHeaders
 	LoadSettingsDialog.h
 	VtkWidget.h
 	Scene.h
-
-	
-	NodeItem.h
-	AppearanceDockWidget.h
-	PresetsWidget.h
-	Preset.h
 	Controls.h
-	EdgeItem.h
 	Material.h
 	Sample.h
 )
@@ -179,7 +188,7 @@ SOURCE_GROUP("Generated" FILES
 )
 
 # Appearance sources
-SET(TransferFunctionSrcs
+SET(AppearanceSources
 	AppearanceDockWidget.h
 	TransferFunction.h
 	TransferFunctionCanvas.h
@@ -187,6 +196,9 @@ SET(TransferFunctionSrcs
 	TransferFunctionGradient.h
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
+	AppearanceDockWidget.h
+	NodeItem.h
+	EdgeItem.h
 	AppearanceDockWidget.cpp
 	TransferFunction.cpp
 	TransferFunctionCanvas.cpp
@@ -194,10 +206,13 @@ SET(TransferFunctionSrcs
 	TransferFunctionGradient.cpp
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
+	AppearanceDockWidget.cpp
+	NodeItem.cpp
+	EdgeItem.cpp
 )
 
 # Make the appearance group
-SOURCE_GROUP("Transfer Function" FILES ${TransferFunctionSrcs})
+SOURCE_GROUP("Appearance" FILES ${AppearanceSources})
 
 # Lighting sources
 SET(LightingSources
@@ -216,9 +231,37 @@ SET(LightingSources
 # Make the lighting group
 SOURCE_GROUP("Lighting" FILES ${LightingSources})
 
+# Camera sources
+SET(CameraSources
+	Camera.h
+	CameraDockWidget.h
+	FilmWidget.h
+	ApertureWidget.h
+	ProjectionWidget.h
+	FocusWidget.h
+	CameraWidget.h
+	Camera.cpp
+	CameraDockWidget.cpp
+	FilmWidget.cpp
+	ApertureWidget.cpp
+	ProjectionWidget.cpp
+	FocusWidget.cpp
+	CameraWidget.cpp
+)
 
+# Make the camera group
+SOURCE_GROUP("Camera" FILES ${CameraSources})
 
+# Presets sources
+SET(PresetsSources
+	PresetsWidget.h
+	Preset.h
+	PresetsWidget.cpp
+	Preset.cpp
+)
 
+# Make the presets group
+SOURCE_GROUP("Presets" FILES ${PresetsSources})
 
 
 
@@ -269,7 +312,7 @@ IF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
   SET (TransferFunctionSrcs ${TransferFunctionSrcs})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionHeaders} ${TransferFunctionSrcs} ${LightingSources} ${CudaHeaders} ${CudaSources}
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionHeaders} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CudaSources}
 )
 
 TARGET_LINK_LIBRARIES(ExposureRender

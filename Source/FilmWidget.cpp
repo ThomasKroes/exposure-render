@@ -23,7 +23,7 @@ CFilmWidget::CFilmWidget(QWidget* pParent) :
 	// Film width
 	m_GridLayout.addWidget(new QLabel("Film width"), 0, 0);
 
-	m_FilmWidthSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_FilmWidthSlider.setOrientation(Qt::Horizontal);
 	m_FilmWidthSlider.setRange(4, 1024);
 	m_GridLayout.addWidget(&m_FilmWidthSlider, 0, 1);
 	
@@ -37,7 +37,7 @@ CFilmWidget::CFilmWidget(QWidget* pParent) :
 	// Film height
 	m_GridLayout.addWidget(new QLabel("Film height"), 2, 0);
 
-	m_FilmHeightSlider.setOrientation(Qt::Orientation::Horizontal);
+	m_FilmHeightSlider.setOrientation(Qt::Horizontal);
 	m_FilmHeightSlider.setRange(4, 1024);
 	m_GridLayout.addWidget(&m_FilmHeightSlider, 2, 1);
 	

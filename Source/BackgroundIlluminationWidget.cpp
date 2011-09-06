@@ -31,9 +31,9 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 
 	m_MainLayout.addWidget(new QLabel("Intensity"), 1, 0);
 
-	m_IntensitySlider.setOrientation(Qt::Orientation::Horizontal);
+	m_IntensitySlider.setOrientation(Qt::Horizontal);
 	m_IntensitySlider.setFocusPolicy(Qt::StrongFocus);
-	m_IntensitySlider.setTickPosition(QDoubleSlider::TickPosition::NoTicks);
+	m_IntensitySlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_IntensitySlider.setRange(0.0, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySlider, 1, 1, 1, 2);
 
