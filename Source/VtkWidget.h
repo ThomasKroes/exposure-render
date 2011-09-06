@@ -34,7 +34,9 @@ public slots:
 	void OnRenderEnd(void);
 	void OnPreRenderFrame(void);
 	void OnPostRenderFrame(void);
-	
+	void OnDirty(int Dirty);
+	void OnRenderLoopTimer(void);
+
 private:
 	void SetupRenderView(void);
 
@@ -50,4 +52,6 @@ private:
 	vtkCallbackCommand*					m_pKeyPressCallback;
 	vtkCallbackCommand*					m_pKeyReleaseCallback;
 	CInteractorStyleRealisticCamera*	m_pInteractorStyleRealisticCamera;
+
+	QTimer								m_RenderLoopTimer;
 };

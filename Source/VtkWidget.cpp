@@ -41,7 +41,8 @@ void KeyReleaseCallbackFunction(vtkObject* pCaller, long unsigned int EventId, v
 CVtkWidget::CVtkWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
-	m_QtVtkWidget()
+	m_QtVtkWidget(),
+	m_RenderLoopTimer()
 {
 	// Create and apply main layout
 	setLayout(&m_MainLayout);
@@ -49,8 +50,13 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	// Add VTK widget 
 	m_MainLayout.addWidget(&m_QtVtkWidget);
 
-	// Notify us when rendering begins and ends, and after each rendered frame
+	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, and when timer has timed out
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
+	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
+	connect(&gRenderStatus, SIGNAL(Dirty(int)), this, SLOT(OnDirty(int)));
+	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 
 	// Setup the render view
 	SetupRenderView();
@@ -89,6 +95,10 @@ void CVtkWidget::OnRenderBegin(void)
 
 	// Scale
 	m_pSceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
+	/**/
+
+	// Start the timer
+	m_RenderLoopTimer.start(30);
 }
 
 void CVtkWidget::OnRenderEnd(void)
@@ -100,6 +110,9 @@ void CVtkWidget::OnRenderEnd(void)
 
 	m_pImageImport = NULL;
 	m_pImageActor = NULL;
+
+	// Stop the timer
+	m_RenderLoopTimer.start(30);
 }
 
 void CVtkWidget::OnPreRenderFrame(void)
@@ -114,19 +127,9 @@ void CVtkWidget::OnPostRenderFrame(void)
 	if (!Scene())
 		return;
 
-	m_pImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-	m_pImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-	m_pImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-
-	//	m_pImageImport->setup(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-	m_pImageImport->Update();
-	m_pImageImport->SetImportVoidPointer(NULL);
-	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
-
-	m_pImageActor->SetInput(m_pImageImport->GetOutput());
-	// 	m_pImageActor->VisibilityOn();
-
-	m_pRenderWindow->GetInteractor()->Render();
+	
+	
+	
 }
 
 void CVtkWidget::SetupRenderView(void)
@@ -134,7 +137,7 @@ void CVtkWidget::SetupRenderView(void)
 	// Create and configure scene renderer
 	m_pSceneRenderer = vtkRenderer::New();
 	m_pSceneRenderer->SetBackground(0.4, 0.4, 0.43);
-	m_pSceneRenderer->SetBackground2(0.6, 0.6, 0.6);
+	m_pSceneRenderer->SetBackground2(0.9, 0.9, 0.9);
 	m_pSceneRenderer->SetGradientBackground(true);
 	m_pSceneRenderer->GetActiveCamera()->SetPosition(0.0, 0.0, 1.0);
 	m_pSceneRenderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
@@ -162,4 +165,29 @@ void CVtkWidget::SetupRenderView(void)
 
 	m_pRenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyPressEvent, m_pKeyPressCallback);
 	m_pRenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyReleaseEvent, m_pKeyReleaseCallback);
+}
+
+void CVtkWidget::OnDirty(int Dirty)
+{
+	if (!Scene())
+		return;
+
+
+}
+
+void CVtkWidget::OnRenderLoopTimer(void)
+{
+	m_pImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+	m_pImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+	m_pImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+
+	//	m_pImageImport->setup(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+	m_pImageImport->Update();
+	m_pImageImport->SetImportVoidPointer(NULL);
+	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+/*
+	m_pImageActor->SetInput(m_pImageImport->GetOutput());
+	// 	m_pImageActor->VisibilityOn();
+*/
+	m_pRenderWindow->GetInteractor()->Render();
 }

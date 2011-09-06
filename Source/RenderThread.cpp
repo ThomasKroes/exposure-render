@@ -221,7 +221,7 @@ void CRenderThread::run()
 			cudaMalloc((void**)&m_pDevEstRgbLdr, m_SizeLdrFrameBuffer);
 			
 			// Setup the CUDA random number generator
-//			SetupRNG(&SceneCopy, m_pDevScene, m_pDevRandomStates);
+			SetupRNG(&SceneCopy, m_pDevScene, m_pDevRandomStates);
 			
 			// Reset buffers to black
 			cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(CColorXyz));
