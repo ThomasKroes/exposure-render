@@ -22,8 +22,8 @@ public slots:
 	void OnRenderEnd(void);
 	void OnMemoryAllocate(void);
 	void OnMemoryFree(void);
-	void OnPreFrame(void);
-	void OnPostFrame(void);
+	void OnPreRenderFrame(void);
+	void OnPostRenderFrame(void);
 	void ExpandAll(const bool& Expand);
 	
 private:

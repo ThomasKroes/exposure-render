@@ -25,6 +25,7 @@ signals:
 	void RenderEnd(void);
 	void PreRenderFrame(void);
 	void PostRenderFrame(void);
+	void Dirty(int DirtyFlag);
 
 	friend class CRenderThread;
 };

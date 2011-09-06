@@ -11,8 +11,6 @@ class QStatisticsDockWidget : public QDockWidget
 public:
     QStatisticsDockWidget(QWidget* pParent = 0);
 
-	void Init(void);
-
 private:
 	QGridLayout			m_MainLayout;
 	QStatisticsWidget	m_StatisticsWidget;

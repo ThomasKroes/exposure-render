@@ -53,7 +53,11 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	
 	PopulateTree();
 
+	// Notify us when rendering begins and ends, and before/after each rendered frame
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
+	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
 }
 
 QSize QStatisticsWidget::sizeHint() const
@@ -133,9 +137,6 @@ void QStatisticsWidget::OnRenderBegin(void)
 	if (!gpRenderThread)
 		return;
 		
-	// We want to be notified when a frame has completed
-	connect(gpRenderThread, SIGNAL(PostFrame()), this, SLOT(OnPostFrame()));
-
 	// Memory
 	UpdateStatistic("Volume (Cuda)", QString::number((float)gpRenderThread->m_SizeVolume / powf(1024.0f, 2.0f), 'f', 2));
 	UpdateStatistic("HDR Accumulation Buffer (Cuda)", QString::number((float)gpRenderThread->m_SizeHdrAccumulationBuffer / powf(1024.0f, 2.0f), 'f', 2));
@@ -158,9 +159,6 @@ void QStatisticsWidget::OnRenderBegin(void)
 
 void QStatisticsWidget::OnRenderEnd(void)
 {
-	// Do not receive signals anymore
-	disconnect(gpRenderThread, SIGNAL(PostFrame()), this, SLOT(OnPostFrame()));
-
 	// Collapse all tree items
 	ExpandAll(false);
 }
@@ -175,13 +173,13 @@ void QStatisticsWidget::OnMemoryFree(void)
 
 }
 
-void QStatisticsWidget::OnPreFrame(void)
+void QStatisticsWidget::OnPreRenderFrame(void)
 {
 
 }
 
 
-void QStatisticsWidget::OnPostFrame(void)
+void QStatisticsWidget::OnPostRenderFrame(void)
 {
 	if (!Scene())
 		return;
@@ -203,7 +201,5 @@ void QStatisticsWidget::ExpandAll(const bool& Expand)
 	QList<QTreeWidgetItem*> Items = m_Tree.findItems("*", Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard, 0);
 
 	foreach (QTreeWidgetItem* pItem, Items)
-	{
 		pItem->setExpanded(Expand);
-	}
 }

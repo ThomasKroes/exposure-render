@@ -75,8 +75,6 @@ SET(SimpleViewSrcs
 	StatisticsWidget.cpp
 	CameraWidget.cpp
 	
-	
-	LoadVolume.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
 	SettingsDockWidget.cpp
@@ -84,7 +82,6 @@ SET(SimpleViewSrcs
 	VtkWidget.cpp
 	Scene.cpp
 
-	
 	NodeItem.cpp
 	AppearanceDockWidget.cpp
 	PresetsWidget.cpp
@@ -143,9 +140,6 @@ SET(SimpleViewHeaders
 	StatisticsDockWidget.h
 	StatisticsWidget.h
 	
-	
-	
-	LoadVolume.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
 	SettingsDockWidget.h
