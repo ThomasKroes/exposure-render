@@ -25,7 +25,8 @@ signals:
 	void RenderEnd(void);
 	void PreRenderFrame(void);
 	void PostRenderFrame(void);
-	void Dirty(int DirtyFlag);
+	void Resize(void);
+	void BufferSizeChanged(const QString& Name, const int& Size);
 
 	friend class CRenderThread;
 };
@@ -50,6 +51,9 @@ public:
 	void			Close(void);
 
 private:
+	void HandleCudaError(const cudaError_t CudaError);
+
+private:
 	QString					m_FileName;
 	int						m_N;
 	unsigned char*			m_pRenderImage;
@@ -69,12 +73,13 @@ private:
 	unsigned char*			m_pImageCanvas;
 
 public:
-	int	m_SizeVolume;
+	int	m_SizeRandomStates;
 	int m_SizeHdrAccumulationBuffer;
 	int m_SizeHdrFrameBuffer;
 	int m_SizeHdrBlurFrameBuffer;
 	int m_SizeLdrFrameBuffer;
 
+	QMutex					m_Mutex;
 	bool m_Abort;
 
 signals:

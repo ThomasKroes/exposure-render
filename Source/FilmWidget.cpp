@@ -50,6 +50,10 @@ CFilmWidget::CFilmWidget(QWidget* pParent) :
 	connect(&m_FilmHeightSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmHeight(int)));
 	connect(&m_FilmHeightSpinBox, SIGNAL(valueChanged(int)), &m_FilmHeightSlider, SLOT(setValue(int)));
 	connect(&m_LockFilmHeightCheckBox, SIGNAL(stateChanged(int)), this, SLOT(LockFilmHeight(int)));
+
+	// Inform us when rendering begins and ends
+	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 }
 
 void CFilmWidget::LockFilmHeight(const int& Lock)
@@ -78,6 +82,7 @@ void CFilmWidget::SetFilmWidth(const int& FilmWidth)
 		return;
 
 	Scene()->m_Camera.m_Film.m_Resolution.m_XY.x = FilmWidth;
+	Scene()->m_Camera.m_Film.m_Resolution.Update();
 
 	// Flag the film resolution as dirty, this will restart the rendering
 	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
@@ -88,8 +93,45 @@ void CFilmWidget::SetFilmHeight(const int& FilmHeight)
 	if (!Scene())
 		return;
 
+	gpRenderThread->m_Mutex.lock();
+
 	Scene()->m_Camera.m_Film.m_Resolution.m_XY.y = FilmHeight;
+	Scene()->m_Camera.m_Film.m_Resolution.Update();
 
 	// Flag the film resolution as dirty, this will restart the rendering
 	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
+
+	gpRenderThread->m_Mutex.unlock();
+}
+
+void CFilmWidget::OnRenderBegin(void)
+{
+	if (!Scene())
+		return;
+
+	// Width
+	m_FilmWidthSlider.blockSignals(true);
+	m_FilmWidthSpinBox.blockSignals(true);
+
+	m_FilmWidthSlider.setValue(Scene()->m_Camera.m_Film.m_Resolution.Width());
+	m_FilmWidthSpinBox.setValue(Scene()->m_Camera.m_Film.m_Resolution.Width());
+
+	m_FilmWidthSlider.blockSignals(false);
+	m_FilmWidthSpinBox.blockSignals(false);
+	
+	// Height
+	m_FilmHeightSlider.blockSignals(true);
+	m_FilmHeightSpinBox.blockSignals(true);
+
+	m_FilmHeightSlider.setValue(Scene()->m_Camera.m_Film.m_Resolution.Height());
+	m_FilmHeightSpinBox.setValue(Scene()->m_Camera.m_Film.m_Resolution.Height());
+
+	m_FilmHeightSlider.blockSignals(false);
+	m_FilmHeightSpinBox.blockSignals(false);
+}
+
+void CFilmWidget::OnRenderEnd(void)
+{
+	if (!Scene())
+		return;
 }

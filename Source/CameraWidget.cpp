@@ -1,7 +1,7 @@
 
 #include "CameraWidget.h"
 #include "MainWindow.h"
-#include "Scene.h"
+#include "RenderThread.h"
 
 QCamera gCamera;
 

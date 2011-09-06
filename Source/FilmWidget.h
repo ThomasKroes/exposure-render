@@ -11,10 +11,12 @@ class CFilmWidget : public QGroupBox
 public:
     CFilmWidget(QWidget* pParent = NULL);
 
-private slots:
+public slots:
 	void LockFilmHeight(const int& State);
 	void SetFilmWidth(const int& FilmWidth);
 	void SetFilmHeight(const int& FilmHeight);
+	void OnRenderBegin(void);
+	void OnRenderEnd(void);
 
 private:
 	QGridLayout		m_GridLayout;

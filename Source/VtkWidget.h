@@ -34,7 +34,7 @@ public slots:
 	void OnRenderEnd(void);
 	void OnPreRenderFrame(void);
 	void OnPostRenderFrame(void);
-	void OnDirty(int Dirty);
+	void OnResize(void);
 	void OnRenderLoopTimer(void);
 
 private:

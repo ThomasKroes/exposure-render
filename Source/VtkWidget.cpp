@@ -50,12 +50,12 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	// Add VTK widget 
 	m_MainLayout.addWidget(&m_QtVtkWidget);
 
-	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, and when timer has timed out
+	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, when the rendering canvas is resized and when the timer has timed out
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
 	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
-	connect(&gRenderStatus, SIGNAL(Dirty(int)), this, SLOT(OnDirty(int)));
+	connect(&gRenderStatus, SIGNAL(Resize()), this, SLOT(OnResize()));
 	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 
 	// Setup the render view
@@ -167,27 +167,31 @@ void CVtkWidget::SetupRenderView(void)
 	m_pRenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyReleaseEvent, m_pKeyReleaseCallback);
 }
 
-void CVtkWidget::OnDirty(int Dirty)
-{
-	if (!Scene())
-		return;
-
-
-}
-
 void CVtkWidget::OnRenderLoopTimer(void)
 {
-	m_pImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-	m_pImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-	m_pImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
-
+/*
 	//	m_pImageImport->setup(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
 	m_pImageImport->Update();
 	m_pImageImport->SetImportVoidPointer(NULL);
 	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
-/*
+
 	m_pImageActor->SetInput(m_pImageImport->GetOutput());
 	// 	m_pImageActor->VisibilityOn();
 */
 	m_pRenderWindow->GetInteractor()->Render();
+}
+
+void CVtkWidget::OnResize(void)
+{
+	if (!Scene())
+		return;
+
+	/*
+ 	m_pImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+ 	m_pImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+ 	m_pImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+
+	m_pImageImport->SetImportVoidPointer(NULL);
+	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+	*/
 }

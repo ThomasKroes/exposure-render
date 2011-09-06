@@ -243,6 +243,12 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkViews
 )
 
+### VTK dependencies ###
+#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkRendering.dll")
+#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkGraphics.dll")
+#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkIO.dll")
+#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkCommon.dll")
+
 ### Example .mhd and .raw files ###
 INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.mhd")
 INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.raw")

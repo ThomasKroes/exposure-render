@@ -16,15 +16,15 @@ private:
 	void PopulateTree(void);
 	QTreeWidgetItem* AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value = "", const QString& Unit = "");
 	void UpdateStatistic(const QString& Property, const QString& Value);
+	QTreeWidgetItem* FindItem(const QString& Name);
 
 public slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
-	void OnMemoryAllocate(void);
-	void OnMemoryFree(void);
 	void OnPreRenderFrame(void);
 	void OnPostRenderFrame(void);
-	void ExpandAll(const bool& Expand);
+	void OnBufferSizeChanged(const QString& Name, const int& Size);
+	void OnExpandAll(const bool& Expand);
 	
 private:
 	QGridLayout		m_MainLayout;

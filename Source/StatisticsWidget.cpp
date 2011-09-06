@@ -58,6 +58,7 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
 	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
+	connect(&gRenderStatus, SIGNAL(BufferSizeChanged(const QString&, const int&)), this, SLOT(OnBufferSizeChanged(const QString&, const int&)));
 }
 
 QSize QStatisticsWidget::sizeHint() const
@@ -77,12 +78,6 @@ void QStatisticsWidget::PopulateTree(void)
 	// Memory
 	QTreeWidgetItem* pMemory = AddItem(NULL, "Memory");
 	pMemory->setIcon(0, QIcon(":/Images/memory.png"));
-
-	AddItem(pMemory, "Volume (Cuda)", "", "MB");
-	AddItem(pMemory, "HDR Accumulation Buffer (Cuda)", "", "MB");
-	AddItem(pMemory, "HDR Frame Buffer (Cuda)", "", "MB");
-	AddItem(pMemory, "HDR Frame Buffer Blur (Cuda)", "", "MB");
-	AddItem(pMemory, "LDR Estimation Buffer (Cuda)", "", "MB");
 
 	// Volume
 	QTreeWidgetItem* pVolume = AddItem(NULL, "Volume");
@@ -134,16 +129,9 @@ void QStatisticsWidget::UpdateStatistic(const QString& Property, const QString& 
 
 void QStatisticsWidget::OnRenderBegin(void)
 {
-	if (!gpRenderThread)
+	if (!Scene())
 		return;
 		
-	// Memory
-	UpdateStatistic("Volume (Cuda)", QString::number((float)gpRenderThread->m_SizeVolume / powf(1024.0f, 2.0f), 'f', 2));
-	UpdateStatistic("HDR Accumulation Buffer (Cuda)", QString::number((float)gpRenderThread->m_SizeHdrAccumulationBuffer / powf(1024.0f, 2.0f), 'f', 2));
-	UpdateStatistic("HDR Frame Buffer (Cuda)", QString::number((float)gpRenderThread->m_SizeHdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2));
-	UpdateStatistic("HDR Frame Buffer Blur (Cuda)", QString::number((float)gpRenderThread->m_SizeHdrBlurFrameBuffer / powf(1024.0f, 2.0f), 'f', 2));
-	UpdateStatistic("LDR Estimation Buffer (Cuda)", QString::number((float)gpRenderThread->m_SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2));
-
 	// Volume
 	UpdateStatistic("File", gpRenderThread->GetFileName());
 	UpdateStatistic("Bounding Box", "[" + QString::number(Scene()->m_BoundingBox.m_MinP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.z) + "] - [" + QString::number(Scene()->m_BoundingBox.m_MaxP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.z) + "]");
@@ -154,30 +142,20 @@ void QStatisticsWidget::OnRenderBegin(void)
 	UpdateStatistic("Density Range", "[" + QString::number(Scene()->m_IntensityRange.m_Min) + " - " + QString::number(Scene()->m_IntensityRange.m_Max) + "]");
 
 	// Expand all tree items
-	ExpandAll(true);
+	OnExpandAll(true);
 }
 
 void QStatisticsWidget::OnRenderEnd(void)
 {
 	// Collapse all tree items
-	ExpandAll(false);
-}
-
-void QStatisticsWidget::OnMemoryAllocate(void)
-{
-
-}
-
-void QStatisticsWidget::OnMemoryFree(void)
-{
-
+	OnExpandAll(false);
 }
 
 void QStatisticsWidget::OnPreRenderFrame(void)
 {
-
+	if (!Scene())
+		return;
 }
-
 
 void QStatisticsWidget::OnPostRenderFrame(void)
 {
@@ -196,10 +174,41 @@ void QStatisticsWidget::OnPostRenderFrame(void)
 	UpdateStatistic("Field Of View", QString::number(Scene()->m_Camera.m_FovV, 'f', 2));
 }
 
-void QStatisticsWidget::ExpandAll(const bool& Expand)
+void QStatisticsWidget::OnBufferSizeChanged(const QString& Name, const int& Size)
+{
+	QList<QTreeWidgetItem*> Items = m_Tree.findItems(Name, Qt::MatchFlag::MatchRecursive, 0);
+
+	QTreeWidgetItem* pItem = FindItem(Name);
+
+	if (!pItem)
+		return;
+
+	const QString SizeString = QString::number(Size / powf(1024.0f, 2.0f), 'f', 2);
+
+	if (Items.size() <= 0)
+	{
+		AddItem(pItem, Name, SizeString, "");
+	}
+	else
+	{
+		UpdateStatistic(Name, SizeString);
+	}
+}
+
+void QStatisticsWidget::OnExpandAll(const bool& Expand)
 {
 	QList<QTreeWidgetItem*> Items = m_Tree.findItems("*", Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard, 0);
 
 	foreach (QTreeWidgetItem* pItem, Items)
 		pItem->setExpanded(Expand);
+}
+
+QTreeWidgetItem* QStatisticsWidget::FindItem(const QString& Name)
+{
+	QList<QTreeWidgetItem*> Items = m_Tree.findItems(Name, Qt::MatchFlag::MatchRecursive, 0);
+
+	if (Items.size() <= 0)
+		return NULL;
+	else
+		return Items[0];
 }
