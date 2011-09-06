@@ -7,7 +7,7 @@
 #include "VolumePoint.h"
 #include "Flags.h"
 
-#define MAX_NO_DURATIONS 100
+#define MAX_NO_DURATIONS 300
 
 
 class CEvent
@@ -110,7 +110,6 @@ public:
 		m_NoVoxels				= Other.m_NoVoxels;
 		m_IntensityRange		= Other.m_IntensityRange;
 		m_KernelSize			= Other.m_KernelSize;
-		m_FPS					= Other.m_FPS;
 
 		return *this;
 	}
@@ -130,5 +129,4 @@ public:
 	int					m_NoVoxels;
 	CRange				m_IntensityRange;
 	Vec2f				m_KernelSize;
-	CEvent				m_FPS;
 };

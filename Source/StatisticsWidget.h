@@ -10,12 +10,14 @@ public:
     QStatisticsWidget(QWidget* pParent = NULL);
 
 	QSize sizeHint() const;
+
 	void Init(void);
+	void ExpandAll(const bool& Expand);
 
 private:
 	void PopulateTree(void);
-	QTreeWidgetItem* AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value = "", const QString& Unit = "");
-	void UpdateStatistic(const QString& Property, const QString& Value);
+	QTreeWidgetItem* AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value = "", const QString& Unit = "", const QString& Icon = "");
+	void UpdateStatistic(const QString& Group, const QString& Name, const QString& Value, const QString& Unit, const QString& Icon = "");
 	QTreeWidgetItem* FindItem(const QString& Name);
 
 public slots:
@@ -23,8 +25,7 @@ public slots:
 	void OnRenderEnd(void);
 	void OnPreRenderFrame(void);
 	void OnPostRenderFrame(void);
-	void OnBufferSizeChanged(const QString& Name, const int& Size);
-	void OnExpandAll(const bool& Expand);
+	void OnStatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit, const QString& Icon = "");
 	
 private:
 	QGridLayout		m_MainLayout;

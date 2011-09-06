@@ -6,11 +6,6 @@
 
 #define MB 1024.0f * 1024.0f
 
-QString FormatVector(const Vec3f& Vector, const int& Precision = 2)
-{
-	return "[" + QString::number(Vector.x, 'f', Precision) + ", " + QString::number(Vector.y, 'f', Precision) + ", " + QString::number(Vector.z, 'f', Precision) + "]";
-}
-
 QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
@@ -52,13 +47,13 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	m_Tree.header()->setWindowIcon(QIcon(":/Images/table-export.png"));
 	
 	PopulateTree();
-
+	
 	// Notify us when rendering begins and ends, and before/after each rendered frame
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
 	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
-	connect(&gRenderStatus, SIGNAL(BufferSizeChanged(const QString&, const int&)), this, SLOT(OnBufferSizeChanged(const QString&, const int&)));
+	connect(&gRenderStatus, SIGNAL(StatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)), this, SLOT(OnStatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)));
 }
 
 QSize QStatisticsWidget::sizeHint() const
@@ -72,38 +67,24 @@ void QStatisticsWidget::PopulateTree(void)
 	QTreeWidgetItem* pPerformance = AddItem(NULL, "Performance");
 	pPerformance->setIcon(0, QIcon(":/Images/alarm-clock.png"));
 
-	AddItem(pPerformance, "Tracer FPS", "", "Frames/Sec.");
-	AddItem(pPerformance, "No. Iterations", "", "Iterations");
-
-	// Memory
-	QTreeWidgetItem* pMemory = AddItem(NULL, "Memory");
-	pMemory->setIcon(0, QIcon(":/Images/memory.png"));
-
 	// Volume
 	QTreeWidgetItem* pVolume = AddItem(NULL, "Volume");
 	pVolume->setIcon(0, QIcon(":/Images/grid.png"));
 
-	AddItem(pVolume, "File", "");
-	AddItem(pVolume, "Bounding Box");
-	AddItem(pVolume, "Resolution");
-	AddItem(pVolume, "Spacing");
-	AddItem(pVolume, "Scale");
-	AddItem(pVolume, "No. Voxels");
-	AddItem(pVolume, "Density Range");
+	// CUDA Memory
+	QTreeWidgetItem* pMemoryCuda = AddItem(NULL, "Memory [CUDA]");
+	pMemoryCuda->setIcon(0, QIcon(":/Images/memory.png"));
+
+	// Host Memory
+	QTreeWidgetItem* pMemoryHost = AddItem(NULL, "Memory [Host]");
+	pMemoryHost->setIcon(0, QIcon(":/Images/memory.png"));
 
 	// Camera
 	QTreeWidgetItem* pCamera = AddItem(NULL, "Camera");
 	pCamera->setIcon(0, QIcon(":/Images/camera.png"));
-
-	AddItem(pCamera, "Resolution", "", "Pixels");
-	AddItem(pCamera, "Position");
-	AddItem(pCamera, "Target");
-	AddItem(pCamera, "Up Vector");
-	AddItem(pCamera, "Aperture Size");
-	AddItem(pCamera, "Field Of View");
 }
 
-QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value, const QString& Unit)
+QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value, const QString& Unit, const QString& Icon)
 {
 	// Create new item
 	QTreeWidgetItem* pItem = new QTreeWidgetItem(pParent);
@@ -117,38 +98,46 @@ QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QStr
 	return pItem;
 }
 
-void QStatisticsWidget::UpdateStatistic(const QString& Property, const QString& Value)
+void QStatisticsWidget::UpdateStatistic(const QString& Group, const QString& Name, const QString& Value, const QString& Unit, const QString& Icon)
 {
-	QList<QTreeWidgetItem*> Items = m_Tree.findItems(Property, Qt::MatchFlag::MatchRecursive, 0);
+	QTreeWidgetItem* pGroup = FindItem(Group);
 
-	foreach (QTreeWidgetItem* pItem, Items)
+	if (!pGroup)
 	{
-		pItem->setText(1, Value);
+		pGroup = AddItem(NULL, Group);
+		pGroup->setIcon(0, QIcon(Icon));
+
+		AddItem(pGroup, Name, Value, Unit, Icon);
+	}
+	else
+	{
+		bool Found = false;
+
+		for (int i = 0; i < pGroup->childCount(); i++)
+		{
+			if (pGroup->child(i)->text(0) == Name)
+			{
+				pGroup->child(i)->setText(1, Value);
+				pGroup->child(i)->setText(2, Unit);
+				Found = true;
+			}
+		}
+
+		if (!Found)
+			AddItem(pGroup, Name, Value, Unit, Icon);
 	}
 }
 
 void QStatisticsWidget::OnRenderBegin(void)
 {
-	if (!Scene())
-		return;
-		
-	// Volume
-	UpdateStatistic("File", gpRenderThread->GetFileName());
-	UpdateStatistic("Bounding Box", "[" + QString::number(Scene()->m_BoundingBox.m_MinP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MinP.z) + "] - [" + QString::number(Scene()->m_BoundingBox.m_MaxP.x) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.y) + ", " + QString::number(Scene()->m_BoundingBox.m_MaxP.z) + "]");
-	UpdateStatistic("Resolution", "[" + QString::number(Scene()->m_Resolution.m_XYZ.x) + ", " + QString::number(Scene()->m_Resolution.m_XYZ.y) + ", " + QString::number(Scene()->m_Resolution.m_XYZ.z) + "]");
-	UpdateStatistic("Spacing", "[" + QString::number(Scene()->m_Spacing.x) + ", " + QString::number(Scene()->m_Spacing.y) + ", " + QString::number(Scene()->m_Spacing.z) + "]");
-	UpdateStatistic("Scale", "[" + QString::number(Scene()->m_Scale.x) + ", " + QString::number(Scene()->m_Scale.y) + ", " + QString::number(Scene()->m_Scale.z) + "]");
-	UpdateStatistic("No. Voxels", QString::number(Scene()->m_NoVoxels));
-	UpdateStatistic("Density Range", "[" + QString::number(Scene()->m_IntensityRange.m_Min) + " - " + QString::number(Scene()->m_IntensityRange.m_Max) + "]");
-
 	// Expand all tree items
-	OnExpandAll(true);
+	ExpandAll(true);
 }
 
 void QStatisticsWidget::OnRenderEnd(void)
 {
 	// Collapse all tree items
-	OnExpandAll(false);
+	ExpandAll(false);
 }
 
 void QStatisticsWidget::OnPreRenderFrame(void)
@@ -161,41 +150,14 @@ void QStatisticsWidget::OnPostRenderFrame(void)
 {
 	if (!Scene())
 		return;
-
-	UpdateStatistic("Tracer FPS", QString::number(Scene()->m_FPS.m_FilteredDuration, 'f', 2));
-	UpdateStatistic("No. Iterations", QString::number(gpRenderThread->GetNoIterations()));
-
-	// Camera
-	UpdateStatistic("Resolution", QString::number(Scene()->m_Camera.m_Film.m_Resolution.m_XY.x) + " x " + QString::number(Scene()->m_Camera.m_Film.m_Resolution.m_XY.y));
-	UpdateStatistic("Position", FormatVector(Scene()->m_Camera.m_From));
-	UpdateStatistic("Target", FormatVector(Scene()->m_Camera.m_Target));
-	UpdateStatistic("Up Vector", FormatVector(Scene()->m_Camera.m_Up));
-	UpdateStatistic("Aperture Size", QString::number(Scene()->m_Camera.m_Aperture.m_Size, 'f', 2));
-	UpdateStatistic("Field Of View", QString::number(Scene()->m_Camera.m_FovV, 'f', 2));
 }
 
-void QStatisticsWidget::OnBufferSizeChanged(const QString& Name, const int& Size)
+void QStatisticsWidget::OnStatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit /*= ""*/, const QString& Icon /*= ""*/)
 {
-	QList<QTreeWidgetItem*> Items = m_Tree.findItems(Name, Qt::MatchFlag::MatchRecursive, 0);
-
-	QTreeWidgetItem* pItem = FindItem(Name);
-
-	if (!pItem)
-		return;
-
-	const QString SizeString = QString::number(Size / powf(1024.0f, 2.0f), 'f', 2);
-
-	if (Items.size() <= 0)
-	{
-		AddItem(pItem, Name, SizeString, "");
-	}
-	else
-	{
-		UpdateStatistic(Name, SizeString);
-	}
+	UpdateStatistic(Group, Name, Value, Unit);
 }
 
-void QStatisticsWidget::OnExpandAll(const bool& Expand)
+void QStatisticsWidget::ExpandAll(const bool& Expand)
 {
 	QList<QTreeWidgetItem*> Items = m_Tree.findItems("*", Qt::MatchFlag::MatchRecursive | Qt::MatchFlag::MatchWildcard, 0);
 
