@@ -216,6 +216,9 @@ void CRenderThread::run()
 		emit gRenderStatus.StatisticChanged("Camera", "Aperture Size", QString::number(Scene()->m_Camera.m_Aperture.m_Size, 'f', 2));
 		emit gRenderStatus.StatisticChanged("Camera", "Field Of View", QString::number(Scene()->m_Camera.m_FovV, 'f', 2));
 
+		// Copy scene from host to device
+		cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
+
 		// Resizing the image canvas requires special attention
 		if (SceneCopy.m_DirtyFlags.HasFlag(FilmResolutionDirty))
 		{
@@ -291,9 +294,6 @@ void CRenderThread::run()
 		// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 		m_Scene.m_DirtyFlags.ClearAllFlags();
 
-		// Copy scene from host to device
-		cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
-		
 		// Execute the rendering kernels
  		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
 		HandleCudaError(cudaGetLastError());

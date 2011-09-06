@@ -121,6 +121,11 @@ public:
 			bWeight[2] * z;
 	}
 
+	HOD CColorXyz ToXYZ(void)
+	{
+		return CColorXyz::FromRGB(r, g, b);
+	}
+
 	float	r;
 	float	g;
 	float	b;
