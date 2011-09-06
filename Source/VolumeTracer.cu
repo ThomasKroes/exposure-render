@@ -176,6 +176,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 //	BsdfPdf = Dot(Wi, N);
 
+	/*
 	// Sample the light with MIS
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
 	{
@@ -191,6 +192,15 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 		// Add contribution
 		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
 	}
+	
+	// Compute tau
+	const CColorXyz Tr = ;
+	*/	
+	// Attenuation due to volume
+	
+
+	Ld = Li * Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+
 	/**/
 
 	/*
@@ -238,7 +248,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	}
 	*/
 
-	return SPEC_WHITE;
+	return Ld;
 }
 
 // Uniformly samples one light
