@@ -91,7 +91,7 @@ public:
 		{
 			if (m_Presets[i].GetName() == Preset.GetName())
 			{
-				int Result = QMessageBox::question(this, "Preset already exists            ", "Overwrite?", QMessageBox::Yes | QMessageBox::No);
+				int Result = QMessageBox::question(this, "Preset already exists", "Overwrite?", QMessageBox::Yes | QMessageBox::No);
 				
 				if (Result == QMessageBox::No)
 					return;
@@ -118,6 +118,11 @@ public:
 		m_Presets.removeAt(CurrentRow);
 
 		UpdatePresetsList();
+	}
+
+	void LoadPreset(const QString& Name)
+	{
+		emit QTestWidget::LoadPreset(Name);
 	}
 
 	void LoadPresets(const bool& ChoosePath)
@@ -231,7 +236,12 @@ public:
 
 		// Write
 		for (int i = 0; i < m_Presets.size(); i++)
+		{
+			if (m_Presets[i].GetName() == "Default")
+				continue;
+
 			m_Presets[i].WriteXML(DOM, Presets);
+		}
 
 		DOM.appendChild(Presets);
 
@@ -245,8 +255,29 @@ public:
 		XmlFile.close();
 	};
 	
+	void AddPreset(T& Preset)
+	{
+		m_Presets.append(Preset);
+
+		// Update GUI
+		UpdatePresetsList();
+	};
+
+	void InsertPreset(const int& Index, T& Preset)
+	{
+		m_Presets.insert(Index, Preset);
+
+		// Update GUI
+		UpdatePresetsList();
+	};
+
 	void RenamePreset(const int& Index, const QString& Name)
 	{
+		// Check if preset with same name already exists
+		for (int i = 0; i < m_Presets.size(); i++)
+			if (m_Presets[i].GetName() == Name)
+				return;
+
 		// Rename
 		m_Presets[Index].SetName(Name);
 
@@ -266,5 +297,6 @@ public:
 		return Preset;
 	}
 
+private:
 	QList<T>	m_Presets;
 };

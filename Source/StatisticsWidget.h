@@ -19,6 +19,7 @@ private:
 	QTreeWidgetItem* AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value = "", const QString& Unit = "", const QString& Icon = "");
 	void UpdateStatistic(const QString& Group, const QString& Name, const QString& Value, const QString& Unit, const QString& Icon = "");
 	QTreeWidgetItem* FindItem(const QString& Name);
+	void RemoveChildren(const QString& Name);
 
 public slots:
 	void OnRenderBegin(void);

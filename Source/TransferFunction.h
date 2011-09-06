@@ -43,36 +43,18 @@ public:
 
 	QNode(QTransferFunction* pTransferFunction, const float& Intensity = 0.0f, const float& Opacity = 0.5f, const QColor& DiffuseColor = Qt::white, const QColor& SpecularColor = Qt::white, const float& Roughness = 100.0f);
 	
-	QNode& operator = (const QNode& Other)			
-	{
-		m_pTransferFunction	= Other.m_pTransferFunction;
-		m_Intensity			= Other.m_Intensity;
-		m_Opacity			= Other.m_Opacity;
-		m_DiffuseColor		= Other.m_DiffuseColor;
-		m_SpecularColor		= Other.m_SpecularColor;
-		m_Roughness			= Other.m_Roughness;
-		m_MinX				= Other.m_MinX;
-		m_MaxX				= Other.m_MaxX;
-		m_MinY				= Other.m_MinY;
-		m_MaxY				= Other.m_MaxY;
-		m_ID				= Other.m_ID;
+	QNode& operator = (const QNode& Other);
 
-		return *this;
-	}
+	bool operator == (const QNode& Other) const;
 
-	bool operator == (const QNode& Other) const
-	{
-		return m_ID == Other.m_ID;
-	}
-
-	float		GetNormalizedIntensity(void) const;
-	void		SetNormalizedIntensity(const float& NormalizedX);
-	float		GetNormalizedOpacity(void) const;
-	void		SetNormalizedOpacity(const float& NormalizedY);
 	float		GetIntensity(void) const;
 	void		SetIntensity(const float& Intensity);
+	float		GetNormalizedIntensity(void) const;
+	void		SetNormalizedIntensity(const float& NormalizedX);
 	float		GetOpacity(void) const;
 	void		SetOpacity(const float& Opacity);
+	float		GetNormalizedOpacity(void) const;
+	void		SetNormalizedOpacity(const float& NormalizedY);
 	QColor		GetDiffuseColor(void) const;
 	void		SetDiffuseColor(const QColor& DiffuseColor);
 	QColor		GetSpecularColor(void) const;
@@ -133,7 +115,7 @@ public:
 
 	QTransferFunction& operator = (const QTransferFunction& Other);			
 	
-	void				AddNode(const float& Position, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness);
+	void				AddNode(const float& Intensity, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness);
 	void				AddNode(const QNode& pNode);
 	void				RemoveNode(QNode* pNode);
 	float				GetRangeMin(void) const;
@@ -141,6 +123,8 @@ public:
 	float				GetRangeMax(void) const;
 	void				SetRangeMax(const float& RangeMax);
 	float				GetRange(void) const;
+	void				NormalizeIntensity(void);
+	void				DeNormalizeIntensity(void);
 	void				UpdateNodeRanges(void);
 	const QNodeList&	GetNodes(void) const;
 	QNode&				GetNode(const int& Index);
@@ -155,23 +139,24 @@ public:
 	void				ReadXML(QDomElement& Parent);
 	QDomElement			WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
+	static QTransferFunction Default(void);
+
 private slots:
 	void	OnNodeChanged(QNode* pNode);
 
 signals:
 	void	FunctionChanged(void);
 	void	SelectionChanged(QNode* pNode);
-	void	NodeCountChange();
-	void	NodeCountChanged();
 	void	HistogramChanged(void);
-
+	
 protected:
 	QNodeList		m_Nodes;
-	float			m_RangeMin;
-	float			m_RangeMax;
-	float			m_Range;
 	QNode*			m_pSelectedNode;
 	QHistogram		m_Histogram;
+
+	static float	m_RangeMin;
+	static float	m_RangeMax;
+	static float	m_Range;
 
 	friend class QNode;
 };

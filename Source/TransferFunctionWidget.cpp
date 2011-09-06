@@ -23,6 +23,6 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 
 	m_MainLayout.addWidget(&m_TransferFunctionView);
 
-	gTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, 100.0f);
-	gTransferFunction.AddNode(255.0f, 1.0f, Qt::white, Qt::white, 100.0f);
+	gTransferFunction.AddNode(0.0f, 0.0f, Qt::red, Qt::red, 100.0f);
+	gTransferFunction.AddNode(1.0f, 1.0f, Qt::green, Qt::green, 100.0f);
 }

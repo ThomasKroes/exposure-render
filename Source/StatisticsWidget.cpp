@@ -144,6 +144,13 @@ void QStatisticsWidget::OnRenderEnd(void)
 {
 	// Collapse all tree items
 	ExpandAll(false);
+
+	// Remove 2nd order children
+	RemoveChildren("Performance");
+	RemoveChildren("Volume");
+	RemoveChildren("Memory [CUDA]");
+	RemoveChildren("Memory [Host]");
+	RemoveChildren("Camera");
 }
 
 void QStatisticsWidget::OnPreRenderFrame(void)
@@ -179,4 +186,12 @@ QTreeWidgetItem* QStatisticsWidget::FindItem(const QString& Name)
 		return NULL;
 	else
 		return Items[0];
+}
+
+void QStatisticsWidget::RemoveChildren(const QString& Name)
+{
+	QTreeWidgetItem* pItem = FindItem(Name);
+
+	if (pItem)
+		qDeleteAll(pItem->takeChildren());
 }

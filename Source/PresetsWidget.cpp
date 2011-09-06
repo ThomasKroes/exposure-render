@@ -93,7 +93,8 @@ void QTestWidget::OnSavePreset(void)
 	InputDialog.setTextValue(m_PresetName.currentText());
 	InputDialog.setLabelText("Name");
 
-	InputDialog.exec();
+	if (InputDialog.exec() == QDialog::Rejected)
+		return;
 
 	if (InputDialog.textValue().isEmpty())
 		return;
@@ -111,7 +112,8 @@ void QTestWidget::OnRenamePreset(void)
 	InputDialog.setTextValue(m_PresetName.currentText());
 	InputDialog.setLabelText("Name");
 
-	InputDialog.exec();
+	if (InputDialog.exec() == QDialog::Rejected)
+		return;
 
 	// Get new name
 	QString Name = InputDialog.textValue();

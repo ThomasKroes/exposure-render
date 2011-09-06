@@ -25,24 +25,26 @@ QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const
 {
 }
 
-float QNode::GetNormalizedIntensity(void) const 
+QNode& QNode::operator=(const QNode& Other)
 {
-	return (GetIntensity() - m_pTransferFunction->m_RangeMin) / m_pTransferFunction->m_Range;
+	m_pTransferFunction	= Other.m_pTransferFunction;
+	m_Intensity			= Other.m_Intensity;
+	m_Opacity			= Other.m_Opacity;
+	m_DiffuseColor		= Other.m_DiffuseColor;
+	m_SpecularColor		= Other.m_SpecularColor;
+	m_Roughness			= Other.m_Roughness;
+	m_MinX				= Other.m_MinX;
+	m_MaxX				= Other.m_MaxX;
+	m_MinY				= Other.m_MinY;
+	m_MaxY				= Other.m_MaxY;
+	m_ID				= Other.m_ID;
+
+	return *this;
 }
 
-void QNode::SetNormalizedIntensity(const float& NormalizedIntensity)
+bool QNode::operator==(const QNode& Other) const
 {
-	SetIntensity(m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedIntensity));
-}
-
-float QNode::GetNormalizedOpacity(void) const 
-{
-	return GetOpacity();
-}
-
-void QNode::SetNormalizedOpacity(const float& NormalizedOpacity)
-{
-	SetOpacity(NormalizedOpacity);
+	return m_ID == Other.m_ID;
 }
 
 float QNode::GetIntensity(void) const
@@ -53,9 +55,19 @@ float QNode::GetIntensity(void) const
 void QNode::SetIntensity(const float& Intensity)
 {
 	m_Intensity = qMin(m_MaxX, qMax(Intensity, m_MinX));
-	
+
 	emit NodeChanged(this);
 	emit IntensityChanged(this);
+}
+
+float QNode::GetNormalizedIntensity(void) const 
+{
+	return (GetIntensity() - QTransferFunction::m_RangeMin) / QTransferFunction::m_Range;
+}
+
+void QNode::SetNormalizedIntensity(const float& NormalizedIntensity)
+{
+	SetIntensity(QTransferFunction::m_RangeMin + (QTransferFunction::m_Range * NormalizedIntensity));
 }
 
 float QNode::GetOpacity(void) const
@@ -70,6 +82,16 @@ void QNode::SetOpacity(const float& Opacity)
 
 	emit NodeChanged(this);
 	emit OpacityChanged(this);
+}
+
+float QNode::GetNormalizedOpacity(void) const 
+{
+	return GetOpacity();
+}
+
+void QNode::SetNormalizedOpacity(const float& NormalizedOpacity)
+{
+	SetOpacity(NormalizedOpacity);
 }
 
 QColor QNode::GetDiffuseColor(void) const
@@ -171,15 +193,13 @@ int QNode::GetID(void) const
 
 void QNode::ReadXML(QDomElement& Parent)
 {
-	QPresetXML::ReadXML(Parent);
+//	QPresetXML::ReadXML(Parent);
 
 	// Intensity
-	const float NormalizedIntensity = Parent.firstChildElement("NormalizedIntensity").attribute("Value").toFloat();
-	m_Intensity = m_pTransferFunction->m_RangeMin + (m_pTransferFunction->m_Range * NormalizedIntensity);
+	m_Intensity = Parent.firstChildElement("NormalizedIntensity").attribute("Value").toFloat();
 
 	// Opacity
-	const float NormalizedOpacity = Parent.firstChildElement("NormalizedOpacity").attribute("Value").toFloat();
-	m_Opacity = NormalizedOpacity;
+	m_Opacity = Parent.firstChildElement("NormalizedOpacity").attribute("Value").toFloat();
 	
 	// Diffuse Color
 	QDomElement DiffuseColor = Parent.firstChildElement("DiffuseColor");
@@ -203,18 +223,16 @@ QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	QDomElement Node = DOM.createElement("Node");
 	Parent.appendChild(Node);
 
-	QPresetXML::WriteXML(DOM, Node);
+//	QPresetXML::WriteXML(DOM, Node);
 
 	// Intensity
 	QDomElement Intensity = DOM.createElement("NormalizedIntensity");
-	const float NormalizedIntensity = GetNormalizedIntensity();
-	Intensity.setAttribute("Value", NormalizedIntensity);
+	Intensity.setAttribute("Value", GetIntensity());
 	Node.appendChild(Intensity);
 
 	// Opacity
 	QDomElement Opacity = DOM.createElement("NormalizedOpacity");
-	const float NormalizedOpacity = GetNormalizedOpacity();
-	Opacity.setAttribute("Value", NormalizedOpacity);
+	Opacity.setAttribute("Value", GetOpacity());
 	Node.appendChild(Opacity);
 
 	// Diffuse Color
@@ -239,12 +257,13 @@ QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	return Node;
 }
 
+float QTransferFunction::m_RangeMin = 0.0f;
+float QTransferFunction::m_RangeMax = 1.0f;
+float QTransferFunction::m_Range	= QTransferFunction::m_RangeMax - QTransferFunction::m_RangeMin;
+
 QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	QPresetXML(pParent),
 	m_Nodes(),
-	m_RangeMin(0.0f),
-	m_RangeMax(255.0f),
-	m_Range(m_RangeMax - m_RangeMin),
 	m_pSelectedNode(NULL),
 	m_Histogram()
 {
@@ -254,26 +273,13 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 {
 	QPresetXML::operator=(Other);
 
-	blockSignals(true);
-
 	m_Nodes			= Other.m_Nodes;
-	m_RangeMin		= Other.m_RangeMin;
-	m_RangeMax		= Other.m_RangeMax;
-	m_Range			= Other.m_Range;
 	m_pSelectedNode	= Other.m_pSelectedNode;
 	m_Histogram		= Other.m_Histogram;
 
+	// Notify us when the nodes change
 	for (int i = 0; i < m_Nodes.size(); i++)
-	{
-		// Notify us when the node changes
 		connect(&m_Nodes[i], SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
-	}
-
-	// Allow events to be fired
-	blockSignals(false);
-
-	// Inform others that our node count has changed
-	emit NodeCountChanged();
 
 	// Update node's range
 	UpdateNodeRanges();
@@ -393,16 +399,13 @@ int	QTransferFunction::GetNodeIndex(QNode* pNode)
 	return m_Nodes.indexOf(*pNode);
 }
 
-void QTransferFunction::AddNode(const float& Position, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness)
+void QTransferFunction::AddNode(const float& Intensity, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness)
 {
-	AddNode(QNode(this, Position, Opacity, DiffuseColor, SpecularColor, Roughness));
+	AddNode(QNode(this, Intensity, Opacity, DiffuseColor, SpecularColor, Roughness));
 }
 
 void QTransferFunction::AddNode(const QNode& Node)
 {
-	// Inform others that our node count is about to change
-	emit NodeCountChange();
-
 	// Add the node to the list
 	m_Nodes.append(Node);
 
@@ -430,18 +433,12 @@ void QTransferFunction::AddNode(const QNode& Node)
 
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
-
-	// Inform others that our node count has changed
-	emit NodeCountChanged();
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)
 {
 	if (!pNode)
 		return;
-
-	// Inform others that our node count is about to change
-	emit NodeCountChange();
 
 	// Remove the connection
 	disconnect(pNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
@@ -466,9 +463,30 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
+}
 
-	// Inform others that our node count has changed
-	emit NodeCountChanged();
+void QTransferFunction::NormalizeIntensity(void)
+{
+	for (int i = 0; i < m_Nodes.size(); i++)
+		m_Nodes[i].m_Intensity = (m_Nodes[i].m_Intensity - QTransferFunction::m_RangeMin) / QTransferFunction::m_Range;
+
+	// Update node's range
+	UpdateNodeRanges();
+
+	// Inform others that the transfer function has changed
+	emit FunctionChanged();
+}
+
+void QTransferFunction::DeNormalizeIntensity(void)
+{
+	for (int i = 0; i < m_Nodes.size(); i++)
+		m_Nodes[i].m_Intensity = QTransferFunction::m_RangeMin + m_Nodes[i].m_Intensity * QTransferFunction::m_Range;
+
+	// Update node's range
+	UpdateNodeRanges();
+
+	// Inform others that the transfer function has changed
+	emit FunctionChanged();
 }
 
 void QTransferFunction::UpdateNodeRanges(void)
@@ -535,30 +553,22 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
 
-	// Don't fire events during loading
-	blockSignals(true);
-
-//	SetRangeMin(Parent.attribute("RangeMin", "Failed").toInt());
-//	SetRangeMax(Parent.attribute("RangeMax", "Failed").toInt());
-
 	QDomElement Nodes = Parent.firstChild().toElement();
 
 	// Read child nodes
 	for (QDomNode DomNode = Nodes.firstChild(); !DomNode.isNull(); DomNode = DomNode.nextSibling())
 	{
 		// Create new node
-		QNode Light(this);
+		QNode Node(this);
 
 		// Load preset into it
-		Light.ReadXML(DomNode.toElement());
+		Node.ReadXML(DomNode.toElement());
 
 		// Add the node to the list
-		AddNode(Light);
+		AddNode(Node);
 	}
 
-	// Allow events again
-	blockSignals(false);
-
+	// Update node's range
 	UpdateNodeRanges();
 
 	// Inform others that the transfer function has changed
@@ -574,8 +584,6 @@ QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	QPresetXML::WriteXML(DOM, Preset);
 
 	Parent.appendChild(Preset);
-	Preset.setAttribute("RangeMin", m_RangeMin);
-	Preset.setAttribute("RangeMax", m_RangeMax);
 
 	// Nodes
 	QDomElement Nodes = DOM.createElement("Nodes");
@@ -585,4 +593,15 @@ QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 		m_Nodes[i].WriteXML(DOM, Nodes);
 
 	return Preset;
+}
+
+QTransferFunction QTransferFunction::Default(void)
+{
+	QTransferFunction DefaultTransferFunction;
+
+	DefaultTransferFunction.SetName("Default");
+	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, 100.0f);
+	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, 100.0f);
+
+	return DefaultTransferFunction;
 }
