@@ -373,18 +373,29 @@ void CRenderThread::run()
 		// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 		m_Scene.m_DirtyFlags.ClearAllFlags();
 
+		CCudaTimer Timer;
+
 		// Execute the rendering kernels
  		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
 		HandleCudaError(cudaGetLastError());
+
+		emit gRenderStatus.StatisticChanged("Performance", "Casting", QString::number(Timer.StopTimer(), 'f', 2), "ms");
+
+		Timer.StartTimer();
 
 		// Blur the estimate
  		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height()), 1.3f);
 		HandleCudaError(cudaGetLastError());
 
+		emit gRenderStatus.StatisticChanged("Performance", "Blur Estimate", QString::number(Timer.StopTimer(), 'f', 2), "ms");
+
+		Timer.StartTimer();
+
 		// Compute converged image
  		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
 		HandleCudaError(cudaGetLastError());
-		/**/
+		
+		emit gRenderStatus.StatisticChanged("Performance", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
 		// Increase the number of iterations performed so far
 		m_N++;

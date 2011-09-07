@@ -57,12 +57,12 @@ DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 
 DEV CColorRgbHdr GetDiffuseColor(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_DiffuseColor.F(D).r * 10000.0f;
+	return pDevScene->m_TransferFunctions.m_DiffuseColor.F(D);
 }
 
 DEV CColorRgbHdr GetSpecularColor(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_SpecularColor.F(D).r * 10000.0f;
+	return pDevScene->m_TransferFunctions.m_SpecularColor.F(D);
 }
 
 // Computes the attenuation through the volume
@@ -186,7 +186,8 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 		const float Weight = 1.0f;//PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
 		// Add contribution
-		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
+//		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
+		Ld += Li;// * (AbsDot(Wi, N) * Weight / LightPdf);
 	}
 	
 	// Compute tau
@@ -347,18 +348,14 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		Te += Ss;
 
 		// Fetch density
-		const short D = Density(pDevScene, Pe);
-
-		// We ignore air density
-		if (D == 0.0f)
-			continue;
+		const float D = Density(pDevScene, Pe);
 
 		// Get opacity at eye point
 		const float Tr = GetOpacity(pDevScene, D).r;
 //		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission
-//		Ltr += Ke;
+		Lv += Ltr * GetDiffuseColor(pDevScene, D).ToXYZ();
 
 		// Compute outgoing direction
 		Wo = Normalize(-Re.m_D);
@@ -371,7 +368,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			continue;
 
 		// Estimate direct light at eye point
-	 	Lv += Ltr * UniformSampleOneLight(pDevScene, Wo, Pe, Gn, RNG, Ss);
+//	 	Lv += Ltr * UniformSampleOneLight(pDevScene, Wo, Pe, Gn, RNG, Ss);
 //		Lv += Ltr * T * SPEC_WHITE;
 
 		// Compute eye transmittance
