@@ -208,7 +208,8 @@ public:
 				const Vec3f Wi = SP.m_P - SPl.m_P;
 
 				// Compute probability
-				Pdf = Dot(Wi, m_N) > 0.0f ? DistanceSquared(SP.m_P, SPl.m_P) / (AbsDot(Wi, m_N) * m_Area) : 0.0f;
+//				Pdf = Dot(Wi, m_N) > 0.0f ? DistanceSquared(SP.m_P, SPl.m_P) / (AbsDot(Wi, m_N) * m_Area) : 0.0f;
+				Pdf = DistanceSquared(SP.m_P, SPl.m_P) / (AbsDot(Wi, m_N) * m_Area);
 
 				// Set the light color
 				return Dot(Wi, m_N) > 0.0f ? Le(Vec2f(0.0f)) : SPEC_BLACK;
@@ -216,10 +217,9 @@ public:
 
 			case Background:
 			{
-				UniformSampleSphere(LS.m_LightSample.m_Pos);
+				SPl.m_P = UniformSampleSphere(LS.m_LightSample.m_Pos);
 
-				// Set the light color
-				return SPEC_WHITE;
+				return Le(Vec2f(0.0f));
 			}
 
 			default:

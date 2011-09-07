@@ -3,7 +3,9 @@
   <qresource prefix="/Images">
     <!-- Typical file operations. -->
     <file>disk.png</file>
+    <file>disks.png</file>
     <file>folder-open-document.png</file>
+    <file>folders-stack.png</file>
 
     
     <file>disk--plus.png</file>
@@ -40,6 +42,10 @@
     <file>graphic-card.png</file>
     <file>processor.png</file>
     <file>checkerboard.png</file>
+    <file>eraser.png</file>
+    <file>cross.png</file>
+    <file>edit.png</file>
+    <file>folders.png</file>
     
   </qresource>
 </RCC>

@@ -272,18 +272,17 @@ void QLighting::Update(void)
 		return;
 
 	Scene()->m_Lighting.Reset();
-
-	/*
+	
 	if (Background().GetEnabled())
 	{
 		CLight BackgroundLight;
 
 		BackgroundLight.m_Type	= CLight::Background;
-		BackgroundLight.m_Color	= CColorRgbHdr(Background().GetColor().redF(), Background().GetColor().greenF(), Background().GetColor().blueF());
+		BackgroundLight.m_Color	= Background().GetIntensity() * CColorRgbHdr(Background().GetColor().redF(), Background().GetColor().greenF(), Background().GetColor().blueF());
 
 		Scene()->m_Lighting.AddLight(BackgroundLight);
 	}
-	*/
+
 	for (int i = 0; i < m_Lights.size(); i++)
 	{
 		QLight& Light = m_Lights[i];

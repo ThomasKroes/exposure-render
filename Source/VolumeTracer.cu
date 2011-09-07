@@ -136,7 +136,8 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	float D = Density(pDevScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuseColor(pDevScene, D).ToXYZ(), pDevScene->m_TransferFunctions.m_SpecularColor.F(D).ToXYZ(), 1.0f, 1.0f);
+	CBSDF Bsdf(N, Wo, GetDiffuseColor(pDevScene, D).ToXYZ(), pDevScene->m_TransferFunctions.m_SpecularColor.F(D).ToXYZ(), 500.0f, 0.1f);//pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
+
 	// Light/shadow ray
 	CRay R; 
 
@@ -161,17 +162,12 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	R.m_MinT	= 0.0f;
 	R.m_MaxT	= (SPl.m_P - SPe.m_P).Length();
 	
-	Tr = Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
-
-	return Tr * Li;
-
 	Wi = -R.m_D; 
 
 	F = Bsdf.F(Wo, Wi); 
 
-//	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
+	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 //	BsdfPdf = Dot(Wi, N);
-
 	
 	// Sample the light with MIS
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
@@ -186,8 +182,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 		const float Weight = 1.0f;//PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
 		// Add contribution
-//		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
-		Ld += Li;// * (AbsDot(Wi, N) * Weight / LightPdf);
+		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
 	}
 	
 	// Compute tau
@@ -274,7 +269,9 @@ DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P)
 {
 	Vec3f Normal;
 
-	Vec3f X(1.0f, 0.0f, 0.0f), Y(0.0f, 1.0f, 0.0f), Z(0.0f, 0.0f, 1.0f);
+	const float Delta = pDevScene->m_Spacing.Min();
+
+	Vec3f X(Delta, 0.0f, 0.0f), Y(0.0f, Delta, 0.0f), Z(0.0f, 0.0f, Delta);
 
 	Normal.x = 0.5f * (float)(Density(pDevScene, P + X) - Density(pDevScene, P - X));
 	Normal.y = 0.5f * (float)(Density(pDevScene, P + Y) - Density(pDevScene, P - Y));
@@ -369,7 +366,6 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 
 		// Estimate direct light at eye point
 	 	Lv += Ltr * UniformSampleOneLight(pDevScene, Wo, Pe, Gn, RNG, Ss);
-//		Lv += Ltr * T * SPEC_WHITE;
 
 		// Compute eye transmittance
 		Ltr *= expf(-(Tr * Ss));
@@ -379,10 +375,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 // 			break;
 
 		if (Ltr.y() < 0.1f)
-		{
-// 			EyeTr = 
 			break;
-		}
 	}
 
 	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = Lv;

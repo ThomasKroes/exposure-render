@@ -16,6 +16,8 @@ CFilmWidget::CFilmWidget(QWidget* pParent) :
 	setStatusTip("Film properties");
 	setToolTip("Film properties");
 
+	setEnabled(false);
+
 	// Create grid layout
 	m_GridLayout.setColSpacing(0, 70);
 	setLayout(&m_GridLayout);

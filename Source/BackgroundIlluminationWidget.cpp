@@ -70,22 +70,22 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 
 void QBackgroundIlluminationWidget::OnBackgroundIlluminationChanged(bool Checked)
 {
-//	gLighting.Background().SetEnabled(Checked);
+	gLighting.Background().SetEnabled(Checked);
 }
 
 void QBackgroundIlluminationWidget::OnColorChanged(const QColor& Color)
 {
-//	gLighting.Background().SetColor(Color);
+	gLighting.Background().SetColor(Color);
 }
 
 void QBackgroundIlluminationWidget::SetIntensity(double Intensity)
 {
-//	gLighting.Background().SetIntensity(Intensity);
+	gLighting.Background().SetIntensity(Intensity);
 }
 
 void QBackgroundIlluminationWidget::OnUseTextureChanged(int UseTexture)
 {
-//	gLighting.Background().SetUseTexture(UseTexture);
+	gLighting.Background().SetUseTexture(UseTexture);
 }
 
 void QBackgroundIlluminationWidget::OnLoadTexture(void)

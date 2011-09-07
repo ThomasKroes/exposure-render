@@ -78,10 +78,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_DistanceSlider.setOrientation(Qt::Horizontal);
     m_DistanceSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_DistanceSlider.setRange(0.0, 100.0);
+	m_DistanceSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_DistanceSlider, 2, 1);
 	
-    m_DistanceSpinBox.setRange(0.0, 100.0);
+    m_DistanceSpinBox.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_DistanceSpinBox, 2, 2);
 	
 	connect(&m_DistanceSlider, SIGNAL(valueChanged(double)), &m_DistanceSpinBox, SLOT(setValue(double)));

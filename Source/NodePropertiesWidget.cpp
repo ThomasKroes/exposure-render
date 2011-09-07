@@ -145,12 +145,12 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_RoughnessSlider.setOrientation(Qt::Horizontal);
 	m_RoughnessSlider.setStatusTip("Roughness");
 	m_RoughnessSlider.setToolTip("Roughness");
-	m_RoughnessSlider.setRange(0.0f, 1000.0f);
+	m_RoughnessSlider.setRange(0.0f, 10000.0f);
 	m_MainLayout.addWidget(&m_RoughnessSlider, 5, 1);
 
 	m_RoughnessSpinBox.setStatusTip("Roughness");
 	m_RoughnessSpinBox.setToolTip("Roughness");
-	m_RoughnessSpinBox.setRange(0.0f, 1000.0f);
+	m_RoughnessSpinBox.setRange(0.0f, 10000.0f);
 	m_MainLayout.addWidget(&m_RoughnessSpinBox, 5, 2);
 
 	connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));

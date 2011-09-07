@@ -243,7 +243,7 @@ void CRenderThread::run()
 		return;
 	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(800, 600));
 	m_Scene.m_Camera.m_Aperture.m_Size = 0.01f;
 	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
 	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
@@ -255,14 +255,8 @@ void CRenderThread::run()
 
 	qDebug("Copying volume data to device");
 
-//	CCudaTimer Timer;
-
 	// Bind the volume
 	BindVolumeData((short*)m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution);
-
-//	QString Time = QString::number(Timer.StopTimer(), 'f', 2);
-
-//	QMessageBox::warning(gpMainWindow, "", "Binding took: " + Time + "secs.");
 
 	// Allocate CUDA memory for scene
 	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));
