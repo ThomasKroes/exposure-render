@@ -254,51 +254,6 @@ QLighting& QLighting::operator=(const QLighting& Other)
 	return *this;
 }
 
-void QLighting::ReadXML(QDomElement& Parent)
-{
-	SetSelectedLight(NULL);
-
-	QPresetXML::ReadXML(Parent);
-
-	QDomElement Lights = Parent.firstChild().toElement();
-
-	// Read child nodes
-	for (QDomNode DomNode = Lights.firstChild(); !DomNode.isNull(); DomNode = DomNode.nextSibling())
-	{
-		// Create new light preset
-		QLight LightPreset(this);
-
-		m_Lights.append(LightPreset);
-
-		// Load preset into it
-		m_Lights.back().ReadXML(DomNode.toElement());
-	}
-
-	QDomElement Background = Parent.firstChildElement("Background").toElement();
- 	m_Background.ReadXML(Background);
-
-	SetSelectedLight(0);
-}
-
-QDomElement QLighting::WriteXML(QDomDocument& DOM, QDomElement& Parent)
-{
-	// Preset
-	QDomElement Preset = DOM.createElement("Preset");
-	Parent.appendChild(Preset);
-
-	QPresetXML::WriteXML(DOM, Preset);
-
-	QDomElement Lights = DOM.createElement("Lights");
-	Preset.appendChild(Lights);
-
-	for (int i = 0; i < m_Lights.size(); i++)
-		m_Lights[i].WriteXML(DOM, Lights);
-	
- 	m_Background.WriteXML(DOM, Preset);
-
-	return Preset;
-}
-
 void QLighting::OnLightPropertiesChanged(QLight* pLight)
 {
 	Update();
@@ -483,4 +438,63 @@ void QLighting::RenameLight(const int& Index, const QString& Name)
 
 	// Let others know the lighting has changed
 	emit LightingChanged();
+}
+
+void QLighting::ReadXML(QDomElement& Parent)
+{
+	SetSelectedLight(NULL);
+
+	QPresetXML::ReadXML(Parent);
+
+	QDomElement Lights = Parent.firstChild().toElement();
+
+	// Read child nodes
+	for (QDomNode DomNode = Lights.firstChild(); !DomNode.isNull(); DomNode = DomNode.nextSibling())
+	{
+		// Create new light preset
+		QLight LightPreset(this);
+
+		m_Lights.append(LightPreset);
+
+		// Load preset into it
+		m_Lights.back().ReadXML(DomNode.toElement());
+	}
+
+	QDomElement Background = Parent.firstChildElement("Background").toElement();
+	m_Background.ReadXML(Background);
+
+	SetSelectedLight(0);
+}
+
+QDomElement QLighting::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+{
+	// Preset
+	QDomElement Preset = DOM.createElement("Preset");
+	Parent.appendChild(Preset);
+
+	QPresetXML::WriteXML(DOM, Preset);
+
+	QDomElement Lights = DOM.createElement("Lights");
+	Preset.appendChild(Lights);
+
+	for (int i = 0; i < m_Lights.size(); i++)
+		m_Lights[i].WriteXML(DOM, Lights);
+
+	m_Background.WriteXML(DOM, Preset);
+
+	return Preset;
+}
+
+QLighting QLighting::Default(void)
+{
+	QLighting DefaultLighting;
+
+	DefaultLighting.SetName("Default");
+
+	QLight Light;
+	Light.SetName("Key");
+
+	DefaultLighting.AddLight(Light);
+
+	return DefaultLighting;
 }

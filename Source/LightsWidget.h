@@ -35,6 +35,7 @@ protected slots:
 	void OnRemoveLight(void);
 	void OnRenameLight(void);
 	void OnCopyLight(void);
+	void OnReset(void);
 
 protected:
 	QGridLayout		m_MainLayout;
@@ -43,6 +44,7 @@ protected:
 	QPushButton		m_RemoveLight;
 	QPushButton		m_RenameLight;
 	QPushButton		m_CopyLight;
-	
+	QPushButton		m_Reset;
+
 	friend class QLightingWidget;
 };

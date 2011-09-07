@@ -365,8 +365,7 @@ IF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
   SET (TransferFunctionSrcs ${TransferFunctionSrcs})
 ENDIF (${CMAKE_BUILD_TOOL} MATCHES "devenv")
 
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionHeaders} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CudaSources}
-)
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${SimpleViewSrcs} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${TransferFunctionHeaders} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CudaSources})
 
 TARGET_LINK_LIBRARIES(ExposureRender
   QVTK
@@ -379,25 +378,39 @@ TARGET_LINK_LIBRARIES(ExposureRender
 )
 
 ### VTK dependencies ###
-#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkRendering.dll")
-#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkGraphics.dll")
-#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkIO.dll")
-#INSTALL_FILES(/ FILES "${VTK_BINARY_DIR}\\\\vtkCommon.dll")
+FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")
+INSTALL_FILES(/bin FILES ${VtkDlls})
+
+### CUDA dependencies ###
+SET(CudaDlls
+	${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart32_40_17.dll
+	${CUDA_TOOLKIT_ROOT_DIR}/bin/curand32_40_17.dll
+)
+
+INSTALL_FILES(/bin FILES ${CudaDlls})
+
+### QT dependencies ###
+SET(QtDlls
+	${QT_BINARY_DIR}/QtCore4.dll
+	${QT_BINARY_DIR}/QtGui4.dll
+	${QT_BINARY_DIR}/QtXml4.dll
+)
+
+INSTALL_FILES(/bin FILES ${QtDlls})
 
 ### Example .mhd and .raw files ###
 INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.mhd")
 INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.raw")
 
 ### Preset files ###
-INSTALL_FILES(/ FILES ${CMAKE_CURRENT_BINARY_DIR}\\\\AppearancePresets.xml)
-INSTALL_FILES(/ FILES ${CMAKE_CURRENT_BINARY_DIR}\\\\LightingPresets.xml)
-INSTALL_FILES(/ FILES ${CMAKE_CURRENT_BINARY_DIR}\\\\CameraPresets.xml)
+FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")
+INSTALL_FILES(/bin FILES ${Presets})
 
 ### ReadMe and Copyright ###
 INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
 INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
 
-INSTALL_TARGETS(/ ExposureRender)
+INSTALL_TARGETS(/bin ExposureRender)
 
 INCLUDE(InstallRequiredSystemLibraries)
 
@@ -426,7 +439,6 @@ set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 SET(CPACK_PACKAGE_EXECUTABLES "ExposureRender;Exposure Render")
 
 
- 
 INCLUDE(CPack)
 
 

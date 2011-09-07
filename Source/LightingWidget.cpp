@@ -1,5 +1,6 @@
 
 #include "LightingWidget.h"
+#include "RenderThread.h"
 
 QLightingWidget::QLightingWidget(QWidget* pParent) :
 	QWidget(pParent),
@@ -21,6 +22,8 @@ QLightingWidget::QLightingWidget(QWidget* pParent) :
 	// Connections
 	connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
 	connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
+	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 }
 
 void QLightingWidget::OnLoadPreset(const QString& Name)
@@ -35,4 +38,18 @@ void QLightingWidget::OnSavePreset(const QString& Name)
 
 	// Add the preset
 	m_PresetsWidget.SavePreset(Preset);
+}
+
+void QLightingWidget::OnRenderBegin(void)
+{
+	// Add a default transfer function and load it
+	m_PresetsWidget.InsertPreset(0, QLighting::Default());
+	m_PresetsWidget.LoadPreset("Default");
+}
+
+void QLightingWidget::OnRenderEnd(void)
+{
+	// Add a default transfer function and load it
+	m_PresetsWidget.InsertPreset(0, QLighting::Default());
+	m_PresetsWidget.LoadPreset("Default");
 }

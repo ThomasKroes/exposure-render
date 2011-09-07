@@ -24,7 +24,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_LightList.setSelectionMode(QAbstractItemView::SingleSelection);
 	m_LightList.setAlternatingRowColors(true);
 	m_LightList.setSortingEnabled(true);
-	m_MainLayout.addWidget(&m_LightList, 0, 0, 1, 5);
+	m_MainLayout.addWidget(&m_LightList, 0, 0, 1, 6);
 
 	// Add light
 // 	m_AddLight.setText("Add");
@@ -61,6 +61,15 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
  	m_CopyLight.setFixedWidth(24);
 	m_CopyLight.setFixedHeight(24);
 	m_MainLayout.addWidget(&m_CopyLight, 1, 3);
+
+	// Reset
+	m_Reset.setIcon(QIcon(":/Images/document-copy.png"));
+	m_Reset.setToolTip("Reset Lighting");
+	m_Reset.setStatusTip("Reset lighting to defaults");
+	m_Reset.setFixedWidth(24);
+	m_Reset.setFixedHeight(24);
+	m_MainLayout.addWidget(&m_Reset, 1, 4);
+	
 
  	connect(&m_LightList, SIGNAL(itemSelectionChanged()), this, SLOT(OnLightSelectionChanged()));
 	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*, QLight*)), this, SLOT(OnLightSelectionChanged(QLight*, QLight*)));
@@ -186,4 +195,8 @@ void QLightsWidget::OnRenameLight(void)
 void QLightsWidget::OnCopyLight(void)
 {
 	gLighting.CopySelectedLight();
+}
+
+void QLightsWidget::OnReset(void)
+{
 }

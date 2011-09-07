@@ -77,8 +77,6 @@ public:
 
 	QLighting& QLighting::operator=(const QLighting& Other);
 	
-	void			ReadXML(QDomElement& Parent);
-	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	void			AddLight(QLight& Light);
 	void			RemoveLight(QLight* pLight);
 	void			RemoveLight(const int& Index);
@@ -91,6 +89,10 @@ public:
 	QLight*			GetSelectedLight(void);
 	void			SelectPreviousLight(void);
 	void			SelectNextLight(void);
+	void			ReadXML(QDomElement& Parent);
+	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
+
+	static QLighting Default(void);
 
 public slots:
 	void OnLightPropertiesChanged(QLight* pLight);

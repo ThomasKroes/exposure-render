@@ -153,12 +153,12 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 //	BsdfPdf = Dot(Wi, N);
 
-	/*
+	
 	// Sample the light with MIS
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
 	{
 		// Compute tau
-		const CColorXyz Tr = Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+		Tr = Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
 		
 		// Attenuation due to volume
 		Li *= Tr;
@@ -171,12 +171,12 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	}
 	
 	// Compute tau
-	const CColorXyz Tr = ;
-	*/	
+
+	/**/	
 	// Attenuation due to volume
 	
 
-	Ld = Li * Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+//	Ld = Li * Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
 
 	/**/
 
@@ -247,38 +247,6 @@ DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Ve
 
 	// Return estimated direct light
 	return (float)pDevScene->m_Lighting.m_NoLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
-}
-
-HOD float PhaseHG(const Vec3f& W, const Vec3f& Wp, float G)
-{
-	float CosTheta = Dot(W, Wp);
-	return 1.0f / (4.0f * PI_F) * (1.0f - G * G) / powf(1.0f + G * G - 2.0f * G * CosTheta, 1.5f);
-}
-
-HOD Vec3f SampleHG(const Vec3f& W, float G, const Vec2f& U)
-{
-	float CosTheta;
-
-	if (fabsf(G) < 1e-3)
-	{
-		CosTheta = 1.0f - 2.0f * U.x;
-	}
-	else
-	{
-		float SqrtTerm = (1.0f - G * G) / (1.0f - G + 2.0f * G * U.x);
-		CosTheta = (1.0f + G * G - SqrtTerm * SqrtTerm) / (2.0f * G);
-	}
-
-	float SinTheta = sqrtf(max(0.f, 1.f - CosTheta * CosTheta));
-	float Phi = 2.f * PI_F * U.y;
-	Vec3f V1, V2;
-	CoordinateSystem(W, &V1, &V2);
-	return SphericalDirection(SinTheta, CosTheta, Phi, V1, V2, W);
-}
-
-HOD float PdfHG(const Vec3f& W, const Vec3f& Wp, float G)
-{
-	return PhaseHG(W, Wp, G);
 }
 
 // Fetches the density from the texture
