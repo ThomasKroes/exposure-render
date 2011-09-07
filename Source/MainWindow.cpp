@@ -151,7 +151,7 @@ void CMainWindow::SetupDockingWidgets()
 	// Statistics dock widget
 	m_StatisticsDockWidget.setEnabled(false);
 	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::LeftDockWidgetArea, &m_StatisticsDockWidget);
+    addDockWidget(Qt::RightDockWidgetArea, &m_StatisticsDockWidget);
     m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());
 
 	// Camera dock widget
@@ -163,12 +163,12 @@ void CMainWindow::SetupDockingWidgets()
 	// Settings dock widget
 	m_SettingsDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::RightDockWidgetArea, &m_SettingsDockWidget);
+    addDockWidget(Qt::LeftDockWidgetArea, &m_SettingsDockWidget);
     m_pViewMenu->addAction(m_SettingsDockWidget.toggleViewAction());
 
 	tabifyDockWidget(&m_AppearanceDockWidget, &m_LightingDockWidget);
 	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);
-	tabifyDockWidget(&m_CameraDockWidget, &m_SettingsDockWidget);
+//	tabifyDockWidget(&m_CameraDockWidget, &m_SettingsDockWidget);
 
 	m_AppearanceDockWidget.raise();
 }

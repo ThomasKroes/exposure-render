@@ -95,10 +95,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_WidthSlider.setOrientation(Qt::Horizontal);
     m_WidthSlider.setFocusPolicy(Qt::StrongFocus);
     m_WidthSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_WidthSlider.setRange(0.0, 100.0);
+	m_WidthSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_WidthSlider, 3, 1);
 	
-	m_WidthSpinBox.setRange(0.0, 100.0);
+	m_WidthSpinBox.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_WidthSpinBox, 3, 2);
 	
 	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_WidthSpinBox, SLOT(setValue(double)));

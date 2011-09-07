@@ -27,23 +27,17 @@ CRenderStatus gRenderStatus;
 // Render thread
 CRenderThread* gpRenderThread = NULL;
 
-bool InitializeCuda(void)
+// This function wraps the CUDA Driver API into a template function
+template <class T>
+inline void getCudaAttribute(T *attribute, CUdevice_attribute device_attribute, int device)
 {
-	/*
-	// No CUDA enabled devices
-	int NoDevices = 0;
+	CUresult error = 	cuDeviceGetAttribute( attribute, device_attribute, device );
 
-	cudaError_t ErrorID = cudaGetDeviceCount(&NoDevices);
-
-	if (ErrorID != cudaSuccess)
-		throw QString("Unable to initialize CUDA");
-
-	// This function call returns 0 if there are no CUDA capable devices.
-	if (NoDevices == 0)
-		throw QString("There is no device supporting CUDA");
-	*/
-
-	return cudaSetDevice(cutGetMaxGflopsDeviceId()) == cudaSuccess;
+	if( CUDA_SUCCESS != error) {
+		fprintf(stderr, "cuSafeCallNoSync() Driver API error = %04d from file <%s>, line %i.\n",
+			error, __FILE__, __LINE__);
+		exit(-1);
+	}
 }
 
 class CCudaTimer
@@ -162,6 +156,82 @@ CRenderThread::CRenderThread(QObject* pParent) :
 
 CRenderThread::~CRenderThread(void)
 {
+}
+
+bool CRenderThread::InitializeCuda(void)
+{
+	// No CUDA enabled devices
+	int NoDevices = 0;
+
+	cudaError_t ErrorID = cudaGetDeviceCount(&NoDevices);
+
+	emit gRenderStatus.StatisticChanged("Graphics Card", "No. CUDA capable devices", QString::number(NoDevices));
+
+	int DriverVersion = 0, RuntimeVersion = 0; 
+
+	cudaDriverGetVersion(&DriverVersion);
+	cudaRuntimeGetVersion(&RuntimeVersion);
+
+	QString DriverVersionString		= QString::number(DriverVersion / 1000) + "." + QString::number(DriverVersion % 100);
+	QString RuntimeVersionString	= QString::number(RuntimeVersion / 1000) + "." + QString::number(RuntimeVersion % 100);
+
+	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Driver Version", DriverVersionString);
+	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Runtime Version", RuntimeVersionString);
+
+	for (int Device = 0; Device < NoDevices; Device++)
+	{
+		QString DeviceString = "Device " + QString::number(Device);
+
+		emit gRenderStatus.StatisticChanged("Graphics Card", DeviceString, "");
+
+		cudaDeviceProp DeviceProperties;
+		cudaGetDeviceProperties(&DeviceProperties, Device);
+
+		QString CudaCapabilityString = QString::number(DeviceProperties.major) + "." + QString::number(DeviceProperties.minor);
+		
+		emit gRenderStatus.StatisticChanged(DeviceString, "CUDA Capability", CudaCapabilityString);
+
+		// Memory
+		emit gRenderStatus.StatisticChanged(DeviceString, "Memory", "", "");
+
+		emit gRenderStatus.StatisticChanged("Memory", "Total Global Memory", QString::number((float)DeviceProperties.totalGlobalMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
+		emit gRenderStatus.StatisticChanged("Memory", "Total Constant Memory", QString::number((float)DeviceProperties.totalConstMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
+
+		int MemoryClock, MemoryBusWidth, L2CacheSize;
+		getCudaAttribute<int>(&MemoryClock, CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, Device);
+		getCudaAttribute<int>(&MemoryBusWidth, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, Device);
+		getCudaAttribute<int>(&L2CacheSize, CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, Device);
+
+		emit gRenderStatus.StatisticChanged("Memory", "Memory Clock Rate", QString::number(MemoryClock * 1e-3f), "Mhz");
+		emit gRenderStatus.StatisticChanged("Memory", "Memory Bus Width", QString::number(MemoryBusWidth), "bit");
+		emit gRenderStatus.StatisticChanged("Memory", "L2 Cache Size", QString::number(L2CacheSize), "bytes");
+
+		emit gRenderStatus.StatisticChanged("Memory", "Maximum Memory Pitch", QString::number((float)DeviceProperties.memPitch / powf(1024.0f, 2.0f), 'f', 2), "MB");
+		
+		// Processor
+		emit gRenderStatus.StatisticChanged(DeviceString, "Processor", "", "");
+		emit gRenderStatus.StatisticChanged("Processor", "No. Multiprocessors", QString::number(DeviceProperties.multiProcessorCount), "Processors");
+		emit gRenderStatus.StatisticChanged("Processor", "GPU Clock Speed", QString::number(DeviceProperties.clockRate * 1e-6f, 'f', 2), "GHz");
+
+
+		emit gRenderStatus.StatisticChanged("Processor", "Maximum Block Size", QString::number(DeviceProperties.maxThreadsDim[0]) + " x " + QString::number(DeviceProperties.maxThreadsDim[1]) + " x " + QString::number(DeviceProperties.maxThreadsDim[2]), "Threads");
+		emit gRenderStatus.StatisticChanged("Processor", "Maximum Grid Size", QString::number(DeviceProperties.maxGridSize[0]) + " x " + QString::number(DeviceProperties.maxGridSize[1]) + " x " + QString::number(DeviceProperties.maxGridSize[2]), "Blocks");
+		emit gRenderStatus.StatisticChanged("Processor", "Warp Size", QString::number(DeviceProperties.warpSize), "Threads");
+		emit gRenderStatus.StatisticChanged("Processor", "Maximum No. Threads/Block", QString::number(DeviceProperties.maxThreadsPerBlock), "Threads");
+
+		emit gRenderStatus.StatisticChanged("Processor", "Maximum Shared Memory Per Block", QString::number((float)DeviceProperties.sharedMemPerBlock / 1024.0f, 'f', 2), "KB");
+		emit gRenderStatus.StatisticChanged("Processor", "Registers Available Per Block", QString::number((float)DeviceProperties.regsPerBlock / 1024.0f, 'f', 2), "KB");
+
+
+		// Texture
+		emit gRenderStatus.StatisticChanged(DeviceString, "Texture", "", "");
+		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 1D", QString::number(DeviceProperties.maxTexture1D), "Pixels");
+		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 2D", QString::number(DeviceProperties.maxTexture2D[0]) + " x " + QString::number(DeviceProperties.maxTexture2D[1]), "Pixels");
+		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 3D", QString::number(DeviceProperties.maxTexture3D[0]) + " x " + QString::number(DeviceProperties.maxTexture3D[1]) + " x " + QString::number(DeviceProperties.maxTexture3D[2]), "Pixels");
+		emit gRenderStatus.StatisticChanged("Texture", "Alignment", QString::number((float)DeviceProperties.textureAlignment / powf(1024.0f, 2.0f), 'f', 2), "MB");
+	}	
+	
+	return cudaSetDevice(cutGetMaxGflopsDeviceId()) == cudaSuccess;
 }
 
 void CRenderThread::run()

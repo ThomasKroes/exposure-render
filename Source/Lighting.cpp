@@ -245,7 +245,14 @@ QLighting& QLighting::operator=(const QLighting& Other)
 {
 	QPresetXML::operator=(Other);
 
+	foreach (QLight Light, m_Lights)
+		disconnect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
+
 	m_Lights			= Other.m_Lights;
+
+	foreach (QLight Light, m_Lights)
+		connect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
+
 	m_pSelectedLight	= Other.m_pSelectedLight;
 	m_Background		= Other.m_Background;
 
@@ -266,6 +273,7 @@ void QLighting::Update(void)
 
 	Scene()->m_Lighting.Reset();
 
+	/*
 	if (Background().GetEnabled())
 	{
 		CLight BackgroundLight;
@@ -275,7 +283,7 @@ void QLighting::Update(void)
 
 		Scene()->m_Lighting.AddLight(BackgroundLight);
 	}
-
+	*/
 	for (int i = 0; i < m_Lights.size(); i++)
 	{
 		QLight& Light = m_Lights[i];
@@ -288,9 +296,9 @@ void QLighting::Update(void)
 		AreaLight.m_Width		= Light.GetWidth();
 		AreaLight.m_Height		= Light.GetHeight();
 		AreaLight.m_Distance	= Light.GetDistance();
-		AreaLight.m_Color		= CColorRgbHdr(Light.GetColor().redF(), Light.GetColor().greenF(), Light.GetColor().blueF());
+		AreaLight.m_Color		= Light.GetIntensity() * CColorRgbHdr(Light.GetColor().redF(), Light.GetColor().greenF(), Light.GetColor().blueF());
 
-		AreaLight.Update();
+		AreaLight.Update(Scene()->m_BoundingBox);
 
 		Scene()->m_Lighting.AddLight(AreaLight);
 	}

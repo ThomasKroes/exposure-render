@@ -82,6 +82,10 @@ void QStatisticsWidget::PopulateTree(void)
 	// Camera
 	QTreeWidgetItem* pCamera = AddItem(NULL, "Camera");
 	pCamera->setIcon(0, QIcon(":/Images/camera.png"));
+
+	// Camera
+	QTreeWidgetItem* pGraphicsCard = AddItem(NULL, "Graphics Card");
+	pGraphicsCard->setIcon(0, QIcon(":/Images/graphic-card.png"));
 }
 
 QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value, const QString& Unit, const QString& Icon)

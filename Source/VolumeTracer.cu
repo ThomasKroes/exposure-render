@@ -50,6 +50,21 @@ DEV float Density(const Vec3f& P)
 	return (float)(SHRT_MAX * tex3D(gTexDensity, P.x, P.y, P.z));
 }
 
+DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
+{
+	return pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 10000.0f;
+}
+
+DEV CColorRgbHdr GetDiffuseColor(CScene* pDevScene, const float& D)
+{
+	return pDevScene->m_TransferFunctions.m_DiffuseColor.F(D).r * 10000.0f;
+}
+
+DEV CColorRgbHdr GetSpecularColor(CScene* pDevScene, const float& D)
+{
+	return pDevScene->m_TransferFunctions.m_SpecularColor.F(D).r * 10000.0f;
+}
+
 // Computes the attenuation through the volume
 DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, const float& MaxT, const float& StepSize, CCudaRNG& RNG)
 {
@@ -81,15 +96,19 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 		}
 
 		// Get shadow opacity
-		const float		Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 100.0f;
-		const CColorXyz	Color	= pDevScene->m_TransferFunctions.m_DiffuseColor.F(D).ToXYZ();
+		const float		Opacity = GetOpacity(pDevScene, D).r;
+		const CColorXyz	Color	= GetDiffuseColor(pDevScene, D).r;
 
 		if (Opacity > 0.0f)
 		{
 			// Compute chromatic attenuation
-			Lt.c[0] *= expf(-(Opacity * (1.0f - Color.c[0]) * StepSize));
-			Lt.c[1] *= expf(-(Opacity * (1.0f - Color.c[1]) * StepSize));
-			Lt.c[2] *= expf(-(Opacity * (1.0f - Color.c[2]) * StepSize));
+// 			Lt.c[0] *= expf(-(Opacity * (1.0f - Color.c[0]) * StepSize));
+// 			Lt.c[1] *= expf(-(Opacity * (1.0f - Color.c[1]) * StepSize));
+// 			Lt.c[2] *= expf(-(Opacity * (1.0f - Color.c[2]) * StepSize));
+
+			Lt.c[0] *= expf(-(Opacity * StepSize));
+			Lt.c[1] *= expf(-(Opacity * StepSize));
+			Lt.c[2] *= expf(-(Opacity * StepSize));
 
 			// Exit if eye transmittance is very small
 			if (Lt.y() < 0.05f)
@@ -121,7 +140,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	float D = Density(Pe);
 
-	CBSDF Bsdf(N, Wo, pDevScene->m_TransferFunctions.m_DiffuseColor.F(D).ToXYZ(), pDevScene->m_TransferFunctions.m_SpecularColor.F(D).ToXYZ(), 1.0f, 1.0f);
+	CBSDF Bsdf(N, Wo, GetDiffuseColor(pDevScene, D).ToXYZ(), pDevScene->m_TransferFunctions.m_SpecularColor.F(D).ToXYZ(), 1.0f, 1.0f);
 	// Light/shadow ray
 	CRay R; 
 
@@ -150,7 +169,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	F = Bsdf.F(Wo, Wi); 
 
-	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
+//	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 //	BsdfPdf = Dot(Wi, N);
 
 	
@@ -249,12 +268,6 @@ DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Ve
 	return (float)pDevScene->m_Lighting.m_NoLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
 }
 
-// Fetches the density from the texture
-DEV inline float LookupDensity(const Vec3f& P)
-{
-	return (float)(SHRT_MAX * tex3D(gTexDensity, P.x, P.y, P.z));
-}
-
 // Computes the local gradient
 DEV Vec3f ComputeGradient(const Vec3f& P)
 {
@@ -267,84 +280,6 @@ DEV Vec3f ComputeGradient(const Vec3f& P)
 	Normal.z = 0.5f * (float)(Density(P + Z) - Density(P - Z));
 
 	return -Normal;
-}
-
-DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
-{
-	float MinT = 0.0f, MaxT = 0.0f;
-
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
-		return false;
-
-	MinT = max(MinT, R.m_MinT);
-	MaxT = min(MaxT, R.m_MaxT);
-
-	float S = -log(RNG.Get1()) / pDevScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
-
-	Vec3f samplePos; 
-
-	MinT += RNG.Get1() * Dt;
-
-	while (Sum < S)
-	{
-		samplePos = R.m_O + MinT * R.m_D;
-
-		if (MinT > MaxT)
-			return false;
-		
-		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
-
-		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Opacity.F(D)[Component] * pDevScene->m_TransferFunctions.m_DiffuseColor.F(D)[Component];
-		Sum		+= SigmaT * Dt;
-		MinT	+= Dt;
-	}
-
-	VP.m_Transmittance.c[Component]	= 0.5f;
-	VP.m_P							= samplePos;
-	VP.m_D							= D;
-
-	return true;
-}
-
-DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
-{
-	float MinT = 0.0f, MaxT = 0.0f;
-
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
-		return false;
-
-	MinT = max(MinT, R.m_MinT);
-//	MaxT = min(MaxT, R.m_MaxT);
-
-	float S = -log(RNG.Get1()) / pDevScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
-
-	Vec3f samplePos; 
-
-	MinT += RNG.Get1() * Dt;
-
-	while (Sum < S)
-	{
-		samplePos = R.m_O + MinT * R.m_D;
-
-		// Free path, no collisions in between
-		if (MinT > R.m_MaxT)
-			break;
-		
-		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
-
-		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Opacity.F(D)[Component] * pDevScene->m_TransferFunctions.m_DiffuseColor.F(D)[Component];
-		Sum		+= SigmaT * Dt;
-		MinT	+= Dt;
-	}
-
-	if (MinT < R.m_MaxT)
-		return false;
-
-	VP.m_Transmittance.c[Component]	= 0.5f;
-	VP.m_P							= samplePos;
-	VP.m_D							= D;
-
-	return true;
 }
 
 // Trace volume with single scattering
@@ -421,7 +356,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			continue;
 
 		// Get opacity at eye point
-		const float Tr = pDevScene->m_TransferFunctions.m_Opacity.F(D).r;
+		const float Tr = GetOpacity(pDevScene, D).r;
 //		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission

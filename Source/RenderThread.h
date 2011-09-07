@@ -43,6 +43,7 @@ public:
 
 	void run();
 
+	bool			InitializeCuda(void);
 	QString			GetFileName(void) const;
 	int				GetNoIterations(void) const;
 	unsigned char*	GetRenderImage(void) const;

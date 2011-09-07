@@ -37,5 +37,6 @@
     <file>application-list.png</file>
     <file>light-bulb.png</file>
     <file>document-copy.png</file>
+    <file>graphic-card.png</file>
   </qresource>
 </RCC>

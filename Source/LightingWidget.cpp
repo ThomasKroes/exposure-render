@@ -28,7 +28,7 @@ QLightingWidget::QLightingWidget(QWidget* pParent) :
 
 void QLightingWidget::OnLoadPreset(const QString& Name)
 {
-	gLighting = m_PresetsWidget.GetPreset(Name);
+//	gLighting = m_PresetsWidget.GetPreset(Name);
 }
 
 void QLightingWidget::OnSavePreset(const QString& Name)

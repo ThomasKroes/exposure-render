@@ -70,7 +70,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_Reset.setFixedHeight(24);
 	m_MainLayout.addWidget(&m_Reset, 1, 4);
 	
-
+	// Inform us when the light selection changes, a light is added/removed/renamed/copied
  	connect(&m_LightList, SIGNAL(itemSelectionChanged()), this, SLOT(OnLightSelectionChanged()));
 	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*, QLight*)), this, SLOT(OnLightSelectionChanged(QLight*, QLight*)));
  	connect(&m_AddLight, SIGNAL(clicked()), this, SLOT(OnAddLight()));
