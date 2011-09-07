@@ -192,24 +192,24 @@ bool CRenderThread::InitializeCuda(void)
 		emit gRenderStatus.StatisticChanged(DeviceString, "CUDA Capability", CudaCapabilityString);
 
 		// Memory
-		emit gRenderStatus.StatisticChanged(DeviceString, "Memory", "", "");
+		emit gRenderStatus.StatisticChanged(DeviceString, "On Board Memory", "", "", "memory");
 
-		emit gRenderStatus.StatisticChanged("Memory", "Total Global Memory", QString::number((float)DeviceProperties.totalGlobalMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
-		emit gRenderStatus.StatisticChanged("Memory", "Total Constant Memory", QString::number((float)DeviceProperties.totalConstMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
+		emit gRenderStatus.StatisticChanged("On Board Memory", "Total Global Memory", QString::number((float)DeviceProperties.totalGlobalMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
+		emit gRenderStatus.StatisticChanged("On Board Memory", "Total Constant Memory", QString::number((float)DeviceProperties.totalConstMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
 
 		int MemoryClock, MemoryBusWidth, L2CacheSize;
 		getCudaAttribute<int>(&MemoryClock, CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, Device);
 		getCudaAttribute<int>(&MemoryBusWidth, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, Device);
 		getCudaAttribute<int>(&L2CacheSize, CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, Device);
 
-		emit gRenderStatus.StatisticChanged("Memory", "Memory Clock Rate", QString::number(MemoryClock * 1e-3f), "Mhz");
-		emit gRenderStatus.StatisticChanged("Memory", "Memory Bus Width", QString::number(MemoryBusWidth), "bit");
-		emit gRenderStatus.StatisticChanged("Memory", "L2 Cache Size", QString::number(L2CacheSize), "bytes");
+		emit gRenderStatus.StatisticChanged("On Board Memory", "Memory Clock Rate", QString::number(MemoryClock * 1e-3f), "Mhz");
+		emit gRenderStatus.StatisticChanged("On Board Memory", "Memory Bus Width", QString::number(MemoryBusWidth), "bit");
+		emit gRenderStatus.StatisticChanged("On Board Memory", "L2 Cache Size", QString::number(L2CacheSize), "bytes");
 
-		emit gRenderStatus.StatisticChanged("Memory", "Maximum Memory Pitch", QString::number((float)DeviceProperties.memPitch / powf(1024.0f, 2.0f), 'f', 2), "MB");
+		emit gRenderStatus.StatisticChanged("On Board Memory", "Maximum Memory Pitch", QString::number((float)DeviceProperties.memPitch / powf(1024.0f, 2.0f), 'f', 2), "MB");
 		
 		// Processor
-		emit gRenderStatus.StatisticChanged(DeviceString, "Processor", "", "");
+		emit gRenderStatus.StatisticChanged(DeviceString, "Processor", "", "", "processor");
 		emit gRenderStatus.StatisticChanged("Processor", "No. Multiprocessors", QString::number(DeviceProperties.multiProcessorCount), "Processors");
 		emit gRenderStatus.StatisticChanged("Processor", "GPU Clock Speed", QString::number(DeviceProperties.clockRate * 1e-6f, 'f', 2), "GHz");
 
@@ -224,7 +224,7 @@ bool CRenderThread::InitializeCuda(void)
 
 
 		// Texture
-		emit gRenderStatus.StatisticChanged(DeviceString, "Texture", "", "");
+		emit gRenderStatus.StatisticChanged(DeviceString, "Texture", "", "", "checkerboard");
 		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 1D", QString::number(DeviceProperties.maxTexture1D), "Pixels");
 		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 2D", QString::number(DeviceProperties.maxTexture2D[0]) + " x " + QString::number(DeviceProperties.maxTexture2D[1]), "Pixels");
 		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 3D", QString::number(DeviceProperties.maxTexture3D[0]) + " x " + QString::number(DeviceProperties.maxTexture3D[1]) + " x " + QString::number(DeviceProperties.maxTexture3D[2]), "Pixels");
@@ -267,7 +267,7 @@ void CRenderThread::run()
 	// Allocate CUDA memory for scene
 	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));
 
-	emit gRenderStatus.StatisticChanged("Memory [CUDA]", "Scene", QString::number(sizeof(CScene) / powf(1024.0f, 2.0f), 'f', 2), "MB");
+	emit gRenderStatus.StatisticChanged("CUDA", "Scene", QString::number(sizeof(CScene) / powf(1024.0f, 2.0f), 'f', 2), "MB");
 
 	// Let others know that we are starting with rendering
 	emit gRenderStatus.RenderBegin();
@@ -310,7 +310,7 @@ void CRenderThread::run()
 			m_pRenderImage = (unsigned char*)malloc(3 * SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char));
 			memset(m_pRenderImage, 0, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char));
 			
-			emit gRenderStatus.StatisticChanged("Memory [Host]", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char) / powf(1024.0f, 2.0f), 'f', 2), "MB");
+			emit gRenderStatus.StatisticChanged("Host", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char) / powf(1024.0f, 2.0f), 'f', 2), "MB");
 
 			m_Mutex.unlock();
 
@@ -334,10 +334,10 @@ void CRenderThread::run()
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, m_SizeHdrBlurFrameBuffer));
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbLdr, m_SizeLdrFrameBuffer));
 			
-			emit gRenderStatus.StatisticChanged("Memory [CUDA]", "Random States", QString::number(m_SizeRandomStates / powf(1024.0f, 2.0f), 'f', 2), "MB", ":/Images/memory.png");
-			emit gRenderStatus.StatisticChanged("Memory [CUDA]", "HDR Accumulation Buffer", QString::number(m_SizeHdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
-			emit gRenderStatus.StatisticChanged("Memory [CUDA]", "HDR Frame Buffer Blur", QString::number(m_SizeHdrBlurFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
-			emit gRenderStatus.StatisticChanged("Memory [CUDA]", "LDR Estimation Buffer", QString::number(m_SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
+			emit gRenderStatus.StatisticChanged("CUDA", "Random States", QString::number(m_SizeRandomStates / powf(1024.0f, 2.0f), 'f', 2), "MB", ":/Images/memory.png");
+			emit gRenderStatus.StatisticChanged("CUDA", "HDR Accumulation Buffer", QString::number(m_SizeHdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
+			emit gRenderStatus.StatisticChanged("CUDA", "HDR Frame Buffer Blur", QString::number(m_SizeHdrBlurFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
+			emit gRenderStatus.StatisticChanged("CUDA", "LDR Estimation Buffer", QString::number(m_SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
 			
 			// Setup the CUDA random number generator
 			SetupRNG(&m_Scene, m_pDevScene, m_pDevRandomStates);
@@ -468,6 +468,9 @@ bool CRenderThread::Load(QString& FileName)
 //	gpProgressDialog->setWindowFlags(Qt::Popup);
 //	gpProgressDialog->show();
 
+	emit gRenderStatus.StatisticChanged("Memory", "CUDA", "", "", "memory");
+	emit gRenderStatus.StatisticChanged("Memory", "Host", "", "", "memory");
+
 	// Create meta image reader
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
@@ -547,7 +550,7 @@ bool CRenderThread::Load(QString& FileName)
 
 	m_Scene.m_MemorySize	= (float)m_pImageDataVolume->GetActualMemorySize() / 1024.0f;
 	
-	emit gRenderStatus.StatisticChanged("Memory [CUDA]", "Volume", QString::number(m_Scene.m_MemorySize, 'f', 2), "MB");
+	emit gRenderStatus.StatisticChanged("Host", "Volume", QString::number(m_Scene.m_MemorySize, 'f', 2), "MB");
 
 	double Range[2];
 

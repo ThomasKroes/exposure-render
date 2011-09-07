@@ -45,9 +45,9 @@ void UnbindVolumeData(void)
 	cudaFree(gpI);
 }
 
-DEV float Density(const Vec3f& P)
+DEV float Density(CScene* pDevScene, const Vec3f& P)
 {
-	return (float)(SHRT_MAX * tex3D(gTexDensity, P.x, P.y, P.z));
+	return (float)(SHRT_MAX * tex3D(gTexDensity, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ()));
 }
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
@@ -85,7 +85,7 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 		const Vec3f SP = P + D * (NearT);
 
 		// Fetch density
-		const float D = Density(SP);
+		const float D = Density(pDevScene, SP);
 		
 		// We ignore air density
 		if (D == 0)
@@ -138,7 +138,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	// Attenuation
 	CColorXyz Tr = SPEC_BLACK;
 
-	float D = Density(Pe);
+	float D = Density(pDevScene, Pe);
 
 	CBSDF Bsdf(N, Wo, GetDiffuseColor(pDevScene, D).ToXYZ(), pDevScene->m_TransferFunctions.m_SpecularColor.F(D).ToXYZ(), 1.0f, 1.0f);
 	// Light/shadow ray
@@ -269,15 +269,15 @@ DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Ve
 }
 
 // Computes the local gradient
-DEV Vec3f ComputeGradient(const Vec3f& P)
+DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P)
 {
 	Vec3f Normal;
 
 	Vec3f X(1.0f, 0.0f, 0.0f), Y(0.0f, 1.0f, 0.0f), Z(0.0f, 0.0f, 1.0f);
 
-	Normal.x = 0.5f * (float)(Density(P + X) - Density(P - X));
-	Normal.y = 0.5f * (float)(Density(P + Y) - Density(P - Y));
-	Normal.z = 0.5f * (float)(Density(P + Z) - Density(P - Z));
+	Normal.x = 0.5f * (float)(Density(pDevScene, P + X) - Density(pDevScene, P - X));
+	Normal.y = 0.5f * (float)(Density(pDevScene, P + Y) - Density(pDevScene, P - Y));
+	Normal.z = 0.5f * (float)(Density(pDevScene, P + Z) - Density(pDevScene, P - Z));
 
 	return -Normal;
 }
@@ -320,10 +320,8 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	CColorXyz Lv	= SPEC_BLACK;
 	CColorXyz F		= SPEC_BLACK;
 
-	int NoScatteringEvents = 0, RussianRouletteDepth = 2; 
-
-	Re.m_MinT	= 0.0f;
-	Re.m_MaxT	= RAY_MAX;
+	Re.m_MinT	= MinT;
+	Re.m_MaxT	= MaxT;
 
 	// Continue probability (Pc) Light probability (LightPdf) Bsdf probability (BsdfPdf)
 	float Pc = 0.5f, LightPdf = 1.0f, BsdfPdf = 1.0f;
@@ -349,7 +347,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		Te += Ss;
 
 		// Fetch density
-		const short D = Density(Pe);
+		const short D = Density(pDevScene, Pe);
 
 		// We ignore air density
 		if (D == 0.0f)
@@ -366,7 +364,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		Wo = Normalize(-Re.m_D);
 
 		// Obtain normal
-		Gn = ComputeGradient(Pe);
+		Gn = ComputeGradient(pDevScene, Pe);
 
 		// Exit if air, or not within hemisphere
 		if (Tr < 0.01f)

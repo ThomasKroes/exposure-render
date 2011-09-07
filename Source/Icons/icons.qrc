@@ -38,5 +38,8 @@
     <file>light-bulb.png</file>
     <file>document-copy.png</file>
     <file>graphic-card.png</file>
+    <file>processor.png</file>
+    <file>checkerboard.png</file>
+    
   </qresource>
 </RCC>

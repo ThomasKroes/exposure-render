@@ -71,13 +71,9 @@ void QStatisticsWidget::PopulateTree(void)
 	QTreeWidgetItem* pVolume = AddItem(NULL, "Volume");
 	pVolume->setIcon(0, QIcon(":/Images/grid.png"));
 
-	// CUDA Memory
-	QTreeWidgetItem* pMemoryCuda = AddItem(NULL, "Memory [CUDA]");
-	pMemoryCuda->setIcon(0, QIcon(":/Images/memory.png"));
-
-	// Host Memory
-	QTreeWidgetItem* pMemoryHost = AddItem(NULL, "Memory [Host]");
-	pMemoryHost->setIcon(0, QIcon(":/Images/memory.png"));
+	// Memory
+	QTreeWidgetItem* pMemory = AddItem(NULL, "Memory");
+	pMemory->setIcon(0, QIcon(":/Images/memory.png"));
 
 	// Camera
 	QTreeWidgetItem* pCamera = AddItem(NULL, "Camera");
@@ -95,6 +91,7 @@ QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QStr
 	pItem->setText(0, Property);
 	pItem->setText(1, Value);
 	pItem->setText(2, Unit);
+	pItem->setIcon(0, QIcon(":/Images/" + Icon + ".png"));
 
 	if (!pParent)
 		m_Tree.addTopLevelItem(pItem);
@@ -109,13 +106,6 @@ void QStatisticsWidget::UpdateStatistic(const QString& Group, const QString& Nam
 	if (!pGroup)
 	{
 		pGroup = AddItem(NULL, Group);
-		pGroup->setIcon(0, QIcon(Icon));
-		
-		QFont Font = pGroup->font(0);
-		Font.setBold(true);
-
-		pGroup->setFont(0, Font);
-		pGroup->setBackgroundColor(0, Qt::red);
 		
 		AddItem(pGroup, Name, Value, Unit, Icon);
 	}
@@ -129,6 +119,7 @@ void QStatisticsWidget::UpdateStatistic(const QString& Group, const QString& Nam
 			{
 				pGroup->child(i)->setText(1, Value);
 				pGroup->child(i)->setText(2, Unit);
+
 				Found = true;
 			}
 		}
@@ -171,7 +162,7 @@ void QStatisticsWidget::OnPostRenderFrame(void)
 
 void QStatisticsWidget::OnStatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit /*= ""*/, const QString& Icon /*= ""*/)
 {
-	UpdateStatistic(Group, Name, Value, Unit);
+	UpdateStatistic(Group, Name, Value, Unit, Icon);
 }
 
 void QStatisticsWidget::ExpandAll(const bool& Expand)

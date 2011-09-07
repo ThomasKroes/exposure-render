@@ -112,10 +112,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_HeightSlider.setOrientation(Qt::Horizontal);
     m_HeightSlider.setFocusPolicy(Qt::StrongFocus);
     m_HeightSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_HeightSlider.setRange(0.0, 100.0);
+	m_HeightSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_HeightSlider, 5, 1);
 	
-	m_HeightSpinBox.setRange(0.0, 100.0);
+	m_HeightSpinBox.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_HeightSpinBox, 5, 2);
 	
 	m_LockSizeCheckBox.setText("Lock Size");
