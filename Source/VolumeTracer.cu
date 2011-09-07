@@ -104,7 +104,7 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 		}
 
 		// Get shadow opacity
-		const float		Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r;
+		const float		Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 100.0f;
 		const CColorXyz	Color	= pDevScene->m_TransferFunctions.m_DiffuseColor.F(D).ToXYZ();
 
 		if (Opacity > 0.0f)
@@ -403,176 +403,6 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 }
 
 // Trace volume with single scattering
-KERNEL void KrnlRenderVolume(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
-{
-	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
-	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-
-	// Compute sample ID
-	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
-
-	// Exit if beyond kernel boundaries
-	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.Width() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.Height())
-		return;
-
-	// Init random number generator
-	CCudaRNG RNG(&pDevRandomStates[SID]);
-
-	CRay Re, Rl;
-	
-	// Generate the camera ray
-	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
-
-	// Eye attenuation (Le), accumulated color through volume (Lv), unattenuated light from light source (Li), attenuated light from light source (Ld), and BSDF value (F)
-	CColorXyz PathThroughput	= SPEC_WHITE;
-	CColorXyz Li				= SPEC_BLACK;
-	CColorXyz Lv				= SPEC_BLACK;
-	CColorXyz F					= SPEC_BLACK;
-
-	int NoScatteringEvents = 0, RussianRouletteDepth = 2; 
-
-	Re.m_MinT	= 0.0f;
-	Re.m_MaxT	= RAY_MAX;
-
-	// Continue probability (Pc) Light probability (LightPdf) Bsdf probability (BsdfPdf)
-	float Pc = 0.5f, LightPdf = 1.0f, BsdfPdf = 1.0f;
-
-	// Eye point (Pe), light sample point (Pl), Gradient (G), normalized gradient (Gn), reversed eye direction (Wo), incident direction (Wi), new direction (W)
-	Vec3f Pe, Pl, G, Gn, Wo, Wi, W;
-
-	// Choose color component to sample
-	int CC1 = floorf(RNG.Get1() * 3.0f);
-
-	// Walk along the eye ray with ray marching
-	while (NoScatteringEvents < pDevScene->m_MaxNoBounces)
-	{
-		CVolumePoint VP;
-
-		// Sample distance
-		if (SampleDistanceRM(Re, RNG, VP, pDevScene, CC1))
-		{
-// 			if (VP.m_Transmittance.y() > 0.0f)
-//			PathThroughput.c[CC1] *= VP.m_Transmittance.c[CC1];
-
-			// Compute gradient (G) and normalized gradient (Gn)
-  			G	= ComputeGradient(VP.m_P);
-  			Gn	= Normalize(G);
- 			Wo	= Normalize(-Re.m_D);
-
-			// Choose random light and compute the amount of light that reaches the scattering point
-//			Li = SampleRandomLight(pScene, RNG, Pe, Pl, LightPdf);
-//			Li = 1000.0f * CColorXyz(0.9f, 0.6f, 0.2f);
-			Li = 500.0f * CColorXyz(1.0f);
-
-			Pe = VP.m_P;
-
-
-
-//			Pl = pDevScene->m_BoundingBox.GetCenter() + pDevScene->m_Light.m_Distance * Vec3f(sinf(pDevScene->m_Light.m_Theta), sinf(pDevScene->m_Light.m_Phi), cosf(pDevScene->m_Light.m_Theta));
-//			Pl = pBoundingBox->GetCenter() + UniformSampleSphere(RNG.Get2()) * Vec3f(1000.0f);
-
-			// LightPdf = powf((Pe - Pl).Length(), 2.0f);
-
-			Rl = CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length());
-
-			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
-			{
-				Li /= LightPdf;
-				Lv.c[CC1] += PathThroughput.c[CC1] * Li.c[CC1] * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
-			}
-
-			W = Normalize(SampleHG(Wo, pDevScene->m_PhaseG, RNG.Get2()));
-//			W = UniformSampleSphere(RNG.Get2());
-//			W = UniformSampleHemisphere(RNG.Get2(), Gn);
-
-			// Configure eye ray
-			Re = CRay(VP.m_P, W, 0.0f, RAY_MAX);
-
-			// Russian roulette
-			if (NoScatteringEvents >= RussianRouletteDepth)
-			{
-				if (RNG.Get1() > Pc)
-					break;
-				else
-					PathThroughput.c[CC1] /= Pc;
-			}
-
-//			PathThroughput.c[CC1] /= 4.0f * PI_F;
-//			PathThroughput.c[CC1] /= PhaseHG(Wo, Rl.m_D, PhaseG);
-
-			// Add scattering event
-			NoScatteringEvents++;
-		}
-		else
-		{
-			break;
-		}
-	}
-
-//  	if (pBoundingBox->Intersect(Re))
-//  		Lv += SPEC_WHITE;
-
-
-	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X].c[CC1] = Lv.c[CC1] / fmaxf(1.0f, NoScatteringEvents);
-}
-
-// Computes the attenuation through the volume
-DEV inline CColorXyz TransmittanceRM(CScene* pDevScene, CCudaRNG& RNG, CRay& R,const float& StepSize)
-{
-	// Near and far intersections with volume axis aligned bounding box
-	float NearT = 0.0f, FarT = 0.0f;
-
-	// Intersect with volume axis aligned bounding box
-	if (!pDevScene->m_BoundingBox.Intersect(R, &NearT, &FarT))
-		return SPEC_BLACK;
-
-	// Clamp to near plane if necessary
-	if (NearT < 0.0f) 
-		NearT = 0.0f;     
-
-	CColorXyz Lt = SPEC_WHITE;
-
-	NearT += RNG.Get1() * StepSize;
-
-	// Accumulate
-	while (NearT < R.m_MaxT)
-	{
-		// Determine sample point
-		const Vec3f SP = R(NearT);
-
-		// Fetch density
-		const short D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (SP.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (SP.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (SP.z / pDevScene->m_BoundingBox.m_MaxP.z)));
-		
-		// We ignore air density
-		if (D == 0)
-		{
-			// Increase extent
-			NearT += StepSize;
-			continue;
-		}
-
-		// Get shadow opacity
-		const float	Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r;
-
-		if (Opacity > 0.0f)
-		{
-			// Compute eye transmittance
-			Lt *= expf(-(Opacity * StepSize));
-
-			// Exit if eye transmittance is very small
-			if (Lt.y() < 0.1f)
-				break;
-		}
-
-		// Increase extent
-		NearT += StepSize;
-	}
-
-	return Lt;
-}
-
-
-// Trace volume with single scattering
 KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 {
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
@@ -622,7 +452,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	Vec3f Pe, Pl, G, Gn, Wo, Wi, W;
 
 	// Distance along eye ray (Te), step size (Ss), density (D)
-	float Ss = 0.2f, Te = MinT + RNG.Get1() * Ss, D = 0.0f;
+	float Ss = pDevScene->m_Spacing.Min(), Te = MinT + RNG.Get1() * Ss, D = 0.0f;
 
 	// Choose color component to sample
 	int CC1 = floorf(RNG.Get1() * 3.0f);
@@ -682,39 +512,6 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 
 	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = Lv;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Traces the volume
 void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)

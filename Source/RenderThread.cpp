@@ -4,7 +4,10 @@
 #include "MainWindow.h"
 #include "LoadSettingsDialog.h"
 
-// CUDA
+// CUDA kernels
+#include "Blur.cuh"
+#include "ComputeEstimate.cuh"
+#include "Random.cuh"
 #include "VolumeTracer.cuh"
 
 // VTK
@@ -182,8 +185,14 @@ void CRenderThread::run()
 
 	qDebug("Copying volume data to device");
 
+//	CCudaTimer Timer;
+
 	// Bind the volume
 	BindVolumeData((short*)m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution);
+
+//	QString Time = QString::number(Timer.StopTimer(), 'f', 2);
+
+//	QMessageBox::warning(gpMainWindow, "", "Binding took: " + Time + "secs.");
 
 	// Allocate CUDA memory for scene
 	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));

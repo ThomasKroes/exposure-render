@@ -73,79 +73,7 @@ public:
 		return *this;
 	}
 
-	/*
-	// ToDo: Add description
-	DEV void RegisterHit(const float& RayEpsilon, const CHitRecord& HitRecord, Vec3f* pV, Vec4i* pVi, Vec3f* pVN, Vec4i* pVNi, Vec2f* pUV, Vec4i* pUVi)
-	{
-		// Set primitive and object ID
-		m_PrimitiveID	= HitRecord.m_FaceID;
-		m_ObjectID		= pVi[m_PrimitiveID].w;
-
-		// Vertex, vertex normal and texture coordinate indices
-		const Vec4i Vi	= pVi[m_PrimitiveID];
-		const Vec4i Ni	= pVNi[m_PrimitiveID];
-		const Vec4i UVi	= pUVi[m_PrimitiveID];
-
-		// Vertex positions
-		const Vec3f P0	= pV[Vi.x];
-		const Vec3f P1	= pV[Vi.y];
-		const Vec3f P2	= pV[Vi.z];
-
-		// Texture coordinates
-		const Vec2f UV0	= pUV[UVi.x];
-		const Vec2f UV1	= pUV[UVi.y];
-		const Vec2f UV2	= pUV[UVi.z];
-
-		// Normals
-		const Vec3f N0	= pVN[Ni.x];
-		const Vec3f N1	= pVN[Ni.y];
-		const Vec3f N2	= pVN[Ni.z];
-
-		// Compute texture coordinates, normal and hit position
- 		m_UV	= Vec2f(HitRecord.m_B.x * UV0.x + HitRecord.m_B.y * UV1.x + HitRecord.m_B.z * UV2.x, HitRecord.m_B.x * UV0.y + HitRecord.m_B.y * UV1.y + HitRecord.m_B.z * UV2.y);
-		m_Ng	= Normalize(HitRecord.m_B.x * N0 + HitRecord.m_B.y * N1 + HitRecord.m_B.z * N2);
-		m_P		= (HitRecord.m_B.x * P0 + HitRecord.m_B.y * P1 + HitRecord.m_B.z * P2) + RayEpsilon * m_Ng;
-
-		CreateCS(m_Ng, m_NU, m_NV);
-
-		return;
-
-		/*
-		// calculate dPdU and dPdV
-		float du1 = UV0.x - UV2.x;
-		float du2 = UV1.x - UV2.x;
-		float dv1 = UV0.y - UV2.y;
-		float dv2 = UV1.y - UV2.y;
-		float invdet, det = du1 * dv2 - dv1 * du2;
-
-		if(fabs(det) > 1e-30f)
-		{
-			invdet = 1.0f / det;
-			
-			Vec3f dp1 = P0 - P2;
-			Vec3f dp2 = P1 - P2;
-
-			m_dPdU = (dv2 * invdet) * dp1 - (dv1 * invdet) * dp2;
-			m_dPdV = (du1 * invdet) * dp2 - (du2 * invdet) * dp1;
-		}
-		else
-		{
-			m_dPdU = Vec3f(0.f);
-			m_dPdV = Vec3f(0.f);
-		}
-
-		CreateCS(m_Ng, m_NU, m_NV);
-
-		// Transform dPdU and dPdV in shading space
-		m_dSdU.x = Dot(m_NU, m_dPdU);
-		m_dSdU.y = Dot(m_NV, m_dPdU);
-		m_dSdU.z = Dot(m_Ng, m_dPdU);
-		m_dSdV.x = Dot(m_NU, m_dPdV);
-		m_dSdV.y = Dot(m_NV, m_dPdV);
-		m_dSdV.z = Dot(m_Ng, m_dPdV);
-		
-	}
-*/
+	
 	// ToDo: Add description
 	DEV void ComputeBump(void)
 	{
@@ -287,7 +215,13 @@ public:
 			case Background:
 			{
 				UniformSampleSphere(LS.m_LightSample.m_Pos);
+
+				// Set the light color
+				return SPEC_WHITE;
 			}
+
+			default:
+				return SPEC_BLACK;
 		}
 	}
 
@@ -344,6 +278,9 @@ public:
 			{
 				return true;
 			}
+
+			default:
+				return false;
 		}
 	}
 
@@ -372,6 +309,9 @@ public:
 			{
 				return 1.0f;
 			}
+
+			default:
+				return 1.0f;
 		}
 	}
 
