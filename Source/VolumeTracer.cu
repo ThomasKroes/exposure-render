@@ -52,7 +52,7 @@ DEV float Density(CScene* pDevScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 10000.0f;
+	return pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 1000.0f;
 }
 
 DEV CColorRgbHdr GetDiffuseColor(CScene* pDevScene, const float& D)
@@ -125,10 +125,6 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 // Estimates direct lighting
 DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
-	
-	if (Dot(Wo, N) < 0.0f)
-		return SPEC_BLACK;
-
 	// Accumulated radiance
 	CColorXyz Ld = SPEC_BLACK;
 	
@@ -165,6 +161,10 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	R.m_MinT	= 0.0f;
 	R.m_MaxT	= (SPl.m_P - SPe.m_P).Length();
 	
+	Tr = Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+
+	return Tr * Li;
+
 	Wi = -R.m_D; 
 
 	F = Bsdf.F(Wo, Wi); 
@@ -355,7 +355,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 //		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission
-		Lv += Ltr * GetDiffuseColor(pDevScene, D).ToXYZ();
+//		Lv += Ltr * GetDiffuseColor(pDevScene, D).ToXYZ();
 
 		// Compute outgoing direction
 		Wo = Normalize(-Re.m_D);
@@ -368,7 +368,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			continue;
 
 		// Estimate direct light at eye point
-//	 	Lv += Ltr * UniformSampleOneLight(pDevScene, Wo, Pe, Gn, RNG, Ss);
+	 	Lv += Ltr * UniformSampleOneLight(pDevScene, Wo, Pe, Gn, RNG, Ss);
 //		Lv += Ltr * T * SPEC_WHITE;
 
 		// Compute eye transmittance

@@ -17,7 +17,9 @@ KERNEL void KrnlComputeEstimate(int Width, int Height, CColorXyz* gpEstFrameXyz,
 
 	float InvGamma = 1.0f / 2.2f;
 
-	CColorRgbHdr RgbHdr = CColorRgbHdr(L.c[0], L.c[1], L.c[2]);
+	CColorRgbHdr RgbHdr;
+	
+	RgbHdr.FromXYZ(L.c[0], L.c[1], L.c[2]);
 
 	RgbHdr.r = Clamp(1.0f - expf(-(RgbHdr.r / Exposure)), 0.0, 1.0f);
 	RgbHdr.g = Clamp(1.0f - expf(-(RgbHdr.g / Exposure)), 0.0, 1.0f);
