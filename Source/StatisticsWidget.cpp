@@ -39,9 +39,13 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	m_Tree.setHeaderLabels(ColumnNames);
 
 	// Configure headers
-	m_Tree.header()->setResizeMode(0, QHeaderView::ResizeToContents);
+//	m_Tree.header()->setResizeMode(0, QHeaderView::ResizeToContents);
 //	m_Tree.header()->setResizeMode(1, QHeaderView::ResizeToContents);
 //	m_Tree.header()->setResizeMode(2, QHeaderView::ResizeToContents);
+	m_Tree.header()->resizeSection(0, 260);
+	m_Tree.header()->resizeSection(1, 150);
+	m_Tree.header()->resizeSection(2, 100);
+
 	m_Tree.header()->setWindowIcon(QIcon(":/Images/table-export.png"));
 	
 	PopulateTree();
@@ -56,7 +60,7 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 
 QSize QStatisticsWidget::sizeHint() const
 {
-	return QSize(500, 900);
+	return QSize(550, 900);
 }
 
 void QStatisticsWidget::PopulateTree(void)

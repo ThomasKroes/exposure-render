@@ -130,6 +130,16 @@ QString FormatVector(const Vec3i& Vector)
 	return "[" + QString::number(Vector.x) + ", " + QString::number(Vector.y) + ", " + QString::number(Vector.z) + "]";
 }
 
+QString FormatSize(const Vec3f& Size, const int& Precision = 2)
+{
+	return QString::number(Size.x, 'f', Precision) + " x " + QString::number(Size.y, 'f', Precision) + " x " + QString::number(Size.z, 'f', Precision);
+}
+
+QString FormatSize(const Vec3i& Size)
+{
+	return QString::number(Size.x) + " x " + QString::number(Size.y) + " x " + QString::number(Size.z);
+}
+
 CRenderThread::CRenderThread(QObject* pParent) :
 	QThread(pParent),
 	m_Mutex(),
@@ -214,12 +224,12 @@ bool CRenderThread::InitializeCuda(void)
 		emit gRenderStatus.StatisticChanged("Processor", "GPU Clock Speed", QString::number(DeviceProperties.clockRate * 1e-6f, 'f', 2), "GHz");
 
 
-		emit gRenderStatus.StatisticChanged("Processor", "Maximum Block Size", QString::number(DeviceProperties.maxThreadsDim[0]) + " x " + QString::number(DeviceProperties.maxThreadsDim[1]) + " x " + QString::number(DeviceProperties.maxThreadsDim[2]), "Threads");
-		emit gRenderStatus.StatisticChanged("Processor", "Maximum Grid Size", QString::number(DeviceProperties.maxGridSize[0]) + " x " + QString::number(DeviceProperties.maxGridSize[1]) + " x " + QString::number(DeviceProperties.maxGridSize[2]), "Blocks");
+		emit gRenderStatus.StatisticChanged("Processor", "Max. Block Size", QString::number(DeviceProperties.maxThreadsDim[0]) + " x " + QString::number(DeviceProperties.maxThreadsDim[1]) + " x " + QString::number(DeviceProperties.maxThreadsDim[2]), "Threads");
+		emit gRenderStatus.StatisticChanged("Processor", "Max. Grid Size", QString::number(DeviceProperties.maxGridSize[0]) + " x " + QString::number(DeviceProperties.maxGridSize[1]) + " x " + QString::number(DeviceProperties.maxGridSize[2]), "Blocks");
 		emit gRenderStatus.StatisticChanged("Processor", "Warp Size", QString::number(DeviceProperties.warpSize), "Threads");
-		emit gRenderStatus.StatisticChanged("Processor", "Maximum No. Threads/Block", QString::number(DeviceProperties.maxThreadsPerBlock), "Threads");
+		emit gRenderStatus.StatisticChanged("Processor", "Max. No. Threads/Block", QString::number(DeviceProperties.maxThreadsPerBlock), "Threads");
 
-		emit gRenderStatus.StatisticChanged("Processor", "Maximum Shared Memory Per Block", QString::number((float)DeviceProperties.sharedMemPerBlock / 1024.0f, 'f', 2), "KB");
+		emit gRenderStatus.StatisticChanged("Processor", "Max. Shared Memory Per Block", QString::number((float)DeviceProperties.sharedMemPerBlock / 1024.0f, 'f', 2), "KB");
 		emit gRenderStatus.StatisticChanged("Processor", "Registers Available Per Block", QString::number((float)DeviceProperties.regsPerBlock / 1024.0f, 'f', 2), "KB");
 
 
@@ -399,7 +409,7 @@ void CRenderThread::run()
 		FPS.AddDuration(1000.0f / CudaTimer.StopTimer());
 
 		emit gRenderStatus.StatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
-		emit gRenderStatus.StatisticChanged("Performance", "No. Iterations", QString::number(m_N));
+		emit gRenderStatus.StatisticChanged("Performance", "No. Iterations", QString::number(m_N), "Iterations");
 
 		// Blit
 		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevEstRgbLdr, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.m_NoElements * sizeof(unsigned char), cudaMemcpyDeviceToHost));
@@ -609,10 +619,15 @@ bool CRenderThread::Load(QString& FileName)
 //	delete gpProgressDialog;
 //	gpProgressDialog = NULL;
 
+	const Vec3f PhysicalSize(Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.m_XYZ.x, m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.m_XYZ.y, m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.m_XYZ.z));
+
 	emit gRenderStatus.StatisticChanged("Volume", "File", QFileInfo(m_FileName).fileName(), "");
-	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", FormatVector(m_Scene.m_BoundingBox.m_MinP, 2) + " - " + FormatVector(m_Scene.m_BoundingBox.m_MaxP, 2), "");
-	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatVector(m_Scene.m_Resolution.m_XYZ), "Voxels");
-	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatVector(m_Scene.m_Spacing, 2), "");
+	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", "", "");
+	emit gRenderStatus.StatisticChanged("Bounding Box", "Min", FormatVector(m_Scene.m_BoundingBox.m_MinP, 2), "");
+	emit gRenderStatus.StatisticChanged("Bounding Box", "Max", FormatVector(m_Scene.m_BoundingBox.m_MaxP, 2), "");
+	emit gRenderStatus.StatisticChanged("Volume", "Physical Size", FormatSize(PhysicalSize, 2), "mm");
+	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatSize(m_Scene.m_Resolution.m_XYZ), "Voxels");
+	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(m_Scene.m_Spacing, 2), "mm");
 	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(m_Scene.m_Scale, 2), "");
 	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_NoVoxels), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");

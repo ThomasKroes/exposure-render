@@ -52,7 +52,7 @@ DEV float Density(CScene* pDevScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 1000.0f;
+	return pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 100000000.0f;
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
@@ -187,7 +187,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 		const float Weight = 1.0f;//PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
 		// Add contribution
-		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
+		Ld += Li * (Weight / LightPdf);
 	}
 	
 	// Compute tau
