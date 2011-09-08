@@ -38,7 +38,7 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	// Histogram
 	m_Histogram.setParentItem(this);
-	m_Histogram.setPen(QPen(QBrush(QColor(100, 10, 10, 150)), 0.5f));
+	m_Histogram.setPen(QPen(QBrush(QColor::fromHsl(0, 100, 110)), 0.65f));
 
 	// Background styling
 	m_BackgroundBrush.setColor(QColor(Qt::gray));
@@ -281,8 +281,8 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 
 		QGradientStops GradientStops;
 
-		GradientStops.append(QGradientStop(0, QColor(210, 210, 210, 60)));
-		GradientStops.append(QGradientStop(1, QColor(210, 210, 210, 220)));
+		GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 30, 150, 30)));
+		GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 30, 150, 150)));
 
 		m_PolygonGradient.setStops(GradientStops);
 	}

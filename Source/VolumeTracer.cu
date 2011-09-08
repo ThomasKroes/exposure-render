@@ -52,8 +52,8 @@ DEV float Density(CScene* pDevScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	const float Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 10000.0f;
-	return Opacity;
+	const float Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 10000000.0f;
+	return CColorRgbHdr(Opacity, Opacity, Opacity);
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
@@ -348,7 +348,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		const float D = Density(pDevScene, Pe);
 
 		// Get opacity at eye point
-		const float Tr = GetOpacity(pDevScene, D).r;
+		const float Tr = GetOpacity(pDevScene, D).r * 1000.0f;
 //		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission

@@ -6,11 +6,11 @@
 #define NODE_POSITION_EPSILON 0.01f
 
 float	QNodeItem::m_Radius			= 4.0f;
-QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(0, 100, 160));
-QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(45, 180, 150));
+QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(0, 0, 170));
+QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(0, 0, 230));
 QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 140));
-QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 130, 120)), 1.3);
-QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 130, 120)), 1.3);
+QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 0, 240)), 1.3);
+QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 0, 230)), 1.3);
 QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 120)), 1.3);
 
 QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode) :
