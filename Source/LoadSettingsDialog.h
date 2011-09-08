@@ -11,6 +11,8 @@ class QLoadSettingsDialog : public QDialog
 public:
     QLoadSettingsDialog(QWidget* pParent = NULL);
 
+	virtual void accept();
+
 public:
 	bool GetResample(void);
 	float GetResampleX(void);

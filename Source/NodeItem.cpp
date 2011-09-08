@@ -3,6 +3,8 @@
 #include "TransferFunction.h"
 #include "TransferFunctionCanvas.h"
 
+#define NODE_POSITION_EPSILON 0.01f
+
 float	QNodeItem::m_Radius						= 4.0f;
 float	QNodeItem::m_RadiusHover				= 4.0f;
 float	QNodeItem::m_RadiusSelected				= 4.0f;
@@ -86,7 +88,7 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 		QPointF NodeRangeMin = m_pTransferFunctionCanvas->TransferFunctionToScene(QPointF(m_pNode->GetMinX(), m_pNode->GetMinY()));
 		QPointF NodeRangeMax = m_pTransferFunctionCanvas->TransferFunctionToScene(QPointF(m_pNode->GetMaxX(), m_pNode->GetMaxY()));
 
-		NewScenePoint.setX(qMin(NodeRangeMax.x(), qMax(NewScenePoint.x(), NodeRangeMin.x())));
+		NewScenePoint.setX(qMin(NodeRangeMax.x() - NODE_POSITION_EPSILON, qMax(NewScenePoint.x(), NodeRangeMin.x() + NODE_POSITION_EPSILON)));
 		NewScenePoint.setY(qMin(NodeRangeMin.y(), qMax(NewScenePoint.y(), NodeRangeMax.y())));
 
 		return NewScenePoint;

@@ -30,9 +30,12 @@ QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :
 
 	setLayout(&m_MainLayout);
 
+	QSettings Settings;
+	
 	// Create main layout
 	m_ResampleGroupBox.setTitle("Resampling");
 	m_ResampleGroupBox.setCheckable(true);
+	m_ResampleGroupBox.setChecked(Settings.value("resampling/enabled", false).toBool());
 	m_MainLayout.addWidget(&m_ResampleGroupBox);
 
 	// Align
@@ -61,6 +64,8 @@ QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :
 	connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), &m_ResampleXSlider, SLOT(setValue(double)));
 	connect(&m_ResampleXSpinBox, SIGNAL(valueChanged(double)), this, SLOT(SetResampleX(double)));
 
+	m_ResampleXSlider.setValue(Settings.value("resampling/x", 1.0).toDouble());
+
 	// Scaling y
 	m_ResampleYLabel.setText("Y Resample (%)");
 	m_ResampleLayout.addWidget(&m_ResampleYLabel, 1, 0);
@@ -80,6 +85,9 @@ QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :
 	connect(&m_ResampleYSpinBox, SIGNAL(valueChanged(double)), &m_ResampleYSlider, SLOT(setValue(double)));
 	connect(&m_ResampleYSpinBox, SIGNAL(valueChanged(double)), this, SLOT(SetResampleY(double)));
 	connect(&m_LockYCheckBox, SIGNAL(stateChanged(int)), this, SLOT(LockY(int)));
+
+	m_ResampleYSlider.setValue(Settings.value("resampling/y", 1.0).toDouble());
+	m_LockYCheckBox.setChecked(Settings.value("resampling/lock-y", true).toBool());
 
 	// Scaling z
 	m_ResampleZLabel.setText("Z Resample (%)");
@@ -102,6 +110,9 @@ QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :
 	connect(&m_ResampleZSlider, SIGNAL(valueChanged(double)), this, SLOT(SetResampleZ(double)));
 	connect(&m_LockZCheckBox, SIGNAL(stateChanged(int)), this, SLOT(LockZ(int)));
 	
+	m_ResampleZSlider.setValue(Settings.value("resampling/z", 1.0).toDouble());
+	m_LockZCheckBox.setChecked(Settings.value("resampling/lock-z", true).toBool());
+
 	// Dialog buttons
 	m_DialogButtons.setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Reset);
 	connect(&m_DialogButtons, SIGNAL(accepted()), this, SLOT(Accept()));
@@ -109,9 +120,6 @@ QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :
 	connect(&m_DialogButtons, SIGNAL(clicked(QAbstractButton*)), this, SLOT(Clicked(QAbstractButton*)));
 
 	m_MainLayout.addWidget(&m_DialogButtons);
-
-	// Reset to defaults
-	Reset();
 
 	// Set tooltips
 	SetToolTips();
@@ -226,4 +234,18 @@ void QLoadSettingsDialog::SetToolTips(void)
 	m_ResampleZSpinBox.setToolTip("Spin to adjust the Z scale");
 	m_LockZCheckBox.setToolTip("Lock the Z scale");
 	m_DialogButtons.setToolTip("Z scale");
+}
+
+void QLoadSettingsDialog::accept()
+{
+	QSettings Settings;
+
+	Settings.setValue("resampling/enabled", m_ResampleGroupBox.isChecked());
+	Settings.setValue("resampling/x", m_ResampleXSlider.value());
+	Settings.setValue("resampling/y", m_ResampleYSlider.value());
+	Settings.setValue("resampling/lock-y", m_LockYCheckBox.isEnabled());
+	Settings.setValue("resampling/z", m_ResampleZSlider.value());
+	Settings.setValue("resampling/lock-z", m_LockZCheckBox.isEnabled());
+
+	QDialog::accept();
 }
