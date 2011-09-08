@@ -4,7 +4,7 @@
 
 class CLight;
 
-class FIDELITY_RENDER_DLL CVolumePoint
+class EXPOSURE_RENDER_DLL CVolumePoint
 {
 public:
 	float			m_T;				/*!< Parametric distance */

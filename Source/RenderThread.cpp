@@ -258,6 +258,8 @@ void CRenderThread::run()
 	// Bind the volume
 	BindVolumeData((short*)m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution);
 
+	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
+
 	// Allocate CUDA memory for scene
 	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));
 
@@ -373,7 +375,7 @@ void CRenderThread::run()
  		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
 		HandleCudaError(cudaGetLastError());
 
-		emit gRenderStatus.StatisticChanged("Performance", "Casting", QString::number(Timer.StopTimer(), 'f', 2), "ms");
+		emit gRenderStatus.StatisticChanged("Timings", "Casting", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
 		Timer.StartTimer();
 
@@ -381,7 +383,7 @@ void CRenderThread::run()
  		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height()), 1.3f);
 		HandleCudaError(cudaGetLastError());
 
-		emit gRenderStatus.StatisticChanged("Performance", "Blur Estimate", QString::number(Timer.StopTimer(), 'f', 2), "ms");
+		emit gRenderStatus.StatisticChanged("Timings", "Blur Estimate", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
 		Timer.StartTimer();
 
@@ -389,7 +391,7 @@ void CRenderThread::run()
  		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.Width(), SceneCopy.m_Camera.m_Film.m_Resolution.Height(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
 		HandleCudaError(cudaGetLastError());
 		
-		emit gRenderStatus.StatisticChanged("Performance", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
+		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
 		// Increase the number of iterations performed so far
 		m_N++;

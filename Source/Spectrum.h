@@ -234,7 +234,7 @@ static float RGBIllum2SpectBlue[nSpectralSamples] = {
 
 #ifdef SAMPLED_SPECTRUM
 
-class FIDELITY_RENDER_DLL CColorXyz
+class EXPOSURE_RENDER_DLL CColorXyz
 {
 public:
 	enum EType
@@ -739,7 +739,7 @@ CD static float YWeight[gNoSamplesSpectrumXYZ] =
 	0.212671f, 0.715160f, 0.072169f
 };
 
-class FIDELITY_RENDER_DLL CColorXyz
+class EXPOSURE_RENDER_DLL CColorXyz
 {
 public:
 	enum EType
@@ -957,7 +957,7 @@ public:
 
 #endif
 
-class FIDELITY_RENDER_DLL CSpectrumSample
+class EXPOSURE_RENDER_DLL CSpectrumSample
 {
 public:
 	float	m_C;

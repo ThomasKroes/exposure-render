@@ -3,7 +3,7 @@
 #include "Dll.h"
 #include "Defines.h"
 
-class FIDELITY_RENDER_DLL CFlags
+class EXPOSURE_RENDER_DLL CFlags
 {
 private:
 	long	m_Bits;

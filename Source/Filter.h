@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Dll.h"
-#include "Defines.h"
 #include "Geometry.h"
 
 // ToDo: Add description
-class FIDELITY_RENDER_DLL CFilter
+class EXPOSURE_RENDER_DLL CFilter
 {
 public:
 	HOD CFilter(float xw, float yw)
@@ -18,7 +16,7 @@ public:
 };
 
 // ToDo: Add description
-class FIDELITY_RENDER_DLL CGaussianFilter : public CFilter
+class EXPOSURE_RENDER_DLL CGaussianFilter : public CFilter
 {
 public:
 	HOD CGaussianFilter(float xw, float yw, float a)
@@ -56,7 +54,7 @@ public:
 };
 
 // ToDo: Add description
-class FIDELITY_RENDER_DLL CMitchellFilter : public CFilter
+class EXPOSURE_RENDER_DLL CMitchellFilter : public CFilter
 {
 public:
 	HOD CMitchellFilter(float b, float c, float xw, float yw)

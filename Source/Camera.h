@@ -4,7 +4,7 @@
 
 class CCamera;
 
-class FIDELITY_RENDER_DLL CCameraSample
+class EXPOSURE_RENDER_DLL CCameraSample
 {
 public:
 	Vec2f m_ImageXY;			/*!< Image sample position */
@@ -44,7 +44,15 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CFocus
+#define DEF_FOCUS_TYPE					CenterScreen
+#define DEF_FOCUS_SENSOR_POS_CANVAS		Vec2f(0.0f)
+#define DEF_FOCUS_P						Vec3f(0.0f)
+#define DEF_FOCUS_FOCAL_DISTANCE		100.0f
+#define	DEF_FOCUS_T						0.0f
+#define DEF_FOCUS_N						Vec3f(0.0f)
+#define DEF_FOCUS_DOT_WN				0.0f
+
+class EXPOSURE_RENDER_DLL CFocus
 {
 public:
 	enum EType
@@ -95,7 +103,12 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CAperture
+#define DEF_APERTURE_SIZE			0.0f
+#define DEF_APERTURE_NO_BLADES		5
+#define DEF_APERTURE_BIAS			BiasNone
+#define DEF_APERTURE_ROTATION		0.0f
+
+class EXPOSURE_RENDER_DLL CAperture
 {
 public:
 	enum EBias
@@ -164,7 +177,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CBloom
+class EXPOSURE_RENDER_DLL CBloom
 {
 public:
 	float	m_Radius;			/*!< Nominal bloom radius */
@@ -200,7 +213,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CToneMap
+class EXPOSURE_RENDER_DLL CToneMap
 {
 public:
 	float	m_Factor;		/*!< Factor */
@@ -230,7 +243,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CFilm
+class EXPOSURE_RENDER_DLL CFilm
 {
 public:
 	CResolution2D		m_Resolution;		/*!< Resolution */
@@ -313,7 +326,11 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CImportance
+#define DEF_IMPORTANCE_ENABLED		false
+#define DEF_IMPORTANCE_RADIUS		100.0f
+#define DEF_IMPORTANCE_PROBABILITY	0.5f
+
+class EXPOSURE_RENDER_DLL CImportance
 {
 public:
 	float	m_Test;	
@@ -350,7 +367,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CStereoRender
+class EXPOSURE_RENDER_DLL CStereoRender
 {
 public:
 	bool		m_Enabled;					/*!< On/off */
@@ -391,7 +408,7 @@ public:
 
 #define FPS1 30.0f
 
-class FIDELITY_RENDER_DLL CCameraAnimation
+class EXPOSURE_RENDER_DLL CCameraAnimation
 {
 public:
 	enum EType
@@ -500,7 +517,23 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CCamera 
+#define DEF_CAMERA_TYPE						Perspective
+#define DEF_CAMERA_OPERATOR					CameraOperatorUndefined
+#define DEF_CAMERA_VIEW_MODE				ViewModeBack
+#define DEF_CAMERA_HITHER					1.0f
+#define DEF_CAMERA_YON						50000.0f
+#define DEF_CAMERA_ENABLE_CLIPPING			true
+#define DEF_CAMERA_GAMMA					2.2f
+#define DEF_CAMERA_FIELD_OF_VIEW			55.0f
+#define DEF_CAMERA_NUM_APERTURE_BLADES		4
+#define DEF_CAMERA_APERTURE_BLADES_ANGLE	0.0f
+#define DEF_CAMERA_ASPECT_RATIO				1.0f
+#define DEF_CAMERA_ZOOM_SPEED				1.0f
+#define DEF_CAMERA_ORBIT_SPEED				5.0f
+#define DEF_CAMERA_APERTURE_SPEED			0.25f
+#define DEF_CAMERA_FOCAL_DISTANCE_SPEED		10.0f
+
+class EXPOSURE_RENDER_DLL CCamera 
 {
 public:
 	enum EType

@@ -12,7 +12,7 @@ class Vec4i;
 class Vec4f;
 class CColorXyz;
 
-class FIDELITY_RENDER_DLL CColorRgbHdr
+class EXPOSURE_RENDER_DLL CColorRgbHdr
 {
 public:
 	HOD CColorRgbHdr(void)
@@ -131,7 +131,7 @@ public:
 	float	b;
 };
 
-class FIDELITY_RENDER_DLL CColorRgbLdr
+class EXPOSURE_RENDER_DLL CColorRgbLdr
 {
 public:
 	HOD CColorRgbLdr(void)
@@ -242,7 +242,7 @@ public:
 	unsigned char	b;
 };
 
-class FIDELITY_RENDER_DLL Vec2f
+class EXPOSURE_RENDER_DLL Vec2f
 {
 public:
 	HOD Vec2f(void)
@@ -350,7 +350,7 @@ public:
 	float x, y;
 };
 
-class FIDELITY_RENDER_DLL  Vec2i
+class EXPOSURE_RENDER_DLL  Vec2i
 {
 public:
 	HOD Vec2i(void)
@@ -419,7 +419,7 @@ public:
 	int x, y;
 };
 
-class FIDELITY_RENDER_DLL Vec3i
+class EXPOSURE_RENDER_DLL Vec3i
 {
 public:
 	HOD Vec3i(void)
@@ -520,7 +520,7 @@ public:
 	int x, y, z;
 };
 
-class FIDELITY_RENDER_DLL Vec3f
+class EXPOSURE_RENDER_DLL Vec3f
 {
 public:
 	HOD Vec3f(void)
@@ -759,7 +759,7 @@ public:
 	float x, y, z;
 };
 
-class FIDELITY_RENDER_DLL Vec4i
+class EXPOSURE_RENDER_DLL Vec4i
 {
 public:
 	HOD Vec4i(void)
@@ -789,7 +789,7 @@ public:
 	int x, y, z, w;
 };
 
-class FIDELITY_RENDER_DLL Vec4f
+class EXPOSURE_RENDER_DLL Vec4f
 {
 public:
 	HOD Vec4f(void)
@@ -852,7 +852,7 @@ static inline HOD CColorRgbHdr operator * (const Vec3f& v1, const CColorRgbHdr& 
 
 static inline HOD Vec2f operator * (Vec2f& V2f, Vec2i& V2i)	{ return Vec2f(V2f.x * V2i.x, V2f.y * V2i.y);				};
 
-class FIDELITY_RENDER_DLL CRay
+class EXPOSURE_RENDER_DLL CRay
 {	
 public:
 	// ToDo: Add description
@@ -901,7 +901,7 @@ public:
 	int		m_PixelID;		/*!< Pixel ID associated with the ray */
 };
 
-class FIDELITY_RENDER_DLL CSize2D
+class EXPOSURE_RENDER_DLL CSize2D
 {
 public:
 	Vec2f	m_Size;
@@ -940,7 +940,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CSize3D
+class EXPOSURE_RENDER_DLL CSize3D
 {
 public:
 	Vec3f	m_Size;
@@ -979,7 +979,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CRange
+class EXPOSURE_RENDER_DLL CRange
 {
 public:
 	float	m_Min;			/*!< Minimum range */
@@ -1020,7 +1020,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CBoundingBox
+class EXPOSURE_RENDER_DLL CBoundingBox
 {
 public:
 	Vec3f	m_MinP;
@@ -1251,7 +1251,7 @@ public:
 	}
 };
 
-class FIDELITY_RENDER_DLL CPixel
+class EXPOSURE_RENDER_DLL CPixel
 {
 public:
 	HOD CPixel(void)
@@ -1278,7 +1278,7 @@ public:
 	int		m_ID;		/*!< Pixel ID */
 };
 
-class FIDELITY_RENDER_DLL CResolution2D
+class EXPOSURE_RENDER_DLL CResolution2D
 {
 public:
 	Vec2i	m_XY;					/*!< Resolution width and height */
@@ -1361,7 +1361,7 @@ public:
 	HOD float Height(void) const	{ return m_XY.y; }
 };
 
-class FIDELITY_RENDER_DLL CResolution3D
+class EXPOSURE_RENDER_DLL CResolution3D
 {
 public:
 	Vec3i	m_XYZ;					/*!< Width, height and depth */
@@ -1585,7 +1585,7 @@ HOD inline CColorXyz Lerp(float T, const CColorXyz& C1, const CColorXyz& C2)
 }
 
 // ToDo: Add description
-class FIDELITY_RENDER_DLL CTransferFunction
+class EXPOSURE_RENDER_DLL CTransferFunction
 {
 public:
 	float			m_P[MAX_NO_TF_POINTS];		/*!< Node positions */
@@ -1640,7 +1640,7 @@ public:
 };
 
 // ToDo: Add description
-class FIDELITY_RENDER_DLL CTransferFunctions
+class EXPOSURE_RENDER_DLL CTransferFunctions
 {
 public:
 	CTransferFunction	m_Opacity;
