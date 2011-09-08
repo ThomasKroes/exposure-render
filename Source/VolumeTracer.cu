@@ -55,14 +55,19 @@ DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 	return pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 1000.0f;
 }
 
-DEV CColorRgbHdr GetDiffuseColor(CScene* pDevScene, const float& D)
+DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_DiffuseColor.F(D);
+	return pDevScene->m_TransferFunctions.m_Diffuse.F(D);
 }
 
-DEV CColorRgbHdr GetSpecularColor(CScene* pDevScene, const float& D)
+DEV CColorRgbHdr GetSpecular(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_SpecularColor.F(D);
+	return pDevScene->m_TransferFunctions.m_Specular.F(D);
+}
+
+DEV CColorRgbHdr GetEmission(CScene* pDevScene, const float& D)
+{
+	return pDevScene->m_TransferFunctions.m_Emission.F(D);
 }
 
 // Computes the attenuation through the volume
@@ -97,7 +102,7 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 
 		// Get shadow opacity
 		const float		Opacity = GetOpacity(pDevScene, D).r;
-		const CColorXyz	Color	= GetDiffuseColor(pDevScene, D).r;
+		const CColorXyz	Color	= GetDiffuse(pDevScene, D).r;
 
 		if (Opacity > 0.0f)
 		{
@@ -136,7 +141,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	float D = Density(pDevScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuseColor(pDevScene, D).ToXYZ(), pDevScene->m_TransferFunctions.m_SpecularColor.F(D).ToXYZ(), 500.0f, 0.1f);//pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 500.0f, 0.1f);//pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
 
 	// Light/shadow ray
 	CRay R; 
@@ -352,7 +357,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 //		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission
-//		Lv += Ltr * GetDiffuseColor(pDevScene, D).ToXYZ();
+//		Lv += Ltr * GetDiffuse(pDevScene, D).ToXYZ();
 
 		// Compute outgoing direction
 		Wo = Normalize(-Re.m_D);

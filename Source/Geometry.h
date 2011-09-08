@@ -1644,8 +1644,9 @@ class EXPOSURE_RENDER_DLL CTransferFunctions
 {
 public:
 	CTransferFunction	m_Opacity;
-	CTransferFunction	m_DiffuseColor;
-	CTransferFunction	m_SpecularColor;
+	CTransferFunction	m_Diffuse;
+	CTransferFunction	m_Specular;
+	CTransferFunction	m_Emission;
 	CTransferFunction	m_Roughness;
 
 	// ToDo: Add description
@@ -1662,8 +1663,9 @@ public:
 	HOD CTransferFunctions& operator=(const CTransferFunctions& Other)
 	{
 		m_Opacity		= Other.m_Opacity;
-		m_DiffuseColor	= Other.m_DiffuseColor;
-		m_SpecularColor	= Other.m_SpecularColor;
+		m_Diffuse		= Other.m_Diffuse;
+		m_Specular		= Other.m_Specular;
+		m_Emission		= Other.m_Emission;
 		m_Roughness		= Other.m_Roughness;
 
 		return *this;

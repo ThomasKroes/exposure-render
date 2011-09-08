@@ -67,7 +67,7 @@ void QTransferFunctionGradient::Update(void)
 		QNode& Node = gTransferFunction.GetNode(i);
 
 		// Get node color
-		QColor Color = Node.GetDiffuseColor();
+		QColor Color = Node.GetDiffuse();
 
 		// Clamp node position to [0, 1]
 		const float GradientStopPosition = qMin(1.0f, qMax(0.0f, (Node.GetIntensity() - gTransferFunction.GetRangeMin()) / gTransferFunction.GetRange()));

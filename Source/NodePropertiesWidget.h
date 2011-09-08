@@ -24,8 +24,9 @@ private slots:
 	void OnDeleteNode(void);
 	void OnIntensityChanged(const double& Position);
 	void OnOpacityChanged(const double& Opacity);
-	void OnDiffuseColorChanged(const QColor& DiffuseColor);
-	void OnSpecularColorChanged(const QColor& Color);
+	void OnDiffuseChanged(const QColor& Diffuse);
+	void OnSpecularChanged(const QColor& Specular);
+	void OnEmissionChanged(const QColor& Emission);
 	void OnRoughnessChanged(const double& Roughness);
 	void OnNodeIntensityChanged(QNode* pNode);
 	void OnNodeOpacityChanged(QNode* pNode);
@@ -50,8 +51,9 @@ private:
 	QLabel					m_OpacityLabel;
 	QDoubleSlider			m_OpacitySlider;
 	QDoubleSpinner			m_OpacitySpinBox;
-	QColorPushButton		m_DiffuseColor;
-	QColorPushButton		m_SpecularColor;
+	QColorPushButton		m_Diffuse;
+	QColorPushButton		m_Specular;
+	QColorPushButton		m_Emission;
 	QLabel					m_RoughnessLabel;
 	QDoubleSlider			m_RoughnessSlider;
 	QDoubleSpinner			m_RoughnessSpinBox;

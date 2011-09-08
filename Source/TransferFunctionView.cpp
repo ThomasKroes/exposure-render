@@ -74,8 +74,9 @@ void QTransferFunctionView::Update(void)
 		return;
 
 	Scene()->m_TransferFunctions.m_Opacity.m_NoNodes		= gTransferFunction.GetNodes().size();
-	Scene()->m_TransferFunctions.m_DiffuseColor.m_NoNodes	= gTransferFunction.GetNodes().size();
-	Scene()->m_TransferFunctions.m_SpecularColor.m_NoNodes	= gTransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Diffuse.m_NoNodes		= gTransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Specular.m_NoNodes		= gTransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Emission.m_NoNodes		= gTransferFunction.GetNodes().size();
 	Scene()->m_TransferFunctions.m_Roughness.m_NoNodes		= gTransferFunction.GetNodes().size();
 
 	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
@@ -83,16 +84,18 @@ void QTransferFunctionView::Update(void)
 		QNode& Node = gTransferFunction.GetNode(i);
 
 		// Positions
-		Scene()->m_TransferFunctions.m_Opacity.m_P[i]			= Node.GetIntensity();
-		Scene()->m_TransferFunctions.m_DiffuseColor.m_P[i]		= Node.GetIntensity();
-		Scene()->m_TransferFunctions.m_SpecularColor.m_P[i]		= Node.GetIntensity();
-		Scene()->m_TransferFunctions.m_Roughness.m_P[i]			= Node.GetIntensity();
-		
+		Scene()->m_TransferFunctions.m_Opacity.m_P[i]		= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_Diffuse.m_P[i]		= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_Specular.m_P[i]		= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_Emission.m_P[i]		= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_Roughness.m_P[i]		= Node.GetIntensity();
+
 		// Colors
-		Scene()->m_TransferFunctions.m_Opacity.m_C[i]			= CColorRgbHdr(Node.GetOpacity());
-		Scene()->m_TransferFunctions.m_DiffuseColor.m_C[i]		= CColorRgbHdr(Node.GetDiffuseColor().redF(), Node.GetDiffuseColor().greenF(), Node.GetDiffuseColor().blueF());
-		Scene()->m_TransferFunctions.m_SpecularColor.m_C[i]		= CColorRgbHdr(Node.GetSpecularColor().redF(), Node.GetSpecularColor().greenF(), Node.GetSpecularColor().blueF());
-		Scene()->m_TransferFunctions.m_Roughness.m_C[i]			= CColorRgbHdr(Node.GetRoughness());
+		Scene()->m_TransferFunctions.m_Opacity.m_C[i]		= CColorRgbHdr(Node.GetOpacity());
+		Scene()->m_TransferFunctions.m_Diffuse.m_C[i]		= CColorRgbHdr(Node.GetDiffuse().redF(), Node.GetDiffuse().greenF(), Node.GetDiffuse().blueF());
+		Scene()->m_TransferFunctions.m_Specular.m_C[i]		= CColorRgbHdr(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
+		Scene()->m_TransferFunctions.m_Emission.m_C[i]		= CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
+		Scene()->m_TransferFunctions.m_Roughness.m_C[i]		= CColorRgbHdr(Node.GetRoughness());
 	}
 
 	Scene()->m_DirtyFlags.SetFlag(TransferFunctionDirty);

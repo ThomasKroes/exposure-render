@@ -18,8 +18,8 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacityLabel(),
 	m_OpacitySlider(),
 	m_OpacitySpinBox(),
-	m_DiffuseColor(),
-	m_SpecularColor(),
+	m_Diffuse(),
+	m_Specular(),
 	m_RoughnessLabel(),
 	m_RoughnessSlider(),
 	m_RoughnessSpinBox()
@@ -124,34 +124,41 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	connect(&m_OpacitySpinBox, SIGNAL(valueChanged(double)), &m_OpacitySlider, SLOT(setValue(double)));
 	connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnOpacityChanged(double)));
 
-	// Diffuse Color
-	m_MainLayout.addWidget(new QLabel("Diffuse Color"), 3, 0);
-	m_DiffuseColor.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_DiffuseColor, 3, 1);
+	// Diffuse
+	m_MainLayout.addWidget(new QLabel("Diffuse"), 3, 0);
+	m_Diffuse.setFixedWidth(120);
+	m_MainLayout.addWidget(&m_Diffuse, 3, 1);
 
-	connect(&m_DiffuseColor, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseColorChanged(const QColor&)));
+	connect(&m_Diffuse, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseChanged(const QColor&)));
 
-	// Specular Color
-	m_MainLayout.addWidget(new QLabel("Specular Color"), 4, 0);
-	m_SpecularColor.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_SpecularColor, 4, 1);
+	// Specular
+	m_MainLayout.addWidget(new QLabel("Specular"), 4, 0);
+	m_Specular.setFixedWidth(120);
+	m_MainLayout.addWidget(&m_Specular, 4, 1);
 
-	connect(&m_SpecularColor, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularColorChanged(const QColor&)));
+	connect(&m_Specular, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularChanged(const QColor&)));
+
+	// Emission
+	m_MainLayout.addWidget(new QLabel("Emission"), 5, 0);
+	m_Emission.setFixedWidth(120);
+	m_MainLayout.addWidget(&m_Emission, 5, 1);
+
+	connect(&m_Emission, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnEmissionChanged(const QColor&)));
 
 	// Roughness
 	m_RoughnessLabel.setText("Roughness");
-	m_MainLayout.addWidget(&m_RoughnessLabel, 5, 0);
+	m_MainLayout.addWidget(&m_RoughnessLabel, 6, 0);
 
 	m_RoughnessSlider.setOrientation(Qt::Horizontal);
 	m_RoughnessSlider.setStatusTip("Roughness");
 	m_RoughnessSlider.setToolTip("Roughness");
 	m_RoughnessSlider.setRange(0.0f, 10000.0f);
-	m_MainLayout.addWidget(&m_RoughnessSlider, 5, 1);
+	m_MainLayout.addWidget(&m_RoughnessSlider, 6, 1);
 
 	m_RoughnessSpinBox.setStatusTip("Roughness");
 	m_RoughnessSpinBox.setToolTip("Roughness");
 	m_RoughnessSpinBox.setRange(0.0f, 10000.0f);
-	m_MainLayout.addWidget(&m_RoughnessSpinBox, 5, 2);
+	m_MainLayout.addWidget(&m_RoughnessSpinBox, 6, 2);
 
 	connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));
 	connect(&m_RoughnessSpinBox, SIGNAL(valueChanged(double)), &m_RoughnessSlider, SLOT(setValue(double)));
@@ -237,16 +244,22 @@ void QNodePropertiesWidget::OnOpacityChanged(const double& Opacity)
 		gTransferFunction.GetSelectedNode()->SetOpacity(Opacity);
 }
 
-void QNodePropertiesWidget::OnDiffuseColorChanged(const QColor& DiffuseColor)
+void QNodePropertiesWidget::OnDiffuseChanged(const QColor& Diffuse)
 {
 	if (gTransferFunction.GetSelectedNode())
-		gTransferFunction.GetSelectedNode()->SetDiffuseColor(DiffuseColor);
+		gTransferFunction.GetSelectedNode()->SetDiffuse(Diffuse);
 }
 
-void QNodePropertiesWidget::OnSpecularColorChanged(const QColor& SpecularColor)
+void QNodePropertiesWidget::OnSpecularChanged(const QColor& Specular)
 {
 	if (gTransferFunction.GetSelectedNode())
-		gTransferFunction.GetSelectedNode()->SetSpecularColor(SpecularColor);
+		gTransferFunction.GetSelectedNode()->SetSpecular(Specular);
+}
+
+void QNodePropertiesWidget::OnEmissionChanged(const QColor& Emission)
+{
+	if (gTransferFunction.GetSelectedNode())
+		gTransferFunction.GetSelectedNode()->SetEmission(Emission);
 }
 
 void QNodePropertiesWidget::OnRoughnessChanged(const double& Roughness)
@@ -301,10 +314,10 @@ void QNodePropertiesWidget::OnNodeDiffuseColorChanged(QNode* pNode)
 
 	if (pNode)
 	{
-		m_DiffuseColor.SetColor(pNode->GetDiffuseColor(), true);
+		m_Diffuse.SetColor(pNode->GetDiffuse(), true);
 	}
 
-	m_DiffuseColor.setEnabled(Enable);
+	m_Diffuse.setEnabled(Enable);
 }
 
 void QNodePropertiesWidget::OnNodeSpecularColorChanged(QNode* pNode)
@@ -313,10 +326,10 @@ void QNodePropertiesWidget::OnNodeSpecularColorChanged(QNode* pNode)
 
 	if (pNode)
 	{
-		m_SpecularColor.SetColor(pNode->GetSpecularColor(), true);
+		m_Specular.SetColor(pNode->GetSpecular(), true);
 	}
 
-	m_SpecularColor.setEnabled(Enable);
+	m_Specular.setEnabled(Enable);
 }
 
 void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
@@ -377,3 +390,5 @@ void QNodePropertiesWidget::SetupSelectionUI(void)
 		m_NextNode.setToolTip(NextToolTip);
 	}
 }
+
+

@@ -380,8 +380,8 @@ INSTALL_FILES(/bin FILES ${QtDlls})
 
 MESSAGE("" QT_BINARY_DIR)
 ### Example .mhd and .raw files ###
-# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.mhd")
-# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.raw")
+# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.mhd")
+# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.raw")
 
 ### Preset files ###
 FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")
