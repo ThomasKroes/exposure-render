@@ -393,6 +393,7 @@ INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
 
 INSTALL_TARGETS(/bin ExposureRender)
 
+# Requires re-distributables
 INCLUDE(InstallRequiredSystemLibraries)
 
 SET(CPACK_GENERATOR NSIS)
@@ -405,20 +406,14 @@ SET(CPACK_PACKAGE_DEFAULT_LOCATION /bin)
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "0")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
-SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CMAKE_PROJECT_NAME}-${EWS_VERSION}")
 
-# this works
-set(CPACK_NSIS_MENU_LINKS "http://graphics.tudelft.nl/" "TU Delft Graphics Website")
+# Menu links
+set(CPACK_NSIS_MENU_LINKS "http://graphics.tudelft.nl/" "TU Delft Graphics Website" "http://code.google.com/p/exposure-render/" "Exposure Render Website" "http://code.google.com/p/exposure-render/downloads" "Data sets" "http://code.google.com/p/exposure-render/wiki" "Wiki")
 
-# this doesn't
-set(CPACK_CREATE_DESKTOP_LINKS "${CMAKE_PROJECT_NAME}")
-
-# Icon in the add/remove control panel. Must be an .exe file 
+# Icon in the add/remove control panel, this must be an .exe file 
 set(CPACK_NSIS_INSTALLED_ICON_NAME bin\\\\${EXE_TARGET_NAME}.exe)
 
-
-
-
+# Install directory
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Exposure Render")
 
 # SET(CPACK_PACKAGE_ICON "c:\\WindowsMovieMaker.bmp")
@@ -430,6 +425,8 @@ SET(CPACK_NSIS_URL_INFO_ABOUT "http://code.google.com/p/exposure-render/")
 SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "bin\\\\ExposureRender")
 
 SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+
+# Shortcut in start menu
 SET(CPACK_PACKAGE_EXECUTABLES "bin\\\\ExposureRender;Exposure Render")
 
 INCLUDE(CPack)

@@ -138,9 +138,9 @@ public:
 		QString CurrentPath = QDir::currentPath();
 
 		// File name + extension
-		QString FileName = QApplication::applicationDirPath() + m_InternalName + "Presets.xml";
+		QString FileName = QApplication::applicationDirPath() + "/" + m_InternalName + "Presets.xml";
 
-		qDebug(QString("Loading " + m_UserInterfaceName + " presets from file: " + FileName).toAscii());
+		qDebug(QString("Loading: " + QFileInfo(FileName).fileName()).toAscii());
 
 		// Set the file name
 		if (ChoosePath)
@@ -204,9 +204,9 @@ public:
 		QString CurrentPath = QDir::currentPath();
 
 		// File name + extension
-		QString FileName = m_InternalName + "Presets.xml";
+		QString FileName = QApplication::applicationDirPath() + "/" + m_InternalName + "Presets.xml";
 
-		qDebug(QString("Saving " + m_UserInterfaceName + " presets to file: " + FileName).toAscii());
+		qDebug(QString("Saving: " + QFileInfo(FileName).fileName()).toAscii());
 
 		// Set the file name
 		if (ChoosePath)
