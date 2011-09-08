@@ -19,7 +19,7 @@ int main(int ArgumentCount, char* pArgv[])
 // 
 // 	SplashScreen.showMessage("Setting up main window", TopRight, Qt::white);
 	
-	Q_INIT_RESOURCE(icons);
+	Q_INIT_RESOURCE(Icons);
 
 	// Adjust style
 	Application.setStyle("plastique");

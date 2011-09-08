@@ -4,8 +4,6 @@
 #include "Statistics.h"
 #include "RenderThread.h"
 
-#define MB 1024.0f * 1024.0f
-
 QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
@@ -63,31 +61,21 @@ QSize QStatisticsWidget::sizeHint() const
 
 void QStatisticsWidget::PopulateTree(void)
 {
-	// Performance
-	QTreeWidgetItem* pPerformance = AddItem(NULL, "Performance");
-	pPerformance->setIcon(0, QIcon(":/Images/alarm-clock.png"));
-
-	// Volume
-	QTreeWidgetItem* pVolume = AddItem(NULL, "Volume");
-	pVolume->setIcon(0, QIcon(":/Images/grid.png"));
-
-	// Memory
-	QTreeWidgetItem* pMemory = AddItem(NULL, "Memory");
-	pMemory->setIcon(0, QIcon(":/Images/memory.png"));
-
-	// Camera
-	QTreeWidgetItem* pCamera = AddItem(NULL, "Camera");
-	pCamera->setIcon(0, QIcon(":/Images/camera.png"));
-
-	// Camera
-	QTreeWidgetItem* pGraphicsCard = AddItem(NULL, "Graphics Card");
-	pGraphicsCard->setIcon(0, QIcon(":/Images/graphic-card.png"));
+	// Populate tree with top-level items
+	AddItem(NULL, "Performance", "", "", "alarm-clock");
+	AddItem(NULL, "Volume", "", "", "grid");
+	AddItem(NULL, "Memory", "", "", "memory");
+	AddItem(NULL, "Camera", "", "", "camera");
+	AddItem(NULL, "Performance", "", "", "alarm-clock");
+	AddItem(NULL, "Graphics Card", "", "", "graphic-card");
 }
 
 QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QString& Property, const QString& Value, const QString& Unit, const QString& Icon)
 {
 	// Create new item
 	QTreeWidgetItem* pItem = new QTreeWidgetItem(pParent);
+
+	// Set item properties
 	pItem->setText(0, Property);
 	pItem->setText(1, Value);
 	pItem->setText(2, Unit);
@@ -143,9 +131,9 @@ void QStatisticsWidget::OnRenderEnd(void)
 	// Remove 2nd order children
 	RemoveChildren("Performance");
 	RemoveChildren("Volume");
-	RemoveChildren("Memory [CUDA]");
-	RemoveChildren("Memory [Host]");
+	RemoveChildren("Memory");
 	RemoveChildren("Camera");
+	RemoveChildren("Graphics Card");
 }
 
 void QStatisticsWidget::OnPreRenderFrame(void)
