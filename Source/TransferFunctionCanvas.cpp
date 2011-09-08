@@ -20,7 +20,7 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_Polygon(),
 	m_PolygonGradient(),
 	m_Histogram(),
-	m_RealisticsGradient(false),
+	m_RealisticsGradient(true),
 	m_AllowUpdateNodes(true),
 	m_Nodes(),
 	m_Edges(),
@@ -270,8 +270,8 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 
 		QGradientStops GradientStops;
 
-		GradientStops.append(QGradientStop(0, QColor(230, 230, 230, 0)));
-		GradientStops.append(QGradientStop(1, QColor(230, 230, 230, 220)));
+		GradientStops.append(QGradientStop(0, QColor(210, 210, 210, 60)));
+		GradientStops.append(QGradientStop(1, QColor(210, 210, 210, 220)));
 
 		m_PolygonGradient.setStops(GradientStops);
 	}

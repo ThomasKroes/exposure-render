@@ -202,17 +202,23 @@ void QNode::ReadXML(QDomElement& Parent)
 	// Opacity
 	m_Opacity = Parent.firstChildElement("Opacity").attribute("Value").toFloat();
 
-	// Diffuse Color
-	QDomElement DiffuseColor = Parent.firstChildElement("DiffuseColor");
-	m_Diffuse.setRed(DiffuseColor.attribute("R").toInt());
-	m_Diffuse.setGreen(DiffuseColor.attribute("G").toInt());
-	m_Diffuse.setBlue(DiffuseColor.attribute("B").toInt());
+	// Diffuse
+	QDomElement Diffuse = Parent.firstChildElement("Diffuse");
+	m_Diffuse.setRed(Diffuse.attribute("R").toInt());
+	m_Diffuse.setGreen(Diffuse.attribute("G").toInt());
+	m_Diffuse.setBlue(Diffuse.attribute("B").toInt());
 
-	// Specular Color
-	QDomElement SpecularColor = Parent.firstChildElement("SpecularColor");
-	m_Specular.setRed(SpecularColor.attribute("R").toInt());
-	m_Specular.setGreen(SpecularColor.attribute("G").toInt());
-	m_Specular.setBlue(SpecularColor.attribute("B").toInt());
+	// Specular
+	QDomElement Specular = Parent.firstChildElement("Specular");
+	m_Specular.setRed(Specular.attribute("R").toInt());
+	m_Specular.setGreen(Specular.attribute("G").toInt());
+	m_Specular.setBlue(Specular.attribute("B").toInt());
+
+	// Emission
+	QDomElement Emission = Parent.firstChildElement("Emission");
+	m_Emission.setRed(Emission.attribute("R").toInt());
+	m_Emission.setGreen(Emission.attribute("G").toInt());
+	m_Emission.setBlue(Emission.attribute("B").toInt());
 
 	// Roughness
 	m_Roughness = Parent.firstChildElement("Roughness").attribute("Value").toFloat();
@@ -234,19 +240,26 @@ QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	Opacity.setAttribute("Value", GetOpacity());
 	Node.appendChild(Opacity);
 
-	// Diffuse Color
-	QDomElement DiffuseColor = DOM.createElement("DiffuseColor");
+	// Diffuse
+	QDomElement DiffuseColor = DOM.createElement("Diffuse");
 	DiffuseColor.setAttribute("R", m_Diffuse.red());
 	DiffuseColor.setAttribute("G", m_Diffuse.green());
 	DiffuseColor.setAttribute("B", m_Diffuse.blue());
 	Node.appendChild(DiffuseColor);
 
-	// Specular Color
-	QDomElement SpecularColor = DOM.createElement("SpecularColor");
+	// Specular
+	QDomElement SpecularColor = DOM.createElement("Specular");
 	SpecularColor.setAttribute("R", m_Specular.red());
 	SpecularColor.setAttribute("G", m_Specular.green());
 	SpecularColor.setAttribute("B", m_Specular.blue());
 	Node.appendChild(SpecularColor);
+
+	// Emission
+	QDomElement EmissionColor = DOM.createElement("Emission");
+	EmissionColor.setAttribute("R", m_Emission.red());
+	EmissionColor.setAttribute("G", m_Emission.green());
+	EmissionColor.setAttribute("B", m_Emission.blue());
+	Node.appendChild(EmissionColor);
 
 	// Roughness
 	QDomElement Roughness = DOM.createElement("Roughness");
