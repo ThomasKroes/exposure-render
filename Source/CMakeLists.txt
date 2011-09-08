@@ -380,8 +380,8 @@ INSTALL_FILES(/bin FILES ${QtDlls})
 
 MESSAGE("" QT_BINARY_DIR)
 ### Example .mhd and .raw files ###
-INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.mhd")
-INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.raw")
+# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.mhd")
+# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_SOURCE_DIR}\\\\Bonsai.raw")
 
 ### Preset files ###
 FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")
@@ -395,28 +395,41 @@ INSTALL_TARGETS(/bin ExposureRender)
 
 INCLUDE(InstallRequiredSystemLibraries)
 
+SET(CPACK_GENERATOR NSIS)
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Exposure Render")
 SET(CPACK_PACKAGE_VENDOR "TU Delft")
 SET(CPACK_RESOURCE_FILE_WELCOME ${CMAKE_CURRENT_SOURCE_DIR}/Welcome.txt)
 SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt)
 SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt)
-
+SET(CPACK_PACKAGE_DEFAULT_LOCATION /bin)
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "0")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CMAKE_PROJECT_NAME}-${EWS_VERSION}")
+
+# this works
+set(CPACK_NSIS_MENU_LINKS "http://graphics.tudelft.nl/" "TU Delft Graphics Website")
+
+# this doesn't
+set(CPACK_CREATE_DESKTOP_LINKS "${CMAKE_PROJECT_NAME}")
+
+# Icon in the add/remove control panel. Must be an .exe file 
+set(CPACK_NSIS_INSTALLED_ICON_NAME bin\\\\${EXE_TARGET_NAME}.exe)
+
+
+
 
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Exposure Render")
 
-# SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ExecWait '\\\"$INSTDIR\\\\vcredist_x86.exe\\\" /q:a)
-
-SET(CPACK_PACKAGE_ICON "c:\\WindowsMovieMaker.bmp")
+# SET(CPACK_PACKAGE_ICON "c:\\WindowsMovieMaker.bmp")
+SET(CPACK_NSIS_PACKAGE_NAME "Exposure Render")
 SET(CPACK_NSIS_DISPLAY_NAME "Exposure Render")
 SET(CPACK_NSIS_CONTACT "t.kroes@tudelft.nl")
 SET(CPACK_NSIS_HELP_LINK "http://graphics.tudelft.nl/")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http://code.google.com/p/exposure-render/")
-SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "ExposureRender")
+SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "bin\\\\ExposureRender")
 
-set(CPACK_NSIS_EXECUTABLES_DIRECTORY "/bin")
-SET(CPACK_PACKAGE_EXECUTABLES "ExposureRender;Exposure Render")
+SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+SET(CPACK_PACKAGE_EXECUTABLES "bin\\\\ExposureRender;Exposure Render")
 
 INCLUDE(CPack)

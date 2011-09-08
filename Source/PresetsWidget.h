@@ -138,7 +138,7 @@ public:
 		QString CurrentPath = QDir::currentPath();
 
 		// File name + extension
-		QString FileName = m_InternalName + "Presets.xml";
+		QString FileName = QApplication::applicationDirPath() + m_InternalName + "Presets.xml";
 
 		qDebug(QString("Loading " + m_UserInterfaceName + " presets from file: " + FileName).toAscii());
 
@@ -150,7 +150,7 @@ public:
 		}
 		else
 		{
-			XmlFile.setFileName(CurrentPath + "/" + FileName);
+			XmlFile.setFileName(FileName);
 		}
 
 		// Open the XML file for reading
@@ -216,7 +216,7 @@ public:
 		}
 		else
 		{
-			XmlFile.setFileName(CurrentPath + "/" + FileName);
+			XmlFile.setFileName(FileName);
 		}
 
 		// Open the XML file for writing
