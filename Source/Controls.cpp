@@ -176,7 +176,8 @@ QString GetOpenFileName(const QString& Caption, const QString& Filter)
 	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 	FileDialog.setWindowIcon(QIcon(":/Images/folder-open-document.png"));
 
-	FileDialog.exec();
+	if (FileDialog.exec() == QMessageBox::Rejected)
+		return "";
 
 	return FileDialog.selectedFiles().value(0);
 }
@@ -190,7 +191,8 @@ QString GetSaveFileName(const QString& Caption, const QString& Filter)
 	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 	FileDialog.setWindowIcon(QIcon(":/Images/disk.png"));
 
-	FileDialog.exec();
+	if (FileDialog.exec() == QMessageBox::Rejected)
+		return "";
 
 	return FileDialog.selectedFiles().value(0);
 }

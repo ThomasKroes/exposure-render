@@ -236,6 +236,10 @@ void CMainWindow::Open()
 	// Create open file dialog
     QString FileName = GetOpenFileName("Open volume", "Meta Image Volume Files (*.mhd)");
 
+	// Exit empty
+	if (FileName.isEmpty())
+		return;
+
 	// Open the file
 	Open(FileName);
 }
