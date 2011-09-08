@@ -122,9 +122,7 @@ void QLightsWidget::OnLightSelectionChanged(void)
 	if (CurrentRow < 0)
 		return;
 
-	QLightItem* pLightItem = dynamic_cast<QLightItem*>(m_LightList.currentItem());
-
-	gLighting.SetSelectedLight(CurrentRow);
+//	gLighting.SetSelectedLight(CurrentRow);
 }
 
 void QLightsWidget::OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight)

@@ -316,6 +316,9 @@ void QLighting::AddLight(QLight& Light)
 	// Connect
 	connect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
 
+	// Update the scene
+	Update();
+
 	// Let others know the lighting has changed
 	emit LightingChanged();
 }
@@ -329,6 +332,9 @@ void QLighting::RemoveLight(QLight* pLight)
 
 	// Deselect
 	SetSelectedLight(NULL);
+
+	// Update the scene
+	Update();
 
 	// Let others know the lighting has changed
 	emit LightingChanged();

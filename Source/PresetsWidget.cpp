@@ -1,6 +1,5 @@
 
 #include "PresetsWidget.h"
-#include "Controls.h"
 
 QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
 	QGroupBox(pParent),

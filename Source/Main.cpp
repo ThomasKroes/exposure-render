@@ -24,7 +24,7 @@ int main(int ArgumentCount, char* pArgv[])
 	// Adjust style
 	Application.setStyle("plastique");
 	Application.setOrganizationName("TU Delft");
-	Application.setApplicationName("Exposure");
+	Application.setApplicationName("Exposure Render");
 
 	CMainWindow MainWindow;
 

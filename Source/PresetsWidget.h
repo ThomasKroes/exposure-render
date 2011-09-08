@@ -4,6 +4,7 @@
 #include <QtXml\qdom.h>
 
 #include "Preset.h"
+#include "Controls.h"
 
 class QTestWidget : public QGroupBox
 {

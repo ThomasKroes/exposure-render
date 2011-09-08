@@ -394,6 +394,7 @@ SET(QtDlls
 	${QT_BINARY_DIR}/QtCore4.dll
 	${QT_BINARY_DIR}/QtGui4.dll
 	${QT_BINARY_DIR}/QtXml4.dll
+	${QT_BINARY_DIR}/QtSql4.dll
 )
 
 INSTALL_FILES(/bin FILES ${QtDlls})
@@ -435,7 +436,7 @@ SET(CPACK_NSIS_HELP_LINK "http://graphics.tudelft.nl/")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http://code.google.com/p/exposure-render/")
 SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "ExposureRender")
 
-set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+set(CPACK_NSIS_EXECUTABLES_DIRECTORY "/bin")
 SET(CPACK_PACKAGE_EXECUTABLES "ExposureRender;Exposure Render")
 
 
