@@ -6,27 +6,28 @@
 
 class QTransferFunction;
 
-class QHistogram : public QGraphicsPolygonItem
+class QHistogram : public QObject
 {
+	Q_OBJECT
+
 public:
-    QHistogram(QGraphicsItem* pParent = NULL) :
-		QGraphicsPolygonItem(pParent)
-	{
-	}
+    QHistogram(QObject* pParent = NULL);
+	QHistogram::QHistogram(const QHistogram& Other);
+	QHistogram& operator = (const QHistogram& Other);
 
-	QHistogram::QHistogram(const QHistogram& Other)
-	{
-		*this = Other;
-	};
+	bool			GetEnabled(void) const;
+	void			SetEnabled(const bool& Enabled);
+	QList<int>&		GetBins(void);
+	void			SetBins(const QList<int>& Bins);
+	int				GetMax(void) const;
+	void			SetMax(const int& Max);
+	void			Reset(void);
 
-	QHistogram& operator = (const QHistogram& Other)			
-	{
-		m_Bins	= Other.m_Bins;
-		m_Max	= Other.m_Max;
+signals:
+	void HistogramChanged(void);
 
-		return *this;
-	}
-
+private:
+	bool			m_Enabled;
 	QList<int>		m_Bins;
 	int				m_Max;
 };
@@ -135,7 +136,7 @@ public:
 	void				SelectPreviousNode(void);
 	void				SelectNextNode(void);
 	int					GetNodeIndex(QNode* pNode);
-	const QHistogram&	GetHistogram(void) const;		
+	QHistogram&			GetHistogram(void);		
 	void				SetHistogram(const int* pBins, const int& NoBins);
 	void				ReadXML(QDomElement& Parent);
 	QDomElement			WriteXML(QDomDocument& DOM, QDomElement& Parent);
@@ -148,7 +149,6 @@ private slots:
 signals:
 	void	FunctionChanged(void);
 	void	SelectionChanged(QNode* pNode);
-	void	HistogramChanged(void);
 	
 protected:
 	QNodeList		m_Nodes;

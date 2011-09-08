@@ -56,6 +56,9 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	// Y-axis label
 	m_AxisLabelY.m_Text = "Opacity";
 	m_GraphicsScene.addItem(&m_AxisLabelY);
+
+	// Notify us when the histogram changes
+	connect(&gTransferFunction.GetHistogram(), SIGNAL(gTransferFunction.GetHistogram().HistogramChanged()), this, SLOT(m_TransferFunctionCanvas.UpdateHistogram()));
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)

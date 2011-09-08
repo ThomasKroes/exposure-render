@@ -438,6 +438,9 @@ void CRenderThread::run()
 	// Free render image buffer
 	free(m_pRenderImage);
 	m_pRenderImage = NULL;
+
+	// Clear the histogram
+	gTransferFunction.GetHistogram().Reset();
 }
 
 void CRenderThread::Close(void)
@@ -604,15 +607,15 @@ bool CRenderThread::Load(QString& FileName)
 
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
-// 	Histogram->SetInputConnection(ImageResample->GetOutputPort());
-// 	Histogram->SetComponentExtent(0, 1024, 0, 0, 0, 0);
-// 	Histogram->SetComponentOrigin(0, 0, 0);
-// 	Histogram->SetComponentSpacing(1, 0, 0);
-// 	Histogram->IgnoreZeroOn();
-// 	Histogram->Update();
+ 	Histogram->SetInputConnection(ImageCast->GetOutputPort());
+ 	Histogram->SetComponentExtent(0, 1024, 0, 0, 0, 0);
+ 	Histogram->SetComponentOrigin(0, 0, 0);
+ 	Histogram->SetComponentSpacing(1, 0, 0);
+ 	Histogram->IgnoreZeroOn();
+ 	Histogram->Update();
  
 	// Update the histogram in the transfer function
-//	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
+	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
 	
 	// Delete progress dialog
 //	gpProgressDialog->close();

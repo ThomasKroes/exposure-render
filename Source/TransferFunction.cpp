@@ -9,6 +9,77 @@ bool CompareNodes(QNode NodeA, QNode NodeB)
 	return NodeA.GetIntensity() < NodeB.GetIntensity();
 }
 
+QHistogram::QHistogram(QObject* pParent /*= NULL*/) :
+	QObject(pParent),
+	m_Enabled(false),
+	m_Bins(),
+	m_Max(0)
+{
+}
+
+QHistogram::QHistogram(const QHistogram& Other)
+{
+	*this = Other;
+};
+
+QHistogram& QHistogram::operator=(const QHistogram& Other)
+{
+	m_Enabled	= Other.m_Enabled;
+	m_Bins		= Other.m_Bins;
+	m_Max		= Other.m_Max;
+
+	return *this;
+}
+
+bool QHistogram::GetEnabled(void) const
+{
+	return m_Enabled;
+}
+
+void QHistogram::SetEnabled(const bool& Enabled)
+{
+	m_Enabled = Enabled;
+
+	// Inform others that the histogram has changed
+	emit HistogramChanged();
+}
+
+QList<int>& QHistogram::GetBins(void)
+{
+	return m_Bins;
+}
+
+void QHistogram::SetBins(const QList<int>& Bins)
+{
+	m_Bins = Bins;
+
+	// Inform others that the histogram has changed
+	emit HistogramChanged();
+}
+
+int QHistogram::GetMax(void) const
+{
+	return m_Max;
+}
+
+void QHistogram::SetMax(const int& Max)
+{
+	m_Max = Max;
+
+	// Inform others that the histogram has changed
+	emit HistogramChanged();
+}
+
+void QHistogram::Reset(void)
+{
+	m_Enabled = false;
+	m_Bins.clear();
+	m_Max = 0;
+
+	// Inform others that the histogram has changed
+	emit HistogramChanged();
+}
+
 QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const float& Opacity, const QColor& Diffuse, const QColor& Specular, const QColor& Emission, const float& Roughness) :
 	QPresetXML(pTransferFunction),
 	m_pTransferFunction(pTransferFunction),
@@ -532,26 +603,29 @@ QNode& QTransferFunction::GetNode(const int& Index)
 	return m_Nodes[Index];
 }
 
-const QHistogram& QTransferFunction::GetHistogram(void) const
+QHistogram& QTransferFunction::GetHistogram(void)
 {
 	return m_Histogram;
 }
 
 void QTransferFunction::SetHistogram(const int* pBins, const int& NoBins)
 {
-	m_Histogram.m_Bins.clear();
+	QList<int> Bins;
+
+	int Max = 0;
 
 	for (int i = 0; i < NoBins; i++)
 	{
-		if (pBins[i] > m_Histogram.m_Max)
-			m_Histogram.m_Max = pBins[i];
+		if (pBins[i] > m_Histogram.GetMax())
+			Max = pBins[i];
 	}
 
 	for (int i = 0; i < NoBins; i++)
-		m_Histogram.m_Bins.append(pBins[i]);
+		Bins.append(pBins[i]);
 
-	// Inform other that the histogram has changed
-	emit HistogramChanged();
+	m_Histogram.SetEnabled(true);
+	m_Histogram.SetBins(Bins);
+	m_Histogram.SetMax(Max);
 }
 
 void QTransferFunction::ReadXML(QDomElement& Parent)
