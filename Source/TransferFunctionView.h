@@ -47,7 +47,7 @@ public:
 	QColor	GetBackgroundColor(void) const { return m_BackgroundColor; };
 	void	SetBackgroundColor(const QColor& BackgroundColor) { m_BackgroundColor = BackgroundColor; };
 
-private slots:
+public slots:
 	void OnNodeSelectionChanged(QNode* pNode);
 	void OnHistogramChanged(void);
 	void Update(void);

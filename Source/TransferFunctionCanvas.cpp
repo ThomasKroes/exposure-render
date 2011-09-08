@@ -134,18 +134,18 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 
 void QTransferFunctionCanvas::UpdateHistogram(void)
 {
-	m_Histogram.setVisible(gTransferFunction.GetHistogram().GetEnabled());
+	m_Histogram.setVisible(gHistogram.GetEnabled());
 
-	if (!gTransferFunction.GetHistogram().GetEnabled())
+	if (!gHistogram.GetEnabled())
 		return;
 
 	QPolygonF Polygon;
 
 	// Set the gradient stops
-	for (int i = 0; i < gTransferFunction.GetHistogram().GetBins().size(); i++)
+	for (int i = 0; i < gHistogram.GetBins().size(); i++)
 	{
 		// Compute polygon point in scene coordinates
-		QPointF ScenePoint = TransferFunctionToScene(QPointF(i, logf((float)gTransferFunction.GetHistogram().GetBins()[i]) / logf(1.5f * (float)gTransferFunction.GetHistogram().GetMax())));
+		QPointF ScenePoint = TransferFunctionToScene(QPointF(i, logf((float)gHistogram.GetBins()[i]) / logf(1.5f * (float)gHistogram.GetMax())));
 
 		if (i == 0)
 		{
@@ -158,7 +158,7 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 
 		Polygon.append(ScenePoint);
 
-		if (i == (gTransferFunction.GetHistogram().GetBins().size() - 1))
+		if (i == (gHistogram.GetBins().size() - 1))
 		{
 			QPointF CenterCopy = ScenePoint;
 

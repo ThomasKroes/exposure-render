@@ -61,6 +61,8 @@ SET(ExposureRenderSources
 	AppearanceDockWidget.cpp
 	NodeItem.cpp
 	EdgeItem.cpp
+	Histogram.cpp
+	Node.cpp
 
 	# Camera
 	Camera.cpp
@@ -124,6 +126,8 @@ SET(ExposureRenderHeaders
 	AppearanceDockWidget.h
 	NodeItem.h
 	EdgeItem.h
+	Histogram.h
+	Node.h
 
 	# Camera
 	Camera.h
@@ -208,6 +212,8 @@ SET(AppearanceSources
 	AppearanceDockWidget.h
 	NodeItem.h
 	EdgeItem.h
+	Histogram.h
+	Node.h
 	AppearanceDockWidget.cpp
 	TransferFunction.cpp
 	TransferFunctionCanvas.cpp
@@ -218,6 +224,8 @@ SET(AppearanceSources
 	AppearanceDockWidget.cpp
 	NodeItem.cpp
 	EdgeItem.cpp
+	Histogram.cpp
+	Node.cpp
 )
 
 # Make the appearance group

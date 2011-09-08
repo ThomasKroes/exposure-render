@@ -440,7 +440,7 @@ void CRenderThread::run()
 	m_pRenderImage = NULL;
 
 	// Clear the histogram
-	gTransferFunction.GetHistogram().Reset();
+	gHistogram.Reset();
 }
 
 void CRenderThread::Close(void)
@@ -615,7 +615,7 @@ bool CRenderThread::Load(QString& FileName)
  	Histogram->Update();
  
 	// Update the histogram in the transfer function
-	gTransferFunction.SetHistogram((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
+	gHistogram.SetBins((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
 	
 	// Delete progress dialog
 //	gpProgressDialog->close();

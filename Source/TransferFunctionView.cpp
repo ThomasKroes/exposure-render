@@ -47,7 +47,6 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	
 	// Respond to changes in node selection
 	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
-	connect(&gTransferFunction, SIGNAL(HistogramChanged(void)), this, SLOT(OnHistogramChanged(void)));
 
 	// X-axis label
 	m_AxisLabelX.m_Text =  "Density";
@@ -58,7 +57,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_GraphicsScene.addItem(&m_AxisLabelY);
 
 	// Notify us when the histogram changes
-	connect(&gTransferFunction.GetHistogram(), SIGNAL(gTransferFunction.GetHistogram().HistogramChanged()), this, SLOT(m_TransferFunctionCanvas.UpdateHistogram()));
+	connect(&gHistogram, SIGNAL(HistogramChanged()), this, SLOT(OnHistogramChanged()));
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)
