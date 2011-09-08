@@ -53,16 +53,10 @@ public:
 	bool						m_SuspendUpdate;
 
 	static float				m_Radius;
-	static float				m_RadiusHover;
-	static float				m_RadiusSelected;
-	static QColor				m_BackgroundColor;
-	static QColor				m_BackgroundColorHover;
-	static QColor				m_BackgroundColorSelected;
-	static QColor				m_TextColor;
-	static float				m_PenWidth;
-	static float				m_PenWidthHover;
-	static float				m_PenWidthSelected;
-	static QColor				m_PenColor;
-	static QColor				m_PenColorHover;
-	static QColor				m_PenColorSelected;
+	static QBrush				m_BrushNormal;
+	static QBrush				m_BrushHighlight;
+	static QBrush				m_BrushDisabled;
+	static QPen					m_PenNormal;
+	static QPen					m_PenHighlight;
+	static QPen					m_PenDisabled;
 };

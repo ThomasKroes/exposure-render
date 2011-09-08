@@ -94,7 +94,7 @@ void QNode::SetDiffuse(const QColor& Diffuse)
 	m_Diffuse = Diffuse;
 
 	emit NodeChanged(this);
-	emit DiffuseColorChanged(this);
+	emit DiffuseChanged(this);
 }
 
 QColor QNode::GetSpecular(void) const
@@ -107,7 +107,7 @@ void QNode::SetSpecular(const QColor& Specular)
 	m_Specular = Specular;
 
 	emit NodeChanged(this);
-	emit SpecularColorChanged(this);
+	emit SpecularChanged(this);
 }
 
 QColor QNode::GetEmission(void) const
@@ -120,7 +120,7 @@ void QNode::SetEmission(const QColor& Emission)
 	m_Emission = Emission;
 
 	emit NodeChanged(this);
-	emit SpecularColorChanged(this);
+	emit EmissionChanged(this);
 }
 
 float QNode::GetRoughness(void) const

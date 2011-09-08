@@ -28,4 +28,8 @@ public:
 
 public:
 	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
+
+	static QPen					m_PenNormal;
+	static QPen					m_PenHighlight;
+	static QPen					m_PenDisabled;
 };

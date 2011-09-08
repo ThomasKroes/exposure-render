@@ -5,19 +5,13 @@
 
 #define NODE_POSITION_EPSILON 0.01f
 
-float	QNodeItem::m_Radius						= 4.0f;
-float	QNodeItem::m_RadiusHover				= 4.0f;
-float	QNodeItem::m_RadiusSelected				= 4.0f;
-QColor	QNodeItem::m_BackgroundColor			= QColor(230, 230, 230);
-QColor	QNodeItem::m_BackgroundColorHover		= QColor(240, 160, 30);
-QColor	QNodeItem::m_BackgroundColorSelected	= QColor(240, 160, 30);
-QColor	QNodeItem::m_TextColor					= QColor(20, 20, 20);
-float	QNodeItem::m_PenWidth					= 1.3f;
-float	QNodeItem::m_PenWidthHover				= 1.3f;
-float	QNodeItem::m_PenWidthSelected			= 1.3f;
-QColor	QNodeItem::m_PenColor					= QColor(240, 160, 30);
-QColor	QNodeItem::m_PenColorHover				= QColor(200, 30, 45);
-QColor	QNodeItem::m_PenColorSelected			= QColor(200, 30, 45);
+float	QNodeItem::m_Radius			= 4.0f;
+QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(0, 100, 160));
+QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(45, 180, 150));
+QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 140));
+QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 130, 120)), 1.3);
+QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 130, 120)), 1.3);
+QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 120)), 1.3);
 
 QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode) :
 	QGraphicsEllipseItem(pTransferFunctionCanvas),
@@ -30,8 +24,8 @@ QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pN
 	m_SuspendUpdate(false)
 {
 	// Styling
-	setBrush(QBrush(QNodeItem::m_BackgroundColor));
-	setPen(QPen(QNodeItem::m_PenColor, QNodeItem::m_PenWidth));
+	setBrush(QNodeItem::m_BrushNormal);
+	setPen(QNodeItem::m_PenNormal);
 
 	// Make item movable
 	setFlag(QGraphicsItem::ItemIsMovable);
@@ -53,13 +47,9 @@ void QNodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
 	if (isSelected())
 		return;
 
-	// Change the cursor shape
-//	m_Cursor.setShape(Qt::CursorShape::PointingHandCursor);
-//	setCursor(m_Cursor);
-
 	// Modify pen and brush
-	setPen(QPen(QNodeItem::m_PenColorHover, QNodeItem::m_PenWidthHover));
-	setBrush(QBrush(QNodeItem::m_BackgroundColorHover));
+	setPen(isEnabled() ? QNodeItem::m_PenHighlight : QNodeItem::m_PenDisabled);
+	setBrush(isEnabled() ? QNodeItem::m_BrushHighlight : QNodeItem::m_BrushDisabled);
 }
 
 void QNodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
@@ -75,8 +65,8 @@ void QNodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
 //	setCursor(m_Cursor);
 
 	// Modify pen and brush
-	setPen(QPen(QNodeItem::m_PenColor, QNodeItem::m_PenWidth));
-	setBrush(QBrush(QNodeItem::m_BackgroundColor));
+	setPen(isEnabled() ? QNodeItem::m_PenNormal : QNodeItem::m_PenDisabled);
+	setBrush(isEnabled() ? QNodeItem::m_BrushNormal : QNodeItem::m_BrushDisabled);
 }
 
 QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
@@ -116,14 +106,14 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 			m_CachePen		= pen();
 			m_CacheBrush	= brush();
 
-			setPen(QPen(QNodeItem::m_PenColorSelected, QNodeItem::m_PenWidthSelected));
-			setBrush(QBrush(QNodeItem::m_BackgroundColorSelected));
+			setPen(QPen(isEnabled() ? QNodeItem::m_PenHighlight : QNodeItem::m_PenDisabled));
+			setBrush(QBrush(isEnabled() ? QNodeItem::m_BrushHighlight : QNodeItem::m_BrushDisabled));
 		}
 		else
 		{
 			// Restore normal pen and brush
-			setPen(QPen(QNodeItem::m_PenColor, QNodeItem::m_PenWidth));
-			setBrush(QBrush(QNodeItem::m_BackgroundColor));
+			setPen(QPen(isEnabled() ? QNodeItem::m_PenNormal : QNodeItem::m_PenDisabled));
+			setBrush(QBrush(isEnabled() ? QNodeItem::m_BrushNormal : QNodeItem::m_BrushDisabled));
 		}
 	}
 

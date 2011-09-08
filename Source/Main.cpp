@@ -23,7 +23,7 @@ int main(int ArgumentCount, char* pArgv[])
 
 	// Adjust style
 	Application.setStyle("plastique");
-	Application.setStyleSheet("QTransferFunctionView:enabled { background-color: rgb(240, 240, 240) } QTransferFunctionView:disabled { background-color: rgb(0, 240, 240) }");
+//	Application.setStyleSheet("QTransferFunctionView:enabled { background-color: rgb(240, 240, 240) } QTransferFunctionView:disabled { background-color: rgb(0, 240, 240) }");
 	Application.setOrganizationName("TU Delft");
 	Application.setApplicationName("Exposure Render");
 

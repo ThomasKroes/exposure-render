@@ -30,8 +30,9 @@ private slots:
 	void OnRoughnessChanged(const double& Roughness);
 	void OnNodeIntensityChanged(QNode* pNode);
 	void OnNodeOpacityChanged(QNode* pNode);
-	void OnNodeDiffuseColorChanged(QNode* pNode);
-	void OnNodeSpecularColorChanged(QNode* pNode);
+	void OnNodeDiffuseChanged(QNode* pNode);
+	void OnNodeSpecularChanged(QNode* pNode);
+	void OnNodeEmissionChanged(QNode* pNode);
 	void OnNodeRoughnessChanged(QNode* pNode);
 
 private:

@@ -31,7 +31,6 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 
 	// Main layout
 	m_MainLayout.setAlignment(Qt::AlignTop);
-//	m_pMainLayout.setContentsMargins(0, 0, 0, 0);
 
 	setLayout(&m_MainLayout);
 
@@ -62,8 +61,6 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_PreviousNode.setFixedHeight(22);
 	m_PreviousNode.updateGeometry();
 	m_SelectionLayout.addWidget(&m_PreviousNode, 0, 1);
-
-	m_PreviousNode.setStyleSheet("color: blue");
 
 	connect(&m_PreviousNode, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
 
@@ -190,23 +187,26 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 
 			disconnect(&Node, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
 			disconnect(&Node, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
-			disconnect(&Node, SIGNAL(DiffuseColorChanged(QNode*)), this, SLOT(OnNodeDiffuseColorChanged(QNode*)));
-			disconnect(&Node, SIGNAL(SpecularColorChanged(QNode*)), this, SLOT(OnNodeSpecularColorChanged(QNode*)));
+			disconnect(&Node, SIGNAL(DiffuseChanged(QNode*)), this, SLOT(OnNodeDiffuseChanged(QNode*)));
+			disconnect(&Node, SIGNAL(SpecularChanged(QNode*)), this, SLOT(OnNodeSpecularChanged(QNode*)));
+			disconnect(&Node, SIGNAL(EmissionChanged(QNode*)), this, SLOT(OnNodeEmissionChanged(QNode*)));
 			disconnect(&Node, SIGNAL(RoughnessChanged(QNode*)), this, SLOT(OnNodeRoughnessChanged(QNode*)));
 		}
 
 		// Setup connections
 		connect(pNode, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
 		connect(pNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
-		connect(pNode, SIGNAL(DiffuseColorChanged(QNode*)), this, SLOT(OnNodeDiffuseColorChanged(QNode*)));
-		connect(pNode, SIGNAL(SpecularColorChanged(QNode*)), this, SLOT(OnNodeSpecularColorChanged(QNode*)));
+		connect(pNode, SIGNAL(DiffuseChanged(QNode*)), this, SLOT(OnNodeDiffuseChanged(QNode*)));
+		connect(pNode, SIGNAL(SpecularChanged(QNode*)), this, SLOT(OnNodeSpecularChanged(QNode*)));
+		connect(pNode, SIGNAL(EmissionChanged(QNode*)), this, SLOT(OnNodeEmissionChanged(QNode*)));
 		connect(pNode, SIGNAL(RoughnessChanged(QNode*)), this, SLOT(OnNodeRoughnessChanged(QNode*)));
 	}
 
 	OnNodeIntensityChanged(pNode);
 	OnNodeOpacityChanged(pNode);
-	OnNodeDiffuseColorChanged(pNode);
-	OnNodeSpecularColorChanged(pNode);
+	OnNodeDiffuseChanged(pNode);
+	OnNodeSpecularChanged(pNode);
+	OnNodeEmissionChanged(pNode);
 	OnNodeRoughnessChanged(pNode);
 }
 
@@ -310,7 +310,7 @@ void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)
 	m_OpacitySpinBox.setEnabled(Enable);
 }
 
-void QNodePropertiesWidget::OnNodeDiffuseColorChanged(QNode* pNode)
+void QNodePropertiesWidget::OnNodeDiffuseChanged(QNode* pNode)
 {
 	const bool Enable = pNode != NULL;
 
@@ -322,7 +322,7 @@ void QNodePropertiesWidget::OnNodeDiffuseColorChanged(QNode* pNode)
 	m_Diffuse.setEnabled(Enable);
 }
 
-void QNodePropertiesWidget::OnNodeSpecularColorChanged(QNode* pNode)
+void QNodePropertiesWidget::OnNodeSpecularChanged(QNode* pNode)
 {
 	const bool Enable = pNode != NULL;
 
@@ -332,6 +332,18 @@ void QNodePropertiesWidget::OnNodeSpecularColorChanged(QNode* pNode)
 	}
 
 	m_Specular.setEnabled(Enable);
+}
+
+void QNodePropertiesWidget::OnNodeEmissionChanged(QNode* pNode)
+{
+	const bool Enable = pNode != NULL;
+
+	if (pNode)
+	{
+		m_Emission.SetColor(pNode->GetEmission(), true);
+	}
+
+	m_Emission.setEnabled(Enable);
 }
 
 void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
@@ -392,5 +404,3 @@ void QNodePropertiesWidget::SetupSelectionUI(void)
 		m_NextNode.setToolTip(NextToolTip);
 	}
 }
-
-

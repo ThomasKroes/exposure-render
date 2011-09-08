@@ -52,7 +52,8 @@ DEV float Density(CScene* pDevScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 1000.0f;
+	const float Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 10000.0f;
+	return Opacity;
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
@@ -92,14 +93,6 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 		// Fetch density
 		const float D = Density(pDevScene, SP);
 		
-		// We ignore air density
-		if (D == 0)
-		{
-			// Increase extent
-			NearT += StepSize;
-			continue;
-		}
-
 		// Get shadow opacity
 		const float		Opacity = GetOpacity(pDevScene, D).r;
 		const CColorXyz	Color	= GetDiffuse(pDevScene, D).r;
@@ -359,7 +352,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 //		const CColorXyz	Ke = pDevScene->m_Volume.Ke(D);
 		
 		// Add emission
-//		Lv += Ltr * GetDiffuse(pDevScene, D).ToXYZ();
+		Lv += Ltr * GetEmission(pDevScene, D).ToXYZ();
 
 		// Compute outgoing direction
 		Wo = Normalize(-Re.m_D);

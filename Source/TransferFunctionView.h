@@ -35,8 +35,6 @@ class QTransferFunctionView : public QGraphicsView
 {
     Q_OBJECT
 
-	Q_PROPERTY(QColor m_BackgroundColor READ GetBackgroundColor WRITE SetBackgroundColor)
-
 public:
     QTransferFunctionView(QWidget* pParent = NULL);
 
@@ -44,13 +42,12 @@ public:
 	void resizeEvent(QResizeEvent* pResizeEvent);
 	void mousePressEvent(QMouseEvent* pEvent);
 
-	QColor	GetBackgroundColor(void) const { return m_BackgroundColor; };
-	void	SetBackgroundColor(const QColor& BackgroundColor) { m_BackgroundColor = BackgroundColor; };
-
 public slots:
 	void OnNodeSelectionChanged(QNode* pNode);
 	void OnHistogramChanged(void);
 	void Update(void);
+	void OnRenderBegin(void);
+	void OnRenderEnd(void);
 
 public:
 	QGraphicsScene				m_GraphicsScene;
@@ -62,7 +59,5 @@ public:
 	float						m_MarginRight;
 	QAxisLabel					m_AxisLabelX;
 	QAxisLabel					m_AxisLabelY;
-
-	// Styling
-	QColor						m_BackgroundColor;
+	QGraphicsColorizeEffect		m_GraphicsBlurEffect;
 };

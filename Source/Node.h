@@ -47,8 +47,9 @@ signals:
 	void NodeChanged(QNode* pNode);
 	void IntensityChanged(QNode* pNode);
 	void OpacityChanged(QNode* pNode);
-	void DiffuseColorChanged(QNode* pNode);
-	void SpecularColorChanged(QNode* pNode);
+	void DiffuseChanged(QNode* pNode);
+	void SpecularChanged(QNode* pNode);
+	void EmissionChanged(QNode* pNode);
 	void RoughnessChanged(QNode* pNode);
 	void RangeChanged(QNode* pNode);
 

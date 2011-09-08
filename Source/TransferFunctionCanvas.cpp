@@ -20,7 +20,7 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_Polygon(),
 	m_PolygonGradient(),
 	m_Histogram(),
-	m_RealisticsGradient(true),
+	m_RealisticsGradient(false),
 	m_AllowUpdateNodes(true),
 	m_Nodes(),
 	m_Edges(),
@@ -38,7 +38,6 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	// Histogram
 	m_Histogram.setParentItem(this);
-	m_Histogram.setBrush(QColor(200, 20, 20, 50));
 	m_Histogram.setPen(QPen(QBrush(QColor(100, 10, 10, 150)), 0.5f));
 
 	// Background styling
@@ -141,6 +140,18 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 
 	QPolygonF Polygon;
 
+	QLinearGradient LinearGradient;
+
+	LinearGradient.setStart(0, rect().bottom());
+	LinearGradient.setFinalStop(0, rect().top());
+
+	QGradientStops GradientStops;
+
+	GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 100, 150, 0)));
+	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 100, 150, 255)));
+
+	LinearGradient.setStops(GradientStops);
+
 	// Set the gradient stops
 	for (int i = 0; i < gHistogram.GetBins().size(); i++)
 	{
@@ -173,6 +184,7 @@ void QTransferFunctionCanvas::UpdateHistogram(void)
 
 	// Update the polygon geometry
 	m_Histogram.setPolygon(Polygon);
+	m_Histogram.setBrush(QBrush(LinearGradient));
 }
 
 void QTransferFunctionCanvas::UpdateNodes(void)
@@ -232,7 +244,6 @@ void QTransferFunctionCanvas::UpdateEdges(void)
 		m_Edges.append(pEdge);
 
 		pEdge->setLine(QLineF(PtFrom, PtTo));		
-		pEdge->setPen(QPen(QColor(240, 160, 30), 1.2f));
 		pEdge->setZValue(m_EdgeZ);
 	}
 }

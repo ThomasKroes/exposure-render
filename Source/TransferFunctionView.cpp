@@ -14,11 +14,9 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_MarginLeft(15.0f),
 	m_MarginRight(8.0f),
 	m_AxisLabelX(NULL, ""),
-	m_AxisLabelY(NULL, "")
+	m_AxisLabelY(NULL, ""),
+	m_GraphicsBlurEffect()
 {
-	// Set the size policy, making sure the widget fits nicely in the layout
-//	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-
 	// Styling
 	setFrameShadow(Sunken);
 	setFrameShape(NoFrame);
@@ -58,13 +56,36 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 
 	// Notify us when the histogram changes
 	connect(&gHistogram, SIGNAL(HistogramChanged()), this, SLOT(OnHistogramChanged()));
+
+// 	m_GraphicsBlurEffect.set(5);
+// 	setGraphicsEffect(&m_GraphicsBlurEffect);
+
+	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
+
+	// Inform us when rendering begins and ends
+	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+}
+
+void QTransferFunctionView::OnRenderBegin(void)
+{
+	if (!Scene())
+		return;
+
+	m_GraphicsBlurEffect.setEnabled(false);
+}
+
+void QTransferFunctionView::OnRenderEnd(void)
+{
+	if (!Scene())
+		return;
+
+	m_GraphicsBlurEffect.setEnabled(true);
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)
 {
 	QGraphicsView::drawBackground(pPainter, Rectangle);
-
-//	setBackgroundBrush(QBrush(m_BackgroundColor));
 }
 
 void QTransferFunctionView::Update(void)
@@ -105,7 +126,6 @@ void QTransferFunctionView::Update(void)
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 {
-	
 	// Deselect all nodes
  	for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
  		m_TransferFunctionCanvas.m_Nodes[i]->setSelected(false);
