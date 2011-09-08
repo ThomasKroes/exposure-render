@@ -64,7 +64,7 @@ void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rec
 {
 	QGraphicsView::drawBackground(pPainter, Rectangle);
 
-	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
+//	setBackgroundBrush(QBrush(m_BackgroundColor));
 }
 
 void QTransferFunctionView::Update(void)
@@ -105,7 +105,7 @@ void QTransferFunctionView::Update(void)
 
 void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 {
-	/*
+	
 	// Deselect all nodes
  	for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
  		m_TransferFunctionCanvas.m_Nodes[i]->setSelected(false);
@@ -118,7 +118,6 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 				m_TransferFunctionCanvas.m_Nodes[i]->setSelected(true);
 		}
 	}
-	*/
 }
 
 void QTransferFunctionView::OnHistogramChanged(void)

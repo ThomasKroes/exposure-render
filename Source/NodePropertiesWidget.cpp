@@ -63,6 +63,8 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_PreviousNode.updateGeometry();
 	m_SelectionLayout.addWidget(&m_PreviousNode, 0, 1);
 
+	m_PreviousNode.setStyleSheet("color: blue");
+
 	connect(&m_PreviousNode, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
 
 	// Next node
