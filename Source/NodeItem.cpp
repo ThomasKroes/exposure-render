@@ -6,12 +6,13 @@
 #define NODE_POSITION_EPSILON 0.01f
 
 float	QNodeItem::m_Radius			= 4.0f;
-QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(0, 0, 170));
-QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(0, 0, 230));
-QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 140));
-QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 0, 240)), 1.3);
-QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 0, 230)), 1.3);
-QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 120)), 1.3);
+QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(200, 100, 150));
+QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(0, 100, 150));
+QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 100));
+
+QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.3);
+QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(100, 100, 150)), 1.8);
+QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 150)), 1.3);
 
 QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode) :
 	QGraphicsEllipseItem(pTransferFunctionCanvas),
@@ -33,41 +34,11 @@ QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pN
 	setFlag(QGraphicsItem::ItemIsSelectable);
 
 	// We are going to catch hover events
-	setAcceptHoverEvents(true);
+//	setAcceptHoverEvents(true);
 	
 	// Tooltip
 	UpdateTooltip();
 };
-
-void QNodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent)
-{
-	QGraphicsEllipseItem::hoverEnterEvent(pEvent);
-
-	// Don't overwrite styling when selected
-	if (isSelected())
-		return;
-
-	// Modify pen and brush
-	setPen(isEnabled() ? QNodeItem::m_PenHighlight : QNodeItem::m_PenDisabled);
-	setBrush(isEnabled() ? QNodeItem::m_BrushHighlight : QNodeItem::m_BrushDisabled);
-}
-
-void QNodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent)
-{
-	QGraphicsEllipseItem::hoverLeaveEvent(pEvent);
-
-	// Don't overwrite styling when selected
-	if (isSelected())
-		return;
-
-	// Change the cursor shape back to normal
-//	m_Cursor.setShape(Qt::CursorShape::ArrowCursor);
-//	setCursor(m_Cursor);
-
-	// Modify pen and brush
-	setPen(isEnabled() ? QNodeItem::m_PenNormal : QNodeItem::m_PenDisabled);
-	setBrush(isEnabled() ? QNodeItem::m_BrushNormal : QNodeItem::m_BrushDisabled);
-}
 
 QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 {
@@ -98,36 +69,31 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 		return NewScenePoint;
 	}
 
-    if (Change == QGraphicsItem::ItemSelectedHasChanged)
-	{
-		if (isSelected())
-		{
-			// Cache the old pen and brush
-			m_CachePen		= pen();
-			m_CacheBrush	= brush();
-
-			setPen(QPen(isEnabled() ? QNodeItem::m_PenHighlight : QNodeItem::m_PenDisabled));
-			setBrush(QBrush(isEnabled() ? QNodeItem::m_BrushHighlight : QNodeItem::m_BrushDisabled));
-		}
-		else
-		{
-			// Restore normal pen and brush
-			setPen(QPen(isEnabled() ? QNodeItem::m_PenNormal : QNodeItem::m_PenDisabled));
-			setBrush(QBrush(isEnabled() ? QNodeItem::m_BrushNormal : QNodeItem::m_BrushDisabled));
-		}
-	}
-
     return QGraphicsItem::itemChange(Change, Value);
 }
 
 void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
- 	pPainter->setPen(pen());
- 	pPainter->setBrush(brush());
- 
- 	pPainter->drawEllipse(rect());
-//	pPainter->setFont(QFont("Arial", 6, 3));
-//	pPainter->drawText(rect(), Qt::AlignCenter, "1");
+	if (isEnabled())
+	{
+		if (isUnderMouse() || isSelected())
+		{
+			setBrush(m_BrushHighlight);
+			setPen(m_PenHighlight);
+		}
+		else
+		{
+			setBrush(m_BrushNormal);
+			setPen(m_PenNormal);
+		}
+	}
+	else
+	{
+		setBrush(m_BrushDisabled);
+		setPen(m_PenDisabled);
+	}
+
+	QGraphicsEllipseItem::paint(pPainter, pOption, pWidget);
 }
 
 void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)

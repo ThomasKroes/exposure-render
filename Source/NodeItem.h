@@ -34,8 +34,6 @@ public:
 	void setPos(const QPointF& Pos);
 
 protected:
-	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent* pEvent);
-	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent* pEvent);
 	virtual QVariant itemChange(GraphicsItemChange Change, const QVariant& Value);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent* pEvent);
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent);

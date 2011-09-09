@@ -71,6 +71,8 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 	// We are going to catch hover events
 	setAcceptHoverEvents(true);
+
+	setEnabled(false);
 }
 
 QTransferFunctionCanvas::~QTransferFunctionCanvas(void)

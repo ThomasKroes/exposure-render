@@ -21,8 +21,6 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	setFrameShadow(Sunken);
 	setFrameShape(NoFrame);
 
-	setStyleSheet("border-color: red;");
-
 	// Never show scrollbars
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -65,6 +63,9 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	// Inform us when rendering begins and ends
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+
+	QGraphicsGridLayout *layout = new QGraphicsGridLayout;
+	layout->setSpacing(10);
 }
 
 void QTransferFunctionView::OnRenderBegin(void)
@@ -73,6 +74,8 @@ void QTransferFunctionView::OnRenderBegin(void)
 		return;
 
 	m_GraphicsBlurEffect.setEnabled(false);
+	m_TransferFunctionCanvas.setEnabled(true);
+	m_TransferFunctionGradient.setEnabled(true);
 }
 
 void QTransferFunctionView::OnRenderEnd(void)
@@ -81,6 +84,8 @@ void QTransferFunctionView::OnRenderEnd(void)
 		return;
 
 	m_GraphicsBlurEffect.setEnabled(true);
+	m_TransferFunctionCanvas.setEnabled(false);
+	m_TransferFunctionGradient.setEnabled(false);
 }
 
 void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rectangle)

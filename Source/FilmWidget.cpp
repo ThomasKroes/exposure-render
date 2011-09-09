@@ -1,7 +1,7 @@
 
 #include "FilmWidget.h"
-#include "MainWindow.h"
-#include "Scene.h"
+#include "RenderThread.h"
+#include "CameraWidget.h"
 
 CFilmWidget::CFilmWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -80,30 +80,12 @@ void CFilmWidget::LockFilmHeight(const int& Lock)
 
 void CFilmWidget::SetFilmWidth(const int& FilmWidth)
 {
-	if (!Scene())
-		return;
-
-	Scene()->m_Camera.m_Film.m_Resolution.m_XY.x = FilmWidth;
-	Scene()->m_Camera.m_Film.m_Resolution.Update();
-
-	// Flag the film resolution as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
+	gCamera.GetFilm().SetWidth(FilmWidth);
 }
 
 void CFilmWidget::SetFilmHeight(const int& FilmHeight)
 {
-	if (!Scene())
-		return;
-
-	gpRenderThread->m_Mutex.lock();
-
-	Scene()->m_Camera.m_Film.m_Resolution.m_XY.y = FilmHeight;
-	Scene()->m_Camera.m_Film.m_Resolution.Update();
-
-	// Flag the film resolution as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
-
-	gpRenderThread->m_Mutex.unlock();
+	gCamera.GetFilm().SetHeight(FilmHeight);
 }
 
 void CFilmWidget::OnRenderBegin(void)
@@ -115,8 +97,8 @@ void CFilmWidget::OnRenderBegin(void)
 	m_FilmWidthSlider.blockSignals(true);
 	m_FilmWidthSpinBox.blockSignals(true);
 
-	m_FilmWidthSlider.setValue(Scene()->m_Camera.m_Film.m_Resolution.Width());
-	m_FilmWidthSpinBox.setValue(Scene()->m_Camera.m_Film.m_Resolution.Width());
+	m_FilmWidthSlider.setValue(Scene()->m_Camera.m_Film.m_Resolution.GetWidth());
+	m_FilmWidthSpinBox.setValue(Scene()->m_Camera.m_Film.m_Resolution.GetWidth());
 
 	m_FilmWidthSlider.blockSignals(false);
 	m_FilmWidthSpinBox.blockSignals(false);
@@ -125,8 +107,8 @@ void CFilmWidget::OnRenderBegin(void)
 	m_FilmHeightSlider.blockSignals(true);
 	m_FilmHeightSpinBox.blockSignals(true);
 
-	m_FilmHeightSlider.setValue(Scene()->m_Camera.m_Film.m_Resolution.Height());
-	m_FilmHeightSpinBox.setValue(Scene()->m_Camera.m_Film.m_Resolution.Height());
+	m_FilmHeightSlider.setValue(Scene()->m_Camera.m_Film.m_Resolution.GetHeight());
+	m_FilmHeightSpinBox.setValue(Scene()->m_Camera.m_Film.m_Resolution.GetHeight());
 
 	m_FilmHeightSlider.blockSignals(false);
 	m_FilmHeightSpinBox.blockSignals(false);

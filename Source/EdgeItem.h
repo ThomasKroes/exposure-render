@@ -25,6 +25,7 @@ public:
 	void UpdateTooltip(void);
 	
 	void setPos(const QPointF& Pos);
+	void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
 
 public:
 	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;

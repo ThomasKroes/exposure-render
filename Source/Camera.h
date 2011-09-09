@@ -301,23 +301,23 @@ public:
 
 		Scale = tanf(0.5f * (FovV / RAD_F));
 
-		if (m_Resolution.m_AspectRatio > 1.0f)
+		if (m_Resolution.GetAspectRatio() > 1.0f)
 		{
 			m_Screen[0][0] = -Scale;
 			m_Screen[0][1] = Scale;
-			m_Screen[1][0] = -Scale / m_Resolution.m_AspectRatio;
-			m_Screen[1][1] = Scale / m_Resolution.m_AspectRatio;
+			m_Screen[1][0] = -Scale / m_Resolution.GetAspectRatio();
+			m_Screen[1][1] = Scale / m_Resolution.GetAspectRatio();
 		}
 		else
 		{
-			m_Screen[0][0] = -Scale / m_Resolution.m_AspectRatio;
-			m_Screen[0][1] = Scale / m_Resolution.m_AspectRatio;
+			m_Screen[0][0] = -Scale / m_Resolution.GetAspectRatio();
+			m_Screen[0][1] = Scale / m_Resolution.GetAspectRatio();
 			m_Screen[1][0] = -Scale;
 			m_Screen[1][1] = Scale;
 		}
 
-		m_InvScreen.x = (m_Screen[0][1] - m_Screen[0][0]) / m_Resolution.m_XY.x;
-		m_InvScreen.y = (m_Screen[1][1] - m_Screen[1][0]) / m_Resolution.m_XY.y;
+		m_InvScreen.x = (m_Screen[0][1] - m_Screen[0][0]) / m_Resolution.GetWidth();
+		m_InvScreen.y = (m_Screen[1][1] - m_Screen[1][0]) / m_Resolution.GetHeight();
 
 		m_Resolution.Update();
 		m_ToneMap.Update();
@@ -624,7 +624,7 @@ public:
 		
 		m_Film.Update(m_FovV, m_Aperture.m_Size);
 
-		m_AreaPixel = m_Film.m_Resolution.m_AspectRatio / (m_Focus.m_FocalDistance * m_Focus.m_FocalDistance);
+		m_AreaPixel = m_Film.m_Resolution.GetAspectRatio() / (m_Focus.m_FocalDistance * m_Focus.m_FocalDistance);
 
 		m_Aperture.Update(m_Film.m_FStop);
 
@@ -675,7 +675,7 @@ public:
 		const float Length = (m_Target - m_From).Length();
 
 		// Obtain window width and height
-		const unsigned int WindowWidth	= m_Film.m_Resolution.m_XY.x;
+		const unsigned int WindowWidth	= m_Film.m_Resolution.GetWidth();
 
 		// Compute translation along the screen
 		const float U = Length * (RightDegrees / WindowWidth);
@@ -847,8 +847,8 @@ public:
 		const float Ua	= U / fabs(m_Film.m_Screen[0][1]);
 		const float Va	= V / fabs(m_Film.m_Screen[1][1]);
 
-		const float HalfW 	= 0.5f * m_Film.m_Resolution.m_XY.x;
-		const float HalfH 	= 0.5f * m_Film.m_Resolution.m_XY.y;
+		const float HalfW 	= 0.5f * m_Film.m_Resolution.GetWidth();
+		const float HalfH 	= 0.5f * m_Film.m_Resolution.GetHeight();
 
 		u	= HalfW + Ua * HalfW;
 		v	= HalfH + Va * HalfH;

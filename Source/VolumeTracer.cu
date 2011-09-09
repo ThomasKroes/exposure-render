@@ -290,7 +290,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
 	// Exit if beyond kernel boundaries
-	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.Width() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.Height())
+	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetWidth() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetHeight())
 		return;
 
 	// Init random number generator
@@ -308,7 +308,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	// Early ray termination if ray does not intersect with bounding box
 	if (!pDevScene->m_BoundingBox.Intersect(Re, &MinT, &MaxT))
 	{
-		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = SPEC_BLACK;
+		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetWidth() + X] = SPEC_BLACK;
 		return;
 	}
 
@@ -378,14 +378,14 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			break;
 	}
 
-	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X] = Lv;
+	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetWidth() + X] = Lv;
 }
 
 // Traces the volume
 void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 {
 	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
-	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Width() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Height() / (float)KernelBlock.y));
+	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetHeight() / (float)KernelBlock.y));
 	
 	// Execute kernel
 //	KrnlRenderVolume<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);

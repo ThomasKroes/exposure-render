@@ -1281,18 +1281,10 @@ public:
 class EXPOSURE_RENDER_DLL CResolution2D
 {
 public:
-	Vec2i	m_XY;					/*!< Resolution width and height */
-	Vec2f	m_InvXY;				/*!< Resolution width and height reciprocal */
-	int		m_NoElements;			/*!< No. elements */
-	float	m_AspectRatio;			/*!< Aspect ratio of image plane */
-	float	m_DiagonalLength;		/*!< Diagonal length */
-	bool	m_Dirty;				/*!< Resolution dirty flag */
-
 	// ToDo: Add description
 	HOD CResolution2D(const float& Width, const float& Height)
 	{
 		m_XY		= Vec2i(Width, Height);
-		m_Dirty		= false;
 
 		Update();
 	}
@@ -1301,7 +1293,6 @@ public:
 	HOD CResolution2D(void)
 	{
 		m_XY		= Vec2i(800, 600);
-		m_Dirty		= false;
 
 		Update();
 	}
@@ -1319,7 +1310,6 @@ public:
 		m_NoElements		= Other.m_NoElements;
 		m_AspectRatio		= Other.m_AspectRatio;
 		m_DiagonalLength	= Other.m_DiagonalLength;
-		m_Dirty				= Other.m_Dirty;
 
 		return *this;
 	}
@@ -1351,14 +1341,25 @@ public:
 
 	HOD void Set(const Vec2i& Resolution)
 	{
-		m_Dirty		= m_XY.x != Resolution.x || m_XY.y != Resolution.y;
 		m_XY		= Resolution;
 
 		Update();
 	}
 
-	HOD float Width(void) const		{ return m_XY.x; }
-	HOD float Height(void) const	{ return m_XY.y; }
+	HOD float GetWidth(void) const { return m_XY.x; }
+	HOD void SetWidth(const float& Width) { m_XY.x = Width; Update(); }
+	HOD float GetHeight(void) const { return m_XY.y; }
+	HOD void SetHeight(const float& Height) { m_XY.x = Height; Update(); }
+	HOD Vec2f GetInv(void) const { return m_InvXY; }
+	HOD int GetNoElements(void) const { return m_NoElements; }
+	HOD float GetAspectRatio(void) const { return m_AspectRatio; }
+	
+private:
+	Vec2i	m_XY;					/*!< Resolution width and height */
+	Vec2f	m_InvXY;				/*!< Resolution width and height reciprocal */
+	int		m_NoElements;			/*!< No. elements */
+	float	m_AspectRatio;			/*!< Aspect ratio of image plane */
+	float	m_DiagonalLength;		/*!< Diagonal length */
 };
 
 class EXPOSURE_RENDER_DLL CResolution3D

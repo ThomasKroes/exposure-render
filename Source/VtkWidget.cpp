@@ -50,6 +50,10 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	// Add VTK widget 
 	m_MainLayout.addWidget(&m_QtVtkWidget);
 
+	// Create the image importer and image actor, they provide the canvas for 
+	m_ImageImport = vtkImageImport::New();
+	m_ImageActor = vtkImageActor::New();
+
 	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, when the rendering canvas is resized and when the timer has timed out
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
@@ -69,11 +73,7 @@ QVTKWidget* CVtkWidget::GetQtVtkWidget(void)
 
 void CVtkWidget::OnRenderBegin(void)
 {
-	if (!Scene())
-		return;
-
-	// Create and configure image importer
-	m_ImageImport = vtkImageImport::New();
+	
 	m_ImageImport->SetDataSpacing(1, 1, 1);
 	m_ImageImport->SetDataOrigin(-400, -300, 0);
 	m_ImageImport->SetImportVoidPointer((void*)malloc(3 * 800 * 600 * sizeof(unsigned char)));
@@ -83,8 +83,7 @@ void CVtkWidget::OnRenderBegin(void)
 	m_ImageImport->SetNumberOfScalarComponents(3);
 	m_ImageImport->Update();
 
-	// Create and configure background image actor
-	m_ImageActor = vtkImageActor::New();
+	
 	m_ImageActor->SetInterpolate(1);
 	m_ImageActor->SetInput(m_ImageImport->GetOutput());
 	m_ImageActor->SetScale(1, -1, -1);
@@ -103,13 +102,11 @@ void CVtkWidget::OnRenderBegin(void)
 
 void CVtkWidget::OnRenderEnd(void)
 {
+	// Remove the image actor from the screen
+	m_SceneRenderer->RemoveActor(m_ImageActor);
+
 	// Stop the timer
 	m_RenderLoopTimer.stop();
-
-	if (!Scene())
-		return;
-
-	m_SceneRenderer->RemoveActor(m_ImageActor);
 }
 
 void CVtkWidget::OnPreRenderFrame(void)
@@ -181,9 +178,9 @@ void CVtkWidget::OnResize(void)
 		return;
 
 	
- 	m_ImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
- 	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
- 	m_ImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.Width() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);
+ 	m_ImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
+ 	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
+ 	m_ImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
 /*
 	m_pImageImport->SetImportVoidPointer(NULL);
 	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());

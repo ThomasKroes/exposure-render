@@ -67,8 +67,9 @@ void QTransferFunctionGradient::Update(void)
 		QNode& Node = gTransferFunction.GetNode(i);
 
 		// Get node color
-		QColor Color = Node.GetDiffuse();
+		QColor ColorRgb = Node.GetDiffuse();
 
+		
 		// Clamp node position to [0, 1]
 		const float GradientStopPosition = qMin(1.0f, qMax(0.0f, (Node.GetIntensity() - gTransferFunction.GetRangeMin()) / gTransferFunction.GetRange()));
 
@@ -76,10 +77,10 @@ void QTransferFunctionGradient::Update(void)
 		const float GradientStopAlpha = qMin(1.0f, qMax(0.0f, Node.GetOpacity()));
 
 		// Adjust color
-		Color.setAlphaF(GradientStopAlpha);
+		ColorRgb.setAlphaF(GradientStopAlpha);
 
 		// Add the gradient stop
-		GradientStops.append(QGradientStop(GradientStopPosition, Color));
+		GradientStops.append(QGradientStop(GradientStopPosition, QColor::fromHsl(ColorRgb.hslHue(), isEnabled() ? ColorRgb.saturation() : 0, ColorRgb.lightness(), ColorRgb.alpha())));
 	}
 
 	m_LinearGradient.setStops(GradientStops);

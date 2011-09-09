@@ -72,6 +72,10 @@ SET(ExposureRenderSources
 	ProjectionWidget.cpp
 	FocusWidget.cpp
 	CameraWidget.cpp
+	Film.cpp
+	Aperture.cpp
+	Projection.cpp
+	Focus.cpp
 
 	# Presets
 	PresetsWidget.cpp
@@ -137,6 +141,10 @@ SET(ExposureRenderHeaders
 	ApertureWidget.h
 	ProjectionWidget.h
 	FocusWidget.h
+	Film.h
+	Aperture.h
+	Projection.h
+	Focus.h
 
 	# Presets
 	PresetsWidget.h
@@ -261,6 +269,10 @@ SET(CameraSources
 	ProjectionWidget.h
 	FocusWidget.h
 	CameraWidget.h
+	Film.h
+	Aperture.h
+	Projection.h
+	Focus.h
 	Camera.cpp
 	CameraDockWidget.cpp
 	FilmWidget.cpp
@@ -268,6 +280,10 @@ SET(CameraSources
 	ProjectionWidget.cpp
 	FocusWidget.cpp
 	CameraWidget.cpp
+	Film.cpp
+	Aperture.cpp
+	Projection.cpp
+	Focus.cpp
 )
 
 # Make the camera group
