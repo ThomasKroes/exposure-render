@@ -46,13 +46,13 @@ protected:
 	QDoubleSpinner		m_PhiSpinBox;
 	QLabel				m_DistanceLabel;
 	QDoubleSlider		m_DistanceSlider;
-	QDoubleSpinner		m_DistanceSpinBox;
+	QDoubleSpinner		m_DistanceSpinner;
 	QLabel				m_WidthLabel;
 	QDoubleSlider		m_WidthSlider;
-	QDoubleSpinner		m_WidthSpinBox;
+	QDoubleSpinner		m_WidthSpinner;
 	QLabel				m_HeightLabel;
 	QDoubleSlider		m_HeightSlider;
-	QDoubleSpinner		m_HeightSpinBox;
+	QDoubleSpinner		m_HeightSpinner;
 	QCheckBox			m_LockSizeCheckBox;
 	QLabel				m_ColorLabel;
 	QColorPushButton	m_ColorButton;

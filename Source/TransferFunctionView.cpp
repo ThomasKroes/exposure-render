@@ -14,8 +14,7 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	m_MarginLeft(15.0f),
 	m_MarginRight(8.0f),
 	m_AxisLabelX(NULL, ""),
-	m_AxisLabelY(NULL, ""),
-	m_GraphicsBlurEffect()
+	m_AxisLabelY(NULL, "")
 {
 	// Styling
 	setFrameShadow(Sunken);
@@ -55,9 +54,6 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 	// Notify us when the histogram changes
 	connect(&gHistogram, SIGNAL(HistogramChanged()), this, SLOT(OnHistogramChanged()));
 
-// 	m_GraphicsBlurEffect.set(5);
-// 	setGraphicsEffect(&m_GraphicsBlurEffect);
-
 	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
 
 	// Inform us when rendering begins and ends
@@ -73,7 +69,6 @@ void QTransferFunctionView::OnRenderBegin(void)
 	if (!Scene())
 		return;
 
-	m_GraphicsBlurEffect.setEnabled(false);
 	m_TransferFunctionCanvas.setEnabled(true);
 	m_TransferFunctionGradient.setEnabled(true);
 }
@@ -83,7 +78,6 @@ void QTransferFunctionView::OnRenderEnd(void)
 	if (!Scene())
 		return;
 
-	m_GraphicsBlurEffect.setEnabled(true);
 	m_TransferFunctionCanvas.setEnabled(false);
 	m_TransferFunctionGradient.setEnabled(false);
 }

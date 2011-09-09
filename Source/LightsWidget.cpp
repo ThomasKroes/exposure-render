@@ -173,7 +173,7 @@ void QLightsWidget::OnRenameLight(void)
 	InputDialog.setWindowTitle("Choose name for light");
 	InputDialog.setLabelText("Light Name");
 	InputDialog.setOkButtonText("Rename");
-
+	
 	InputDialog.exec();
 
 	if (InputDialog.textValue().isEmpty())

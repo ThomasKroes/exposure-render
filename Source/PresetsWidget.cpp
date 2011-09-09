@@ -7,7 +7,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	m_UserInterfaceName(UserInterfaceName)
 {
 	// Title, status and tooltip
-	setTitle("Presets");
+	setTitle(m_UserInterfaceName + " Presets");
 	setToolTip(UserInterfaceName + " presets");
 	setStatusTip(UserInterfaceName + " presets");
 

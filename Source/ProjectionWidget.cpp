@@ -3,11 +3,11 @@
 #include "RenderThread.h"
 #include "Camera.h"
 
-CProjectionWidget::CProjectionWidget(QWidget* pParent) :
+QProjectionWidget::QProjectionWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_GridLayout(),
 	m_FieldOfViewSlider(),
-	m_FieldOfViewSpinBox()
+	m_FieldOfViewSpinner()
 {
 	setTitle("Projection");
 	setStatusTip("Projection properties");
@@ -19,37 +19,42 @@ CProjectionWidget::CProjectionWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(new QLabel("Field of view"), 4, 0);
 
 	m_FieldOfViewSlider.setOrientation(Qt::Horizontal);
-	m_FieldOfViewSlider.setRange(10, 200);
+	m_FieldOfViewSlider.setRange(10.0, 150.0);
 	m_GridLayout.addWidget(&m_FieldOfViewSlider, 4, 1);
 	
-    m_FieldOfViewSpinBox.setRange(10, 200);
-	m_GridLayout.addWidget(&m_FieldOfViewSpinBox, 4, 2);
+    m_FieldOfViewSpinner.setRange(10.0, 150.0);
+	m_FieldOfViewSpinner.setSuffix(" deg.");
+	m_GridLayout.addWidget(&m_FieldOfViewSpinner, 4, 2);
 	
-	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), &m_FieldOfViewSpinBox, SLOT(setValue(double)));
+	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), &m_FieldOfViewSpinner, SLOT(setValue(double)));
 	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFieldOfView(double)));
-	connect(&m_FieldOfViewSpinBox, SIGNAL(valueChanged(double)), &m_FieldOfViewSlider, SLOT(setValue(double)));
+	connect(&m_FieldOfViewSpinner, SIGNAL(valueChanged(double)), &m_FieldOfViewSlider, SLOT(setValue(double)));
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetProjection(), SIGNAL(Changed(const QProjection&)), this, SLOT(OnProjectionChanged(const QProjection&)));
+
+	emit gRenderStatus.StatisticChanged("Camera", "Projection", "", "", "");
 }
 
-void CProjectionWidget::SetFieldOfView(const double& FieldOfView)
+void QProjectionWidget::SetFieldOfView(const double& FieldOfView)
 {
 	gCamera.GetProjection().SetFieldOfView(FieldOfView);
 }
 
-void CProjectionWidget::OnRenderBegin(void)
+void QProjectionWidget::OnRenderBegin(void)
 {
 	OnProjectionChanged(gCamera.GetProjection());
 }
 
-void CProjectionWidget::OnRenderEnd(void)
+void QProjectionWidget::OnRenderEnd(void)
 {
 	gCamera.GetProjection().Reset();
 }
 
-void CProjectionWidget::OnProjectionChanged(const QProjection& Projection)
+void QProjectionWidget::OnProjectionChanged(const QProjection& Projection)
 {
 	m_FieldOfViewSlider.setValue(Projection.GetFieldOfView(), true);
-	m_FieldOfViewSpinBox.setValue(Projection.GetFieldOfView(), true);
+	m_FieldOfViewSpinner.setValue(Projection.GetFieldOfView(), true);
+
+	emit gRenderStatus.StatisticChanged("Projection", "Field Of View", QString::number(Projection.GetFieldOfView(), 'f', 2), "Deg.");
 }

@@ -13,8 +13,8 @@ public:
 	QFocus::QFocus(const QFocus& Other);
 	QFocus& QFocus::operator=(const QFocus& Other);
 
-	int			GetFocalDistance(void) const;
-	void		SetFocalDistance(const int& FocalDistance);
+	float		GetFocalDistance(void) const;
+	void		SetFocalDistance(const float& FocalDistance);
 	void		Reset(void);
 	void		ReadXML(QDomElement& Parent);
 	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);

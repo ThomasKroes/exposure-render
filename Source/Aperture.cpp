@@ -23,12 +23,12 @@ QAperture& QAperture::operator=(const QAperture& Other)
 	return *this;
 }
 
-int QAperture::GetSize(void) const
+float QAperture::GetSize(void) const
 {
 	return m_Size;
 }
 
-void QAperture::SetSize(const int& Size)
+void QAperture::SetSize(const float& Size)
 {
 	m_Size = Size;
 
@@ -56,7 +56,7 @@ QDomElement QAperture::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	// Size
 	QDomElement Size = DOM.createElement("Size");
 	Size.setAttribute("Value", m_Size);
-	Size.appendChild(Size);
+	Aperture.appendChild(Size);
 
 	return Aperture;
 }

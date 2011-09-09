@@ -51,33 +51,6 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 	return *this;
 }
 
-float QTransferFunction::GetRangeMin(void) const
-{
-	return m_RangeMin;
-}
-
-void QTransferFunction::SetRangeMin(const float& RangeMin)
-{
-	m_RangeMin	= RangeMin;
-	m_Range		= GetRange();
-}
-
-float QTransferFunction::GetRangeMax(void) const
-{
-	return m_RangeMax;
-}
-
-void QTransferFunction::SetRangeMax(const float& RangeMax)
-{
-	m_RangeMax	= RangeMax;
-	m_Range		= GetRange();
-}
-
-float QTransferFunction::GetRange(void) const
-{
-	return m_RangeMax - m_RangeMin;
-}
-
 void QTransferFunction::OnNodeChanged(QNode* pNode)
 {
 	// Update node's range
@@ -341,4 +314,31 @@ QTransferFunction QTransferFunction::Default(void)
 	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, 100.0f);
 
 	return DefaultTransferFunction;
+}
+
+float QTransferFunction::GetRangeMin(void)
+{
+	return m_RangeMin;
+}
+
+void QTransferFunction::SetRangeMin(const float& RangeMin)
+{
+	m_RangeMin	= RangeMin;
+	m_Range		= GetRange();
+}
+
+float QTransferFunction::GetRangeMax(void)
+{
+	return m_RangeMax;
+}
+
+void QTransferFunction::SetRangeMax(const float& RangeMax)
+{
+	m_RangeMax	= RangeMax;
+	m_Range		= GetRange();
+}
+
+float QTransferFunction::GetRange(void)
+{
+	return m_RangeMax - m_RangeMin;
 }

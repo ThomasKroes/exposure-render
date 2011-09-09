@@ -3,12 +3,12 @@
 #include "RenderThread.h"
 #include "Camera.h"
 
-CFocusWidget::CFocusWidget(QWidget* pParent) :
+QFocusWidget::QFocusWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_GridLayout(),
 	m_FocusTypeComboBox(),
 	m_FocalDistanceSlider(),
-	m_FocalDistanceSpinBox()
+	m_FocalDistanceSpinner()
 {
 	setTitle("Focus");
 	setStatusTip("Focus properties");
@@ -34,33 +34,39 @@ CFocusWidget::CFocusWidget(QWidget* pParent) :
 	m_FocalDistanceSlider.setRange(0.0, 100.0);
 	m_GridLayout.addWidget(&m_FocalDistanceSlider, 0, 1);
 	
-    m_FocalDistanceSpinBox.setRange(0.0, 1000000.0);
-	m_GridLayout.addWidget(&m_FocalDistanceSpinBox, 0, 2);
+    m_FocalDistanceSpinner.setRange(0.0, 100.0);
+	m_FocalDistanceSpinner.setSuffix(" mm");
+	m_GridLayout.addWidget(&m_FocalDistanceSpinner, 0, 2);
 	
-	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), &m_FocalDistanceSpinBox, SLOT(setValue(double)));
+	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), &m_FocalDistanceSpinner, SLOT(setValue(double)));
 	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFocalDistance(double)));
-	connect(&m_FocalDistanceSpinBox, SIGNAL(valueChanged(double)), &m_FocalDistanceSlider, SLOT(setValue(double)));
+	connect(&m_FocalDistanceSpinner, SIGNAL(valueChanged(double)), &m_FocalDistanceSlider, SLOT(setValue(double)));
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetFocus(), SIGNAL(Changed(const QFocus&)), this, SLOT(OnFocusChanged(const QFocus&)));
+
+	emit gRenderStatus.StatisticChanged("Camera", "Focus", "", "", "");
 }
 
-void CFocusWidget::SetFocalDistance(const double& FocalDistance)
+void QFocusWidget::SetFocalDistance(const double& FocalDistance)
 {
 	gCamera.GetFocus().SetFocalDistance(FocalDistance);
 }
 
-void CFocusWidget::OnRenderBegin(void)
+void QFocusWidget::OnRenderBegin(void)
 {
 	OnFocusChanged(gCamera.GetFocus());
 }
 
-void CFocusWidget::OnRenderEnd(void)
+void QFocusWidget::OnRenderEnd(void)
 {
 	gCamera.GetFocus().Reset();
 }
 
-void CFocusWidget::OnFocusChanged(const QFocus& Focus)
+void QFocusWidget::OnFocusChanged(const QFocus& Focus)
 {
 	m_FocalDistanceSlider.setValue(Focus.GetFocalDistance(), true);
+	m_FocalDistanceSpinner.setValue(Focus.GetFocalDistance(), true);
+
+	emit gRenderStatus.StatisticChanged("Focus", "Focal Distance", QString::number(Focus.GetFocalDistance(), 'f', 2), "mm");
 }

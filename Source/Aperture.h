@@ -13,8 +13,8 @@ public:
 	QAperture::QAperture(const QAperture& Other);
 	QAperture& QAperture::operator=(const QAperture& Other);
 
-	int				GetSize(void) const;
-	void			SetSize(const int& Size);
+	float			GetSize(void) const;
+	void			SetSize(const float& Size);
 	void			Reset(void);
 	void			ReadXML(QDomElement& Parent);
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);

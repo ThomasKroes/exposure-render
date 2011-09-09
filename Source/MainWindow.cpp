@@ -45,6 +45,8 @@ CMainWindow::CMainWindow() :
 
 	setWindowFilePath(QString());
 
+	m_pCloseAct->setEnabled(false);
+
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 }
@@ -280,6 +282,16 @@ void CMainWindow::OnRenderBegin(void)
 {
 	qDebug("Rendering started");
 
+	m_pOpenAct->setEnabled(false);
+	
+	for (int i = 0; i < MaxRecentFiles; i++)
+	{
+		if (m_pRecentFileActions[i]) 
+			m_pRecentFileActions[i]->setEnabled(false);
+	}
+	
+	m_pCloseAct->setEnabled(true);
+
 	m_LightingDockWidget.setEnabled(true);
 	m_AppearanceDockWidget.setEnabled(true);
 	m_StatisticsDockWidget.setEnabled(true);
@@ -290,6 +302,16 @@ void CMainWindow::OnRenderBegin(void)
 void CMainWindow::OnRenderEnd(void)
 {
 	qDebug("Rendering ended");
+
+	m_pOpenAct->setEnabled(true);
+	
+	for (int i = 0; i < MaxRecentFiles; i++)
+	{
+		if (m_pRecentFileActions[i])
+			m_pRecentFileActions[i]->setEnabled(true);
+	}
+
+	m_pCloseAct->setEnabled(false);
 
 	m_LightingDockWidget.setEnabled(false);
 	m_AppearanceDockWidget.setEnabled(false);

@@ -29,6 +29,10 @@ signals:
 	void StatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit = "", const QString& Icon = "");
 
 	friend class CRenderThread;
+	friend class QFilmWidget;
+	friend class QApertureWidget;
+	friend class QProjectionWidget;
+	friend class QFocusWidget;
 };
 
 extern CRenderStatus gRenderStatus;

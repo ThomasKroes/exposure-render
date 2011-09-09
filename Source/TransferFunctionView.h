@@ -59,5 +59,4 @@ public:
 	float						m_MarginRight;
 	QAxisLabel					m_AxisLabelX;
 	QAxisLabel					m_AxisLabelY;
-	QGraphicsColorizeEffect		m_GraphicsBlurEffect;
 };

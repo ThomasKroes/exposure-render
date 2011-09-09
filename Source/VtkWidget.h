@@ -4,6 +4,7 @@
 #include <QVTKWidget.h>
 
 // VTK
+#include <vtkSmartPointer.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkConeSource.h>
@@ -16,7 +17,8 @@
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkVolumeMapper.h>
-#include <vtkSmartPointer.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
 
 // Interactor
 #include "InteractorStyleRealisticCamera.h"
@@ -53,6 +55,6 @@ private:
 	vtkSmartPointer<vtkCallbackCommand>			m_KeyPressCallback;
 	vtkSmartPointer<vtkCallbackCommand>			m_KeyReleaseCallback;
 	vtkSmartPointer<vtkRealisticCameraStyle>	m_InteractorStyleRealisticCamera;
-
+	vtkSmartPointer<vtkTextActor>				m_TextActor;
 	QTimer										m_RenderLoopTimer;
 };

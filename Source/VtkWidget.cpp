@@ -42,6 +42,16 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
 	m_QtVtkWidget(),
+	m_ImageImport(),
+	m_ImageActor(),
+	m_InteractorStyleImage(),
+	m_SceneRenderer(),
+	m_RenderWindow(),
+	m_RenderWindowInteractor(),
+	m_KeyPressCallback(),
+	m_KeyReleaseCallback(),
+	m_InteractorStyleRealisticCamera(),
+	m_TextActor(),
 	m_RenderLoopTimer()
 {
 	// Create and apply main layout
@@ -105,6 +115,8 @@ void CVtkWidget::OnRenderEnd(void)
 	// Remove the image actor from the screen
 	m_SceneRenderer->RemoveActor(m_ImageActor);
 
+	m_RenderWindow->Render();
+
 	// Stop the timer
 	m_RenderLoopTimer.stop();
 }
@@ -154,6 +166,14 @@ void CVtkWidget::SetupRenderView(void)
 
 	m_RenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyPressEvent, m_KeyPressCallback);
 	m_RenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyReleaseEvent, m_KeyReleaseCallback);
+
+	// Setup the text and add it to the window
+	vtkSmartPointer<vtkTextActor> m_TextActor = vtkSmartPointer<vtkTextActor>::New();
+	m_TextActor->GetTextProperty()->SetFontSize(24);
+	m_TextActor->SetPosition2(10, 40);
+//	m_SceneRenderer->AddActor2D(m_TextActor);
+	m_TextActor->SetInput ( "Hello world" );
+	m_TextActor->GetTextProperty()->SetColor(1.0,0.0,0.0);
 }
 
 void CVtkWidget::OnRenderLoopTimer(void)
@@ -176,11 +196,10 @@ void CVtkWidget::OnResize(void)
 {
 	if (!Scene())
 		return;
-
 	
  	m_ImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
  	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
- 	m_ImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
+// 	m_ImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
 /*
 	m_pImageImport->SetImportVoidPointer(NULL);
 	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());

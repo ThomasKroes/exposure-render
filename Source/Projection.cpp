@@ -23,12 +23,12 @@ QProjection& QProjection::operator=(const QProjection& Other)
 	return *this;
 }
 
-int QProjection::GetFieldOfView(void) const
+float QProjection::GetFieldOfView(void) const
 {
 	return m_FieldOfView;
 }
 
-void QProjection::SetFieldOfView(const int& FieldOfView)
+void QProjection::SetFieldOfView(const float& FieldOfView)
 {
 	m_FieldOfView = FieldOfView;
 

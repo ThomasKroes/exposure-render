@@ -23,12 +23,12 @@ QFocus& QFocus::operator=(const QFocus& Other)
 	return *this;
 }
 
-int QFocus::GetFocalDistance(void) const
+float QFocus::GetFocalDistance(void) const
 {
 	return m_FocalDistance;
 }
 
-void QFocus::SetFocalDistance(const int& FocalDistance)
+void QFocus::SetFocalDistance(const float& FocalDistance)
 {
 	m_FocalDistance = FocalDistance;
 

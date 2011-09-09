@@ -33,9 +33,6 @@ QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pN
 	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 	setFlag(QGraphicsItem::ItemIsSelectable);
 
-	// We are going to catch hover events
-//	setAcceptHoverEvents(true);
-	
 	// Tooltip
 	UpdateTooltip();
 };

@@ -108,9 +108,11 @@ void QColorPushButton::OnCurrentColorChanged(const QColor& Color)
 
 QDoubleSlider::QDoubleSlider(QWidget* pParent /*= NULL*/) :
 	QSlider(pParent),
-	m_Multiplier(10000.0f)
+	m_Multiplier(100000.0)
 {
 	connect(this, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
+
+	setSingleStep(100);
 }
 
 void QDoubleSlider::setValue(int Value)

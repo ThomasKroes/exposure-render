@@ -3,7 +3,7 @@
 #include "RenderThread.h"
 #include "Camera.h"
 
-CFilmWidget::CFilmWidget(QWidget* pParent) :
+QFilmWidget::QFilmWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_GridLayout(),
 	m_WidthSlider(),
@@ -55,9 +55,11 @@ CFilmWidget::CFilmWidget(QWidget* pParent) :
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
+
+	emit gRenderStatus.StatisticChanged("Camera", "Film", "", "", "");
 }
 
-void CFilmWidget::LockFilmHeight(const int& Lock)
+void QFilmWidget::LockFilmHeight(const int& Lock)
 {
 	m_HeightSlider.setEnabled(!Lock);
 	m_HeightSpinBox.setEnabled(!Lock);
@@ -76,27 +78,27 @@ void CFilmWidget::LockFilmHeight(const int& Lock)
 	}
 }
 
-void CFilmWidget::SetFilmWidth(const int& FilmWidth)
+void QFilmWidget::SetFilmWidth(const int& FilmWidth)
 {
 	gCamera.GetFilm().SetWidth(FilmWidth);
 }
 
-void CFilmWidget::SetFilmHeight(const int& FilmHeight)
+void QFilmWidget::SetFilmHeight(const int& FilmHeight)
 {
 	gCamera.GetFilm().SetHeight(FilmHeight);
 }
 
-void CFilmWidget::OnRenderBegin(void)
+void QFilmWidget::OnRenderBegin(void)
 {
 	OnFilmChanged(gCamera.GetFilm());
 }
 
-void CFilmWidget::OnRenderEnd(void)
+void QFilmWidget::OnRenderEnd(void)
 {
 	gCamera.GetFilm().Reset();
 }
 
-void CFilmWidget::OnFilmChanged(const QFilm& Film)
+void QFilmWidget::OnFilmChanged(const QFilm& Film)
 {
 	// Width
 	m_WidthSlider.blockSignals(true);
@@ -113,4 +115,7 @@ void CFilmWidget::OnFilmChanged(const QFilm& Film)
 	m_HeightSpinBox.setValue(Film.GetHeight());
 	m_HeightSlider.blockSignals(false);
 	m_HeightSpinBox.blockSignals(false);
+
+	emit gRenderStatus.StatisticChanged("Film", "Width", QString::number(Film.GetWidth()), "Pixels");
+	emit gRenderStatus.StatisticChanged("Film", "Height", QString::number(Film.GetHeight()), "Pixels");
 }

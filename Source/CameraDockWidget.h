@@ -12,5 +12,5 @@ public:
     QCameraDockWidget(QWidget* pParent = NULL);
 
 private:
-	CCameraWidget	m_CameraWidget;
+	QCameraWidget	m_CameraWidget;
 };

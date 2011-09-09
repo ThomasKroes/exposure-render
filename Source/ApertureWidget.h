@@ -5,14 +5,14 @@
 #include "Controls.h"
 #include "Aperture.h"
 
-class CApertureWidget : public QGroupBox
+class QApertureWidget : public QGroupBox
 {
     Q_OBJECT
 
 public:
-    CApertureWidget(QWidget* pParent = NULL);
+    QApertureWidget(QWidget* pParent = NULL);
 
-private slots:
+public slots:
 	void SetAperture(const double& Aperture);
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
@@ -21,5 +21,5 @@ private slots:
 private:
 	QGridLayout		m_GridLayout;
 	QDoubleSlider	m_SizeSlider;
-	QDoubleSpinner	m_SizeSpinBox;
+	QDoubleSpinner	m_SizeSpinner;
 };

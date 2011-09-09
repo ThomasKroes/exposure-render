@@ -5,12 +5,12 @@
 #include "Controls.h"
 #include "Focus.h"
 
-class CFocusWidget : public QGroupBox
+class QFocusWidget : public QGroupBox
 {
     Q_OBJECT
 
 public:
-    CFocusWidget(QWidget* pParent = NULL);
+    QFocusWidget(QWidget* pParent = NULL);
 
 private slots:
 	void SetFocalDistance(const double& FocalDistance);
@@ -22,5 +22,5 @@ private:
 	QGridLayout		m_GridLayout;
 	QComboBox		m_FocusTypeComboBox;
 	QDoubleSlider	m_FocalDistanceSlider;
-	QDoubleSpinner	m_FocalDistanceSpinBox;
+	QDoubleSpinner	m_FocalDistanceSpinner;
 };

@@ -5,12 +5,12 @@
 #include "Controls.h"
 #include "Projection.h"
 
-class CProjectionWidget : public QGroupBox
+class QProjectionWidget : public QGroupBox
 {
     Q_OBJECT
 
 public:
-    CProjectionWidget(QWidget* pParent = NULL);
+    QProjectionWidget(QWidget* pParent = NULL);
 
 private slots:
 	void SetFieldOfView(const double& FieldOfView);
@@ -21,5 +21,5 @@ private slots:
 private:
 	QGridLayout		m_GridLayout;
 	QDoubleSlider	m_FieldOfViewSlider;
-	QDoubleSpinner	m_FieldOfViewSpinBox;
+	QDoubleSpinner	m_FieldOfViewSpinner;
 };

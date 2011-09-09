@@ -5,12 +5,12 @@
 #include "Controls.h"
 #include "Film.h"
 
-class CFilmWidget : public QGroupBox
+class QFilmWidget : public QGroupBox
 {
     Q_OBJECT
 
 public:
-    CFilmWidget(QWidget* pParent = NULL);
+    QFilmWidget(QWidget* pParent = NULL);
 
 public slots:
 	void LockFilmHeight(const int& State);

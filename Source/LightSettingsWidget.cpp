@@ -14,13 +14,13 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_PhiSpinBox(),
 	m_DistanceLabel(),
 	m_DistanceSlider(),
-	m_DistanceSpinBox(),
+	m_DistanceSpinner(),
 	m_WidthLabel(),
 	m_WidthSlider(),
-	m_WidthSpinBox(),
+	m_WidthSpinner(),
 	m_HeightLabel(),
 	m_HeightSlider(),
-	m_HeightSpinBox(),
+	m_HeightSpinner(),
 	m_LockSizeCheckBox(),
 	m_ColorLabel(),
 	m_ColorButton(),
@@ -48,7 +48,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_ThetaSlider, 0, 1);
 	
     m_ThetaSpinBox.setRange(-360.0, 360.0);
-	m_ThetaSpinBox.setSuffix(" deg");
+	m_ThetaSpinBox.setSuffix(" deg.");
 	m_MainLayout.addWidget(&m_ThetaSpinBox, 0, 2);
 	
 	connect(&m_ThetaSlider, SIGNAL(valueChanged(double)), &m_ThetaSpinBox, SLOT(setValue(double)));
@@ -65,7 +65,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_PhiSlider, 1, 1);
 	
     m_PhiSpinBox.setRange(-90.0, 90.0);
-	m_PhiSpinBox.setSuffix(" deg");
+	m_PhiSpinBox.setSuffix(" deg.");
 	m_MainLayout.addWidget(&m_PhiSpinBox, 1, 2);
 	
 	connect(&m_PhiSlider, SIGNAL(valueChanged(double)), &m_PhiSpinBox, SLOT(setValue(double)));
@@ -81,11 +81,12 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_DistanceSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_DistanceSlider, 2, 1);
 	
-    m_DistanceSpinBox.setRange(0.0, 10.0);
-	m_MainLayout.addWidget(&m_DistanceSpinBox, 2, 2);
+    m_DistanceSpinner.setRange(0.0, 10.0);
+	m_DistanceSpinner.setSuffix(" mm");
+	m_MainLayout.addWidget(&m_DistanceSpinner, 2, 2);
 	
-	connect(&m_DistanceSlider, SIGNAL(valueChanged(double)), &m_DistanceSpinBox, SLOT(setValue(double)));
-	connect(&m_DistanceSpinBox, SIGNAL(valueChanged(double)), &m_DistanceSlider, SLOT(setValue(double)));
+	connect(&m_DistanceSlider, SIGNAL(valueChanged(double)), &m_DistanceSpinner, SLOT(setValue(double)));
+	connect(&m_DistanceSpinner, SIGNAL(valueChanged(double)), &m_DistanceSlider, SLOT(setValue(double)));
 	connect(&m_DistanceSlider, SIGNAL(valueChanged(double)), this, SLOT(OnDistanceChanged(double)));
 
 	// Width
@@ -93,16 +94,16 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_WidthLabel, 3, 0);
 
 	m_WidthSlider.setOrientation(Qt::Horizontal);
-    m_WidthSlider.setFocusPolicy(Qt::StrongFocus);
     m_WidthSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_WidthSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_WidthSlider, 3, 1);
 	
-	m_WidthSpinBox.setRange(0.0, 10.0);
-	m_MainLayout.addWidget(&m_WidthSpinBox, 3, 2);
+	m_WidthSpinner.setRange(0.0, 10.0);
+	m_WidthSpinner.setSuffix(" mm");
+	m_MainLayout.addWidget(&m_WidthSpinner, 3, 2);
 	
-	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_WidthSpinBox, SLOT(setValue(double)));
-	connect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_WidthSlider, SLOT(setValue(double)));
+	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_WidthSpinner, SLOT(setValue(double)));
+	connect(&m_WidthSpinner, SIGNAL(valueChanged(double)), &m_WidthSlider, SLOT(setValue(double)));
 	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), this, SLOT(OnWidthChanged(double)));
 
 	// Height
@@ -110,19 +111,19 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_HeightLabel, 5, 0);
 
 	m_HeightSlider.setOrientation(Qt::Horizontal);
-    m_HeightSlider.setFocusPolicy(Qt::StrongFocus);
     m_HeightSlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_HeightSlider.setRange(0.0, 10.0);
 	m_MainLayout.addWidget(&m_HeightSlider, 5, 1);
 	
-	m_HeightSpinBox.setRange(0.0, 10.0);
-	m_MainLayout.addWidget(&m_HeightSpinBox, 5, 2);
+	m_HeightSpinner.setRange(0.0, 10.0);
+	m_HeightSpinner.setSuffix(" mm");
+	m_MainLayout.addWidget(&m_HeightSpinner, 5, 2);
 	
 	m_LockSizeCheckBox.setText("Lock Size");
 	m_MainLayout.addWidget(&m_LockSizeCheckBox, 6, 1);
 
-	connect(&m_HeightSlider, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
-	connect(&m_HeightSpinBox, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
+	connect(&m_HeightSlider, SIGNAL(valueChanged(double)), &m_HeightSpinner, SLOT(setValue(double)));
+	connect(&m_HeightSpinner, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
 	connect(&m_HeightSlider, SIGNAL(valueChanged(double)), this, SLOT(OnHeightChanged(double)));
 
 	connect(&m_LockSizeCheckBox, SIGNAL(stateChanged(int)), this, SLOT(OnLockSizeChanged(int)));
@@ -300,12 +301,12 @@ void QLightSettingsWidget::OnLightDistanceChanged(QLight* pLight)
 	if (pLight)
 	{
 		m_DistanceSlider.setValue(pLight->GetDistance(), true);
-		m_DistanceSpinBox.setValue(pLight->GetDistance(), true);
+		m_DistanceSpinner.setValue(pLight->GetDistance(), true);
 	}
 
 	m_DistanceLabel.setEnabled(Enable);
 	m_DistanceSlider.setEnabled(Enable);
-	m_DistanceSpinBox.setEnabled(Enable);
+	m_DistanceSpinner.setEnabled(Enable);
 }
 
 void QLightSettingsWidget::OnLightWidthChanged(QLight* pLight)
@@ -315,12 +316,12 @@ void QLightSettingsWidget::OnLightWidthChanged(QLight* pLight)
 	if (pLight)
 	{
 		m_WidthSlider.setValue(pLight->GetWidth(), true);
-		m_WidthSpinBox.setValue(pLight->GetWidth(), true);
+		m_WidthSpinner.setValue(pLight->GetWidth(), true);
 	}
 
 	m_WidthLabel.setEnabled(Enable);
 	m_WidthSlider.setEnabled(Enable);
-	m_WidthSpinBox.setEnabled(Enable);
+	m_WidthSpinner.setEnabled(Enable);
 }
 
 void QLightSettingsWidget::OnLightLockSizeChanged(QLight* pLight)
@@ -338,7 +339,7 @@ void QLightSettingsWidget::OnLightLockSizeChanged(QLight* pLight)
 		if (LockSize)
 		{
 			connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
-			connect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
+			connect(&m_WidthSpinner, SIGNAL(valueChanged(double)), &m_HeightSpinner, SLOT(setValue(double)));
 
 			m_HeightSlider.setValue((double)m_WidthSlider.value());
 
@@ -347,13 +348,13 @@ void QLightSettingsWidget::OnLightLockSizeChanged(QLight* pLight)
 		else
 		{
 			disconnect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_HeightSlider, SLOT(setValue(double)));
-			disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(double)), &m_HeightSpinBox, SLOT(setValue(double)));
+			disconnect(&m_WidthSpinner, SIGNAL(valueChanged(double)), &m_HeightSpinner, SLOT(setValue(double)));
 		}
 	}
 
 	m_HeightLabel.setEnabled(Enable);
 	m_HeightSlider.setEnabled(Enable);
-	m_HeightSpinBox.setEnabled(Enable);
+	m_HeightSpinner.setEnabled(Enable);
 }
 
 void QLightSettingsWidget::OnLightHeightChanged(QLight* pLight)
@@ -363,12 +364,12 @@ void QLightSettingsWidget::OnLightHeightChanged(QLight* pLight)
 	if (pLight)
 	{
 		m_HeightSlider.setValue(pLight->GetHeight(), true);
-		m_HeightSpinBox.setValue(pLight->GetHeight(), true);
+		m_HeightSpinner.setValue(pLight->GetHeight(), true);
 	}
 
 	m_HeightLabel.setEnabled(Enable);
 	m_HeightSlider.setEnabled(Enable);
-	m_HeightSpinBox.setEnabled(Enable);
+	m_HeightSpinner.setEnabled(Enable);
 }
 
 void QLightSettingsWidget::OnLightColorChanged(QLight* pLight)

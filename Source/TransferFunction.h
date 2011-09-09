@@ -18,11 +18,6 @@ public:
 	void				AddNode(const float& Intensity, const float& Opacity, const QColor& Diffuse, const QColor& SpecularColor, const float& Roughness);
 	void				AddNode(const QNode& pNode);
 	void				RemoveNode(QNode* pNode);
-	float				GetRangeMin(void) const;
-	void				SetRangeMin(const float& RangeMin);
-	float				GetRangeMax(void) const;
-	void				SetRangeMax(const float& RangeMax);
-	float				GetRange(void) const;
 	void				NormalizeIntensity(void);
 	void				DeNormalizeIntensity(void);
 	void				UpdateNodeRanges(void);
@@ -37,7 +32,12 @@ public:
 	void				ReadXML(QDomElement& Parent);
 	QDomElement			WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
-	static QTransferFunction Default(void);
+	static QTransferFunction	Default(void);
+	static float				GetRangeMin(void);
+	static void					SetRangeMin(const float& RangeMin);
+	static float				GetRangeMax(void);
+	static void					SetRangeMax(const float& RangeMax);
+	static float				GetRange(void);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);

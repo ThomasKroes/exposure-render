@@ -3,8 +3,8 @@
 #include "MainWindow.h"
 #include "RenderThread.h"
 
-CCameraWidget::CCameraWidget(QWidget* pParent) :
-QWidget(pParent),
+QCameraWidget::QCameraWidget(QWidget* pParent) :
+	QWidget(pParent),
 	m_MainLayout(),
 	m_FilmWidget(),
 	m_ApertureWidget(),
@@ -28,12 +28,12 @@ QWidget(pParent),
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 }
 
-void CCameraWidget::OnLoadPreset(const QString& Name)
+void QCameraWidget::OnLoadPreset(const QString& Name)
 {
 	gCamera = m_PresetsWidget.GetPreset(Name);
 }
 
-void CCameraWidget::OnSavePreset(const QString& Name)
+void QCameraWidget::OnSavePreset(const QString& Name)
 {
 	QCamera Preset(gCamera);
 	Preset.SetName(Name);
@@ -42,21 +42,21 @@ void CCameraWidget::OnSavePreset(const QString& Name)
 	m_PresetsWidget.SavePreset(Preset);
 }
 
-void CCameraWidget::OnRenderBegin(void)
+void QCameraWidget::OnRenderBegin(void)
 {
 	// Add a default transfer function and load it
 	m_PresetsWidget.InsertPreset(0, QCamera::Default());
 	m_PresetsWidget.LoadPreset("Default");
 }
 
-void CCameraWidget::OnRenderEnd(void)
+void QCameraWidget::OnRenderEnd(void)
 {
 	// Add a default transfer function and load it
 	m_PresetsWidget.InsertPreset(0, QCamera::Default());
 	m_PresetsWidget.LoadPreset("Default");
 }
 
-void CCameraWidget::Update(void)
+void QCameraWidget::Update(void)
 {
 	// Flag the film resolution as dirty, this will restart the rendering
 	//	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
