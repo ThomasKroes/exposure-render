@@ -51,7 +51,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_NodeSelection.setToolTip("Node selection");
 	m_SelectionLayout.addWidget(&m_NodeSelection, 0, 0);
 
-	connect(&m_NodeSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(OnNodeSelectionChanged(int)));
+	QObject::connect(&m_NodeSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(OnNodeSelectionChanged(int)));
 
 	// Previous node
 	m_PreviousNode.setIcon(QIcon(":/Images/arrow-180.png"));
@@ -62,7 +62,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_PreviousNode.updateGeometry();
 	m_SelectionLayout.addWidget(&m_PreviousNode, 0, 1);
 
-	connect(&m_PreviousNode, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
+	QObject::connect(&m_PreviousNode, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
 
 	// Next node
 	m_NextNode.setIcon(QIcon(":/Images/arrow.png"));
@@ -72,7 +72,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_NextNode.setFixedHeight(20);
 	m_SelectionLayout.addWidget(&m_NextNode, 0, 2);
 	
-	connect(&m_NextNode, SIGNAL(pressed()), this, SLOT(OnNextNode()));
+	QObject::connect(&m_NextNode, SIGNAL(pressed()), this, SLOT(OnNextNode()));
 
 	// Delete node
 	m_DeleteNode.setIcon(QIcon(":/Images/bin.png"));
@@ -82,7 +82,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_DeleteNode.setFixedHeight(20);
 	m_SelectionLayout.addWidget(&m_DeleteNode, 0, 3);
 	
-	connect(&m_DeleteNode, SIGNAL(pressed()), this, SLOT(OnDeleteNode()));
+	QObject::connect(&m_DeleteNode, SIGNAL(pressed()), this, SLOT(OnDeleteNode()));
 
 	// Position
 	m_IntensityLabel.setText("Position");
@@ -100,9 +100,9 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_IntensitySpinBox.setSingleStep(1);
 	m_MainLayout.addWidget(&m_IntensitySpinBox, 1, 2);
 
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
-	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
-	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
+	QObject::connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
+	QObject::connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
+	QObject::connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
 
 	// Opacity
 	m_OpacityLabel.setText("Opacity");
@@ -119,30 +119,30 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySpinBox.setRange(0.0, 1.0);
 	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 2);
 	
-	connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), &m_OpacitySpinBox, SLOT(setValue(double)));
-	connect(&m_OpacitySpinBox, SIGNAL(valueChanged(double)), &m_OpacitySlider, SLOT(setValue(double)));
-	connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnOpacityChanged(double)));
+	QObject::connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), &m_OpacitySpinBox, SLOT(setValue(double)));
+	QObject::connect(&m_OpacitySpinBox, SIGNAL(valueChanged(double)), &m_OpacitySlider, SLOT(setValue(double)));
+	QObject::connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnOpacityChanged(double)));
 
 	// Diffuse
 	m_MainLayout.addWidget(new QLabel("Diffuse"), 3, 0);
 	m_Diffuse.setFixedWidth(120);
 	m_MainLayout.addWidget(&m_Diffuse, 3, 1);
 
-	connect(&m_Diffuse, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseChanged(const QColor&)));
+	QObject::connect(&m_Diffuse, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseChanged(const QColor&)));
 
 	// Specular
 	m_MainLayout.addWidget(new QLabel("Specular"), 4, 0);
 	m_Specular.setFixedWidth(120);
 	m_MainLayout.addWidget(&m_Specular, 4, 1);
 
-	connect(&m_Specular, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularChanged(const QColor&)));
+	QObject::connect(&m_Specular, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularChanged(const QColor&)));
 
 	// Emission
 	m_MainLayout.addWidget(new QLabel("Emission"), 5, 0);
 	m_Emission.setFixedWidth(120);
 	m_MainLayout.addWidget(&m_Emission, 5, 1);
 
-	connect(&m_Emission, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnEmissionChanged(const QColor&)));
+	QObject::connect(&m_Emission, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnEmissionChanged(const QColor&)));
 
 	// Roughness
 	m_RoughnessLabel.setText("Roughness");
@@ -159,12 +159,10 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_RoughnessSpinBox.setRange(0.0f, 10000.0f);
 	m_MainLayout.addWidget(&m_RoughnessSpinBox, 6, 2);
 
-	connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));
-	connect(&m_RoughnessSpinBox, SIGNAL(valueChanged(double)), &m_RoughnessSlider, SLOT(setValue(double)));
-	connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), this, SLOT(OnRoughnessChanged(double)));
-
-	// Respond to changes in node selection
-	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
+	QObject::connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));
+	QObject::connect(&m_RoughnessSpinBox, SIGNAL(valueChanged(double)), &m_RoughnessSlider, SLOT(setValue(double)));
+	QObject::connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), this, SLOT(OnRoughnessChanged(double)));
+	QObject::connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
 
 	SetupSelectionUI();
 
@@ -173,27 +171,20 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 
 void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 {
-	if (!pNode)
+	// Remove existing connections
+	QObject::disconnect(this, SLOT(OnNodeIntensityChanged(QNode*)));
+	QObject::disconnect(this, SLOT(OnNodeOpacityChanged(QNode*)));
+	QObject::disconnect(this, SLOT(OnNodeDiffuseChanged(QNode*)));
+	QObject::disconnect(this, SLOT(OnNodeSpecularChanged(QNode*)));
+	QObject::disconnect(this, SLOT(OnNodeEmissionChanged(QNode*)));
+	QObject::disconnect(this, SLOT(OnNodeRoughnessChanged(QNode*)));
+
+	if (pNode)
 	{
-	}
-	else
-	{
+		// Setup the selection interface
 		SetupSelectionUI();
-		
-		// Remove existing connections
-		for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
-		{
-			QNode& Node = gTransferFunction.GetNode(i);
 
-			disconnect(&Node, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
-			disconnect(&Node, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
-			disconnect(&Node, SIGNAL(DiffuseChanged(QNode*)), this, SLOT(OnNodeDiffuseChanged(QNode*)));
-			disconnect(&Node, SIGNAL(SpecularChanged(QNode*)), this, SLOT(OnNodeSpecularChanged(QNode*)));
-			disconnect(&Node, SIGNAL(EmissionChanged(QNode*)), this, SLOT(OnNodeEmissionChanged(QNode*)));
-			disconnect(&Node, SIGNAL(RoughnessChanged(QNode*)), this, SLOT(OnNodeRoughnessChanged(QNode*)));
-		}
-
-		// Setup connections
+		// Setup new connections
 		connect(pNode, SIGNAL(IntensityChanged(QNode*)), this, SLOT(OnNodeIntensityChanged(QNode*)));
 		connect(pNode, SIGNAL(OpacityChanged(QNode*)), this, SLOT(OnNodeOpacityChanged(QNode*)));
 		connect(pNode, SIGNAL(DiffuseChanged(QNode*)), this, SLOT(OnNodeDiffuseChanged(QNode*)));

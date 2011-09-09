@@ -88,8 +88,6 @@ void QLightsWidget::UpdateLightList(void)
 		// Create new list item
 		QLightItem* pLightItem = new QLightItem(&m_LightList, &gLighting.m_Lights[i]);
 
-		pLightItem->setFlags(pLightItem->flags() | Qt::ItemIsEditable);
-
 		// Add the item
 		m_LightList.addItem(pLightItem);
 	}
@@ -97,9 +95,13 @@ void QLightsWidget::UpdateLightList(void)
 	// Select
 	if (gLighting.GetSelectedLight())
 	{
-//		const int Index = gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight());
-//		m_LightList.setCurrentRow(Index, QItemSelectionModel::Select);
-//		m_LightList.setFocus();
+		m_LightList.blockSignals(true);
+
+		const int Index = gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight());
+		m_LightList.setCurrentRow(Index, QItemSelectionModel::Select);
+		m_LightList.setFocus();
+
+		m_LightList.blockSignals(false);
 	}
 
 	// Get current row
@@ -120,7 +122,7 @@ void QLightsWidget::OnLightSelectionChanged(void)
 
 void QLightsWidget::OnLightSelectionChanged(QLight* pLight)
 {
-	m_LightList.update();
+	UpdateLightList();
 }
 
 void QLightsWidget::OnLightItemChanged(QListWidgetItem* pWidgetItem)
