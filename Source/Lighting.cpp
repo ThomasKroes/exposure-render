@@ -243,6 +243,8 @@ QLighting::QLighting(const QLighting& Other)
 
 QLighting& QLighting::operator=(const QLighting& Other)
 {
+	blockSignals(true);
+
 	QPresetXML::operator=(Other);
 
 	foreach (QLight Light, m_Lights)
@@ -255,6 +257,8 @@ QLighting& QLighting::operator=(const QLighting& Other)
 
 	m_pSelectedLight	= Other.m_pSelectedLight;
 	m_Background		= Other.m_Background;
+
+	blockSignals(false);
 
 	emit LightingChanged();
 
@@ -355,9 +359,8 @@ QBackground& QLighting::Background(void)
 
 void QLighting::SetSelectedLight(QLight* pSelectedLight)
 {
-	QLight* pOldLight = m_pSelectedLight;
 	m_pSelectedLight = pSelectedLight;
-	emit LightSelectionChanged(pOldLight, m_pSelectedLight);
+	emit LightSelectionChanged(pSelectedLight);
 }
 
 void QLighting::SetSelectedLight(const int& Index)
@@ -366,7 +369,7 @@ void QLighting::SetSelectedLight(const int& Index)
 
 	if (m_Lights.size() <= 0)
 	{
-		m_pSelectedLight = NULL;
+		SetSelectedLight((QLight*)NULL);
 	}
 	else
 	{
@@ -374,11 +377,8 @@ void QLighting::SetSelectedLight(const int& Index)
 		const int NewIndex = qMin(m_Lights.size() - 1, qMax(0, Index));
 
 		// Set selected node
-		m_pSelectedLight = &m_Lights[NewIndex];
+		SetSelectedLight(&m_Lights[NewIndex]);
 	}
-
-	// Notify others that our selection has changed
-	emit LightSelectionChanged(pOldLight, m_pSelectedLight);
 }
 
 QLight* QLighting::GetSelectedLight(void)

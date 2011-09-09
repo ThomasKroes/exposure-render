@@ -100,7 +100,7 @@ public slots:
 
 signals:
 	void LightingChanged(void);
-	void LightSelectionChanged(QLight*, QLight*);
+	void LightSelectionChanged(QLight*);
 
 protected:
 	QLightList		m_Lights;

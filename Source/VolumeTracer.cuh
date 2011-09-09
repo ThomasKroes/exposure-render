@@ -2,7 +2,6 @@
 
 #include "Geometry.h"
 #include "Random.h"
-#include "Camera.h"
 #include "Light.h"
 #include "VolumePoint.h"
 

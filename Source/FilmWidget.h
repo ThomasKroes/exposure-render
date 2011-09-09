@@ -3,6 +3,7 @@
 #include <QtGui>
 
 #include "Controls.h"
+#include "Film.h"
 
 class CFilmWidget : public QGroupBox
 {
@@ -17,12 +18,13 @@ public slots:
 	void SetFilmHeight(const int& FilmHeight);
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
+	void OnFilmChanged(const QFilm& Film);
 
 private:
-	QGridLayout		m_GridLayout;
-	QSlider			m_FilmWidthSlider;
-	QSpinBox		m_FilmWidthSpinBox;
-	QSlider			m_FilmHeightSlider;
-	QSpinBox		m_FilmHeightSpinBox;
-	QCheckBox		m_LockFilmHeightCheckBox;
+	QGridLayout	m_GridLayout;
+	QSlider		m_WidthSlider;
+	QSpinBox	m_WidthSpinBox;
+	QSlider		m_HeightSlider;
+	QSpinBox	m_HeightSpinBox;
+	QCheckBox	m_LockSizeCheckBox;
 };

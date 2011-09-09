@@ -15,11 +15,12 @@ public:
 
 	int				GetFieldOfView(void) const;
 	void			SetFieldOfView(const int& FieldOfView);
+	void			Reset(void);
 	void			ReadXML(QDomElement& Parent);
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
-	void Changed(void);
+	void Changed(const QProjection&);
 
 private:
 	float				m_FieldOfView;

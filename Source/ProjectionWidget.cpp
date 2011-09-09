@@ -1,7 +1,7 @@
 
 #include "ProjectionWidget.h"
-#include "MainWindow.h"
 #include "RenderThread.h"
+#include "Camera.h"
 
 CProjectionWidget::CProjectionWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -25,18 +25,31 @@ CProjectionWidget::CProjectionWidget(QWidget* pParent) :
     m_FieldOfViewSpinBox.setRange(10, 200);
 	m_GridLayout.addWidget(&m_FieldOfViewSpinBox, 4, 2);
 	
-	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(int)), &m_FieldOfViewSpinBox, SLOT(setValue(int)));
-	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFieldOfView(int)));
-	connect(&m_FieldOfViewSpinBox, SIGNAL(valueChanged(int)), &m_FieldOfViewSlider, SLOT(setValue(int)));
+	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), &m_FieldOfViewSpinBox, SLOT(setValue(double)));
+	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFieldOfView(double)));
+	connect(&m_FieldOfViewSpinBox, SIGNAL(valueChanged(double)), &m_FieldOfViewSlider, SLOT(setValue(double)));
+	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gCamera.GetProjection(), SIGNAL(Changed(const QProjection&)), this, SLOT(OnProjectionChanged(const QProjection&)));
 }
 
-void CProjectionWidget::SetFieldOfView(const int& FieldOfView)
+void CProjectionWidget::SetFieldOfView(const double& FieldOfView)
 {
-	if (!Scene())
-		return;
+	gCamera.GetProjection().SetFieldOfView(FieldOfView);
+}
 
-	Scene()->m_Camera.m_FovV = FieldOfView;
+void CProjectionWidget::OnRenderBegin(void)
+{
+	OnProjectionChanged(gCamera.GetProjection());
+}
 
-	// Flag the camera as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+void CProjectionWidget::OnRenderEnd(void)
+{
+	gCamera.GetProjection().Reset();
+}
+
+void CProjectionWidget::OnProjectionChanged(const QProjection& Projection)
+{
+	m_FieldOfViewSlider.setValue(Projection.GetFieldOfView(), true);
+	m_FieldOfViewSpinBox.setValue(Projection.GetFieldOfView(), true);
 }

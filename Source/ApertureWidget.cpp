@@ -1,13 +1,13 @@
 
 #include "ApertureWidget.h"
-#include "MainWindow.h"
 #include "RenderThread.h"
+#include "Camera.h"
 
 CApertureWidget::CApertureWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_GridLayout(),
-	m_ApertureSizeSlider(),
-	m_ApertureSizeSpinBox()
+	m_SizeSlider(),
+	m_SizeSpinBox()
 {
 	setTitle("Aperture");
 	setStatusTip("Aperture properties");
@@ -18,27 +18,40 @@ CApertureWidget::CApertureWidget(QWidget* pParent) :
 	// Aperture size
 	m_GridLayout.addWidget(new QLabel("Size"), 3, 0);
 
-	m_ApertureSizeSlider.setOrientation(Qt::Horizontal);
-    m_ApertureSizeSlider.setFocusPolicy(Qt::StrongFocus);
-    m_ApertureSizeSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_ApertureSizeSlider.setRange(0.0, 1.0);
-	m_GridLayout.addWidget(&m_ApertureSizeSlider, 3, 1);
+	m_SizeSlider.setOrientation(Qt::Horizontal);
+    m_SizeSlider.setFocusPolicy(Qt::StrongFocus);
+    m_SizeSlider.setTickPosition(QDoubleSlider::NoTicks);
+	m_SizeSlider.setRange(0.0, 1.0);
+	m_GridLayout.addWidget(&m_SizeSlider, 3, 1);
 	
-    m_ApertureSizeSpinBox.setRange(0.0, 1.0);
-	m_GridLayout.addWidget(&m_ApertureSizeSpinBox, 3, 2);
+    m_SizeSpinBox.setRange(0.0, 1.0);
+	m_GridLayout.addWidget(&m_SizeSpinBox, 3, 2);
 	
-	connect(&m_ApertureSizeSlider, SIGNAL(valueChanged(double)), &m_ApertureSizeSpinBox, SLOT(setValue(double)));
-	connect(&m_ApertureSizeSlider, SIGNAL(valueChanged(double)), this, SLOT(SetAperture(double)));
-	connect(&m_ApertureSizeSpinBox, SIGNAL(valueChanged(double)), &m_ApertureSizeSlider, SLOT(setValue(double)));
+	connect(&m_SizeSlider, SIGNAL(valueChanged(double)), &m_SizeSpinBox, SLOT(setValue(double)));
+	connect(&m_SizeSlider, SIGNAL(valueChanged(double)), this, SLOT(SetAperture(double)));
+	connect(&m_SizeSpinBox, SIGNAL(valueChanged(double)), &m_SizeSlider, SLOT(setValue(double)));
+	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gCamera.GetAperture(), SIGNAL(Changed(const QAperture&)), this, SLOT(OnApertureChanged(const QAperture&)));
 }
 
 void CApertureWidget::SetAperture(const double& Aperture)
 {
-	if (!Scene())
-		return;
+	gCamera.GetAperture().SetSize(Aperture);
+}
 
-	Scene()->m_Camera.m_Aperture.m_Size = (float)Aperture;
+void CApertureWidget::OnRenderBegin(void)
+{
+	OnApertureChanged(gCamera.GetAperture());
+}
 
-	// Flag the camera as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+void CApertureWidget::OnRenderEnd(void)
+{
+	gCamera.GetAperture().Reset();
+}
+
+void CApertureWidget::OnApertureChanged(const QAperture& Aperture)
+{
+	m_SizeSlider.setValue(Aperture.GetSize(), true);
+	m_SizeSpinBox.setValue(Aperture.GetSize(), true);
 }

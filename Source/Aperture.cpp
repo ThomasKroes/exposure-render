@@ -3,7 +3,7 @@
 
 QAperture::QAperture(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
-	m_Size(0.05)
+	m_Size(0.05f)
 {
 }
 
@@ -18,7 +18,7 @@ QAperture& QAperture::operator=(const QAperture& Other)
 
 	m_Size = Other.m_Size;
 
-	emit Changed();
+	emit Changed(*this);
 
 	return *this;
 }
@@ -32,7 +32,14 @@ void QAperture::SetSize(const int& Size)
 {
 	m_Size = Size;
 
-	emit Changed();
+	emit Changed(*this);
+}
+
+void QAperture::Reset(void)
+{
+	m_Size = 0.05f;
+
+	emit Changed(*this);
 }
 
 void QAperture::ReadXML(QDomElement& Parent)

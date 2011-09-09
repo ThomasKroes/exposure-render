@@ -16,7 +16,7 @@ public:
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 
 public slots:
-	void OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight);
+	void OnLightSelectionChanged(QLight* pLight);
 
 	void OnThetaChanged(const double& Theta);
 	void OnPhiChanged(const double& Phi);

@@ -18,7 +18,7 @@ QFocus& QFocus::operator=(const QFocus& Other)
 
 	m_FocalDistance = Other.m_FocalDistance;
 
-	emit Changed();
+	emit Changed(*this);
 
 	return *this;
 }
@@ -32,7 +32,14 @@ void QFocus::SetFocalDistance(const int& FocalDistance)
 {
 	m_FocalDistance = FocalDistance;
 
-	emit Changed();
+	emit Changed(*this);
+}
+
+void QFocus::Reset(void)
+{
+	m_FocalDistance = 1.0f;
+
+	emit Changed(*this);
 }
 
 void QFocus::ReadXML(QDomElement& Parent)

@@ -18,7 +18,7 @@ QProjection& QProjection::operator=(const QProjection& Other)
 
 	m_FieldOfView = Other.m_FieldOfView;
 
-	emit Changed();
+	emit Changed(*this);
 
 	return *this;
 }
@@ -32,7 +32,14 @@ void QProjection::SetFieldOfView(const int& FieldOfView)
 {
 	m_FieldOfView = FieldOfView;
 
-	emit Changed();
+	emit Changed(*this);
+}
+
+void QProjection::Reset(void)
+{
+	m_FieldOfView = 35.0f;
+
+	emit Changed(*this);
 }
 
 void QProjection::ReadXML(QDomElement& Parent)

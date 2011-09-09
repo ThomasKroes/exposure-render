@@ -29,6 +29,8 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 {
 	QPresetXML::operator=(Other);
 
+	blockSignals(true);
+	
 	m_Nodes			= Other.m_Nodes;
 	m_pSelectedNode	= Other.m_pSelectedNode;
 
@@ -38,6 +40,8 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 
 	// Update node's range
 	UpdateNodeRanges();
+
+	blockSignals(false);
 
 	// Notify others that the function has changed selection has changed
 	emit FunctionChanged();

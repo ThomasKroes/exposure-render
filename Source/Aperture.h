@@ -15,11 +15,12 @@ public:
 
 	int				GetSize(void) const;
 	void			SetSize(const int& Size);
+	void			Reset(void);
 	void			ReadXML(QDomElement& Parent);
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
-	void Changed(void);
+	void Changed(const QAperture&);
 
 private:
 	float			m_Size;

@@ -156,48 +156,45 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
 	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
-	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*, QLight*)), this, SLOT(OnLightSelectionChanged(QLight*, QLight*)));
+	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*)), this, SLOT(OnLightSelectionChanged(QLight*)));
 	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), &gLighting, SLOT(Update()));
 
-	OnLightSelectionChanged(NULL, NULL);
+	OnLightSelectionChanged(NULL);
 }
 
-void QLightSettingsWidget::OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight)
+void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 {
-	if (pOldLight)
+	QObject::disconnect(this, SLOT(OnLightThetaChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightPhiChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightDistanceChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightWidthChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightLockSizeChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightHeightChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightColorChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightIntensityChanged(QLight*)));
+		
+	if (pLight)
 	{
-		disconnect(pOldLight, SIGNAL(ThetaChanged(QLight*)), this, SLOT(OnLightThetaChanged(QLight*)));
-		disconnect(pOldLight, SIGNAL(PhiChanged(QLight*)), this, SLOT(OnLightPhiChanged(QLight*)));
-		disconnect(pOldLight, SIGNAL(DistanceChanged(QLight*)), this, SLOT(OnLightDistanceChanged(QLight*)));
-		disconnect(pOldLight, SIGNAL(WidthChanged(QLight*)), this, SLOT(OnLightWidthChanged(QLight*)));
-		disconnect(pOldLight, SIGNAL(LockSizeChanged(QLight*)), this, SLOT(OnLightLockSizeChanged(QLight*)));
-		disconnect(pOldLight, SIGNAL(HeightChanged(QLight*)), this, SLOT(OnLightHeightChanged(QLight*)));
-		disconnect(pOldLight, SIGNAL(ColorChanged(QLight*)), this, SLOT(OnLightColorChanged(QLight*)));
-		disconnect(pOldLight, SIGNAL(IntensityChanged(QLight*)), this, SLOT(OnLightIntensityChanged(QLight*)));
+		connect(pLight, SIGNAL(ThetaChanged(QLight*)), this, SLOT(OnLightThetaChanged(QLight*)));
+		connect(pLight, SIGNAL(PhiChanged(QLight*)), this, SLOT(OnLightPhiChanged(QLight*)));
+		connect(pLight, SIGNAL(DistanceChanged(QLight*)), this, SLOT(OnLightDistanceChanged(QLight*)));
+		connect(pLight, SIGNAL(WidthChanged(QLight*)), this, SLOT(OnLightWidthChanged(QLight*)));
+		connect(pLight, SIGNAL(LockSizeChanged(QLight*)), this, SLOT(OnLightLockSizeChanged(QLight*)));
+		connect(pLight, SIGNAL(HeightChanged(QLight*)), this, SLOT(OnLightHeightChanged(QLight*)));
+		connect(pLight, SIGNAL(ColorChanged(QLight*)), this, SLOT(OnLightColorChanged(QLight*)));
+		connect(pLight, SIGNAL(IntensityChanged(QLight*)), this, SLOT(OnLightIntensityChanged(QLight*)));
 	}
 
-	if (pNewLight)
-	{
-		connect(pNewLight, SIGNAL(ThetaChanged(QLight*)), this, SLOT(OnLightThetaChanged(QLight*)));
-		connect(pNewLight, SIGNAL(PhiChanged(QLight*)), this, SLOT(OnLightPhiChanged(QLight*)));
-		connect(pNewLight, SIGNAL(DistanceChanged(QLight*)), this, SLOT(OnLightDistanceChanged(QLight*)));
-		connect(pNewLight, SIGNAL(WidthChanged(QLight*)), this, SLOT(OnLightWidthChanged(QLight*)));
-		connect(pNewLight, SIGNAL(LockSizeChanged(QLight*)), this, SLOT(OnLightLockSizeChanged(QLight*)));
-		connect(pNewLight, SIGNAL(HeightChanged(QLight*)), this, SLOT(OnLightHeightChanged(QLight*)));
-		connect(pNewLight, SIGNAL(ColorChanged(QLight*)), this, SLOT(OnLightColorChanged(QLight*)));
-		connect(pNewLight, SIGNAL(IntensityChanged(QLight*)), this, SLOT(OnLightIntensityChanged(QLight*)));
-	}
+	setEnabled(pLight != NULL);
 
-	setEnabled(pNewLight != NULL);
-
-	OnLightThetaChanged(pNewLight);
-	OnLightPhiChanged(pNewLight);
-	OnLightDistanceChanged(pNewLight);
-	OnLightWidthChanged(pNewLight);
-	OnLightLockSizeChanged(pNewLight);
-	OnLightHeightChanged(pNewLight);
-	OnLightColorChanged(pNewLight);
-	OnLightIntensityChanged(pNewLight);
+	OnLightThetaChanged(pLight);
+	OnLightPhiChanged(pLight);
+	OnLightDistanceChanged(pLight);
+	OnLightWidthChanged(pLight);
+	OnLightLockSizeChanged(pLight);
+	OnLightHeightChanged(pLight);
+	OnLightColorChanged(pLight);
+	OnLightIntensityChanged(pLight);
 }
 
 void QLightSettingsWidget::OnThetaChanged(const double& Theta)

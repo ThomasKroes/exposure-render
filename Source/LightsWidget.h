@@ -29,7 +29,7 @@ public:
 protected slots:
 	void UpdateLightList(void);
 	void OnLightSelectionChanged(void);
-	void OnLightSelectionChanged(QLight* pOldLight, QLight* pNewLight);
+	void OnLightSelectionChanged(QLight* pLight);
 	void OnLightItemChanged(QListWidgetItem* pWidgetItem);
 	void OnAddLight(void);
 	void OnRemoveLight(void);

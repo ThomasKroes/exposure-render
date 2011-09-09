@@ -1,23 +1,111 @@
 
 #include "Camera.h"
 
-HOD void CCameraAnimation::Sample(CCamera& Camera)
+QCamera gCamera;
+
+QCamera::QCamera(QObject* pParent /*= NULL*/) :
+	QPresetXML(pParent),
+	m_Film(),
+	m_Aperture(),
+	m_Projection(),
+	m_Focus()
 {
-	switch (m_Type)
-	{
-		case TurnTable:
-		{
-			const float Theta = (m_InitialAngle / RAD_F) + (m_DeltaTheta * (float)m_CurrentFrame);
+}
 
-			Camera.m_From	= Camera.m_Target + Vec3f((cosf(m_Latitude / RAD_F) * m_Distance) * cosf(Theta), (sinf(m_Latitude / RAD_F) * m_Distance) * sinf(m_Latitude / RAD_F), (cosf(m_Latitude / RAD_F) * m_Distance) * sinf(Theta));
-			Camera.m_Up		= Vec3f(0.0f, 1.0f, 0.0f);
+QCamera::QCamera(const QCamera& Other)
+{
+	*this = Other;
+};
 
-			break;
-		}
+QCamera& QCamera::operator=(const QCamera& Other)
+{
+	QPresetXML::operator=(Other);
 
-		default:
-		{
-			break;
-		}
-	}
+	blockSignals(true);
+
+	m_Film			= Other.m_Film;
+	m_Aperture		= Other.m_Aperture;
+	m_Projection	= Other.m_Projection;
+	m_Focus			= Other.m_Focus;
+
+	blockSignals(false);
+
+	emit Changed();
+
+	return *this;
+}
+
+QFilm& QCamera::GetFilm(void)
+{
+	return m_Film;
+}
+
+void QCamera::SetFilm(const QFilm& Film)
+{
+	m_Film = Film;
+}
+
+QAperture& QCamera::GetAperture(void)
+{
+	return m_Aperture;
+}
+
+void QCamera::SetAperture(const QAperture& Aperture)
+{
+	m_Aperture = Aperture;
+}
+
+QProjection& QCamera::GetProjection(void)
+{
+	return m_Projection;
+}
+
+void QCamera::SetProjection(const QProjection& Projection)
+{
+	m_Projection = Projection;
+}
+
+QFocus& QCamera::GetFocus(void)
+{
+	return m_Focus;
+}
+
+void QCamera::SetFocus(const QFocus& Focus)
+{
+	m_Focus = Focus;
+}
+
+void QCamera::ReadXML(QDomElement& Parent)
+{
+	QPresetXML::ReadXML(Parent);
+
+	m_Film.ReadXML(Parent.firstChildElement("Film"));
+	m_Aperture.ReadXML(Parent.firstChildElement("Aperture"));
+	m_Projection.ReadXML(Parent.firstChildElement("Projection"));
+	m_Focus.ReadXML(Parent.firstChildElement("Focus"));
+}
+
+QDomElement QCamera::WriteXML(QDomDocument& DOM, QDomElement& Parent)
+{
+	// Camera
+	QDomElement Camera = DOM.createElement("Preset");
+	Parent.appendChild(Camera);
+
+	QPresetXML::WriteXML(DOM, Camera);
+
+	m_Film.WriteXML(DOM, Camera);
+	m_Aperture.WriteXML(DOM, Camera);
+	m_Projection.WriteXML(DOM, Camera);
+	m_Focus.WriteXML(DOM, Camera);
+
+	return Camera;
+}
+
+QCamera QCamera::Default(void)
+{
+	QCamera DefaultCamera;
+
+	DefaultCamera.SetName("Default");
+
+	return DefaultCamera;
 }

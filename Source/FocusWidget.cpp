@@ -1,7 +1,7 @@
 
 #include "FocusWidget.h"
-#include "MainWindow.h"
 #include "RenderThread.h"
+#include "Camera.h"
 
 CFocusWidget::CFocusWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -17,51 +17,50 @@ CFocusWidget::CFocusWidget(QWidget* pParent) :
 	setLayout(&m_GridLayout);
 
 	// Focus type
-	m_GridLayout.addWidget(new QLabel("Focus type"), 5, 0);
+//	m_GridLayout.addWidget(new QLabel("Focus type"), 5, 0);
 
-	m_FocusTypeComboBox.addItem("Automatic");
-	m_FocusTypeComboBox.addItem("Pick");
-	m_FocusTypeComboBox.addItem("Manual");
-	m_GridLayout.addWidget(&m_FocusTypeComboBox, 5, 1, 1, 2);
+//	m_FocusTypeComboBox.addItem("Automatic");
+// 	m_FocusTypeComboBox.addItem("Pick");
+// 	m_FocusTypeComboBox.addItem("Manual");
+//	m_GridLayout.addWidget(&m_FocusTypeComboBox, 5, 1, 1, 2);
 	
-	connect(&m_FocusTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(SetFocusType(int)));
+//	connect(&m_FocusTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(SetFocusType(int)));
 
 	// Focal distance
-	m_GridLayout.addWidget(new QLabel("Focal distance"), 6, 0);
+	m_GridLayout.addWidget(new QLabel("Focal distance"), 0, 0);
 
 	m_FocalDistanceSlider.setOrientation(Qt::Horizontal);
-	m_FocalDistanceSlider.setEnabled(false);
     m_FocalDistanceSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_FocalDistanceSlider.setRange(0.0, 1000000.0);
-	m_GridLayout.addWidget(&m_FocalDistanceSlider, 6, 1);
+	m_FocalDistanceSlider.setRange(0.0, 100.0);
+	m_GridLayout.addWidget(&m_FocalDistanceSlider, 0, 1);
 	
-	m_FocalDistanceSpinBox.setEnabled(false);
     m_FocalDistanceSpinBox.setRange(0.0, 1000000.0);
-	m_GridLayout.addWidget(&m_FocalDistanceSpinBox, 6, 2);
+	m_GridLayout.addWidget(&m_FocalDistanceSpinBox, 0, 2);
 	
 	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), &m_FocalDistanceSpinBox, SLOT(setValue(double)));
 	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFocalDistance(double)));
 	connect(&m_FocalDistanceSpinBox, SIGNAL(valueChanged(double)), &m_FocalDistanceSlider, SLOT(setValue(double)));
-}
-
-void CFocusWidget::SetFocusType(const int& FocusType)
-{
-	if (!Scene())
-		return;
-
-	Scene()->m_Camera.m_Focus.m_Type = (CFocus::EType)FocusType;
-
-	// Flag the camera as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gCamera.GetFocus(), SIGNAL(Changed(const QFocus&)), this, SLOT(OnFocusChanged(const QFocus&)));
 }
 
 void CFocusWidget::SetFocalDistance(const double& FocalDistance)
 {
-	if (!Scene())
-		return;
+	gCamera.GetFocus().SetFocalDistance(FocalDistance);
+}
 
-	Scene()->m_Camera.m_Focus.m_FocalDistance = FocalDistance;
+void CFocusWidget::OnRenderBegin(void)
+{
+	OnFocusChanged(gCamera.GetFocus());
+}
 
-	// Flag the camera as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+void CFocusWidget::OnRenderEnd(void)
+{
+	gCamera.GetFocus().Reset();
+}
+
+void CFocusWidget::OnFocusChanged(const QFocus& Focus)
+{
+	m_FocalDistanceSlider.setValue(Focus.GetFocalDistance(), true);
 }

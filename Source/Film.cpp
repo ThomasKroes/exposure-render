@@ -22,7 +22,7 @@ QFilm& QFilm::operator=(const QFilm& Other)
 	m_Height	= Other.m_Height;
 	m_Dirty		= Other.m_Dirty;
 
-	emit Changed();
+	emit Changed(*this);
 
 	return *this;
 }
@@ -37,7 +37,7 @@ void QFilm::SetWidth(const int& Width)
 	m_Width	= Width;
 	m_Dirty = true;
 
-	emit Changed();
+	emit Changed(*this);
 }
 
 int QFilm::GetHeight(void) const
@@ -50,7 +50,16 @@ void QFilm::SetHeight(const int& Height)
 	m_Height	= Height;
 	m_Dirty		= true;
 
-	emit Changed();
+	emit Changed(*this);
+}
+
+void QFilm::Reset(void)
+{
+	m_Width		= 640;
+	m_Height	= 480;
+	m_Dirty		= true;
+
+	emit Changed(*this);
 }
 
 void QFilm::ReadXML(QDomElement& Parent)

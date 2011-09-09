@@ -17,11 +17,12 @@ public:
 	void		SetWidth(const int& Width);
 	int			GetHeight(void) const;
 	void		SetHeight(const int& Height);
+	void		Reset(void);
 	void		ReadXML(QDomElement& Parent);
 	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
-	void Changed(void);
+	void Changed(const QFilm&);
 
 private:
 	int				m_Width;
