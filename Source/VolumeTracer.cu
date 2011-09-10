@@ -52,7 +52,7 @@ DEV float Density(CScene* pDevScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	const float Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r * 10000000.0f;
+	const float Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r;
 	return CColorRgbHdr(Opacity, Opacity, Opacity);
 }
 
@@ -123,15 +123,17 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 // Estimates direct lighting
 DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
+	return SPEC_WHITE;
+
 	// Accumulated radiance (Ld), exitant radiance from light source (Li), attenuation through participating medium along light ray (Tr)
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, Tr = SPEC_BLACK;
 	
 	float D = Density(pDevScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 1.5f, 0.1f);//pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 1.5f, pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
 
 	// Light/shadow ray
-	CRay R; 
+	CRay Rl; 
 
 	// Light probability
 	float LightPdf = 1.0f, BsdfPdf = 1.0f;
@@ -141,24 +143,12 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	CColorXyz F = SPEC_BLACK;
 	
-	CSurfacePoint SPe, SPl;
-
-	SPe.m_P		= Pe;
-	SPe.m_Ng	= N; 
-
 	// Sample the light source
- 	Li = Light.SampleL(SPe, SPl, LS, LightPdf, 0.1f);
+ 	Li = Light.SampleL(Pe, Rl, LightPdf, LS);
 	
-	R.m_O		= SPl.m_P;
-	R.m_D		= Normalize(SPe.m_P - SPl.m_P);
-	R.m_MinT	= 0.0f;
-	R.m_MaxT	= (SPl.m_P - SPe.m_P).Length();
-	
-	Wi = -R.m_D; 
+	F = Bsdf.F(Wo, -Rl.m_D); 
 
-	F = Bsdf.F(Wo, Wi); 
-
-	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
+	BsdfPdf	= Bsdf.Pdf(Wo, -Rl.m_D);
 //	BsdfPdf = Dot(Wi, N);
 	
 
@@ -166,7 +156,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
 	{
 		// Compute tau
-		Tr = Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+		Tr = Transmittance(pDevScene, Rl.m_O, Rl.m_D, Length(Rl.m_O - Pe), StepSize, Rnd);
 		
 		// Attenuation due to volume
 		Li *= Tr;
@@ -184,7 +174,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	// Attenuation due to volume
 	
 
-//	Ld = Li * Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+//	Ld = Li * Transmittance(pDevScene, Rl.m_O, Rl.m_D, Length(Rl.m_O - Pe), StepSize, Rnd);
 
 	/**/
 
@@ -240,7 +230,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
  	if (pDevScene->m_Lighting.m_NoLights == 0)
- 		return SPEC_BLACK;
+ 		return SPEC_RED;
 
 	CLightingSample LS;
 
@@ -271,6 +261,43 @@ DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P)
 	Normal.z = 0.5f * (float)(Density(pDevScene, P + Z) - Density(pDevScene, P - Z));
 
 	return Normalize(-Normal);
+}
+
+DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
+{
+	float MinT = 0.0f, MaxT = 0.0f;
+
+	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+		return false;
+
+	MinT = max(MinT, R.m_MinT);
+	MaxT = min(MaxT, R.m_MaxT);
+
+	float S = -log(RNG.Get1()) / pDevScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+
+	Vec3f samplePos; 
+
+	MinT += RNG.Get1() * Dt;
+
+	while (Sum < S)
+	{
+		samplePos = R.m_O + MinT * R.m_D;
+
+		if (MinT > MaxT)
+			return false;
+		
+		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
+
+		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Kt.F(D)[Component] * pDevScene->m_TransferFunctions.m_Kd.F(D)[Component];
+		Sum		+= SigmaT * Dt;
+		MinT	+= Dt;
+	}
+
+	VP.m_Transmittance.c[Component]	= 0.5f;
+	VP.m_P							= samplePos;
+	VP.m_D							= D;
+
+	return true;
 }
 
 // Trace volume with single scattering
@@ -334,6 +361,9 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	int CC1 = floorf(RNG.Get1() * 3.0f);
 
 	bool Hit = false;
+
+ 	// Choose color component to sample
+ 	int CC1 = floorf(RNG.Get1() * 3.0f);
 
 	// Walk along the eye ray with ray marching
 	while (Te < MaxT)

@@ -1019,4 +1019,4 @@ Spectrum FromXYZ(float x, float y, float z) {
 #define SPEC_GRAY_90										CColorXyz(1.0f)
 #define SPEC_WHITE											CColorXyz(1.0f)
 #define SPEC_CYAN											CColorXyz(1.0f)
-#define SPEC_RED											CColorXyz(1.0f)
+#define SPEC_RED											CColorXyz(1.0f, 0.0f, 0.0f)

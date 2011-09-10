@@ -88,13 +88,13 @@ public:
 class CLight
 {
 public:
-	enum EType
-	{
-		Area,
-		Background
-	};
+// 	enum EType
+// 	{
+// 		Area,
+// 		Background
+// 	};
 
-	EType			m_Type;
+	int				m_Type;
 	float			m_Theta;
 	float			m_Phi;
 	float			m_Width;
@@ -106,17 +106,18 @@ public:
 	float			m_HalfHeight;
 	float			m_InvHalfHeight;
 	float			m_Distance;
+	float			m_SkyRadius;
 	Vec3f			m_P;
 	Vec3f			m_Target;	
 	Vec3f			m_N;					
 	Vec3f			m_U;					
 	Vec3f			m_V;					
 	float			m_Area;					
-	float			m_Pdf;
+	float			m_AreaPdf;
 	CColorRgbHdr	m_Color;
 
 	CLight(void) :
-		m_Type(Area),
+		m_Type(0),
 		m_Theta(0.0f),
 		m_Phi(0.0f),
 		m_Width(1.0f),
@@ -128,13 +129,14 @@ public:
 		m_HalfHeight(0.5f * m_Height),
 		m_InvHalfHeight(1.0f / m_HalfHeight),
 		m_Distance(1.0f),
+		m_SkyRadius(100.0f),
 		m_P(1.0f, 1.0f, 1.0f),
 		m_Target(0.0f, 0.0f, 0.0f),
 		m_N(1.0f, 0.0f, 0.0f),
 		m_U(1.0f, 0.0f, 0.0f),
 		m_V(1.0f, 0.0f, 0.0f),
 		m_Area(m_Width * m_Height),
-		m_Pdf(1.0f / m_Area),
+		m_AreaPdf(1.0f / m_Area),
 		m_Color(10.0f)
 	{
 	}
@@ -153,13 +155,14 @@ public:
 		m_HalfHeight		= Other.m_HalfHeight;
 		m_InvHalfHeight		= Other.m_InvHalfHeight;
 		m_Distance			= Other.m_Distance;
+		m_SkyRadius			= Other.m_SkyRadius;
 		m_P					= Other.m_P;
 		m_Target			= Other.m_Target;
 		m_N					= Other.m_N;
 		m_U					= Other.m_U;
 		m_V					= Other.m_V;
 		m_Area				= Other.m_Area;
-		m_Pdf				= Other.m_Pdf;
+		m_AreaPdf			= Other.m_AreaPdf;
 		m_Color				= Other.m_Color;
 
 		return *this;
@@ -173,8 +176,7 @@ public:
 		m_InvHeight		= 1.0f / m_Height;
 		m_HalfHeight	= 0.5f * m_Height;
 		m_InvHalfHeight	= 1.0f / m_HalfHeight;
-
-		m_Target = BoundingBox.GetCenter();
+		m_Target		= BoundingBox.GetCenter();
 
 		// Determine light position
 		m_P.x = m_Distance * cosf(m_Phi) * sinf(m_Theta);
@@ -184,10 +186,32 @@ public:
 		m_P += m_Target;
 
 		// Determine area
-		m_Area = m_Width * m_Height;
+		switch (m_Type)
+		{
+			case 0:
+			{
+				m_Area		= m_Width * m_Height;
+				m_AreaPdf	= 1.0f / m_Area;
 
-		// Determine pdf
-		m_Pdf = 1.0f;
+				break;
+			}
+
+			case 1:
+			{
+				m_Area		= 4.0f * PI_F * powf(m_SkyRadius, 2.0f);
+				m_AreaPdf	= 1.0f / m_Area;
+				
+				break;
+			}
+
+			default:
+			{
+				m_Area		= 1.0f;
+				m_AreaPdf	= 1.0f;
+				
+				break;
+			}
+		}
 
 		// Compute orthogonal basis frame
 		m_N = Normalize(m_Target - m_P);
@@ -196,35 +220,50 @@ public:
 	}
 
 	// Samples the light
-	HOD CColorXyz SampleL(CSurfacePoint& SP, CSurfacePoint& SPl, CLightingSample& LS, float& Pdf, const float& RayEpsilon)
+	HOD CColorXyz SampleL(const Vec3f& P, CRay& Rl, float& Pdf, CLightingSample& LS)
 	{
-		switch (m_Type)
-		{
-			case Area:
-			{
-				// Compute light ray position and direction
-				SPl.m_P	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
+		// Exitant radiance
+		CColorXyz L = SPEC_BLACK;
 
-				const Vec3f Wi = SP.m_P - SPl.m_P;
+		// Determine position on light
+// 		switch (m_Type)
+// 		{
+// 			case Area:
+// 			{
+				Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
+				Rl.m_D	= Normalize(P - Rl.m_O);
+				L		= Dot(Rl.m_D, m_N) > 0.0f ? Le(Vec2f(0.0f)) : SPEC_BLACK;
 
-				// Compute probability
-//				Pdf = Dot(Wi, m_N) > 0.0f ? DistanceSquared(SP.m_P, SPl.m_P) / (AbsDot(Wi, m_N) * m_Area) : 0.0f;
-				Pdf = DistanceSquared(SP.m_P, SPl.m_P) / (AbsDot(Wi, m_N) * m_Area);
+//				break;				
+// 			}
+// 
+// 			case Background:
+// 			{
+// 				Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
+// 				Rl.m_D	= Normalize(P - Rl.m_O);
+// 				L		= Le(Vec2f(0.0f));
+// 
+// 				break;
+// 			}
 
-				// Set the light color
-				return Dot(Wi, m_N) > 0.0f ? Le(Vec2f(0.0f)) : SPEC_BLACK;
-			}
+// 			default:
+// 			{
+// 				Rl.m_O = Vec3f(1.0f, 1.0f, 1.0f);
+// 				Rl.m_D		= Normalize(P - Rl.m_O);
+// 				L		= SPEC_WHITE;
+// 
+// 				break;
+// 			}
+//		}
 
-			case Background:
-			{
-				SPl.m_P = UniformSampleSphere(LS.m_LightSample.m_Pos);
+		Rl.m_MinT	= 0.0f;
+		Rl.m_MaxT	= (P - Rl.m_O).Length();
 
-				return Le(Vec2f(0.0f));
-			}
+		// Compute PDF
+		Pdf = DistanceSquared(P, Rl.m_O) / (AbsDot(Rl.m_D, m_N) * m_Area);
 
-			default:
-				return SPEC_BLACK;
-		}
+		// Return light exitant radiance
+		return L;
 	}
 
 	// Intersect ray with light
@@ -232,7 +271,7 @@ public:
 	{
 		switch (m_Type)
 		{
-			case Area:
+			case 0:
 			{
 				// Intersection ray
 				CRay R(P, W, MinT, MaxT);
@@ -276,7 +315,7 @@ public:
 				return true;
 			}
 
-			case Background:
+			case 1:
 			{
 				return true;
 			}
@@ -290,7 +329,7 @@ public:
 	{
 		switch (m_Type)
 		{
-			case Area:
+			case 0:
 			{
 				// Hit distance
 				float T = 0.0f;
@@ -307,7 +346,7 @@ public:
 				return T / (AbsDot(m_N, -Wi) * m_Area);
 			}
 
-			case Background:
+			case 1:
 			{
 				return 1.0f;
 			}
@@ -350,7 +389,7 @@ public:
 
 		m_Lights[m_NoLights] = Light;
 
-		m_NoLights++;
+		m_NoLights = m_NoLights + 1;
 	}
 
 	void Reset(void)

@@ -78,10 +78,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_DistanceSlider.setOrientation(Qt::Horizontal);
     m_DistanceSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_DistanceSlider.setRange(0.0, 10.0);
+	m_DistanceSlider.setRange(0.0, 10000.0);
 	m_MainLayout.addWidget(&m_DistanceSlider, 2, 1);
 	
-    m_DistanceSpinner.setRange(0.0, 10.0);
+    m_DistanceSpinner.setRange(0.0, 10000.0);
 	m_DistanceSpinner.setSuffix(" mm");
 	m_MainLayout.addWidget(&m_DistanceSpinner, 2, 2);
 	
@@ -95,10 +95,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_WidthSlider.setOrientation(Qt::Horizontal);
     m_WidthSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_WidthSlider.setRange(0.0, 10.0);
+	m_WidthSlider.setRange(0.0, 1000.0);
 	m_MainLayout.addWidget(&m_WidthSlider, 3, 1);
 	
-	m_WidthSpinner.setRange(0.0, 10.0);
+	m_WidthSpinner.setRange(0.0, 1000.0);
 	m_WidthSpinner.setSuffix(" mm");
 	m_MainLayout.addWidget(&m_WidthSpinner, 3, 2);
 	
@@ -112,10 +112,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_HeightSlider.setOrientation(Qt::Horizontal);
     m_HeightSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_HeightSlider.setRange(0.0, 10.0);
+	m_HeightSlider.setRange(0.0, 1000.0);
 	m_MainLayout.addWidget(&m_HeightSlider, 5, 1);
 	
-	m_HeightSpinner.setRange(0.0, 10.0);
+	m_HeightSpinner.setRange(0.0, 1000.0);
 	m_HeightSpinner.setSuffix(" mm");
 	m_MainLayout.addWidget(&m_HeightSpinner, 5, 2);
 	

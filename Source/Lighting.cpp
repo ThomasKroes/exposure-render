@@ -8,7 +8,7 @@ QLight::QLight(QObject* pParent) :
 	QPresetXML(pParent),
 	m_Theta(0.0f),
 	m_Phi(0.0f),
-	m_Distance(10.0f),
+	m_Distance(100.0f),
 	m_Width(1.0f),
 	m_Height(1.0f),
 	m_LockSize(true),
@@ -277,15 +277,19 @@ void QLighting::Update(void)
 
 	Scene()->m_Lighting.Reset();
 	
+/*
 	if (Background().GetEnabled())
 	{
 		CLight BackgroundLight;
 
 		BackgroundLight.m_Type	= CLight::Background;
+		
 		BackgroundLight.m_Color	= Background().GetIntensity() * CColorRgbHdr(Background().GetColor().redF(), Background().GetColor().greenF(), Background().GetColor().blueF());
 
+		BackgroundLight.Update(Scene()->m_BoundingBox);
+
 		Scene()->m_Lighting.AddLight(BackgroundLight);
-	}
+	}*/
 
 	for (int i = 0; i < m_Lights.size(); i++)
 	{
@@ -293,7 +297,7 @@ void QLighting::Update(void)
 
 		CLight AreaLight;
 
-		AreaLight.m_Type		= CLight::Area;
+		AreaLight.m_Type		= 1;
 		AreaLight.m_Theta		= Light.GetTheta() / RAD_F;
 		AreaLight.m_Phi			= Light.GetPhi() / RAD_F;
 		AreaLight.m_Width		= Light.GetWidth();
@@ -507,7 +511,7 @@ QLighting QLighting::Default(void)
 	QLight Light;
 	Light.SetName("Key");
 
-	DefaultLighting.AddLight(Light);
+//	DefaultLighting.AddLight(Light);
 
 	return DefaultLighting;
 }

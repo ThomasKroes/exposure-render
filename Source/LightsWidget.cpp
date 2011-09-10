@@ -23,7 +23,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	// Lights list
 	m_LightList.setSelectionMode(QAbstractItemView::SingleSelection);
 	m_LightList.setAlternatingRowColors(true);
-	m_LightList.setSortingEnabled(true);
+//	m_LightList.setSortingEnabled(true);
 	m_MainLayout.addWidget(&m_LightList, 0, 0, 1, 6);
 
 	// Add light
@@ -92,6 +92,7 @@ void QLightsWidget::UpdateLightList(void)
 		m_LightList.addItem(pLightItem);
 	}
 
+	/*
 	// Select
 	if (gLighting.GetSelectedLight())
 	{
@@ -103,6 +104,7 @@ void QLightsWidget::UpdateLightList(void)
 
 		m_LightList.blockSignals(false);
 	}
+	*/
 
 	// Get current row
 	const int CurrentRow = m_LightList.currentRow();
@@ -118,6 +120,10 @@ void QLightsWidget::OnLightSelectionChanged(void)
 	int CurrentRow = m_LightList.currentRow();
 
 	gLighting.SetSelectedLight(CurrentRow >= 0 ? CurrentRow : -1);
+
+	m_RemoveLight.setEnabled(CurrentRow >= 0);
+	m_RenameLight.setEnabled(CurrentRow >= 0);
+	m_CopyLight.setEnabled(CurrentRow >= 0);
 }
 
 void QLightsWidget::OnLightSelectionChanged(QLight* pLight)

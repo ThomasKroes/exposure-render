@@ -597,8 +597,11 @@ bool CRenderThread::Load(QString& FileName)
 
 	float Max = Resolution.Max();
 
-	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f);
-	m_Scene.m_BoundingBox.m_MaxP	= Vec3f(Resolution.x / Max, Resolution.y / Max, Resolution.z / Max);
+	const Vec3f PhysicalSize(Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.m_XYZ.x, m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.m_XYZ.y, m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.m_XYZ.z));
+
+	// Compute the volume's bounding box
+	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f, 0.0f, 0.0f);
+	m_Scene.m_BoundingBox.m_MaxP	= PhysicalSize;
 
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
@@ -617,7 +620,7 @@ bool CRenderThread::Load(QString& FileName)
 //	delete gpProgressDialog;
 //	gpProgressDialog = NULL;
 
-	const Vec3f PhysicalSize(Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.m_XYZ.x, m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.m_XYZ.y, m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.m_XYZ.z));
+	
 
 	emit gRenderStatus.StatisticChanged("Volume", "File", QFileInfo(m_FileName).fileName(), "");
 	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", "", "");
