@@ -117,6 +117,9 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySpinBox.setStatusTip("Node Opacity");
 	m_OpacitySpinBox.setToolTip("Node Opacity");
 	m_OpacitySpinBox.setRange(0.0, 1.0);
+	m_OpacitySpinBox.setDecimals(3);
+	m_OpacitySpinBox.setSingleStep(0.01);
+
 	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 2);
 	
 	QObject::connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), &m_OpacitySpinBox, SLOT(setValue(double)));

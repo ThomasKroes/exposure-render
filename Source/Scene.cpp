@@ -13,7 +13,8 @@ CScene::CScene(void) :
 	m_TransferFunctions(),
 	m_MaxNoBounces(3),
 	m_IntensityRange(),
-	m_KernelSize(16, 8)
+	m_KernelSize(16, 8),
+	m_MaxD(5000)
 {
 }
 
@@ -31,6 +32,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_MaxNoBounces		= Other.m_MaxNoBounces;
 	m_IntensityRange	= Other.m_IntensityRange;
 	m_KernelSize		= Other.m_KernelSize;
+	m_MaxD				= Other.m_MaxD;
 
 	return *this;
 }

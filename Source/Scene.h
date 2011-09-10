@@ -753,4 +753,5 @@ public:
 	int					m_MaxNoBounces;
 	CRange				m_IntensityRange;
 	Vec2f				m_KernelSize;
+	float				m_MaxD;
 };

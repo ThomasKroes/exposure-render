@@ -18,7 +18,7 @@ private slots:
 private:
 	QGridLayout		m_MainLayout;
 	QComboBox		m_RenderTypeComboBox;
-	QDoubleSlider	m_NoBouncesSlider;
+	QSlider			m_NoBouncesSlider;
 	QSpinBox		m_NoBouncesSpinBox;
 	QGridLayout		m_ScatteringLayout;
 	QDoubleSlider	m_PhaseSlider;
