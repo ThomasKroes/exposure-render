@@ -566,11 +566,7 @@ bool CRenderThread::Load(QString& FileName)
 	ImageGradientMagnitude->Update();
 	*/
 
-	
-
-	m_Scene.m_MemorySize	= (float)m_pImageDataVolume->GetActualMemorySize() / 1024.0f;
-	
-	emit gRenderStatus.StatisticChanged("Host", "Volume", QString::number(m_Scene.m_MemorySize, 'f', 2), "MB");
+//	emit gRenderStatus.StatisticChanged("Host", "Volume", QString::number((float)m_pImageDataVolume->GetActualMemorySize() / 1024.0f, 'f', 2), "MB");
 
 	double Range[2];
 
@@ -601,7 +597,6 @@ bool CRenderThread::Load(QString& FileName)
 
 	float Max = Resolution.Max();
 
-	m_Scene.m_NoVoxels				= m_Scene.m_Resolution.m_NoElements;
 	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f);
 	m_Scene.m_BoundingBox.m_MaxP	= Vec3f(Resolution.x / Max, Resolution.y / Max, Resolution.z / Max);
 
@@ -632,7 +627,7 @@ bool CRenderThread::Load(QString& FileName)
 	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatSize(m_Scene.m_Resolution.m_XYZ), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(m_Scene.m_Spacing, 2), "mm");
 	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(m_Scene.m_Scale, 2), "");
-	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_NoVoxels), "Voxels");
+	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.m_NoElements), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");
 
 	return true;

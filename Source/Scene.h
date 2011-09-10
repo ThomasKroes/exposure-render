@@ -737,41 +737,9 @@ public:
 class CScene
 {
 public:
-	CScene(void)
-	{
-		m_PhaseG = 0.0f;
+	CScene(void);
 
-		m_MaxD = 255.0f;
-		m_MaxNoBounces = 1;
-
-		m_KernelSize.x = 8;
-		m_KernelSize.y = 8;
-	}
-
-	virtual ~CScene(void)
-	{
-	}
-
-	HOD CScene& operator = (const CScene& Other)			
-	{
-		m_Camera				= Other.m_Camera;
-		m_Lighting				= Other.m_Lighting;
-		m_Resolution			= Other.m_Resolution;
-		m_DirtyFlags			= Other.m_DirtyFlags;
-		m_Spacing				= Other.m_Spacing;
-		m_Scale					= Other.m_Scale;
-		m_BoundingBox			= Other.m_BoundingBox;
-		m_PhaseG				= Other.m_PhaseG;
-		m_MaxD					= Other.m_MaxD;
-		m_TransferFunctions		= Other.m_TransferFunctions;
-		m_MaxNoBounces			= Other.m_MaxNoBounces;
-		m_MemorySize			= Other.m_MemorySize;
-		m_NoVoxels				= Other.m_NoVoxels;
-		m_IntensityRange		= Other.m_IntensityRange;
-		m_KernelSize			= Other.m_KernelSize;
-
-		return *this;
-	}
+	HOD CScene& operator = (const CScene& Other);
 
 	CCamera				m_Camera;
 	CLighting			m_Lighting;
@@ -781,11 +749,8 @@ public:
 	Vec3f				m_Scale;
 	CBoundingBox		m_BoundingBox;
 	float				m_PhaseG;
-	float				m_MaxD;
 	CTransferFunctions	m_TransferFunctions;
 	int					m_MaxNoBounces;
-	float				m_MemorySize;
-	int					m_NoVoxels;
 	CRange				m_IntensityRange;
 	Vec2f				m_KernelSize;
 };

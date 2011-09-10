@@ -15,7 +15,7 @@ public:
 	QTransferFunction(const QTransferFunction& Other);
 	QTransferFunction& operator = (const QTransferFunction& Other);			
 	
-	void				AddNode(const float& Intensity, const float& Opacity, const QColor& Diffuse, const QColor& SpecularColor, const float& Roughness);
+	void				AddNode(const float& Intensity, const float& Opacity, const QColor& Diffuse, const QColor& Specular, const QColor& Emission, const float& Roughness);
 	void				AddNode(const QNode& pNode);
 	void				RemoveNode(QNode* pNode);
 	void				NormalizeIntensity(void);
@@ -29,15 +29,15 @@ public:
 	void				SelectPreviousNode(void);
 	void				SelectNextNode(void);
 	int					GetNodeIndex(QNode* pNode);
+	float				GetRangeMin(void);
+	void				SetRangeMin(const float& RangeMin);
+	float				GetRangeMax(void);
+	void				SetRangeMax(const float& RangeMax);
+	float				GetRange(void);
 	void				ReadXML(QDomElement& Parent);
 	QDomElement			WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 	static QTransferFunction	Default(void);
-	static float				GetRangeMin(void);
-	static void					SetRangeMin(const float& RangeMin);
-	static float				GetRangeMax(void);
-	static void					SetRangeMax(const float& RangeMax);
-	static float				GetRange(void);
 
 private slots:
 	void	OnNodeChanged(QNode* pNode);
@@ -46,12 +46,12 @@ signals:
 	void	FunctionChanged(void);
 	void	SelectionChanged(QNode* pNode);
 	
-protected:
-	QNodeList		m_Nodes;
-	QNode*			m_pSelectedNode;
-	static float	m_RangeMin;
-	static float	m_RangeMax;
-	static float	m_Range;
+private:
+	QNodeList	m_Nodes;
+	QNode*		m_pSelectedNode;
+	float		m_RangeMin;
+	float		m_RangeMax;
+	float		m_Range;
 
 	friend class QNode;
 };

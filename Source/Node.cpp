@@ -62,12 +62,12 @@ void QNode::SetIntensity(const float& Intensity)
 
 float QNode::GetNormalizedIntensity(void) const 
 {
-	return (GetIntensity() - QTransferFunction::m_RangeMin) / QTransferFunction::m_Range;
+	return (GetIntensity() - m_pTransferFunction->GetRangeMin()) / m_pTransferFunction->GetRange();
 }
 
 void QNode::SetNormalizedIntensity(const float& NormalizedIntensity)
 {
-	SetIntensity(QTransferFunction::m_RangeMin + (QTransferFunction::m_Range * NormalizedIntensity));
+	SetIntensity(m_pTransferFunction->GetRangeMin() + (m_pTransferFunction->GetRange() * NormalizedIntensity));
 }
 
 float QNode::GetOpacity(void) const

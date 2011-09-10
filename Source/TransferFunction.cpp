@@ -9,14 +9,13 @@ bool CompareNodes(QNode NodeA, QNode NodeB)
 	return NodeA.GetIntensity() < NodeB.GetIntensity();
 }
 
-float QTransferFunction::m_RangeMin = 0.0f;
-float QTransferFunction::m_RangeMax = 1.0f;
-float QTransferFunction::m_Range	= QTransferFunction::m_RangeMax - QTransferFunction::m_RangeMin;
-
 QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	QPresetXML(pParent),
 	m_Nodes(),
-	m_pSelectedNode(NULL)
+	m_pSelectedNode(NULL),
+	m_RangeMin(0.0f),
+	m_RangeMax(1.0f),
+	m_Range(1.0f)
 {
 }
 
@@ -131,9 +130,9 @@ int	QTransferFunction::GetNodeIndex(QNode* pNode)
 	return m_Nodes.indexOf(*pNode);
 }
 
-void QTransferFunction::AddNode(const float& Intensity, const float& Opacity, const QColor& DiffuseColor, const QColor& SpecularColor, const float& Roughness)
+void QTransferFunction::AddNode(const float& Intensity, const float& Opacity, const QColor& Diffuse, const QColor& Specular, const QColor& Emission, const float& Roughness)
 {
-	AddNode(QNode(this, Intensity, Opacity, DiffuseColor, SpecularColor, Roughness));
+	AddNode(QNode(this, Intensity, Opacity, Diffuse, Specular, Emission, Roughness));
 }
 
 void QTransferFunction::AddNode(const QNode& Node)
@@ -259,6 +258,33 @@ QNode& QTransferFunction::GetNode(const int& Index)
 	return m_Nodes[Index];
 }
 
+float QTransferFunction::GetRangeMin(void)
+{
+	return m_RangeMin;
+}
+
+void QTransferFunction::SetRangeMin(const float& RangeMin)
+{
+	m_RangeMin	= RangeMin;
+	m_Range		= GetRange();
+}
+
+float QTransferFunction::GetRangeMax(void)
+{
+	return m_RangeMax;
+}
+
+void QTransferFunction::SetRangeMax(const float& RangeMax)
+{
+	m_RangeMax	= RangeMax;
+	m_Range		= GetRange();
+}
+
+float QTransferFunction::GetRange(void)
+{
+	return m_RangeMax - m_RangeMin;
+}
+
 void QTransferFunction::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
@@ -310,35 +336,8 @@ QTransferFunction QTransferFunction::Default(void)
 	QTransferFunction DefaultTransferFunction;
 
 	DefaultTransferFunction.SetName("Default");
-	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, 100.0f);
-	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, 100.0f);
+	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, Qt::black, 0.0f);
+	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, Qt::black, 100.0f);
 
 	return DefaultTransferFunction;
-}
-
-float QTransferFunction::GetRangeMin(void)
-{
-	return m_RangeMin;
-}
-
-void QTransferFunction::SetRangeMin(const float& RangeMin)
-{
-	m_RangeMin	= RangeMin;
-	m_Range		= GetRange();
-}
-
-float QTransferFunction::GetRangeMax(void)
-{
-	return m_RangeMax;
-}
-
-void QTransferFunction::SetRangeMax(const float& RangeMax)
-{
-	m_RangeMax	= RangeMax;
-	m_Range		= GetRange();
-}
-
-float QTransferFunction::GetRange(void)
-{
-	return m_RangeMax - m_RangeMin;
 }

@@ -135,6 +135,8 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 
 void QTransferFunctionCanvas::UpdateHistogram(void)
 {
+	return;
+
 	m_Histogram.setVisible(gHistogram.GetEnabled());
 
 	if (!gHistogram.GetEnabled())
@@ -348,7 +350,7 @@ QPointF QTransferFunctionCanvas::SceneToTransferFunction(const QPointF& ScenePoi
 // Maps from transfer function coordinates to scene coordinates
 QPointF QTransferFunctionCanvas::TransferFunctionToScene(const QPointF& TfPoint)
 {
-	const float NormalizedX = (TfPoint.x() - 1000.0f/*QTransferFunction::GetRangeMin()*/) / 4095.0f;//QTransferFunction::GetRange();
+	const float NormalizedX = (TfPoint.x() - gTransferFunction.GetRangeMin()) / gTransferFunction.GetRange();
 	const float NormalizedY = 1.0f - TfPoint.y();
 
 	const float SceneX = NormalizedX * rect().width();

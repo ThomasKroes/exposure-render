@@ -123,18 +123,12 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 // Estimates direct lighting
 DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
-	// Accumulated radiance
-	CColorXyz Ld = SPEC_BLACK;
+	// Accumulated radiance (Ld), exitant radiance from light source (Li), attenuation through participating medium along light ray (Tr)
+	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, Tr = SPEC_BLACK;
 	
-	// Radiance from light source
-	CColorXyz Li = SPEC_BLACK;
-
-	// Attenuation
-	CColorXyz Tr = SPEC_BLACK;
-
 	float D = Density(pDevScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 500.0f, 0.1f);//pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 1.5f, 0.1f);//pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
 
 	// Light/shadow ray
 	CRay R; 
@@ -167,7 +161,6 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 //	BsdfPdf = Dot(Wi, N);
 	
-	return F * Li * Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
 
 	// Sample the light with MIS
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
@@ -182,7 +175,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 		const float Weight = 1.0f;//PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
 		// Add contribution
-		Ld += Li * (Weight / LightPdf);
+		Ld += F * Li * (Weight / LightPdf);
 	}
 	
 	// Compute tau
@@ -277,7 +270,7 @@ DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P)
 	Normal.y = 0.5f * (float)(Density(pDevScene, P + Y) - Density(pDevScene, P - Y));
 	Normal.z = 0.5f * (float)(Density(pDevScene, P + Z) - Density(pDevScene, P - Z));
 
-	return -Normal;
+	return Normalize(-Normal);
 }
 
 // Trace volume with single scattering
@@ -310,6 +303,13 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	{
 		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetWidth() + X] = SPEC_BLACK;
 		return;
+	}
+
+	for (int i = 0; i < pDevScene->m_Lighting.m_NoLights; i++)
+	{
+		float T = INF_MAX;
+
+//		if (pDevScene->m_Lighting.m_Lights[i].Intersect(,)
 	}
 
 	// Eye attenuation (Le), accumulated color through volume (Lv), unattenuated light from light source (Li), attenuated light from light source (Ld), and BSDF value (F)
@@ -388,6 +388,5 @@ void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRa
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetHeight() / (float)KernelBlock.y));
 	
 	// Execute kernel
-//	KrnlRenderVolume<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);
 	KrnlSS<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);
 }

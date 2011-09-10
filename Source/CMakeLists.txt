@@ -104,6 +104,7 @@ SET(ExposureRenderSources
 	Controls.cpp
 	Material.cpp
 	Sample.cpp
+	LightTransport.cpp
 )
 
 SET(ExposureRenderHeaders 
@@ -177,6 +178,7 @@ SET(ExposureRenderHeaders
 	Controls.h
 	Material.h
 	Sample.h
+	LightTransport.h
 )
 
 # Resources
@@ -335,6 +337,7 @@ SET(CoreSources
 	Controls.h
 	Material.h
 	Sample.h
+	LightTransport.h
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
@@ -353,6 +356,7 @@ SET(CoreSources
 	Controls.cpp
 	Material.cpp
 	Sample.cpp
+	LightTransport.cpp
 )
 
 # Make the core group
