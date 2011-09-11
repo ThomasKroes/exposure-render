@@ -1404,7 +1404,7 @@ public:
 	// ToDo: Add description
 	HOD void Update(void)
 	{
-		m_InvXYZ			= Vec3f(1.0f / m_XYZ.x, 1.0f / m_XYZ.y, 1.0f / m_XYZ.z);
+		m_InvXYZ			= Vec3f(m_XYZ.x == 0.0f ? 1.0f : 1.0f / m_XYZ.x, m_XYZ.y == 0.0f ? 1.0f : 1.0f / m_XYZ.y, m_XYZ.z == 0.0f ? 1.0f : 1.0f / m_XYZ.z);
 		m_NoElements		= m_XYZ.x * m_XYZ.y * m_XYZ.z;
 		m_DiagonalLength	= m_XYZ.Length();
 	}
@@ -1419,10 +1419,11 @@ public:
 
 	HOD void SetResXYZ(const Vec3i& Resolution)
 	{
-		m_Dirty		= m_XYZ.x != Resolution.x || m_XYZ.y != Resolution.y || m_XYZ.z != Resolution.z;
-		m_XYZ		= Resolution;
-
-		Update();
+		m_Dirty				= m_XYZ.x != Resolution.x || m_XYZ.y != Resolution.y || m_XYZ.z != Resolution.z;
+		m_XYZ				= Resolution;
+		m_InvXYZ			= Vec3f(m_XYZ.x == 0.0f ? 1.0f : 1.0f / m_XYZ.x, m_XYZ.y == 0.0f ? 1.0f : 1.0f / m_XYZ.y, m_XYZ.z == 0.0f ? 1.0f : 1.0f / m_XYZ.z);
+		m_NoElements		= m_XYZ.x * m_XYZ.y * m_XYZ.z;
+		m_DiagonalLength	= m_XYZ.Length();
 	}
 
 	HOD Vec3i	GetResXYZ(void) const				{ return m_XYZ; }
@@ -1434,6 +1435,11 @@ public:
 	HOD void	SetResZ(const float& ResZ)			{ m_XYZ.z = ResZ; Update(); }
 	HOD Vec3f	GetInv(void) const					{ return m_InvXYZ; }
 	HOD int		GetNoElements(void) const			{ return m_NoElements; }
+
+	HO void PrintSelf(void)
+	{
+		printf("%5d x %5d x %5d", GetResX(), GetResY(), GetResZ());
+	}
 
 private:
 	Vec3i	m_XYZ;

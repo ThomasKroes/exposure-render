@@ -1,6 +1,5 @@
 #pragma once
 
-
 // CUDA
 #include "cutil_inline.h"
 #include "curand_kernel.h"
@@ -26,7 +25,7 @@ signals:
 	void Resize(void);
 	void StatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit = "", const QString& Icon = "");
 
-	friend class CRenderThread;
+	friend class QRenderThread;
 	friend class QFilmWidget;
 	friend class QApertureWidget;
 	friend class QProjectionWidget;
@@ -35,18 +34,21 @@ signals:
 
 extern CRenderStatus gRenderStatus;
 
-class CRenderThread : public QThread
+class QRenderThread : public QThread
 {
 	Q_OBJECT
 
 public:
-	CRenderThread(QObject* pParent = NULL);
-	virtual ~CRenderThread(void);
+	QRenderThread(const QString& FileName = "", QObject* pParent = NULL);
+	virtual ~QRenderThread(void);
+	QRenderThread(const QRenderThread& Other);
+	QRenderThread& operator = (const QRenderThread& Other);
 
 	void run();
 
-	bool			InitializeCuda(void);
 	QString			GetFileName(void) const;
+	void			SetFileName(const QString& FileName);
+	bool			InitializeCuda(void);
 	int				GetNoIterations(void) const;
 	unsigned char*	GetRenderImage(void) const;
 	CScene*			GetScene(void);
@@ -76,27 +78,8 @@ private:
 	unsigned char*			m_pImageCanvas;
 
 public:
-	int	m_SizeRandomStates;
-	int m_SizeHdrAccumulationBuffer;
-	int m_SizeHdrFrameBuffer;
-	int m_SizeHdrBlurFrameBuffer;
-	int m_SizeLdrFrameBuffer;
-
 	QMutex					m_Mutex;
 	bool m_Abort;
-
-public:
-	float*		GetDensityBuffer(void);
-	cudaExtent	GetDensityBufferSize(void) const;
-
-private:
-	void CreateDensityVolume(void);
-	void CreateExtinctionVolume(void);
-
-	float*		m_pDensityBuffer;
-	cudaExtent	m_DensityBufferSize;
-	cudaExtent	m_ExtinctionSize;
-	int			m_MacrocellSize;
 
 signals:
 	void RenderBegin(void);
@@ -109,7 +92,7 @@ signals:
 };
 
 // Render thread
-extern CRenderThread* gpRenderThread;
+extern QRenderThread* gpRenderThread;
 
 CScene* Scene(void);
 void StartRenderThread(QString& FileName);

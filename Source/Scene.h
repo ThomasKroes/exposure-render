@@ -741,17 +741,19 @@ public:
 
 	HOD CScene& operator = (const CScene& Other);
 
-	CCamera				m_Camera;
-	CLighting			m_Lighting;
-	CResolution3D		m_Resolution;
-	CFlags				m_DirtyFlags;
-	Vec3f				m_Spacing;
-	Vec3f				m_Scale;
-	CBoundingBox		m_BoundingBox;
-	float				m_PhaseG;
-	CTransferFunctions	m_TransferFunctions;
-	int					m_MaxNoBounces;
-	CRange				m_IntensityRange;
-	Vec2f				m_KernelSize;
-	float				m_SigmaMax;
+	void Set(void);
+
+	CCamera					m_Camera;
+	CLighting				m_Lighting;
+	CResolution3D			m_Resolution;
+	CFlags					m_DirtyFlags;
+	Vec3f					m_Spacing;
+	Vec3f					m_Scale;
+	CBoundingBox			m_BoundingBox;
+	float					m_PhaseG;
+	CTransferFunctions		m_TransferFunctions;
+	int						m_MaxNoBounces;
+	CRange					m_IntensityRange;
+	Vec2f					m_KernelSize;
+	float					m_SigmaMax;
 };

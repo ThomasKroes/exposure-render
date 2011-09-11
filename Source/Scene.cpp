@@ -39,3 +39,8 @@ HOD CScene& CScene::operator=(const CScene& Other)
 
 	return *this;
 }
+
+void CScene::Set(void)
+{
+//	printf("sad");
+}
