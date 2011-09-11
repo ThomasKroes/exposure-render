@@ -41,27 +41,41 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	
 	connect(&m_NoBouncesSlider, SIGNAL(valueChanged(int)), &m_NoBouncesSpinBox, SLOT(setValue(int)));
 	connect(&m_NoBouncesSpinBox, SIGNAL(valueChanged(int)), &m_NoBouncesSlider, SLOT(setValue(int)));
-	connect(&m_NoBouncesSlider, SIGNAL(valueChanged(int)), this, SLOT(SetNoBounces(int)));
+	connect(&m_NoBouncesSlider, SIGNAL(valueChanged(int)), this, SLOT(OnSetNoBounces(int)));
+
+	// Density scale
+	m_MainLayout.addWidget(new QLabel("Density Scale"), 2, 0);
+
+	m_DensityScaleSlider.setOrientation(Qt::Horizontal);
+	m_DensityScaleSlider.setRange(0.01, 100.0);
+	m_MainLayout.addWidget(&m_DensityScaleSlider, 2, 1);
+
+	m_DensityScaleSpinner.setRange(0.01, 100.0);
+	m_MainLayout.addWidget(&m_DensityScaleSpinner, 2, 2);
+
+	connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));
+	connect(&m_DensityScaleSpinner, SIGNAL(valueChanged(double)), &m_DensityScaleSlider, SLOT(setValue(double)));
+	connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetDensityScale(double)));
 
 	// Phase
-	m_MainLayout.addWidget(new QLabel("Scattering"), 2, 0);
+	m_MainLayout.addWidget(new QLabel("Scattering"), 3, 0);
 
 	// Create scattering layout
-	m_MainLayout.addLayout(&m_ScatteringLayout, 2, 1, 1, 2);
+	m_MainLayout.addLayout(&m_ScatteringLayout, 3, 1, 1, 2);
 
 	m_ScatteringLayout.addWidget(new QLabel("Backward"), 0, 0);
 
 	m_PhaseSlider.setOrientation(Qt::Horizontal);
-	m_PhaseSlider.setRange(-100, 100);
+	m_PhaseSlider.setRange(-1.0, 1.0);
 	m_PhaseSlider.setToolTip("Move slider to the left to increase <i>backward</i> scattering and right to increase <i>forward</i> scattering");
 	m_ScatteringLayout.addWidget(&m_PhaseSlider, 0, 1);
 	
 	m_ScatteringLayout.addWidget(new QLabel("Forward"), 0, 2);
 	
-	connect(&m_PhaseSlider, SIGNAL(valueChanged(int)), this, SLOT(SetPhase(int)));
+	connect(&m_PhaseSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetPhase(double)));
 }
 
-void CTracerSettingsWidget::SetNoBounces(const int& NoBounces)
+void CTracerSettingsWidget::OnSetNoBounces(const int& NoBounces)
 {
 	if (Scene())
 	{
@@ -72,15 +86,26 @@ void CTracerSettingsWidget::SetNoBounces(const int& NoBounces)
 	}
 }
 
-void CTracerSettingsWidget::SetPhase(const int& Phase)
+void CTracerSettingsWidget::OnSetPhase(const double& Phase)
 {
-	if (Scene())
-	{
-		Scene()->m_PhaseG = 0.01f * (float)Phase;
+	if (!Scene())
+		return;
+
+	Scene()->m_PhaseG = (float)Phase;
 		
-		// Flag the render params as dirty, this will restart the rendering
-		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
-	}
+	// Flag the render params as dirty, this will restart the rendering
+	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
+}
+
+void CTracerSettingsWidget::OnSetDensityScale(double DensityScale)
+{
+	if (!Scene())
+		return;
+
+	Scene()->m_DensityScale = DensityScale;
+
+	// Flag the render params as dirty, this will restart the rendering
+	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :

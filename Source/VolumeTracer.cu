@@ -69,8 +69,7 @@ DEV float Density(CScene* pDevScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	const float Opacity = pDevScene->m_TransferFunctions.m_Opacity.F(D).r;
-	return CColorRgbHdr(Opacity, Opacity, Opacity);
+	return 10000000.0f * pDevScene->m_TransferFunctions.m_Opacity.F(D);
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
@@ -322,8 +321,11 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	float S		= -log(RNG.Get1()) / pDevScene->m_DensityScale;
-	float Dt	= 10.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
+	float Dt		= 2.0f * pDevScene->m_Spacing.Min();
+	float Sum		= 0.0f;
+	float SigmaT	= 0.0f;
+	float D			= 0.0f;
 
 	Vec3f samplePos; 
 
@@ -338,7 +340,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 		
 		D = Density(pDevScene, samplePos);
 
-		SigmaT	= 100.0f * GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= GetOpacity(pDevScene, D)[Component] * GetDiffuse(pDevScene, D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -348,6 +350,150 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 	VP.m_D							= D;
 
 	return true;
+}
+
+#define EPS (0.000001f)
+
+DEV float sign(float num)
+{
+  if(num<0.0f) return(-1.0f);
+  if(num>0.0f) return(1.0f);
+  return(0.0f);
+}
+
+DEV bool SampleDistanceDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component/*Photon* photon, unsigned int* seed0, unsigned int* seed1, cudaExtent densitySize*/)
+{
+  float3 cellIndex;
+  cellIndex.x = floor(R.m_O.x / pDevScene->m_MacrocellSize);
+  cellIndex.y = floor(R.m_O.y / pDevScene->m_MacrocellSize);
+  cellIndex.z = floor(R.m_O.z / pDevScene->m_MacrocellSize);
+
+  Vec3f t(0.0f);
+
+  if(R.m_D.x > EPS)
+  {
+    t.x = ((cellIndex.x + 1) * pDevScene->m_MacrocellSize - R.m_O.x) / R.m_D.x;
+  } else {
+    if(R.m_D.x < -EPS){
+      t.x = (cellIndex.x * pDevScene->m_MacrocellSize - R.m_O.x) / R.m_D.x;
+    } else {
+      t.x = 1000.0f;
+    }
+  }
+  if(R.m_D.y > EPS){
+    t.y = ((cellIndex.y + 1) * pDevScene->m_MacrocellSize - R.m_O.y) / R.m_D.y;
+  } else {
+    if(R.m_D.y < -EPS){
+      t.y = (cellIndex.y * pDevScene->m_MacrocellSize - R.m_O.y) / R.m_D.y;
+    } else {
+      t.y = 1000.0f;
+    }
+  }
+  if(R.m_D.z > EPS){
+    t.z = ((cellIndex.z + 1) * pDevScene->m_MacrocellSize - R.m_O.z) / R.m_D.z;
+  } else {
+    if(R.m_D.z < -EPS){
+      t.z = (cellIndex.z * pDevScene->m_MacrocellSize - R.m_O.z) / R.m_D.z;
+    } else {
+      t.z = 1000.0f;
+    }
+  }
+
+  Vec3f cpv;
+  cpv.x = pDevScene->m_MacrocellSize / fabs(R.m_D.x);
+  cpv.y = pDevScene->m_MacrocellSize / fabs(R.m_D.y);
+  cpv.z = pDevScene->m_MacrocellSize / fabs(R.m_D.z);
+
+  Vec3f samplePos = R.m_O;
+
+  int steps = 0;
+  
+  bool virtualHit = true;
+  
+  while(virtualHit)
+  {
+    float sigmaMax = tex3D(gTexExtinction, R.m_O.x, R.m_O.y, R.m_O.z);
+    float lastSigmaMax = sigmaMax;
+    float ds = min(t.x, min(t.y, t.z));
+    float sigmaSum = sigmaMax * ds;
+    float s = -log(1.0f - RNG.Get1()) / pDevScene->m_DensityScale;
+    float tt = min(t.x, min(t.y, t.z));
+    Vec3f entry;
+    Vec3f exit = R.m_O + tt * R.m_D;
+
+    while(sigmaSum < s)
+	{
+      if(steps++ > 100.0f)
+	  {
+//         photon->energy = 0.0f;
+        return false;
+      }
+
+      entry = exit;
+
+      if (entry.x <= 0.0f || entry.x >= 1.0f ||
+          entry.y <= 0.0f || entry.y >= 1.0f ||
+          entry.z <= 0.0f || entry.z >= 1.0f){
+//         photon->energy = 0.0f;
+        return false;
+      }
+
+      if(t.x<t.y && t.x<t.z)
+	  {
+        cellIndex.x += sign(R.m_D.x);
+        t.x += cpv.x;
+      }
+	  else
+	  {
+        if(t.y<t.x && t.y<t.z)
+		{
+          cellIndex.y += sign(R.m_D.y);
+          t.y += cpv.y;
+        } else {
+          cellIndex.z += sign(R.m_D.z);
+          t.z += cpv.z;
+        }
+      }
+
+      tt = min(t.x, min(t.y, t.z));
+      exit = R.m_O + tt * R.m_D;
+      ds = (exit - entry).Length();
+      sigmaSum += ds * sigmaMax;
+      lastSigmaMax = sigmaMax;
+      Vec3f ePos = 0.5f * (exit + entry);
+      sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
+      samplePos = entry;
+    }
+
+    float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
+    samplePos += R.m_D * cS;
+
+    if (R.m_O.x <= 0.0f || R.m_O.x >= 1.0f ||
+        R.m_O.y <= 0.0f || R.m_O.y >= 1.0f ||
+        R.m_O.z <= 0.0f || R.m_O.z >= 1.0f){
+//       photon->energy = 0.0f;
+      return false;
+    }
+
+    if(tex3D(gTexDensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1())
+	{
+      virtualHit = false;
+	  return false;
+    }
+	else
+	{
+		R.m_O = exit;
+
+		VP.m_Transmittance.c[Component]	= 0.5f;
+		VP.m_P							= samplePos;
+// 		VP.m_D							= D;
+
+		return true;
+    }
+  }
+
+//   photon->energy = photon->energy * c_albedo;
+//   R.m_O = samplePos;
 }
 
 DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
@@ -360,8 +506,11 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 	MinT = max(MinT, R.m_MinT);
 //	MaxT = min(MaxT, R.m_MaxT);
 
-	float S		= -log(RNG.Get1()) / pDevScene->m_DensityScale;
-	float Dt	= 10.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
+	float Dt		= 2.0f * pDevScene->m_Spacing.Min();
+	float Sum		= 0.0f;
+	float SigmaT	= 0.0f;
+	float D			= 0.0f;
 
 	Vec3f samplePos; 
 
@@ -377,7 +526,7 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 		
 		D = Density(pDevScene, samplePos);
 
-		SigmaT	= 100.0f * GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= GetOpacity(pDevScene, D)[Component] * GetDiffuse(pDevScene, D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -402,7 +551,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
 	// Exit if beyond kernel boundaries
-	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetResY())
+	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetResY() || pDevScene->m_Lighting.m_NoLights == 0)
 		return;
 
 	// Init random number generator
@@ -454,14 +603,9 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			CLightingSample LS;
 			LS.LargeStep(RNG);
 
-			Li = pDevScene->m_Lighting.m_Lights[(int)floorf(RNG.Get1() * (float)pDevScene->m_Lighting.m_NoLights)].SampleL(Pe, Rl, LightPdf, LS);
+			const int WhichLight = (int)floorf(RNG.Get1() * (float)pDevScene->m_Lighting.m_NoLights);
 
-//			Pl = pDevScene->m_BoundingBox.GetCenter() + pDevScene->m_Lighting.m_Lights[0].m_Distance * Vec3f(sinf(pDevScene->m_Lighting.m_Lights[0].m_Theta), sinf(pDevScene->m_Lighting.m_Lights[0].m_Phi), cosf(pDevScene->m_Lighting.m_Lights[0].m_Theta));
-//			Pl = pBoundingBox->GetCenter() + UniformSampleSphere(RNG.Get2()) * Vec3f(1000.0f);
-
-			// LightPdf = powf((Pe - Pl).Length(), 2.0f);
-
-//			Rl = CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length());
+			Li = pDevScene->m_Lighting.m_Lights[WhichLight].SampleL(Pe, Rl, LightPdf, LS);
 
  			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
  			{

@@ -82,12 +82,10 @@ public:
 	CScene					m_Scene;
 
 private:
-	float*					m_pDensityBuffer;
-	cudaExtent				m_DensityBufferSize;
-	int						m_MacrocellSize;
+	
 
-	void CreateDensityVolume(void);
-	void CreateExtinctionVolume(void);
+	void CreateVolume(void);
+	void CreateExtinctionVolume(float* pDensityBuffer, const CResolution3D& Resolution);
 
 signals:
 	void RenderBegin(void);

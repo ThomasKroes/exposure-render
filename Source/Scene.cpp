@@ -18,7 +18,8 @@ CScene::CScene(void) :
 	m_IntensityRange(),
 	m_KernelSize(16, 8),
 	m_SigmaMax(5000),
-	m_DensityScale(5)
+	m_DensityScale(1),
+	m_MacrocellSize(8)
 {
 }
 
@@ -47,6 +48,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_KernelSize		= Other.m_KernelSize;
 	m_SigmaMax			= Other.m_SigmaMax;
 	m_DensityScale		= Other.m_DensityScale;
+	m_MacrocellSize		= Other.m_MacrocellSize;
 
 	return *this;
 }

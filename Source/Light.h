@@ -94,7 +94,7 @@ public:
 // 		Background
 // 	};
 
-	int				m_Type;
+	long			m_Type;
 	float			m_Theta;
 	float			m_Phi;
 	float			m_Width;
@@ -115,6 +115,7 @@ public:
 	float			m_Area;					
 	float			m_AreaPdf;
 	CColorRgbHdr	m_Color;
+	int				m_T;
 
 	CLight(void) :
 		m_Type(0),
@@ -129,7 +130,7 @@ public:
 		m_HalfHeight(0.5f * m_Height),
 		m_InvHalfHeight(1.0f / m_HalfHeight),
 		m_Distance(1.0f),
-		m_SkyRadius(100.0f),
+		m_SkyRadius(1000.0f),
 		m_P(1.0f, 1.0f, 1.0f),
 		m_Target(0.0f, 0.0f, 0.0f),
 		m_N(1.0f, 0.0f, 0.0f),
@@ -137,7 +138,8 @@ public:
 		m_V(1.0f, 0.0f, 0.0f),
 		m_Area(m_Width * m_Height),
 		m_AreaPdf(1.0f / m_Area),
-		m_Color(10.0f)
+		m_Color(10.0f),
+		m_T(0)
 	{
 	}
 
@@ -164,6 +166,7 @@ public:
 		m_Area				= Other.m_Area;
 		m_AreaPdf			= Other.m_AreaPdf;
 		m_Color				= Other.m_Color;
+		m_T					= Other.m_T;
 
 		return *this;
 	}
@@ -186,31 +189,16 @@ public:
 		m_P += m_Target;
 
 		// Determine area
-		switch (m_Type)
+		if (m_T == 0)
 		{
-			case 0:
-			{
-				m_Area		= m_Width * m_Height;
-				m_AreaPdf	= 1.0f / m_Area;
+			m_Area		= m_Width * m_Height;
+			m_AreaPdf	= 1.0f / m_Area;
+		}
 
-				break;
-			}
-
-			case 1:
-			{
-				m_Area		= 4.0f * PI_F * powf(m_SkyRadius, 2.0f);
-				m_AreaPdf	= 1.0f / m_Area;
-				
-				break;
-			}
-
-			default:
-			{
-				m_Area		= 1.0f;
-				m_AreaPdf	= 1.0f;
-				
-				break;
-			}
+		if (m_T == 1)
+		{
+			m_Area		= 4.0f * PI_F * powf(m_SkyRadius, 2.0f);
+			m_AreaPdf	= 1.0f / m_Area;
 		}
 
 		// Compute orthogonal basis frame
@@ -226,41 +214,25 @@ public:
 		CColorXyz L = SPEC_BLACK;
 
 		// Determine position on light
-// 		switch (m_Type)
-// 		{
-// 			case Area:
-// 			{
-				Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
-				Rl.m_D	= Normalize(P - Rl.m_O);
-				L		= Dot(Rl.m_D, m_N) > 0.0f ? Le(Vec2f(0.0f)) : SPEC_BLACK;
+		if (m_T == 0)
+		{
+			Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
+			Rl.m_D	= Normalize(P - Rl.m_O);
+			L		= Le(Vec2f(0.0f));
+		}
 
-//				break;				
-// 			}
-// 
-// 			case Background:
-// 			{
-// 				Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
-// 				Rl.m_D	= Normalize(P - Rl.m_O);
-// 				L		= Le(Vec2f(0.0f));
-// 
-// 				break;
-// 			}
-
-// 			default:
-// 			{
-// 				Rl.m_O = Vec3f(1.0f, 1.0f, 1.0f);
-// 				Rl.m_D		= Normalize(P - Rl.m_O);
-// 				L		= SPEC_WHITE;
-// 
-// 				break;
-// 			}
-//		}
+		if (m_T == 1)
+		{
+			Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
+			Rl.m_D	= Normalize(P - Rl.m_O);
+			L		= Le(Vec2f(0.0f));
+		}
 
 		Rl.m_MinT	= 0.0f;
 		Rl.m_MaxT	= (P - Rl.m_O).Length();
 
 		// Compute PDF
-		Pdf = DistanceSquared(P, Rl.m_O) / (AbsDot(Rl.m_D, m_N) * m_Area);
+		Pdf = DistanceSquared(P, Rl.m_O) / /*(AbsDot(Rl.m_D, m_N)*/ m_Area;//);
 
 		// Return light exitant radiance
 		return L;
@@ -384,8 +356,8 @@ public:
 
 	void AddLight(const CLight& Light)
 	{
-		if (m_NoLights >= MAX_NO_LIGHTS)
-			return;
+// 		if (m_NoLights >= MAX_NO_LIGHTS)
+// 			return;
 
 		m_Lights[m_NoLights] = Light;
 
@@ -395,9 +367,9 @@ public:
 	void Reset(void)
 	{
 		m_NoLights = 0;
-		memset(m_Lights, 0 , MAX_NO_LIGHTS * sizeof(CLight));
+		//memset(m_Lights, 0 , MAX_NO_LIGHTS * sizeof(CLight));
 	}
 
-	CLight			m_Lights[MAX_NO_LIGHTS];
-	int				m_NoLights;
+	CLight		m_Lights[MAX_NO_LIGHTS];
+	int			m_NoLights;
 };

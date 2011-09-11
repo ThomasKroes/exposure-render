@@ -10,14 +10,17 @@ public:
     CTracerSettingsWidget(QWidget* pParent = NULL);
 
 private slots:
-	void SetNoBounces(const int& NoBounces);
-	void SetPhase(const int& Phase);
+	void OnSetNoBounces(const int& NoBounces);
+	void OnSetPhase(const double& Phase);
+	void OnSetDensityScale(double DensityScale);
 
 private:
 	QGridLayout		m_MainLayout;
 	QComboBox		m_RenderTypeComboBox;
 	QSlider			m_NoBouncesSlider;
 	QSpinBox		m_NoBouncesSpinBox;
+	QDoubleSlider	m_DensityScaleSlider;
+	QDoubleSpinner	m_DensityScaleSpinner;
 	QGridLayout		m_ScatteringLayout;
 	QDoubleSlider	m_PhaseSlider;
 };

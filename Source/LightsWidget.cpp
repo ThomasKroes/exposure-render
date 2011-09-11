@@ -95,7 +95,7 @@ void QLightsWidget::UpdateLightList(void)
 		m_LightList.addItem(pLightItem);
 	}
 
-	/*
+	
 	// Select
 	if (gLighting.GetSelectedLight())
 	{
@@ -107,7 +107,7 @@ void QLightsWidget::UpdateLightList(void)
 
 		m_LightList.blockSignals(false);
 	}
-	*/
+	/**/
 
 	// Get current row
 	const int CurrentRow = m_LightList.currentRow();

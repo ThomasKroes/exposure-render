@@ -159,8 +159,6 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pDevEstRgbLdr(NULL),
 	m_pImageCanvas(NULL),
 	m_Abort(false),
- 	m_pDensityBuffer(NULL),
- 	m_DensityBufferSize(),
  	m_MacrocellSize(8)
 {
 }
@@ -186,8 +184,6 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pDevEstRgbLdr			= Other.m_pDevEstRgbLdr;
 	m_pImageCanvas			= Other.m_pImageCanvas;
 	m_Abort					= Other.m_Abort;
-	m_pDensityBuffer		= Other.m_pDensityBuffer;
-	m_DensityBufferSize		= Other.m_DensityBufferSize;
 	m_MacrocellSize			= Other.m_MacrocellSize;
 
 	return *this;
@@ -196,8 +192,6 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 QRenderThread::~QRenderThread(void)
 {
 	qDebug("Render thread destructor");
-
-	free(m_pDensityBuffer);
 }
 
 bool QRenderThread::InitializeCuda(void)
@@ -286,7 +280,7 @@ void QRenderThread::run()
  	}
 
 	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
- 	m_Scene.m_Camera.m_Aperture.m_Size = 0.01f;
+ 	m_Scene.m_Camera.m_Aperture.m_Size = 0.001f;
  	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
@@ -295,9 +289,8 @@ void QRenderThread::run()
 	// Force the render thread to allocate the necessary buffers, do not remove this line
 	m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
 
- 	CreateDensityVolume();
- 	CreateExtinctionVolume();
-
+ 	CreateVolume();
+ 	
 	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
 
 	// Allocate CUDA memory for scene
@@ -344,7 +337,9 @@ void QRenderThread::run()
 			m_pRenderImage = NULL;
 
 			m_pRenderImage = (unsigned char*)malloc(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char));
-			memset(m_pRenderImage, 0, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char));
+
+			if (m_pRenderImage)
+				memset(m_pRenderImage, 0, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char));
 			
 			emit gRenderStatus.StatisticChanged("Host", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char) / powf(1024.0f, 2.0f), 'f', 2), "MB");
 
@@ -459,6 +454,7 @@ void QRenderThread::run()
 	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 	HandleCudaError(cudaFree(m_pDevEstRgbLdr));
 
+	m_pDevScene				= NULL;
 	m_pDevRandomStates		= NULL;
 	m_pDevAccEstXyz			= NULL;
 	m_pDevEstFrameXyz		= NULL;
@@ -619,9 +615,10 @@ bool QRenderThread::Load(QString& FileName)
 	// Spacing
 	double* pSpacing = m_pImageDataVolume->GetSpacing();
 	
-	m_Scene.m_Spacing.x = pSpacing[0];
-	m_Scene.m_Spacing.y = pSpacing[1];
-	m_Scene.m_Spacing.z = pSpacing[2];
+	// Voxel spacing is typically in mm exposure render work in meters so convert to meters
+	m_Scene.m_Spacing.x = 0.001f * (float)pSpacing[0];
+	m_Scene.m_Spacing.y = 0.001f * (float)pSpacing[1];
+	m_Scene.m_Spacing.z = 0.001f * (float)pSpacing[2];
 
 	// Sigma max
 	m_Scene.m_SigmaMax = gTransferFunction.GetRange();
@@ -632,13 +629,6 @@ bool QRenderThread::Load(QString& FileName)
 	// Compute the volume's bounding box
 	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f, 0.0f, 0.0f);
 	m_Scene.m_BoundingBox.m_MaxP	= PhysicalSize;
-
-	// Allocate density buffer
-	m_pDensityBuffer = (float*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(float));
-
-	// Copy density data from vtk image to density buffer
-	m_pImageDataVolume->Update();
-	memcpy(m_pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(float));
 
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
@@ -659,12 +649,12 @@ bool QRenderThread::Load(QString& FileName)
 
 	emit gRenderStatus.StatisticChanged("Volume", "File", QFileInfo(m_FileName).fileName(), "");
 	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", "", "");
-	emit gRenderStatus.StatisticChanged("Bounding Box", "Min", FormatVector(m_Scene.m_BoundingBox.m_MinP, 2), "");
-	emit gRenderStatus.StatisticChanged("Bounding Box", "Max", FormatVector(m_Scene.m_BoundingBox.m_MaxP, 2), "");
-	emit gRenderStatus.StatisticChanged("Volume", "Physical Size", FormatSize(PhysicalSize, 2), "mm");
+	emit gRenderStatus.StatisticChanged("Bounding Box", "Min", FormatVector(1000.0f * m_Scene.m_BoundingBox.m_MinP, 2), "mm");
+	emit gRenderStatus.StatisticChanged("Bounding Box", "Max", FormatVector(1000.0f * m_Scene.m_BoundingBox.m_MaxP, 2), "mm");
+	emit gRenderStatus.StatisticChanged("Volume", "Physical Size", FormatSize(1000.0f * PhysicalSize, 2), "mm");
 	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatSize(m_Scene.m_Resolution.GetResXYZ()), "Voxels");
-	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(m_Scene.m_Spacing, 2), "mm");
-	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(m_Scene.m_Scale, 2), "");
+	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(1000.0f * m_Scene.m_Spacing, 2), "mm");
+//	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(1000.0f * m_Scene.m_Scale, 2), "");
 	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.GetNoElements()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");
 
@@ -674,17 +664,24 @@ bool QRenderThread::Load(QString& FileName)
 	return true;
 }
 
-void QRenderThread::CreateDensityVolume(void)
+void QRenderThread::CreateVolume(void)
 {
 	qDebug("Creating density volume");
 
-	m_DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
+	cudaExtent DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
+
+	// Allocate density buffer
+	float* pDensityBuffer = (float*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(float));
+
+	// Copy density data from vtk image to density buffer
+	m_pImageDataVolume->Update();
+	memcpy(pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(float));
 
 	m_Scene.m_SigmaMax = 0.0f;
 
 	for(int i = 0; i < m_Scene.m_Resolution.GetNoElements(); ++i)
 	{
-		m_Scene.m_SigmaMax = m_Scene.m_SigmaMax > m_pDensityBuffer[i] ? m_Scene.m_SigmaMax : m_pDensityBuffer[i];
+		m_Scene.m_SigmaMax = m_Scene.m_SigmaMax > pDensityBuffer[i] ? m_Scene.m_SigmaMax : pDensityBuffer[i];
 	}
 
 	for (int i = 0; i < m_Scene.m_Resolution.GetNoElements(); ++i)
@@ -693,46 +690,52 @@ void QRenderThread::CreateDensityVolume(void)
 //		m_pDensityBuffer[i] = m_pDensityBuffer[i] / m_Scene.m_SigmaMax;
 	}
 
-	BindDensityVolume(m_pDensityBuffer, m_DensityBufferSize);
+	// Copy to graphics device
+	BindDensityVolume(pDensityBuffer, DensityBufferSize);
+
+	// Create the extinction volume
+	CreateExtinctionVolume(pDensityBuffer, m_Scene.m_Resolution);
 }
 
-void QRenderThread::CreateExtinctionVolume(void)
+void QRenderThread::CreateExtinctionVolume(float* pDensityBuffer, const CResolution3D& Resolution)
 {
 	qDebug("Creating extinction volume");
 
 	cudaExtent ExtinctionSize;
 
-	ExtinctionSize.width	= m_DensityBufferSize.width / m_MacrocellSize;
-	ExtinctionSize.height	= m_DensityBufferSize.height / m_MacrocellSize;
-	ExtinctionSize.depth	= m_DensityBufferSize.depth / m_MacrocellSize;
+	ExtinctionSize.width	= Resolution.GetResX() / m_MacrocellSize;
+	ExtinctionSize.height	= Resolution.GetResY() / m_MacrocellSize;
+	ExtinctionSize.depth	= Resolution.GetResZ() / m_MacrocellSize;
 
-	float* pExtinction = (float*)malloc(sizeof(float)*ExtinctionSize.width*ExtinctionSize.height*ExtinctionSize.depth);
+	float* pExtinction = (float*)malloc(Resolution.GetNoElements() * sizeof(float));
 	
-	for(int i = 0; i<ExtinctionSize.width*ExtinctionSize.height*ExtinctionSize.depth; ++i)
+	for(int i = 0; i < ExtinctionSize.width * ExtinctionSize.height * ExtinctionSize.depth; ++i)
 	{
 		pExtinction[i] = 0.0f;
 	}
 
-	for (int x = 0; x<m_DensityBufferSize.width; ++x)
+	for (int x = 0; x < Resolution.GetResX(); ++x)
 	{
-		for (int y = 0; y<m_DensityBufferSize.height; ++y)
+		for (int y = 0; y < Resolution.GetResY(); ++y)
 		{
-			for (int z = 0; z<m_DensityBufferSize.depth; ++z)
+			for (int z = 0; z < Resolution.GetResZ(); ++z)
 			{
 				int index =
 					x / m_MacrocellSize +
 					y / m_MacrocellSize * ExtinctionSize.width +
 					z / m_MacrocellSize * ExtinctionSize.width * ExtinctionSize.height;
 
-				if (pExtinction[index] < m_pDensityBuffer[x + y * m_DensityBufferSize.width + z * m_DensityBufferSize.width * m_DensityBufferSize.height])
+				if (pExtinction[index] < pDensityBuffer[x + y * Resolution.GetResX() + z * Resolution.GetResY() * Resolution.GetResZ()])
 				{
-					pExtinction[index] = m_pDensityBuffer[x + y * m_DensityBufferSize.width + z * m_DensityBufferSize.width * m_DensityBufferSize.height];
+					pExtinction[index] = pDensityBuffer[x + y * Resolution.GetResX() + z * Resolution.GetResY() * Resolution.GetResZ()];
 				}
 			}
 		}
 	}
 
 	BindExtinctionVolume(pExtinction, ExtinctionSize);
+
+	free(pExtinction);
 }
 
 void QRenderThread::HandleCudaError(const cudaError_t CudaError)
@@ -745,14 +748,14 @@ void QRenderThread::HandleCudaError(const cudaError_t CudaError)
 
 CScene* Scene(void)
 {
-	return gpRenderThread->GetScene();
+	return gpRenderThread ? gpRenderThread->GetScene() : NULL;
 }
 
 void StartRenderThread(QString& FileName)
 {
 	// Create new render thread
  	gpRenderThread = new QRenderThread(FileName);
- 	gpRenderThread->setStackSize(150000000);
+//  	gpRenderThread->setStackSize(150000000);
 
 	// Load the volume
 	if (!gpRenderThread->Load(FileName))
