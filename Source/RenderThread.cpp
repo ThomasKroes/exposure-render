@@ -585,9 +585,7 @@ bool CRenderThread::Load(QString& FileName)
 
 	int* pExtent = m_pImageDataVolume->GetExtent();
 	
-	m_Scene.m_Resolution.m_XYZ.x = pExtent[1] + 1;
-	m_Scene.m_Resolution.m_XYZ.y = pExtent[3] + 1;
-	m_Scene.m_Resolution.m_XYZ.z = pExtent[5] + 1;
+	m_Scene.m_Resolution.SetResXYZ(Vec3i(pExtent[1] + 1, pExtent[3] + 1, pExtent[5] + 1));
 	m_Scene.m_Resolution.Update();
 
 	double* pSpacing = m_pImageDataVolume->GetSpacing();
@@ -599,11 +597,11 @@ bool CRenderThread::Load(QString& FileName)
 	
 	m_Scene.m_SigmaMax = gTransferFunction.GetRange();
 
-	Vec3f Resolution = Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.m_XYZ.x, m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.m_XYZ.y, m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.m_XYZ.z);
+	Vec3f Resolution = Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.GetResX(), m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.GetResY(), m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.GetResZ());
 
 	float Max = Resolution.Max();
 
-	const Vec3f PhysicalSize(Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.m_XYZ.x, m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.m_XYZ.y, m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.m_XYZ.z));
+	const Vec3f PhysicalSize(Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.GetResX(), m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.GetResY(), m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.GetResZ()));
 
 	// Compute the volume's bounding box
 	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f, 0.0f, 0.0f);
@@ -626,18 +624,18 @@ bool CRenderThread::Load(QString& FileName)
 //	delete gpProgressDialog;
 //	gpProgressDialog = NULL;
 
-	m_pDensityBuffer = (float*)malloc(m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.m_NoElements * sizeof(float));
-	memcpy(m_pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.m_NoElements * sizeof(float));
+	m_pDensityBuffer = (float*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(float));
+	memcpy(m_pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(float));
 
 	emit gRenderStatus.StatisticChanged("Volume", "File", QFileInfo(m_FileName).fileName(), "");
 	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", "", "");
 	emit gRenderStatus.StatisticChanged("Bounding Box", "Min", FormatVector(m_Scene.m_BoundingBox.m_MinP, 2), "");
 	emit gRenderStatus.StatisticChanged("Bounding Box", "Max", FormatVector(m_Scene.m_BoundingBox.m_MaxP, 2), "");
 	emit gRenderStatus.StatisticChanged("Volume", "Physical Size", FormatSize(PhysicalSize, 2), "mm");
-	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatSize(m_Scene.m_Resolution.m_XYZ), "Voxels");
+	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatSize(m_Scene.m_Resolution.GetResXYZ()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(m_Scene.m_Spacing, 2), "mm");
 	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(m_Scene.m_Scale, 2), "");
-	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.m_NoElements), "Voxels");
+	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.GetNoElements()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");
 
 	return true;
@@ -654,13 +652,13 @@ void CRenderThread::CreateDensityVolume(void)
 //		size = fread(volumeSize, sizeof(int), 3, dataFile);
 		m_DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
 
-		m_pDensityBuffer = new float[m_Scene.m_Resolution.m_XYZ.x * m_Scene.m_Resolution.m_XYZ.y * m_Scene.m_Resolution.m_XYZ.z];
+		m_pDensityBuffer = new float[m_Scene.m_Resolution.GetNoElements()];
 
 //		size = fread(densityBuffer, sizeof(float), volumeSize[0] * volumeSize[1] * volumeSize[2], dataFile);
 
 		m_Scene.m_SigmaMax = 0.0f;
 
-		for(int i = 0; i < m_Scene.m_Resolution.m_XYZ.x * m_Scene.m_Resolution.m_XYZ.y * m_Scene.m_Resolution.m_XYZ.z; ++i)
+		for(int i = 0; i < m_Scene.m_Resolution.GetNoElements(); ++i)
 		{
 			m_Scene.m_SigmaMax = m_Scene.m_SigmaMax > m_pDensityBuffer[i] ? m_Scene.m_SigmaMax : m_pDensityBuffer[i];
 		}
@@ -677,8 +675,6 @@ void CRenderThread::CreateDensityVolume(void)
 
 void CRenderThread::CreateExtinctionVolume(void)
 {
-	cudaArray* volArray;
-
 	m_ExtinctionSize.width	= m_DensityBufferSize.width / m_MacrocellSize;
 	m_ExtinctionSize.height	= m_DensityBufferSize.height / m_MacrocellSize;
 	m_ExtinctionSize.depth	= m_DensityBufferSize.depth / m_MacrocellSize;

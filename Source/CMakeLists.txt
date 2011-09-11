@@ -382,7 +382,7 @@ SOURCE_GROUP("CUDA" FILES ${CudaSources})
 ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
 
 # Create executable
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CudaSources})
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources})
 
 TARGET_LINK_LIBRARIES(ExposureRender
   QVTK
@@ -406,7 +406,6 @@ INSTALL_FILES(/bin FILES ${CudaDlls})
 SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll)
 INSTALL_FILES(/bin FILES ${QtDlls})
 
-MESSAGE("" QT_BINARY_DIR)
 ### Example .mhd and .raw files ###
 # INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.mhd")
 # INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.raw")
