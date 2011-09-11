@@ -186,10 +186,9 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pDevEstRgbLdr			= Other.m_pDevEstRgbLdr;
 	m_pImageCanvas			= Other.m_pImageCanvas;
 	m_Abort					= Other.m_Abort;
-// 	m_pDensityBuffer		= Other.m_pDensityBuffer;
-// 	m_DensityBufferSize		= Other.m_DensityBufferSize;
-// 	m_ExtinctionSize		= Other.m_ExtinctionSize;
-// 	m_MacrocellSize			= Other.m_MacrocellSize;
+	m_pDensityBuffer		= Other.m_pDensityBuffer;
+	m_DensityBufferSize		= Other.m_DensityBufferSize;
+	m_MacrocellSize			= Other.m_MacrocellSize;
 
 	return *this;
 }
@@ -298,8 +297,6 @@ void QRenderThread::run()
 
  	CreateDensityVolume();
  	CreateExtinctionVolume();
-
-	return;
 
 	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
 
@@ -415,7 +412,7 @@ void QRenderThread::run()
 		CCudaTimer Timer;
 
 		// Execute the rendering kernels
- 		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
+  		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
 		HandleCudaError(cudaGetLastError());
 
 		emit gRenderStatus.StatisticChanged("Timings", "Casting", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -423,7 +420,7 @@ void QRenderThread::run()
 		Timer.StartTimer();
 
 		// Blur the estimate
- 		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
+  		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
 		HandleCudaError(cudaGetLastError());
 
 		emit gRenderStatus.StatisticChanged("Timings", "Blur Estimate", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -431,7 +428,7 @@ void QRenderThread::run()
 		Timer.StartTimer();
 
 		// Compute converged image
- 		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
+  		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
 		HandleCudaError(cudaGetLastError());
 		
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -510,13 +507,13 @@ CScene* QRenderThread::GetScene(void)
 bool QRenderThread::Load(QString& FileName)
 {
 	m_FileName = FileName;
-// 	QLoadSettingsDialog LoadSettingsDialog;
-// 
-// 	// Make it a modal dialog
-// 	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
-// 	 
-// 	// Show it
-// 	LoadSettingsDialog.exec();
+ 	QLoadSettingsDialog LoadSettingsDialog;
+ 
+ 	// Make it a modal dialog
+ 	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
+ 	 
+ 	// Show it
+ 	LoadSettingsDialog.exec();
 
 	// Create and configure progress dialog
 //	gpProgressDialog = new QProgressDialog("Volume loading in progress", "Abort", 0, 100);
@@ -564,8 +561,8 @@ bool QRenderThread::Load(QString& FileName)
 	ImageCast->Update();
 
 	m_pImageDataVolume = ImageCast->GetOutput();
-	m_pImageDataVolume->Update();
-	/*
+	
+	
 //	if (LoadSettingsDialog.GetResample())
 //	{
 		// Create resampler
@@ -591,7 +588,7 @@ bool QRenderThread::Load(QString& FileName)
 
 		m_pImageDataVolume = ImageResample->GetOutput();
 //	}
-	*/
+	/**/
 	/*
 	// Create magnitude volume
 	vtkSmartPointer<vtkImageGradientMagnitude> ImageGradientMagnitude = vtkImageGradientMagnitude::New();
@@ -640,6 +637,7 @@ bool QRenderThread::Load(QString& FileName)
 	m_pDensityBuffer = (float*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(float));
 
 	// Copy density data from vtk image to density buffer
+	m_pImageDataVolume->Update();
 	memcpy(m_pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(float));
 
 	// Build the histogram
@@ -681,7 +679,6 @@ void QRenderThread::CreateDensityVolume(void)
 	qDebug("Creating density volume");
 
 	m_DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
-	m_pDensityBuffer = new float[m_Scene.m_Resolution.GetNoElements()];
 
 	m_Scene.m_SigmaMax = 0.0f;
 
@@ -693,7 +690,7 @@ void QRenderThread::CreateDensityVolume(void)
 	for (int i = 0; i < m_Scene.m_Resolution.GetNoElements(); ++i)
 	{
 //		m_pDensityBuffer[i] = m_pDensityBuffer[i] > cutValue ? m_pDensityBuffer[i] / m_Scene.m_SigmaMax : 0;
-		m_pDensityBuffer[i] = m_pDensityBuffer[i] / m_Scene.m_SigmaMax;
+//		m_pDensityBuffer[i] = m_pDensityBuffer[i] / m_Scene.m_SigmaMax;
 	}
 
 	BindDensityVolume(m_pDensityBuffer, m_DensityBufferSize);

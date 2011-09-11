@@ -14,10 +14,11 @@ CScene::CScene(void) :
 	m_BoundingBox(),
 	m_PhaseG(0.0f),
 	m_TransferFunctions(),
-	m_MaxNoBounces(3),
+	m_MaxNoBounces(1),
 	m_IntensityRange(),
 	m_KernelSize(16, 8),
-	m_SigmaMax(5000)
+	m_SigmaMax(5000),
+	m_DensityScale(5)
 {
 }
 
@@ -45,6 +46,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_IntensityRange	= Other.m_IntensityRange;
 	m_KernelSize		= Other.m_KernelSize;
 	m_SigmaMax			= Other.m_SigmaMax;
+	m_DensityScale		= Other.m_DensityScale;
 
 	return *this;
 }

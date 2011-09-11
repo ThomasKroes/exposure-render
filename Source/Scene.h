@@ -757,4 +757,5 @@ public:
 	CRange					m_IntensityRange;
 	Vec2f					m_KernelSize;
 	float					m_SigmaMax;
+	float					m_DensityScale;
 };

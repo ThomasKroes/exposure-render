@@ -64,7 +64,7 @@ void BindExtinctionVolume(float* pExtinctionBuffer, cudaExtent Size)
 
 DEV float Density(CScene* pDevScene, const Vec3f& P)
 {
-	return (float)(SHRT_MAX * tex3D(gTexDensity, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ()));
+	return tex3D(gTexDensity, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ());
 }
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
@@ -322,7 +322,8 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	float S = -log(RNG.Get1()) / pDevScene->m_SigmaMax, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+	float S		= -log(RNG.Get1()) / pDevScene->m_DensityScale;
+	float Dt	= 10.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
 
 	Vec3f samplePos; 
 
@@ -335,10 +336,9 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 		if (MinT > MaxT)
 			return false;
 		
-//		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
 		D = Density(pDevScene, samplePos);
 
-		SigmaT	= GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= 100.0f * GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -360,7 +360,8 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 	MinT = max(MinT, R.m_MinT);
 //	MaxT = min(MaxT, R.m_MaxT);
 
-	float S = -log(RNG.Get1()) / pDevScene->m_SigmaMax, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+	float S		= -log(RNG.Get1()) / pDevScene->m_DensityScale;
+	float Dt	= 10.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
 
 	Vec3f samplePos; 
 
@@ -374,10 +375,9 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 		if (MinT > R.m_MaxT)
 			break;
 		
-//		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
 		D = Density(pDevScene, samplePos);
 
-		SigmaT	= GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= 100.0f * GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -449,27 +449,25 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
   			Gn	= Normalize(G);
  			Wo	= Normalize(-Re.m_D);
 
-			// Choose random light and compute the amount of light that reaches the scattering point
-//			Li = SampleRandomLight(pScene, RNG, Pe, Pl, LightPdf);
-//			Li = 1000.0f * CColorXyz(0.9f, 0.6f, 0.2f);
-			Li = 500.0f * CColorXyz(1.0f);
-
 			Pe = VP.m_P;
 
+			CLightingSample LS;
+			LS.LargeStep(RNG);
 
+			Li = pDevScene->m_Lighting.m_Lights[(int)floorf(RNG.Get1() * (float)pDevScene->m_Lighting.m_NoLights)].SampleL(Pe, Rl, LightPdf, LS);
 
-			Pl = pDevScene->m_BoundingBox.GetCenter() + pDevScene->m_Lighting.m_Lights[0].m_Distance * Vec3f(sinf(pDevScene->m_Lighting.m_Lights[0].m_Theta), sinf(pDevScene->m_Lighting.m_Lights[0].m_Phi), cosf(pDevScene->m_Lighting.m_Lights[0].m_Theta));
+//			Pl = pDevScene->m_BoundingBox.GetCenter() + pDevScene->m_Lighting.m_Lights[0].m_Distance * Vec3f(sinf(pDevScene->m_Lighting.m_Lights[0].m_Theta), sinf(pDevScene->m_Lighting.m_Lights[0].m_Phi), cosf(pDevScene->m_Lighting.m_Lights[0].m_Theta));
 //			Pl = pBoundingBox->GetCenter() + UniformSampleSphere(RNG.Get2()) * Vec3f(1000.0f);
 
 			// LightPdf = powf((Pe - Pl).Length(), 2.0f);
 
-			Rl = CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length());
+//			Rl = CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length());
 
-			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
-			{
-				Li /= LightPdf;
-				Lv.c[CC1] += PathThroughput.c[CC1] * Li.c[CC1] * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
-			}
+ 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
+ 			{
+ 				Li /= LightPdf;
+ 				Lv.c[CC1] += PathThroughput.c[CC1] * Li.c[CC1] * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
+ 			}
 
 			W = Normalize(SampleHG(Wo, pDevScene->m_PhaseG, RNG.Get2()));
 //			W = UniformSampleSphere(RNG.Get2());

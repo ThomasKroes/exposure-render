@@ -372,7 +372,7 @@ public:
 
 	HOD CLighting& operator=(const CLighting& Other)
 	{
-		for (int i = 0; i < m_NoLights; i++)
+		for (int i = 0; i < MAX_NO_LIGHTS; i++)
 		{
 			m_Lights[i] = Other.m_Lights[i];
 		}
