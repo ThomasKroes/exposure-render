@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "VtkWidget.h"
 #include "RenderThread.h"
 

@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "FilmWidget.h"
 #include "RenderThread.h"
 #include "Camera.h"
@@ -19,7 +22,7 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	setEnabled(false);
 
 	// Create grid layout
-	m_GridLayout.setColSpacing(0, 70);
+//	m_GridLayout.setColSpacing(0, 70);
 	setLayout(&m_GridLayout);
 
 	// Film width

@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "NodePropertiesWidget.h"
 #include "TransferFunction.h"
 #include "NodeItem.h"

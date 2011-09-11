@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "StatisticsDockWidget.h"
 #include "MainWindow.h"
 

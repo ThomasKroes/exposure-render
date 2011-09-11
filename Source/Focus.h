@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "Preset.h"
 
 class QFocus : public QPresetXML

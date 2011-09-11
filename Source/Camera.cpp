@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "Camera.h"
 
 QCamera gCamera;

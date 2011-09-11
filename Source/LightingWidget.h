@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "LightsWidget.h"
 #include "LightSettingsWidget.h"
 #include "BackgroundIlluminationWidget.h"

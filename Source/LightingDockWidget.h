@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "LightingWidget.h"
 
 class QLightingDockWidget : public QDockWidget

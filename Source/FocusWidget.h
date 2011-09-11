@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "Controls.h"
 #include "Focus.h"
 

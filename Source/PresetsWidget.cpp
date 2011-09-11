@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "PresetsWidget.h"
 
 QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 class QColorPushButton : public QPushButton
 {
 	Q_OBJECT

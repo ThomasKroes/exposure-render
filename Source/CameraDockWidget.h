@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "CameraWidget.h"
 
 class QCameraDockWidget : public QDockWidget

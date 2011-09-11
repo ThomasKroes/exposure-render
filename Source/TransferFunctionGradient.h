@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 class QTransferFunction;
 class QNodeItem;
 class QNode;

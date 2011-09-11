@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "Preset.h"
 
 QPresetXML::QPresetXML(QObject* pParent /*= NULL*/, const QString& Name /*= ""*/) :

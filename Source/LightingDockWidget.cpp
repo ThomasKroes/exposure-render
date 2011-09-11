@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "LightingDockWidget.h"
 
 QLightingDockWidget::QLightingDockWidget(QWidget* pParent) :

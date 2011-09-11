@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QtGui>
-#include <QtXml\qdom.h>
-
 class QPresetXML : public QObject
 {
 	Q_OBJECT

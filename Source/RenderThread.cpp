@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "RenderThread.h"
 #include "Scene.h"
 #include "MainWindow.h"

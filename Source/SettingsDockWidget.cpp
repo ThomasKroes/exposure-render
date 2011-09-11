@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "SettingsDockWidget.h"
 #include "RenderThread.h"
 
@@ -14,7 +17,7 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	setTitle("Tracer Properties");
 	
 	// Create grid layout
-	m_MainLayout.setColSpacing(0, 70);
+//	m_MainLayout.setColSpacing(0, 70);
 	setLayout(&m_MainLayout);
 
 	// Render type
@@ -92,7 +95,7 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 	setToolTip("Kernel settings");
 
 	// Create grid layout
-	m_MainLayout.setColSpacing(0, 70);
+//	m_MainLayout.setColSpacing(0, 70);
 	setLayout(&m_MainLayout);
 
 	// Kernel width

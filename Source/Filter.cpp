@@ -1,11 +1,5 @@
 
-// For use of pre-compiled headers 
-// #include "stdafx.h"
+// Precompiled headers
+#include "Stable.h"
 
 #include "Filter.h"
-
-#ifdef _DEBUG
-	#undef THIS_FILE
-	static char THIS_FILE[]=__FILE__;
-	#define new DEBUG_NEW
-#endif

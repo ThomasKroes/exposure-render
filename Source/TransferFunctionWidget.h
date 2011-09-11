@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "TransferFunctionView.h"
 
 class QTransferFunctionWidget : public QGroupBox

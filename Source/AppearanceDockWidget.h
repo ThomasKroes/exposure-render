@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "TransferFunctionWidget.h"
 #include "PresetsWidget.h"
 #include "NodePropertiesWidget.h"

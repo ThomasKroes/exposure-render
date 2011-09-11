@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "Camera.h"
 #include "FilmWidget.h"
 #include "ApertureWidget.h"

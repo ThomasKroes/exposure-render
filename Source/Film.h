@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "Preset.h"
 
 class QFilm : public QPresetXML

@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "ApertureWidget.h"
 #include "RenderThread.h"
 #include "Camera.h"

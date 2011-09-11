@@ -86,6 +86,7 @@ SET(ExposureRenderSources
 	StatisticsWidget.cpp
 	
 	# Core
+	Stable.cpp
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
@@ -156,6 +157,7 @@ SET(ExposureRenderHeaders
 	StatisticsWidget.h
 	
 	# Core
+	Stable.h
 	Defines.h
 	Dll.h
 	Enumerations.h
@@ -181,22 +183,92 @@ SET(ExposureRenderHeaders
 	LightTransport.h
 )
 
+SET(ExposureRenderMocHeaders 
+	
+	# Main
+	MainWindow.h
+
+	# Lighting
+	LightSettingsWidget.h
+	LightingDockWidget.h
+	LightsWidget.h
+	LightingWidget.h
+	Lighting.h
+	Background.h
+	BackgroundIlluminationWidget.h
+
+	# Appearance
+	TransferFunction.h
+	TransferFunctionView.h
+	TransferFunctionWidget.h
+	NodePropertiesWidget.h
+	AppearanceDockWidget.h
+	Histogram.h
+	Node.h
+
+	# Camera
+	Camera.h
+	CameraWidget.h
+	CameraDockWidget.h
+	FilmWidget.h
+	ApertureWidget.h
+	ProjectionWidget.h
+	FocusWidget.h
+	Film.h
+	Aperture.h
+	Projection.h
+	Focus.h
+
+	# Presets
+	PresetsWidget.h
+	Preset.h
+
+	# Statistics
+	StatisticsDockWidget.h
+	StatisticsWidget.h
+	
+	# Core
+	RenderThread.h
+	SettingsDockWidget.h
+	LoadSettingsDialog.h
+	VtkWidget.h
+	Controls.h
+)
+
 # Resources
 SET(ExposureRenderResources Icons/Icons.qrc)
 
+# PATCHED QT4_WRAP_CPP for use with StdAfx
+# Original source: Qt4Macros.cmake
+MACRO (PCH_QT4_WRAP_CPP outfiles )
+  # get include dirs
+  QT4_GET_MOC_FLAGS(moc_flags)
+  QT4_EXTRACT_OPTIONS(moc_files moc_options ${ARGN})
+ 
+  FOREACH (it ${moc_files})
+    GET_FILENAME_COMPONENT(it ${it} ABSOLUTE)
+    QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
+    set (moc_flags_append "-fStable.h" "-f${it}") # StdAfx hack.
+ # message (STATUS "Moc Flags append ${moc_flags_append}")
+ QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags};${moc_flags_append}" "${moc_options}")
+    SET(${outfiles} ${${outfiles}} ${outfile})
+  ENDFOREACH(it)
+ENDMACRO (PCH_QT4_WRAP_CPP)
+
 # The rest should just work (sure...)
-QT4_WRAP_CPP(MOCSrcs ${ExposureRenderHeaders} )
-QT4_ADD_RESOURCES(ResourceSrcs ${ExposureRenderResources})
+#QT4_WRAP_CPP(MOCSrcs ${ExposureRenderHeaders} )
+PCH_QT4_WRAP_CPP(MOCSrcs ${ExposureRenderMocHeaders} )
+#QT4_ADD_RESOURCES(ResourceSrcs ${ExposureRenderResources})
 
 SOURCE_GROUP("Resources" FILES
-  ${ExposureRenderResources}
+#  ${ExposureRenderResources}
   ${EXE_ICON}
 )
 
 SOURCE_GROUP("Generated" FILES
   ${UISrcs}
   ${MOCSrcs}
-  ${ResourceSrcs}
+# ${ResourceSrcs}
   ${RCS_SOURCES}
 )
 
@@ -315,6 +387,7 @@ SOURCE_GROUP("Statistics" FILES ${StatisticsSources})
 	
 # Core sources
 SET(CoreSources
+	Stable.h
 	Defines.h
 	Dll.h
 	Enumerations.h
@@ -338,6 +411,7 @@ SET(CoreSources
 	Material.h
 	Sample.h
 	LightTransport.h
+	Stable.cpp
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
@@ -393,6 +467,13 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkCommon
   vtkViews
 )
+
+if (MSVC)
+   set_target_properties(ExposureRender PROPERTIES COMPILE_FLAGS "/YuStable.h")
+   set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
+endif(MSVC)
+
+
 
 ### VTK dependencies ###
 FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")

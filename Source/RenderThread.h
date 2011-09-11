@@ -1,7 +1,5 @@
 #pragma once
 
-// Qt
-#include <QtGui>
 
 // CUDA
 #include "cutil_inline.h"

@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "Background.h"
 
 QBackground::QBackground(QObject* pParent) :

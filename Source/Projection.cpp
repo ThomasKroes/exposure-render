@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "Projection.h"
 
 QProjection::QProjection(QObject* pParent /*= NULL*/) :

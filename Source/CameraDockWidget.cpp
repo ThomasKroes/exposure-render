@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "CameraDockWidget.h"
 #include "MainWindow.h"
 #include "Scene.h"

@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "Focus.h"
 
 QFocus::QFocus(QObject* pParent /*= NULL*/) :

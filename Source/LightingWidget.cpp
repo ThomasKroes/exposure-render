@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "LightingWidget.h"
 #include "RenderThread.h"
 

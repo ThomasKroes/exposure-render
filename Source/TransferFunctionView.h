@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "TransferFunctionCanvas.h"
 #include "TransferFunctionGradient.h"
 

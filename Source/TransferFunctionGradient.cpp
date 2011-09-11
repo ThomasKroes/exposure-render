@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "TransferFunctionGradient.h"
 #include "TransferFunction.h"
 #include "NodeItem.h"

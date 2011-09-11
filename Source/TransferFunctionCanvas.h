@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "TransferFunction.h"
 #include "NodeItem.h"
 #include "EdgeItem.h"

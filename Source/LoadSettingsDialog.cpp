@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "LoadSettingsDialog.h"
 
 QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :

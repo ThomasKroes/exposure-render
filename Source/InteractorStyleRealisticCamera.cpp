@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "InteractorStyleRealisticCamera.h"
 #include "RenderThread.h"
 

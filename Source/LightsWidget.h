@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "Lighting.h"
 
 class QLightItem : public QListWidgetItem

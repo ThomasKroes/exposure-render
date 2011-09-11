@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 #include "Controls.h"
 #include "Aperture.h"
 

@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "Film.h"
 
 QFilm::QFilm(QObject* pParent /*= NULL*/) :

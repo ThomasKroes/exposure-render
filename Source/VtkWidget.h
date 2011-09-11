@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QtGui>
 #include <QVTKWidget.h>
 
 // VTK

@@ -1,4 +1,7 @@
 
+// Precompiled headers
+#include "Stable.h"
+
 #include "TransferFunctionWidget.h"
 #include "TransferFunction.h"
 

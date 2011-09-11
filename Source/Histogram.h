@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGui>
-
 class QHistogram : public QObject
 {
 	Q_OBJECT
