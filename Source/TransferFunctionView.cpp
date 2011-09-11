@@ -92,21 +92,27 @@ void QTransferFunctionView::drawBackground(QPainter* pPainter, const QRectF& Rec
 
 void QTransferFunctionView::Update(void)
 {
-	m_TransferFunctionCanvas.Update();
-	m_TransferFunctionGradient.Update();
+ 	m_TransferFunctionCanvas.Update();
+ 	m_TransferFunctionGradient.Update();
 
 	if (!Scene())
 		return;
 
-	Scene()->m_TransferFunctions.m_Opacity.m_NoNodes		= gTransferFunction.GetNodes().size();
-	Scene()->m_TransferFunctions.m_Diffuse.m_NoNodes		= gTransferFunction.GetNodes().size();
-	Scene()->m_TransferFunctions.m_Specular.m_NoNodes		= gTransferFunction.GetNodes().size();
-	Scene()->m_TransferFunctions.m_Emission.m_NoNodes		= gTransferFunction.GetNodes().size();
-	Scene()->m_TransferFunctions.m_Roughness.m_NoNodes		= gTransferFunction.GetNodes().size();
+	QTransferFunction TransferFunction = gTransferFunction;
+	TransferFunction.SetRangeMin(gTransferFunction.GetRangeMin());
+	TransferFunction.SetRangeMax(gTransferFunction.GetRangeMax());
 
-	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
+	TransferFunction.NormalizeIntensity();
+
+	Scene()->m_TransferFunctions.m_Opacity.m_NoNodes		= TransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Diffuse.m_NoNodes		= TransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Specular.m_NoNodes		= TransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Emission.m_NoNodes		= TransferFunction.GetNodes().size();
+	Scene()->m_TransferFunctions.m_Roughness.m_NoNodes		= TransferFunction.GetNodes().size();
+
+	for (int i = 0; i < TransferFunction.GetNodes().size(); i++)
 	{
-		QNode& Node = gTransferFunction.GetNode(i);
+		QNode& Node = TransferFunction.GetNode(i);
 
 		// Positions
 		Scene()->m_TransferFunctions.m_Opacity.m_P[i]		= Node.GetIntensity();

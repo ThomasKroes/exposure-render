@@ -158,8 +158,7 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pDevEstFrameBlurXyz(NULL),
 	m_pDevEstRgbLdr(NULL),
 	m_pImageCanvas(NULL),
-	m_Abort(false),
- 	m_MacrocellSize(8)
+	m_Abort(false)
 {
 }
 
@@ -184,7 +183,6 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pDevEstRgbLdr			= Other.m_pDevEstRgbLdr;
 	m_pImageCanvas			= Other.m_pImageCanvas;
 	m_Abort					= Other.m_Abort;
-	m_MacrocellSize			= Other.m_MacrocellSize;
 
 	return *this;
 }
@@ -616,9 +614,9 @@ bool QRenderThread::Load(QString& FileName)
 	double* pSpacing = m_pImageDataVolume->GetSpacing();
 	
 	// Voxel spacing is typically in mm exposure render work in meters so convert to meters
-	m_Scene.m_Spacing.x = 0.001f * (float)pSpacing[0];
-	m_Scene.m_Spacing.y = 0.001f * (float)pSpacing[1];
-	m_Scene.m_Spacing.z = 0.001f * (float)pSpacing[2];
+	m_Scene.m_Spacing.x = /*0.001f * */(float)pSpacing[0];
+	m_Scene.m_Spacing.y = /*0.001f * */(float)pSpacing[1];
+	m_Scene.m_Spacing.z = /*0.001f * */(float)pSpacing[2];
 
 	// Sigma max
 	m_Scene.m_SigmaMax = gTransferFunction.GetRange();
@@ -628,7 +626,7 @@ bool QRenderThread::Load(QString& FileName)
 
 	// Compute the volume's bounding box
 	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f, 0.0f, 0.0f);
-	m_Scene.m_BoundingBox.m_MaxP	= PhysicalSize;
+	m_Scene.m_BoundingBox.m_MaxP	= Vec3f(1.0f, 1.0f, 1.0f);//PhysicalSize;
 
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
@@ -687,7 +685,7 @@ void QRenderThread::CreateVolume(void)
 	for (int i = 0; i < m_Scene.m_Resolution.GetNoElements(); ++i)
 	{
 //		m_pDensityBuffer[i] = m_pDensityBuffer[i] > cutValue ? m_pDensityBuffer[i] / m_Scene.m_SigmaMax : 0;
-//		m_pDensityBuffer[i] = m_pDensityBuffer[i] / m_Scene.m_SigmaMax;
+		pDensityBuffer[i] = pDensityBuffer[i] / m_Scene.m_SigmaMax;
 	}
 
 	// Copy to graphics device
@@ -703,9 +701,9 @@ void QRenderThread::CreateExtinctionVolume(float* pDensityBuffer, const CResolut
 
 	cudaExtent ExtinctionSize;
 
-	ExtinctionSize.width	= Resolution.GetResX() / m_MacrocellSize;
-	ExtinctionSize.height	= Resolution.GetResY() / m_MacrocellSize;
-	ExtinctionSize.depth	= Resolution.GetResZ() / m_MacrocellSize;
+	ExtinctionSize.width	= Resolution.GetResX() / m_Scene.m_MacrocellSize;
+	ExtinctionSize.height	= Resolution.GetResY() / m_Scene.m_MacrocellSize;
+	ExtinctionSize.depth	= Resolution.GetResZ() / m_Scene.m_MacrocellSize;
 
 	float* pExtinction = (float*)malloc(Resolution.GetNoElements() * sizeof(float));
 	
@@ -721,9 +719,9 @@ void QRenderThread::CreateExtinctionVolume(float* pDensityBuffer, const CResolut
 			for (int z = 0; z < Resolution.GetResZ(); ++z)
 			{
 				int index =
-					x / m_MacrocellSize +
-					y / m_MacrocellSize * ExtinctionSize.width +
-					z / m_MacrocellSize * ExtinctionSize.width * ExtinctionSize.height;
+					x / m_Scene.m_MacrocellSize +
+					y / m_Scene.m_MacrocellSize * ExtinctionSize.width +
+					z / m_Scene.m_MacrocellSize * ExtinctionSize.width * ExtinctionSize.height;
 
 				if (pExtinction[index] < pDensityBuffer[x + y * Resolution.GetResX() + z * Resolution.GetResY() * Resolution.GetResZ()])
 				{

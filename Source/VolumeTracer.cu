@@ -29,7 +29,7 @@ void BindDensityVolume(float* pDensityBuffer, cudaExtent Size)
 	gTexDensity.filterMode		= cudaFilterModeLinear;      
 	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
 	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
-	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
+// 	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
 
 	// Bind array to 3D texture
 	cudaBindTextureToArray(gTexDensity, gpDensity, ChannelDesc);
@@ -56,7 +56,7 @@ void BindExtinctionVolume(float* pExtinctionBuffer, cudaExtent Size)
 	gTexExtinction.filterMode		= cudaFilterModePoint;      
 	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
 	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
-	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
+// 	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
 
 	// Bind array to 3D texture
 	cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc);
@@ -67,9 +67,14 @@ DEV float Density(CScene* pDevScene, const Vec3f& P)
 	return tex3D(gTexDensity, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ());
 }
 
+DEV float Extinction(CScene* pDevScene, const Vec3f& P)
+{
+	return tex3D(gTexExtinction, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ());
+}
+
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	return 10000000.0f * pDevScene->m_TransferFunctions.m_Opacity.F(D);
+	return pDevScene->m_TransferFunctions.m_Opacity.F(D);
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
@@ -322,31 +327,29 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 	MaxT = min(MaxT, R.m_MaxT);
 
 	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
-	float Dt		= 2.0f * pDevScene->m_Spacing.Min();
+	float Dt		= 1.0f / (float)pDevScene->m_Resolution.GetResX();
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 	float D			= 0.0f;
 
-	Vec3f samplePos; 
+	Vec3f SamplePos; 
 
 	MinT += RNG.Get1() * Dt;
 
 	while (Sum < S)
 	{
-		samplePos = R.m_O + MinT * R.m_D;
+		SamplePos = R.m_O + MinT * R.m_D;
 
 		if (MinT > MaxT)
 			return false;
 		
-		D = Density(pDevScene, samplePos);
-
-		SigmaT	= GetOpacity(pDevScene, D)[Component] * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component] * GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
 
 	VP.m_Transmittance.c[Component]	= 0.5f;
-	VP.m_P							= samplePos;
+	VP.m_P							= R(MinT);
 	VP.m_D							= D;
 
 	return true;
@@ -361,139 +364,159 @@ DEV float sign(float num)
   return(0.0f);
 }
 
+struct CPhoton
+{
+  Vec3f origin;
+  Vec3f direction;
+  float energy;
+
+  // gamma photon
+  float photonEnergy;
+  float sigma;
+};
+
 DEV bool SampleDistanceDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component/*Photon* photon, unsigned int* seed0, unsigned int* seed1, cudaExtent densitySize*/)
 {
+	float MinT = 0.0f, MaxT = 0.0f;
+		
+	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+		return false;
+
+	R.m_O = R(MinT + RNG.Get1() * 0.01f);
+
+	CPhoton Photon;
+	Photon.origin		= R.m_O;
+	Photon.direction	= R.m_D;
+
   float3 cellIndex;
-  cellIndex.x = floor(R.m_O.x / pDevScene->m_MacrocellSize);
-  cellIndex.y = floor(R.m_O.y / pDevScene->m_MacrocellSize);
-  cellIndex.z = floor(R.m_O.z / pDevScene->m_MacrocellSize);
+  cellIndex.x = floor(Photon.origin.x / pDevScene->m_MacrocellSize);
+  cellIndex.y = floor(Photon.origin.y / pDevScene->m_MacrocellSize);
+  cellIndex.z = floor(Photon.origin.z / pDevScene->m_MacrocellSize);
 
   Vec3f t(0.0f);
 
-  if(R.m_D.x > EPS)
+  if(Photon.direction.x > EPS)
   {
-    t.x = ((cellIndex.x + 1) * pDevScene->m_MacrocellSize - R.m_O.x) / R.m_D.x;
+    t.x = ((cellIndex.x + 1) * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
   } else {
-    if(R.m_D.x < -EPS){
-      t.x = (cellIndex.x * pDevScene->m_MacrocellSize - R.m_O.x) / R.m_D.x;
+    if(Photon.direction.x < -EPS){
+      t.x = (cellIndex.x * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
     } else {
       t.x = 1000.0f;
     }
   }
-  if(R.m_D.y > EPS){
-    t.y = ((cellIndex.y + 1) * pDevScene->m_MacrocellSize - R.m_O.y) / R.m_D.y;
+  if(Photon.direction.y > EPS){
+    t.y = ((cellIndex.y + 1) * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
   } else {
-    if(R.m_D.y < -EPS){
-      t.y = (cellIndex.y * pDevScene->m_MacrocellSize - R.m_O.y) / R.m_D.y;
+    if(Photon.direction.y < -EPS){
+      t.y = (cellIndex.y * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
     } else {
       t.y = 1000.0f;
     }
   }
-  if(R.m_D.z > EPS){
-    t.z = ((cellIndex.z + 1) * pDevScene->m_MacrocellSize - R.m_O.z) / R.m_D.z;
+  if(Photon.direction.z > EPS){
+    t.z = ((cellIndex.z + 1) * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
   } else {
-    if(R.m_D.z < -EPS){
-      t.z = (cellIndex.z * pDevScene->m_MacrocellSize - R.m_O.z) / R.m_D.z;
+    if(Photon.direction.z < -EPS){
+      t.z = (cellIndex.z * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
     } else {
       t.z = 1000.0f;
     }
   }
 
-  Vec3f cpv;
-  cpv.x = pDevScene->m_MacrocellSize / fabs(R.m_D.x);
-  cpv.y = pDevScene->m_MacrocellSize / fabs(R.m_D.y);
-  cpv.z = pDevScene->m_MacrocellSize / fabs(R.m_D.z);
+	Vec3f cpv;
+	cpv.x = pDevScene->m_MacrocellSize / fabs(Photon.direction.x);
+	cpv.y = pDevScene->m_MacrocellSize / fabs(Photon.direction.y);
+	cpv.z = pDevScene->m_MacrocellSize / fabs(Photon.direction.z);
 
-  Vec3f samplePos = R.m_O;
+	Vec3f samplePos = Photon.origin;
 
-  int steps = 0;
+	int steps = 0;
   
-  bool virtualHit = true;
+	bool virtualHit = true;
   
-  while(virtualHit)
-  {
-    float sigmaMax = tex3D(gTexExtinction, R.m_O.x, R.m_O.y, R.m_O.z);
-    float lastSigmaMax = sigmaMax;
-    float ds = min(t.x, min(t.y, t.z));
-    float sigmaSum = sigmaMax * ds;
-    float s = -log(1.0f - RNG.Get1()) / pDevScene->m_DensityScale;
-    float tt = min(t.x, min(t.y, t.z));
-    Vec3f entry;
-    Vec3f exit = R.m_O + tt * R.m_D;
-
-    while(sigmaSum < s)
+	while (virtualHit)
 	{
-      if(steps++ > 100.0f)
-	  {
-//         photon->energy = 0.0f;
-        return false;
-      }
+		float sigmaMax = tex3D(gTexExtinction, Photon.origin.x, Photon.origin.y, Photon.origin.z);
+		float lastSigmaMax = sigmaMax;
+		float ds = min(t.x, min(t.y, t.z));
+		float sigmaSum = sigmaMax * ds;
+		float s = -log(1.0f - RNG.Get1()) / pDevScene->m_DensityScale;
+		float tt = min(t.x, min(t.y, t.z));
+		Vec3f entry;
+		Vec3f exit = Photon.origin + tt * Photon.direction;
 
-      entry = exit;
-
-      if (entry.x <= 0.0f || entry.x >= 1.0f ||
-          entry.y <= 0.0f || entry.y >= 1.0f ||
-          entry.z <= 0.0f || entry.z >= 1.0f){
-//         photon->energy = 0.0f;
-        return false;
-      }
-
-      if(t.x<t.y && t.x<t.z)
-	  {
-        cellIndex.x += sign(R.m_D.x);
-        t.x += cpv.x;
-      }
-	  else
-	  {
-        if(t.y<t.x && t.y<t.z)
+		while(sigmaSum < s)
 		{
-          cellIndex.y += sign(R.m_D.y);
-          t.y += cpv.y;
-        } else {
-          cellIndex.z += sign(R.m_D.z);
-          t.z += cpv.z;
-        }
-      }
+			if(steps++ > 100.0f)
+			{
+				return false;
+			}
 
-      tt = min(t.x, min(t.y, t.z));
-      exit = R.m_O + tt * R.m_D;
-      ds = (exit - entry).Length();
-      sigmaSum += ds * sigmaMax;
-      lastSigmaMax = sigmaMax;
-      Vec3f ePos = 0.5f * (exit + entry);
-      sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
-      samplePos = entry;
-    }
+			entry = exit;
 
-    float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
-    samplePos += R.m_D * cS;
+// 			if (!pDevScene->m_BoundingBox.Contains(entry))
+// 				return false;
 
-    if (R.m_O.x <= 0.0f || R.m_O.x >= 1.0f ||
-        R.m_O.y <= 0.0f || R.m_O.y >= 1.0f ||
-        R.m_O.z <= 0.0f || R.m_O.z >= 1.0f){
-//       photon->energy = 0.0f;
-      return false;
-    }
+			if (entry.x <= 0.0f || entry.x >= 1.0f || entry.y <= 0.0f || entry.y >= 1.0f || entry.z <= 0.0f || entry.z >= 1.0f)
+				return false;
 
-    if(tex3D(gTexDensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1())
+			if(t.x<t.y && t.x<t.z)
+			{
+				cellIndex.x += sign(Photon.direction.x);
+				t.x += cpv.x;
+			}
+			else
+			{
+				if(t.y<t.x && t.y<t.z)
+				{
+					cellIndex.y += sign(Photon.direction.y);
+					t.y += cpv.y;
+				}
+				else
+				{
+					cellIndex.z += sign(Photon.direction.z);
+					t.z += cpv.z;
+				}
+			}
+
+			tt = min(t.x, min(t.y, t.z));
+			exit = Photon.origin + tt * Photon.direction;
+			ds = (exit - entry).Length();
+			sigmaSum += ds * sigmaMax;
+			lastSigmaMax = sigmaMax;
+			Vec3f ePos = 0.5f * (exit + entry);
+			sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
+			samplePos = entry;
+		}
+
+		float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
+		samplePos += Photon.direction * cS;
+
+		if (Photon.origin.x <= 0.0f || Photon.origin.x >= 1.0f || Photon.origin.y <= 0.0f || Photon.origin.y >= 1.0f || Photon.origin.z <= 0.0f || Photon.origin.z >= 1.0f)
+			return false;
+ 
+// 		if (!pDevScene->m_BoundingBox.Contains(Photon.origin))
+// 			return false;
+
+		if (tex3D(gTexDensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1())
+		{
+			virtualHit = false;
+		}
+		else
+		{
+			Photon.origin = exit;
+		}
+	}
+
+	if (!virtualHit)
 	{
-      virtualHit = false;
-	  return false;
-    }
-	else
-	{
-		R.m_O = exit;
-
 		VP.m_Transmittance.c[Component]	= 0.5f;
 		VP.m_P							= samplePos;
-// 		VP.m_D							= D;
-
 		return true;
-    }
-  }
+	}
 
-//   photon->energy = photon->energy * c_albedo;
-//   R.m_O = samplePos;
+	return false;
 }
 
 DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
@@ -507,26 +530,24 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 //	MaxT = min(MaxT, R.m_MaxT);
 
 	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
-	float Dt		= 2.0f * pDevScene->m_Spacing.Min();
+	float Dt		= 1.0f / (float)pDevScene->m_Resolution.GetResX();
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 	float D			= 0.0f;
 
-	Vec3f samplePos; 
+	Vec3f SamplePos; 
 
 	MinT += RNG.Get1() * Dt;
 
 	while (Sum < S)
 	{
-		samplePos = R.m_O + MinT * R.m_D;
+		SamplePos = R.m_O + MinT * R.m_D;
 
 		// Free path, no collisions in between
 		if (MinT > R.m_MaxT)
 			break;
 		
-		D = Density(pDevScene, samplePos);
-
-		SigmaT	= GetOpacity(pDevScene, D)[Component] * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component] * GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -535,10 +556,160 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 		return false;
 
 	VP.m_Transmittance.c[Component]	= 0.5f;
-	VP.m_P							= samplePos;
+	VP.m_P							= R(MinT);
 	VP.m_D							= D;
 
 	return true;
+}
+
+DEV bool  FreePathDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component/*Photon* photon, unsigned int* seed0, unsigned int* seed1, cudaExtent densitySize*/)
+{
+	float MinT = 0.0f, MaxT = 0.0f;
+	
+	float maxt = R.m_MaxT;
+	Vec3f origin = R.m_O;
+
+		
+	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+		return false;
+
+	R.m_O = R(MinT + RNG.Get1() * 0.01f);
+
+	CPhoton Photon;
+	Photon.origin		= R.m_O;
+	Photon.direction	= R.m_D;
+
+  float3 cellIndex;
+  cellIndex.x = floor(Photon.origin.x / pDevScene->m_MacrocellSize);
+  cellIndex.y = floor(Photon.origin.y / pDevScene->m_MacrocellSize);
+  cellIndex.z = floor(Photon.origin.z / pDevScene->m_MacrocellSize);
+
+  Vec3f t(0.0f);
+
+  if(Photon.direction.x > EPS)
+  {
+    t.x = ((cellIndex.x + 1) * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
+  } else {
+    if(Photon.direction.x < -EPS){
+      t.x = (cellIndex.x * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
+    } else {
+      t.x = 1000.0f;
+    }
+  }
+  if(Photon.direction.y > EPS){
+    t.y = ((cellIndex.y + 1) * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
+  } else {
+    if(Photon.direction.y < -EPS){
+      t.y = (cellIndex.y * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
+    } else {
+      t.y = 1000.0f;
+    }
+  }
+  if(Photon.direction.z > EPS){
+    t.z = ((cellIndex.z + 1) * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
+  } else {
+    if(Photon.direction.z < -EPS){
+      t.z = (cellIndex.z * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
+    } else {
+      t.z = 1000.0f;
+    }
+  }
+
+	Vec3f cpv;
+	cpv.x = pDevScene->m_MacrocellSize / fabs(Photon.direction.x);
+	cpv.y = pDevScene->m_MacrocellSize / fabs(Photon.direction.y);
+	cpv.z = pDevScene->m_MacrocellSize / fabs(Photon.direction.z);
+
+	Vec3f samplePos = Photon.origin;
+
+	int steps = 0;
+  
+	bool virtualHit = true;
+  
+	while (virtualHit)
+	{
+		float sigmaMax = tex3D(gTexExtinction, Photon.origin.x, Photon.origin.y, Photon.origin.z);
+		float lastSigmaMax = sigmaMax;
+		float ds = min(t.x, min(t.y, t.z));
+		float sigmaSum = sigmaMax * ds;
+		float s = -log(1.0f - RNG.Get1()) / pDevScene->m_DensityScale;
+		float tt = min(t.x, min(t.y, t.z));
+		Vec3f entry;
+		Vec3f exit = Photon.origin + tt * Photon.direction;
+
+		while(sigmaSum < s)
+		{
+			if(steps++ > 100.0f)
+			{
+				return false;
+			}
+
+			entry = exit;
+
+// 			if (!pDevScene->m_BoundingBox.Contains(entry))
+// 				return false;
+
+			if (entry.x <= 0.0f || entry.x >= 1.0f || entry.y <= 0.0f || entry.y >= 1.0f || entry.z <= 0.0f || entry.z >= 1.0f)
+				return false;
+
+			if(t.x<t.y && t.x<t.z)
+			{
+				cellIndex.x += sign(Photon.direction.x);
+				t.x += cpv.x;
+			}
+			else
+			{
+				if(t.y<t.x && t.y<t.z)
+				{
+					cellIndex.y += sign(Photon.direction.y);
+					t.y += cpv.y;
+				}
+				else
+				{
+					cellIndex.z += sign(Photon.direction.z);
+					t.z += cpv.z;
+				}
+			}
+
+			tt = min(t.x, min(t.y, t.z));
+			exit = Photon.origin + tt * Photon.direction;
+			ds = (exit - entry).Length();
+			sigmaSum += ds * sigmaMax;
+			lastSigmaMax = sigmaMax;
+			Vec3f ePos = 0.5f * (exit + entry);
+			sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
+			samplePos = entry;
+		}
+
+		float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
+		samplePos += Photon.direction * cS;
+
+		if (Photon.origin.x <= 0.0f || Photon.origin.x >= 1.0f || Photon.origin.y <= 0.0f || Photon.origin.y >= 1.0f || Photon.origin.z <= 0.0f || Photon.origin.z >= 1.0f)
+			return false;
+ 
+// 		if (!pDevScene->m_BoundingBox.Contains(Photon.origin))
+// 			return false;
+
+		if (tex3D(gTexDensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1())
+		{
+			virtualHit = false;
+		}
+		else
+		{
+			Photon.origin = exit;
+		}
+	}
+
+	if (!virtualHit)
+	{
+		VP.m_Transmittance.c[Component]	= 0.5f;
+		VP.m_P							= samplePos;
+
+		if ((samplePos - origin).Length() > maxt)
+			return true;
+	}
+
+	return false;
 }
 
 // Trace volume with single scattering
@@ -588,7 +759,8 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		CVolumePoint VP;
 
 		// Sample distance
-		if (SampleDistanceRM(Re, RNG, VP, pDevScene, CC1))
+ 		if (SampleDistanceRM(Re, RNG, VP, pDevScene, CC1))
+//		if (SampleDistanceDdaWoodcock(Re, RNG, VP, pDevScene, CC1))
 		{
 // 			if (VP.m_Transmittance.y() > 0.0f)
 //			PathThroughput.c[CC1] *= VP.m_Transmittance.c[CC1];
@@ -606,8 +778,9 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			const int WhichLight = (int)floorf(RNG.Get1() * (float)pDevScene->m_Lighting.m_NoLights);
 
 			Li = pDevScene->m_Lighting.m_Lights[WhichLight].SampleL(Pe, Rl, LightPdf, LS);
-
- 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
+			
+			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
+// 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathDdaWoodcock(Rl, RNG, VP, pDevScene, CC1))
  			{
  				Li /= LightPdf;
  				Lv.c[CC1] += PathThroughput.c[CC1] * Li.c[CC1] * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
