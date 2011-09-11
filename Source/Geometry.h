@@ -126,6 +126,11 @@ public:
 		return CColorXyz::FromRGB(r, g, b);
 	}
 
+	void PrintSelf(void)
+	{
+		printf("[%4.2f, %4.2f, %4.2f]\n", r, g, b);
+	}
+
 	float	r;
 	float	g;
 	float	b;
@@ -234,6 +239,11 @@ public:
 		r = (unsigned char)(R * 255.0f);
 		g = (unsigned char)(G * 255.0f);
 		b = (unsigned char)(B * 255.0f);
+	}
+
+	void PrintSelf(void)
+	{
+		printf("[%d, %d, %d]\n", r, g, b);
 	}
 
 public:
@@ -347,6 +357,11 @@ public:
 		return sqrtf(LengthSquared());
 	}
 
+	void PrintSelf(void)
+	{
+		printf("[%4.2f, %4.2f]\n", x, y);
+	}
+
 	float x, y;
 };
 
@@ -414,6 +429,11 @@ public:
 	HOD bool operator == (const Vec2i& V) const
 	{
 		return V.x == x && V.y == y;
+	}
+
+	void PrintSelf(void)
+	{
+		printf("[%d, %d]\n", x, y);
 	}
 
 	int x, y;
@@ -515,6 +535,11 @@ public:
 			else
 				return z;
 		}
+	}
+
+	void PrintSelf(void)
+	{
+		printf("[%d, %d, %d]\n", x, y, z);
 	}
 
 	int x, y, z;
@@ -756,6 +781,11 @@ public:
 		return vl;
 	}
 
+	void PrintSelf(void)
+	{
+		printf("[%4.2f, %4.2f, %4.2f]\n", x, y, z);
+	}
+
 	float x, y, z;
 };
 
@@ -821,6 +851,11 @@ public:
 		w *= f;
 
 		return *this;
+	}
+
+	void PrintSelf(void)
+	{
+		printf("[%d, %d, %d, %d]\n", x, y, z, w);
 	}
 
 	float x, y, z, w;
@@ -892,6 +927,19 @@ public:
 	HOD Vec3f operator()(float t) const
 	{
 		return m_O + Normalize(m_D) * t;
+	}
+
+	void PrintSelf(void)
+	{
+		printf("Origin ");
+		m_O.PrintSelf();
+
+		printf("Direction ");
+		m_D.PrintSelf();
+
+		printf("Min T: %4.2f\n", m_MinT);
+		printf("Max T: %4.2f\n", m_MaxT);
+		printf("Pixel ID: %d\n", m_PixelID);
 	}
 
 	Vec3f 	m_O;			/*!< Ray origin */
@@ -1018,6 +1066,11 @@ public:
 
 		return *this;
 	}
+
+	void PrintSelf(void)
+	{
+		printf("[%4.2f - %4.2f]\n", m_Min, m_Max);
+	}
 };
 
 class EXPOSURE_RENDER_DLL CBoundingBox
@@ -1026,7 +1079,7 @@ public:
 	Vec3f	m_MinP;
 	Vec3f	m_MaxP;
 		
-	HOD CBoundingBox(void) :
+	CBoundingBox(void) :
 		m_MinP(FLT_MAX, FLT_MAX, FLT_MAX),
 		m_MaxP(-FLT_MAX, -FLT_MAX, -FLT_MAX)
 	{
@@ -1249,6 +1302,15 @@ public:
 
 		return true;
 	}
+
+	void PrintSelf(void)
+	{
+		printf("Min: ");
+		m_MinP.PrintSelf();
+
+		printf("Max: ");
+		m_MaxP.PrintSelf();
+	}
 };
 
 class EXPOSURE_RENDER_DLL CPixel
@@ -1346,13 +1408,18 @@ public:
 		Update();
 	}
 
-	HOD float	GetResX(void) const				{ return m_XY.x; }
-	HOD void	SetResX(const float& Width)		{ m_XY.x = Width; Update(); }
-	HOD float	GetResY(void) const				{ return m_XY.y; }
-	HOD void	SetResY(const float& Height)	{ m_XY.y = Height; Update(); }
+	HOD int		GetResX(void) const				{ return m_XY.x; }
+	HOD void	SetResX(const int& Width)		{ m_XY.x = Width; Update(); }
+	HOD int		GetResY(void) const				{ return m_XY.y; }
+	HOD void	SetResY(const int& Height)		{ m_XY.y = Height; Update(); }
 	HOD Vec2f	GetInv(void) const				{ return m_InvXY; }
 	HOD int		GetNoElements(void) const		{ return m_NoElements; }
 	HOD float	GetAspectRatio(void) const		{ return m_AspectRatio; }
+
+	void PrintSelf(void)
+	{
+		printf("[%d x %d]\n", GetResX(), GetResY());
+	}
 	
 private:
 	Vec2i	m_XY;					/*!< Resolution width and height */
@@ -1404,9 +1471,9 @@ public:
 	// ToDo: Add description
 	HOD void Update(void)
 	{
-		m_InvXYZ			= Vec3f(m_XYZ.x == 0.0f ? 1.0f : 1.0f / m_XYZ.x, m_XYZ.y == 0.0f ? 1.0f : 1.0f / m_XYZ.y, m_XYZ.z == 0.0f ? 1.0f : 1.0f / m_XYZ.z);
-		m_NoElements		= m_XYZ.x * m_XYZ.y * m_XYZ.z;
-		m_DiagonalLength	= m_XYZ.Length();
+// 		m_InvXYZ			= Vec3f(m_XYZ.x == 0.0f ? 1.0f : 1.0f / m_XYZ.x, m_XYZ.y == 0.0f ? 1.0f : 1.0f / m_XYZ.y, m_XYZ.z == 0.0f ? 1.0f : 1.0f / m_XYZ.z);
+// 		m_NoElements		= m_XYZ.x * m_XYZ.y * m_XYZ.z;
+// 		m_DiagonalLength	= m_XYZ.Length();
 	}
 
 	// ToDo: Add description
@@ -1414,8 +1481,6 @@ public:
 	{
 		return Vec3f(m_XYZ.x, m_XYZ.y, m_XYZ.z);
 	}
-
-	
 
 	HOD void SetResXYZ(const Vec3i& Resolution)
 	{
@@ -1427,18 +1492,18 @@ public:
 	}
 
 	HOD Vec3i	GetResXYZ(void) const				{ return m_XYZ; }
-	HOD float	GetResX(void) const					{ return m_XYZ.x; }
-	HOD void	SetResX(const float& ResX)			{ m_XYZ.x = ResX; Update(); }
-	HOD float	GetResY(void) const					{ return m_XYZ.y; }
-	HOD void	SetResY(const float& ResY)			{ m_XYZ.y = ResY; Update(); }
-	HOD float	GetResZ(void) const					{ return m_XYZ.z; }
-	HOD void	SetResZ(const float& ResZ)			{ m_XYZ.z = ResZ; Update(); }
+	HOD int		GetResX(void) const					{ return m_XYZ.x; }
+	HOD void	SetResX(const int& ResX)			{ m_XYZ.x = ResX; Update(); }
+	HOD int		GetResY(void) const					{ return m_XYZ.y; }
+	HOD void	SetResY(const int& ResY)			{ m_XYZ.y = ResY; Update(); }
+	HOD int		GetResZ(void) const					{ return m_XYZ.z; }
+	HOD void	SetResZ(const int& ResZ)			{ m_XYZ.z = ResZ; Update(); }
 	HOD Vec3f	GetInv(void) const					{ return m_InvXYZ; }
 	HOD int		GetNoElements(void) const			{ return m_NoElements; }
 
 	HO void PrintSelf(void)
 	{
-		printf("%5d x %5d x %5d", GetResX(), GetResY(), GetResZ());
+		printf("[%d x %d x %d]\n", GetResX(), GetResY(), GetResZ());
 	}
 
 private:

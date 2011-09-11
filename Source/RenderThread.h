@@ -64,7 +64,6 @@ private:
 	unsigned char*			m_pRenderImage;
 
 	vtkImageData*			m_pImageDataVolume;
-	CScene					m_Scene;
 
 	// CUDA allocations
 	CScene*					m_pDevScene;
@@ -80,7 +79,7 @@ private:
 public:
 	QMutex					m_Mutex;
 	bool m_Abort;
-
+	CScene					m_Scene;
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);

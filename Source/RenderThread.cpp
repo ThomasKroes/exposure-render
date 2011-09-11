@@ -298,9 +298,9 @@ void QRenderThread::run()
 
 //	qDebug("Copying volume data to device");
 
-//	Load(m_FileName);
+	Load(m_FileName);
 
-	m_Scene.m_Resolution.PrintSelf();
+	m_Scene.PrintSelf();
 
 	return;
 
@@ -628,7 +628,7 @@ bool QRenderThread::Load(QString& FileName)
 
 	m_Scene.m_Resolution.SetResXYZ(Vec3i(pExtent[1] + 1, pExtent[3] + 1, pExtent[5] + 1));
 
-	m_Scene.m_Resolution.PrintSelf();
+//	m_Scene.m_Resolution.PrintSelf();
 
 	double* pSpacing = m_pImageDataVolume->GetSpacing();
 

@@ -21,6 +21,15 @@ CScene::CScene(void) :
 {
 }
 
+CScene::CScene(const CScene& Other)
+{
+	*this = Other;
+}
+
+CScene::~CScene(void)
+{
+}
+
 HOD CScene& CScene::operator=(const CScene& Other)
 {
 	m_Camera			= Other.m_Camera;
@@ -35,12 +44,32 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_MaxNoBounces		= Other.m_MaxNoBounces;
 	m_IntensityRange	= Other.m_IntensityRange;
 	m_KernelSize		= Other.m_KernelSize;
-	m_SigmaMax				= Other.m_SigmaMax;
+	m_SigmaMax			= Other.m_SigmaMax;
 
 	return *this;
 }
 
-void CScene::Set(void)
+void CScene::PrintSelf(void)
 {
-//	printf("sad");
+// 	m_Camera.PrintSelf();
+// 	m_Lighting.PrintSelf();
+
+	printf("Volume Resolution: ");
+ 	m_Resolution.PrintSelf();
+// 	m_DirtyFlags.PrintSelf();
+
+	printf("Spacing: ");
+ 	m_Spacing.PrintSelf();
+
+	printf("Scale: ");
+ 	m_Scale.PrintSelf();
+
+	printf("Bounding Box: ");
+	m_BoundingBox.PrintSelf();
+// 	m_TransferFunctions.PrintSelf();
+
+	printf("Intensity Range: ");
+	m_IntensityRange.PrintSelf();
+
+// 	m_KernelSize.PrintSelf();
 }

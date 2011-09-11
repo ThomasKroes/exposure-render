@@ -738,10 +738,11 @@ class CScene
 {
 public:
 	CScene(void);
+	CScene(const CScene& Other);
+	virtual ~CScene(void);
+	CScene& operator = (const CScene& Other);
 
-	HOD CScene& operator = (const CScene& Other);
-
-	void Set(void);
+	void PrintSelf(void);
 
 	CCamera					m_Camera;
 	CLighting				m_Lighting;
