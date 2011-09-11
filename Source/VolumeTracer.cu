@@ -64,7 +64,7 @@ void BindExtinctionVolume(float* pExtinctionBuffer, cudaExtent Size)
 
 DEV float Density(CScene* pDevScene, const Vec3f& P)
 {
-	return tex3D(gTexDensity, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ());
+	return tex3D(gTexDensity, P.x, P.y, P.z);
 }
 
 DEV float Extinction(CScene* pDevScene, const Vec3f& P)
@@ -90,6 +90,11 @@ DEV CColorRgbHdr GetSpecular(CScene* pDevScene, const float& D)
 DEV CColorRgbHdr GetEmission(CScene* pDevScene, const float& D)
 {
 	return pDevScene->m_TransferFunctions.m_Emission.F(D);
+}
+
+DEV CColorRgbHdr GetRoughness(CScene* pDevScene, const float& D)
+{
+	return pDevScene->m_TransferFunctions.m_Roughness.F(D);
 }
 
 // Computes the attenuation through the volume
@@ -343,14 +348,12 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component] * GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];
+		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];// * (1.0f - GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component]);
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
 
-	VP.m_Transmittance.c[Component]	= 0.5f;
-	VP.m_P							= R(MinT);
-	VP.m_D							= D;
+	VP.m_P = R(MinT);
 
 	return true;
 }
@@ -527,13 +530,11 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 		return false;
 
 	MinT = max(MinT, R.m_MinT);
-//	MaxT = min(MaxT, R.m_MaxT);
 
 	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
 	float Dt		= 1.0f / (float)pDevScene->m_Resolution.GetResX();
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
-	float D			= 0.0f;
 
 	Vec3f SamplePos; 
 
@@ -547,19 +548,17 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 		if (MinT > R.m_MaxT)
 			break;
 		
-		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component] * GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];
+		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];// * (1.0f - GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component]);
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
 
+	VP.m_P = R(MinT);
+
 	if (MinT < R.m_MaxT)
 		return false;
-
-	VP.m_Transmittance.c[Component]	= 0.5f;
-	VP.m_P							= R(MinT);
-	VP.m_D							= D;
-
-	return true;
+	else
+		return true;
 }
 
 DEV bool  FreePathDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component/*Photon* photon, unsigned int* seed0, unsigned int* seed1, cudaExtent densitySize*/)
@@ -763,7 +762,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 //		if (SampleDistanceDdaWoodcock(Re, RNG, VP, pDevScene, CC1))
 		{
 // 			if (VP.m_Transmittance.y() > 0.0f)
-//			PathThroughput.c[CC1] *= VP.m_Transmittance.c[CC1];
+// 			PathThroughput.c[CC1] *= VP.m_Transmittance.c[CC1];
 
 			// Compute gradient (G) and normalized gradient (Gn)
   			G	= ComputeGradient(pDevScene, VP.m_P);
@@ -779,15 +778,27 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 
 			Li = pDevScene->m_Lighting.m_Lights[WhichLight].SampleL(Pe, Rl, LightPdf, LS);
 			
-			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
+			const float D = tex3D(gTexDensity, VP.m_P.x, VP.m_P.y, VP.m_P.z);
+
+			CBSDF Bsdf(Gn, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, GetRoughness(pDevScene, D).ToXYZ().y());
+
+			const float f = Bsdf.F(-Re.m_D, -Rl.m_D).c[CC1];
+
+			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1) && f > 0.0f)
 // 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathDdaWoodcock(Rl, RNG, VP, pDevScene, CC1))
  			{
  				Li /= LightPdf;
- 				Lv.c[CC1] += PathThroughput.c[CC1] * Li.c[CC1] * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
+// 				Ld += F * Li * (Weight / LightPdf);
+ 				Lv.c[CC1] += PathThroughput.c[CC1] * f * /*AbsDot(-Rl.m_D, Gn) * */Li.c[CC1];// * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
  			}
 
-			W = Normalize(SampleHG(Wo, pDevScene->m_PhaseG, RNG.Get2()));
-//			W = UniformSampleSphere(RNG.Get2());
+			CBsdfSample BsdfSample;
+
+			BsdfSample.LargeStep(RNG);
+
+//			Bsdf.SampleF(-Re.m_D, W, LightPdf, BsdfSample);
+//			W = Normalize(SampleHG(Wo, pDevScene->m_PhaseG, RNG.Get2()));
+			W = UniformSampleSphere(RNG.Get2());
 //			W = UniformSampleHemisphere(RNG.Get2(), Gn);
 
 			// Configure eye ray
@@ -802,7 +813,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 					PathThroughput.c[CC1] /= Pc;
 			}
 
-//			PathThroughput.c[CC1] /= 4.0f * PI_F;
+			PathThroughput.c[CC1] * f;
 //			PathThroughput.c[CC1] /= PhaseHG(Wo, Rl.m_D, PhaseG);
 
 			// Add scattering event
