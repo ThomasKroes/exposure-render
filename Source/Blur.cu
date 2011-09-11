@@ -7,15 +7,15 @@ KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D
 {
 	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-	const int PID	= (Y * Resolution.GetWidth()) + X;				// Get pixel ID	
+	const int PID	= (Y * Resolution.GetResX()) + X;				// Get pixel ID	
 
 	// Exit if beyond image boundaries
-	if (X >= Resolution.GetWidth() || Y >= Resolution.GetHeight())
+	if (X >= Resolution.GetResX() || Y >= Resolution.GetResY())
 		return;
 
 	// Compute filter extent
 	const int X0 = max((int)ceilf(X - GaussianFilter.xWidth), 0);
-	const int X1 = min((int)floorf(X + GaussianFilter.xWidth), (int)Resolution.GetWidth());
+	const int X1 = min((int)floorf(X + GaussianFilter.xWidth), (int)Resolution.GetResX());
 
 	// Accumulated color
 	CColorXyz Sum;
@@ -28,7 +28,7 @@ KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D
 		// Compute filter weight
 		FW = GaussianFilter.Evaluate(fabs((float)(x - X) / (0.5f * GaussianFilter.xWidth)), 0.0f);
 
-		Sum		+= FW * pImage[(Y * (int)Resolution.GetWidth()) + x];
+		Sum		+= FW * pImage[(Y * (int)Resolution.GetResX()) + x];
 		SumW	+= FW;
 	}
 
@@ -43,15 +43,15 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D
 {
 	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-	const int PID	= (Y * Resolution.GetWidth()) + X;				// Get pixel ID	
+	const int PID	= (Y * Resolution.GetResX()) + X;				// Get pixel ID	
 
 	// Exit if beyond image boundaries
-	if (X >= Resolution.GetWidth() || Y >= Resolution.GetHeight())
+	if (X >= Resolution.GetResX() || Y >= Resolution.GetResY())
 		return;
 
 	// Compute filter extent
 	const int Y0 = max((int)ceilf (Y - GaussianFilter.yWidth), 0);
-	const int Y1 = min((int)floorf(Y + GaussianFilter.yWidth), (int)Resolution.GetHeight() - 1);
+	const int Y1 = min((int)floorf(Y + GaussianFilter.yWidth), (int)Resolution.GetResY() - 1);
 
 	// Accumulated color
 	CColorXyz Sum;
@@ -64,7 +64,7 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D
 		// Compute filter weight
 		FW = GaussianFilter.Evaluate(0.0f, fabs((float)(y - Y) / (0.5f * GaussianFilter.yWidth)));
 
-		Sum		+= FW * pTempImage[(y * (int)Resolution.GetWidth()) + X];
+		Sum		+= FW * pTempImage[(y * (int)Resolution.GetResX()) + X];
 		SumW	+= FW;
 	}
 
@@ -78,7 +78,7 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D
 void BlurImageXyz(CColorXyz* pImage, CColorXyz* pTempImage, const CResolution2D& Resolution, const float& Radius)
 {
 	const dim3 KernelBlock(32, 8);
-	const dim3 KernelGrid((int)ceilf((float)Resolution.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)Resolution.GetHeight() / (float)KernelBlock.y));
+	const dim3 KernelGrid((int)ceilf((float)Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)Resolution.GetResY() / (float)KernelBlock.y));
 
 	// Create gaussian filter
 	CGaussianFilter GaussianFilter(2.0f * Radius, 2.0f * Radius, 2.0f);

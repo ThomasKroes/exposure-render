@@ -5,28 +5,23 @@
 #include "Scene.h"
 #include "Material.h"
 
-texture<short, 3, cudaReadModeNormalizedFloat>	gTexDensity;
+texture<float, 3, cudaReadModeElementType>	gTexDensity;
+texture<float, 3, cudaReadModeElementType>	gTexExtinction;
 
-cudaArray* gpI = NULL;
-
-void BindVolumeData(short* pDensity, CResolution3D& Resolution)
+void BindDensityVolume(float* pDensityBuffer, cudaExtent Size)
 {
-	cudaExtent ExtentGridI;
-
-	ExtentGridI.width	= Resolution.m_XYZ.x;
-	ExtentGridI.depth	= Resolution.m_XYZ.z;
-	ExtentGridI.height	= Resolution.m_XYZ.y; 
+	cudaArray* gpDensity = NULL;
 
 	// create 3D array
-	cudaChannelFormatDesc ChannelDescDensity = cudaCreateChannelDesc<short>();
-	cudaMalloc3DArray(&gpI, &ChannelDescDensity, ExtentGridI);
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
+	cudaMalloc3DArray(&gpDensity, &ChannelDesc, Size);
 
 	// copy data to 3D array
-	cudaMemcpy3DParms copyParams = {0};
-	copyParams.srcPtr   = make_cudaPitchedPtr(pDensity, ExtentGridI.width * sizeof(short), ExtentGridI.width, ExtentGridI.height);
-	copyParams.dstArray = gpI;
-	copyParams.extent   = ExtentGridI;
-	copyParams.kind     = cudaMemcpyHostToDevice;
+	cudaMemcpy3DParms copyParams	= {0};
+	copyParams.srcPtr				= make_cudaPitchedPtr(pDensityBuffer, Size.width * sizeof(float), Size.width, Size.height);
+	copyParams.dstArray				= gpDensity;
+	copyParams.extent				= Size;
+	copyParams.kind					= cudaMemcpyHostToDevice;
 	cudaMemcpy3D(&copyParams);
 
 	// Set texture parameters
@@ -37,12 +32,34 @@ void BindVolumeData(short* pDensity, CResolution3D& Resolution)
 	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
 
 	// Bind array to 3D texture
-	cudaBindTextureToArray(gTexDensity, gpI, ChannelDescDensity);
+	cudaBindTextureToArray(gTexDensity, gpDensity, ChannelDesc);
 }
 
-void UnbindVolumeData(void)
+void BindExtinctionVolume(float* pExtinctionBuffer, cudaExtent Size)
 {
-	cudaFree(gpI);
+	cudaArray* gpExtinction = NULL;
+
+	// create 3D array
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
+	cudaMalloc3DArray(&gpExtinction, &ChannelDesc, Size);
+
+	// copy data to 3D array
+	cudaMemcpy3DParms copyParams	= {0};
+	copyParams.srcPtr				= make_cudaPitchedPtr(pExtinctionBuffer, Size.width * sizeof(float), Size.width, Size.height);
+	copyParams.dstArray				= gpExtinction;
+	copyParams.extent				= Size;
+	copyParams.kind					= cudaMemcpyHostToDevice;
+	cudaMemcpy3D(&copyParams);
+
+	// Set texture parameters
+	gTexExtinction.normalized		= true;
+	gTexExtinction.filterMode		= cudaFilterModePoint;      
+	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
+	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
+	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
+
+	// Bind array to 3D texture
+	cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc);
 }
 
 DEV float Density(CScene* pDevScene, const Vec3f& P)
@@ -305,7 +322,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	float S = -log(RNG.Get1()) / pDevScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+	float S = -log(RNG.Get1()) / pDevScene->m_SigmaMax, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
 
 	Vec3f samplePos; 
 
@@ -321,7 +338,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScen
 //		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
 		D = Density(pDevScene, samplePos);
 
-		SigmaT	= GetOpacity(pDevScene, D)[Component] * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -343,7 +360,7 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 	MinT = max(MinT, R.m_MinT);
 //	MaxT = min(MaxT, R.m_MaxT);
 
-	float S = -log(RNG.Get1()) / pDevScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+	float S = -log(RNG.Get1()) / pDevScene->m_SigmaMax, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.GetResXYZ().Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
 
 	Vec3f samplePos; 
 
@@ -360,7 +377,7 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDe
 //		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
 		D = Density(pDevScene, samplePos);
 
-		SigmaT	= GetOpacity(pDevScene, D)[Component] * GetDiffuse(pDevScene, D)[Component];
+		SigmaT	= GetOpacity(pDevScene, D)[Component];// * GetDiffuse(pDevScene, D)[Component];
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -385,7 +402,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
 	// Exit if beyond kernel boundaries
-	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetWidth() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetHeight())
+	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetResY())
 		return;
 
 	// Init random number generator
@@ -486,14 +503,14 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 //  		Lv += SPEC_WHITE;
 
 
-	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetWidth() + X].c[CC1] = Lv.c[CC1] / fmaxf(1.0f, NoScatteringEvents);
+	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X].c[CC1] = Lv.c[CC1] / fmaxf(1.0f, NoScatteringEvents);
 }
 
 // Traces the volume
 void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 {
-	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
-	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetHeight() / (float)KernelBlock.y));
+	const dim3 KernelBlock(32, 8);
+	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	// Execute kernel
 	KrnlSS<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);

@@ -160,12 +160,17 @@ CRenderThread::CRenderThread(QObject* pParent) :
 	m_SizeHdrFrameBuffer(0),
 	m_SizeHdrBlurFrameBuffer(0),
 	m_SizeLdrFrameBuffer(0),
-	m_Abort(false)
+	m_Abort(false),
+	m_pDensityBuffer(NULL),
+	m_DensityBufferSize(),
+	m_ExtinctionSize(),
+	m_MacrocellSize(8)
 {
 }
 
 CRenderThread::~CRenderThread(void)
 {
+	delete[] m_pDensityBuffer;
 }
 
 bool CRenderThread::InitializeCuda(void)
@@ -253,7 +258,7 @@ void CRenderThread::run()
 		return;
 	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(800, 600));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
 	m_Scene.m_Camera.m_Aperture.m_Size = 0.01f;
 	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
 	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
@@ -265,8 +270,8 @@ void CRenderThread::run()
 
 	qDebug("Copying volume data to device");
 
-	// Bind the volume
-	BindVolumeData((short*)m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution);
+	CreateDensityVolume();
+	CreateExtinctionVolume();
 
 	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
 
@@ -360,7 +365,7 @@ void CRenderThread::run()
 			// Notify Inform others about the memory allocations
 			emit gRenderStatus.Resize();
 
-			emit gRenderStatus.StatisticChanged("Camera", "Resolution", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetWidth()) + " x " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetHeight()), "Pixels");
+			emit gRenderStatus.StatisticChanged("Camera", "Resolution", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()) + " x " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
 		}
 
 		// Restart the rendering when when the camera, lights and render params are dirty
@@ -390,7 +395,7 @@ void CRenderThread::run()
 		Timer.StartTimer();
 
 		// Blur the estimate
- 		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.GetWidth(), SceneCopy.m_Camera.m_Film.m_Resolution.GetHeight()), 1.3f);
+ 		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
 		HandleCudaError(cudaGetLastError());
 
 		emit gRenderStatus.StatisticChanged("Timings", "Blur Estimate", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -398,7 +403,7 @@ void CRenderThread::run()
 		Timer.StartTimer();
 
 		// Compute converged image
- 		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetWidth(), SceneCopy.m_Camera.m_Film.m_Resolution.GetHeight(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
+ 		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
 		HandleCudaError(cudaGetLastError());
 		
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -528,7 +533,7 @@ bool CRenderThread::Load(QString& FileName)
 
 	m_pImageDataVolume = ImageCast->GetOutput();
 
-	/*
+	
 //	if (LoadSettingsDialog.GetResample())
 //	{
 		// Create resampler
@@ -540,21 +545,21 @@ bool CRenderThread::Load(QString& FileName)
 		ImageResample->SetInput(m_pImageDataVolume);
 
 		// Obtain resampling scales from dialog input
-		gm_Scene.m_Scale.x = LoadSettingsDialog.GetResampleX();
-		gm_Scene.m_Scale.y = LoadSettingsDialog.GetResampleY();
-		gm_Scene.m_Scale.z = LoadSettingsDialog.GetResampleZ();
+		m_Scene.m_Scale.x = LoadSettingsDialog.GetResampleX();
+		m_Scene.m_Scale.y = LoadSettingsDialog.GetResampleY();
+		m_Scene.m_Scale.z = LoadSettingsDialog.GetResampleZ();
 
 		// Apply scaling factors
-		ImageResample->SetAxisMagnificationFactor(0, gm_Scene.m_Scale.x);
-		ImageResample->SetAxisMagnificationFactor(1, gm_Scene.m_Scale.y);
-		ImageResample->SetAxisMagnificationFactor(2, gm_Scene.m_Scale.z);
+		ImageResample->SetAxisMagnificationFactor(0, m_Scene.m_Scale.x);
+		ImageResample->SetAxisMagnificationFactor(1, m_Scene.m_Scale.y);
+		ImageResample->SetAxisMagnificationFactor(2, m_Scene.m_Scale.z);
 	
 		// Resample
 		ImageResample->Update();
 
 		m_pImageDataVolume = ImageResample->GetOutput();
 //	}
-	*/
+	/**/
 	/*
 	// Create magnitude volume
 	vtkSmartPointer<vtkImageGradientMagnitude> ImageGradientMagnitude = vtkImageGradientMagnitude::New();
@@ -592,6 +597,7 @@ bool CRenderThread::Load(QString& FileName)
 	m_Scene.m_Spacing.y = pSpacing[1];
 	m_Scene.m_Spacing.z = pSpacing[2];
 	
+	m_Scene.m_SigmaMax = gTransferFunction.GetRange();
 
 	Vec3f Resolution = Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.m_XYZ.x, m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.m_XYZ.y, m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.m_XYZ.z);
 
@@ -620,7 +626,8 @@ bool CRenderThread::Load(QString& FileName)
 //	delete gpProgressDialog;
 //	gpProgressDialog = NULL;
 
-	
+	m_pDensityBuffer = (float*)malloc(m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.m_NoElements * sizeof(float));
+	memcpy(m_pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.m_NoElements * sizeof(float));
 
 	emit gRenderStatus.StatisticChanged("Volume", "File", QFileInfo(m_FileName).fileName(), "");
 	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", "", "");
@@ -636,12 +643,91 @@ bool CRenderThread::Load(QString& FileName)
 	return true;
 }
 
+void CRenderThread::CreateDensityVolume(void)
+{
+//	char* magicNum = new char[2];
+//	size_t size = fread(magicNum, sizeof(char), 2, dataFile);
+
+//	if('V' == magicNum[0] && 'F' == magicNum[1])
+//	{
+//		int volumeSize[3];
+//		size = fread(volumeSize, sizeof(int), 3, dataFile);
+		m_DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
+
+		m_pDensityBuffer = new float[m_Scene.m_Resolution.m_XYZ.x * m_Scene.m_Resolution.m_XYZ.y * m_Scene.m_Resolution.m_XYZ.z];
+
+//		size = fread(densityBuffer, sizeof(float), volumeSize[0] * volumeSize[1] * volumeSize[2], dataFile);
+
+		m_Scene.m_SigmaMax = 0.0f;
+
+		for(int i = 0; i < m_Scene.m_Resolution.m_XYZ.x * m_Scene.m_Resolution.m_XYZ.y * m_Scene.m_Resolution.m_XYZ.z; ++i)
+		{
+			m_Scene.m_SigmaMax = m_Scene.m_SigmaMax > m_pDensityBuffer[i] ? m_Scene.m_SigmaMax : m_pDensityBuffer[i];
+		}
+
+// 		for (int i=0; i<volumeSize[0]*volumeSize[1]*volumeSize[2]; ++i)
+// 		{
+//			m_pDensityBuffer[i] = m_pDensityBuffer[i] > cutValue ? m_pDensityBuffer[i] / m_Scene.m_SigmaMax : 0;
+// 		}
+
+		BindDensityVolume(m_pDensityBuffer, m_DensityBufferSize);
+
+//	}
+}
+
+void CRenderThread::CreateExtinctionVolume(void)
+{
+	cudaArray* volArray;
+
+	m_ExtinctionSize.width	= m_DensityBufferSize.width / m_MacrocellSize;
+	m_ExtinctionSize.height	= m_DensityBufferSize.height / m_MacrocellSize;
+	m_ExtinctionSize.depth	= m_DensityBufferSize.depth / m_MacrocellSize;
+
+	float* pExtinction = (float*)malloc(sizeof(float)*m_ExtinctionSize.width*m_ExtinctionSize.height*m_ExtinctionSize.depth);
+	
+	for(int i = 0; i<m_ExtinctionSize.width*m_ExtinctionSize.height*m_ExtinctionSize.depth; ++i)
+	{
+		pExtinction[i] = 0.0f;
+	}
+
+	for (int x = 0; x<m_DensityBufferSize.width; ++x)
+	{
+		for (int y = 0; y<m_DensityBufferSize.height; ++y)
+		{
+			for (int z = 0; z<m_DensityBufferSize.depth; ++z)
+			{
+				int index =
+					x / m_MacrocellSize +
+					y / m_MacrocellSize * m_ExtinctionSize.width +
+					z / m_MacrocellSize * m_ExtinctionSize.width * m_ExtinctionSize.height;
+
+				if (pExtinction[index] < m_pDensityBuffer[x + y * m_DensityBufferSize.width + z * m_DensityBufferSize.width * m_DensityBufferSize.height])
+				{
+					pExtinction[index] = m_pDensityBuffer[x + y * m_DensityBufferSize.width + z * m_DensityBufferSize.width * m_DensityBufferSize.height];
+				}
+			}
+		}
+	}
+
+	BindExtinctionVolume(pExtinction, m_ExtinctionSize);
+}
+
 void CRenderThread::HandleCudaError(const cudaError_t CudaError)
 {
 	if (CudaError == cudaSuccess)
 		return;
 
 	qDebug(cudaGetErrorString(CudaError));
+}
+
+float* CRenderThread::GetDensityBuffer(void)
+{
+	return m_pDensityBuffer;
+}
+
+cudaExtent CRenderThread::GetDensityBufferSize(void) const
+{
+	return m_DensityBufferSize;
 }
 
 CScene* Scene(void)

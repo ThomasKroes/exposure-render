@@ -1346,13 +1346,13 @@ public:
 		Update();
 	}
 
-	HOD float GetWidth(void) const { return m_XY.x; }
-	HOD void SetWidth(const float& Width) { m_XY.x = Width; Update(); }
-	HOD float GetHeight(void) const { return m_XY.y; }
-	HOD void SetHeight(const float& Height) { m_XY.x = Height; Update(); }
-	HOD Vec2f GetInv(void) const { return m_InvXY; }
-	HOD int GetNoElements(void) const { return m_NoElements; }
-	HOD float GetAspectRatio(void) const { return m_AspectRatio; }
+	HOD float	GetResX(void) const				{ return m_XY.x; }
+	HOD void	SetResX(const float& Width)		{ m_XY.x = Width; Update(); }
+	HOD float	GetResY(void) const				{ return m_XY.y; }
+	HOD void	SetResY(const float& Height)	{ m_XY.y = Height; Update(); }
+	HOD Vec2f	GetInv(void) const				{ return m_InvXY; }
+	HOD int		GetNoElements(void) const		{ return m_NoElements; }
+	HOD float	GetAspectRatio(void) const		{ return m_AspectRatio; }
 	
 private:
 	Vec2i	m_XY;					/*!< Resolution width and height */
@@ -1365,12 +1365,6 @@ private:
 class EXPOSURE_RENDER_DLL CResolution3D
 {
 public:
-	Vec3i	m_XYZ;					/*!< Width, height and depth */
-	Vec3f	m_InvXYZ;				/*!< Resolution width, height and depth reciprocal */
-	int		m_NoElements;			/*!< No. elements */
-	float	m_DiagonalLength;		/*!< Diagonal length */
-	bool	m_Dirty;				/*!< Resolution dirty flag */
-
 	// ToDo: Add description
 	HOD CResolution3D(void)
 	{
@@ -1421,13 +1415,32 @@ public:
 		return Vec3f(m_XYZ.x, m_XYZ.y, m_XYZ.z);
 	}
 
-	HOD void Set(const Vec3i& Resolution)
+	
+
+	HOD void SetResXYZ(const Vec3i& Resolution)
 	{
 		m_Dirty		= m_XYZ.x != Resolution.x || m_XYZ.y != Resolution.y || m_XYZ.z != Resolution.z;
 		m_XYZ		= Resolution;
 
 		Update();
 	}
+
+	HOD Vec3i	GetResXYZ(void) const				{ return m_XYZ; }
+	HOD float	GetResX(void) const					{ return m_XYZ.x; }
+	HOD void	SetResX(const float& ResX)			{ m_XYZ.x = ResX; Update(); }
+	HOD float	GetResY(void) const					{ return m_XYZ.y; }
+	HOD void	SetResY(const float& ResY)			{ m_XYZ.y = ResY; Update(); }
+	HOD float	GetResZ(void) const					{ return m_XYZ.z; }
+	HOD void	SetResZ(const float& ResZ)			{ m_XYZ.z = ResZ; Update(); }
+	HOD Vec3f	GetInv(void) const					{ return m_InvXYZ; }
+	HOD int		GetNoElements(void) const			{ return m_NoElements; }
+
+private:
+	Vec3i	m_XYZ;
+	Vec3f	m_InvXYZ;
+	int		m_NoElements;
+	float	m_DiagonalLength;
+	bool	m_Dirty;
 };
 
 HOD inline CColorRgbHdr& CColorRgbHdr::operator = (const CColorXyz& S)			

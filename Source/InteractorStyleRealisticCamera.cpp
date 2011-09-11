@@ -130,7 +130,7 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			Scene()->m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetHeight()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetWidth()));
+			Scene()->m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetResY()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetResX()));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 
@@ -144,7 +144,7 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 	{
 		GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-		Scene()->m_Camera.Pan(m_PanSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetHeight()), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetWidth()));
+		Scene()->m_Camera.Pan(m_PanSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetResY()), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetResX()));
 
 		GetLastPos(m_OldPos[0], m_OldPos[1]);
 

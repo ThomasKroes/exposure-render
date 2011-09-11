@@ -199,9 +199,9 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 			QPointF TfPoint = m_TransferFunctionCanvas.SceneToTransferFunction(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop));
 
 			// Generate random color
-			int R = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int G = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int B = (int)(((float)rand() / (float)RAND_MAX) * 255.0f);
+			int R = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
+			int G = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
+			int B = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
 
 			// Create new transfer function node
 			QNode NewNode(&gTransferFunction, TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));

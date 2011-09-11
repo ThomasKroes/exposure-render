@@ -320,8 +320,8 @@ public:
 			m_Screen[1][1] = Scale;
 		}
 
-		m_InvScreen.x = (m_Screen[0][1] - m_Screen[0][0]) / m_Resolution.GetWidth();
-		m_InvScreen.y = (m_Screen[1][1] - m_Screen[1][0]) / m_Resolution.GetHeight();
+		m_InvScreen.x = (m_Screen[0][1] - m_Screen[0][0]) / m_Resolution.GetResX();
+		m_InvScreen.y = (m_Screen[1][1] - m_Screen[1][0]) / m_Resolution.GetResY();
 
 		m_Resolution.Update();
 		m_ToneMap.Update();
@@ -481,7 +481,7 @@ public:
 		const float Length = (m_Target - m_From).Length();
 
 		// Obtain window width and height
-		const unsigned int WindowWidth	= m_Film.m_Resolution.GetWidth();
+		const unsigned int WindowWidth	= m_Film.m_Resolution.GetResX();
 
 		// Compute translation along the screen
 		const float U = Length * (RightDegrees / WindowWidth);
@@ -653,8 +653,8 @@ public:
 		const float Ua	= U / fabs(m_Film.m_Screen[0][1]);
 		const float Va	= V / fabs(m_Film.m_Screen[1][1]);
 
-		const float HalfW 	= 0.5f * m_Film.m_Resolution.GetWidth();
-		const float HalfH 	= 0.5f * m_Film.m_Resolution.GetHeight();
+		const float HalfW 	= 0.5f * m_Film.m_Resolution.GetResX();
+		const float HalfH 	= 0.5f * m_Film.m_Resolution.GetResY();
 
 		u	= HalfW + Ua * HalfW;
 		v	= HalfH + Va * HalfH;
@@ -753,5 +753,5 @@ public:
 	int					m_MaxNoBounces;
 	CRange				m_IntensityRange;
 	Vec2f				m_KernelSize;
-	float				m_MaxD;
+	float				m_SigmaMax;
 };

@@ -87,6 +87,19 @@ public:
 	QMutex					m_Mutex;
 	bool m_Abort;
 
+public:
+	float*		GetDensityBuffer(void);
+	cudaExtent	GetDensityBufferSize(void) const;
+
+private:
+	void CreateDensityVolume(void);
+	void CreateExtinctionVolume(void);
+
+	float*		m_pDensityBuffer;
+	cudaExtent	m_DensityBufferSize;
+	cudaExtent	m_ExtinctionSize;
+	int			m_MacrocellSize;
+
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);
@@ -94,6 +107,7 @@ signals:
 	void MemoryFree(void);
 	void PreFrame(void);
 	void PostFrame(void);
+	
 };
 
 // Render thread
