@@ -128,7 +128,7 @@ public:
 
 	void PrintSelf(void)
 	{
-		printf("[%4.2f, %4.2f, %4.2f]\n", r, g, b);
+		printf("[%g, %g, %g]\n", r, g, b);
 	}
 
 	float	r;
@@ -359,7 +359,7 @@ public:
 
 	void PrintSelf(void)
 	{
-		printf("[%4.2f, %4.2f]\n", x, y);
+		printf("[%g, %g]\n", x, y);
 	}
 
 	float x, y;
@@ -783,7 +783,7 @@ public:
 
 	void PrintSelf(void)
 	{
-		printf("[%4.2f, %4.2f, %4.2f]\n", x, y, z);
+		printf("[%g, %g, %g]\n", x, y, z);
 	}
 
 	float x, y, z;
@@ -1435,15 +1435,9 @@ public:
 	// ToDo: Add description
 	HOD CResolution3D(void)
 	{
-		m_XYZ		= Vec3i(100, 100, 100);
-		m_Dirty		= false;
-
-		Update();
-	}
-
-	// ToDo: Add description
-	HOD ~CResolution3D(void)
-	{
+		SetResX(0);
+		SetResY(0);
+		SetResZ(0);
 	}
 
 	// ToDo: Add description
@@ -1468,15 +1462,15 @@ public:
 		return m_XYZ[i];
 	}
 
-	// ToDo: Add description
 	HOD void Update(void)
 	{
-// 		m_InvXYZ			= Vec3f(m_XYZ.x == 0.0f ? 1.0f : 1.0f / m_XYZ.x, m_XYZ.y == 0.0f ? 1.0f : 1.0f / m_XYZ.y, m_XYZ.z == 0.0f ? 1.0f : 1.0f / m_XYZ.z);
-// 		m_NoElements		= m_XYZ.x * m_XYZ.y * m_XYZ.z;
-// 		m_DiagonalLength	= m_XYZ.Length();
+		m_InvXYZ.x			= m_XYZ.x == 0.0f ? 1.0f : 1.0f / (float)m_XYZ.x;
+		m_InvXYZ.y			= m_XYZ.y == 0.0f ? 1.0f : 1.0f / (float)m_XYZ.y;
+		m_InvXYZ.z			= m_XYZ.z == 0.0f ? 1.0f : 1.0f / (float)m_XYZ.z;
+		m_NoElements		= m_XYZ.x * m_XYZ.y * m_XYZ.z;
+		m_DiagonalLength	= m_XYZ.Length();
 	}
 
-	// ToDo: Add description
 	HOD Vec3f ToVector3(void) const
 	{
 		return Vec3f(m_XYZ.x, m_XYZ.y, m_XYZ.z);
@@ -1484,26 +1478,25 @@ public:
 
 	HOD void SetResXYZ(const Vec3i& Resolution)
 	{
-		m_Dirty				= m_XYZ.x != Resolution.x || m_XYZ.y != Resolution.y || m_XYZ.z != Resolution.z;
-		m_XYZ				= Resolution;
-		m_InvXYZ			= Vec3f(m_XYZ.x == 0.0f ? 1.0f : 1.0f / m_XYZ.x, m_XYZ.y == 0.0f ? 1.0f : 1.0f / m_XYZ.y, m_XYZ.z == 0.0f ? 1.0f : 1.0f / m_XYZ.z);
-		m_NoElements		= m_XYZ.x * m_XYZ.y * m_XYZ.z;
-		m_DiagonalLength	= m_XYZ.Length();
+		m_Dirty	= m_XYZ.x != Resolution.x || m_XYZ.y != Resolution.y || m_XYZ.z != Resolution.z;
+		m_XYZ	= Resolution;
+
+		Update();
 	}
 
 	HOD Vec3i	GetResXYZ(void) const				{ return m_XYZ; }
 	HOD int		GetResX(void) const					{ return m_XYZ.x; }
-	HOD void	SetResX(const int& ResX)			{ m_XYZ.x = ResX; Update(); }
+	HOD void	SetResX(const int& ResX)			{ m_Dirty = m_XYZ.x != ResX; m_XYZ.x = ResX; Update(); }
 	HOD int		GetResY(void) const					{ return m_XYZ.y; }
-	HOD void	SetResY(const int& ResY)			{ m_XYZ.y = ResY; Update(); }
+	HOD void	SetResY(const int& ResY)			{ m_Dirty = m_XYZ.y != ResY; m_XYZ.y = ResY; Update(); }
 	HOD int		GetResZ(void) const					{ return m_XYZ.z; }
-	HOD void	SetResZ(const int& ResZ)			{ m_XYZ.z = ResZ; Update(); }
+	HOD void	SetResZ(const int& ResZ)			{ m_Dirty = m_XYZ.z != ResZ; m_XYZ.z = ResZ; Update(); }
 	HOD Vec3f	GetInv(void) const					{ return m_InvXYZ; }
 	HOD int		GetNoElements(void) const			{ return m_NoElements; }
 
 	HO void PrintSelf(void)
 	{
-		printf("[%d x %d x %d]\n", GetResX(), GetResY(), GetResZ());
+		printf("[%d x %d x %d], %d elements\n", GetResX(), GetResY(), GetResZ(), GetNoElements());
 	}
 
 private:
