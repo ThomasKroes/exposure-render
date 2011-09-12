@@ -47,10 +47,10 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(new QLabel("Density Scale"), 2, 0);
 
 	m_DensityScaleSlider.setOrientation(Qt::Horizontal);
-	m_DensityScaleSlider.setRange(0.01, 10000.0);
+	m_DensityScaleSlider.setRange(0.01, 100000.0);
 	m_MainLayout.addWidget(&m_DensityScaleSlider, 2, 1);
 
-	m_DensityScaleSpinner.setRange(0.01, 10000.0);
+	m_DensityScaleSpinner.setRange(0.01, 100000.0);
 	m_MainLayout.addWidget(&m_DensityScaleSpinner, 2, 2);
 
 	connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));

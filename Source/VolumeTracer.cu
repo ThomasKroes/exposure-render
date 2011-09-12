@@ -278,7 +278,7 @@ DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P)
 {
 	Vec3f Normal;
 
-	const float Delta = pDevScene->m_Spacing.Min();
+	const float Delta = 0.01f;//pDevScene->m_Spacing.Min();
 
 	Vec3f X(Delta, 0.0f, 0.0f), Y(0.0f, Delta, 0.0f), Z(0.0f, 0.0f, Delta);
 
@@ -319,43 +319,6 @@ HOD Vec3f SampleHG(const Vec3f& W, float G, const Vec2f& U)
 HOD float PdfHG(const Vec3f& W, const Vec3f& Wp, float G)
 {
 	return PhaseHG(W, Wp, G);
-}
-
-DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
-{
-	float MinT = 0.0f, MaxT = 0.0f;
-
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
-		return false;
-
-	MinT = max(MinT, R.m_MinT);
-	MaxT = min(MaxT, R.m_MaxT);
-
-	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
-	float Dt		= 1.0f / (float)pDevScene->m_Resolution.GetResX();
-	float Sum		= 0.0f;
-	float SigmaT	= 0.0f;
-	float D			= 0.0f;
-
-	Vec3f SamplePos; 
-
-	MinT += RNG.Get1() * Dt;
-
-	while (Sum < S)
-	{
-		SamplePos = R.m_O + MinT * R.m_D;
-
-		if (MinT > MaxT)
-			return false;
-		
-		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];// * (1.0f - GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component]);
-		Sum		+= SigmaT * Dt;
-		MinT	+= Dt;
-	}
-
-	VP.m_P = R(MinT);
-
-	return true;
 }
 
 #define EPS (0.000001f)
@@ -522,45 +485,6 @@ DEV bool SampleDistanceDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CSc
 	return false;
 }
 
-DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
-{
-	float MinT = 0.0f, MaxT = 0.0f;
-
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
-		return false;
-
-	MinT = max(MinT, R.m_MinT);
-
-	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
-	float Dt		= 1.0f / (float)pDevScene->m_Resolution.GetResX();
-	float Sum		= 0.0f;
-	float SigmaT	= 0.0f;
-
-	Vec3f SamplePos; 
-
-	MinT += RNG.Get1() * Dt;
-
-	while (Sum < S)
-	{
-		SamplePos = R.m_O + MinT * R.m_D;
-
-		// Free path, no collisions in between
-		if (MinT > R.m_MaxT)
-			break;
-		
-		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component];// * (1.0f - GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component]);
-		Sum		+= SigmaT * Dt;
-		MinT	+= Dt;
-	}
-
-	VP.m_P = R(MinT);
-
-	if (MinT < R.m_MaxT)
-		return false;
-	else
-		return true;
-}
-
 DEV bool  FreePathDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component/*Photon* photon, unsigned int* seed0, unsigned int* seed1, cudaExtent densitySize*/)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
@@ -711,6 +635,43 @@ DEV bool  FreePathDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* 
 	return false;
 }
 
+DEV inline float SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
+{
+	float MinT = 0.0f, MaxT = 0.0f;
+
+	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+		return false;
+
+ 	MinT = max(MinT, R.m_MinT);
+ 	MaxT = min(MaxT, R.m_MaxT);
+
+	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
+	float Dt		= 2.0f * (1.0f / (float)pDevScene->m_Resolution.GetResX());
+	float Sum		= 0.0f;
+	float SigmaT	= 0.0f;
+
+	MinT += RNG.Get1() * Dt;
+
+	while (Sum < S)
+	{
+		VP.m_P = R.m_O + MinT * R.m_D;
+
+		if (MinT > MaxT)
+			return -1.0f;
+		
+		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, VP.m_P.x, VP.m_P.y, VP.m_P.z)).r;// * (1.0f - GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component]);
+		Sum		+= SigmaT * Dt;
+		MinT	+= Dt;
+	}
+
+	return MinT;
+}
+
+DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
+{
+	return SampleDistanceRM(R, RNG, VP, pDevScene, 0) > R.m_MaxT;
+}
+
 // Trace volume with single scattering
 KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 {
@@ -756,14 +717,10 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	while (NoScatteringEvents < pDevScene->m_MaxNoBounces)
 	{
 		CVolumePoint VP;
-
-		// Sample distance
- 		if (SampleDistanceRM(Re, RNG, VP, pDevScene, CC1))
 //		if (SampleDistanceDdaWoodcock(Re, RNG, VP, pDevScene, CC1))
+		// Sample distance
+ 		if (SampleDistanceRM(Re, RNG, VP, pDevScene, CC1) > 0.0f)
 		{
-// 			if (VP.m_Transmittance.y() > 0.0f)
-// 			PathThroughput.c[CC1] *= VP.m_Transmittance.c[CC1];
-
 			// Compute gradient (G) and normalized gradient (Gn)
   			G	= ComputeGradient(pDevScene, VP.m_P);
   			Gn	= Normalize(G);
@@ -778,42 +735,44 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 
 			Li = pDevScene->m_Lighting.m_Lights[WhichLight].SampleL(Pe, Rl, LightPdf, LS);
 			
-			const float D = tex3D(gTexDensity, VP.m_P.x, VP.m_P.y, VP.m_P.z);
+ 			const float D = tex3D(gTexDensity, VP.m_P.x, VP.m_P.y, VP.m_P.z);
+// 
+// 			CBSDF Bsdf(Gn, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, GetRoughness(pDevScene, D).ToXYZ().y());
+// 
+// 			const CColorXyz f = Bsdf.F(Wo, -Rl.m_D);
+// 			BsdfPdf = Bsdf.Pdf(Wo, -Rl.m_D);
 
-			CBSDF Bsdf(Gn, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, GetRoughness(pDevScene, D).ToXYZ().y());
-
-			const float f = Bsdf.F(-Re.m_D, -Rl.m_D).c[CC1];
-
-			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1) && f > 0.0f)
-// 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathDdaWoodcock(Rl, RNG, VP, pDevScene, CC1))
- 			{
+			// 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathDdaWoodcock(Rl, RNG, VP, pDevScene, CC1))
+ 			if (GetOpacity(pDevScene, D).r > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1) && !Li.IsBlack())// && LightPdf > 0.0f)
+  			{
  				Li /= LightPdf;
 // 				Ld += F * Li * (Weight / LightPdf);
- 				Lv.c[CC1] += PathThroughput.c[CC1] * f * /*AbsDot(-Rl.m_D, Gn) * */Li.c[CC1];// * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
+ 				Lv += PathThroughput * /*AbsDot(-Rl.m_D, Gn) * */Li / (4.0f * PI_F);// * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
  			}
 
-			CBsdfSample BsdfSample;
-
-			BsdfSample.LargeStep(RNG);
+// 			CBsdfSample BsdfSample;
+// 
+// 			BsdfSample.LargeStep(RNG);
 
 //			Bsdf.SampleF(-Re.m_D, W, LightPdf, BsdfSample);
 //			W = Normalize(SampleHG(Wo, pDevScene->m_PhaseG, RNG.Get2()));
 			W = UniformSampleSphere(RNG.Get2());
+//			W = Wo;
 //			W = UniformSampleHemisphere(RNG.Get2(), Gn);
 
 			// Configure eye ray
 			Re = CRay(VP.m_P, W, 0.0f, RAY_MAX);
 
 			// Russian roulette
-			if (NoScatteringEvents >= RussianRouletteDepth)
-			{
-				if (RNG.Get1() > Pc)
-					break;
-				else
-					PathThroughput.c[CC1] /= Pc;
-			}
+// 			if (NoScatteringEvents >= RussianRouletteDepth)
+// 			{
+// 				if (RNG.Get1() > Pc)
+// 					break;
+// 				else
+// 					PathThroughput /= Pc;
+// 			}
 
-			PathThroughput.c[CC1] * f;
+			PathThroughput /= 4.0 * PI_F;
 //			PathThroughput.c[CC1] /= PhaseHG(Wo, Rl.m_D, PhaseG);
 
 			// Add scattering event
@@ -825,11 +784,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		}
 	}
 
-//  	if (pBoundingBox->Intersect(Re))
-//  		Lv += SPEC_WHITE;
-
-
-	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X].c[CC1] = Lv.c[CC1] / fmaxf(1.0f, NoScatteringEvents);
+	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Lv;// / fmaxf(1.0f, NoScatteringEvents);
 }
 
 // Traces the volume

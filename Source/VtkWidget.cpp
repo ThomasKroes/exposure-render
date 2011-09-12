@@ -183,27 +183,29 @@ void CVtkWidget::OnRenderLoopTimer(void)
 {
 	if (!Scene())
 		return;
-/*
-	//	m_pImageImport->setup(0, gpScene->m_Camera.m_Film.m_Resolution.Width() - 1, 0, gpScene->m_Camera.m_Film.m_Resolution.Height() - 1, 0, 0);*/
-	m_ImageImport->Update();
-	m_ImageImport->SetImportVoidPointer(NULL);
-	m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
 
-	m_ImageActor->SetInput(m_ImageImport->GetOutput());
-	// 	m_pImageActor->VisibilityOn();
+	if (gpRenderThread->GetRenderImage())
+	{
+		m_ImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
+		m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
+		m_ImageImport->SetImportVoidPointer(NULL);
+		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
 
-	m_RenderWindow->GetInteractor()->Render();
+		m_ImageActor->SetInput(m_ImageImport->GetOutput());
+
+		m_RenderWindow->GetInteractor()->Render();
+	}
 }
 
 void CVtkWidget::OnResize(void)
 {
 	if (!Scene())
 		return;
-	
+	/*
  	m_ImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
  	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
 // 	m_ImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
-/*
+
 	m_pImageImport->SetImportVoidPointer(NULL);
 	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
 	*/
