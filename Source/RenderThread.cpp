@@ -423,7 +423,7 @@ void QRenderThread::run()
 		// Compute converged image
   		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
 		HandleCudaError(cudaGetLastError());
-		
+
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
 		// Increase the number of iterations performed so far
@@ -549,7 +549,7 @@ bool QRenderThread::Load(QString& FileName)
 
 	qDebug("Casting volume data type to short");
 
-	ImageCast->SetOutputScalarTypeToFloat();
+	ImageCast->SetOutputScalarTypeToShort();
 	ImageCast->SetInput(MetaImageReader->GetOutput());
 	
 	ImageCast->Update();
@@ -669,11 +669,11 @@ void QRenderThread::CreateVolume(void)
 	cudaExtent DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
 
 	// Allocate density buffer
-	float* pDensityBuffer = (float*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(float));
+	short* pDensityBuffer = (short*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(short));
 
 	// Copy density data from vtk image to density buffer
 	m_pImageDataVolume->Update();
-	memcpy(pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(float));
+	memcpy(pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(short));
 
 	m_Scene.m_SigmaMax = 0.0f;
 
@@ -685,17 +685,19 @@ void QRenderThread::CreateVolume(void)
 	for (int i = 0; i < m_Scene.m_Resolution.GetNoElements(); ++i)
 	{
 //		m_pDensityBuffer[i] = m_pDensityBuffer[i] > cutValue ? m_pDensityBuffer[i] / m_Scene.m_SigmaMax : 0;
-		pDensityBuffer[i] = pDensityBuffer[i] / m_Scene.m_SigmaMax;
+// 		pDensityBuffer[i] = pDensityBuffer[i] / m_Scene.m_SigmaMax;
 	}
 
 	// Copy to graphics device
 	BindDensityVolume(pDensityBuffer, DensityBufferSize);
 
 	// Create the extinction volume
-	CreateExtinctionVolume(pDensityBuffer, m_Scene.m_Resolution);
+// 	CreateExtinctionVolume(pDensityBuffer, m_Scene.m_Resolution);
+
+	free(pDensityBuffer);
 }
 
-void QRenderThread::CreateExtinctionVolume(float* pDensityBuffer, const CResolution3D& Resolution)
+void QRenderThread::CreateExtinctionVolume(short* pDensityBuffer, const CResolution3D& Resolution)
 {
 	qDebug("Creating extinction volume");
 
@@ -705,7 +707,7 @@ void QRenderThread::CreateExtinctionVolume(float* pDensityBuffer, const CResolut
 	ExtinctionSize.height	= Resolution.GetResY() / m_Scene.m_MacrocellSize;
 	ExtinctionSize.depth	= Resolution.GetResZ() / m_Scene.m_MacrocellSize;
 
-	float* pExtinction = (float*)malloc(Resolution.GetNoElements() * sizeof(float));
+	short* pExtinction = (short*)malloc(Resolution.GetNoElements() * sizeof(short));
 	
 	for(int i = 0; i < ExtinctionSize.width * ExtinctionSize.height * ExtinctionSize.depth; ++i)
 	{

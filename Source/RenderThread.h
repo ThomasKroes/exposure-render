@@ -82,10 +82,8 @@ public:
 	CScene					m_Scene;
 
 private:
-	
-
 	void CreateVolume(void);
-	void CreateExtinctionVolume(float* pDensityBuffer, const CResolution3D& Resolution);
+	void CreateExtinctionVolume(short* pDensityBuffer, const CResolution3D& Resolution);
 
 signals:
 	void RenderBegin(void);

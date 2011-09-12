@@ -32,7 +32,7 @@ KERNEL void KrnlComputeEstimate(int Width, int Height, CColorXyz* gpEstFrameXyz,
 
 void ComputeEstimate(int Width, int Height, CColorXyz* pEstFrameXyz, CColorXyz* pAccEstXyz, float N, float Exposure, unsigned char* pPixels)
 {
-	const dim3 KernelBlock(8, 8);
+	const dim3 KernelBlock(32, 8);
 	const dim3 KernelGrid((int)ceilf((float)Width / (float)KernelBlock.x), (int)ceilf((float)Height / (float)KernelBlock.y));
 
 	KrnlComputeEstimate<<<KernelGrid, KernelBlock>>>(Width, Height, pEstFrameXyz, pAccEstXyz, N, Exposure, pPixels); 

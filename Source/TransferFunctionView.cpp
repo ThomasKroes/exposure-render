@@ -102,7 +102,7 @@ void QTransferFunctionView::Update(void)
 	TransferFunction.SetRangeMin(gTransferFunction.GetRangeMin());
 	TransferFunction.SetRangeMax(gTransferFunction.GetRangeMax());
 
-	TransferFunction.NormalizeIntensity();
+// 	TransferFunction.NormalizeIntensity();
 
 	Scene()->m_TransferFunctions.m_Opacity.m_NoNodes		= TransferFunction.GetNodes().size();
 	Scene()->m_TransferFunctions.m_Diffuse.m_NoNodes		= TransferFunction.GetNodes().size();

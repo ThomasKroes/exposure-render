@@ -5,20 +5,20 @@
 #include "Scene.h"
 #include "Material.h"
 
-texture<float, 3, cudaReadModeElementType>	gTexDensity;
-texture<float, 3, cudaReadModeElementType>	gTexExtinction;
+texture<short, 3, cudaReadModeNormalizedFloat>	gTexDensity;
+texture<short, 3, cudaReadModeNormalizedFloat>	gTexExtinction;
 
-void BindDensityVolume(float* pDensityBuffer, cudaExtent Size)
+void BindDensityVolume(short* pDensityBuffer, cudaExtent Size)
 {
 	cudaArray* gpDensity = NULL;
 
 	// create 3D array
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
 	cudaMalloc3DArray(&gpDensity, &ChannelDesc, Size);
 
 	// copy data to 3D array
 	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(pDensityBuffer, Size.width * sizeof(float), Size.width, Size.height);
+	copyParams.srcPtr				= make_cudaPitchedPtr(pDensityBuffer, Size.width * sizeof(short), Size.width, Size.height);
 	copyParams.dstArray				= gpDensity;
 	copyParams.extent				= Size;
 	copyParams.kind					= cudaMemcpyHostToDevice;
@@ -29,23 +29,23 @@ void BindDensityVolume(float* pDensityBuffer, cudaExtent Size)
 	gTexDensity.filterMode		= cudaFilterModeLinear;      
 	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
 	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
-// 	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
+ 	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
 
 	// Bind array to 3D texture
 	cudaBindTextureToArray(gTexDensity, gpDensity, ChannelDesc);
 }
 
-void BindExtinctionVolume(float* pExtinctionBuffer, cudaExtent Size)
+void BindExtinctionVolume(short* pExtinctionBuffer, cudaExtent Size)
 {
 	cudaArray* gpExtinction = NULL;
 
 	// create 3D array
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
 	cudaMalloc3DArray(&gpExtinction, &ChannelDesc, Size);
 
 	// copy data to 3D array
 	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(pExtinctionBuffer, Size.width * sizeof(float), Size.width, Size.height);
+	copyParams.srcPtr				= make_cudaPitchedPtr(pExtinctionBuffer, Size.width * sizeof(short), Size.width, Size.height);
 	copyParams.dstArray				= gpExtinction;
 	copyParams.extent				= Size;
 	copyParams.kind					= cudaMemcpyHostToDevice;
@@ -64,7 +64,7 @@ void BindExtinctionVolume(float* pExtinctionBuffer, cudaExtent Size)
 
 DEV float Density(CScene* pDevScene, const Vec3f& P)
 {
-	return tex3D(gTexDensity, P.x, P.y, P.z);
+	return ((float)(SHRT_MAX) * tex3D(gTexDensity, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ()));
 }
 
 DEV float Extinction(CScene* pDevScene, const Vec3f& P)
@@ -74,7 +74,7 @@ DEV float Extinction(CScene* pDevScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
 {
-	return pDevScene->m_TransferFunctions.m_Opacity.F(D);
+	return pDevScene->m_DensityScale * pDevScene->m_TransferFunctions.m_Opacity.F(D);
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
@@ -97,18 +97,160 @@ DEV CColorRgbHdr GetRoughness(CScene* pDevScene, const float& D)
 	return pDevScene->m_TransferFunctions.m_Roughness.F(D);
 }
 
+// Determines whether ray is blocked by lights
+DEV bool IntersectP(CScene* pDevScene, const Vec3f& P, const Vec3f& W, const float& MinT, const float& MaxT)
+{
+	/*
+	// Ray for intersection
+	CRay R(P, W, MinT, MaxT);
+
+	// Hit distance
+	float T = 0.0f; 
+	 
+	for (int i = 0; i < pScene->m_NoLights; i++) 
+	{
+		if (pScene->m_Lights[i].Intersect(P, W, MinT, MaxT, T) && T >= MinT && T <= MaxT)
+			return true;
+	}
+	*/
+
+	return false;
+}
+
+// ToDo: Add description
+DEV bool NearestLight(CScene* pDevScene, const Vec3f& P, const Vec3f& W, const float& MinT, float& MaxT, CLight*& pLight, bool* pFront = NULL, Vec2f* pUV = NULL, float* pPdf = NULL)
+{
+	/*
+	// Ray for intersection
+	CRay R(P, W, MinT, MaxT);
+
+	// Whether a hit was found or not 
+	bool Hit = false;
+	 
+	// Hit distance
+	float HitT = MaxT;
+
+	for (int i = 0; i < pScene->m_NoLights; i++)
+	{
+		if (pScene->m_Lights[i].Intersect(P, W, MinT, MaxT, HitT, pFront, pUV, pPdf) && HitT <= MaxT)
+		{
+			Hit		= true;
+			pLight	= &pScene->m_Lights[i];
+			MaxT	= HitT;
+		}
+	}
+	
+	return Hit;
+	*/
+
+	return false;
+}
+
+// Exitant radiance from nearest light source in scene
+DEV CColorXyz Le(CScene* pDevScene, const Vec3f& P, const Vec3f& N, const Vec3f& W, const float& MinT, const float& MaxT)
+{
+	/*
+	// Ray for intersection
+	CRay R(P, W, MinT, MaxT);
+	 
+	// Hit distance
+	float HitT = 0.0, T = INF_MAX;
+
+	// Direct light from lights
+	CColorXyz Ld = SPEC_BLACK;
+
+	for (int i = 0; i < pScene->m_NoLights; i++)
+	{
+		Vec2f UV(0.0f); 
+
+		if (pScene->m_Lights[i].Intersect(P, W, MinT, MaxT, HitT, NULL, &UV) && HitT > MinT && HitT <= T)
+		{
+			Ld	= pScene->m_Lights[i].Le(UV, pMaterials, pTextures, pBitmaps);
+			T	= HitT; 
+		}
+	}
+	
+	return Ld;
+	*/
+
+	return SPEC_BLACK;
+}
+
+// Computes the power heuristic
+DEV inline float PowerHeuristic(int nf, float fPdf, int ng, float gPdf)
+{
+	float f = nf * fPdf, g = ng * gPdf;
+	return (f * f) / (f * f + g * g); 
+}
+
+// Find the nearest non-empty voxel in the volume
+DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& StepSize, const float& U)
+{
+	float MinT;
+	float MaxT;
+
+	// Intersect the eye ray with bounding box, if it does not intersect then return the environment
+	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+		return false;
+	
+	bool EyeEmpty = true;
+
+	MinT += U * StepSize;
+
+	// Step through the volume and stop as soon as we come across a non-empty voxel
+	while (MinT < MaxT)
+	{
+		if (GetOpacity(pDevScene, Density(pDevScene, R(MinT))).r > 0.0f)
+		{
+			EyeEmpty = false;
+			break;
+		}
+		else
+		{
+			MinT += StepSize;
+		}
+	}
+
+	R.m_MinT = MinT;
+	R.m_MaxT = MaxT;
+
+	if (EyeEmpty)
+		return false;
+
+	return true;
+}
+
+// Computes the local gradient
+DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P, const Vec3f& D)
+{
+	Vec3f Normal;
+
+	Normal.x = Density(pDevScene, P + 1 * Vec3f(1.0f, 0.0f, 0.0f)) - Density(pDevScene, P - 1 * Vec3f(1.0f, 0.0f, 0.0f));
+	Normal.y = Density(pDevScene, P + 1 * Vec3f(0.0f, 1.0f, 0.0f)) - Density(pDevScene, P - 1 * Vec3f(0.0f, 1.0f, 0.0f));
+	Normal.z = Density(pDevScene, P + 1 * Vec3f(0.0f, 0.0f, 1.0f)) - Density(pDevScene, P - 1 * Vec3f(0.0f, 0.0f, 1.0f));
+
+	Normal.Normalize();
+
+	return -Normal;
+}
+
 // Computes the attenuation through the volume
-DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, const float& MaxT, const float& StepSize, CCudaRNG& RNG)
+DEV inline CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, const float& MaxT, const float& StepSize, CCudaRNG& Rnd)
 {
 	// Near and far intersections with volume axis aligned bounding box
-	float NearT = 0.0f, FarT = FLT_MAX;
+	float NearT = 0.0f, FarT = 0.0f;
 
-	if (!pDevScene->m_BoundingBox.Intersect(CRay(P, D, 0.0f, MaxT), &NearT, &FarT))
-		return SPEC_WHITE;
+	// Intersect with volume axis aligned bounding box
+	if (!pDevScene->m_BoundingBox.Intersect(CRay(P, D, 0.0f, FLT_MAX), &NearT, &FarT))
+		return SPEC_BLACK;
+
+	// Clamp to near plane if necessary
+	if (NearT < 0.0f) 
+		NearT = 0.0f;     
 
 	CColorXyz Lt = SPEC_WHITE;
 
-	NearT += RNG.Get1() * StepSize;
+	NearT += Rnd.Get1() * StepSize;
 
 	// Accumulate
 	while (NearT < MaxT)
@@ -119,20 +261,21 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 		// Fetch density
 		const float D = Density(pDevScene, SP);
 		
+		// We ignore air density
+		if (D == 0)
+		{
+			// Increase extent
+			NearT += StepSize;
+			continue;
+		}
+
 		// Get shadow opacity
-		const float		Opacity = GetOpacity(pDevScene, D).r;
-		const CColorXyz	Color	= GetDiffuse(pDevScene, D).r;
+		const float	Opacity = GetOpacity(pDevScene, D).r;
 
 		if (Opacity > 0.0f)
 		{
-			// Compute chromatic attenuation
-// 			Lt.c[0] *= expf(-(Opacity * (1.0f - Color.c[0]) * StepSize));
-// 			Lt.c[1] *= expf(-(Opacity * (1.0f - Color.c[1]) * StepSize));
-// 			Lt.c[2] *= expf(-(Opacity * (1.0f - Color.c[2]) * StepSize));
-
-			Lt.c[0] *= expf(-(Opacity * StepSize));
-			Lt.c[1] *= expf(-(Opacity * StepSize));
-			Lt.c[2] *= expf(-(Opacity * StepSize));
+			// Compute eye transmittance
+			Lt *= expf(-(Opacity * StepSize));
 
 			// Exit if eye transmittance is very small
 			if (Lt.y() < 0.05f)
@@ -149,17 +292,23 @@ DEV CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, c
 // Estimates direct lighting
 DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
-	return SPEC_WHITE;
+// 	if (Dot(Wo, N) < 0.0f)
+// 		return SPEC_BLACK;
 
-	// Accumulated radiance (Ld), exitant radiance from light source (Li), attenuation through participating medium along light ray (Tr)
-	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, Tr = SPEC_BLACK;
+	// Accumulated radiance
+	CColorXyz Ld = SPEC_BLACK;
 	
-	float D = Density(pDevScene, Pe);
+	// Radiance from light source
+	CColorXyz Li = SPEC_BLACK;
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 1.5f, pDevScene->m_TransferFunctions.m_Roughness.F(D).r);
+	// Attenuation
+	CColorXyz Tr = SPEC_BLACK;
 
+	const float D = Density(pDevScene, Pe);
+
+	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, GetRoughness(pDevScene, D).r);
 	// Light/shadow ray
-	CRay Rl; 
+	CRay R; 
 
 	// Light probability
 	float LightPdf = 1.0f, BsdfPdf = 1.0f;
@@ -169,61 +318,53 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	CColorXyz F = SPEC_BLACK;
 	
+	CSurfacePoint SPe, SPl;
+
+	SPe.m_P		= Pe;
+	SPe.m_Ng	= N; 
+
 	// Sample the light source
- 	Li = Light.SampleL(Pe, Rl, LightPdf, LS);
+ 	Li = Light.SampleL(Pe, R, LightPdf, LS);
 	
-	F = Bsdf.F(Wo, -Rl.m_D); 
+	Wi = -R.m_D; 
 
-	BsdfPdf	= Bsdf.Pdf(Wo, -Rl.m_D);
-//	BsdfPdf = Dot(Wi, N);
+	F = Bsdf.F(Wo, Wi); 
+
+	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 	
-
 	// Sample the light with MIS
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
 	{
 		// Compute tau
-		Tr = Transmittance(pDevScene, Rl.m_O, Rl.m_D, Length(Rl.m_O - Pe), StepSize, Rnd);
+		const CColorXyz Tr = Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
 		
 		// Attenuation due to volume
 		Li *= Tr;
 
 		// Compute MIS weight
-		const float Weight = 1.0f;//PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+		const float Weight = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
 		// Add contribution
-		Ld += F * Li * (Weight / LightPdf);
+		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
 	}
-	
-	// Compute tau
 
-	/**/	
-	// Attenuation due to volume
-	
+	return Ld;
 
-//	Ld = Li * Transmittance(pDevScene, Rl.m_O, Rl.m_D, Length(Rl.m_O - Pe), StepSize, Rnd);
-
-	/**/
-
-	/*
 	// Sample the BRDF with MIS
 	F = Bsdf.SampleF(Wo, Wi, BsdfPdf, LS.m_BsdfSample);
 	
-//	Wi = CosineWeightedHemisphere(Rnd.Get2(), N);
-
-//	BsdfPdf = Dot(Wi, N);
-
 	CLight* pNearestLight = NULL;
 
 	Vec2f UV;
-
+	
 	if (!F.IsBlack())
 	{
-		float MaxT = INF_MAX;
+		float MaxT = 1000000000.0f; 
 
 		// Compute virtual light point
 		const Vec3f Pl = Pe + (MaxT * Wi);
 
-		if (NearestLight(pScene, Pe, Wi, 0.0f, MaxT, pNearestLight, NULL, &UV, &LightPdf))
+		if (NearestLight(pDevScene, Pe, Wi, 0.0f, MaxT, pNearestLight, NULL, &UV, &LightPdf))
 		{
 			if (LightPdf > 0.0f && BsdfPdf > 0.0f) 
 			{
@@ -231,12 +372,12 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 				const float Weight = PowerHeuristic(1.0f, BsdfPdf, 1.0f, LightPdf);
 				 
 				// Get exitant radiance from light source
-				Li = pNearestLight->Le(UV, pScene->m_Materials, pScene->m_Textures, pScene->m_Bitmaps);
+// 				Li = pNearestLight->Le(UV, pScene->m_Materials, pScene->m_Textures, pScene->m_Bitmaps);
 
 				if (!Li.IsBlack())
 				{
 					// Scale incident radiance by attenuation through volume
-					Tr = Transmittance(pScene, Pe, Wi, 1.0f, StepSize, Rnd);
+					Tr = Transmittance(pDevScene, Pe, Wi, 1.0f, StepSize, Rnd);
 
 					// Attenuation due to volume
 					Li *= Tr;
@@ -247,7 +388,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 			}
 		}
 	}
-	*/
+	/**/
 
 	return Ld;
 }
@@ -255,8 +396,12 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 // Uniformly samples one light
 DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
- 	if (pDevScene->m_Lighting.m_NoLights == 0)
- 		return SPEC_RED;
+	// Determine no. lights
+	const int NumLights = pDevScene->m_Lighting.m_NoLights;
+
+	// Exit return zero radiance if no light
+ 	if (NumLights == 0)
+ 		return SPEC_BLACK;
 
 	CLightingSample LS;
 
@@ -264,412 +409,13 @@ DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Ve
 	LS.LargeStep(Rnd);
 
 	// Choose which light to sample
-	const int WhichLight = (int)floorf(LS.m_LightNum * (float)pDevScene->m_Lighting.m_NoLights);
+	const int WhichLight = (int)floorf(LS.m_LightNum * (float)NumLights);
 
 	// Get the light
 	CLight& Light = pDevScene->m_Lighting.m_Lights[WhichLight];
 
 	// Return estimated direct light
-	return (float)pDevScene->m_Lighting.m_NoLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
-}
-
-// Computes the local gradient
-DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P)
-{
-	Vec3f Normal;
-
-	const float Delta = 0.01f;//pDevScene->m_Spacing.Min();
-
-	Vec3f X(Delta, 0.0f, 0.0f), Y(0.0f, Delta, 0.0f), Z(0.0f, 0.0f, Delta);
-
-	Normal.x = 0.5f * (float)(Density(pDevScene, P + X) - Density(pDevScene, P - X));
-	Normal.y = 0.5f * (float)(Density(pDevScene, P + Y) - Density(pDevScene, P - Y));
-	Normal.z = 0.5f * (float)(Density(pDevScene, P + Z) - Density(pDevScene, P - Z));
-
-	return Normalize(-Normal);
-}
-
-HOD float PhaseHG(const Vec3f& W, const Vec3f& Wp, float G)
-{
-	float CosTheta = Dot(W, Wp);
-	return 1.0f / (4.0f * PI_F) * (1.0f - G * G) / powf(1.0f + G * G - 2.0f * G * CosTheta, 1.5f);
-}
-
-HOD Vec3f SampleHG(const Vec3f& W, float G, const Vec2f& U)
-{
-	float CosTheta;
-
-	if (fabsf(G) < 1e-3)
-	{
-		CosTheta = 1.0f - 2.0f * U.x;
-	}
-	else
-	{
-		float SqrtTerm = (1.0f - G * G) / (1.0f - G + 2.0f * G * U.x);
-		CosTheta = (1.0f + G * G - SqrtTerm * SqrtTerm) / (2.0f * G);
-	}
-
-	float SinTheta = sqrtf(max(0.f, 1.f - CosTheta * CosTheta));
-	float Phi = 2.f * PI_F * U.y;
-	Vec3f V1, V2;
-	CoordinateSystem(W, &V1, &V2);
-	return SphericalDirection(SinTheta, CosTheta, Phi, V1, V2, W);
-}
-
-HOD float PdfHG(const Vec3f& W, const Vec3f& Wp, float G)
-{
-	return PhaseHG(W, Wp, G);
-}
-
-#define EPS (0.000001f)
-
-DEV float sign(float num)
-{
-  if(num<0.0f) return(-1.0f);
-  if(num>0.0f) return(1.0f);
-  return(0.0f);
-}
-
-struct CPhoton
-{
-  Vec3f origin;
-  Vec3f direction;
-  float energy;
-
-  // gamma photon
-  float photonEnergy;
-  float sigma;
-};
-
-DEV bool SampleDistanceDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component/*Photon* photon, unsigned int* seed0, unsigned int* seed1, cudaExtent densitySize*/)
-{
-	float MinT = 0.0f, MaxT = 0.0f;
-		
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
-		return false;
-
-	R.m_O = R(MinT + RNG.Get1() * 0.01f);
-
-	CPhoton Photon;
-	Photon.origin		= R.m_O;
-	Photon.direction	= R.m_D;
-
-  float3 cellIndex;
-  cellIndex.x = floor(Photon.origin.x / pDevScene->m_MacrocellSize);
-  cellIndex.y = floor(Photon.origin.y / pDevScene->m_MacrocellSize);
-  cellIndex.z = floor(Photon.origin.z / pDevScene->m_MacrocellSize);
-
-  Vec3f t(0.0f);
-
-  if(Photon.direction.x > EPS)
-  {
-    t.x = ((cellIndex.x + 1) * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
-  } else {
-    if(Photon.direction.x < -EPS){
-      t.x = (cellIndex.x * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
-    } else {
-      t.x = 1000.0f;
-    }
-  }
-  if(Photon.direction.y > EPS){
-    t.y = ((cellIndex.y + 1) * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
-  } else {
-    if(Photon.direction.y < -EPS){
-      t.y = (cellIndex.y * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
-    } else {
-      t.y = 1000.0f;
-    }
-  }
-  if(Photon.direction.z > EPS){
-    t.z = ((cellIndex.z + 1) * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
-  } else {
-    if(Photon.direction.z < -EPS){
-      t.z = (cellIndex.z * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
-    } else {
-      t.z = 1000.0f;
-    }
-  }
-
-	Vec3f cpv;
-	cpv.x = pDevScene->m_MacrocellSize / fabs(Photon.direction.x);
-	cpv.y = pDevScene->m_MacrocellSize / fabs(Photon.direction.y);
-	cpv.z = pDevScene->m_MacrocellSize / fabs(Photon.direction.z);
-
-	Vec3f samplePos = Photon.origin;
-
-	int steps = 0;
-  
-	bool virtualHit = true;
-  
-	while (virtualHit)
-	{
-		float sigmaMax = tex3D(gTexExtinction, Photon.origin.x, Photon.origin.y, Photon.origin.z);
-		float lastSigmaMax = sigmaMax;
-		float ds = min(t.x, min(t.y, t.z));
-		float sigmaSum = sigmaMax * ds;
-		float s = -log(1.0f - RNG.Get1()) / pDevScene->m_DensityScale;
-		float tt = min(t.x, min(t.y, t.z));
-		Vec3f entry;
-		Vec3f exit = Photon.origin + tt * Photon.direction;
-
-		while(sigmaSum < s)
-		{
-			if(steps++ > 100.0f)
-			{
-				return false;
-			}
-
-			entry = exit;
-
-// 			if (!pDevScene->m_BoundingBox.Contains(entry))
-// 				return false;
-
-			if (entry.x <= 0.0f || entry.x >= 1.0f || entry.y <= 0.0f || entry.y >= 1.0f || entry.z <= 0.0f || entry.z >= 1.0f)
-				return false;
-
-			if(t.x<t.y && t.x<t.z)
-			{
-				cellIndex.x += sign(Photon.direction.x);
-				t.x += cpv.x;
-			}
-			else
-			{
-				if(t.y<t.x && t.y<t.z)
-				{
-					cellIndex.y += sign(Photon.direction.y);
-					t.y += cpv.y;
-				}
-				else
-				{
-					cellIndex.z += sign(Photon.direction.z);
-					t.z += cpv.z;
-				}
-			}
-
-			tt = min(t.x, min(t.y, t.z));
-			exit = Photon.origin + tt * Photon.direction;
-			ds = (exit - entry).Length();
-			sigmaSum += ds * sigmaMax;
-			lastSigmaMax = sigmaMax;
-			Vec3f ePos = 0.5f * (exit + entry);
-			sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
-			samplePos = entry;
-		}
-
-		float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
-		samplePos += Photon.direction * cS;
-
-		if (Photon.origin.x <= 0.0f || Photon.origin.x >= 1.0f || Photon.origin.y <= 0.0f || Photon.origin.y >= 1.0f || Photon.origin.z <= 0.0f || Photon.origin.z >= 1.0f)
-			return false;
- 
-// 		if (!pDevScene->m_BoundingBox.Contains(Photon.origin))
-// 			return false;
-
-		if (tex3D(gTexDensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1())
-		{
-			virtualHit = false;
-		}
-		else
-		{
-			Photon.origin = exit;
-		}
-	}
-
-	if (!virtualHit)
-	{
-		VP.m_Transmittance.c[Component]	= 0.5f;
-		VP.m_P							= samplePos;
-		return true;
-	}
-
-	return false;
-}
-
-DEV bool  FreePathDdaWoodcock(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component/*Photon* photon, unsigned int* seed0, unsigned int* seed1, cudaExtent densitySize*/)
-{
-	float MinT = 0.0f, MaxT = 0.0f;
-	
-	float maxt = R.m_MaxT;
-	Vec3f origin = R.m_O;
-
-		
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
-		return false;
-
-	R.m_O = R(MinT + RNG.Get1() * 0.01f);
-
-	CPhoton Photon;
-	Photon.origin		= R.m_O;
-	Photon.direction	= R.m_D;
-
-  float3 cellIndex;
-  cellIndex.x = floor(Photon.origin.x / pDevScene->m_MacrocellSize);
-  cellIndex.y = floor(Photon.origin.y / pDevScene->m_MacrocellSize);
-  cellIndex.z = floor(Photon.origin.z / pDevScene->m_MacrocellSize);
-
-  Vec3f t(0.0f);
-
-  if(Photon.direction.x > EPS)
-  {
-    t.x = ((cellIndex.x + 1) * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
-  } else {
-    if(Photon.direction.x < -EPS){
-      t.x = (cellIndex.x * pDevScene->m_MacrocellSize - Photon.origin.x) / Photon.direction.x;
-    } else {
-      t.x = 1000.0f;
-    }
-  }
-  if(Photon.direction.y > EPS){
-    t.y = ((cellIndex.y + 1) * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
-  } else {
-    if(Photon.direction.y < -EPS){
-      t.y = (cellIndex.y * pDevScene->m_MacrocellSize - Photon.origin.y) / Photon.direction.y;
-    } else {
-      t.y = 1000.0f;
-    }
-  }
-  if(Photon.direction.z > EPS){
-    t.z = ((cellIndex.z + 1) * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
-  } else {
-    if(Photon.direction.z < -EPS){
-      t.z = (cellIndex.z * pDevScene->m_MacrocellSize - Photon.origin.z) / Photon.direction.z;
-    } else {
-      t.z = 1000.0f;
-    }
-  }
-
-	Vec3f cpv;
-	cpv.x = pDevScene->m_MacrocellSize / fabs(Photon.direction.x);
-	cpv.y = pDevScene->m_MacrocellSize / fabs(Photon.direction.y);
-	cpv.z = pDevScene->m_MacrocellSize / fabs(Photon.direction.z);
-
-	Vec3f samplePos = Photon.origin;
-
-	int steps = 0;
-  
-	bool virtualHit = true;
-  
-	while (virtualHit)
-	{
-		float sigmaMax = tex3D(gTexExtinction, Photon.origin.x, Photon.origin.y, Photon.origin.z);
-		float lastSigmaMax = sigmaMax;
-		float ds = min(t.x, min(t.y, t.z));
-		float sigmaSum = sigmaMax * ds;
-		float s = -log(1.0f - RNG.Get1()) / pDevScene->m_DensityScale;
-		float tt = min(t.x, min(t.y, t.z));
-		Vec3f entry;
-		Vec3f exit = Photon.origin + tt * Photon.direction;
-
-		while(sigmaSum < s)
-		{
-			if(steps++ > 100.0f)
-			{
-				return false;
-			}
-
-			entry = exit;
-
-// 			if (!pDevScene->m_BoundingBox.Contains(entry))
-// 				return false;
-
-			if (entry.x <= 0.0f || entry.x >= 1.0f || entry.y <= 0.0f || entry.y >= 1.0f || entry.z <= 0.0f || entry.z >= 1.0f)
-				return false;
-
-			if(t.x<t.y && t.x<t.z)
-			{
-				cellIndex.x += sign(Photon.direction.x);
-				t.x += cpv.x;
-			}
-			else
-			{
-				if(t.y<t.x && t.y<t.z)
-				{
-					cellIndex.y += sign(Photon.direction.y);
-					t.y += cpv.y;
-				}
-				else
-				{
-					cellIndex.z += sign(Photon.direction.z);
-					t.z += cpv.z;
-				}
-			}
-
-			tt = min(t.x, min(t.y, t.z));
-			exit = Photon.origin + tt * Photon.direction;
-			ds = (exit - entry).Length();
-			sigmaSum += ds * sigmaMax;
-			lastSigmaMax = sigmaMax;
-			Vec3f ePos = 0.5f * (exit + entry);
-			sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
-			samplePos = entry;
-		}
-
-		float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
-		samplePos += Photon.direction * cS;
-
-		if (Photon.origin.x <= 0.0f || Photon.origin.x >= 1.0f || Photon.origin.y <= 0.0f || Photon.origin.y >= 1.0f || Photon.origin.z <= 0.0f || Photon.origin.z >= 1.0f)
-			return false;
- 
-// 		if (!pDevScene->m_BoundingBox.Contains(Photon.origin))
-// 			return false;
-
-		if (tex3D(gTexDensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1())
-		{
-			virtualHit = false;
-		}
-		else
-		{
-			Photon.origin = exit;
-		}
-	}
-
-	if (!virtualHit)
-	{
-		VP.m_Transmittance.c[Component]	= 0.5f;
-		VP.m_P							= samplePos;
-
-		if ((samplePos - origin).Length() > maxt)
-			return true;
-	}
-
-	return false;
-}
-
-DEV inline float SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
-{
-	float MinT = 0.0f, MaxT = 0.0f;
-
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
-		return false;
-
- 	MinT = max(MinT, R.m_MinT);
- 	MaxT = min(MaxT, R.m_MaxT);
-
-	float S			= -log(RNG.Get1()) / pDevScene->m_DensityScale;
-	float Dt		= 2.0f * (1.0f / (float)pDevScene->m_Resolution.GetResX());
-	float Sum		= 0.0f;
-	float SigmaT	= 0.0f;
-
-	MinT += RNG.Get1() * Dt;
-
-	while (Sum < S)
-	{
-		VP.m_P = R.m_O + MinT * R.m_D;
-
-		if (MinT > MaxT)
-			return -1.0f;
-		
-		SigmaT	= GetOpacity(pDevScene, tex3D(gTexDensity, VP.m_P.x, VP.m_P.y, VP.m_P.z)).r;// * (1.0f - GetDiffuse(pDevScene, tex3D(gTexDensity, SamplePos.x, SamplePos.y, SamplePos.z))[Component]);
-		Sum		+= SigmaT * Dt;
-		MinT	+= Dt;
-	}
-
-	return MinT;
-}
-
-DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
-{
-	return SampleDistanceRM(R, RNG, VP, pDevScene, 0) > R.m_MaxT;
+	return (float)NumLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
 }
 
 // Trace volume with single scattering
@@ -677,114 +423,147 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 {
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-
+	
 	// Compute sample ID
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
-	// Exit if beyond kernel boundaries
-	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetResY() || pDevScene->m_Lighting.m_NoLights == 0)
-		return;
+	float StepSize = 0.02f;
 
+	// Exit if beyond kernel boundaries
+	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetResY())
+		return;
+	
 	// Init random number generator
 	CCudaRNG RNG(&pDevRandomStates[SID]);
 
-	CRay Re, Rl;
+	// Transmittance
+	CColorXyz 	EyeTr	= SPEC_WHITE;		// Eye transmittance
+	CColorXyz	L		= SPEC_BLACK;		// Measured volume radiance
+
+	// Continue
+	bool Continue = true;
+
+	CRay EyeRay;
+
+ 	// Generate the camera ray
+ 	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), EyeRay.m_O, EyeRay.m_D);
+
+
+	EyeRay.m_MinT = 0.0f; 
+	EyeRay.m_MaxT = FLT_MAX;
+
+	// Parametric range along eye and shadow ray
+	float MinT = EyeRay.m_MinT, MaxT = EyeRay.m_MaxT;
+
+	CLight* pNearestLight = NULL; 
+	Vec2f UV;
+	bool Front = true; 
+
 	
-	// Generate the camera ray
-	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
-
-	// Eye attenuation (Le), accumulated color through volume (Lv), unattenuated light from light source (Li), attenuated light from light source (Ld), and BSDF value (F)
-	CColorXyz PathThroughput	= SPEC_WHITE;
-	CColorXyz Li				= SPEC_BLACK;
-	CColorXyz Lv				= SPEC_BLACK;
-	CColorXyz F					= SPEC_BLACK;
-
-	int NoScatteringEvents = 0, RussianRouletteDepth = 2; 
-
-	Re.m_MinT	= 0.0f;
-	Re.m_MaxT	= RAY_MAX;
-
-	// Continue probability (Pc) Light probability (LightPdf) Bsdf probability (BsdfPdf)
-	float Pc = 0.5f, LightPdf = 1.0f, BsdfPdf = 1.0f;
-
-	// Eye point (Pe), light sample point (Pl), Gradient (G), normalized gradient (Gn), reversed eye direction (Wo), incident direction (Wi), new direction (W)
-	Vec3f Pe, Pl, G, Gn, Wo, Wi, W;
-
-	// Choose color component to sample
-	int CC1 = floorf(RNG.Get1() * 3.0f);
-
-	// Walk along the eye ray with ray marching
-	while (NoScatteringEvents < pDevScene->m_MaxNoBounces)
+	// Check if ray passes through volume, if it doesn't, evaluate scene lights and stop tracing 
+	if (!NearestIntersection(pDevScene, EyeRay, StepSize, RNG.Get1()))
 	{
-		CVolumePoint VP;
-//		if (SampleDistanceDdaWoodcock(Re, RNG, VP, pDevScene, CC1))
-		// Sample distance
- 		if (SampleDistanceRM(Re, RNG, VP, pDevScene, CC1) > 0.0f)
-		{
-			// Compute gradient (G) and normalized gradient (Gn)
-  			G	= ComputeGradient(pDevScene, VP.m_P);
-  			Gn	= Normalize(G);
- 			Wo	= Normalize(-Re.m_D);
+		float MaxT = 1000000000.0f;
 
-			Pe = VP.m_P;
+		// Check if there is a light between the observer and the volume, if there is, evaluate it, contribute to image and stop tracing
+// 		if (NearestLight(pDevScene, EyeRay.m_O, EyeRay.m_D, 0.0f, MaxT, pNearestLight, &Front, &UV, NULL))
+// 			L = Front ? pNearestLight->Le(UV, pDevScene->m_Materials, pDevScene->m_Textures, pDevScene->m_Bitmaps) : SPEC_BLACK;
+// 		else
+// 			L = SPEC_BLACK;
 
-			CLightingSample LS;
-			LS.LargeStep(RNG);
-
-			const int WhichLight = (int)floorf(RNG.Get1() * (float)pDevScene->m_Lighting.m_NoLights);
-
-			Li = pDevScene->m_Lighting.m_Lights[WhichLight].SampleL(Pe, Rl, LightPdf, LS);
-			
- 			const float D = tex3D(gTexDensity, VP.m_P.x, VP.m_P.y, VP.m_P.z);
-// 
-// 			CBSDF Bsdf(Gn, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, GetRoughness(pDevScene, D).ToXYZ().y());
-// 
-// 			const CColorXyz f = Bsdf.F(Wo, -Rl.m_D);
-// 			BsdfPdf = Bsdf.Pdf(Wo, -Rl.m_D);
-
-			// 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathDdaWoodcock(Rl, RNG, VP, pDevScene, CC1))
- 			if (GetOpacity(pDevScene, D).r > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1) && !Li.IsBlack())// && LightPdf > 0.0f)
-  			{
- 				Li /= LightPdf;
-// 				Ld += F * Li * (Weight / LightPdf);
- 				Lv += PathThroughput * /*AbsDot(-Rl.m_D, Gn) * */Li / (4.0f * PI_F);// * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
- 			}
-
-// 			CBsdfSample BsdfSample;
-// 
-// 			BsdfSample.LargeStep(RNG);
-
-//			Bsdf.SampleF(-Re.m_D, W, LightPdf, BsdfSample);
-//			W = Normalize(SampleHG(Wo, pDevScene->m_PhaseG, RNG.Get2()));
-			W = UniformSampleSphere(RNG.Get2());
-//			W = Wo;
-//			W = UniformSampleHemisphere(RNG.Get2(), Gn);
-
-			// Configure eye ray
-			Re = CRay(VP.m_P, W, 0.0f, RAY_MAX);
-
-			// Russian roulette
-// 			if (NoScatteringEvents >= RussianRouletteDepth)
-// 			{
-// 				if (RNG.Get1() > Pc)
-// 					break;
-// 				else
-// 					PathThroughput /= Pc;
-// 			}
-
-			PathThroughput /= 4.0 * PI_F;
-//			PathThroughput.c[CC1] /= PhaseHG(Wo, Rl.m_D, PhaseG);
-
-			// Add scattering event
-			NoScatteringEvents++;
-		}
-		else
-		{
-			break;
-		}
+		L = SPEC_RED;
+		// Stop
+		Continue = false;
 	}
 
-	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Lv;// / fmaxf(1.0f, NoScatteringEvents);
+	MinT = EyeRay.m_MinT;
+	MaxT = EyeRay.m_MaxT; 
+/*
+	// Check if there is a light between the observer and the volume, if there is, evaluate it, contribute to image and stop tracing
+	if (NearestLight(pDevScene, EyeRay.m_O, EyeRay.m_D, 0.0f, MinT, pNearestLight, &Front, &UV, NULL))
+	{
+// 		L = Front ? EyeTr * pNearestLight->Le(UV, pDevScene->m_Materials, pDevScene->m_Textures, pDevScene->m_Bitmaps) : SPEC_BLACK;
+
+		// Stop
+		Continue = false;
+	}
+	*/
+
+// 	MinT = 0.0f;
+// 	MaxT = 150.0f;
+
+	// Range and delta
+	float EyeT	= MinT;
+
+ 	if (MaxT == INF_MAX)
+ 		Continue = false;
+	
+	Vec3f EyeP, Normal;
+	
+	const float Threshold = 0.5f;
+
+	// Walk along the eye ray with ray marching
+	while (Continue && EyeT < MaxT)
+	{
+		// Determine new point on eye ray
+		EyeP = EyeRay(EyeT);
+
+		// Increase parametric range
+		EyeT += StepSize;
+
+		// Fetch density
+		const float D = Density(pDevScene, EyeP);
+
+		// We ignore air density
+		if (Density == 0) 
+			continue;
+		 
+		// Get opacity at eye point
+		const float		Tr = GetOpacity(pDevScene, D).r;
+		const CColorXyz	Ke = GetEmission(pDevScene, D).ToXYZ();
+		
+		// Add emission
+		EyeTr += Ke; 
+		
+		// Compute outgoing direction
+		const Vec3f Wo = Normalize(-EyeRay.m_D);
+
+		// Obtain normal
+		Normal = ComputeGradient(pDevScene, EyeP, Wo);
+
+		// Exit if air, or not within hemisphere
+		if (Tr < 0.05f)// || Dot(Wo, Normal[TID]) < 0.0f)
+			continue;
+
+		// Estimate direct light at eye point
+	 	L += EyeTr * UniformSampleOneLight(pDevScene, Wo, EyeP, Normal, RNG, StepSize);
+
+		// Compute eye transmittance
+		EyeTr *= expf(-(Tr * StepSize));
+
+		/*
+		// Russian roulette
+		if (EyeTr.y() < 0.5f)
+		{
+			const float DieP = 1.0f - (EyeTr.y() / Threshold);
+
+			if (DieP > RNG.Get1())
+			{
+				break;
+			}
+			else
+			{
+				EyeTr *= 1.0f / (1.0f - DieP);
+			}
+		}
+		*/
+
+		if (EyeTr.y() < 0.05f)
+			break;
+	}
+
+	// Contribute
+	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;
 }
 
 // Traces the volume
