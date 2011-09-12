@@ -130,7 +130,7 @@ public:
 		m_HalfHeight(0.5f * m_Height),
 		m_InvHalfHeight(1.0f / m_HalfHeight),
 		m_Distance(1.0f),
-		m_SkyRadius(1000.0f),
+		m_SkyRadius(1000000.0f),
 		m_P(1.0f, 1.0f, 1.0f),
 		m_Target(0.0f, 0.0f, 0.0f),
 		m_N(1.0f, 0.0f, 0.0f),
@@ -239,66 +239,75 @@ public:
 	}
 
 	// Intersect ray with light
-	HOD bool Intersect(const Vec3f& P, const Vec3f& W, const float& MinT, const float& MaxT, float& T, bool* pFront = NULL, Vec2f* pUV = NULL, float* pPdf = NULL)
+	HOD bool Intersect(CRay& R, float& T, CColorXyz& Le, Vec2f* pUV = NULL, float* pPdf = NULL)
 	{
-		switch (m_Type)
+		if (m_Type == 0)
 		{
-			case 0:
-			{
-				// Intersection ray
-				CRay R(P, W, MinT, MaxT);
+			// Compute projection
+			const float DotN = Dot(R.m_D, m_N);
 
-				// Compute projection
-				const float DotN = Dot(R.m_D, m_N);
-
-				// Rays is co-planar with light surface
-				if (DotN == 0.0f)
-					return false;
-
-				// Compute hit distance
-				T = (-m_Distance - Dot(R.m_O, m_N)) / DotN;
-
-				// Intersection is in ray's negative direction
-				if (T < MinT || T > MaxT)
-					return false;
-
-				// Determine position on light
-				const Vec3f Pl = R(T);
-
-				// Vector from point on area light to center of area light
-				const Vec3f Wl = Pl - m_P;
-
-				// Compute texture coordinates
-				const Vec2f UV = Vec2f(Dot(Wl, m_U), Dot(Wl, m_V));
-
-				// Check if within bounds of light surface
-				if (UV.x > m_HalfWidth || UV.x < -m_HalfWidth || UV.y > m_HalfHeight || UV.y < -m_HalfHeight)
-					return false;
-
-				if (pUV)
-					*pUV = UV;
-
-				if (pFront)
-					*pFront = DotN < 0.0f;
-
-				if (pPdf)
-					*pPdf = DistanceSquared(P, Pl) / m_Area;
-
-				return true;
-			}
-
-			case 1:
-			{
-				return true;
-			}
-
-			default:
+			// Rays is co-planar with light surface
+			if (DotN == 0.0f)
 				return false;
+
+			// Compute hit distance
+			T = (-m_Distance - Dot(R.m_O, m_N)) / DotN;
+
+			// Intersection is in ray's negative direction
+			if (T < R.m_MinT || T > R.m_MaxT)
+				return false;
+
+			// Determine position on light
+			const Vec3f Pl = R(T);
+
+			// Vector from point on area light to center of area light
+			const Vec3f Wl = Pl - m_P;
+
+			// Compute texture coordinates
+			const Vec2f UV = Vec2f(Dot(Wl, m_U), Dot(Wl, m_V));
+
+			// Check if within bounds of light surface
+			if (UV.x > m_HalfWidth || UV.x < -m_HalfWidth || UV.y > m_HalfHeight || UV.y < -m_HalfHeight)
+				return false;
+
+			R.m_MaxT = T;
+
+			if (pUV)
+				*pUV = UV;
+
+// 			if (DotN < 0.0f)
+				Le = m_Color.ToXYZ();
+// 			else
+// 				Le = SPEC_BLACK;
+
+			if (pPdf)
+				*pPdf = DistanceSquared(R.m_O, Pl) / m_Area;
+
+			return true;
 		}
+
+		if (m_Type == 1)
+		{
+			return false;
+
+			T = m_SkyRadius;
+			
+			// Intersection is in ray's negative direction
+			if (T < R.m_MinT || T > R.m_MaxT)
+				return false;
+			
+			R.m_MaxT	= T;
+			Le			= m_Color.ToXYZ();
+
+			return true;
+		}
+
+		return true;
 	}
 
 	HOD float Pdf(const Vec3f& P, const Vec3f& Wi)
 	{
+		/*
 		switch (m_Type)
 		{
 			case 0:
@@ -326,6 +335,9 @@ public:
 			default:
 				return 1.0f;
 		}
+		*/
+
+		return 1.0f;
 	}
 
 	HOD CColorXyz Le(const Vec2f& UV)

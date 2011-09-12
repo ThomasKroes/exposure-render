@@ -118,32 +118,22 @@ DEV bool IntersectP(CScene* pDevScene, const Vec3f& P, const Vec3f& W, const flo
 }
 
 // ToDo: Add description
-DEV bool NearestLight(CScene* pDevScene, const Vec3f& P, const Vec3f& W, const float& MinT, float& MaxT, CLight*& pLight, bool* pFront = NULL, Vec2f* pUV = NULL, float* pPdf = NULL)
+DEV bool NearestLight(CScene* pDevScene, CRay& R, CColorXyz& LightColor)
 {
-	/*
-	// Ray for intersection
-	CRay R(P, W, MinT, MaxT);
-
-	// Whether a hit was found or not 
+	// Whether a hit with a light was found or not 
 	bool Hit = false;
-	 
-	// Hit distance
-	float HitT = MaxT;
+	
+	float T = 0.0f;
 
-	for (int i = 0; i < pScene->m_NoLights; i++)
+	CRay RayCopy = R;
+
+	for (int i = 0; i < pDevScene->m_Lighting.m_NoLights; i++)
 	{
-		if (pScene->m_Lights[i].Intersect(P, W, MinT, MaxT, HitT, pFront, pUV, pPdf) && HitT <= MaxT)
-		{
-			Hit		= true;
-			pLight	= &pScene->m_Lights[i];
-			MaxT	= HitT;
-		}
+		if (pDevScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor))
+			Hit = true;
 	}
 	
 	return Hit;
-	*/
-
-	return false;
 }
 
 // Exitant radiance from nearest light source in scene
@@ -184,7 +174,7 @@ DEV inline float PowerHeuristic(int nf, float fPdf, int ng, float gPdf)
 }
 
 // Find the nearest non-empty voxel in the volume
-DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& StepSize, const float& U)
+DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& StepSize, const float& U, float* pBoxMinT = NULL, float* pBoxMaxT = NULL)
 {
 	float MinT;
 	float MaxT;
@@ -192,8 +182,14 @@ DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& Ste
 	// Intersect the eye ray with bounding box, if it does not intersect then return the environment
 	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
 		return false;
-	
-	bool EyeEmpty = true;
+
+	bool Hit = false;
+
+	if (pBoxMinT)
+		*pBoxMinT = MinT;
+
+	if (pBoxMaxT)
+		*pBoxMaxT = MaxT;
 
 	MinT += U * StepSize;
 
@@ -202,7 +198,7 @@ DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& Ste
 	{
 		if (GetOpacity(pDevScene, Density(pDevScene, R(MinT))).r > 0.0f)
 		{
-			EyeEmpty = false;
+			Hit = true;
 			break;
 		}
 		else
@@ -211,13 +207,13 @@ DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& Ste
 		}
 	}
 
-	R.m_MinT = MinT;
-	R.m_MaxT = MaxT;
+	if (Hit)
+	{
+		R.m_MinT = MinT;
+		R.m_MaxT = MaxT;
+	}
 
-	if (EyeEmpty)
-		return false;
-
-	return true;
+	return Hit;
 }
 
 // Computes the local gradient
@@ -350,6 +346,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	return Ld;
 
+	/*
 	// Sample the BRDF with MIS
 	F = Bsdf.SampleF(Wo, Wi, BsdfPdf, LS.m_BsdfSample);
 	
@@ -388,7 +385,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 			}
 		}
 	}
-	/**/
+	*/
 
 	return Ld;
 }
@@ -443,42 +440,32 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	// Continue
 	bool Continue = true;
 
-	CRay EyeRay;
+	CRay EyeRay, RayCopy;
+
+
+	float BoxMinT = 0.0f, BoxMaxT = 0.0f;
+
 
  	// Generate the camera ray
  	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), EyeRay.m_O, EyeRay.m_D);
 
-
 	EyeRay.m_MinT = 0.0f; 
 	EyeRay.m_MaxT = FLT_MAX;
 
-	// Parametric range along eye and shadow ray
-	float MinT = EyeRay.m_MinT, MaxT = EyeRay.m_MaxT;
-
-	CLight* pNearestLight = NULL; 
-	Vec2f UV;
-	bool Front = true; 
-
-	
 	// Check if ray passes through volume, if it doesn't, evaluate scene lights and stop tracing 
-	if (!NearestIntersection(pDevScene, EyeRay, StepSize, RNG.Get1()))
+ 	if (!NearestIntersection(pDevScene, EyeRay, StepSize, RNG.Get1(), &BoxMinT, &BoxMaxT))
+ 		Continue = false;
+
+	CColorXyz Li = SPEC_BLACK;
+	RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, BoxMinT);
+
+	if (NearestLight(pDevScene, RayCopy, Li))
 	{
-		float MaxT = 1000000000.0f;
-
-		// Check if there is a light between the observer and the volume, if there is, evaluate it, contribute to image and stop tracing
-// 		if (NearestLight(pDevScene, EyeRay.m_O, EyeRay.m_D, 0.0f, MaxT, pNearestLight, &Front, &UV, NULL))
-// 			L = Front ? pNearestLight->Le(UV, pDevScene->m_Materials, pDevScene->m_Textures, pDevScene->m_Bitmaps) : SPEC_BLACK;
-// 		else
-// 			L = SPEC_BLACK;
-
-		L = SPEC_RED;
-		// Stop
-		Continue = false;
+		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
+		return;
 	}
-
-	MinT = EyeRay.m_MinT;
-	MaxT = EyeRay.m_MaxT; 
 /*
+
 	// Check if there is a light between the observer and the volume, if there is, evaluate it, contribute to image and stop tracing
 	if (NearestLight(pDevScene, EyeRay.m_O, EyeRay.m_D, 0.0f, MinT, pNearestLight, &Front, &UV, NULL))
 	{
@@ -489,21 +476,15 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	}
 	*/
 
-// 	MinT = 0.0f;
-// 	MaxT = 150.0f;
-
-	// Range and delta
-	float EyeT	= MinT;
-
- 	if (MaxT == INF_MAX)
- 		Continue = false;
+// 	if (EyeRay.m_MaxT == INF_MAX)
+//  		Continue = false;
 	
+	float EyeT	= EyeRay.m_MinT;
+
 	Vec3f EyeP, Normal;
 	
-	const float Threshold = 0.5f;
-
 	// Walk along the eye ray with ray marching
-	while (Continue && EyeT < MaxT)
+	while (Continue && EyeT < EyeRay.m_MaxT)
 	{
 		// Determine new point on eye ray
 		EyeP = EyeRay(EyeT);
@@ -515,8 +496,8 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		const float D = Density(pDevScene, EyeP);
 
 		// We ignore air density
-		if (Density == 0) 
-			continue;
+// 		if (Density == 0) 
+// 			continue;
 		 
 		// Get opacity at eye point
 		const float		Tr = GetOpacity(pDevScene, D).r;
@@ -561,6 +542,13 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		if (EyeTr.y() < 0.05f)
 			break;
 	}
+
+	RayCopy = CRay(EyeRay(BoxMaxT), EyeRay.m_D, 0.0f);
+
+// 	if (NearestLight(pDevScene, RayCopy, Li))
+// 		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
+// 		return;
+//		L += Li;
 
 	// Contribute
 	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;
