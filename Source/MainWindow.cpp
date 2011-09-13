@@ -22,6 +22,7 @@ CMainWindow::CMainWindow() :
 	m_StatisticsDockWidget(),
 	m_CameraDockWidget(),
 	m_SettingsDockWidget(),
+	m_LogDockWidget(),
     m_pOpenAct(NULL),
 	m_pCloseAct(NULL),
     m_pExitAct(NULL),
@@ -170,6 +171,12 @@ void CMainWindow::SetupDockingWidgets()
 	m_SettingsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::LeftDockWidgetArea, &m_SettingsDockWidget);
     m_pViewMenu->addAction(m_SettingsDockWidget.toggleViewAction());
+
+	// Log dock widget
+	m_LogDockWidget.setEnabled(true);
+	m_LogDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::BottomDockWidgetArea, &m_LogDockWidget);
+	m_pViewMenu->addAction(m_LogDockWidget.toggleViewAction());
 
 	tabifyDockWidget(&m_AppearanceDockWidget, &m_LightingDockWidget);
 	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);

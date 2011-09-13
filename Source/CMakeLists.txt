@@ -106,6 +106,11 @@ SET(ExposureRenderSources
 	Material.cpp
 	Sample.cpp
 	LightTransport.cpp
+
+	# Logging
+	Logger.cpp
+	LogWidget.cpp
+	LogDockWidget.cpp
 )
 
 SET(ExposureRenderHeaders 
@@ -181,6 +186,12 @@ SET(ExposureRenderHeaders
 	Material.h
 	Sample.h
 	LightTransport.h
+	LogWidget.h
+
+	# Logging
+	Logger.h
+	LogWidget.h
+	LogDockWidget.h
 )
 
 SET(ExposureRenderMocHeaders 
@@ -233,6 +244,11 @@ SET(ExposureRenderMocHeaders
 	LoadSettingsDialog.h
 	VtkWidget.h
 	Controls.h
+
+	# Logging
+	Logger.h
+	LogWidget.h
+	LogDockWidget.h
 )
 
 # Resources
@@ -453,10 +469,23 @@ SET(CudaSources
 # Make the CUDA group
 SOURCE_GROUP("CUDA" FILES ${CudaSources})
 
+# Logging sources
+SET(LoggingSources
+	Logger.h
+	LogWidget.h
+	LogDockWidget.h
+	Logger.cpp
+	LogWidget.cpp
+	LogDockWidget.cpp
+)
+
+# Make the logging group
+SOURCE_GROUP("Logging" FILES ${LoggingSources})
+
 ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
 
 # Create executable
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources})
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources})
 
 TARGET_LINK_LIBRARIES(ExposureRender
   QVTK

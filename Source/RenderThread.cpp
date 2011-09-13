@@ -189,7 +189,7 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 
 QRenderThread::~QRenderThread(void)
 {
-	qDebug("Render thread destructor");
+	qDebug("Render thread destroyed");
 }
 
 bool QRenderThread::InitializeCuda(void)
@@ -542,7 +542,7 @@ bool QRenderThread::Load(QString& FileName)
 
 	MetaImageReader->SetFileName(m_FileName.toAscii());
 
-	qDebug(QString("Loading " + QFileInfo(FileName).fileName()).toAscii());
+	Log(QString("Loading " + QFileInfo(FileName).fileName()).toAscii());
 
 	MetaImageReader->Update();
 

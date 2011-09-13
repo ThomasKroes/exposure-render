@@ -12,6 +12,7 @@
 #include "StatisticsDockWidget.h"
 #include "CameraDockWidget.h"
 #include "SettingsDockWidget.h"
+#include "LogDockWidget.h"
 
 class QAction;
 class QListWidget;
@@ -68,6 +69,7 @@ private:
 	QStatisticsDockWidget				m_StatisticsDockWidget;
 	QCameraDockWidget					m_CameraDockWidget;
 	QSettingsDockWidget					m_SettingsDockWidget;
+	QLogDockWidget						m_LogDockWidget;
 
 	// Actions
     QAction*							m_pOpenAct;
