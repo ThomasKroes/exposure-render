@@ -77,7 +77,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	connect(&m_RenameLight, SIGNAL(clicked()), this, SLOT(OnRenameLight()));
 	connect(&m_CopyLight, SIGNAL(clicked()), this, SLOT(OnCopyLight()));
  	connect(&m_LightList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(OnLightItemChanged(QListWidgetItem*)));
-	connect(&gLighting, SIGNAL(LightingChanged()), this, SLOT(UpdateLightList()));
+ 	connect(&gLighting, SIGNAL(LightingChanged()), this, SLOT(UpdateLightList()));
 
 	OnLightSelectionChanged();
 }
@@ -86,6 +86,8 @@ void QLightsWidget::UpdateLightList(void)
 {
 	m_LightList.clear();
 
+	m_LightList.setFocus();
+
 	for (int i = 0; i < gLighting.m_Lights.size(); i++)
 	{
 		// Create new list item
@@ -93,40 +95,43 @@ void QLightsWidget::UpdateLightList(void)
 
 		// Add the item
 		m_LightList.addItem(pLightItem);
+
+// 		if (*gLighting.GetSelectedLight() == gLighting.m_Lights[i])
+// 		{
+// 			m_LightList.blockSignals(true);
+// 
+// 			const int Index = gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight());
+// 			m_LightList.setCurrentRow(Index, QItemSelectionModel::Select);
+// 			m_LightList.setFocus();
+// 
+// 			m_LightList.blockSignals(false);
+// 		}
 	}
 
-	
-	// Select
-	if (gLighting.GetSelectedLight())
+	QLight* pSelectedLight = gLighting.GetSelectedLight();
+
+	if (pSelectedLight != NULL)
 	{
 		m_LightList.blockSignals(true);
-
-		const int Index = gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight());
-		m_LightList.setCurrentRow(Index, QItemSelectionModel::Select);
-		m_LightList.setFocus();
-
+		m_LightList.setCurrentRow(gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight()), QItemSelectionModel::Select);
 		m_LightList.blockSignals(false);
 	}
-	/**/
 
-	// Get current row
-	const int CurrentRow = m_LightList.currentRow();
-
-	m_RemoveLight.setEnabled(CurrentRow >= 0);
-	m_RenameLight.setEnabled(CurrentRow >= 0);
-	m_CopyLight.setEnabled(CurrentRow >= 0);
+	m_RemoveLight.setEnabled(m_LightList.currentRow() >= 0);
+	m_RenameLight.setEnabled(m_LightList.currentRow() >= 0);
+	m_CopyLight.setEnabled(m_LightList.currentRow() >= 0);
 }
 
 void QLightsWidget::OnLightSelectionChanged(void)
 {
-	// Get current row
-	int CurrentRow = m_LightList.currentRow();
+	if (m_LightList.currentRow() < 0)
+		return;
 
-	gLighting.SetSelectedLight(CurrentRow >= 0 ? CurrentRow : -1);
+	gLighting.SetSelectedLight(m_LightList.currentRow());
 
-	m_RemoveLight.setEnabled(CurrentRow >= 0);
-	m_RenameLight.setEnabled(CurrentRow >= 0);
-	m_CopyLight.setEnabled(CurrentRow >= 0);
+	m_RemoveLight.setEnabled(m_LightList.currentRow() >= 0);
+	m_RenameLight.setEnabled(m_LightList.currentRow() >= 0);
+	m_CopyLight.setEnabled(m_LightList.currentRow() >= 0);
 }
 
 void QLightsWidget::OnLightSelectionChanged(QLight* pLight)
@@ -165,34 +170,39 @@ void QLightsWidget::OnAddLight(void)
 
 void QLightsWidget::OnRemoveLight(void)
 {
+	if (m_LightList.currentRow() < 0)
+		return;
+
 	gLighting.RemoveLight(m_LightList.currentRow());
 }
 
 void QLightsWidget::OnRenameLight(void)
 {
-	// Get current row
-	const int CurrentRow = m_LightList.currentRow();
-
-	if (CurrentRow < 0)
+	if (m_LightList.currentRow() < 0)
 		return;
 
 	QInputDialogEx InputDialog;
 
-	InputDialog.setTextValue(gLighting.m_Lights[CurrentRow].GetName());
+	InputDialog.setTextValue(gLighting.m_Lights[m_LightList.currentRow()].GetName());
 	InputDialog.setWindowTitle("Choose name for light");
 	InputDialog.setLabelText("Light Name");
 	InputDialog.setOkButtonText("Rename");
+	
+	InputDialog.move(m_RenameLight.rect().center());
 	
 	InputDialog.exec();
 
 	if (InputDialog.textValue().isEmpty())
 		return;
 
-	gLighting.RenameLight(CurrentRow, InputDialog.textValue());
+	gLighting.RenameLight(m_LightList.currentRow(), InputDialog.textValue());
 }
 
 void QLightsWidget::OnCopyLight(void)
 {
+	if (m_LightList.currentRow() < 0)
+		return;
+
 	gLighting.CopySelectedLight();
 }
 

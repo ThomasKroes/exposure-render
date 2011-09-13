@@ -46,7 +46,9 @@ void QLightingWidget::OnSavePreset(const QString& Name)
 void QLightingWidget::OnRenderBegin(void)
 {
 	// Add a default transfer function and load it
-	m_PresetsWidget.InsertPreset(0, QLighting::Default());
+	QLighting DefaultLighting = QLighting::Default();
+
+	m_PresetsWidget.InsertPreset(0, DefaultLighting);
 	m_PresetsWidget.LoadPreset("Default");
 }
 

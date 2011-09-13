@@ -246,24 +246,26 @@ QLighting::QLighting(const QLighting& Other)
 
 QLighting& QLighting::operator=(const QLighting& Other)
 {
+	// Clear light selection, do not remove this line!
+	SetSelectedLight((QLight*)NULL);
+
 	blockSignals(true);
 
 	QPresetXML::operator=(Other);
 
-	foreach (QLight Light, m_Lights)
-		disconnect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
+	QObject::disconnect(this, SLOT(OnLightPropertiesChanged(QLight*)));
 
-	m_Lights			= Other.m_Lights;
-
-	foreach (QLight Light, m_Lights)
-		connect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
-
-	m_pSelectedLight	= Other.m_pSelectedLight;
-	m_Background		= Other.m_Background;
+	m_Lights		= Other.m_Lights;
+	m_Background	= Other.m_Background;
 
 	blockSignals(false);
 
 	emit LightingChanged();
+
+	for (int i = 0; i < m_Lights.size(); i++)
+	{
+		QObject::connect(&m_Lights[i], SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
+	}
 
 	return *this;
 }
@@ -286,7 +288,9 @@ void QLighting::Update(void)
 
 		BackgroundLight.m_T	= 1;
 		
-		BackgroundLight.m_Color	= Background().GetIntensity() * CColorRgbHdr(Background().GetColor().redF(), Background().GetColor().greenF(), Background().GetColor().blueF());
+		BackgroundLight.m_ColorTop		= Background().GetTopIntensity() * CColorRgbHdr(Background().GetTopColor().redF(), Background().GetTopColor().greenF(), Background().GetTopColor().blueF());
+		BackgroundLight.m_ColorMiddle	= Background().GetMiddleIntensity() * CColorRgbHdr(Background().GetMiddleColor().redF(), Background().GetMiddleColor().greenF(), Background().GetMiddleColor().blueF());
+		BackgroundLight.m_ColorBottom	= Background().GetBottomIntensity() * CColorRgbHdr(Background().GetBottomColor().redF(), Background().GetBottomColor().greenF(), Background().GetBottomColor().blueF());
 
 		BackgroundLight.Update(Scene()->m_BoundingBox);
 
@@ -510,10 +514,37 @@ QLighting QLighting::Default(void)
 
 	DefaultLighting.SetName("Default");
 
-	QLight Light;
-	Light.SetName("Key");
+	QLight Key;
+	Key.SetTheta(180.0f);
+	Key.SetPhi(45.0f);
+	Key.SetName("Key");
+	Key.SetColor(QColor(255, 228, 165));
+	Key.SetWidth(0.7f);
+	Key.SetHeight(0.7f);
+	Key.SetIntensity(5000.0f);
+	Key.SetDistance(1.25f);
 
-//	DefaultLighting.AddLight(Light);
+	DefaultLighting.AddLight(Key);
+
+	QLight Rim;
+	Rim.SetTheta(90.0f);
+	Rim.SetPhi(25.0f);
+	Rim.SetName("Rim");
+	Rim.SetColor(QColor(155, 155, 205));
+	Rim.SetWidth(1.7f);
+	Rim.SetHeight(1.7f);
+	Rim.SetIntensity(3000.0f);
+	Rim.SetDistance(2.25f);
+
+	DefaultLighting.AddLight(Rim);
+
+	DefaultLighting.Background().SetTopColor(QColor(185, 213, 255));
+	DefaultLighting.Background().SetMiddleColor(QColor(185, 213, 255));
+	DefaultLighting.Background().SetBottomColor(QColor(185, 213, 255));
+
+	DefaultLighting.Background().SetTopIntensity(300.0f);
+	DefaultLighting.Background().SetMiddleIntensity(300.0f);
+	DefaultLighting.Background().SetBottomIntensity(300.0f);
 
 	return DefaultLighting;
 }

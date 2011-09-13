@@ -278,6 +278,7 @@ void QRenderThread::run()
  	}
 
 	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
+	m_Scene.m_Camera.m_Film.m_Exposure = 50.0f;
  	m_Scene.m_Camera.m_Aperture.m_Size = 0.001f;
  	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
@@ -421,7 +422,7 @@ void QRenderThread::run()
 		Timer.StartTimer();
 
 		// Compute converged image
-  		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 100.0f, m_pDevEstRgbLdr);
+  		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 500.0f, m_pDevEstRgbLdr);
 		HandleCudaError(cudaGetLastError());
 
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");

@@ -97,26 +97,6 @@ DEV CColorRgbHdr GetRoughness(CScene* pDevScene, const float& D)
 	return pDevScene->m_TransferFunctions.m_Roughness.F(D);
 }
 
-// Determines whether ray is blocked by lights
-DEV bool IntersectP(CScene* pDevScene, const Vec3f& P, const Vec3f& W, const float& MinT, const float& MaxT)
-{
-	/*
-	// Ray for intersection
-	CRay R(P, W, MinT, MaxT);
-
-	// Hit distance
-	float T = 0.0f; 
-	 
-	for (int i = 0; i < pScene->m_NoLights; i++) 
-	{
-		if (pScene->m_Lights[i].Intersect(P, W, MinT, MaxT, T) && T >= MinT && T <= MaxT)
-			return true;
-	}
-	*/
-
-	return false;
-}
-
 // ToDo: Add description
 DEV bool NearestLight(CScene* pDevScene, CRay& R, CColorXyz& LightColor)
 {
@@ -134,36 +114,6 @@ DEV bool NearestLight(CScene* pDevScene, CRay& R, CColorXyz& LightColor)
 	}
 	
 	return Hit;
-}
-
-// Exitant radiance from nearest light source in scene
-DEV CColorXyz Le(CScene* pDevScene, const Vec3f& P, const Vec3f& N, const Vec3f& W, const float& MinT, const float& MaxT)
-{
-	/*
-	// Ray for intersection
-	CRay R(P, W, MinT, MaxT);
-	 
-	// Hit distance
-	float HitT = 0.0, T = INF_MAX;
-
-	// Direct light from lights
-	CColorXyz Ld = SPEC_BLACK;
-
-	for (int i = 0; i < pScene->m_NoLights; i++)
-	{
-		Vec2f UV(0.0f); 
-
-		if (pScene->m_Lights[i].Intersect(P, W, MinT, MaxT, HitT, NULL, &UV) && HitT > MinT && HitT <= T)
-		{
-			Ld	= pScene->m_Lights[i].Le(UV, pMaterials, pTextures, pBitmaps);
-			T	= HitT; 
-		}
-	}
-	
-	return Ld;
-	*/
-
-	return SPEC_BLACK;
 }
 
 // Computes the power heuristic
@@ -221,9 +171,11 @@ DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P, const Vec3f& D)
 {
 	Vec3f Normal;
 
-	Normal.x = Density(pDevScene, P + 1 * Vec3f(1.0f, 0.0f, 0.0f)) - Density(pDevScene, P - 1 * Vec3f(1.0f, 0.0f, 0.0f));
-	Normal.y = Density(pDevScene, P + 1 * Vec3f(0.0f, 1.0f, 0.0f)) - Density(pDevScene, P - 1 * Vec3f(0.0f, 1.0f, 0.0f));
-	Normal.z = Density(pDevScene, P + 1 * Vec3f(0.0f, 0.0f, 1.0f)) - Density(pDevScene, P - 1 * Vec3f(0.0f, 0.0f, 1.0f));
+	float Delta = 0.01f;
+
+	Normal.x = Density(pDevScene, P + Vec3f(Delta, 0.0f, 0.0f)) - Density(pDevScene, P - Vec3f(Delta, 0.0f, 0.0f));
+	Normal.y = Density(pDevScene, P + Vec3f(0.0f, Delta, 0.0f)) - Density(pDevScene, P - Vec3f(0.0f, Delta, 0.0f));
+	Normal.z = Density(pDevScene, P + Vec3f(0.0f, 0.0f, Delta)) - Density(pDevScene, P - Vec3f(0.0f, 0.0f, Delta));
 
 	Normal.Normalize();
 
@@ -302,7 +254,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 
 	const float D = Density(pDevScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, GetRoughness(pDevScene, D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, 0.0001 * GetRoughness(pDevScene, D).r);
 	// Light/shadow ray
 	CRay R; 
 
@@ -338,7 +290,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 		Li *= Tr;
 
 		// Compute MIS weight
-		const float Weight = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+		const float Weight = 1.0f;//PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
 		// Add contribution
 		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
@@ -424,7 +376,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	// Compute sample ID
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
-	float StepSize = 0.02f;
+	float StepSize = 0.03;
 
 	// Exit if beyond kernel boundaries
 	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetResY())
@@ -442,9 +394,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 
 	CRay EyeRay, RayCopy;
 
-
 	float BoxMinT = 0.0f, BoxMaxT = 0.0f;
-
 
  	// Generate the camera ray
  	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), EyeRay.m_O, EyeRay.m_D);
@@ -457,27 +407,16 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
  		Continue = false;
 
 	CColorXyz Li = SPEC_BLACK;
-	RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, BoxMinT);
+	RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, Continue ? EyeRay.m_MinT : EyeRay.m_MaxT);
 
 	if (NearestLight(pDevScene, RayCopy, Li))
 	{
 		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
 		return;
 	}
-/*
 
-	// Check if there is a light between the observer and the volume, if there is, evaluate it, contribute to image and stop tracing
-	if (NearestLight(pDevScene, EyeRay.m_O, EyeRay.m_D, 0.0f, MinT, pNearestLight, &Front, &UV, NULL))
-	{
-// 		L = Front ? EyeTr * pNearestLight->Le(UV, pDevScene->m_Materials, pDevScene->m_Textures, pDevScene->m_Bitmaps) : SPEC_BLACK;
-
-		// Stop
-		Continue = false;
-	}
-	*/
-
-// 	if (EyeRay.m_MaxT == INF_MAX)
-//  		Continue = false;
+	if (EyeRay.m_MaxT == INF_MAX)
+ 		Continue = false;
 	
 	float EyeT	= EyeRay.m_MinT;
 
@@ -496,8 +435,8 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		const float D = Density(pDevScene, EyeP);
 
 		// We ignore air density
-// 		if (Density == 0) 
-// 			continue;
+		if (Density == 0) 
+			continue;
 		 
 		// Get opacity at eye point
 		const float		Tr = GetOpacity(pDevScene, D).r;
@@ -543,12 +482,13 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 			break;
 	}
 
-	RayCopy = CRay(EyeRay(BoxMaxT), EyeRay.m_D, 0.0f);
+	RayCopy.m_O		= EyeP;
+	RayCopy.m_D		= EyeRay.m_D;
+	RayCopy.m_MinT	= EyeT;
+	RayCopy.m_MaxT	= 10000000.0f;
 
-// 	if (NearestLight(pDevScene, RayCopy, Li))
-// 		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
-// 		return;
-//		L += Li;
+	if (NearestLight(pDevScene, RayCopy, Li))
+		Li += EyeTr * Li;
 
 	// Contribute
 	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;

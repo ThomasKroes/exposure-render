@@ -15,17 +15,27 @@ public:
 
 public slots:
 	void OnBackgroundIlluminationChanged(bool Checked);
-	void OnColorChanged(const QColor& Color);
-	void SetIntensity(double Intensity);
+	void OnGradientColorTopChanged(const QColor& Color);
+	void OnGradientColorMiddleChanged(const QColor& Color);
+	void OnGradientColorBottomChanged(const QColor& Color);
+	void OnTopIntensityChanged(double Intensity);
+	void OnMiddleIntensityChanged(double Intensity);
+	void OnBottomIntensityChanged(double Intensity);
 	void OnUseTextureChanged(int UseTexture);
 	void OnLoadTexture(void);
 	void OnBackgroundChanged(void);
 
 protected:
 	QGridLayout			m_MainLayout;
-	QColorPushButton	m_Color;
-	QDoubleSlider		m_IntensitySlider;
-	QDoubleSpinner		m_IntensitySpinBox;
+	QColorPushButton	m_GradientColorTop;
+	QDoubleSlider		m_IntensitySliderTop;
+	QDoubleSpinner		m_IntensitySpinBoxTop;
+	QColorPushButton	m_GradientColorMiddle;
+	QDoubleSlider		m_IntensitySliderMiddle;
+	QDoubleSpinner		m_IntensitySpinBoxMiddle;
+	QColorPushButton	m_GradientColorBottom;
+	QDoubleSlider		m_IntensitySliderBottom;
+	QDoubleSpinner		m_IntensitySpinBoxBottom;
 	QCheckBox			m_UseTexture;
 	QLineEdit			m_TextureFilePath;
 	QPushButton			m_LoadTexture;

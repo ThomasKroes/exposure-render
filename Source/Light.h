@@ -88,13 +88,6 @@ public:
 class CLight
 {
 public:
-// 	enum EType
-// 	{
-// 		Area,
-// 		Background
-// 	};
-
-	long			m_Type;
 	float			m_Theta;
 	float			m_Phi;
 	float			m_Width;
@@ -115,10 +108,12 @@ public:
 	float			m_Area;					
 	float			m_AreaPdf;
 	CColorRgbHdr	m_Color;
+	CColorRgbHdr	m_ColorTop;
+	CColorRgbHdr	m_ColorMiddle;
+	CColorRgbHdr	m_ColorBottom;
 	int				m_T;
 
 	CLight(void) :
-		m_Type(0),
 		m_Theta(0.0f),
 		m_Phi(0.0f),
 		m_Width(1.0f),
@@ -130,7 +125,7 @@ public:
 		m_HalfHeight(0.5f * m_Height),
 		m_InvHalfHeight(1.0f / m_HalfHeight),
 		m_Distance(1.0f),
-		m_SkyRadius(1000000.0f),
+		m_SkyRadius(100.0f),
 		m_P(1.0f, 1.0f, 1.0f),
 		m_Target(0.0f, 0.0f, 0.0f),
 		m_N(1.0f, 0.0f, 0.0f),
@@ -139,13 +134,15 @@ public:
 		m_Area(m_Width * m_Height),
 		m_AreaPdf(1.0f / m_Area),
 		m_Color(10.0f),
+		m_ColorTop(10.0f),
+		m_ColorMiddle(10.0f),
+		m_ColorBottom(10.0f),
 		m_T(0)
 	{
 	}
 
 	HOD CLight& operator=(const CLight& Other)
 	{
-		m_Type				= Other.m_Type;
 		m_Theta				= Other.m_Theta;
 		m_Phi				= Other.m_Phi;
 		m_Width				= Other.m_Width;
@@ -166,6 +163,9 @@ public:
 		m_Area				= Other.m_Area;
 		m_AreaPdf			= Other.m_AreaPdf;
 		m_Color				= Other.m_Color;
+		m_ColorTop			= Other.m_ColorTop;
+		m_ColorMiddle		= Other.m_ColorMiddle;
+		m_ColorBottom		= Other.m_ColorBottom;
 		m_T					= Other.m_T;
 
 		return *this;
@@ -219,6 +219,7 @@ public:
 			Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
 			Rl.m_D	= Normalize(P - Rl.m_O);
 			L		= Le(Vec2f(0.0f));
+			Pdf		= DistanceSquared(P, Rl.m_O) / AbsDot(Rl.m_D, m_N) * m_Area;
 		}
 
 		if (m_T == 1)
@@ -226,22 +227,19 @@ public:
 			Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
 			Rl.m_D	= Normalize(P - Rl.m_O);
 			L		= Le(Vec2f(0.0f));
+			Pdf		= DistanceSquared(P, Rl.m_O) / m_Area;
 		}
 
 		Rl.m_MinT	= 0.0f;
 		Rl.m_MaxT	= (P - Rl.m_O).Length();
 
-		// Compute PDF
-		Pdf = DistanceSquared(P, Rl.m_O) / /*(AbsDot(Rl.m_D, m_N)*/ m_Area;//);
-
-		// Return light exitant radiance
 		return L;
 	}
 
 	// Intersect ray with light
 	HOD bool Intersect(CRay& R, float& T, CColorXyz& Le, Vec2f* pUV = NULL, float* pPdf = NULL)
 	{
-		if (m_Type == 0)
+		if (m_T == 0)
 		{
 			// Compute projection
 			const float DotN = Dot(R.m_D, m_N);
@@ -275,10 +273,10 @@ public:
 			if (pUV)
 				*pUV = UV;
 
-// 			if (DotN < 0.0f)
-				Le = m_Color.ToXYZ();
-// 			else
-// 				Le = SPEC_BLACK;
+ 			if (DotN < 0.0f)
+				Le = m_Color.ToXYZ() / m_Area;
+ 			else
+ 				Le = SPEC_BLACK;
 
 			if (pPdf)
 				*pPdf = DistanceSquared(R.m_O, Pl) / m_Area;
@@ -286,10 +284,8 @@ public:
 			return true;
 		}
 
-		if (m_Type == 1)
+		if (m_T == 1)
 		{
-			return false;
-
 			T = m_SkyRadius;
 			
 			// Intersection is in ray's negative direction
@@ -297,12 +293,20 @@ public:
 				return false;
 			
 			R.m_MaxT	= T;
-			Le			= m_Color.ToXYZ();
+
+			Vec2f pUV = Vec2f(SphericalPhi(R.m_D) * INV_TWO_PI_F, SphericalTheta(R.m_D) * INV_PI_F);
+
+// 			if (pUV.y > 0.0f)
+// 				Le = Lerp(fabs(pUV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
+// 			else
+// 				Le = Lerp(fabs(pUV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
+
+			Le = m_Color.ToXYZ();			
 
 			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	HOD float Pdf(const Vec3f& P, const Vec3f& Wi)

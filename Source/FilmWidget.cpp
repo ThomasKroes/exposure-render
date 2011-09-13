@@ -83,12 +83,12 @@ void QFilmWidget::LockFilmHeight(const int& Lock)
 
 void QFilmWidget::SetFilmWidth(const int& FilmWidth)
 {
-	gCamera.GetFilm().SetWidth(FilmWidth);
+// 	gCamera.GetFilm().SetWidth(FilmWidth);
 }
 
 void QFilmWidget::SetFilmHeight(const int& FilmHeight)
 {
-	gCamera.GetFilm().SetHeight(FilmHeight);
+// 	gCamera.GetFilm().SetHeight(FilmHeight);
 }
 
 void QFilmWidget::OnRenderBegin(void)
