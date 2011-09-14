@@ -18,7 +18,7 @@ CScene::CScene(void) :
 	m_IntensityRange(),
 	m_KernelSize(16, 8),
 	m_SigmaMax(5000),
-	m_DensityScale(1),
+	m_DensityScale(5000),
 	m_MacrocellSize(8)
 {
 }

@@ -7,6 +7,8 @@ class QTimeTableWidgetItem : public QTableWidgetItem
 {
 public:
 	QTimeTableWidgetItem(void);
+
+	virtual QSize sizeHint() const;
 };
 
 class QTableItemMessage : public QTableWidgetItem

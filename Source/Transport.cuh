@@ -104,7 +104,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pScene, CLight& Light, CLightingSample
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
 	{
 		// Compute tau
-		const CColorXyz Tr = Transmittance(pScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+		const CColorXyz Tr = Transmittance(pScene, R.m_O, R.m_D, Length(R.m_O - Pe), 4.0 * StepSize, Rnd);
 		
 		// Attenuation due to volume
 		Li *= Tr;

@@ -196,7 +196,10 @@ bool QRenderThread::InitializeCuda(void)
 
 	cudaError_t ErrorID = cudaGetDeviceCount(&NoDevices);
 
+
 	emit gRenderStatus.StatisticChanged("Graphics Card", "No. CUDA capable devices", QString::number(NoDevices));
+
+	Log("Found " + QString::number(NoDevices) + " CUDA enabled device(s)");
 
 	int DriverVersion = 0, RuntimeVersion = 0; 
 
@@ -208,6 +211,9 @@ bool QRenderThread::InitializeCuda(void)
 
 	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Driver Version", DriverVersionString);
 	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Runtime Version", RuntimeVersionString);
+
+	Log("Driver version " + DriverVersionString);
+	Log("Runtime version " + RuntimeVersionString);
 
 	for (int Device = 0; Device < NoDevices; Device++)
 	{
@@ -267,14 +273,14 @@ bool QRenderThread::InitializeCuda(void)
 
 void QRenderThread::run()
 {
-	// Initialize CUDA and set the device
  	if (!InitializeCuda())
  	{
- 		QMessageBox::critical(gpMainWindow, "An error has occured", "Unable to locate a CUDA capable device, with streaming architecture 1.1 or higher");
+		Log("Unable to initialize CUDA, rendering cannot start", QLogger::Critical);
+ 		QMessageBox::critical(gpMainWindow, "An error has occurred", "Unable to locate a CUDA capable device");
  		return;
  	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(256, 256));
 	m_Scene.m_Camera.m_Film.m_Exposure = 50.0f;
  	m_Scene.m_Camera.m_Aperture.m_Size = 0.001f;
  	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
@@ -286,7 +292,7 @@ void QRenderThread::run()
 	m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
 
  	CreateVolume();
- 	
+
 	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
 
 	// Allocate CUDA memory for scene
@@ -539,8 +545,8 @@ bool QRenderThread::Load(QString& FileName)
 	m_pImageDataVolume = ImageCast->GetOutput();
 	
 	
-	if (LoadSettingsDialog.GetResample())
-	{
+// 	if (LoadSettingsDialog.GetResample())
+// 	{
 		Log("Resampling volume at " + QString::number(LoadSettingsDialog.GetResampleX(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleY(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleZ(), 'f', 2));
 
 		// Create resampler
@@ -565,7 +571,7 @@ bool QRenderThread::Load(QString& FileName)
 		ImageResample->Update();
 
 		m_pImageDataVolume = ImageResample->GetOutput();
-	}
+// 	}
 
 	/*
 	// Create magnitude volume

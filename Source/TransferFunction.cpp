@@ -339,8 +339,10 @@ QTransferFunction QTransferFunction::Default(void)
 	QTransferFunction DefaultTransferFunction;
 
 	DefaultTransferFunction.SetName("Default");
-	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, Qt::black, 0.0f);
-	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, Qt::black, 100.0f);
+	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
+	DefaultTransferFunction.AddNode(0.3f, 0.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
+	DefaultTransferFunction.AddNode(0.7f, 1.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
+	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
 
 	return DefaultTransferFunction;
 }

@@ -74,7 +74,7 @@ KERNEL void KrnlSetupRNG(CScene* pScene, curandStateXORWOW_t* pDevRandomStates)
 		return;
 
 	// Initialize
-	curand_init(Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X, 1234, 0, &pDevRandomStates[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResY() + X]);
+	curand_init(Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X, Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X, 0, &pDevRandomStates[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResY() + X]);
 }
 
 void SetupRNG(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates)

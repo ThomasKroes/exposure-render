@@ -7,11 +7,16 @@
 QTimeTableWidgetItem::QTimeTableWidgetItem(void) :
 	QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss"))
 {
-	setFont(QFont("Courier"));
+	setFont(QFont("Arial"));
 	setTextColor(QColor(60, 60, 60));
 
 	setToolTip(text());
 	setStatusTip("Message recorded at " + text());
+}
+
+QSize QTimeTableWidgetItem::sizeHint(void) const
+{
+	return QSize(70, 10);
 }
 
 QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::MessageType& MessageType) :
@@ -22,7 +27,27 @@ QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::Mess
 	if (MessageType & QLogger::Critical)
 		ToolTipPrefix += "Critical error: ";
 
-	setFont(QFont("Courier"));
+	setFont(QFont("Arial"));
+	
+	QColor TextColor;
+
+	switch (MessageType)
+	{
+		case QLogger::Normal:
+		{
+			TextColor = Qt::blue;
+			break;
+		}
+
+		case QLogger::Critical:
+		{
+			TextColor = Qt::red;
+			break;
+		}
+	}
+	
+	setTextColor(TextColor);
+
 	setToolTip(ToolTipPrefix + Message);
 	setStatusTip(ToolTipPrefix + Message);
 }
@@ -38,10 +63,9 @@ QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
 	HeaderLabels << "time" << "" << "message";
 
 	setHorizontalHeaderLabels(HeaderLabels);
-	horizontalHeader()->setResizeMode(0, QHeaderView::Fixed);
+	horizontalHeader()->setResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
 	horizontalHeader()->setResizeMode(1, QHeaderView::Fixed);
 	horizontalHeader()->setResizeMode(2, QHeaderView::ResizeMode::Stretch);
-	horizontalHeader()->resizeSection(0, 90);
 	horizontalHeader()->resizeSection(1, 25);
 	horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	
