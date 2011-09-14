@@ -460,16 +460,9 @@ SET(CudaSources
 	SingleScattering.cuh
 	MultipleScattering.cuh
 	Blur.cuh
-	Random.cuh
 	Utilities.cuh
 	Core.cuh
 	ComputeEstimate.cuh
-	ComputeEstimate.cu
-	SingleScattering.cu
-	MultipleScattering.cu
-	Blur.cu
-	Random.cu
-	Utilities.cu
 	Core.cu
 )
 

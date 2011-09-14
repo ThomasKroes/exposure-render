@@ -9,7 +9,6 @@
 
 // CUDA kernels
 #include "Core.cuh"
-#include "Random.cuh"
 
 // VTK
 #include <vtkSmartPointer.h>
@@ -404,25 +403,9 @@ void QRenderThread::run()
 		CCudaTimer Timer;
 
 		// Execute the rendering kernels
-  		RenderVolume(&SceneCopy, m_pScene, m_pDevRandomStates, m_pDevEstFrameXyz);
+  		Render(0, &SceneCopy, m_pScene, m_pDevRandomStates, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_N);
 		HandleCudaError(cudaGetLastError());
-
-		emit gRenderStatus.StatisticChanged("Timings", "Casting", QString::number(Timer.StopTimer(), 'f', 2), "ms");
-
-		Timer.StartTimer();
-
-		// Blur the estimate
-  		BlurImageXyz(m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, CResolution2D(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
-		HandleCudaError(cudaGetLastError());
-
-		emit gRenderStatus.StatisticChanged("Timings", "Blur Estimate", QString::number(Timer.StopTimer(), 'f', 2), "ms");
-
-		Timer.StartTimer();
-
-		// Compute converged image
-  		ComputeEstimate(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), m_pDevEstFrameXyz, m_pDevAccEstXyz, m_N, 500.0f, m_pDevEstRgbLdr);
-		HandleCudaError(cudaGetLastError());
-
+		
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
 		// Increase the number of iterations performed so far
