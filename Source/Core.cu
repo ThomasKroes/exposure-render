@@ -64,3 +64,20 @@ void BindExtinctionVolume(short* pExtinctionBuffer, cudaExtent Size)
 	// Bind array to 3D texture
 	cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc);
 }
+
+void Render(const int& Type, CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
+{
+	switch (Type)
+	{
+		case 0:
+		{
+			SingleScattering(pScene, pDevScene, pDevRandomStates, pDevEstFrameXyz);
+			break;
+		}
+
+		case 1:
+		{
+			break;
+		}
+	}
+}

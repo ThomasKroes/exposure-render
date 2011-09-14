@@ -8,11 +8,8 @@
 #include "LoadSettingsDialog.h"
 
 // CUDA kernels
-#include "Utilities.cuh"
-#include "Blur.cuh"
-#include "ComputeEstimate.cuh"
+#include "Core.cuh"
 #include "Random.cuh"
-#include "VolumeTracer.cuh"
 
 // VTK
 #include <vtkSmartPointer.h>
