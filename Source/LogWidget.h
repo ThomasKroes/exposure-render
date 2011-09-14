@@ -17,6 +17,12 @@ public:
 	QTableItemMessage(const QString& Message, const QLogger::MessageType& MessageType);
 };
 
+class QTableItemProgress : public QTableWidgetItem
+{
+public:
+	QTableItemProgress(const QString& Event, const float& Progress);
+};
+
 class QLogWidget : public QTableWidget
 {
     Q_OBJECT
@@ -31,6 +37,7 @@ protected:
 
 public slots:
 	void OnLog(const QString& Message, const int& Type);
+	void OnLogProgress(const QString& Event, const float& Progress);
 	void OnClear(void);
 	void OnClearAll(void);
 

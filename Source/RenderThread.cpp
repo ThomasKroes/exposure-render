@@ -96,28 +96,29 @@ void OnProgress(vtkObject* pCaller, long unsigned int EventId, void* pClientData
 	vtkImageResample*			pImageResample			= dynamic_cast<vtkImageResample*>(pCaller);
 	vtkImageGradientMagnitude*	pImageGradientMagnitude	= dynamic_cast<vtkImageGradientMagnitude*>(pCaller);
 
-	if (gpProgressDialog)
-	{
-		gpProgressDialog->resize(400, 100);
+// 	if (gpProgressDialog)
+// 	{
+// 		gpProgressDialog->resize(400, 100);
 
 		if (pMetaImageReader)
 		{
-			gpProgressDialog->setLabelText("Loading volume");
-			gpProgressDialog->setValue((int)(pMetaImageReader->GetProgress() * 100.0));
+			LogProgress("Loading Volume", (float)pMetaImageReader->GetProgress() * 100.0f);
+//			gpProgressDialog->setLabelText("Loading volume");
+//			gpProgressDialog->setValue((int)(pMetaImageReader->GetProgress() * 100.0));
 		}
 
 		if (pImageResample)
 		{
-			gpProgressDialog->setLabelText("Resampling volume");
-			gpProgressDialog->setValue((int)(pImageResample->GetProgress() * 100.0));
+//			gpProgressDialog->setLabelText("Resampling volume");
+//			gpProgressDialog->setValue((int)(pImageResample->GetProgress() * 100.0));
 		}
 
 		if (pImageGradientMagnitude)
 		{
-			gpProgressDialog->setLabelText("Creating gradient magnitude volume");
-			gpProgressDialog->setValue((int)(pImageGradientMagnitude->GetProgress() * 100.0));
+//			gpProgressDialog->setLabelText("Creating gradient magnitude volume");
+//			gpProgressDialog->setValue((int)(pImageGradientMagnitude->GetProgress() * 100.0));
 		}
-	}
+//	}
 }
 
 QString FormatVector(const Vec3f& Vector, const int& Precision = 2)
@@ -534,7 +535,7 @@ bool QRenderThread::Load(QString& FileName)
 	ProgressCallback->SetClientData(MetaImageReader);
 
 	// Progress handling
-//	MetaImageReader->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
+	MetaImageReader->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
 
 	MetaImageReader->SetFileName(m_FileName.toAscii());
 

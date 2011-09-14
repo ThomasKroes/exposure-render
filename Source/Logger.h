@@ -13,11 +13,14 @@ public:
 	};
 
 	void SetLog(const QString& Message, const MessageType& Type);
+	void SetProgress(const QString& Event, const float& Progress);
 
 signals:
 	void Log(const QString& Message, const int& Type);
+	void LogProgress(const QString& Event, const float& Progress);
 };
 
 extern QLogger gLogger;
 
 void Log(const QString& Message, const QLogger::MessageType& Type = QLogger::Normal);
+void LogProgress(const QString& Event, const float& Progress);

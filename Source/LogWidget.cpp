@@ -52,6 +52,18 @@ QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::Mess
 	setStatusTip(ToolTipPrefix + Message);
 }
 
+QTableItemProgress::QTableItemProgress(const QString& Event, const float& Progress)
+{
+	QString ProgressString = Event;
+	
+	if (Progress == 100.0f)
+		ProgressString += "... Done";
+	else
+		ProgressString += QString::number(Progress, 'f', 2);
+
+	setText(ProgressString);
+}
+
 QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
 	QTableWidget(pParent),
 	m_pLogger(NULL)
@@ -89,6 +101,7 @@ void QLogWidget::SetLogger(QLogger* pLogger)
 	else
 	{
 		QObject::connect(m_pLogger, SIGNAL(Log(const QString&, const int&)), this, SLOT(OnLog(const QString&, const int&)));
+		QObject::connect(m_pLogger, SIGNAL(LogProgress(const QString&, const float&)), this, SLOT(OnLogProgress(const QString&, const float&)));
 	}
 }
 
@@ -97,8 +110,24 @@ void QLogWidget::OnLog(const QString& Message, const int& Type)
 	insertRow(0);
 
 	setItem(0, 0, new QTimeTableWidgetItem());
-	setItem(0, 1, new QTableWidgetItem(Message));
+	setItem(0, 1, new QTableWidgetItem());
 	setItem(0, 2, new QTableItemMessage(Message, (QLogger::MessageType)Type));
+	setRowHeight(0, 18);
+}
+
+void QLogWidget::OnLogProgress(const QString& Event, const float& Progress)
+{
+	// Find nearest row with matching event
+	QList<QTableWidgetItem*> Items = findItems(Event, Qt::MatchExactly);
+
+	if (Items.empty())
+		return;
+
+	const int RowIndex = Items[0]->row();
+
+	setItem(RowIndex, 0, new QTimeTableWidgetItem());
+	setItem(RowIndex, 1, new QTableWidgetItem(""));
+	setItem(RowIndex, 2, new QTableItemProgress(Event, Progress));
 	setRowHeight(0, 18);
 }
 
