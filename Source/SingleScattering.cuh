@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Geometry.h"
-#include "curand_kernel.h"
 
 #include "Transport.cuh"
 
@@ -49,7 +48,7 @@ DEV inline bool NearestIntersection(CScene* pScene, CRay& R, const float& StepSi
 }
 
 // Trace volume with single scattering
-KERNEL void KrnlSS(CScene* pScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
+KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
@@ -57,14 +56,14 @@ KERNEL void KrnlSS(CScene* pScene, curandStateXORWOW_t* pDevRandomStates, CColor
 	// Compute sample ID
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
-	float StepSize = 0.03;
+	float StepSize = 0.02;
 
 	// Exit if beyond kernel boundaries
 	if (X >= pScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pScene->m_Camera.m_Film.m_Resolution.GetResY())
 		return;
 	
 	// Init random number generator
-	CCudaRNG RNG(&pDevRandomStates[SID]);
+	CCudaRNG RNG(&pSeeds[SID * 2], &pSeeds[SID * 2 + 1]);
 
 	// Transmittance
 	CColorXyz 	EyeTr	= SPEC_WHITE;		// Eye transmittance
@@ -176,7 +175,7 @@ KERNEL void KrnlSS(CScene* pScene, curandStateXORWOW_t* pDevRandomStates, CColor
 }
 
 // Traces the volume
-void SingleScattering(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
+void SingleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	// Copy the scene from host memory to device memory
 //	cudaMemcpyToSymbol("gScene", pScene, sizeof(CScene));
@@ -185,5 +184,5 @@ void SingleScattering(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pD
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	// Execute kernel
-	KrnlSS<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);
+	KrnlSS<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);
 }

@@ -333,7 +333,7 @@ void QLighting::AddLight(QLight& Light)
 	// Update the scene
 	Update();
 
-	Log(Light.GetName() + " added to the scene");
+	Log("'" + Light.GetName() + "' added to the scene");
 
 	// Let others know the lighting has changed
 	emit LightingChanged();
@@ -343,6 +343,8 @@ void QLighting::RemoveLight(QLight* pLight)
 {
 	if (!pLight)
 		return;
+
+	Log("'" + pLight->GetName() + "' removed from the scene");
 
 	// Remove from light list
 	m_Lights.remove(*pLight);
@@ -354,8 +356,6 @@ void QLighting::RemoveLight(QLight* pLight)
 
 	// Update the scene
 	Update();
-
-	Log(pLight->GetName() + " remove from the scene");
 
 	// Let others know the lighting has changed
 	emit LightingChanged();
@@ -464,9 +464,9 @@ void QLighting::RenameLight(const int& Index, const QString& Name)
 	if (Index < 0 || Index >= m_Lights.size() || Name.isEmpty())
 		return;
 
-	m_Lights[Index].SetName(Name);
+	Log("'" + m_Lights[Index].GetName() + " renamed to '" + Name + "'");
 
-	Log(m_Lights[Index].GetName() + " removed from the scene");
+	m_Lights[Index].SetName(Name);
 
 	// Let others know the lighting has changed
 	emit LightingChanged();

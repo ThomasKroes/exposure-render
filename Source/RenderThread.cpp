@@ -149,12 +149,12 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pImageDataVolume(NULL),
 // 	m_Scene(),
 	m_pScene(NULL),
-	m_pDevRandomStates(NULL),
 	m_pDevAccEstXyz(NULL),
 	m_pDevEstFrameXyz(NULL),
 	m_pDevEstFrameBlurXyz(NULL),
 	m_pDevEstRgbLdr(NULL),
 	m_pImageCanvas(NULL),
+	m_pSeeds(NULL),
 	m_Abort(false)
 {
 }
@@ -173,13 +173,13 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pImageDataVolume		= Other.m_pImageDataVolume;
 	m_Scene					= Other.m_Scene;
 	m_pScene				= Other.m_pScene;
-	m_pDevRandomStates		= Other.m_pDevRandomStates;
 	m_pDevAccEstXyz			= Other.m_pDevAccEstXyz;
 	m_pDevEstFrameXyz		= Other.m_pDevEstFrameXyz;
 	m_pDevEstFrameBlurXyz	= Other.m_pDevEstFrameBlurXyz;
 	m_pDevEstRgbLdr			= Other.m_pDevEstRgbLdr;
 	m_pImageCanvas			= Other.m_pImageCanvas;
 	m_Abort					= Other.m_Abort;
+	m_pSeeds				= m_pSeeds;
 
 	return *this;
 }
@@ -280,7 +280,7 @@ void QRenderThread::run()
  		return;
  	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(256, 256));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
 	m_Scene.m_Camera.m_Film.m_Exposure = 50.0f;
  	m_Scene.m_Camera.m_Aperture.m_Size = 0.001f;
  	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
@@ -347,34 +347,43 @@ void QRenderThread::run()
 
 			m_Mutex.unlock();
 
-			// Compute size of the CUDA buffers
-			float m_SizeRandomStates			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(curandStateXORWOW_t);
-			float m_SizeHdrAccumulationBuffer	= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
-			float m_SizeHdrFrameBuffer			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
-			float m_SizeHdrBlurFrameBuffer		= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
-			float m_SizeLdrFrameBuffer			= 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char);
+			const int NoRandomSeeds = SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * 2;
 
-			HandleCudaError(cudaFree(m_pDevRandomStates));
+			// Compute size of the CUDA buffers
+ 			float SizeRandomSeeds			= NoRandomSeeds * sizeof(unsigned int);
+			float SizeHdrAccumulationBuffer	= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
+			float SizeHdrFrameBuffer		= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
+			float SizeHdrBlurFrameBuffer	= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
+			float SizeLdrFrameBuffer		= 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char);
+
+			HandleCudaError(cudaFree(m_pSeeds));
 			HandleCudaError(cudaFree(m_pDevAccEstXyz));
 			HandleCudaError(cudaFree(m_pDevEstFrameXyz));
 			HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 			HandleCudaError(cudaFree(m_pDevEstRgbLdr));
 
 			// Allocate device buffers
-			HandleCudaError(cudaMalloc((void**)&m_pDevRandomStates, m_SizeRandomStates));
-			HandleCudaError(cudaMalloc((void**)&m_pDevAccEstXyz, m_SizeHdrAccumulationBuffer));
-			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameXyz, m_SizeHdrFrameBuffer));
-			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, m_SizeHdrBlurFrameBuffer));
-			HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbLdr, m_SizeLdrFrameBuffer));
+			HandleCudaError(cudaMalloc((void**)&m_pSeeds, SizeRandomSeeds));
+			HandleCudaError(cudaMalloc((void**)&m_pDevAccEstXyz, SizeHdrAccumulationBuffer));
+			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameXyz, SizeHdrFrameBuffer));
+			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeHdrBlurFrameBuffer));
+			HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbLdr, SizeLdrFrameBuffer));
 			
-			emit gRenderStatus.StatisticChanged("CUDA", "Random States", QString::number(m_SizeRandomStates / powf(1024.0f, 2.0f), 'f', 2), "MB", ":/Images/memory.png");
-			emit gRenderStatus.StatisticChanged("CUDA", "HDR Accumulation Buffer", QString::number(m_SizeHdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
-			emit gRenderStatus.StatisticChanged("CUDA", "HDR Frame Buffer Blur", QString::number(m_SizeHdrBlurFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
-			emit gRenderStatus.StatisticChanged("CUDA", "LDR Estimation Buffer", QString::number(m_SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
+// 			emit gRenderStatus.StatisticChanged("CUDA", "Random States", QString::number(m_SizeRandomStates / powf(1024.0f, 2.0f), 'f', 2), "MB", ":/Images/memory.png");
+			emit gRenderStatus.StatisticChanged("CUDA", "HDR Accumulation Buffer", QString::number(SizeHdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
+			emit gRenderStatus.StatisticChanged("CUDA", "HDR Frame Buffer Blur", QString::number(SizeHdrBlurFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
+			emit gRenderStatus.StatisticChanged("CUDA", "LDR Estimation Buffer", QString::number(SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
 			
-			// Setup the CUDA random number generator
-			SetupRNG(&m_Scene, m_pScene, m_pDevRandomStates);
-			
+			// Create random seeds
+			unsigned int* pSeeds = (unsigned int*)malloc(SizeRandomSeeds);
+
+			for (int i = 0; i < NoRandomSeeds; i++)
+				pSeeds[i] = qrand();
+
+			HandleCudaError(cudaMemcpy(m_pSeeds, pSeeds, SizeRandomSeeds, cudaMemcpyHostToDevice));
+
+			free(pSeeds);
+
 			// Reset buffers to black
 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
@@ -409,7 +418,7 @@ void QRenderThread::run()
 		CCudaTimer Timer;
 
 		// Execute the rendering kernels
-  		Render(0, &SceneCopy, m_pScene, m_pDevRandomStates, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_N);
+  		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_N);
 		HandleCudaError(cudaGetLastError());
 		
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -434,14 +443,14 @@ void QRenderThread::run()
 
 	// Free CUDA buffers
 	HandleCudaError(cudaFree(m_pScene));
-	HandleCudaError(cudaFree(m_pDevRandomStates));
+	HandleCudaError(cudaFree(m_pSeeds));
 	HandleCudaError(cudaFree(m_pDevAccEstXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 	HandleCudaError(cudaFree(m_pDevEstRgbLdr));
 
 	m_pScene				= NULL;
-	m_pDevRandomStates		= NULL;
+	m_pSeeds				= NULL;
 	m_pDevAccEstXyz			= NULL;
 	m_pDevEstFrameXyz		= NULL;
 	m_pDevEstFrameBlurXyz	= NULL;
@@ -616,7 +625,7 @@ bool QRenderThread::Load(QString& FileName)
 
 	// Compute the volume's bounding box
 	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f, 0.0f, 0.0f);
-	m_Scene.m_BoundingBox.m_MaxP	= Vec3f(1.0f, 1.0f, 1.0f);//PhysicalSize;
+	m_Scene.m_BoundingBox.m_MaxP	= PhysicalSize / PhysicalSize.Max();
 
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
@@ -645,6 +654,11 @@ bool QRenderThread::Load(QString& FileName)
 //	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(1000.0f * m_Scene.m_Scale, 2), "");
 	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.GetNoElements()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");
+
+	Log("Bounding box: " + FormatVector(m_Scene.m_BoundingBox.m_MinP, 2) + " - " + FormatVector(m_Scene.m_BoundingBox.m_MaxP));
+	Log("Spacing: " + FormatSize(m_Scene.m_Spacing, 2));
+	Log("Resolution after re-sampling: " + FormatSize(m_Scene.m_Resolution.GetResXYZ()) + " mm");
+	Log("Density range: [" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]");
 
 	// Print scene data
 	m_Scene.PrintSelf();
@@ -699,7 +713,7 @@ void QRenderThread::CreateExtinctionVolume(short* pDensityBuffer, const CResolut
 
 	short* pExtinction = (short*)malloc(Resolution.GetNoElements() * sizeof(short));
 	
-	for(int i = 0; i < ExtinctionSize.width * ExtinctionSize.height * ExtinctionSize.depth; ++i)
+	for(int i = 0; i < (int)(ExtinctionSize.width * ExtinctionSize.height * ExtinctionSize.depth); ++i)
 	{
 		pExtinction[i] = 0.0f;
 	}

@@ -15,8 +15,6 @@ class CRenderStatus : public QObject
 {
 	Q_OBJECT
 
-public:
-
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);
@@ -67,7 +65,6 @@ private:
 
 	// CUDA allocations
 	CScene*					m_pScene;
-	curandStateXORWOW_t*	m_pDevRandomStates;
 	CColorXyz*				m_pDevAccEstXyz;
 	CColorXyz*				m_pDevEstFrameXyz;
 	CColorXyz*				m_pDevEstFrameBlurXyz;
@@ -75,6 +72,7 @@ private:
 
 	// Host image buffers
 	unsigned char*			m_pImageCanvas;
+	unsigned int*			m_pSeeds;
 
 public:
 	QMutex					m_Mutex;

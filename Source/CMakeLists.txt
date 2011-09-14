@@ -510,7 +510,7 @@ FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")
 INSTALL_FILES(/bin FILES ${VtkDlls})
 
 ### CUDA dependencies ###
-SET(CudaDlls ${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart32_40_17.dll ${CUDA_TOOLKIT_ROOT_DIR}/bin/curand32_40_17.dll)
+SET(CudaDlls ${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart32_40_17.dll)
 INSTALL_FILES(/bin FILES ${CudaDlls})
 
 ### QT dependencies ###

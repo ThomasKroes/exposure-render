@@ -678,7 +678,7 @@ public:
 		return V.x == x && V.y == y && V.z == z;
 	}
 
-	HOD float Max(void)
+	HOD float Max(void) const
 	{
 		if (x >= y && x >= z)
 		{
@@ -693,7 +693,7 @@ public:
 		}
 	}
 
-	HOD float Min(void)
+	HOD float Min(void) const
 	{
 		if (x <= y && x <= z)
 		{

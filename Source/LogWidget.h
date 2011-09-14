@@ -26,9 +26,14 @@ public:
 
 	void SetLogger(QLogger* pLogger);
 
+protected:
+	void contextMenuEvent(QContextMenuEvent* pContextMenuEvent);
+
 public slots:
 	void OnLog(const QString& Message, const int& Type);
+	void OnClear(void);
+	void OnClearAll(void);
 
 private:
-	QLogger*			m_pLogger;
+	QLogger*	m_pLogger;
 };

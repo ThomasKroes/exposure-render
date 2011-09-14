@@ -7,7 +7,7 @@
 QTimeTableWidgetItem::QTimeTableWidgetItem(void) :
 	QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss"))
 {
-	setFont(QFont("Arial"));
+	setFont(QFont("Arial", 7));
 	setTextColor(QColor(60, 60, 60));
 
 	setToolTip(text());
@@ -27,7 +27,7 @@ QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::Mess
 	if (MessageType & QLogger::Critical)
 		ToolTipPrefix += "Critical error: ";
 
-	setFont(QFont("Arial"));
+	setFont(QFont("Arial", 7));
 	
 	QColor TextColor;
 
@@ -63,9 +63,9 @@ QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
 	HeaderLabels << "time" << "" << "message";
 
 	setHorizontalHeaderLabels(HeaderLabels);
-	horizontalHeader()->setResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
+	horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
 	horizontalHeader()->setResizeMode(1, QHeaderView::Fixed);
-	horizontalHeader()->setResizeMode(2, QHeaderView::ResizeMode::Stretch);
+	horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
 	horizontalHeader()->resizeSection(1, 25);
 	horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	
@@ -99,5 +99,27 @@ void QLogWidget::OnLog(const QString& Message, const int& Type)
 	setItem(0, 0, new QTimeTableWidgetItem());
 	setItem(0, 1, new QTableWidgetItem(Message));
 	setItem(0, 2, new QTableItemMessage(Message, (QLogger::MessageType)Type));
-	setRowHeight(0, 20);
+	setRowHeight(0, 18);
+}
+
+void QLogWidget::OnClear(void)
+{
+	if (currentRow() < 0)
+		return;
+
+	removeRow(currentRow());
+}
+
+void QLogWidget::OnClearAll(void)
+{
+	clear();
+}
+
+void QLogWidget::contextMenuEvent(QContextMenuEvent* pContextMenuEvent)
+{
+	QMenu ContextMenu(this);
+	ContextMenu.setTitle("Log");
+	ContextMenu.addAction("Clear", this, SLOT(OnClear()));
+	ContextMenu.addAction("Clear All", this, SLOT(OnClearAll()));
+	ContextMenu.exec(pContextMenuEvent->globalPos());
 }

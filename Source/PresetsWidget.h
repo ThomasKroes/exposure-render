@@ -161,7 +161,7 @@ public:
 		// Open the XML file for reading
 		if (!XmlFile.open(QIODevice::ReadOnly))
 		{
-			Log(QString("Failed to open file for reading: " + XmlFile.errorString()).toAscii());
+			Log(QString("Failed to open " + QFileInfo(FileName).fileName() + " for reading: " + XmlFile.errorString()).toAscii(), QLogger::Critical);
 			return;
 		}
 
@@ -171,7 +171,7 @@ public:
 		// Parse file content into DOM
 		if (!DOM.setContent(&XmlFile))
 		{
-			Log("Failed to parse file into a DOM tree.");
+			Log("Failed to parse " + QFileInfo(FileName).fileName() + ".xml into a DOM tree.", QLogger::Critical);
 			XmlFile.close();
 			return;
 		}
@@ -227,7 +227,7 @@ public:
 		// Open the XML file for writing
 		if (!XmlFile.open(QIODevice::WriteOnly ))
 		{
-			Log(QString("Failed to open file for writing: " + XmlFile.errorString()).toAscii());
+			Log(QString("Failed to open " + QFileInfo(FileName).fileName() + ".xml for writing: " + XmlFile.errorString()).toAscii(), QLogger::Critical);
 			return;
 		}
 
