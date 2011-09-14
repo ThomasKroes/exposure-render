@@ -103,10 +103,14 @@ public:
 
 		// Update GUI
 		UpdatePresetsList();
+
+		Log(QString("'" + Preset.GetName() + "' " + m_UserInterfaceName.toLower() + " preset saved"));
 	}
 
 	void RemovePreset(void)
 	{
+		QString PresetName = m_PresetName.currentText();
+
 		// Get selected row index
 		const int CurrentRow = m_PresetName.currentIndex();
 
@@ -116,11 +120,15 @@ public:
 		m_Presets.removeAt(CurrentRow);
 
 		UpdatePresetsList();
+
+		Log(QString("'" + PresetName + "' " + m_UserInterfaceName.toLower() + " preset removed"));
 	}
 
 	void LoadPreset(const QString& Name)
 	{
 		emit QTestWidget::LoadPreset(Name);
+
+		Log("Loading '" + Name + "' " + m_UserInterfaceName.toLower() + " preset");
 	}
 
 	void LoadPresets(const bool& ChoosePath)
@@ -137,7 +145,7 @@ public:
 		// File name + extension
 		QString FileName = QApplication::applicationDirPath() + "/" + m_InternalName + "Presets.xml";
 
-		qDebug(QString("Loading: " + QFileInfo(FileName).fileName()).toAscii());
+		Log(QString("Loading " + m_UserInterfaceName.toLower() + " presets from file: "+ QFileInfo(FileName).fileName()).toAscii());
 
 		// Set the file name
 		if (ChoosePath)
@@ -153,7 +161,7 @@ public:
 		// Open the XML file for reading
 		if (!XmlFile.open(QIODevice::ReadOnly))
 		{
-			qDebug(QString("Failed to open file for reading: " + XmlFile.errorString()).toAscii());
+			Log(QString("Failed to open file for reading: " + XmlFile.errorString()).toAscii());
 			return;
 		}
 
@@ -163,7 +171,7 @@ public:
 		// Parse file content into DOM
 		if (!DOM.setContent(&XmlFile))
 		{
-			qDebug("Failed to parse file into a DOM tree.");
+			Log("Failed to parse file into a DOM tree.");
 			XmlFile.close();
 			return;
 		}
@@ -203,7 +211,7 @@ public:
 		// File name + extension
 		QString FileName = QApplication::applicationDirPath() + "/" + m_InternalName + "Presets.xml";
 
-		qDebug(QString("Saving: " + QFileInfo(FileName).fileName()).toAscii());
+		Log(QString("Saving " + m_UserInterfaceName.toLower() + " presets to file: " + QFileInfo(FileName).fileName()).toAscii());
 
 		// Set the file name
 		if (ChoosePath)
@@ -219,7 +227,7 @@ public:
 		// Open the XML file for writing
 		if (!XmlFile.open(QIODevice::WriteOnly ))
 		{
-			qDebug(QString("Failed to open file for writing: " + XmlFile.errorString()).toAscii());
+			Log(QString("Failed to open file for writing: " + XmlFile.errorString()).toAscii());
 			return;
 		}
 
@@ -273,14 +281,20 @@ public:
 	{
 		// Check if preset with same name already exists
 		for (int i = 0; i < m_Presets.size(); i++)
+		{
 			if (m_Presets[i].GetName() == Name)
 				return;
+		}
+
+		QString OldName = m_Presets[Index].GetName();
 
 		// Rename
 		m_Presets[Index].SetName(Name);
 
 		// Update GUI
 		UpdatePresetsList();
+
+		Log("'" + OldName + "' renamed to '" + Name + "'");
 	};
 
 	T GetPreset(const QString& Name)

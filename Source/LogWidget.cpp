@@ -4,6 +4,29 @@
 
 #include "LogWidget.h"
 
+QTimeTableWidgetItem::QTimeTableWidgetItem(void) :
+	QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss"))
+{
+	setFont(QFont("Courier"));
+	setTextColor(QColor(60, 60, 60));
+
+	setToolTip(text());
+	setStatusTip("Message recorded at " + text());
+}
+
+QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::MessageType& MessageType) :
+	QTableWidgetItem(Message)
+{
+	QString ToolTipPrefix;
+
+	if (MessageType & QLogger::Critical)
+		ToolTipPrefix += "Critical error: ";
+
+	setFont(QFont("Courier"));
+	setToolTip(ToolTipPrefix + Message);
+	setStatusTip(ToolTipPrefix + Message);
+}
+
 QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
 	QTableWidget(pParent),
 	m_pLogger(NULL)
@@ -12,17 +35,20 @@ QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
 	
 	QStringList HeaderLabels;
 
-	HeaderLabels << "Timestamp" << "" << "Message";
+	HeaderLabels << "time" << "" << "message";
 
 	setHorizontalHeaderLabels(HeaderLabels);
 	horizontalHeader()->setResizeMode(0, QHeaderView::Fixed);
 	horizontalHeader()->setResizeMode(1, QHeaderView::Fixed);
 	horizontalHeader()->setResizeMode(2, QHeaderView::ResizeMode::Stretch);
-	horizontalHeader()->resizeSection(0, 100);
-	horizontalHeader()->resizeSection(1, 30);
+	horizontalHeader()->resizeSection(0, 90);
+	horizontalHeader()->resizeSection(1, 25);
+	horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	
 	// Disable vertical header
 	verticalHeader()->setVisible(false);
+
+	setGridStyle(Qt::NoPen);
 
 	setAlternatingRowColors(true);
 }
@@ -33,19 +59,21 @@ void QLogWidget::SetLogger(QLogger* pLogger)
 
 	if (!m_pLogger)
 	{
-		qDebug("No valid logger specified!");
+		Log("No valid logger specified!");
 		return;
 	}
 	else
 	{
-		QObject::connect(m_pLogger, SIGNAL(Log(const QString&, const QLogger::MessageType&)), this, SLOT(OnLog(const QString&, const QLogger::MessageType&)));
+		QObject::connect(m_pLogger, SIGNAL(Log(const QString&, const int&)), this, SLOT(OnLog(const QString&, const int&)));
 	}
 }
 
-void QLogWidget::OnLog(const QString& Message, const QLogger::MessageType& Type)
+void QLogWidget::OnLog(const QString& Message, const int& Type)
 {
 	insertRow(0);
-	setItem(0, 0, new QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss")));
-	setItem(0, 1, new QTableWidgetItem(QIcon(""), ""));
-	setItem(0, 2, new QTableWidgetItem(Message));
+
+	setItem(0, 0, new QTimeTableWidgetItem());
+	setItem(0, 1, new QTableWidgetItem(Message));
+	setItem(0, 2, new QTableItemMessage(Message, (QLogger::MessageType)Type));
+	setRowHeight(0, 20);
 }

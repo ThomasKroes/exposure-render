@@ -189,7 +189,7 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 
 QRenderThread::~QRenderThread(void)
 {
-	qDebug("Render thread destroyed");
+	Log("Render thread destroyed");
 }
 
 bool QRenderThread::InitializeCuda(void)
@@ -470,7 +470,7 @@ void QRenderThread::run()
 
 void QRenderThread::Close(void)
 {
-	qDebug("Closing render thread");
+	Log("Closing render thread");
 	m_Abort = true;
 }
 
@@ -526,7 +526,7 @@ bool QRenderThread::Load(QString& FileName)
 	// Exit if the reader can't read the file
 	if (!MetaImageReader->CanReadFile(m_FileName.toAscii()))
 	{
-		qDebug(QString("Unable to read " + QFileInfo(FileName).fileName()).toAscii());
+		Log(QString("Unable to read " + QFileInfo(FileName).fileName()).toAscii());
 		return false;
 	}
 
@@ -548,7 +548,7 @@ bool QRenderThread::Load(QString& FileName)
 
 	vtkSmartPointer<vtkImageCast> ImageCast = vtkImageCast::New();
 
-	qDebug("Casting volume data type to short");
+	Log("Casting volume data type to short");
 
 	ImageCast->SetOutputScalarTypeToShort();
 	ImageCast->SetInput(MetaImageReader->GetOutput());
@@ -558,8 +558,10 @@ bool QRenderThread::Load(QString& FileName)
 	m_pImageDataVolume = ImageCast->GetOutput();
 	
 	
-//	if (LoadSettingsDialog.GetResample())
-//	{
+	if (LoadSettingsDialog.GetResample())
+	{
+		Log("Resampling volume at " + QString::number(LoadSettingsDialog.GetResampleX(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleY(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleZ(), 'f', 2));
+
 		// Create resampler
 		vtkSmartPointer<vtkImageResample> ImageResample = vtkImageResample::New();
 
@@ -582,8 +584,8 @@ bool QRenderThread::Load(QString& FileName)
 		ImageResample->Update();
 
 		m_pImageDataVolume = ImageResample->GetOutput();
-//	}
-	/**/
+	}
+
 	/*
 	// Create magnitude volume
 	vtkSmartPointer<vtkImageGradientMagnitude> ImageGradientMagnitude = vtkImageGradientMagnitude::New();
@@ -665,7 +667,7 @@ bool QRenderThread::Load(QString& FileName)
 
 void QRenderThread::CreateVolume(void)
 {
-	qDebug("Creating density volume");
+	Log("Creating density volume");
 
 	cudaExtent DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
 
@@ -700,7 +702,7 @@ void QRenderThread::CreateVolume(void)
 
 void QRenderThread::CreateExtinctionVolume(short* pDensityBuffer, const CResolution3D& Resolution)
 {
-	qDebug("Creating extinction volume");
+	Log("Creating extinction volume");
 
 	cudaExtent ExtinctionSize;
 
@@ -744,7 +746,7 @@ void QRenderThread::HandleCudaError(const cudaError_t CudaError)
 	if (CudaError == cudaSuccess)
 		return;
 
-	qDebug(cudaGetErrorString(CudaError));
+	Log(cudaGetErrorString(CudaError));
 }
 
 CScene* Scene(void)
@@ -781,5 +783,5 @@ void KillRenderThread(void)
 	delete gpRenderThread;
 	gpRenderThread = NULL;
 
-	qDebug("Render thread killed");
+	Log("Render thread killed");
 }

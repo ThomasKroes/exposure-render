@@ -15,7 +15,7 @@ public:
 	void SetLog(const QString& Message, const MessageType& Type);
 
 signals:
-	void Log(const QString& Message, const QLogger::MessageType& Type);
+	void Log(const QString& Message, const int& Type);
 };
 
 extern QLogger gLogger;

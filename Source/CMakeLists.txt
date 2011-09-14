@@ -195,7 +195,6 @@ SET(ExposureRenderHeaders
 )
 
 SET(ExposureRenderMocHeaders 
-	
 	# Main
 	MainWindow.h
 

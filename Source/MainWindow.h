@@ -64,12 +64,12 @@ private:
 	CVtkWidget*							m_pVtkWidget;
 
 	// Dock widgets
+	QLogDockWidget						m_LogDockWidget;
 	QLightingDockWidget					m_LightingDockWidget;
 	QAppearanceDockWidget				m_AppearanceDockWidget;
 	QStatisticsDockWidget				m_StatisticsDockWidget;
 	QCameraDockWidget					m_CameraDockWidget;
 	QSettingsDockWidget					m_SettingsDockWidget;
-	QLogDockWidget						m_LogDockWidget;
 
 	// Actions
     QAction*							m_pOpenAct;

@@ -17,12 +17,12 @@ CMainWindow::CMainWindow() :
     m_pHelpMenu(NULL),
     m_pFileToolBar(NULL),
 	m_pVtkWidget(NULL),
+	m_LogDockWidget(),
 	m_LightingDockWidget(),
 	m_AppearanceDockWidget(),
 	m_StatisticsDockWidget(),
 	m_CameraDockWidget(),
 	m_SettingsDockWidget(),
-	m_LogDockWidget(),
     m_pOpenAct(NULL),
 	m_pCloseAct(NULL),
     m_pExitAct(NULL),
@@ -142,6 +142,12 @@ void CMainWindow::CreateStatusBar()
 
 void CMainWindow::SetupDockingWidgets()
 {
+	// Log dock widget
+	m_LogDockWidget.setEnabled(true);
+	m_LogDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::RightDockWidgetArea, &m_LogDockWidget);
+	m_pViewMenu->addAction(m_LogDockWidget.toggleViewAction());
+
 	// Lighting dock widget
 	m_LightingDockWidget.setEnabled(false);
     m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -171,12 +177,6 @@ void CMainWindow::SetupDockingWidgets()
 	m_SettingsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::LeftDockWidgetArea, &m_SettingsDockWidget);
     m_pViewMenu->addAction(m_SettingsDockWidget.toggleViewAction());
-
-	// Log dock widget
-	m_LogDockWidget.setEnabled(true);
-	m_LogDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
-	addDockWidget(Qt::BottomDockWidgetArea, &m_LogDockWidget);
-	m_pViewMenu->addAction(m_LogDockWidget.toggleViewAction());
 
 	tabifyDockWidget(&m_AppearanceDockWidget, &m_LightingDockWidget);
 	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);
@@ -290,7 +290,7 @@ void CMainWindow::About()
 
 void CMainWindow::OnRenderBegin(void)
 {
-	qDebug("Rendering started");
+	Log("Rendering started");
 
 	m_pOpenAct->setEnabled(false);
 	
@@ -311,7 +311,7 @@ void CMainWindow::OnRenderBegin(void)
 
 void CMainWindow::OnRenderEnd(void)
 {
-	qDebug("Rendering ended");
+	Log("Rendering ended");
 
 	m_pOpenAct->setEnabled(true);
 	
