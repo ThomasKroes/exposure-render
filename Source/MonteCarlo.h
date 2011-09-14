@@ -671,3 +671,9 @@ HOD inline Vec3f ShirleyDisk(const Vec3f& N, const Vec2f& U)
 
 	return (u * Ucs) + (v * Vcs);
 }
+
+DEV inline float PowerHeuristic(int nf, float fPdf, int ng, float gPdf)
+{
+	float f = nf * fPdf, g = ng * gPdf;
+	return (f * f) / (f * f + g * g); 
+}

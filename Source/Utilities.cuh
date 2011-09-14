@@ -56,3 +56,21 @@ DEV CColorRgbHdr GetRoughness(CScene* pScene, const float& D)
 {
 	return pScene->m_TransferFunctions.m_Roughness.F(D);
 }
+
+DEV bool NearestLight(CScene* pScene, CRay& R, CColorXyz& LightColor)
+{
+	// Whether a hit with a light was found or not 
+	bool Hit = false;
+	
+	float T = 0.0f;
+
+	CRay RayCopy = R;
+
+	for (int i = 0; i < pScene->m_Lighting.m_NoLights; i++)
+	{
+		if (pScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor))
+			Hit = true;
+	}
+	
+	return Hit;
+}
