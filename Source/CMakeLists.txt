@@ -106,6 +106,7 @@ SET(ExposureRenderSources
 	Material.cpp
 	Sample.cpp
 	LightTransport.cpp
+	StartupDialog.cpp
 
 	# Logging
 	Logger.cpp
@@ -187,6 +188,7 @@ SET(ExposureRenderHeaders
 	Sample.h
 	LightTransport.h
 	LogWidget.h
+	StartupDialog.h
 
 	# Logging
 	Logger.h
@@ -426,6 +428,7 @@ SET(CoreSources
 	Material.h
 	Sample.h
 	LightTransport.h
+	StartupDialog.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
@@ -446,6 +449,7 @@ SET(CoreSources
 	Material.cpp
 	Sample.cpp
 	LightTransport.cpp
+	StartupDialog.cpp
 )
 
 # Make the core group
@@ -457,12 +461,14 @@ SET(CudaSources
 	VolumeTracerBackup.cuh
 	Blur.cuh
 	Random.cuh
+	Utilities.cuh
 	ComputeEstimate.cuh
 	ComputeEstimate.cu
 	VolumeTracer.cu
 	VolumeTracerBackup.cu
 	Blur.cu
 	Random.cu
+	Utilities.cu
 )
 
 # Make the CUDA group

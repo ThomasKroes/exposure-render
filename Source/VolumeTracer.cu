@@ -1,5 +1,6 @@
 
 #include "VolumeTracer.cuh"
+#include "Utilities.cuh"
 
 #include "Filter.h"
 #include "Scene.h"
@@ -449,7 +450,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		const Vec3f Wo = Normalize(-EyeRay.m_D);
 
 		// Obtain normal
-		Normal = ComputeGradient(pDevScene, EyeP, Wo);
+		Normal = Grad(pDevScene, EyeP, &gTexDensity);//ComputeGradient(pDevScene, EyeP, Wo);
 
 		// Exit if air, or not within hemisphere
 		if (Tr < 0.05f)// || Dot(Wo, Normal[TID]) < 0.0f)
