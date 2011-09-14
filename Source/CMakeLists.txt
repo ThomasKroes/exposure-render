@@ -457,18 +457,20 @@ SOURCE_GROUP("Core" FILES ${CoreSources})
 
 # CUDA sources
 SET(CudaSources
-	VolumeTracer.cuh
-	VolumeTracerBackup.cuh
+	SingleScattering.cuh
+	MultipleScattering.cuh
 	Blur.cuh
 	Random.cuh
 	Utilities.cuh
+	Core.cuh
 	ComputeEstimate.cuh
 	ComputeEstimate.cu
-	VolumeTracer.cu
-	VolumeTracerBackup.cu
+	SingleScattering.cu
+	MultipleScattering.cu
 	Blur.cu
 	Random.cu
 	Utilities.cu
+	Core.cu
 )
 
 # Make the CUDA group

@@ -8,6 +8,7 @@
 #include "LoadSettingsDialog.h"
 
 // CUDA kernels
+#include "Utilities.cuh"
 #include "Blur.cuh"
 #include "ComputeEstimate.cuh"
 #include "Random.cuh"
@@ -151,7 +152,7 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pRenderImage(NULL),
 	m_pImageDataVolume(NULL),
 // 	m_Scene(),
-	m_pDevScene(NULL),
+	m_pScene(NULL),
 	m_pDevRandomStates(NULL),
 	m_pDevAccEstXyz(NULL),
 	m_pDevEstFrameXyz(NULL),
@@ -175,7 +176,7 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pRenderImage			= Other.m_pRenderImage;
 	m_pImageDataVolume		= Other.m_pImageDataVolume;
 	m_Scene					= Other.m_Scene;
-	m_pDevScene				= Other.m_pDevScene;
+	m_pScene				= Other.m_pScene;
 	m_pDevRandomStates		= Other.m_pDevRandomStates;
 	m_pDevAccEstXyz			= Other.m_pDevAccEstXyz;
 	m_pDevEstFrameXyz		= Other.m_pDevEstFrameXyz;
@@ -293,7 +294,7 @@ void QRenderThread::run()
 	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
 
 	// Allocate CUDA memory for scene
-	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));
+	HandleCudaError(cudaMalloc((void**)&m_pScene, sizeof(CScene)));
 
 	emit gRenderStatus.StatisticChanged("CUDA", "Scene", QString::number(sizeof(CScene) / powf(1024.0f, 2.0f), 'f', 2), "MB");
 
@@ -324,7 +325,7 @@ void QRenderThread::run()
 		emit gRenderStatus.StatisticChanged("Camera", "Field Of View", QString::number(Scene()->m_Camera.m_FovV, 'f', 2));
 
 		// Copy scene from host to device
-		cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
+		cudaMemcpy(m_pScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
 
 		// Resizing the image canvas requires special attention
 		if (SceneCopy.m_DirtyFlags.HasFlag(FilmResolutionDirty))
@@ -370,7 +371,7 @@ void QRenderThread::run()
 			emit gRenderStatus.StatisticChanged("CUDA", "LDR Estimation Buffer", QString::number(m_SizeLdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
 			
 			// Setup the CUDA random number generator
-			SetupRNG(&m_Scene, m_pDevScene, m_pDevRandomStates);
+			SetupRNG(&m_Scene, m_pScene, m_pDevRandomStates);
 			
 			// Reset buffers to black
 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
@@ -406,7 +407,7 @@ void QRenderThread::run()
 		CCudaTimer Timer;
 
 		// Execute the rendering kernels
-  		RenderVolume(&SceneCopy, m_pDevScene, m_pDevRandomStates, m_pDevEstFrameXyz);
+  		RenderVolume(&SceneCopy, m_pScene, m_pDevRandomStates, m_pDevEstFrameXyz);
 		HandleCudaError(cudaGetLastError());
 
 		emit gRenderStatus.StatisticChanged("Timings", "Casting", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -446,14 +447,14 @@ void QRenderThread::run()
 	emit gRenderStatus.RenderEnd();
 
 	// Free CUDA buffers
-	HandleCudaError(cudaFree(m_pDevScene));
+	HandleCudaError(cudaFree(m_pScene));
 	HandleCudaError(cudaFree(m_pDevRandomStates));
 	HandleCudaError(cudaFree(m_pDevAccEstXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 	HandleCudaError(cudaFree(m_pDevEstRgbLdr));
 
-	m_pDevScene				= NULL;
+	m_pScene				= NULL;
 	m_pDevRandomStates		= NULL;
 	m_pDevAccEstXyz			= NULL;
 	m_pDevEstFrameXyz		= NULL;

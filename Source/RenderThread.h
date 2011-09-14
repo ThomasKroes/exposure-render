@@ -66,7 +66,7 @@ private:
 	vtkImageData*			m_pImageDataVolume;
 
 	// CUDA allocations
-	CScene*					m_pDevScene;
+	CScene*					m_pScene;
 	curandStateXORWOW_t*	m_pDevRandomStates;
 	CColorXyz*				m_pDevAccEstXyz;
 	CColorXyz*				m_pDevEstFrameXyz;

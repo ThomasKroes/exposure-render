@@ -8,25 +8,25 @@
 // 
 // cudaArray* gpI = NULL;
 // 
-// KERNEL void KrnlSetupRNG(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates)
+// KERNEL void KrnlSetupRNG(CScene* pScene, curandStateXORWOW_t* pDevRandomStates)
 // {
 // 	const int X		= (blockIdx.x * blockDim.x) + threadIdx.x;
 // 	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
 // 
 // 	// Exit if beyond canvas boundaries
-// 	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.Width() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.Height())
+// 	if (X >= pScene->m_Camera.m_Film.m_Resolution.Width() || Y >= pScene->m_Camera.m_Film.m_Resolution.Height())
 // 		return;
 // 
 // 	// Initialize
-// 	curand_init(Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X, 1234, 0, &pDevRandomStates[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X]);
+// 	curand_init(Y * (int)pScene->m_Camera.m_Film.m_Resolution.Width() + X, 1234, 0, &pDevRandomStates[Y * (int)pScene->m_Camera.m_Film.m_Resolution.Width() + X]);
 // }
 // 
-// extern "C" void SetupRNG(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates)
+// extern "C" void SetupRNG(CScene* pScene, CScene* pScene, curandStateXORWOW_t* pDevRandomStates)
 // {
 // 	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
 // 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Width() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Height() / (float)KernelBlock.y));
 // 
-// 	KrnlSetupRNG<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates);
+// 	KrnlSetupRNG<<<KernelGrid, KernelBlock>>>(pScene, pDevRandomStates);
 // 
 // 	cudaError_t Error = cudaGetLastError();
 // }
@@ -119,17 +119,17 @@
 // 	return -Normal;
 // }
 // 
-// DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
+// DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pScene, int Component)
 // {
 // 	float MinT = 0.0f, MaxT = 0.0f;
 // 
-// 	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+// 	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
 // 		return false;
 // 
 // 	MinT = max(MinT, R.m_MinT);
 // 	MaxT = min(MaxT, R.m_MaxT);
 // 
-// 	float S = -log(RNG.Get1()) / pDevScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+// 	float S = -log(RNG.Get1()) / pScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
 // 
 // 	Vec3f samplePos; 
 // 
@@ -142,9 +142,9 @@
 // 		if (MinT > MaxT)
 // 			return false;
 // 		
-// 		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
+// 		D = (float)(SHRT_MAX * tex3D(gTexDensity, pScene->m_BoundingBox.m_MinP.x + (samplePos.x / pScene->m_BoundingBox.m_MaxP.x), pScene->m_BoundingBox.m_MinP.y + (samplePos.y / pScene->m_BoundingBox.m_MaxP.y), pScene->m_BoundingBox.m_MinP.z + (samplePos.z / pScene->m_BoundingBox.m_MaxP.z)));
 // 
-// 		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Kt.F(D)[Component] * pDevScene->m_TransferFunctions.m_Kd.F(D)[Component];
+// 		SigmaT	= 10.0f * pScene->m_TransferFunctions.m_Kt.F(D)[Component] * pScene->m_TransferFunctions.m_Kd.F(D)[Component];
 // 		Sum		+= SigmaT * Dt;
 // 		MinT	+= Dt;
 // 	}
@@ -156,17 +156,17 @@
 // 	return true;
 // }
 // 
-// DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pDevScene, int Component)
+// DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, CVolumePoint& VP, CScene* pScene, int Component)
 // {
 // 	float MinT = 0.0f, MaxT = 0.0f;
 // 
-// 	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+// 	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
 // 		return false;
 // 
 // 	MinT = max(MinT, R.m_MinT);
 // //	MaxT = min(MaxT, R.m_MaxT);
 // 
-// 	float S = -log(RNG.Get1()) / pDevScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pDevScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
+// 	float S = -log(RNG.Get1()) / pScene->m_MaxD, Dt = 1.0f * (1.0f / (float)pScene->m_Resolution.m_XYZ.Max()), Sum = 0.0f, SigmaT = 0.0f, D = 0.0f;
 // 
 // 	Vec3f samplePos; 
 // 
@@ -180,9 +180,9 @@
 // 		if (MinT > R.m_MaxT)
 // 			break;
 // 		
-// 		D = (float)(SHRT_MAX * tex3D(gTexDensity, pDevScene->m_BoundingBox.m_MinP.x + (samplePos.x / pDevScene->m_BoundingBox.m_MaxP.x), pDevScene->m_BoundingBox.m_MinP.y + (samplePos.y / pDevScene->m_BoundingBox.m_MaxP.y), pDevScene->m_BoundingBox.m_MinP.z + (samplePos.z / pDevScene->m_BoundingBox.m_MaxP.z)));
+// 		D = (float)(SHRT_MAX * tex3D(gTexDensity, pScene->m_BoundingBox.m_MinP.x + (samplePos.x / pScene->m_BoundingBox.m_MaxP.x), pScene->m_BoundingBox.m_MinP.y + (samplePos.y / pScene->m_BoundingBox.m_MaxP.y), pScene->m_BoundingBox.m_MinP.z + (samplePos.z / pScene->m_BoundingBox.m_MaxP.z)));
 // 
-// 		SigmaT	= 10.0f * pDevScene->m_TransferFunctions.m_Kt.F(D)[Component] * pDevScene->m_TransferFunctions.m_Kd.F(D)[Component];
+// 		SigmaT	= 10.0f * pScene->m_TransferFunctions.m_Kt.F(D)[Component] * pScene->m_TransferFunctions.m_Kd.F(D)[Component];
 // 		Sum		+= SigmaT * Dt;
 // 		MinT	+= Dt;
 // 	}
@@ -198,7 +198,7 @@
 // }
 // 
 // // Trace volume with single scattering
-// KERNEL void KrnlRenderVolume(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
+// KERNEL void KrnlRenderVolume(CScene* pScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 // {
 // 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 // 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
@@ -207,7 +207,7 @@
 // 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 // 
 // 	// Exit if beyond kernel boundaries
-// 	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.Width() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.Height())
+// 	if (X >= pScene->m_Camera.m_Film.m_Resolution.Width() || Y >= pScene->m_Camera.m_Film.m_Resolution.Height())
 // 		return;
 // 
 // 	// Init random number generator
@@ -216,7 +216,7 @@
 // 	CRay Re, Rl;
 // 	
 // 	// Generate the camera ray
-// 	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
+// 	pScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
 // 
 // 	// Eye attenuation (Le), accumulated color through volume (Lv), unattenuated light from light source (Li), attenuated light from light source (Ld), and BSDF value (F)
 // 	CColorXyz PathThroughput	= SPEC_WHITE;
@@ -239,12 +239,12 @@
 // 	int CC1 = floorf(RNG.Get1() * 3.0f);
 // 
 // 	// Walk along the eye ray with ray marching
-// 	while (NoScatteringEvents < pDevScene->m_MaxNoBounces)
+// 	while (NoScatteringEvents < pScene->m_MaxNoBounces)
 // 	{
 // 		CVolumePoint VP;
 // 
 // 		// Sample distance
-// 		if (SampleDistanceRM(Re, RNG, VP, pDevScene, CC1))
+// 		if (SampleDistanceRM(Re, RNG, VP, pScene, CC1))
 // 		{
 // // 			if (VP.m_Transmittance.y() > 0.0f)
 // //			PathThroughput.c[CC1] *= VP.m_Transmittance.c[CC1];
@@ -263,20 +263,20 @@
 // 
 // 
 // 
-// 			Pl = pDevScene->m_BoundingBox.GetCenter() + pDevScene->m_Light.m_Distance * Vec3f(sinf(pDevScene->m_Light.m_Theta), sinf(pDevScene->m_Light.m_Phi), cosf(pDevScene->m_Light.m_Theta));
+// 			Pl = pScene->m_BoundingBox.GetCenter() + pScene->m_Light.m_Distance * Vec3f(sinf(pScene->m_Light.m_Theta), sinf(pScene->m_Light.m_Phi), cosf(pScene->m_Light.m_Theta));
 // //			Pl = pBoundingBox->GetCenter() + UniformSampleSphere(RNG.Get2()) * Vec3f(1000.0f);
 // 
 // 			// LightPdf = powf((Pe - Pl).Length(), 2.0f);
 // 
 // 			Rl = CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length());
 // 
-// 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pDevScene, CC1))
+// 			if (!Li.IsBlack() && LightPdf > 0.0f && FreePathRM(Rl, RNG, VP, pScene, CC1))
 // 			{
 // 				Li /= LightPdf;
-// 				Lv.c[CC1] += PathThroughput.c[CC1] * Li.c[CC1] * PhaseHG(Wo, Rl.m_D, pDevScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
+// 				Lv.c[CC1] += PathThroughput.c[CC1] * Li.c[CC1] * PhaseHG(Wo, Rl.m_D, pScene->m_PhaseG);// * VP.m_Transmittance.c[CC1];// * ;
 // 			}
 // 
-// 			W = Normalize(SampleHG(Wo, pDevScene->m_PhaseG, RNG.Get2()));
+// 			W = Normalize(SampleHG(Wo, pScene->m_PhaseG, RNG.Get2()));
 // //			W = UniformSampleSphere(RNG.Get2());
 // //			W = UniformSampleHemisphere(RNG.Get2(), Gn);
 // 
@@ -308,17 +308,17 @@
 // //  		Lv += SPEC_WHITE;
 // 
 // 
-// 	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.Width() + X].c[CC1] = Lv.c[CC1] / fmaxf(1.0f, NoScatteringEvents);
+// 	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.Width() + X].c[CC1] = Lv.c[CC1] / fmaxf(1.0f, NoScatteringEvents);
 // }
 // 
 // // Traces the volume
-// void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
+// void RenderVolume(CScene* pScene, CScene* pScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 // {
 // 	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
 // 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Width() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.Height() / (float)KernelBlock.y));
 // 	
 // 	// Execute kernel
-// 	KrnlRenderVolume<<<KernelGrid, KernelBlock>>>(pDevScene, pDevRandomStates, pDevEstFrameXyz);
+// 	KrnlRenderVolume<<<KernelGrid, KernelBlock>>>(pScene, pDevRandomStates, pDevEstFrameXyz);
 // }
 // 
 // KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D Resolution, CGaussianFilter GaussianFilter)

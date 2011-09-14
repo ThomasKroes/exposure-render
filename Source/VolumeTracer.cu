@@ -6,100 +6,8 @@
 #include "Scene.h"
 #include "Material.h"
 
-texture<short, 3, cudaReadModeNormalizedFloat>	gTexDensity;
-texture<short, 3, cudaReadModeNormalizedFloat>	gTexExtinction;
-
-void BindDensityVolume(short* pDensityBuffer, cudaExtent Size)
-{
-	cudaArray* gpDensity = NULL;
-
-	// create 3D array
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
-	cudaMalloc3DArray(&gpDensity, &ChannelDesc, Size);
-
-	// copy data to 3D array
-	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(pDensityBuffer, Size.width * sizeof(short), Size.width, Size.height);
-	copyParams.dstArray				= gpDensity;
-	copyParams.extent				= Size;
-	copyParams.kind					= cudaMemcpyHostToDevice;
-	cudaMemcpy3D(&copyParams);
-
-	// Set texture parameters
-	gTexDensity.normalized		= true;
-	gTexDensity.filterMode		= cudaFilterModeLinear;      
-	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
-	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
- 	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
-
-	// Bind array to 3D texture
-	cudaBindTextureToArray(gTexDensity, gpDensity, ChannelDesc);
-}
-
-void BindExtinctionVolume(short* pExtinctionBuffer, cudaExtent Size)
-{
-	cudaArray* gpExtinction = NULL;
-
-	// create 3D array
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
-	cudaMalloc3DArray(&gpExtinction, &ChannelDesc, Size);
-
-	// copy data to 3D array
-	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(pExtinctionBuffer, Size.width * sizeof(short), Size.width, Size.height);
-	copyParams.dstArray				= gpExtinction;
-	copyParams.extent				= Size;
-	copyParams.kind					= cudaMemcpyHostToDevice;
-	cudaMemcpy3D(&copyParams);
-
-	// Set texture parameters
-	gTexExtinction.normalized		= true;
-	gTexExtinction.filterMode		= cudaFilterModePoint;      
-	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
-	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
-// 	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
-
-	// Bind array to 3D texture
-	cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc);
-}
-
-DEV float Density(CScene* pDevScene, const Vec3f& P)
-{
-	return ((float)(SHRT_MAX) * tex3D(gTexDensity, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ()));
-}
-
-DEV float Extinction(CScene* pDevScene, const Vec3f& P)
-{
-	return tex3D(gTexExtinction, P.x / pDevScene->m_BoundingBox.LengthX(), P.y / pDevScene->m_BoundingBox.LengthY(), P.z /  pDevScene->m_BoundingBox.LengthZ());
-}
-
-DEV CColorRgbHdr GetOpacity(CScene* pDevScene, const float& D)
-{
-	return pDevScene->m_DensityScale * pDevScene->m_TransferFunctions.m_Opacity.F(D);
-}
-
-DEV CColorRgbHdr GetDiffuse(CScene* pDevScene, const float& D)
-{
-	return pDevScene->m_TransferFunctions.m_Diffuse.F(D);
-}
-
-DEV CColorRgbHdr GetSpecular(CScene* pDevScene, const float& D)
-{
-	return pDevScene->m_TransferFunctions.m_Specular.F(D);
-}
-
-DEV CColorRgbHdr GetEmission(CScene* pDevScene, const float& D)
-{
-	return pDevScene->m_TransferFunctions.m_Emission.F(D);
-}
-
-DEV CColorRgbHdr GetRoughness(CScene* pDevScene, const float& D)
-{
-	return pDevScene->m_TransferFunctions.m_Roughness.F(D);
-}
-
 // ToDo: Add description
-DEV bool NearestLight(CScene* pDevScene, CRay& R, CColorXyz& LightColor)
+DEV bool NearestLight(CScene* pScene, CRay& R, CColorXyz& LightColor)
 {
 	// Whether a hit with a light was found or not 
 	bool Hit = false;
@@ -108,9 +16,9 @@ DEV bool NearestLight(CScene* pDevScene, CRay& R, CColorXyz& LightColor)
 
 	CRay RayCopy = R;
 
-	for (int i = 0; i < pDevScene->m_Lighting.m_NoLights; i++)
+	for (int i = 0; i < pScene->m_Lighting.m_NoLights; i++)
 	{
-		if (pDevScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor))
+		if (pScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor))
 			Hit = true;
 	}
 	
@@ -125,13 +33,13 @@ DEV inline float PowerHeuristic(int nf, float fPdf, int ng, float gPdf)
 }
 
 // Find the nearest non-empty voxel in the volume
-DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& StepSize, const float& U, float* pBoxMinT = NULL, float* pBoxMaxT = NULL)
+DEV inline bool NearestIntersection(CScene* pScene, CRay& R, const float& StepSize, const float& U, float* pBoxMinT = NULL, float* pBoxMaxT = NULL)
 {
 	float MinT;
 	float MaxT;
 
 	// Intersect the eye ray with bounding box, if it does not intersect then return the environment
-	if (!pDevScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
 		return false;
 
 	bool Hit = false;
@@ -147,7 +55,7 @@ DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& Ste
 	// Step through the volume and stop as soon as we come across a non-empty voxel
 	while (MinT < MaxT)
 	{
-		if (GetOpacity(pDevScene, Density(pDevScene, R(MinT))).r > 0.0f)
+		if (GetOpacity(pScene, Density(pScene, R(MinT))).r > 0.0f)
 		{
 			Hit = true;
 			break;
@@ -167,30 +75,16 @@ DEV inline bool NearestIntersection(CScene* pDevScene, CRay& R, const float& Ste
 	return Hit;
 }
 
-// Computes the local gradient
-DEV Vec3f ComputeGradient(CScene* pDevScene, const Vec3f& P, const Vec3f& D)
-{
-	Vec3f Normal;
 
-	float Delta = 0.01f;
-
-	Normal.x = Density(pDevScene, P + Vec3f(Delta, 0.0f, 0.0f)) - Density(pDevScene, P - Vec3f(Delta, 0.0f, 0.0f));
-	Normal.y = Density(pDevScene, P + Vec3f(0.0f, Delta, 0.0f)) - Density(pDevScene, P - Vec3f(0.0f, Delta, 0.0f));
-	Normal.z = Density(pDevScene, P + Vec3f(0.0f, 0.0f, Delta)) - Density(pDevScene, P - Vec3f(0.0f, 0.0f, Delta));
-
-	Normal.Normalize();
-
-	return -Normal;
-}
 
 // Computes the attenuation through the volume
-DEV inline CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3f& D, const float& MaxT, const float& StepSize, CCudaRNG& Rnd)
+DEV inline CColorXyz Transmittance(CScene* pScene, const Vec3f& P, const Vec3f& D, const float& MaxT, const float& StepSize, CCudaRNG& Rnd)
 {
 	// Near and far intersections with volume axis aligned bounding box
 	float NearT = 0.0f, FarT = 0.0f;
 
 	// Intersect with volume axis aligned bounding box
-	if (!pDevScene->m_BoundingBox.Intersect(CRay(P, D, 0.0f, FLT_MAX), &NearT, &FarT))
+	if (!pScene->m_BoundingBox.Intersect(CRay(P, D, 0.0f, FLT_MAX), &NearT, &FarT))
 		return SPEC_BLACK;
 
 	// Clamp to near plane if necessary
@@ -208,7 +102,7 @@ DEV inline CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3
 		const Vec3f SP = P + D * (NearT);
 
 		// Fetch density
-		const float D = Density(pDevScene, SP);
+		const float D = Density(pScene, SP);
 		
 		// We ignore air density
 		if (D == 0)
@@ -219,7 +113,7 @@ DEV inline CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3
 		}
 
 		// Get shadow opacity
-		const float	Opacity = GetOpacity(pDevScene, D).r;
+		const float	Opacity = GetOpacity(pScene, D).r;
 
 		if (Opacity > 0.0f)
 		{
@@ -239,7 +133,7 @@ DEV inline CColorXyz Transmittance(CScene* pDevScene, const Vec3f& P, const Vec3
 }
 
 // Estimates direct lighting
-DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
+DEV CColorXyz EstimateDirectLight(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
 // 	if (Dot(Wo, N) < 0.0f)
 // 		return SPEC_BLACK;
@@ -253,9 +147,9 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	// Attenuation
 	CColorXyz Tr = SPEC_BLACK;
 
-	const float D = Density(pDevScene, Pe);
+	const float D = Density(pScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pDevScene, D).ToXYZ(), GetSpecular(pDevScene, D).ToXYZ(), 50.0f, 0.0001 * GetRoughness(pDevScene, D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, D).ToXYZ(), GetSpecular(pScene, D).ToXYZ(), 50.0f, 0.0001 * GetRoughness(pScene, D).r);
 	// Light/shadow ray
 	CRay R; 
 
@@ -285,7 +179,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
 	{
 		// Compute tau
-		const CColorXyz Tr = Transmittance(pDevScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
+		const CColorXyz Tr = Transmittance(pScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
 		
 		// Attenuation due to volume
 		Li *= Tr;
@@ -314,7 +208,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 		// Compute virtual light point
 		const Vec3f Pl = Pe + (MaxT * Wi);
 
-		if (NearestLight(pDevScene, Pe, Wi, 0.0f, MaxT, pNearestLight, NULL, &UV, &LightPdf))
+		if (NearestLight(pScene, Pe, Wi, 0.0f, MaxT, pNearestLight, NULL, &UV, &LightPdf))
 		{
 			if (LightPdf > 0.0f && BsdfPdf > 0.0f) 
 			{
@@ -327,7 +221,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 				if (!Li.IsBlack())
 				{
 					// Scale incident radiance by attenuation through volume
-					Tr = Transmittance(pDevScene, Pe, Wi, 1.0f, StepSize, Rnd);
+					Tr = Transmittance(pScene, Pe, Wi, 1.0f, StepSize, Rnd);
 
 					// Attenuation due to volume
 					Li *= Tr;
@@ -344,10 +238,10 @@ DEV CColorXyz EstimateDirectLight(CScene* pDevScene, CLight& Light, CLightingSam
 }
 
 // Uniformly samples one light
-DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
+DEV CColorXyz UniformSampleOneLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
 	// Determine no. lights
-	const int NumLights = pDevScene->m_Lighting.m_NoLights;
+	const int NumLights = pScene->m_Lighting.m_NoLights;
 
 	// Exit return zero radiance if no light
  	if (NumLights == 0)
@@ -362,14 +256,14 @@ DEV CColorXyz UniformSampleOneLight(CScene* pDevScene, const Vec3f& Wo, const Ve
 	const int WhichLight = (int)floorf(LS.m_LightNum * (float)NumLights);
 
 	// Get the light
-	CLight& Light = pDevScene->m_Lighting.m_Lights[WhichLight];
+	CLight& Light = pScene->m_Lighting.m_Lights[WhichLight];
 
 	// Return estimated direct light
-	return (float)NumLights * EstimateDirectLight(pDevScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
+	return (float)NumLights * EstimateDirectLight(pScene, Light, LS, Wo, Pe, N, Rnd, StepSize);
 }
 
 // Trace volume with single scattering
-KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
+KERNEL void KrnlSS(CScene* pScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 {
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
@@ -380,7 +274,7 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	float StepSize = 0.03;
 
 	// Exit if beyond kernel boundaries
-	if (X >= pDevScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pDevScene->m_Camera.m_Film.m_Resolution.GetResY())
+	if (X >= pScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pScene->m_Camera.m_Film.m_Resolution.GetResY())
 		return;
 	
 	// Init random number generator
@@ -398,21 +292,21 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	float BoxMinT = 0.0f, BoxMaxT = 0.0f;
 
  	// Generate the camera ray
- 	pDevScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), EyeRay.m_O, EyeRay.m_D);
+ 	pScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), EyeRay.m_O, EyeRay.m_D);
 
 	EyeRay.m_MinT = 0.0f; 
 	EyeRay.m_MaxT = FLT_MAX;
 
 	// Check if ray passes through volume, if it doesn't, evaluate scene lights and stop tracing 
- 	if (!NearestIntersection(pDevScene, EyeRay, StepSize, RNG.Get1(), &BoxMinT, &BoxMaxT))
+ 	if (!NearestIntersection(pScene, EyeRay, StepSize, RNG.Get1(), &BoxMinT, &BoxMaxT))
  		Continue = false;
 
 	CColorXyz Li = SPEC_BLACK;
 	RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, Continue ? EyeRay.m_MinT : EyeRay.m_MaxT);
 
-	if (NearestLight(pDevScene, RayCopy, Li))
+	if (NearestLight(pScene, RayCopy, Li))
 	{
-		pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
+		pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
 		return;
 	}
 
@@ -433,15 +327,15 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		EyeT += StepSize;
 
 		// Fetch density
-		const float D = Density(pDevScene, EyeP);
+		const float D = Density(pScene, EyeP);
 
 		// We ignore air density
 		if (Density == 0) 
 			continue;
 		 
 		// Get opacity at eye point
-		const float		Tr = GetOpacity(pDevScene, D).r;
-		const CColorXyz	Ke = GetEmission(pDevScene, D).ToXYZ();
+		const float		Tr = GetOpacity(pScene, D).r;
+		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
 		
 		// Add emission
 		EyeTr += Ke; 
@@ -450,14 +344,14 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 		const Vec3f Wo = Normalize(-EyeRay.m_D);
 
 		// Obtain normal
-		Normal = Grad(pDevScene, EyeP, &gTexDensity);//ComputeGradient(pDevScene, EyeP, Wo);
+		Normal = NormalizedGradient(pScene, EyeP, &gTexDensity);//ComputeGradient(pScene, EyeP, Wo);
 
 		// Exit if air, or not within hemisphere
 		if (Tr < 0.05f)// || Dot(Wo, Normal[TID]) < 0.0f)
 			continue;
 
 		// Estimate direct light at eye point
-	 	L += EyeTr * UniformSampleOneLight(pDevScene, Wo, EyeP, Normal, RNG, StepSize);
+	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, EyeP, Normal, RNG, StepSize);
 
 		// Compute eye transmittance
 		EyeTr *= expf(-(Tr * StepSize));
@@ -488,16 +382,19 @@ KERNEL void KrnlSS(CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CCo
 	RayCopy.m_MinT	= EyeT;
 	RayCopy.m_MaxT	= 10000000.0f;
 
-	if (NearestLight(pDevScene, RayCopy, Li))
+	if (NearestLight(pScene, RayCopy, Li))
 		Li += EyeTr * Li;
 
 	// Contribute
-	pDevEstFrameXyz[Y * (int)pDevScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;
+	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;
 }
 
 // Traces the volume
 void RenderVolume(CScene* pScene, CScene* pDevScene, curandStateXORWOW_t* pDevRandomStates, CColorXyz* pDevEstFrameXyz)
 {
+	// Copy the scene from host memory to device memory
+//	cudaMemcpyToSymbol("gScene", pScene, sizeof(CScene));
+
 	const dim3 KernelBlock(32, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	

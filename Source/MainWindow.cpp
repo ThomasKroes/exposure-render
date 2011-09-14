@@ -53,6 +53,8 @@ CMainWindow::CMainWindow() :
 
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+
+//	Log("Size of Scene: " + QString::number(sizeof(CScene)) + " bytes");
 }
 
 CMainWindow::~CMainWindow(void)
