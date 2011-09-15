@@ -23,9 +23,10 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySpinBox(),
 	m_Diffuse(),
 	m_Specular(),
-	m_RoughnessLabel(),
+	m_ShinyLabel(),
 	m_RoughnessSlider(),
-	m_RoughnessSpinBox()
+	m_RoughnessSpinBox(),
+	m_DullLabel()
 {
 	// Title, status and tooltip
 	setTitle("Node Properties");
@@ -48,7 +49,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_SelectionLayout.setAlignment(Qt::AlignTop);
 	m_SelectionLayout.setContentsMargins(0, 0, 0, 0);
 	
-	m_MainLayout.addLayout(&m_SelectionLayout, 0, 1, 1, 2);
+	m_MainLayout.addLayout(&m_SelectionLayout, 0, 1, 1, 3);
 
 	m_NodeSelection.setStatusTip("Node selection");
 	m_NodeSelection.setToolTip("Node selection");
@@ -96,12 +97,12 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_IntensitySlider.setOrientation(Qt::Horizontal);
 	m_IntensitySlider.setStatusTip("Node position");
 	m_IntensitySlider.setToolTip("Drag to change node position");
-	m_MainLayout.addWidget(&m_IntensitySlider, 1, 1);
+	m_MainLayout.addWidget(&m_IntensitySlider, 1, 1, 1, 2);
 	
 	m_IntensitySpinBox.setStatusTip("Node Position");
 	m_IntensitySpinBox.setToolTip("Node Position");
 	m_IntensitySpinBox.setSingleStep(1);
-	m_MainLayout.addWidget(&m_IntensitySpinBox, 1, 2);
+	m_MainLayout.addWidget(&m_IntensitySpinBox, 1, 3);
 
 	QObject::connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
 	QObject::connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
@@ -115,7 +116,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySlider.setStatusTip("Node Opacity");
 	m_OpacitySlider.setToolTip("Node Opacity");
 	m_OpacitySlider.setRange(0.0, 1.0);
-	m_MainLayout.addWidget(&m_OpacitySlider, 2, 1);
+	m_MainLayout.addWidget(&m_OpacitySlider, 2, 1, 1, 2);
 	
 	m_OpacitySpinBox.setStatusTip("Node Opacity");
 	m_OpacitySpinBox.setToolTip("Node Opacity");
@@ -123,47 +124,45 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_OpacitySpinBox.setDecimals(3);
 	m_OpacitySpinBox.setSingleStep(0.01);
 
-	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 2);
+	m_MainLayout.addWidget(&m_OpacitySpinBox, 2, 3);
 	
 	QObject::connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), &m_OpacitySpinBox, SLOT(setValue(double)));
 	QObject::connect(&m_OpacitySpinBox, SIGNAL(valueChanged(double)), &m_OpacitySlider, SLOT(setValue(double)));
 	QObject::connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnOpacityChanged(double)));
 
 	// Diffuse
-	m_MainLayout.addWidget(new QLabel("Diffuse"), 3, 0);
+	m_MainLayout.addWidget(new QLabel("Diffuse"), 3, 1);
 	m_Diffuse.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_Diffuse, 3, 1);
+	m_MainLayout.addWidget(&m_Diffuse, 4, 1);
 
 	QObject::connect(&m_Diffuse, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseChanged(const QColor&)));
 
 	// Specular
-	m_MainLayout.addWidget(new QLabel("Specular"), 4, 0);
+	m_MainLayout.addWidget(new QLabel("Specular"), 3, 2);
 	m_Specular.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_Specular, 4, 1);
+	m_MainLayout.addWidget(&m_Specular, 4, 2);
 
 	QObject::connect(&m_Specular, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularChanged(const QColor&)));
 
 	// Emission
-	m_MainLayout.addWidget(new QLabel("Emission"), 5, 0);
+	m_MainLayout.addWidget(new QLabel("Emission"), 3, 3);
 	m_Emission.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_Emission, 5, 1);
+	m_MainLayout.addWidget(&m_Emission, 4, 3);
 
 	QObject::connect(&m_Emission, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnEmissionChanged(const QColor&)));
 
 	// Roughness
-	m_RoughnessLabel.setText("Roughness");
-	m_MainLayout.addWidget(&m_RoughnessLabel, 6, 0);
+	m_ShinyLabel.setText("Shiny");
+	m_MainLayout.addWidget(&m_ShinyLabel, 5, 0);
 
 	m_RoughnessSlider.setOrientation(Qt::Horizontal);
 	m_RoughnessSlider.setStatusTip("Roughness");
 	m_RoughnessSlider.setToolTip("Roughness");
 	m_RoughnessSlider.setRange(0.0f, 1000.0f);
-	m_MainLayout.addWidget(&m_RoughnessSlider, 6, 1);
+	m_MainLayout.addWidget(&m_RoughnessSlider, 5, 1, 1, 2);
 
-	m_RoughnessSpinBox.setStatusTip("Roughness");
-	m_RoughnessSpinBox.setToolTip("Roughness");
-	m_RoughnessSpinBox.setRange(0.0f, 1000.0f);
-	m_MainLayout.addWidget(&m_RoughnessSpinBox, 6, 2);
+	m_DullLabel.setText("Dull");
+	m_MainLayout.addWidget(&m_DullLabel, 5, 3);
 
 	QObject::connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));
 	QObject::connect(&m_RoughnessSpinBox, SIGNAL(valueChanged(double)), &m_RoughnessSlider, SLOT(setValue(double)));
@@ -353,7 +352,7 @@ void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
 		m_RoughnessSpinBox.setValue((double)pNode->GetRoughness(), true);
 	}
 
-	m_RoughnessLabel.setEnabled(Enable);
+	m_ShinyLabel.setEnabled(Enable);
 	m_RoughnessSlider.setEnabled(Enable);
 	m_RoughnessSpinBox.setEnabled(Enable);
 }

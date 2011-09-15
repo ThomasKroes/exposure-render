@@ -53,7 +53,8 @@ private:
 	QColorPushButton		m_Diffuse;
 	QColorPushButton		m_Specular;
 	QColorPushButton		m_Emission;
-	QLabel					m_RoughnessLabel;
+	QLabel					m_ShinyLabel;
 	QDoubleSlider			m_RoughnessSlider;
 	QDoubleSpinner			m_RoughnessSpinBox;
+	QLabel					m_DullLabel;
 };

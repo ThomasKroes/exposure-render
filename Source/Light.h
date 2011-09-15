@@ -226,7 +226,7 @@ public:
 		{
 			Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
 			Rl.m_D	= Normalize(P - Rl.m_O);
-			L		= Le(LS.m_LightSample.m_Pos);
+			L		= Le(Vec2f(-1.0f) + 2.0f * LS.m_LightSample.m_Pos);
 			Pdf		= DistanceSquared(P, Rl.m_O) / m_Area;
 		}
 
@@ -351,10 +351,10 @@ public:
 
 		if (m_T == 1)
 		{
-			if (UV.y > 0.5f)
-				return Lerp(fabs(UV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
+			if (UV.y > 0.0f)
+				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorTop).ToXYZ();
 			else
-				return Lerp(fabs(UV.y), m_ColorMiddle.ToXYZ(), m_ColorBottom.ToXYZ());
+				return Lerp(fabs(UV.y), m_ColorBottom, m_ColorMiddle).ToXYZ();
 		}
 	}
 };
