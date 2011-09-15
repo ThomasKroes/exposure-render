@@ -62,6 +62,8 @@ QTableItemProgress::QTableItemProgress(const QString& Event, const float& Progre
 		ProgressString += QString::number(Progress, 'f', 2);
 
 	setText(ProgressString);
+	setFont(QFont("Arial", 7));
+	setTextColor(Qt::blue);
 }
 
 QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
@@ -118,12 +120,19 @@ void QLogWidget::OnLog(const QString& Message, const int& Type)
 void QLogWidget::OnLogProgress(const QString& Event, const float& Progress)
 {
 	// Find nearest row with matching event
-	QList<QTableWidgetItem*> Items = findItems(Event, Qt::MatchExactly);
+	QList<QTableWidgetItem*> Items = findItems(Event, Qt::MatchStartsWith);
+
+	int RowIndex = 0;
 
 	if (Items.empty())
-		return;
-
-	const int RowIndex = Items[0]->row();
+	{
+		insertRow(0);
+		RowIndex = 0;
+	}
+	else
+	{
+		RowIndex = Items[0]->row();
+	}
 
 	setItem(RowIndex, 0, new QTimeTableWidgetItem());
 	setItem(RowIndex, 1, new QTableWidgetItem(""));
