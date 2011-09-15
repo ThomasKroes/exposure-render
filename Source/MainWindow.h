@@ -59,6 +59,7 @@ public:
 private:
 	// Toolbars
     QToolBar*							m_pFileToolBar;
+	QToolBar*							m_pPlaybackToolBar;
     
 	// Qt-VTK widget					
 	CVtkWidget*							m_pVtkWidget;

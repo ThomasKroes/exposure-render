@@ -16,6 +16,7 @@ CMainWindow::CMainWindow() :
     m_pFileMenu(NULL),
     m_pHelpMenu(NULL),
     m_pFileToolBar(NULL),
+	m_pPlaybackToolBar(),
 	m_pVtkWidget(NULL),
 	m_LogDockWidget(),
 	m_LightingDockWidget(),
@@ -93,11 +94,13 @@ void CMainWindow::CreateActions(void)
 	// About this application action
     m_pAboutAct = new QAction(tr("&About"), this);
     m_pAboutAct->setStatusTip(tr("Show the application's About box"));
+	m_pAboutAct->setIcon(GetIcon("question"));
     connect(m_pAboutAct, SIGNAL(triggered()), this, SLOT(About()));
 
 	// About Qt action
     m_pAboutQtAct = new QAction(tr("About &Qt"), this);
     m_pAboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
+	m_pAboutQtAct->setIcon(GetIcon("question-white"));
     connect(m_pAboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 }
 
@@ -133,7 +136,17 @@ void CMainWindow::CreateMenus(void)
 
 void CMainWindow::CreateToolBars()
 {
-    m_pFileToolBar = addToolBar(tr("File"));
+    m_pFileToolBar		= addToolBar(tr("File"));
+
+	m_pFileToolBar->addAction(GetIcon("folder-open"), "Open", this, SLOT(OnOpen()));
+
+	m_pPlaybackToolBar	= addToolBar(tr("Playback"));
+	m_pPlaybackToolBar->setIconSize(QSize(16, 16));
+
+	m_pPlaybackToolBar->addAction(GetIcon("control"), "Play", this, SLOT(OnPlay()));
+	m_pPlaybackToolBar->addAction(GetIcon("control-pause"), "Pause", this, SLOT(OnPause()));
+	m_pPlaybackToolBar->addAction(GetIcon("control-stop-square"), "Stop", this, SLOT(OnStop()));
+	m_pPlaybackToolBar->addAction(GetIcon("control-stop-180"), "Restart", this, SLOT(OnRestart()));
 }
 
 void CMainWindow::CreateStatusBar()
