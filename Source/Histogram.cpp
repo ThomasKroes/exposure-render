@@ -72,6 +72,57 @@ void QHistogram::SetBins(const int* pBins, const int& NoBins)
 
 	m_Enabled = true;
 
+	/*
+	QRect Rect(0, 0, 500, 500);
+
+	QPainter Painter;
+
+	Painter.begin(&m_PixMap);
+		
+	QPolygonF Polygon;
+
+	QLinearGradient LinearGradient;
+
+	LinearGradient.setStart(0, rect().bottom());
+	LinearGradient.setFinalStop(0, rect().top());
+
+	QGradientStops GradientStops;
+
+	GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 100, 150, 0)));
+	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 100, 150, 255)));
+
+	LinearGradient.setStops(GradientStops);
+
+	// Set the gradient stops
+	for (int i = 0; i < GetBins().size(); i++)
+	{
+		// Compute polygon point in scene coordinates
+		QPointF ScenePoint = TransferFunctionToScene(QPointF(i, logf((float)gHistogram.GetBins()[i]) / logf(1.5f * (float)gHistogram.GetMax())));
+
+		if (i == 0)
+		{
+			QPointF CenterCopy = ScenePoint;
+
+			CenterCopy.setY(rect().height());
+
+			Polygon.append(CenterCopy);
+		}
+
+		Polygon.append(ScenePoint);
+
+		if (i == (gHistogram.GetBins().size() - 1))
+		{
+			QPointF CenterCopy = ScenePoint;
+
+			CenterCopy.setY(rect().height());
+
+			Polygon.append(CenterCopy);
+		}
+	}
+
+	Painter.end();
+	*/
+
 	// Inform others that the histogram has changed
 	emit HistogramChanged();
 }

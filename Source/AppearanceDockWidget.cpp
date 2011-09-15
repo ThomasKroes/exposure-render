@@ -3,7 +3,7 @@
 #include "Stable.h"
 
 #include "AppearanceDockWidget.h"
-#include "MainWindow.h"
+#include "RenderThread.h"
 
 QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 	QWidget(pParent),
@@ -30,6 +30,12 @@ QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 void QAppearanceWidget::OnLoadPreset(const QString& Name)
 {
 	gTransferFunction = m_PresetsWidget.GetPreset(Name);
+
+	if (Scene())
+	{
+		gTransferFunction.SetRangeMin(Scene()->m_IntensityRange.m_Min);
+		gTransferFunction.SetRangeMax(Scene()->m_IntensityRange.m_Max);
+	}
 
 	// De-normalize node intensity
 	gTransferFunction.DeNormalizeIntensity();

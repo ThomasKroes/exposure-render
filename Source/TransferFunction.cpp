@@ -202,7 +202,7 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 void QTransferFunction::NormalizeIntensity(void)
 {
 	for (int i = 0; i < m_Nodes.size(); i++)
-		m_Nodes[i].m_Intensity = (m_Nodes[i].m_Intensity - QTransferFunction::m_RangeMin) / QTransferFunction::m_Range;
+		m_Nodes[i].m_Intensity = (m_Nodes[i].m_Intensity - m_RangeMin) / m_Range;
 
 	// Update node's range
 	UpdateNodeRanges();
@@ -214,7 +214,7 @@ void QTransferFunction::NormalizeIntensity(void)
 void QTransferFunction::DeNormalizeIntensity(void)
 {
 	for (int i = 0; i < m_Nodes.size(); i++)
-		m_Nodes[i].m_Intensity = QTransferFunction::m_RangeMin + m_Nodes[i].m_Intensity * QTransferFunction::m_Range;
+		m_Nodes[i].m_Intensity = m_RangeMin + m_Nodes[i].m_Intensity * m_Range;
 
 	// Update node's range
 	UpdateNodeRanges();
@@ -232,8 +232,8 @@ void QTransferFunction::UpdateNodeRanges(void)
 
 		if (i == 0)
 		{
-			Node.SetMinX(0.0f);
-			Node.SetMaxX(0.0f);
+			Node.SetMinX(m_RangeMin);
+			Node.SetMaxX(m_RangeMin);
 		}
 		else if (i == (m_Nodes.size() - 1))
 		{

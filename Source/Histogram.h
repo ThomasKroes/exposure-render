@@ -25,6 +25,7 @@ private:
 	bool			m_Enabled;
 	QList<int>		m_Bins;
 	int				m_Max;
+// 	QPixmap			m_PixMap;
 };
 
 // Histogram singleton
