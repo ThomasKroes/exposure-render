@@ -7,7 +7,7 @@
 QTimeTableWidgetItem::QTimeTableWidgetItem(void) :
 	QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss"))
 {
-	setFont(QFont("Arial", 7));
+	setFont(QFont("Arial", 8));
 	setTextColor(QColor(60, 60, 60));
 
 	setToolTip(text());
@@ -27,7 +27,7 @@ QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::Mess
 	if (MessageType & QLogger::Critical)
 		ToolTipPrefix += "Critical error: ";
 
-	setFont(QFont("Arial", 7));
+	setFont(QFont("Arial", 8));
 	
 	QColor TextColor;
 
@@ -35,7 +35,7 @@ QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::Mess
 	{
 		case QLogger::Normal:
 		{
-			TextColor = Qt::blue;
+			TextColor = Qt::black;
 			break;
 		}
 
@@ -111,8 +111,25 @@ void QLogWidget::OnLog(const QString& Message, const int& Type)
 {
 	insertRow(0);
 
+	QIcon Icon;
+
+	switch (Type)
+	{
+		case (int)QLogger::Normal:
+		{
+			Icon = GetIcon("information");
+			break;
+		}
+
+		case (int)QLogger::Critical:
+		{
+			Icon = GetIcon("exclamation-red");
+			break;
+		}
+	}
+
 	setItem(0, 0, new QTimeTableWidgetItem());
-	setItem(0, 1, new QTableWidgetItem());
+	setItem(0, 1, new QTableWidgetItem(Icon, ""));
 	setItem(0, 2, new QTableItemMessage(Message, (QLogger::MessageType)Type));
 	setRowHeight(0, 18);
 }

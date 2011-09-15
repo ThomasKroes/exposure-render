@@ -82,33 +82,27 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	EyeRay.m_MinT = 0.0f; 
 	EyeRay.m_MaxT = FLT_MAX;
 
-	// Check if ray passes through volume, if it doesn't, evaluate scene lights and stop tracing 
-//  	if (!NearestIntersection(pScene, EyeRay, StepSize, RNG.Get1(), &BoxMinT, &BoxMaxT))
-//  		Continue = false;
-
 	CColorXyz Li = SPEC_BLACK;
-	RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, Continue ? EyeRay.m_MinT : EyeRay.m_MaxT);
-
-	if (NearestLight(pScene, RayCopy, Li))
-	{
-		pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
-		return;
-	}
 
 	if (EyeRay.m_MaxT == INF_MAX)
  		Continue = false;
 	
 	float EyeT	= EyeRay.m_MinT;
 
-	Vec3f EyeP, Normal;
+	Vec3f Pe, Normal;
 	
-	int NoScattering = 0;
-
-
-	if (FreePathRM(EyeRay, RNG, EyeP, pScene, 0))
+	if (FreePathRM(EyeRay, RNG, Pe, pScene, 0))
 	{
+		RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, (Pe - EyeRay.m_O).Length());
+
+		if (NearestLight(pScene, RayCopy, Li))
+		{
+			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
+			return;
+		}
+
 		// Fetch density
-		const float D = Density(pScene, EyeP);
+		const float D = Density(pScene, Pe);
 
 		// Get opacity at eye point
 		const float		Tr = GetOpacity(pScene, D).r;
@@ -118,16 +112,13 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		const Vec3f Wo = Normalize(-EyeRay.m_D);
 
 		// Obtain normal
-		Normal = NormalizedGradient(pScene, EyeP);
+		Normal = NormalizedGradient(pScene, Pe);
 
 		// Estimate direct light at eye point
- 	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, EyeP, Normal, RNG, 0.001f);
-
-		NoScattering++;
+ 	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, Pe, Normal, RNG, 0.001f);
 	}
-/**/
 
-	RayCopy.m_O		= EyeP;
+	RayCopy.m_O		= Pe;
 	RayCopy.m_D		= EyeRay.m_D;
 	RayCopy.m_MinT	= EyeT;
 	RayCopy.m_MaxT	= 10000000.0f;

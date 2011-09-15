@@ -523,7 +523,7 @@ bool QRenderThread::Load(QString& FileName)
 	// Exit if the reader can't read the file
 	if (!MetaImageReader->CanReadFile(m_FileName.toAscii()))
 	{
-		Log(QString("Unable to read " + QFileInfo(FileName).fileName()).toAscii());
+		Log(QString("Unable to read " + QFileInfo(FileName).fileName()).toAscii(), QLogger::Critical);
 		return false;
 	}
 

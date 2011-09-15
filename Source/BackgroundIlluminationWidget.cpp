@@ -39,10 +39,10 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_GradientColorTop, 0, 1);
 
 	m_IntensitySliderTop.setOrientation(Qt::Horizontal);
-	m_IntensitySliderTop.setRange(0.01, 10000.0);
+	m_IntensitySliderTop.setRange(0.01, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySliderTop, 0, 2);
 
-	m_IntensitySpinBoxTop.setRange(0.01, 10000.0);
+	m_IntensitySpinBoxTop.setRange(0.01, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySpinBoxTop, 0, 3);
 
 	connect(&m_GradientColorTop, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorTopChanged(const QColor&)));
@@ -55,10 +55,10 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_GradientColorMiddle, 1, 1);
 
 	m_IntensitySliderMiddle.setOrientation(Qt::Horizontal);
-	m_IntensitySliderMiddle.setRange(0.01, 10000.0);
+	m_IntensitySliderMiddle.setRange(0.01, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySliderMiddle, 1, 2);
 
-	m_IntensitySpinBoxMiddle.setRange(0.01, 10000.0);
+	m_IntensitySpinBoxMiddle.setRange(0.01, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySpinBoxMiddle, 1, 3);
 
 	connect(&m_GradientColorMiddle, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorMiddleChanged(const QColor&)));
@@ -71,10 +71,10 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_GradientColorBottom, 2, 1);
 
 	m_IntensitySliderBottom.setOrientation(Qt::Horizontal);
-	m_IntensitySliderBottom.setRange(0.01, 10000.0);
+	m_IntensitySliderBottom.setRange(0.01, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySliderBottom, 2, 2);
 
-	m_IntensitySpinBoxBottom.setRange(0.01, 10000.0);
+	m_IntensitySpinBoxBottom.setRange(0.01, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySpinBoxBottom, 2, 3);
 
 	connect(&m_GradientColorBottom, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorBottomChanged(const QColor&)));

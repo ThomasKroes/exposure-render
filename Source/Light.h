@@ -226,7 +226,7 @@ public:
 		{
 			Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
 			Rl.m_D	= Normalize(P - Rl.m_O);
-			L		= Le(Vec2f(0.0f));
+			L		= Le(LS.m_LightSample.m_Pos);
 			Pdf		= DistanceSquared(P, Rl.m_O) / m_Area;
 		}
 
@@ -301,7 +301,7 @@ public:
 // 			else
 // 				Le = Lerp(fabs(pUV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
 
-			Le = m_Color.ToXYZ();			
+// 			Le = m_Color.ToXYZ();			
 
 			return true;
 		}
@@ -346,7 +346,16 @@ public:
 
 	HOD CColorXyz Le(const Vec2f& UV)
 	{
-		return CColorXyz::FromRGB(m_Color.r, m_Color.g, m_Color.b);
+		if (m_T == 0)
+			return CColorXyz::FromRGB(m_Color.r, m_Color.g, m_Color.b);
+
+		if (m_T == 1)
+		{
+			if (UV.y > 0.5f)
+				return Lerp(fabs(UV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
+			else
+				return Lerp(fabs(UV.y), m_ColorMiddle.ToXYZ(), m_ColorBottom.ToXYZ());
+		}
 	}
 };
 
