@@ -281,7 +281,7 @@ void QRenderThread::run()
  		return;
  	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(800, 600));
 	m_Scene.m_Camera.m_Film.m_Exposure = 50.0f;
  	m_Scene.m_Camera.m_Aperture.m_Size = 0.001f;
  	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
@@ -626,7 +626,7 @@ bool QRenderThread::Load(QString& FileName)
 
 	// Compute the volume's bounding box
 	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f, 0.0f, 0.0f);
-	m_Scene.m_BoundingBox.m_MaxP	= PhysicalSize / PhysicalSize.Max();
+	m_Scene.m_BoundingBox.m_MaxP	= PhysicalSize / (float)m_Scene.m_Resolution.GetResXYZ().Max();
 
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
@@ -662,7 +662,7 @@ bool QRenderThread::Load(QString& FileName)
 	Log("Density range: [" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]");
 
 	// Print scene data
-	m_Scene.PrintSelf();
+//	m_Scene.PrintSelf();
 
 	return true;
 }

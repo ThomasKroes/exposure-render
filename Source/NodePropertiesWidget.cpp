@@ -57,7 +57,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QObject::connect(&m_NodeSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(OnNodeSelectionChanged(int)));
 
 	// Previous node
-	m_PreviousNode.setIcon(QIcon(":/Images/arrow-180.png"));
+	m_PreviousNode.setIcon(GetIcon("arrow-180"));
 	m_PreviousNode.setStatusTip("Select previous node");
 	m_PreviousNode.setToolTip("Select previous node");
 	m_PreviousNode.setFixedWidth(22);
@@ -68,7 +68,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QObject::connect(&m_PreviousNode, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
 
 	// Next node
-	m_NextNode.setIcon(QIcon(":/Images/arrow.png"));
+	m_NextNode.setIcon(GetIcon("arrow"));
 	m_NextNode.setStatusTip("Select next node");
 	m_NextNode.setToolTip("Select next node");
 	m_NextNode.setFixedWidth(20);
@@ -78,7 +78,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QObject::connect(&m_NextNode, SIGNAL(pressed()), this, SLOT(OnNextNode()));
 
 	// Delete node
-	m_DeleteNode.setIcon(QIcon(":/Images/bin.png"));
+	m_DeleteNode.setIcon(GetIcon("bin"));
 	m_DeleteNode.setStatusTip("Delete selected node");
 	m_DeleteNode.setToolTip("Delete selected node");
 	m_DeleteNode.setFixedWidth(20);

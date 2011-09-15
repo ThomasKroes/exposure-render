@@ -4,6 +4,81 @@
 #include "Material.h"
 #include "Scene.h"
 
+DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int Component)
+{
+	float MinT = 0.0f, MaxT = 0.0f;
+
+	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+		return false;
+
+	MinT = max(MinT, R.m_MinT);
+	MaxT = min(MaxT, R.m_MaxT);
+
+	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.m_Length;
+	float Dt		= 1.0f * (1.0f / (3.0f * (float)pScene->m_Resolution.GetResX()));
+	float Sum		= 0.0f;
+	float SigmaT	= 0.0f;
+	float D			= 0.0f;
+
+	Vec3f samplePos; 
+
+	MinT += RNG.Get1() * Dt;
+
+	while (Sum < S)
+	{
+		samplePos = R.m_O + MinT * R.m_D;
+
+		if (MinT > MaxT)
+			return false;
+		
+		SigmaT	= 5.0f * GetOpacity(pScene, Density(pScene, samplePos)).r;
+		Sum		+= SigmaT * Dt;
+		MinT	+= Dt;
+	}
+
+	P = samplePos;
+
+	return true;
+}
+
+DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int Component)
+{
+	float MinT = 0.0f, MaxT = 0.0f;
+
+	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+		return false;
+
+	MinT = max(MinT, R.m_MinT);
+	MaxT = min(MaxT, R.m_MaxT);
+
+	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.m_Length;
+	float Dt		= 1.0f * (1.0f / (3.0f * (float)pScene->m_Resolution.GetResX()));
+	float Sum		= 0.0f;
+	float SigmaT	= 0.0f;
+	float D			= 0.0f;
+
+	Vec3f samplePos; 
+
+	MinT += RNG.Get1() * Dt;
+
+	while (Sum < S)
+	{
+		samplePos = R.m_O + MinT * R.m_D;
+
+		// Free path, no collisions in between
+		if (MinT > MaxT)
+			return false;
+		
+		SigmaT	= 5.0f * GetOpacity(pScene, Density(pScene, samplePos)).r;
+		Sum		+= SigmaT * Dt;
+		MinT	+= Dt;
+	}
+
+	P = samplePos;
+
+	return true;
+}
+
 DEV inline CColorXyz Transmittance(CScene* pScene, const Vec3f& P, const Vec3f& D, const float& MaxT, const float& StepSize, CCudaRNG& Rnd)
 {
 	// Near and far intersections with volume axis aligned bounding box
@@ -99,12 +174,14 @@ DEV CColorXyz EstimateDirectLight(CScene* pScene, CLight& Light, CLightingSample
 	F = Bsdf.F(Wo, Wi); 
 
 	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
-	
+
+	Vec3f P;
+
 	// Sample the light with MIS
-	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f)
+	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f && !SampleDistanceRM(R, Rnd, P, pScene, 0))
 	{
 		// Compute tau
-		const CColorXyz Tr = Transmittance(pScene, R.m_O, R.m_D, Length(R.m_O - Pe), 4.0 * StepSize, Rnd);
+		const CColorXyz Tr = SPEC_WHITE;//Transmittance(pScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
 		
 		// Attenuation due to volume
 		Li *= Tr;

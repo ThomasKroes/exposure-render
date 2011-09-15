@@ -12,7 +12,7 @@ QStatisticsDockWidget::QStatisticsDockWidget(QWidget* pParent) :
 {
 	setWindowTitle("Statistics");
 	setToolTip("<img src=':/Images/application-list.png'><div>Rendering statistics</div>");
-	setWindowIcon(QIcon(":/Images/application-list.png"));
+	setWindowIcon(GetIcon("application-list"));
 
 	setWidget(&m_StatisticsWidget);
 }

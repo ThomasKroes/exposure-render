@@ -30,7 +30,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_LightList, 0, 0, 1, 6);
 
 	// Add light
-	m_AddLight.setIcon(QIcon(":/Images/light-bulb--plus.png"));
+	m_AddLight.setIcon(GetIcon("light-bulb--plus"));
 	m_AddLight.setToolTip("Add light");
 	m_AddLight.setStatusTip("Add a new light to the scene");
  	m_AddLight.setFixedWidth(24);
@@ -38,7 +38,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_AddLight, 1, 0);
 
 	// Remove light
-	m_RemoveLight.setIcon(QIcon(":/Images/light-bulb--minus.png"));
+	m_RemoveLight.setIcon(GetIcon("light-bulb--minus"));
 	m_RemoveLight.setToolTip("Remove light");
 	m_RemoveLight.setStatusTip("Remove the selected light from the scene");
 	m_RemoveLight.setFixedWidth(24);
@@ -46,7 +46,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_RemoveLight, 1, 1);
 
 	// Rename light
-	m_RenameLight.setIcon(QIcon(":/Images/light-bulb--pencil.png"));
+	m_RenameLight.setIcon(GetIcon("light-bulb--pencil"));
 	m_RenameLight.setToolTip("Rename light");
 	m_RenameLight.setStatusTip("Rename the selected light");
  	m_RenameLight.setFixedWidth(24);
@@ -54,7 +54,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_RenameLight, 1, 2);
 
 	// Copy light
-	m_CopyLight.setIcon(QIcon(":/Images/document-copy.png"));
+	m_CopyLight.setIcon(GetIcon("document-copy"));
 	m_CopyLight.setToolTip("Copy light");
 	m_CopyLight.setStatusTip("Copy the selected light");
  	m_CopyLight.setFixedWidth(24);
@@ -62,7 +62,7 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_CopyLight, 1, 3);
 
 	// Reset
-	m_Reset.setIcon(QIcon(":/Images/document-copy.png"));
+	m_Reset.setIcon(GetIcon("document-copy"));
 	m_Reset.setToolTip("Reset Lighting");
 	m_Reset.setStatusTip("Reset lighting to defaults");
 	m_Reset.setFixedWidth(24);

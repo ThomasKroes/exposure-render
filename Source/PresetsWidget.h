@@ -139,9 +139,6 @@ public:
 		// XML file containing transfer function presets
 		QFile XmlFile;
 
-		// Get applications working directory
-		QString CurrentPath = QDir::currentPath();
-
 		// File name + extension
 		QString FileName = QApplication::applicationDirPath() + "/" + m_InternalName + "Presets.xml";
 

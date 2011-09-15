@@ -18,7 +18,7 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	setToolTip("Transfer function properties");
 	setStatusTip("Transfer function properties");
 
-	setWindowIcon(QIcon(":/Images/folder-open-image.png"));
+	setWindowIcon(GetIcon("folder-open-image"));
 
 	// Create main layout
 	m_MainLayout.setAlignment(Qt::AlignTop);

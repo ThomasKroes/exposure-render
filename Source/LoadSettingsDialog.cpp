@@ -29,7 +29,7 @@ QLoadSettingsDialog::QLoadSettingsDialog(QWidget* pParent) :
 	resize(400, 100);
 
 	setWindowTitle("Import settings");
-	setWindowIcon(QIcon(":/Images/gear.png"));
+	setWindowIcon(GetIcon("gear"));
 
 	setLayout(&m_MainLayout);
 

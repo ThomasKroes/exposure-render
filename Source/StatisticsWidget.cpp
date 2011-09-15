@@ -49,7 +49,7 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	m_Tree.header()->resizeSection(1, 150);
 	m_Tree.header()->resizeSection(2, 100);
 
-	m_Tree.header()->setWindowIcon(QIcon(":/Images/table-export.png"));
+	m_Tree.header()->setWindowIcon(GetIcon("table-export"));
 	
 	PopulateTree();
 	
@@ -69,11 +69,10 @@ QSize QStatisticsWidget::sizeHint() const
 void QStatisticsWidget::PopulateTree(void)
 {
 	// Populate tree with top-level items
-	AddItem(NULL, "Performance", "", "", "alarm-clock");
+	AddItem(NULL, "Performance", "", "", "application-monitor");
 	AddItem(NULL, "Volume", "", "", "grid");
 	AddItem(NULL, "Memory", "", "", "memory");
 	AddItem(NULL, "Camera", "", "", "camera");
-	AddItem(NULL, "Performance", "", "", "alarm-clock");
 	AddItem(NULL, "Graphics Card", "", "", "graphic-card");
 }
 
@@ -86,7 +85,7 @@ QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QStr
 	pItem->setText(0, Property);
 	pItem->setText(1, Value);
 	pItem->setText(2, Unit);
-	pItem->setIcon(0, QIcon(":/Images/" + Icon + ".png"));
+	pItem->setIcon(0, GetIcon(Icon));
 
 	if (!pParent)
 		m_Tree.addTopLevelItem(pItem);

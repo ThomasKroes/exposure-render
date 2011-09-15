@@ -65,7 +65,7 @@ CMainWindow::~CMainWindow(void)
 void CMainWindow::CreateActions(void)
 {
 	// Open action
-    m_pOpenAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
+    m_pOpenAct = new QAction(GetIcon("open"), tr("&Open..."), this);
     m_pOpenAct->setShortcuts(QKeySequence::Open);
     m_pOpenAct->setStatusTip(tr("Open an existing file"));
     connect(m_pOpenAct, SIGNAL(triggered()), this, SLOT(Open()));
@@ -79,7 +79,7 @@ void CMainWindow::CreateActions(void)
      }
 
 	// Close action
-	m_pCloseAct = new QAction(QIcon(":/images/open.png"), tr("&Close..."), this);
+	m_pCloseAct = new QAction(GetIcon("open"), tr("&Close..."), this);
     m_pCloseAct->setShortcuts(QKeySequence::Close);
     m_pCloseAct->setStatusTip(tr("Close current file"));
     connect(m_pCloseAct, SIGNAL(triggered()), this, SLOT(Close()));

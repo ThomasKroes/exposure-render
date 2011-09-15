@@ -9,13 +9,13 @@
 #define NODE_POSITION_EPSILON 0.01f
 
 float	QNodeItem::m_Radius			= 4.0f;
-QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(200, 100, 150));
+QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(0, 100, 150));
 QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(0, 100, 150));
 QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 100));
 
-QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.3);
-QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(100, 100, 150)), 1.8);
-QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 150)), 1.3);
+QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.3);
+QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.8);
+QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 100)), 1.3);
 
 QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode) :
 	QGraphicsEllipseItem(pTransferFunctionCanvas),

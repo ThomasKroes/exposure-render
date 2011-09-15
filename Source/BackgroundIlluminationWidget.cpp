@@ -93,7 +93,7 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	m_TextureFilePath.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_TextureFilePath, 4, 1, 1, 2);
 
-	m_LoadTexture.setIcon(QIcon(":/Images/folder-open-image.png"));
+	m_LoadTexture.setIcon(GetIcon("folder-open-image"));
 	m_LoadTexture.setFixedWidth(22);
 	m_LoadTexture.setFixedHeight(22);
 	m_MainLayout.addWidget(&m_LoadTexture, 4, 3);

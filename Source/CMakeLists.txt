@@ -263,30 +263,36 @@ MACRO (PCH_QT4_WRAP_CPP outfiles )
   QT4_EXTRACT_OPTIONS(moc_files moc_options ${ARGN})
  
   FOREACH (it ${moc_files})
-    GET_FILENAME_COMPONENT(it ${it} ABSOLUTE)
+    
+	GET_FILENAME_COMPONENT(it ${it} ABSOLUTE)
     QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
     set (moc_flags_append "-fStable.h" "-f${it}") # StdAfx hack.
- # message (STATUS "Moc Flags append ${moc_flags_append}")
- QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags};${moc_flags_append}" "${moc_options}")
-    SET(${outfiles} ${${outfiles}} ${outfile})
+ 
+	# message (STATUS "Moc Flags append ${moc_flags_append}")
+	QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags};${moc_flags_append}" "${moc_options}")
+	
+	SET(${outfiles} ${${outfiles}} ${outfile})
+
   ENDFOREACH(it)
 ENDMACRO (PCH_QT4_WRAP_CPP)
 
+# QT4_CREATE_MOC_COMMAND(Icons/Icons.qrc qrc_Icons.cxx "${moc_flags};${moc_flags_append}" "${moc_options}")
+
 # The rest should just work (sure...)
-#QT4_WRAP_CPP(MOCSrcs ${ExposureRenderHeaders} )
 PCH_QT4_WRAP_CPP(MOCSrcs ${ExposureRenderMocHeaders} )
-#QT4_ADD_RESOURCES(ResourceSrcs ${ExposureRenderResources})
+# QT4_ADD_RESOURCES(ResourceSrcs ${ExposureRenderResources})
 
 SOURCE_GROUP("Resources" FILES
-#  ${ExposureRenderResources}
+  ${ExposureRenderResources}
   ${EXE_ICON}
 )
 
 SOURCE_GROUP("Generated" FILES
-  ${UISrcs}
-  ${MOCSrcs}
-# ${ResourceSrcs}
-  ${RCS_SOURCES}
+	${UISrcs}
+	${MOCSrcs}
+	${ResourceSrcs}
+	qrc_Icons.cxx
+	${RCS_SOURCES}
 )
 
 # Main sources
@@ -503,19 +509,19 @@ if (MSVC)
    set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
 endif(MSVC)
 
-
+set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
 
 ### VTK dependencies ###
 FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")
-INSTALL_FILES(/bin FILES ${VtkDlls})
+INSTALL_FILES(/Bin FILES ${VtkDlls})
 
 ### CUDA dependencies ###
 SET(CudaDlls ${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart32_40_17.dll)
-INSTALL_FILES(/bin FILES ${CudaDlls})
+INSTALL_FILES(/Bin FILES ${CudaDlls})
 
 ### QT dependencies ###
 SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll)
-INSTALL_FILES(/bin FILES ${QtDlls})
+INSTALL_FILES(/Bin FILES ${QtDlls})
 
 ### Example .mhd and .raw files ###
 # INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.mhd")
@@ -523,13 +529,17 @@ INSTALL_FILES(/bin FILES ${QtDlls})
 
 ### Preset files ###
 FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")
-INSTALL_FILES(/bin FILES ${Presets})
+INSTALL_FILES(/Bin FILES ${Presets})
+
+### Icon files ###
+FILE(GLOB Icons "${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png")
+INSTALL_FILES(/Bin/Icons FILES ${Icons})
 
 ### ReadMe and Copyright ###
 INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
 INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
 
-INSTALL_TARGETS(/bin ExposureRender)
+INSTALL_TARGETS(/Bin ExposureRender)
 
 # Requires re-distributables
 INCLUDE(InstallRequiredSystemLibraries)

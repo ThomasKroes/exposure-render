@@ -58,7 +58,7 @@ void QColorPushButton::mousePressEvent(QMouseEvent* pEvent)
 
 	connect(&ColorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
 
-	ColorDialog.setWindowIcon(QIcon(":/Images/color--pencil.png"));
+	ColorDialog.setWindowIcon(GetIcon("color--pencil"));
 
 	ColorDialog.exec();
 
@@ -179,7 +179,7 @@ QString GetOpenFileName(const QString& Caption, const QString& Filter)
 	FileDialog.setWindowTitle(Caption);
 	FileDialog.setFilter(Filter);
 	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-	FileDialog.setWindowIcon(QIcon(":/Images/folder-open-document.png"));
+	FileDialog.setWindowIcon(GetIcon("folder-open-document"));
 
 	if (FileDialog.exec() == QMessageBox::Rejected)
 		return "";
@@ -194,7 +194,7 @@ QString GetSaveFileName(const QString& Caption, const QString& Filter)
 	FileDialog.setWindowTitle(Caption);
 	FileDialog.setFilter(Filter);
 	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-	FileDialog.setWindowIcon(QIcon(":/Images/disk.png"));
+	FileDialog.setWindowIcon(GetIcon("disk"));
 
 	if (FileDialog.exec() == QMessageBox::Rejected)
 		return "";
@@ -224,7 +224,7 @@ void QDoubleSpinner::setValue(double Value, bool BlockSignals)
 QInputDialogEx::QInputDialogEx(QWidget* pParent /*= NULL*/, Qt::WindowFlags Flags /*= 0*/) :
 	QInputDialog(pParent, Flags)
 {
-	setWindowIcon(QIcon(":/Images/pencil-field.png"));
+	setWindowIcon(GetIcon("pencil-field"));
 }
 
 QSize QInputDialogEx::sizeHint() const

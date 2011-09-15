@@ -56,7 +56,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	// Compute sample ID
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
-	float StepSize = 0.02;
+	float StepSize = 0.0005f;
 
 	// Exit if beyond kernel boundaries
 	if (X >= pScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pScene->m_Camera.m_Film.m_Resolution.GetResY())
@@ -83,8 +83,8 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	EyeRay.m_MaxT = FLT_MAX;
 
 	// Check if ray passes through volume, if it doesn't, evaluate scene lights and stop tracing 
- 	if (!NearestIntersection(pScene, EyeRay, StepSize, RNG.Get1(), &BoxMinT, &BoxMaxT))
- 		Continue = false;
+//  	if (!NearestIntersection(pScene, EyeRay, StepSize, RNG.Get1(), &BoxMinT, &BoxMaxT))
+//  		Continue = false;
 
 	CColorXyz Li = SPEC_BLACK;
 	RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, Continue ? EyeRay.m_MinT : EyeRay.m_MaxT);
@@ -102,65 +102,30 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 
 	Vec3f EyeP, Normal;
 	
-	// Walk along the eye ray with ray marching
-	while (Continue && EyeT < EyeRay.m_MaxT)
+	int NoScattering = 0;
+
+
+	if (FreePathRM(EyeRay, RNG, EyeP, pScene, 0))
 	{
-		// Determine new point on eye ray
-		EyeP = EyeRay(EyeT);
-
-		// Increase parametric range
-		EyeT += StepSize;
-
 		// Fetch density
 		const float D = Density(pScene, EyeP);
 
-		// We ignore air density
-		if (Density == 0) 
-			continue;
-		 
 		// Get opacity at eye point
 		const float		Tr = GetOpacity(pScene, D).r;
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
-		
-		// Add emission
-		EyeTr += Ke; 
 		
 		// Compute outgoing direction
 		const Vec3f Wo = Normalize(-EyeRay.m_D);
 
 		// Obtain normal
-		Normal = NormalizedGradient(pScene, EyeP);//ComputeGradient(pScene, EyeP, Wo);
-
-		// Exit if air, or not within hemisphere
-		if (Tr < 0.05f)// || Dot(Wo, Normal[TID]) < 0.0f)
-			continue;
+		Normal = NormalizedGradient(pScene, EyeP);
 
 		// Estimate direct light at eye point
-	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, EyeP, Normal, RNG, StepSize);
+ 	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, EyeP, Normal, RNG, 0.001f);
 
-		// Compute eye transmittance
-		EyeTr *= expf(-(Tr * StepSize));
-
-		/*
-		// Russian roulette
-		if (EyeTr.y() < 0.5f)
-		{
-			const float DieP = 1.0f - (EyeTr.y() / Threshold);
-
-			if (DieP > RNG.Get1())
-			{
-				break;
-			}
-			else
-			{
-				EyeTr *= 1.0f / (1.0f - DieP);
-			}
-		}
-		*/
-
-		if (EyeTr.y() < 0.05f)
-			break;
+		NoScattering++;
 	}
+/**/
 
 	RayCopy.m_O		= EyeP;
 	RayCopy.m_D		= EyeRay.m_D;
@@ -177,9 +142,6 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 // Traces the volume
 void SingleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	// Copy the scene from host memory to device memory
-//	cudaMemcpyToSymbol("gScene", pScene, sizeof(CScene));
-
 	const dim3 KernelBlock(32, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	

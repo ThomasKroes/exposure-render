@@ -23,7 +23,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	m_MainLayout.addWidget(&m_PresetName, 0, 0);
 
 	// Load preset
-	m_LoadPreset.setIcon(QIcon(":/Images/folder-open-document.png"));
+	m_LoadPreset.setIcon(GetIcon("star"));
 	m_LoadPreset.setToolTip("Load " + m_UserInterfaceName.toLower() + " preset");
 	m_LoadPreset.setStatusTip("Load " + m_UserInterfaceName.toLower() + " preset");
 	m_LoadPreset.setFixedWidth(22);
@@ -31,7 +31,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	m_MainLayout.addWidget(&m_LoadPreset, 0, 1);
 
 	// Save Preset
-	m_SavePreset.setIcon(QIcon(":/Images/disk.png"));
+	m_SavePreset.setIcon(GetIcon("disk"));
 	m_SavePreset.setToolTip("Save " + m_UserInterfaceName.toLower() + " Preset");
 	m_SavePreset.setStatusTip("Save " + m_UserInterfaceName.toLower() + " preset");
 	m_SavePreset.setFixedWidth(22);
@@ -39,7 +39,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	m_MainLayout.addWidget(&m_SavePreset, 0, 2);
 
 	// Rename Preset
-	m_RenamePreset.setIcon(QIcon(":/Images/edit.png"));
+	m_RenamePreset.setIcon(GetIcon("edit"));
 	m_RenamePreset.setToolTip("Rename " + m_UserInterfaceName.toLower() + " Preset");
 	m_RenamePreset.setStatusTip("Rename " + m_UserInterfaceName.toLower() + " preset");
 	m_RenamePreset.setFixedWidth(22);
@@ -47,7 +47,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	m_MainLayout.addWidget(&m_RenamePreset, 0, 3);
 
 	// Remove preset
-	m_RemovePreset.setIcon(QIcon(":/Images/cross.png"));
+	m_RemovePreset.setIcon(GetIcon("cross"));
 	m_RemovePreset.setToolTip("Remove " + m_UserInterfaceName.toLower() + " Preset");
 	m_RemovePreset.setStatusTip("Remove " + m_UserInterfaceName.toLower() + " preset");
 	m_RemovePreset.setFixedWidth(22);
@@ -55,7 +55,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	m_MainLayout.addWidget(&m_RemovePreset, 0, 4);
 
 	// Load presets
-	m_LoadPresets.setIcon(QIcon(":/Images/folders.png"));
+	m_LoadPresets.setIcon(GetIcon("folders"));
 	m_LoadPresets.setToolTip("Load " + m_UserInterfaceName.toLower() + " presets from file");
 	m_LoadPresets.setStatusTip("Load " + m_UserInterfaceName.toLower() + " presets from file");
 	m_LoadPresets.setFixedWidth(22);
@@ -63,7 +63,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	m_MainLayout.addWidget(&m_LoadPresets, 0, 5);
 
 	// Save presets
-	m_SavePresets.setIcon(QIcon(":/Images/disks.png"));
+	m_SavePresets.setIcon(GetIcon("disks"));
 	m_SavePresets.setToolTip("Save " + m_UserInterfaceName.toLower() + " presets to file");
 	m_SavePresets.setStatusTip("Save " + m_UserInterfaceName.toLower() + " presets to file");
 	m_SavePresets.setFixedWidth(22);
