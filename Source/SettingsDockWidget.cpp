@@ -214,7 +214,7 @@ CSettingsWidget::CSettingsWidget(QWidget* pParent) :
 	setLayout(&m_MainLayout);
 
 	m_MainLayout.addWidget(&m_TracerSettingsWidget);
-	m_MainLayout.addWidget(&m_KernelSettingsWidget);
+//	m_MainLayout.addWidget(&m_KernelSettingsWidget);
 }
 
 QSettingsDockWidget::QSettingsDockWidget(QWidget* pParent) :
