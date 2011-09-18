@@ -1,8 +1,5 @@
 #pragma once
 
-// Qt
-#include <QtGui>
-
 // Render thread
 #include "RenderThread.h"
 
@@ -13,12 +10,7 @@
 #include "CameraDockWidget.h"
 #include "SettingsDockWidget.h"
 #include "LogDockWidget.h"
-
-class QAction;
-class QListWidget;
-class QMenu;
-class QTextEdit;
-class CVtkWidget;
+#include "VtkWidget.h"
 
 class CMainWindow : public QMainWindow
 {
@@ -41,7 +33,7 @@ private slots:
 	void OnRenderEnd(void);
 	
 public slots:
-	void OnLoadDemo(const int& DemoIndex);
+	void OnLoadDemo(const QString& FileName);
 
 private:
     void								CreateActions(void);
@@ -67,7 +59,7 @@ private:
 	QToolBar*							m_pPlaybackToolBar;
     
 	// Qt-VTK widget					
-	CVtkWidget*							m_pVtkWidget;
+	CVtkWidget							m_VtkWidget;
 
 	// Dock widgets
 	QLogDockWidget						m_LogDockWidget;

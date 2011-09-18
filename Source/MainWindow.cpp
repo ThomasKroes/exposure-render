@@ -18,7 +18,7 @@ CMainWindow::CMainWindow() :
     m_pHelpMenu(NULL),
     m_pFileToolBar(NULL),
 	m_pPlaybackToolBar(),
-	m_pVtkWidget(NULL),
+	m_VtkWidget(),
 	m_LogDockWidget(),
 	m_LightingDockWidget(),
 	m_AppearanceDockWidget(),
@@ -36,8 +36,7 @@ CMainWindow::CMainWindow() :
 	gpMainWindow = this;
 
 	// Create VTK rendering window
-	m_pVtkWidget = new CVtkWidget();
-	setCentralWidget(m_pVtkWidget);
+	setCentralWidget(&m_VtkWidget);
 
 	CreateActions();
 	CreateMenus();
@@ -47,7 +46,7 @@ CMainWindow::CMainWindow() :
 
     setUnifiedTitleAndToolBarOnMac(true);
 
-	maximumSize();
+	setWindowState(Qt::WindowMaximized);
 
 	setWindowFilePath(QString());
 
@@ -55,8 +54,6 @@ CMainWindow::CMainWindow() :
 
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-
-//	Log("Size of Scene: " + QString::number(sizeof(CScene)) + " bytes");
 }
 
 CMainWindow::~CMainWindow(void)
@@ -287,6 +284,11 @@ void CMainWindow::Open(QString FilePath)
  		StartRenderThread(FilePath);
 }
 
+void CMainWindow::OnLoadDemo(const QString& FileName)
+{
+	Open(QApplication::applicationDirPath() + "/Examples/" + FileName);
+}
+
 void CMainWindow::Close(void)
 {
 	KillRenderThread();
@@ -352,10 +354,7 @@ void CMainWindow::ShowStartupDialog(void)
 {
 	QStartupDialog StartupDialog;
 
+	connect(&StartupDialog, SIGNAL(LoadDemo(const QString&)), gpMainWindow, SLOT(OnLoadDemo(const QString&)));
+
 	StartupDialog.exec();
-}
-
-void CMainWindow::OnLoadDemo(const int& DemoIndex)
-{
-
 }

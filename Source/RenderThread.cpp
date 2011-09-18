@@ -102,7 +102,7 @@ void OnProgress(vtkObject* pCaller, long unsigned int EventId, void* pClientData
 
 		if (pMetaImageReader)
 		{
-			LogProgress("Loading Volume", (float)pMetaImageReader->GetProgress() * 100.0f);
+//			LogProgress("Loading Volume", (float)pMetaImageReader->GetProgress() * 100.0f);
 //			gpProgressDialog->setLabelText("Loading volume");
 //			gpProgressDialog->setValue((int)(pMetaImageReader->GetProgress() * 100.0));
 		}
@@ -521,10 +521,18 @@ bool QRenderThread::Load(QString& FileName)
 	// Create meta image reader
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
+	QFileInfo FileInfo(FileName);
+
+	if (!FileInfo.exists())
+	{
+		Log(QString(QFileInfo(FileName).filePath().replace("//", "/")).toAscii() + "  does not exist!", QLogger::Critical);
+		return false;
+	}
+
 	// Exit if the reader can't read the file
 	if (!MetaImageReader->CanReadFile(m_FileName.toAscii()))
 	{
-		Log(QString("Unable to read " + QFileInfo(FileName).fileName()).toAscii(), QLogger::Critical);
+		Log(QString("Meta image reader can't read file " + QFileInfo(FileName).fileName()).toAscii(), QLogger::Critical);
 		return false;
 	}
 

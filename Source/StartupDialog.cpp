@@ -17,8 +17,6 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_DialogButtons(),
 	m_ShowNextTime()
 {
-	resize(400, 100);
-
 	setWindowTitle("Welcome");
 	setWindowIcon(GetIcon("star"));
 
@@ -45,6 +43,8 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	// Standard dialog buttons
 	m_DialogButtons.setStandardButtons(QDialogButtonBox::Ok);
 
+	connect(&m_DialogButtons, SIGNAL(accepted()), this, SLOT(accept()));
+
 	// Show next time button
 	m_ShowNextTime.setText(tr("Show this dialog at start up"));
 
@@ -52,9 +52,23 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_ShowNextTime.setChecked(true);
 
 	m_MainLayout.addWidget(&m_ShowNextTime, 4, 0);
+	m_MainLayout.addWidget(&m_DialogButtons, 4, 1);
 
 	// Load the read me fiel
 	LoadReadMe("Readme.txt");
+
+	QObject::connect(&m_Demo1, SIGNAL(clicked(double)), this, SLOT(OnLoadDemo()));
+
+	QSignalMapper* pSignalMapper = new QSignalMapper(this);
+	pSignalMapper->setMapping(&m_Demo1, QString("bonsai.mhd"));
+	pSignalMapper->setMapping(&m_Demo2, QString("manix.mhd"));
+	pSignalMapper->setMapping(&m_Demo3, QString("backpack.mhd"));
+
+	connect(&m_Demo1, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
+	connect(&m_Demo2, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
+	connect(&m_Demo3, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
+
+	connect(pSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(OnLoadDemo(const QString&)));
 };
 
 QStartupDialog::~QStartupDialog(void)
@@ -71,14 +85,13 @@ QSize QStartupDialog::sizeHint() const
 
 void QStartupDialog::accept()
 {
-	QSettings Settings;
-
 	QDialog::accept();
 }
 
-void QStartupDialog::LoadDemo(void)
+void QStartupDialog::OnLoadDemo(const QString& FileName)
 {
-
+	emit LoadDemo(FileName);
+	accept();
 }
 
 void QStartupDialog::LoadReadMe(const QString& FileName)
@@ -96,7 +109,3 @@ void QStartupDialog::LoadReadMe(const QString& FileName)
 
 	m_ReadMe.setPlainText(DocumentArray);
 }
-
-
-
-

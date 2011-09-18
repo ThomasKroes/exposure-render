@@ -19,10 +19,10 @@ private:
 	void LoadReadMe(const QString& FileName);
 
 private slots:
-	void LoadDemo(void);
+	void OnLoadDemo(const QString& FileName);
 
 signals:
-	void LoadDemo(const int&);
+	void LoadDemo(const QString& FileName);
 
 private:
 	QGridLayout			m_MainLayout;
