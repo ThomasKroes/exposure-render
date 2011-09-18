@@ -734,7 +734,61 @@ public:
 	float		m_FilteredDuration;
 };
 
-class CScene
+// Denoise parameters
+class EXPOSURE_RENDER_DLL CDenoiseParams
+{
+public:
+	bool		m_Enabled;				/*!< Enable/disable */
+	float		m_Noise;				/*!< Noise */
+	float		m_LerpC;				/*!< Linear interpolation constant */
+	float		m_WindowRadius;			/*!< Window radius */
+	float		m_WindowArea;			/*!< Window area */
+	float		m_InvWindowArea;		/*!< Inverse window area */
+	float		m_WeightThreshold;		/*!< Weight threshold */
+	float		m_LerpThreshold;		/*!< Linear interpolation threshold */
+
+public:
+	HO CDenoiseParams(void)
+	{
+// 		m_Enabled			= true;
+// 		m_Noise				= 1.0f / (0.32f * 0.32f);
+// 		m_LerpC				= 0.2f;
+// 		m_WindowRadius		= 2.0f;
+// 		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
+// 		m_InvWindowArea		= 1.0f / m_WindowArea;
+// 		m_WeightThreshold	= 0.02f;
+// 		m_LerpThreshold		= 0.79f;
+
+		m_Enabled			= true;
+		m_Noise				= 1.0f / (0.6f * 0.6f);
+		m_LerpC				= 0.6f;
+		m_WindowRadius		= 2.0f;
+		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
+		m_InvWindowArea		= 1.0f / m_WindowArea;
+		m_WeightThreshold	= 0.02f;
+		m_LerpThreshold		= 0.79f;
+	}
+
+	HO ~CDenoiseParams(void)
+	{
+	}
+
+	HOD CDenoiseParams& CDenoiseParams::operator=(const CDenoiseParams& Other)
+	{
+		m_Enabled			= Other.m_Enabled;
+		m_Noise				= Other.m_Noise;
+		m_LerpC				= Other.m_LerpC;
+		m_WindowRadius		= Other.m_WindowRadius;
+		m_WindowArea		= Other.m_WindowArea;
+		m_InvWindowArea		= Other.m_InvWindowArea;
+		m_WeightThreshold	= Other.m_WeightThreshold;
+		m_LerpThreshold		= Other.m_LerpThreshold;
+
+		return *this;
+	}
+};
+
+class EXPOSURE_RENDER_DLL CScene
 {
 public:
 	CScene(void);
@@ -760,4 +814,5 @@ public:
 	float					m_DensityScale;
 	int						m_MacrocellSize;
 	Vec3i					extinctionSize;
+	CDenoiseParams			m_DenoiseParams;
 };

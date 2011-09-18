@@ -473,6 +473,7 @@ SET(CudaSources
 	Transport.cuh
 	RayMarching.cuh
 	Woodcock.cuh
+	Denoise.cuh
 	Core.cu
 )
 

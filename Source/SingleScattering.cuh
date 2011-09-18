@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Geometry.h"
-
 #include "Transport.cuh"
 
 // Find the nearest non-empty voxel in the volume

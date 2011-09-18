@@ -70,6 +70,7 @@ private:
 	CColorXyz*				m_pDevEstFrameXyz;
 	CColorXyz*				m_pDevEstFrameBlurXyz;
 	unsigned char*			m_pDevEstRgbLdr;
+	unsigned char*			m_pDevRgbLdrDisp;
 
 	// Host image buffers
 	unsigned char*			m_pImageCanvas;

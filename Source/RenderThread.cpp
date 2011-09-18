@@ -154,6 +154,7 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pDevEstFrameXyz(NULL),
 	m_pDevEstFrameBlurXyz(NULL),
 	m_pDevEstRgbLdr(NULL),
+	m_pDevRgbLdrDisp(NULL),
 	m_pImageCanvas(NULL),
 	m_pSeeds(NULL),
 	m_Abort(false)
@@ -178,6 +179,7 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pDevEstFrameXyz		= Other.m_pDevEstFrameXyz;
 	m_pDevEstFrameBlurXyz	= Other.m_pDevEstFrameBlurXyz;
 	m_pDevEstRgbLdr			= Other.m_pDevEstRgbLdr;
+	m_pDevRgbLdrDisp			= Other.m_pDevRgbLdrDisp;
 	m_pImageCanvas			= Other.m_pImageCanvas;
 	m_Abort					= Other.m_Abort;
 	m_pSeeds				= m_pSeeds;
@@ -355,12 +357,13 @@ void QRenderThread::run()
 			float SizeHdrFrameBuffer		= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
 			float SizeHdrBlurFrameBuffer	= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
 			float SizeLdrFrameBuffer		= 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char);
-
+			
 			HandleCudaError(cudaFree(m_pSeeds));
 			HandleCudaError(cudaFree(m_pDevAccEstXyz));
 			HandleCudaError(cudaFree(m_pDevEstFrameXyz));
 			HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 			HandleCudaError(cudaFree(m_pDevEstRgbLdr));
+			HandleCudaError(cudaFree(m_pDevRgbLdrDisp));
 
 			// Allocate device buffers
 			HandleCudaError(cudaMalloc((void**)&m_pSeeds, SizeRandomSeeds));
@@ -368,7 +371,8 @@ void QRenderThread::run()
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameXyz, SizeHdrFrameBuffer));
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeHdrBlurFrameBuffer));
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbLdr, SizeLdrFrameBuffer));
-			
+			HandleCudaError(cudaMalloc((void**)&m_pDevRgbLdrDisp, SizeLdrFrameBuffer));
+
 // 			emit gRenderStatus.StatisticChanged("CUDA", "Random States", QString::number(m_SizeRandomStates / powf(1024.0f, 2.0f), 'f', 2), "MB", ":/Images/memory.png");
 			emit gRenderStatus.StatisticChanged("CUDA", "HDR Accumulation Buffer", QString::number(SizeHdrFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
 			emit gRenderStatus.StatisticChanged("CUDA", "HDR Frame Buffer Blur", QString::number(SizeHdrBlurFrameBuffer / powf(1024.0f, 2.0f), 'f', 2), "MB");
@@ -385,10 +389,11 @@ void QRenderThread::run()
 			free(pSeeds);
 
 			// Reset buffers to black
-			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr)));
+			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SizeHdrAccumulationBuffer));
+			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SizeHdrFrameBuffer));
+			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SizeHdrBlurFrameBuffer));
+			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SizeLdrFrameBuffer));
+			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SizeLdrFrameBuffer));
 
 			// Reset no. iterations
 			m_N = 0.0f;
@@ -406,7 +411,8 @@ void QRenderThread::run()
 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr)));
+			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
+			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
 
 			// Reset no. iterations
 			m_N = 0.0f;
@@ -418,7 +424,7 @@ void QRenderThread::run()
 		CCudaTimer Timer;
 
 		// Execute the rendering kernels
-  		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_N);
+  		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_pDevRgbLdrDisp, m_N);
 		HandleCudaError(cudaGetLastError());
 		
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
@@ -432,7 +438,7 @@ void QRenderThread::run()
 		emit gRenderStatus.StatisticChanged("Performance", "No. Iterations", QString::number(m_N), "Iterations");
 
 		// Blit
-		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevEstRgbLdr, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
+		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
 
 		// Let others know we are finished with a frame
 		emit gRenderStatus.PostRenderFrame();
@@ -451,7 +457,8 @@ void QRenderThread::run()
 	HandleCudaError(cudaFree(m_pDevEstFrameXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 	HandleCudaError(cudaFree(m_pDevEstRgbLdr));
-
+	HandleCudaError(cudaFree(m_pDevRgbLdrDisp));
+	
 	m_pScene				= NULL;
 	m_pSeeds				= NULL;
 	m_pDevAccEstXyz			= NULL;
@@ -500,13 +507,13 @@ CScene* QRenderThread::GetScene(void)
 bool QRenderThread::Load(QString& FileName)
 {
 	m_FileName = FileName;
-//  	QLoadSettingsDialog LoadSettingsDialog;
-//  
-//  	// Make it a modal dialog
-//  	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
-//  	 
-//  	// Show it
-//  	LoadSettingsDialog.exec();
+ 	QLoadSettingsDialog LoadSettingsDialog;
+ 
+ 	// Make it a modal dialog
+ 	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
+ 	 
+ 	// Show it
+ 	LoadSettingsDialog.exec();
 
 	// Create and configure progress dialog
 //	gpProgressDialog = new QProgressDialog("Volume loading in progress", "Abort", 0, 100);
@@ -566,31 +573,31 @@ bool QRenderThread::Load(QString& FileName)
 	
 // 	if (LoadSettingsDialog.GetResample())
 // 	{
-// 		Log("Resampling volume at " + QString::number(LoadSettingsDialog.GetResampleX(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleY(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleZ(), 'f', 2));
-// 
-// 		// Create resampler
-// 		vtkSmartPointer<vtkImageResample> ImageResample = vtkImageResample::New();
-// 
-// 		// Progress handling
-// 		ImageResample->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
-// 
-// 		ImageResample->SetInput(m_pImageDataVolume);
-// 
-// 		// Obtain resampling scales from dialog input
-// 		m_Scene.m_Scale.x = LoadSettingsDialog.GetResampleX();
-// 		m_Scene.m_Scale.y = LoadSettingsDialog.GetResampleY();
-// 		m_Scene.m_Scale.z = LoadSettingsDialog.GetResampleZ();
-// 
-// 		// Apply scaling factors
-// 		ImageResample->SetAxisMagnificationFactor(0, m_Scene.m_Scale.x);
-// 		ImageResample->SetAxisMagnificationFactor(1, m_Scene.m_Scale.y);
-// 		ImageResample->SetAxisMagnificationFactor(2, m_Scene.m_Scale.z);
-// 	
-// 		// Resample
-// 		ImageResample->Update();
-// 
-// 		m_pImageDataVolume = ImageResample->GetOutput();
-// 	}
+		Log("Resampling volume at " + QString::number(LoadSettingsDialog.GetResampleX(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleY(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleZ(), 'f', 2));
+
+		// Create resampler
+		vtkSmartPointer<vtkImageResample> ImageResample = vtkImageResample::New();
+
+		// Progress handling
+		ImageResample->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
+
+		ImageResample->SetInput(m_pImageDataVolume);
+
+		// Obtain resampling scales from dialog input
+		m_Scene.m_Scale.x = LoadSettingsDialog.GetResampleX();
+		m_Scene.m_Scale.y = LoadSettingsDialog.GetResampleY();
+		m_Scene.m_Scale.z = LoadSettingsDialog.GetResampleZ();
+
+		// Apply scaling factors
+		ImageResample->SetAxisMagnificationFactor(0, m_Scene.m_Scale.x);
+		ImageResample->SetAxisMagnificationFactor(1, m_Scene.m_Scale.y);
+		ImageResample->SetAxisMagnificationFactor(2, m_Scene.m_Scale.z);
+	
+		// Resample
+		ImageResample->Update();
+
+		m_pImageDataVolume = ImageResample->GetOutput();
+//	}
 
 	/*
 	// Create magnitude volume

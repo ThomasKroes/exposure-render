@@ -17,7 +17,6 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	float Dt		= 2.0f * (1.0f / ((float)pScene->m_Resolution.GetResX()));
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
-	float D			= 0.0f;
 
 	Vec3f samplePos; 
 

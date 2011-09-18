@@ -5,6 +5,7 @@ texture<short, 3, cudaReadModeNormalizedFloat >	gTexDensity;
 texture<short, 3, cudaReadModeNormalizedFloat >	gTexExtinction;
 
 #include "Blur.cuh"
+#include "Denoise.cuh"
 #include "ComputeEstimate.cuh"
 #include "Utilities.cuh"
 #include "SingleScattering.cuh"
@@ -82,7 +83,7 @@ void BindExtinctionVolume(float* extinction, cudaExtent extinctionSize)
   cudaBindTextureToArray( gTexExtinction, volArray, volChannelDesc);
 }
 
-void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, unsigned char* pDevEstRgbLdr, int N)
+void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, unsigned char* pDevEstRgbLdr, unsigned char* pDevEstRgbLdrDisp, int N)
 {
 	switch (Type)
 	{
@@ -91,7 +92,8 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 			SingleScattering(pScene, pDevScene, pSeeds, pDevEstFrameXyz);
 			BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
   			ComputeEstimate(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY(), pDevEstFrameXyz, pDevAccEstXyz, N, 500.0f, pDevEstRgbLdr);
-			
+			Denoise(pScene, pDevScene, (CColorRgbLdr*)pDevEstRgbLdr, (CColorRgbLdr*)pDevEstRgbLdrDisp);
+
 			break;
 		}
 
