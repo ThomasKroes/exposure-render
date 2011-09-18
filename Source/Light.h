@@ -125,7 +125,7 @@ public:
 		m_HalfHeight(0.5f * m_Height),
 		m_InvHalfHeight(1.0f / m_HalfHeight),
 		m_Distance(1.0f),
-		m_SkyRadius(100.0f),
+		m_SkyRadius(10000.0f),
 		m_P(1.0f, 1.0f, 1.0f),
 		m_Target(0.0f, 0.0f, 0.0f),
 		m_N(1.0f, 0.0f, 0.0f),
@@ -237,7 +237,7 @@ public:
 	}
 
 	// Intersect ray with light
-	HOD bool Intersect(CRay& R, float& T, CColorXyz& Le, Vec2f* pUV = NULL, float* pPdf = NULL)
+	HOD bool Intersect(CRay& R, float& T, CColorXyz& L, Vec2f* pUV = NULL, float* pPdf = NULL)
 	{
 		if (m_T == 0)
 		{
@@ -274,9 +274,9 @@ public:
 				*pUV = UV;
 
  			if (DotN < 0.0f)
-				Le = m_Color.ToXYZ() / m_Area;
+				L = m_Color.ToXYZ() / m_Area;
  			else
- 				Le = SPEC_BLACK;
+ 				L = SPEC_BLACK;
 
 			if (pPdf)
 				*pPdf = DistanceSquared(R.m_O, Pl) / m_Area;
@@ -294,10 +294,12 @@ public:
 			
 			R.m_MaxT	= T;
 
-			Vec2f pUV = Vec2f(SphericalPhi(R.m_D) * INV_TWO_PI_F, SphericalTheta(R.m_D) * INV_PI_F);
+			Vec2f UV = Vec2f(SphericalPhi(R.m_D) * INV_TWO_PI_F, SphericalTheta(R.m_D) * INV_PI_F);
+
+			L	= Le(Vec2f(1.0f) - 2.0f * UV);
 
 // 			if (pUV.y > 0.0f)
-// 				Le = Lerp(fabs(pUV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
+// 				Le = Lerp(fabs(pUV.y), m_ColorTop).ToXYZ(), m_ColorMiddle.ToXYZ());
 // 			else
 // 				Le = Lerp(fabs(pUV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
 
@@ -354,7 +356,7 @@ public:
 			if (UV.y > 0.0f)
 				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorTop).ToXYZ();
 			else
-				return Lerp(fabs(UV.y), m_ColorBottom, m_ColorMiddle).ToXYZ();
+				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorBottom).ToXYZ();
 		}
 	}
 };

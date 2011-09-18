@@ -99,10 +99,6 @@ void QTransferFunctionView::Update(void)
 		return;
 
 	QTransferFunction TransferFunction = gTransferFunction;
-	TransferFunction.SetRangeMin(gTransferFunction.GetRangeMin());
-	TransferFunction.SetRangeMax(gTransferFunction.GetRangeMax());
-
-// 	TransferFunction.NormalizeIntensity();
 
 	Scene()->m_TransferFunctions.m_Opacity.m_NoNodes		= TransferFunction.GetNodes().size();
 	Scene()->m_TransferFunctions.m_Diffuse.m_NoNodes		= TransferFunction.GetNodes().size();
@@ -114,12 +110,14 @@ void QTransferFunctionView::Update(void)
 	{
 		QNode& Node = TransferFunction.GetNode(i);
 
+		const float Intensity = Scene()->m_IntensityRange.m_Min + Scene()->m_IntensityRange.m_Length * Node.GetIntensity();
+
 		// Positions
-		Scene()->m_TransferFunctions.m_Opacity.m_P[i]		= Node.GetIntensity();
-		Scene()->m_TransferFunctions.m_Diffuse.m_P[i]		= Node.GetIntensity();
-		Scene()->m_TransferFunctions.m_Specular.m_P[i]		= Node.GetIntensity();
-		Scene()->m_TransferFunctions.m_Emission.m_P[i]		= Node.GetIntensity();
-		Scene()->m_TransferFunctions.m_Roughness.m_P[i]		= Node.GetIntensity();
+		Scene()->m_TransferFunctions.m_Opacity.m_P[i]		= Intensity;
+		Scene()->m_TransferFunctions.m_Diffuse.m_P[i]		= Intensity;
+		Scene()->m_TransferFunctions.m_Specular.m_P[i]		= Intensity;
+		Scene()->m_TransferFunctions.m_Emission.m_P[i]		= Intensity;
+		Scene()->m_TransferFunctions.m_Roughness.m_P[i]		= Intensity;
 
 		// Colors
 		Scene()->m_TransferFunctions.m_Opacity.m_C[i]		= CColorRgbHdr(Node.GetOpacity());

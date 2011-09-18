@@ -344,7 +344,7 @@ QPointF QTransferFunctionCanvas::SceneToTransferFunction(const QPointF& ScenePoi
 	const float NormalizedX = ScenePoint.x() / (float)rect().width();
 	const float NormalizedY = 1.0f - (ScenePoint.y() / (float)rect().height());
 
-	const float TfX = gTransferFunction.GetRangeMin() + NormalizedX * gTransferFunction.GetRange();
+	const float TfX = NormalizedX;
 	const float TfY = NormalizedY;
 
 	return QPointF(TfX, TfY);
@@ -353,7 +353,7 @@ QPointF QTransferFunctionCanvas::SceneToTransferFunction(const QPointF& ScenePoi
 // Maps from transfer function coordinates to scene coordinates
 QPointF QTransferFunctionCanvas::TransferFunctionToScene(const QPointF& TfPoint)
 {
-	const float NormalizedX = (TfPoint.x() - gTransferFunction.GetRangeMin()) / gTransferFunction.GetRange();
+	const float NormalizedX = TfPoint.x();
 	const float NormalizedY = 1.0f - TfPoint.y();
 
 	const float SceneX = NormalizedX * rect().width();

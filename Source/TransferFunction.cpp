@@ -33,6 +33,9 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 
 	blockSignals(true);
 	
+	m_RangeMin		= Other.m_RangeMin;
+	m_RangeMax		= Other.m_RangeMax;
+	m_Range			= Other.m_Range;
 	m_Nodes			= Other.m_Nodes;
 	m_pSelectedNode	= Other.m_pSelectedNode;
 
@@ -232,13 +235,13 @@ void QTransferFunction::UpdateNodeRanges(void)
 
 		if (i == 0)
 		{
-			Node.SetMinX(m_RangeMin);
-			Node.SetMaxX(m_RangeMin);
+			Node.SetMinX(0.0f);
+			Node.SetMaxX(0.0f);
 		}
 		else if (i == (m_Nodes.size() - 1))
 		{
-			Node.SetMinX(m_RangeMax);
-			Node.SetMaxX(m_RangeMax);
+			Node.SetMinX(1.0f);
+			Node.SetMaxX(1.0f);
 		}
 		else
 		{
@@ -339,10 +342,10 @@ QTransferFunction QTransferFunction::Default(void)
 	QTransferFunction DefaultTransferFunction;
 
 	DefaultTransferFunction.SetName("Default");
-	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
-	DefaultTransferFunction.AddNode(0.3f, 0.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
-	DefaultTransferFunction.AddNode(0.7f, 1.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
-	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, Qt::black, 10000.0f);
+	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, Qt::black, 10.0f);
+	DefaultTransferFunction.AddNode(0.3f, 0.0f, Qt::white, Qt::white, Qt::black, 10.0f);
+	DefaultTransferFunction.AddNode(0.7f, 1.0f, Qt::white, Qt::white, Qt::black, 10.0f);
+	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, Qt::black, 10.0f);
 
 	return DefaultTransferFunction;
 }

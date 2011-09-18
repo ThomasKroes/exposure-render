@@ -56,8 +56,6 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	// Compute sample ID
 	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
 
-	float StepSize = 0.0005f;
-
 	// Exit if beyond kernel boundaries
 	if (X >= pScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pScene->m_Camera.m_Film.m_Resolution.GetResY())
 		return;
@@ -69,12 +67,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	CColorXyz 	EyeTr	= SPEC_WHITE;		// Eye transmittance
 	CColorXyz	L		= SPEC_BLACK;		// Measured volume radiance
 
-	// Continue
-	bool Continue = true;
-
 	CRay EyeRay, RayCopy;
-
-	float BoxMinT = 0.0f, BoxMaxT = 0.0f;
 
  	// Generate the camera ray
  	pScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), EyeRay.m_O, EyeRay.m_D);
@@ -90,11 +83,11 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	{
 		RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, (Pe - EyeRay.m_O).Length());
 
-// 		if (NearestLight(pScene, RayCopy, Li))
-// 		{
-// 			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
-// 			return;
-// 		}
+		if (NearestLight(pScene, RayCopy, Li))
+		{
+			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
+			return;
+		}
 
 		// Fetch density
 		const float D = Density(pScene, Pe);
@@ -112,16 +105,16 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		// Estimate direct light at eye point
 	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, Pe, Normal, RNG, 0.001f);
 	}
-
-/*
-	RayCopy.m_O		= Pe;
-	RayCopy.m_D		= EyeRay.m_D;
-	RayCopy.m_MinT	= EyeT;
-	RayCopy.m_MaxT	= 10000000.0f;
+	else
+	{
+		RayCopy.m_O		= EyeRay.m_O;
+		RayCopy.m_D		= EyeRay.m_D;
+		RayCopy.m_MinT	= (EyeRay.m_O - Pe).Length();
+		RayCopy.m_MaxT	= 100000000000.0f;
 
 	if (NearestLight(pScene, RayCopy, Li))
-		Li += EyeTr * Li;
-*/
+		L += EyeTr * Li;
+	}
 
 	// Contribute
 	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;

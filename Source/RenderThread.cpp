@@ -611,10 +611,6 @@ bool QRenderThread::Load(QString& FileName)
 	m_Scene.m_IntensityRange.m_Min	= (float)pRange[0];
 	m_Scene.m_IntensityRange.m_Max	= (float)pRange[1];
 
-	// Configure transfer function
-	gTransferFunction.SetRangeMin((float)pRange[0]);
-	gTransferFunction.SetRangeMax((float)pRange[1]);
-
 	// Get extent
 	int* pExtent = m_pImageDataVolume->GetExtent();
 	m_Scene.m_Resolution.SetResXYZ(Vec3i(pExtent[1] + 1, pExtent[3] + 1, pExtent[5] + 1));
