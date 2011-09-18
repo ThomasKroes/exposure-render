@@ -441,6 +441,9 @@ void QRenderThread::run()
 	// Let others know that we have stopped rendering
 	emit gRenderStatus.RenderEnd();
 
+	// Load default appearance, lighting and camera presets
+	emit gRenderStatus.LoadPreset("Default");
+
 	// Free CUDA buffers
 	HandleCudaError(cudaFree(m_pScene));
 	HandleCudaError(cudaFree(m_pSeeds));
@@ -466,7 +469,6 @@ void QRenderThread::run()
 
 void QRenderThread::Close(void)
 {
-	Log("Closing render thread");
 	m_Abort = true;
 }
 
@@ -835,6 +837,4 @@ void KillRenderThread(void)
 	// Remove the render thread
 	delete gpRenderThread;
 	gpRenderThread = NULL;
-
-	Log("Render thread killed");
 }

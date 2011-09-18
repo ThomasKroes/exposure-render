@@ -134,6 +134,7 @@ void CMainWindow::CreateMenus(void)
 
 void CMainWindow::CreateToolBars()
 {
+	/*
     m_pFileToolBar		= addToolBar(tr("File"));
 
 	m_pFileToolBar->addAction(GetIcon("folder-open"), "Open", this, SLOT(OnOpen()));
@@ -145,6 +146,7 @@ void CMainWindow::CreateToolBars()
 	m_pPlaybackToolBar->addAction(GetIcon("control-pause"), "Pause", this, SLOT(OnPause()));
 	m_pPlaybackToolBar->addAction(GetIcon("control-stop-square"), "Stop", this, SLOT(OnStop()));
 	m_pPlaybackToolBar->addAction(GetIcon("control-stop-180"), "Restart", this, SLOT(OnRestart()));
+	*/
 }
 
 void CMainWindow::CreateStatusBar()

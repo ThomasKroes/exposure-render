@@ -54,10 +54,8 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_ShowNextTime, 4, 0);
 	m_MainLayout.addWidget(&m_DialogButtons, 4, 1);
 
-	// Load the read me fiel
+	// Load the read me file
 	LoadReadMe("Readme.txt");
-
-	QObject::connect(&m_Demo1, SIGNAL(clicked(double)), this, SLOT(OnLoadDemo()));
 
 	QSignalMapper* pSignalMapper = new QSignalMapper(this);
 	pSignalMapper->setMapping(&m_Demo1, QString("Bonsai.mhd"));
