@@ -101,7 +101,7 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	connect(this, SIGNAL(toggled(bool)), this, SLOT(OnBackgroundIlluminationChanged(bool)));
 	connect(&m_UseTexture, SIGNAL(stateChanged(int)), this, SLOT(OnUseTextureChanged(int)));
 	connect(&m_LoadTexture, SIGNAL(clicked()), this, SLOT(OnLoadTexture()));
-// 	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), this, SLOT(OnBackgroundChanged()));
+ 	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), this, SLOT(OnBackgroundChanged()));
 
 	OnBackgroundChanged();
 }

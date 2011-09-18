@@ -256,9 +256,10 @@ QLighting& QLighting::operator=(const QLighting& Other)
 	QObject::disconnect(this, SLOT(OnLightPropertiesChanged(QLight*)));
 
 	m_Lights		= Other.m_Lights;
-	m_Background	= Other.m_Background;
-
+	
 	blockSignals(false);
+
+	m_Background = Other.m_Background;
 
 	emit LightingChanged();
 

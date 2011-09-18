@@ -77,92 +77,51 @@ DEV CColorXyz EstimateDirectLight(CScene* pScene, CLight& Light, CLightingSample
 
 	const float D = Density(pScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, D).ToXYZ(), GetSpecular(pScene, D).ToXYZ(), 50.0f, 0.0001 * GetRoughness(pScene, D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, D).ToXYZ(), GetSpecular(pScene, D).ToXYZ(), 5.0f, 0.0001 * GetRoughness(pScene, D).r);
+	
 	// Light/shadow ray
-	CRay R; 
+	CRay Rl; 
 
 	// Light probability
 	float LightPdf = 1.0f, BsdfPdf = 1.0f;
 	
 	// Incident light direction
-	Vec3f Wi;
+	Vec3f Wi, P, Pl;
 
 	CColorXyz F = SPEC_BLACK;
 	
-	CSurfacePoint SPe, SPl;
-
-	SPe.m_P		= Pe;
-	SPe.m_Ng	= N; 
-
 	// Sample the light source
- 	Li = Light.SampleL(Pe, R, LightPdf, LS);
+ 	Li = Light.SampleL(Pe, Rl, LightPdf, LS);
 	
-	Wi = -R.m_D; 
+	Wi = -Rl.m_D; 
 
 	F = Bsdf.F(Wo, Wi); 
 
 	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 
-	Vec3f P;
-
 	// Sample the light with MIS
-	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f && !FreePathRM(R, Rnd, P, pScene, 0))// && !SampleDistanceRM(R, Rnd, P, pScene, 0))
+	if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f && !FreePathRM(Rl, Rnd, P, pScene, 0))
 	{
-		// Compute tau
-		const CColorXyz Tr = SPEC_WHITE;//Transmittance(pScene, R.m_O, R.m_D, Length(R.m_O - Pe), StepSize, Rnd);
-		
-		// Attenuation due to volume
-		Li *= Tr;
-
-		// Compute MIS weight
-		const float Weight = 1.0f;//PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+		const float Weight = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
-		// Add contribution
 		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
 	}
 
-	return Ld;
-
-	/*
 	// Sample the BRDF with MIS
 	F = Bsdf.SampleF(Wo, Wi, BsdfPdf, LS.m_BsdfSample);
 	
-	CLight* pNearestLight = NULL;
-
-	Vec2f UV;
-	
 	if (!F.IsBlack())
 	{
-		float MaxT = 1000000000.0f; 
-
-		// Compute virtual light point
-		const Vec3f Pl = Pe + (MaxT * Wi);
-
-		if (NearestLight(pScene, Pe, Wi, 0.0f, MaxT, pNearestLight, NULL, &UV, &LightPdf))
+		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl))
 		{
-			if (LightPdf > 0.0f && BsdfPdf > 0.0f) 
+			if (!Li.IsBlack() && LightPdf > 0.0f && BsdfPdf > 0.0f && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene, 0)) 
 			{
-				// Add light contribution from BSDF sampling
 				const float Weight = PowerHeuristic(1.0f, BsdfPdf, 1.0f, LightPdf);
 				 
-				// Get exitant radiance from light source
-// 				Li = pNearestLight->Le(UV, pScene->m_Materials, pScene->m_Textures, pScene->m_Bitmaps);
-
-				if (!Li.IsBlack())
-				{
-					// Scale incident radiance by attenuation through volume
-					Tr = Transmittance(pScene, Pe, Wi, 1.0f, StepSize, Rnd);
-
-					// Attenuation due to volume
-					Li *= Tr;
-
-					// Contribute
-					Ld += F * Li * AbsDot(Wi, N) * Weight / BsdfPdf;
-				}
+				Ld += F * Li * AbsDot(Wi, N) * Weight / BsdfPdf;
 			}
 		}
 	}
-	*/
 
 	return Ld;
 }

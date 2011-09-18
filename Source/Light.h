@@ -219,7 +219,7 @@ public:
 			Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
 			Rl.m_D	= Normalize(P - Rl.m_O);
 			L		= Le(Vec2f(0.0f));
-			Pdf		= DistanceSquared(P, Rl.m_O) / AbsDot(Rl.m_D, m_N) * m_Area;
+			Pdf		= DistanceSquared(P, Rl.m_O) / (AbsDot(Rl.m_D, m_N) * m_Area);
 		}
 
 		if (m_T == 1)
@@ -297,13 +297,6 @@ public:
 			Vec2f UV = Vec2f(SphericalPhi(R.m_D) * INV_TWO_PI_F, SphericalTheta(R.m_D) * INV_PI_F);
 
 			L	= Le(Vec2f(1.0f) - 2.0f * UV);
-
-// 			if (pUV.y > 0.0f)
-// 				Le = Lerp(fabs(pUV.y), m_ColorTop).ToXYZ(), m_ColorMiddle.ToXYZ());
-// 			else
-// 				Le = Lerp(fabs(pUV.y), m_ColorTop.ToXYZ(), m_ColorMiddle.ToXYZ());
-
-// 			Le = m_Color.ToXYZ();			
 
 			return true;
 		}
