@@ -1,9 +1,6 @@
 #pragma once
 
-// Render thread
 #include "RenderThread.h"
-
-// Dock widgets
 #include "LightingDockWidget.h"
 #include "AppearanceDockWidget.h"
 #include "StatisticsDockWidget.h"

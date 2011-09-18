@@ -3,12 +3,12 @@
 #include "Preset.h"
 #include "Controls.h"
 
-class QTestWidget : public QGroupBox
+class QPresetsWidgetBase : public QGroupBox
 {
 	Q_OBJECT
 
 public:
-	QTestWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName);
+	QPresetsWidgetBase(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName);
 
 	virtual void RemovePreset(void)
 	{
@@ -28,6 +28,7 @@ public:
 
 public slots:
 	void OnLoadPreset(void);
+	void OnLoadPreset(const QString& PresetName);
 	void OnSavePreset(void);
 	void OnRenamePreset(void);
 	void OnRemovePreset(void);
@@ -54,13 +55,16 @@ protected:
 };
 
 template <class T>
-class QPresetsWidget : public QTestWidget
+class QPresetsWidget : public QPresetsWidgetBase
 {
 public:
 	QPresetsWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
-		QTestWidget(pParent, InternalName, UserInterfaceName)
+		QPresetsWidgetBase(pParent, InternalName, UserInterfaceName)
 	{
 		LoadPresets(false);
+
+		// Add default preset
+		InsertPreset(0, T::Default());
 	}
 
 	virtual ~QPresetsWidget(void)
@@ -126,7 +130,7 @@ public:
 
 	void LoadPreset(const QString& Name)
 	{
-		emit QTestWidget::LoadPreset(Name);
+		emit QPresetsWidgetBase::LoadPreset(Name);
 
 		Log("Loading '" + Name + "' " + m_UserInterfaceName.toLower() + " preset");
 	}
@@ -294,6 +298,17 @@ public:
 		Log("'" + OldName + "' renamed to '" + Name + "'");
 	};
 
+	bool HasPreset(const QString& Name)
+	{
+		for (int i = 0; i < m_Presets.size(); i++)
+		{
+			if (m_Presets[i].GetName() == Name)
+				return true;
+		}
+
+		return false;
+	}
+
 	T GetPreset(const QString& Name)
 	{
 		for (int i = 0; i < m_Presets.size(); i++)
@@ -302,8 +317,7 @@ public:
 				return m_Presets[i];
 		}
 
-		T Preset;
-		return Preset;
+		return T::Default();
 	}
 
 private:

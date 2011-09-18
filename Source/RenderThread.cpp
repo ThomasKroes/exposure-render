@@ -243,23 +243,18 @@ bool QRenderThread::InitializeCuda(void)
 		emit gRenderStatus.StatisticChanged("On Board Memory", "Memory Clock Rate", QString::number(MemoryClock * 1e-3f), "Mhz");
 		emit gRenderStatus.StatisticChanged("On Board Memory", "Memory Bus Width", QString::number(MemoryBusWidth), "bit");
 		emit gRenderStatus.StatisticChanged("On Board Memory", "L2 Cache Size", QString::number(L2CacheSize), "bytes");
-
 		emit gRenderStatus.StatisticChanged("On Board Memory", "Maximum Memory Pitch", QString::number((float)DeviceProperties.memPitch / powf(1024.0f, 2.0f), 'f', 2), "MB");
 		
 		// Processor
 		emit gRenderStatus.StatisticChanged(DeviceString, "Processor", "", "", "processor");
 		emit gRenderStatus.StatisticChanged("Processor", "No. Multiprocessors", QString::number(DeviceProperties.multiProcessorCount), "Processors");
 		emit gRenderStatus.StatisticChanged("Processor", "GPU Clock Speed", QString::number(DeviceProperties.clockRate * 1e-6f, 'f', 2), "GHz");
-
-
 		emit gRenderStatus.StatisticChanged("Processor", "Max. Block Size", QString::number(DeviceProperties.maxThreadsDim[0]) + " x " + QString::number(DeviceProperties.maxThreadsDim[1]) + " x " + QString::number(DeviceProperties.maxThreadsDim[2]), "Threads");
 		emit gRenderStatus.StatisticChanged("Processor", "Max. Grid Size", QString::number(DeviceProperties.maxGridSize[0]) + " x " + QString::number(DeviceProperties.maxGridSize[1]) + " x " + QString::number(DeviceProperties.maxGridSize[2]), "Blocks");
 		emit gRenderStatus.StatisticChanged("Processor", "Warp Size", QString::number(DeviceProperties.warpSize), "Threads");
 		emit gRenderStatus.StatisticChanged("Processor", "Max. No. Threads/Block", QString::number(DeviceProperties.maxThreadsPerBlock), "Threads");
-
 		emit gRenderStatus.StatisticChanged("Processor", "Max. Shared Memory Per Block", QString::number((float)DeviceProperties.sharedMemPerBlock / 1024.0f, 'f', 2), "KB");
 		emit gRenderStatus.StatisticChanged("Processor", "Registers Available Per Block", QString::number((float)DeviceProperties.regsPerBlock / 1024.0f, 'f', 2), "KB");
-
 
 		// Texture
 		emit gRenderStatus.StatisticChanged(DeviceString, "Texture", "", "", "checkerboard");
@@ -305,6 +300,9 @@ void QRenderThread::run()
 	// Let others know that we are starting with rendering
 	emit gRenderStatus.RenderBegin();
 	
+	// Try to load appearance/lighting/camera presets with the same name as the loaded file
+	emit gRenderStatus.LoadPreset(QFileInfo(m_FileName).baseName());
+
 	// Keep track of frames/second
 	CEvent FPS;
 

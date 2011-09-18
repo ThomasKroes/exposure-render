@@ -16,8 +16,6 @@ public:
 public slots:
 	void OnLoadPreset(const QString& Name);
 	void OnSavePreset(const QString& Name);
-	void OnRenderBegin(void);
-	void OnRenderEnd(void);
 
 protected:
 	QGridLayout						m_MainLayout;

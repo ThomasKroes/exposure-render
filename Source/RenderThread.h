@@ -21,8 +21,9 @@ signals:
 	void PreRenderFrame(void);
 	void PostRenderFrame(void);
 	void Resize(void);
+	void LoadPreset(const QString& PresetName);
 	void StatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit = "", const QString& Icon = "");
-
+	
 	friend class QRenderThread;
 	friend class QFilmWidget;
 	friend class QApertureWidget;

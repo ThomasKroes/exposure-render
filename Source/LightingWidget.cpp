@@ -22,15 +22,17 @@ QLightingWidget::QLightingWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_BackgroundIlluminationWidget, 3, 0);
 	m_MainLayout.addWidget(&m_PresetsWidget, 0, 0);
 
-	// Connections
-	connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
-	connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
+	QObject::connect(&gRenderStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
+	QObject::connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
 }
 
 void QLightingWidget::OnLoadPreset(const QString& Name)
 {
+	// Only load the preset when it exists
+	if (!m_PresetsWidget.HasPreset(Name))
+		return;
+
 	gLighting = m_PresetsWidget.GetPreset(Name);
 }
 
@@ -41,20 +43,4 @@ void QLightingWidget::OnSavePreset(const QString& Name)
 
 	// Add the preset
 	m_PresetsWidget.SavePreset(Preset);
-}
-
-void QLightingWidget::OnRenderBegin(void)
-{
-	// Add a default transfer function and load it
-	QLighting DefaultLighting = QLighting::Default();
-
-	m_PresetsWidget.InsertPreset(0, DefaultLighting);
-	m_PresetsWidget.LoadPreset("Default");
-}
-
-void QLightingWidget::OnRenderEnd(void)
-{
-	// Add a default transfer function and load it
-	m_PresetsWidget.InsertPreset(0, QLighting::Default());
-	m_PresetsWidget.LoadPreset("Default");
 }

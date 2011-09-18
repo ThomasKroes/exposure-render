@@ -4,7 +4,7 @@
 
 #include "PresetsWidget.h"
 
-QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
+QPresetsWidgetBase::QPresetsWidgetBase(QWidget* pParent, const QString& InternalName, const QString& UserInterfaceName) :
 	QGroupBox(pParent),
 	m_InternalName(InternalName),
 	m_UserInterfaceName(UserInterfaceName)
@@ -80,7 +80,7 @@ QTestWidget::QTestWidget(QWidget* pParent, const QString& InternalName, const QS
 	connect(&m_PresetName, SIGNAL(currentIndexChanged(int)), this, SLOT(OnCurrentIndexChanged(int)));
 }
 
-void QTestWidget::OnLoadPreset(void)
+void QPresetsWidgetBase::OnLoadPreset(void)
 {
 	if (m_PresetName.currentText().isEmpty())
 		return;
@@ -88,7 +88,28 @@ void QTestWidget::OnLoadPreset(void)
 	emit LoadPreset(m_PresetName.currentText());
 }
 
-void QTestWidget::OnSavePreset(void)
+void QPresetsWidgetBase::OnLoadPreset(const QString& PresetName)
+{
+	if (PresetName.isEmpty())
+		return;
+
+	// Index
+	const int Index = m_PresetName.findText(PresetName);
+
+	if (Index >= 0)
+	{
+		// Update combo box to reflect selection
+		m_PresetName.setCurrentIndex(Index);
+
+		emit LoadPreset(PresetName);
+	}
+	else
+	{
+		emit LoadPreset("Default");
+	}
+}
+
+void QPresetsWidgetBase::OnSavePreset(void)
 {
 	QInputDialogEx InputDialog;
 
@@ -104,7 +125,7 @@ void QTestWidget::OnSavePreset(void)
 	emit SavePreset(InputDialog.textValue());
 }
 
-void QTestWidget::OnRenamePreset(void)
+void QPresetsWidgetBase::OnRenamePreset(void)
 {
 	if (m_PresetName.currentText().isEmpty())
 		return;
@@ -125,22 +146,22 @@ void QTestWidget::OnRenamePreset(void)
 		this->RenamePreset(m_PresetName.currentIndex(), Name);
 }
 
-void QTestWidget::OnRemovePreset(void)
+void QPresetsWidgetBase::OnRemovePreset(void)
 {
 	this->RemovePreset();
 }
 
-void QTestWidget::OnSavePresets(void)
+void QPresetsWidgetBase::OnSavePresets(void)
 {
 	this->SavePresets(true);
 }
 
-void QTestWidget::OnLoadPresets(void)
+void QPresetsWidgetBase::OnLoadPresets(void)
 {
 	this->LoadPresets(true);
 }
 
-void QTestWidget::OnCurrentIndexChanged(int Index)
+void QPresetsWidgetBase::OnCurrentIndexChanged(int Index)
 {
 	m_LoadPreset.setEnabled(Index >= 0);
 	m_SavePreset.setEnabled(true);

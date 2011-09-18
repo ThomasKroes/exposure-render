@@ -27,8 +27,7 @@ public:
 	void			SetFocus(const QFocus& Focus);
 	void			ReadXML(QDomElement& Parent);
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
-
-	static QCamera Default(void);
+	static QCamera	Default(void);
 
 signals:
 	void Changed(void);

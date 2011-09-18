@@ -20,15 +20,17 @@ QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_NodePropertiesWidget, 2, 0);
 	m_MainLayout.addWidget(&m_PresetsWidget, 0, 0);
 
-	// Inform us when a new preset is loaded, when we need to save a preset and when the rendering begins and ends
-	connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
-	connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
+	QObject::connect(&gRenderStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
+	QObject::connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
 }
 
 void QAppearanceWidget::OnLoadPreset(const QString& Name)
 {
+	// Only load the preset when it exists
+	if (!m_PresetsWidget.HasPreset(Name))
+		return;
+
 	gTransferFunction = m_PresetsWidget.GetPreset(Name);
 
 	if (Scene())
@@ -51,20 +53,6 @@ void QAppearanceWidget::OnSavePreset(const QString& Name)
 
 	// Save the preset
 	m_PresetsWidget.SavePreset(Preset);
-}
-
-void QAppearanceWidget::OnRenderBegin(void)
-{
-	// Add a default transfer function and load it
-	m_PresetsWidget.InsertPreset(0, QTransferFunction::Default());
-	m_PresetsWidget.LoadPreset("Default");
-}
-
-void QAppearanceWidget::OnRenderEnd(void)
-{
-	// Add a default transfer function and load it
-	m_PresetsWidget.InsertPreset(0, QTransferFunction::Default());
-	m_PresetsWidget.LoadPreset("Default");
 }
 
 QAppearanceDockWidget::QAppearanceDockWidget(QWidget *parent) :

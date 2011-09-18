@@ -33,7 +33,6 @@ public:
 	void		SetColor(const QColor& Color);
 	float		GetIntensity(void) const;
 	void		SetIntensity(const float& Intensity);
-
 	void		ReadXML(QDomElement& Parent);
 	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
@@ -75,22 +74,21 @@ public:
 
 	QLighting& QLighting::operator=(const QLighting& Other);
 	
-	void			AddLight(QLight& Light);
-	void			RemoveLight(QLight* pLight);
-	void			RemoveLight(const int& Index);
-	void			CopyLight(QLight* pLight);
-	void			CopySelectedLight(void);
-	void			RenameLight(const int& Index, const QString& Name);
-	QBackground&	Background(void);
-	void			SetSelectedLight(QLight* pSelectedLight);
-	void			SetSelectedLight(const int& Index);
-	QLight*			GetSelectedLight(void);
-	void			SelectPreviousLight(void);
-	void			SelectNextLight(void);
-	void			ReadXML(QDomElement& Parent);
-	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
-
-	static QLighting Default(void);
+	void				AddLight(QLight& Light);
+	void				RemoveLight(QLight* pLight);
+	void				RemoveLight(const int& Index);
+	void				CopyLight(QLight* pLight);
+	void				CopySelectedLight(void);
+	void				RenameLight(const int& Index, const QString& Name);
+	QBackground&		Background(void);
+	void				SetSelectedLight(QLight* pSelectedLight);
+	void				SetSelectedLight(const int& Index);
+	QLight*				GetSelectedLight(void);
+	void				SelectPreviousLight(void);
+	void				SelectNextLight(void);
+	void				ReadXML(QDomElement& Parent);
+	QDomElement			WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	static QLighting	Default(void);
 
 public slots:
 	void OnLightPropertiesChanged(QLight* pLight);
