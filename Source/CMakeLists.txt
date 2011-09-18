@@ -243,6 +243,7 @@ SET(ExposureRenderMocHeaders
 	RenderThread.h
 	SettingsDockWidget.h
 	LoadSettingsDialog.h
+	StartupDialog.h
 	VtkWidget.h
 	Controls.h
 
@@ -470,6 +471,8 @@ SET(CudaSources
 	Core.cuh
 	ComputeEstimate.cuh
 	Transport.cuh
+	RayMarching.cuh
+	Woodcock.cuh
 	Core.cu
 )
 
@@ -491,8 +494,12 @@ SOURCE_GROUP("Logging" FILES ${LoggingSources})
 
 ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
 
+list(APPEND CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20")
+
 # Create executable
 CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources})
+
+
 
 TARGET_LINK_LIBRARIES(ExposureRender
   QVTK
@@ -501,15 +508,25 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkGraphics
   vtkIO
   vtkCommon
+
   vtkViews
 )
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt ${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt COPYONLY)
 
 if (MSVC)
    set_target_properties(ExposureRender PROPERTIES COMPILE_FLAGS "/YuStable.h")
    set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
 endif(MSVC)
 
+# Precompiled headers
 set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
+
+
+
+
+
+MESSAGE( STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 
 ### VTK dependencies ###
 FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")

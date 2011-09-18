@@ -23,7 +23,7 @@ public:
 	QColor			GetDiffuse(void) const;
 	void			SetDiffuse(const QColor& Diffuse);
 	QColor			GetSpecular(void) const;
-	void			SetSpecular(const QColor& Specular);
+	void			SetSpecular(const QColor& Specular); 
 	QColor			GetEmission(void) const;
 	void			SetEmission(const QColor& Emission);
 	float			GetRoughness(void) const;

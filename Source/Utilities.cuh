@@ -2,14 +2,18 @@
 
 #include "Scene.h"
 
+#include <cuda_runtime.h>
+#include <cutil.h>
+#include <cutil_math.h>
+
 DEV float Density(CScene* pScene, const Vec3f& P)
 {
-	return ((float)(SHRT_MAX) * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.LengthX(), P.y / pScene->m_BoundingBox.LengthY(), P.z /  pScene->m_BoundingBox.LengthZ()));
+	return tex3D(gTexDensity, P.x, P.y, P.z);
 }
 
 DEV float Extinction(CScene* pScene, const Vec3f& P)
 {
-	return tex3D(gTexExtinction, P.x / pScene->m_BoundingBox.LengthX(), P.y / pScene->m_BoundingBox.LengthY(), P.z /  pScene->m_BoundingBox.LengthZ());
+	return tex3D(gTexExtinction, P.x, P.y, P.z);
 }
 
 __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
@@ -29,7 +33,7 @@ __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pScene, const float& D)
 {
-	return pScene->m_DensityScale * pScene->m_TransferFunctions.m_Opacity.F(D);
+	return /*pScene->m_DensityScale * */pScene->m_TransferFunctions.m_Opacity.F(D);
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& D)
@@ -68,4 +72,25 @@ DEV bool NearestLight(CScene* pScene, CRay& R, CColorXyz& LightColor)
 	}
 	
 	return Hit;
+}
+
+DEV int intersectBox(CRay r, Vec3f boxmin, Vec3f boxmax, float *tnear, float *tfar)
+{
+  // compute intersection of ray with all six bbox planes
+  Vec3f invR = Vec3f(1.0f) / r.m_D;
+  Vec3f tbot = invR * (boxmin - r.m_O);
+  Vec3f ttop = invR * (boxmax - r.m_O);
+
+  // re-order intersections to find smallest and largest on each axis
+  Vec3f tmin(fminf(ttop.x, tbot.x), fminf(ttop.y, tbot.y), fminf(ttop.z, tbot.z));
+  Vec3f tmax(fmaxf(ttop.x, tbot.x), fmaxf(ttop.y, tbot.y), fmaxf(ttop.z, tbot.z));
+
+  // find the largest tmin and the smallest tmax
+  float largest_tmin = fmaxf(fmaxf(tmin.x, tmin.y), fmaxf(tmin.x, tmin.z));
+  float smallest_tmax = fminf(fminf(tmax.x, tmax.y), fminf(tmax.x, tmax.z));
+
+  *tnear = largest_tmin;
+  *tfar = smallest_tmax;
+
+  return smallest_tmax > largest_tmin;
 }

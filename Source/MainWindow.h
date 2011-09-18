@@ -28,6 +28,8 @@ public:
     CMainWindow(void);
 	virtual ~CMainWindow(void);
 
+	virtual void ShowStartupDialog(void); 
+
 private slots:
 	void Open(void);
 	void Open(QString FilePath);
@@ -38,6 +40,9 @@ private slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
 	
+public slots:
+	void OnLoadDemo(const int& DemoIndex);
+
 private:
     void								CreateActions(void);
     void								CreateMenus(void);

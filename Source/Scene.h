@@ -759,4 +759,5 @@ public:
 	float					m_SigmaMax;
 	float					m_DensityScale;
 	int						m_MacrocellSize;
+	Vec3i					extinctionSize;
 };

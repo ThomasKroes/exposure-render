@@ -82,7 +82,8 @@ QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
 	horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
 	horizontalHeader()->resizeSection(1, 25);
 	horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-	
+	horizontalHeader()->setVisible(false);
+
 	// Disable vertical header
 	verticalHeader()->setVisible(false);
 

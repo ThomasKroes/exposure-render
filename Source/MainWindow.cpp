@@ -6,6 +6,7 @@
 
 #include "VtkWidget.h"
 #include "Scene.h"
+#include "StartupDialog.h"
 
 // Main window singleton
 CMainWindow* gpMainWindow = NULL;
@@ -301,6 +302,8 @@ void CMainWindow::About()
 	QMessageBox::about(this, tr("About Exposure Render"),
 		tr("This application illustrates the concepts from the paper: <b>Raytraced lighting in direct volume rendering</b>\n"
 		"For more information visit: <b>graphics.tudelft.nl</b>"));
+
+	// Acknowledgments niet vergeten!
 }
 
 void CMainWindow::OnRenderBegin(void)
@@ -343,4 +346,16 @@ void CMainWindow::OnRenderEnd(void)
 	m_StatisticsDockWidget.setEnabled(false);
 	m_CameraDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setEnabled(false);
+}
+
+void CMainWindow::ShowStartupDialog(void)
+{
+	QStartupDialog StartupDialog;
+
+	StartupDialog.exec();
+}
+
+void CMainWindow::OnLoadDemo(const int& DemoIndex)
+{
+
 }

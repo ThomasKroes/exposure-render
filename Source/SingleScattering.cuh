@@ -84,22 +84,17 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 
 	CColorXyz Li = SPEC_BLACK;
 
-	if (EyeRay.m_MaxT == INF_MAX)
- 		Continue = false;
-	
-	float EyeT	= EyeRay.m_MinT;
-
 	Vec3f Pe, Normal;
 	
-	if (FreePathRM(EyeRay, RNG, Pe, pScene, 0))
+	if (SampleDistanceRM(EyeRay, RNG, Pe, pScene, 0))
 	{
 		RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, (Pe - EyeRay.m_O).Length());
 
-		if (NearestLight(pScene, RayCopy, Li))
-		{
-			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
-			return;
-		}
+// 		if (NearestLight(pScene, RayCopy, Li))
+// 		{
+// 			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
+// 			return;
+// 		}
 
 		// Fetch density
 		const float D = Density(pScene, Pe);
@@ -115,9 +110,10 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		Normal = NormalizedGradient(pScene, Pe);
 
 		// Estimate direct light at eye point
- 	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, Pe, Normal, RNG, 0.001f);
+	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, Pe, Normal, RNG, 0.001f);
 	}
 
+/*
 	RayCopy.m_O		= Pe;
 	RayCopy.m_D		= EyeRay.m_D;
 	RayCopy.m_MinT	= EyeT;
@@ -125,6 +121,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 
 	if (NearestLight(pScene, RayCopy, Li))
 		Li += EyeTr * Li;
+*/
 
 	// Contribute
 	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;
@@ -133,7 +130,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 // Traces the volume
 void SingleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	const dim3 KernelBlock(32, 8);
+	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	// Execute kernel

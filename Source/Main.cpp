@@ -20,14 +20,16 @@ int main(int ArgumentCount, char* pArgv[])
 // 
 // 	SplashScreen.showMessage("Setting up main window", TopRight, Qt::white);
 	
-//	Q_INIT_RESOURCE(Icons);
-
 	// Adjust style
 	Application.setStyle("plastique");
 //	Application.setStyleSheet("QTransferFunctionView:enabled { background-color: rgb(240, 240, 240) } QTransferFunctionView:disabled { background-color: rgb(0, 240, 240) }");
 	Application.setOrganizationName("TU Delft");
 	Application.setApplicationName("Exposure Render");
 
+	// Application settings
+	QSettings Settings;
+
+	// Main window
 	CMainWindow MainWindow;
 
 //	SplashScreen.showMessage("Establishing connections", TopRight, Qt::white);
@@ -35,6 +37,13 @@ int main(int ArgumentCount, char* pArgv[])
 	// Show the main window
 	gpMainWindow = &MainWindow;
     MainWindow.show();
+
+	// Override the application setting to enforce the display of the startup dialog
+	Settings.setValue("startup/dialog/show", QVariant(true));
+
+	// Show startup dialog
+	if (Settings.value("startup/dialog/show").toBool() == true)
+		MainWindow.ShowStartupDialog();
 
 //	SplashScreen.finish(&MainWindow);
 

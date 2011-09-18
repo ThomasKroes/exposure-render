@@ -81,7 +81,7 @@ public:
 
 private:
 	void CreateVolume(void);
-	void CreateExtinctionVolume(short* pDensityBuffer, const CResolution3D& Resolution);
+	void CreateExtinctionVolume(float* pDensityBuffer, cudaExtent Resolution);
 
 signals:
 	void RenderBegin(void);

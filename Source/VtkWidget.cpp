@@ -26,7 +26,7 @@ void KeyPressCallbackFunction(vtkObject* pCaller, long unsigned int EventId, voi
 // Key press callback
 void KeyReleaseCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* pCallData)
 {
-	/*
+	/* 
 	vtkRenderWindowInteractor* pRenderWindowInteractor = static_cast<vtkRenderWindowInteractor*>(pCaller);
 
 	char* pKeySymbol = pRenderWindowInteractor->GetKeySym();
@@ -103,7 +103,7 @@ void CVtkWidget::OnRenderBegin(void)
 	m_ImageActor->VisibilityOn();
 
 	// Add the image actor
-	m_SceneRenderer->AddActor(m_ImageActor);
+	m_SceneRenderer->AddActor(m_ImageActor); 
 
 	// Scale
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
