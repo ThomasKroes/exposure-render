@@ -59,8 +59,8 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 
 	QSignalMapper* pSignalMapper = new QSignalMapper(this);
 	pSignalMapper->setMapping(&m_Demo1, QString("Bonsai.mhd"));
-	pSignalMapper->setMapping(&m_Demo2, QString("manix.mhd"));
-	pSignalMapper->setMapping(&m_Demo3, QString("backpack.mhd"));
+	pSignalMapper->setMapping(&m_Demo2, QString("Manix.mhd"));
+	pSignalMapper->setMapping(&m_Demo3, QString("Backpack.mhd"));
 
 	connect(&m_Demo1, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
 	connect(&m_Demo2, SIGNAL(clicked()), pSignalMapper, SLOT (map()));

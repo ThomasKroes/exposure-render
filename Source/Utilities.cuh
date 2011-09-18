@@ -8,7 +8,7 @@
 
 DEV float Density(CScene* pScene, const Vec3f& P)
 {
-	return tex3D(gTexDensity, P.x, P.y, P.z);
+	return (float)((SHRT_MAX) * tex3D(gTexDensity, P.x, P.y, P.z));
 }
 
 DEV float Extinction(CScene* pScene, const Vec3f& P)
@@ -33,7 +33,7 @@ __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 
 DEV CColorRgbHdr GetOpacity(CScene* pScene, const float& D)
 {
-	return /*pScene->m_DensityScale * */pScene->m_TransferFunctions.m_Opacity.F(D);
+	return pScene->m_DensityScale * pScene->m_TransferFunctions.m_Opacity.F(D);
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& D)

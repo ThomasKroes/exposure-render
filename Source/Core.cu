@@ -1,8 +1,8 @@
 
 #include "Core.cuh"
 
-texture<float, 3, cudaReadModeElementType>	gTexDensity;
-texture<float, 3, cudaReadModeElementType>	gTexExtinction;
+texture<short, 3, cudaReadModeNormalizedFloat >	gTexDensity;
+texture<short, 3, cudaReadModeNormalizedFloat >	gTexExtinction;
 
 #include "Blur.cuh"
 #include "ComputeEstimate.cuh"
@@ -10,49 +10,31 @@ texture<float, 3, cudaReadModeElementType>	gTexExtinction;
 #include "SingleScattering.cuh"
 #include "MultipleScattering.cuh"
 
-void BindDensityVolume(float* densityBuffer, cudaExtent densityBufferSize)
+void BindDensityVolume(short* densityBuffer, cudaExtent densityBufferSize)
 {
-	/*cudaArray* gpDensity = NULL;
+	cudaArray* gpDensity = NULL;
 
 	// create 3D array
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
-	cudaMalloc3DArray(&gpDensity, &ChannelDesc, Size);
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
+	cudaMalloc3DArray(&gpDensity, &ChannelDesc, densityBufferSize);
 
 	// copy data to 3D array
 	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(pDensityBuffer, Size.width * sizeof(float), Size.width, Size.height);
+	copyParams.srcPtr				= make_cudaPitchedPtr(densityBuffer, densityBufferSize.width * sizeof(short), densityBufferSize.width, densityBufferSize.height);
 	copyParams.dstArray				= gpDensity;
-	copyParams.extent				= Size;
+	copyParams.extent				= densityBufferSize;
 	copyParams.kind					= cudaMemcpyHostToDevice;
 	cudaMemcpy3D(&copyParams);
 
 	// Set texture parameters
-	gTexDensity.normalized		= true;
-	gTexDensity.filterMode		= cudaFilterModeLinear;      
-	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
-	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
- 	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
+	gTexDensity.normalized			= true;
+	gTexDensity.filterMode			= cudaFilterModeLinear;      
+	gTexDensity.addressMode[0]		= cudaAddressModeClamp;  
+	gTexDensity.addressMode[1]		= cudaAddressModeClamp;
+ 	gTexDensity.addressMode[2]		= cudaAddressModeClamp;
 
 	// Bind array to 3D texture
 	cudaBindTextureToArray(gTexDensity, gpDensity, ChannelDesc);
-	*/
-
-	 cudaArray* densityArray;
-    cudaChannelFormatDesc densityBufferChannelDesc = cudaCreateChannelDesc<float>();
-    CUDA_SAFE_CALL(cudaMalloc3DArray(&densityArray, &densityBufferChannelDesc, densityBufferSize));
-    cudaMemcpy3DParms copyParams = {0};
-    copyParams.srcPtr = make_cudaPitchedPtr((void*)densityBuffer, densityBufferSize.width * sizeof(float), densityBufferSize.width, densityBufferSize.height);
-    copyParams.dstArray = densityArray;
-    copyParams.extent = densityBufferSize;
-    copyParams.kind = cudaMemcpyHostToDevice;
-    CUDA_SAFE_CALL(cudaMemcpy3D(&copyParams));
-
-    gTexDensity.normalized = true;
-    gTexDensity.filterMode = cudaFilterModeLinear;
-    gTexDensity.addressMode[0] = cudaAddressModeClamp;
-    gTexDensity.addressMode[1] = cudaAddressModeClamp;
-
-    cudaBindTextureToArray( gTexDensity, densityArray, densityBufferChannelDesc);
 }
 
 void BindExtinctionVolume(float* extinction, cudaExtent extinctionSize)

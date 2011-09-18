@@ -115,6 +115,12 @@ public:
 	{
 		QString PresetName = m_PresetName.currentText();
 
+		if (PresetName == "Default")
+		{
+			Log("Can't remove 'default' preset");
+			return;
+		}
+
 		// Get selected row index
 		const int CurrentRow = m_PresetName.currentIndex();
 

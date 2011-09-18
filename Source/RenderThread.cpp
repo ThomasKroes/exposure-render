@@ -556,7 +556,7 @@ bool QRenderThread::Load(QString& FileName)
 
 //	Log("Casting volume data type to short");
 
-	ImageCast->SetOutputScalarTypeToFloat();
+	ImageCast->SetOutputScalarTypeToShort();
 	ImageCast->SetInput(MetaImageReader->GetOutput());
 	
 	ImageCast->Update();
@@ -679,15 +679,15 @@ bool QRenderThread::Load(QString& FileName)
 void QRenderThread::CreateVolume(void)
 {
 	Log("Creating density volume");
-	/*
+	
 	cudaExtent DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
 
 	// Allocate density buffer
-	float* pDensityBuffer = (float*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(float));
+	short* pDensityBuffer = (short*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(short));
 
 	// Copy density data from vtk image to density buffer
 	m_pImageDataVolume->Update();
-	memcpy(pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(float));
+	memcpy(pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(short));
 
 	m_Scene.m_SigmaMax = 0.0f;
 
@@ -698,7 +698,7 @@ void QRenderThread::CreateVolume(void)
 
 	for (int i = 0; i < m_Scene.m_Resolution.GetNoElements(); ++i)
 	{
-		pDensityBuffer[i] = pDensityBuffer[i] > 10.0f ? pDensityBuffer[i] / m_Scene.m_SigmaMax : 0;
+//		pDensityBuffer[i] = pDensityBuffer[i] > 10.0f ? pDensityBuffer[i] / m_Scene.m_SigmaMax : 0;
 //		pDensityBuffer[i] /= m_Scene.m_SigmaMax;
 	}
 
@@ -706,57 +706,9 @@ void QRenderThread::CreateVolume(void)
 	BindDensityVolume(pDensityBuffer, DensityBufferSize);
 
 	// Create the extinction volume
- 	CreateExtinctionVolume(pDensityBuffer, DensityBufferSize);
+// 	CreateExtinctionVolume(pDensityBuffer, DensityBufferSize);
 
 	free(pDensityBuffer);
-	*/
-
-	float * densityBuffer = NULL;
-
-	FILE* dataFile = fopen("C:\\ExposureRender\\Build\\RelWithDebInfo\\head128f.vox", "rb");
-	float SigmaMax = 0.0f;
-
-	char* magicNum = new char[2];
-	size_t size = fread(magicNum, sizeof(char), 2, dataFile);
-	if('V' == magicNum[0] && 'F' == magicNum[1]){
-		int volumeSize[3];
-		size = fread(volumeSize, sizeof(int), 3, dataFile);
-		cudaExtent densityBufferSize = make_cudaExtent(volumeSize[0], volumeSize[1], volumeSize[2]);
-		densityBuffer = new float[volumeSize[0] * volumeSize[1] * volumeSize[2]];
-		size = fread(densityBuffer, sizeof(float), volumeSize[0] * volumeSize[1] * volumeSize[2], dataFile);
-		float cutValue = 128.0f;
-
-		for(int i=0; i<volumeSize[0]*volumeSize[1]*volumeSize[2]; ++i){
-			SigmaMax = SigmaMax > densityBuffer[i] ? SigmaMax : densityBuffer[i];
-		}
-
-		for(int i=0; i<volumeSize[0]*volumeSize[1]*volumeSize[2]; ++i){
-			densityBuffer[i] = densityBuffer[i] > cutValue ? densityBuffer[i] / SigmaMax : 0;
-//			densityBuffer[i] = densityBuffer[i] / SigmaMax;
-		}
-
-// 		cudaArray* densityArray;
-// 		cudaChannelFormatDesc densityBufferChannelDesc = cudaCreateChannelDesc<float>();
-// 		CUDA_SAFE_CALL(cudaMalloc3DArray(&densityArray, &densityBufferChannelDesc, densityBufferSize));
-// 		cudaMemcpy3DParms copyParams = {0};
-// 		copyParams.srcPtr = make_cudaPitchedPtr((void*)densityBuffer, densityBufferSize.width * sizeof(float), densityBufferSize.width, densityBufferSize.height);
-// 		copyParams.dstArray = densityArray;
-// 		copyParams.extent = densityBufferSize;
-// 		copyParams.kind = cudaMemcpyHostToDevice;
-// 		CUDA_SAFE_CALL(cudaMemcpy3D(&copyParams));
-// 
-// 		densityTex.normalized = true;
-// 		densityTex.filterMode = cudaFilterModeLinear;
-// 		densityTex.addressMode[0] = cudaAddressModeClamp;
-// 		densityTex.addressMode[1] = cudaAddressModeClamp;
-
-//		CUDA_SAFE_CALL(cudaBindTextureToArray( densityTex, densityArray, densityBufferChannelDesc));
-
-		// Copy to graphics device
-		BindDensityVolume(densityBuffer, densityBufferSize);
-
-		CreateExtinctionVolume(densityBuffer, densityBufferSize);
-	}
 }
 
 void QRenderThread::CreateExtinctionVolume(float* pDensityBuffer, cudaExtent densityBufferSize)
