@@ -13,6 +13,10 @@ QCamera::QCamera(QObject* pParent /*= NULL*/) :
 	m_Projection(),
 	m_Focus()
 {
+	QObject::connect(&m_Film, SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged()));
+	QObject::connect(&m_Aperture, SIGNAL(Changed(const QAperture&)), this, SLOT(OnApertureChanged()));
+	QObject::connect(&m_Projection, SIGNAL(Changed(const QProjection&)), this, SLOT(OnProjectionChanged()));
+	QObject::connect(&m_Focus, SIGNAL(Changed(const QFocus&)), this, SLOT(OnFocusChanged()));
 }
 
 QCamera::QCamera(const QCamera& Other)
@@ -111,4 +115,24 @@ QCamera QCamera::Default(void)
 	DefaultCamera.SetName("Default");
 
 	return DefaultCamera;
+}
+
+void QCamera::OnFilmChanged(void)
+{
+	emit Changed();
+}
+
+void QCamera::OnApertureChanged(void)
+{
+	emit Changed();
+}
+
+void QCamera::OnProjectionChanged(void)
+{
+	emit Changed();
+}
+
+void QCamera::OnFocusChanged(void)
+{
+	emit Changed();
 }

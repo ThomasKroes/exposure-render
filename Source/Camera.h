@@ -29,6 +29,12 @@ public:
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	static QCamera	Default(void);
 
+public slots:
+	void OnFilmChanged(void);
+	void OnApertureChanged(void);
+	void OnProjectionChanged(void);
+	void OnFocusChanged(void);
+
 signals:
 	void Changed(void);
 

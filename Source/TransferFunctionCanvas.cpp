@@ -138,6 +138,12 @@ void QTransferFunctionCanvas::UpdateGrid(void)
 
 void QTransferFunctionCanvas::UpdateHistogram(void)
 {
+	QPainter Painter(&m_PixMap);
+
+	Painter.drawText(0, 0, 100, 100, 0, "sdasdsad");
+
+	Painter.end();
+
 	return;
 
 	m_Histogram.setVisible(gHistogram.GetEnabled());

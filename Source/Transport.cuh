@@ -7,65 +7,8 @@
 #include "RayMarching.cuh"
 #include "Woodcock.cuh"
 
-DEV inline CColorXyz Transmittance(CScene* pScene, const Vec3f& P, const Vec3f& D, const float& MaxT, const float& StepSize, CCudaRNG& Rnd)
-{
-	// Near and far intersections with volume axis aligned bounding box
-	float NearT = 0.0f, FarT = 0.0f;
-
-	// Intersect with volume axis aligned bounding box
-	if (!pScene->m_BoundingBox.Intersect(CRay(P, D, 0.0f, FLT_MAX), &NearT, &FarT))
-		return SPEC_BLACK;
-
-	// Clamp to near plane if necessary
-	if (NearT < 0.0f) 
-		NearT = 0.0f;     
-
-	CColorXyz Lt = SPEC_WHITE;
-
-	NearT += Rnd.Get1() * StepSize;
-
-	// Accumulate
-	while (NearT < MaxT)
-	{
-		// Determine sample point
-		const Vec3f SP = P + D * (NearT);
-
-		// Fetch density
-		const float D = Density(pScene, SP);
-		
-		// We ignore air density
-		if (D == 0)
-		{
-			// Increase extent
-			NearT += StepSize;
-			continue;
-		}
-
-		// Get shadow opacity
-		const float	Opacity = GetOpacity(pScene, D).r;
-
-		if (Opacity > 0.0f)
-		{
-			// Compute eye transmittance
-			Lt *= expf(-(Opacity * StepSize));
-
-			// Exit if eye transmittance is very small
-			if (Lt.y() < 0.05f)
-				break;
-		}
-
-		// Increase extent
-		NearT += StepSize;
-	}
-
-	return Lt;
-}
-
 DEV CColorXyz EstimateDirectLight(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const float& StepSize)
 {
-// 	if (Dot(Wo, N) < 0.0f)
-// 		return SPEC_BLACK;
-
 	// Accumulated radiance
 	CColorXyz Ld = SPEC_BLACK;
 	

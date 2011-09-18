@@ -70,6 +70,8 @@ protected:
 	int						m_NodeZ;
 	int						m_CrossHairZ;
 
+	QPixmap					m_PixMap;
+
 	friend class QTransferFunctionView;
 	friend class QNodeItem;
 };

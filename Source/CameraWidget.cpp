@@ -28,6 +28,7 @@ QCameraWidget::QCameraWidget(QWidget* pParent) :
 	QObject::connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&gRenderStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
+	QObject::connect(&gCamera, SIGNAL(Changed()), this, SLOT(Update()));
 }
 
 void QCameraWidget::OnLoadPreset(const QString& Name)
@@ -50,6 +51,10 @@ void QCameraWidget::OnSavePreset(const QString& Name)
 
 void QCameraWidget::Update(void)
 {
-	// Flag the film resolution as dirty, this will restart the rendering
-	//	Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
+	if (!Scene())
+		return;
+
+	Scene()->m_Camera.m_Aperture.m_Size	= gCamera.GetAperture().GetSize();
+
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 }

@@ -351,6 +351,8 @@ public:
 			else
 				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorBottom).ToXYZ();
 		}
+
+		return SPEC_BLACK;
 	}
 };
 
