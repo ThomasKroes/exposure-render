@@ -63,9 +63,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	// Init random number generator
 	CCudaRNG RNG(&pSeeds[SID * 2], &pSeeds[SID * 2 + 1]);
 
-	// Transmittance
-	CColorXyz 	EyeTr	= SPEC_WHITE;		// Eye transmittance
-	CColorXyz	L		= SPEC_BLACK;		// Measured volume radiance
+	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	CRay EyeRay, RayCopy;
 
@@ -75,15 +73,13 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	EyeRay.m_MinT = 0.0f; 
 	EyeRay.m_MaxT = FLT_MAX;
 
-	CColorXyz Li = SPEC_BLACK;
+	CColorXyz;
 
 	Vec3f Pe, Normal;
 	
 	if (SampleDistanceRM(EyeRay, RNG, Pe, pScene, 0))
 	{
-		RayCopy = CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, (Pe - EyeRay.m_O).Length());
-
-		if (NearestLight(pScene, RayCopy, Li))
+		if (NearestLight(pScene, CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, (Pe - EyeRay.m_O).Length()), Li))
 		{
 			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
 			return;
@@ -103,21 +99,16 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		Normal = NormalizedGradient(pScene, Pe);
 
 		// Estimate direct light at eye point
-	 	L += EyeTr * UniformSampleOneLight(pScene, Wo, Pe, Normal, RNG, 0.001f);
+	 	Lv += Ke + UniformSampleOneLight(pScene, Wo, Pe, Normal, RNG, 0.001f);
 	}
 	else
 	{
-		RayCopy.m_O		= EyeRay.m_O;
-		RayCopy.m_D		= EyeRay.m_D;
-		RayCopy.m_MinT	= (EyeRay.m_O - Pe).Length();
-		RayCopy.m_MaxT	= 100000000000.0f;
-
-	if (NearestLight(pScene, RayCopy, Li))
-		L += EyeTr * Li;
+		if (NearestLight(pScene, CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, INF_MAX), Li))
+			Lv += Li;
 	}
 
 	// Contribute
-	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = L;
+	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Lv;
 }
 
 // Traces the volume
