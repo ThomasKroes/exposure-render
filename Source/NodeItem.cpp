@@ -11,11 +11,11 @@
 float	QNodeItem::m_Radius			= 4.0f;
 QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(0, 100, 150));
 QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(0, 100, 150));
-QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 100));
+QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 150));
 
-QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.3);
-QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.8);
-QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 100)), 1.3);
+QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.5);
+QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 150, 50)), 1.5);
+QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 100)), 1.5);
 
 QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode) :
 	QGraphicsEllipseItem(pTransferFunctionCanvas),
@@ -80,6 +80,8 @@ void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
 		{
 			setBrush(m_BrushHighlight);
 			setPen(m_PenHighlight);
+
+//			pPainter->drawEllipse(rect().center(), 10, 10);
 		}
 		else
 		{

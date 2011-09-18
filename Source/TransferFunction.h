@@ -24,8 +24,10 @@ public:
 	void						SetSelectedNode(QNode* pSelectedNode);
 	void						SetSelectedNode(const int& Index);
 	QNode*						GetSelectedNode(void);
+	void						SelectFirstNode(void);
 	void						SelectPreviousNode(void);
 	void						SelectNextNode(void);
+	void						SelectLastNode(void);
 	int							GetNodeIndex(QNode* pNode);
 	float						GetRangeMin(void);
 	void						SetRangeMin(const float& RangeMin);

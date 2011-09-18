@@ -6,8 +6,8 @@
 #include "TransferFunction.h"
 #include "TransferFunctionCanvas.h"
 
-QPen QEdgeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 200, 150)), 1.3);
-QPen QEdgeItem::m_PenHighlight	= QEdgeItem::m_PenNormal;
+QPen QEdgeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.3);
+QPen QEdgeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.3);
 QPen QEdgeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 150)), 1.3);
 
 QEdgeItem::QEdgeItem(QTransferFunctionCanvas* pTransferFunctionCanvas) :

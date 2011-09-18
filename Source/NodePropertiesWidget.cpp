@@ -12,8 +12,10 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_SelectionLabel(),
 	m_SelectionLayout(),
 	m_NodeSelection(),
+	m_FirstNode(),
 	m_PreviousNode(),
 	m_NextNode(),
+	m_LastNode(),
 	m_DeleteNode(),
 	m_IntensityLabel(),
 	m_IntensitySlider(),
@@ -57,34 +59,56 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 
 	QObject::connect(&m_NodeSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(OnNodeSelectionChanged(int)));
 
+	// First node
+	m_FirstNode.setIcon(GetIcon("control-stop-180"));
+	m_FirstNode.setStatusTip("Select first node");
+	m_FirstNode.setToolTip("Select first node");
+	m_FirstNode.setFixedWidth(22);
+	m_FirstNode.setFixedHeight(22);
+	m_FirstNode.updateGeometry();
+	m_SelectionLayout.addWidget(&m_FirstNode, 0, 2);
+
+	QObject::connect(&m_FirstNode, SIGNAL(pressed()), this, SLOT(OnFirstNode()));
+
 	// Previous node
-	m_PreviousNode.setIcon(GetIcon("arrow-180"));
-	m_PreviousNode.setStatusTip("Select previous node");
+	m_PreviousNode.setIcon(GetIcon("control-180"));
+	m_PreviousNode.setStatusTip("Select previous node"); 
 	m_PreviousNode.setToolTip("Select previous node");
 	m_PreviousNode.setFixedWidth(22);
 	m_PreviousNode.setFixedHeight(22);
 	m_PreviousNode.updateGeometry();
-	m_SelectionLayout.addWidget(&m_PreviousNode, 0, 1);
+	m_SelectionLayout.addWidget(&m_PreviousNode, 0, 3);
 
 	QObject::connect(&m_PreviousNode, SIGNAL(pressed()), this, SLOT(OnPreviousNode()));
 
 	// Next node
-	m_NextNode.setIcon(GetIcon("arrow"));
+	m_NextNode.setIcon(GetIcon("control"));
 	m_NextNode.setStatusTip("Select next node");
 	m_NextNode.setToolTip("Select next node");
 	m_NextNode.setFixedWidth(20);
 	m_NextNode.setFixedHeight(20);
-	m_SelectionLayout.addWidget(&m_NextNode, 0, 2);
+	m_SelectionLayout.addWidget(&m_NextNode, 0, 4);
 	
 	QObject::connect(&m_NextNode, SIGNAL(pressed()), this, SLOT(OnNextNode()));
 
+	// Last node
+	m_LastNode.setIcon(GetIcon("control-stop"));
+	m_LastNode.setStatusTip("Select Last node");
+	m_LastNode.setToolTip("Select Last node");
+	m_LastNode.setFixedWidth(22);
+	m_LastNode.setFixedHeight(22);
+	m_LastNode.updateGeometry();
+	m_SelectionLayout.addWidget(&m_LastNode, 0, 5);
+
+	QObject::connect(&m_LastNode, SIGNAL(pressed()), this, SLOT(OnLastNode()));
+
 	// Delete node
-	m_DeleteNode.setIcon(GetIcon("bin"));
+	m_DeleteNode.setIcon(GetIcon("cross"));
 	m_DeleteNode.setStatusTip("Delete selected node");
 	m_DeleteNode.setToolTip("Delete selected node");
 	m_DeleteNode.setFixedWidth(20);
 	m_DeleteNode.setFixedHeight(20);
-	m_SelectionLayout.addWidget(&m_DeleteNode, 0, 3);
+	m_SelectionLayout.addWidget(&m_DeleteNode, 0, 6);
 	
 	QObject::connect(&m_DeleteNode, SIGNAL(pressed()), this, SLOT(OnDeleteNode()));
 
@@ -212,6 +236,11 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(const int& Index)
 	SetupSelectionUI();
 }
 
+void QNodePropertiesWidget::OnFirstNode(void)
+{
+	gTransferFunction.SelectFirstNode();
+}
+
 void QNodePropertiesWidget::OnPreviousNode(void)
 {
 	gTransferFunction.SelectPreviousNode();
@@ -220,6 +249,11 @@ void QNodePropertiesWidget::OnPreviousNode(void)
 void QNodePropertiesWidget::OnNextNode(void)
 {
 	gTransferFunction.SelectNextNode();
+}
+
+void QNodePropertiesWidget::OnLastNode(void)
+{
+	gTransferFunction.SelectLastNode();
 }
 
 void QNodePropertiesWidget::OnDeleteNode(void)

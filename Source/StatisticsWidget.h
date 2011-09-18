@@ -2,7 +2,7 @@
 
 #include <QtGui>
 
-class QStatisticsWidget : public QWidget
+class QStatisticsWidget : public QTreeWidget
 {
     Q_OBJECT
 
@@ -30,7 +30,4 @@ public slots:
 	
 private:
 	QGridLayout		m_MainLayout;
-	QGroupBox		m_Group;
-	QGridLayout		m_GroupLayout;
-	QTreeWidget		m_Tree;
 };

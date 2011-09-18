@@ -94,6 +94,14 @@ QNode* QTransferFunction::GetSelectedNode(void)
 	return m_pSelectedNode;
 }
 
+void QTransferFunction::SelectFirstNode(void)
+{
+	if (m_Nodes.size() == 0)
+		return;
+
+	SetSelectedNode(&m_Nodes[0]);
+}
+
 void QTransferFunction::SelectPreviousNode(void)
 {
 	if (!m_pSelectedNode)
@@ -126,6 +134,14 @@ void QTransferFunction::SelectNextNode(void)
 
 	// Set selected node
 	SetSelectedNode(&m_Nodes[NewIndex]);
+}
+
+void QTransferFunction::SelectLastNode(void)
+{
+	if (m_Nodes.size() == 0)
+		return;
+
+	SetSelectedNode(&m_Nodes[m_Nodes.size() - 1]);
 }
 
 int	QTransferFunction::GetNodeIndex(QNode* pNode)
@@ -170,6 +186,8 @@ void QTransferFunction::AddNode(const QNode& Node)
 
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
+
+	Log("Inserted node", "layer-select-point");
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)
@@ -200,6 +218,8 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
+
+	Log("Removed node", "layer-select-point");
 }
 
 void QTransferFunction::NormalizeIntensity(void)
@@ -342,10 +362,10 @@ QTransferFunction QTransferFunction::Default(void)
 	QTransferFunction DefaultTransferFunction;
 
 	DefaultTransferFunction.SetName("Default");
-	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::white, Qt::white, Qt::black, 10.0f);
-	DefaultTransferFunction.AddNode(0.3f, 0.0f, Qt::white, Qt::white, Qt::black, 10.0f);
-	DefaultTransferFunction.AddNode(0.7f, 1.0f, Qt::white, Qt::white, Qt::black, 10.0f);
-	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::white, Qt::white, Qt::black, 10.0f);
+	DefaultTransferFunction.AddNode(0.0f, 0.0f, Qt::gray, Qt::darkGray, Qt::black, 100.0f);
+	DefaultTransferFunction.AddNode(0.3f, 0.0f, Qt::gray, Qt::darkGray, Qt::black, 100.0f);
+	DefaultTransferFunction.AddNode(0.7f, 1.0f, Qt::gray, Qt::darkGray, Qt::black, 100.0f);
+	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::gray, Qt::darkGray, Qt::black, 100.0f);
 
 	return DefaultTransferFunction;
 }

@@ -760,13 +760,13 @@ public:
 // 		m_LerpThreshold		= 0.79f;
 
 		m_Enabled			= true;
-		m_Noise				= 1.0f / (0.6f * 0.6f);
-		m_LerpC				= 0.6f;
-		m_WindowRadius		= 2.0f;
+		m_Noise				= 1.0f / (0.5f * 0.5f);
+		m_LerpC				= 0.8f;
+		m_WindowRadius		= 2.9f;
 		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
 		m_InvWindowArea		= 1.0f / m_WindowArea;
-		m_WeightThreshold	= 0.02f;
-		m_LerpThreshold		= 0.79f;
+		m_WeightThreshold	= 0.04f;
+		m_LerpThreshold		= 0.3f;
 	}
 
 	HO ~CDenoiseParams(void)

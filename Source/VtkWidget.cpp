@@ -110,7 +110,7 @@ void CVtkWidget::OnRenderBegin(void)
 	/**/
 
 	// Start the timer
-	m_RenderLoopTimer.start(30);
+	m_RenderLoopTimer.start(10);
 }
 
 void CVtkWidget::OnRenderEnd(void)

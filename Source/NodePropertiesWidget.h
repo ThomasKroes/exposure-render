@@ -17,8 +17,10 @@ public:
 private slots:
 	void OnNodeSelectionChanged(QNode* pNode);
 	void OnNodeSelectionChanged(const int& Index);
+	void OnFirstNode(void);
 	void OnPreviousNode(void);
 	void OnNextNode(void);
+	void OnLastNode(void);
 	void OnDeleteNode(void);
 	void OnIntensityChanged(const double& Position);
 	void OnOpacityChanged(const double& Opacity);
@@ -41,8 +43,10 @@ private:
 	QLabel					m_SelectionLabel;
 	QGridLayout				m_SelectionLayout;
 	QComboBox				m_NodeSelection;
+	QPushButton				m_FirstNode;
 	QPushButton				m_PreviousNode;
 	QPushButton				m_NextNode;
+	QPushButton				m_LastNode;
 	QPushButton				m_DeleteNode;
 	QLabel					m_IntensityLabel;
 	QDoubleSlider			m_IntensitySlider;

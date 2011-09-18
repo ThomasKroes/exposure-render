@@ -179,7 +179,7 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pDevEstFrameXyz		= Other.m_pDevEstFrameXyz;
 	m_pDevEstFrameBlurXyz	= Other.m_pDevEstFrameBlurXyz;
 	m_pDevEstRgbLdr			= Other.m_pDevEstRgbLdr;
-	m_pDevRgbLdrDisp			= Other.m_pDevRgbLdrDisp;
+	m_pDevRgbLdrDisp		= Other.m_pDevRgbLdrDisp;
 	m_pImageCanvas			= Other.m_pImageCanvas;
 	m_Abort					= Other.m_Abort;
 	m_pSeeds				= m_pSeeds;
@@ -202,7 +202,7 @@ bool QRenderThread::InitializeCuda(void)
 
 	emit gRenderStatus.StatisticChanged("Graphics Card", "No. CUDA capable devices", QString::number(NoDevices));
 
-	Log("Found " + QString::number(NoDevices) + " CUDA enabled device(s)");
+	Log("Found " + QString::number(NoDevices) + " CUDA enabled device(s)", "graphic-card");
 
 	int DriverVersion = 0, RuntimeVersion = 0; 
 
@@ -215,8 +215,8 @@ bool QRenderThread::InitializeCuda(void)
 	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Driver Version", DriverVersionString);
 	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Runtime Version", RuntimeVersionString);
 
-	Log("Driver version " + DriverVersionString);
-	Log("Runtime version " + RuntimeVersionString);
+	Log("Driver version " + DriverVersionString, "graphic-card");
+	Log("Runtime version " + RuntimeVersionString, "graphic-card");
 
 	for (int Device = 0; Device < NoDevices; Device++)
 	{
@@ -412,7 +412,7 @@ void QRenderThread::run()
 			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
-			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
+//			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
 
 			// Reset no. iterations
 			m_N = 0.0f;
@@ -668,10 +668,10 @@ bool QRenderThread::Load(QString& FileName)
 	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.GetNoElements()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");
 
-	Log("Bounding box: " + FormatVector(m_Scene.m_BoundingBox.m_MinP, 2) + " - " + FormatVector(m_Scene.m_BoundingBox.m_MaxP));
-	Log("Spacing: " + FormatSize(m_Scene.m_Spacing, 2));
-	Log("Resolution after re-sampling: " + FormatSize(m_Scene.m_Resolution.GetResXYZ()) + " mm");
-	Log("Density range: [" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]");
+	Log("Bounding box: " + FormatVector(m_Scene.m_BoundingBox.m_MinP, 2) + " - " + FormatVector(m_Scene.m_BoundingBox.m_MaxP), "grid");
+	Log("Spacing: " + FormatSize(m_Scene.m_Spacing, 2), "grid");
+	Log("Resolution after re-sampling: " + FormatSize(m_Scene.m_Resolution.GetResXYZ()) + " mm", "grid");
+	Log("Density range: [" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "grid");
 
 	// Print scene data
 //	m_Scene.PrintSelf();
@@ -681,7 +681,7 @@ bool QRenderThread::Load(QString& FileName)
 
 void QRenderThread::CreateVolume(void)
 {
-	Log("Creating density volume");
+	Log("Creating density volume", "grid");
 	
 	cudaExtent DensityBufferSize = make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]);
 

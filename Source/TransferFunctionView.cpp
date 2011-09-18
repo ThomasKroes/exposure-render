@@ -78,9 +78,6 @@ void QTransferFunctionView::OnRenderBegin(void)
 
 void QTransferFunctionView::OnRenderEnd(void)
 {
-	if (!Scene())
-		return;
-
 	m_TransferFunctionCanvas.setEnabled(false);
 	m_TransferFunctionGradient.setEnabled(false);
 }

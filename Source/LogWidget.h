@@ -37,6 +37,7 @@ protected:
 
 public slots:
 	void OnLog(const QString& Message, const int& Type);
+	void OnLog(const QString& Message, const QString& Icon);
 	void OnLogProgress(const QString& Event, const float& Progress);
 	void OnClear(void);
 	void OnClearAll(void);

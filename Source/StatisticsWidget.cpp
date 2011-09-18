@@ -8,10 +8,8 @@
 #include "RenderThread.h"
 
 QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
-	QWidget(pParent),
-	m_MainLayout(),
-	m_Group(),
-	m_Tree()
+	QTreeWidget(pParent),
+	m_MainLayout()
 {
 	// Set the size policy, making sure the widget fits nicely in the layout
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -20,37 +18,25 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	setToolTip("Statistics");
 	setStatusTip("Statistics");
 
-	// Set the main layout
-	setLayout(&m_MainLayout);
-
-	// Add the group
-	m_MainLayout.addWidget(&m_Group);
-
-	// Set the layout
-	m_Group.setLayout(&m_GroupLayout);
-
-	// Add the tree widget
-	m_GroupLayout.addWidget(&m_Tree);
-
 	// Configure tree
-	m_Tree.setColumnCount(3);
+	setColumnCount(3);
 
 	QStringList ColumnNames;
 
 	ColumnNames << "Property" << "Value" << "Unit";
 
-	m_Tree.setHeaderLabels(ColumnNames);
+	setHeaderLabels(ColumnNames);
 
 	// Configure headers
-//	m_Tree.header()->setResizeMode(0, QHeaderView::ResizeToContents);
-//	m_Tree.header()->setResizeMode(1, QHeaderView::ResizeToContents);
-//	m_Tree.header()->setResizeMode(2, QHeaderView::ResizeToContents);
-	m_Tree.header()->resizeSection(0, 260);
-	m_Tree.header()->resizeSection(1, 150);
-	m_Tree.header()->resizeSection(2, 100);
+//	header()->setResizeMode(0, QHeaderView::ResizeToContents);
+//	header()->setResizeMode(1, QHeaderView::ResizeToContents);
+//	header()->setResizeMode(2, QHeaderView::ResizeToContents);
+	header()->resizeSection(0, 260);
+	header()->resizeSection(1, 150);
+	header()->resizeSection(2, 100);
+	header()->setWindowIcon(GetIcon("table-export"));
+	header()->setVisible(false);
 
-	m_Tree.header()->setWindowIcon(GetIcon("table-export"));
-	
 	PopulateTree();
 	
 	// Notify us when rendering begins and ends, and before/after each rendered frame
@@ -88,7 +74,7 @@ QTreeWidgetItem* QStatisticsWidget::AddItem(QTreeWidgetItem* pParent, const QStr
 	pItem->setIcon(0, GetIcon(Icon));
 
 	if (!pParent)
-		m_Tree.addTopLevelItem(pItem);
+		addTopLevelItem(pItem);
 
 	return pItem;
 }
@@ -161,7 +147,7 @@ void QStatisticsWidget::OnStatisticChanged(const QString& Group, const QString& 
 
 void QStatisticsWidget::ExpandAll(const bool& Expand)
 {
-	QList<QTreeWidgetItem*> Items = m_Tree.findItems("*", Qt::MatchRecursive | Qt::MatchWildcard, 0);
+	QList<QTreeWidgetItem*> Items = findItems("*", Qt::MatchRecursive | Qt::MatchWildcard, 0);
 
 	foreach (QTreeWidgetItem* pItem, Items)
 		pItem->setExpanded(Expand);
@@ -169,7 +155,7 @@ void QStatisticsWidget::ExpandAll(const bool& Expand)
 
 QTreeWidgetItem* QStatisticsWidget::FindItem(const QString& Name)
 {
-	QList<QTreeWidgetItem*> Items = m_Tree.findItems(Name, Qt::MatchRecursive, 0);
+	QList<QTreeWidgetItem*> Items = findItems(Name, Qt::MatchRecursive, 0);
 
 	if (Items.size() <= 0)
 		return NULL;

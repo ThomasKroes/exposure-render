@@ -3,12 +3,13 @@
 #include "Stable.h"
 
 #include "LogWidget.h"
+#include "RenderThread.h"
 
 QTimeTableWidgetItem::QTimeTableWidgetItem(void) :
 	QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss"))
 {
 	setFont(QFont("Arial", 8));
-	setTextColor(QColor(60, 60, 60));
+//	setTextColor(QColor(60, 60, 60));
 
 	setToolTip(text());
 	setStatusTip("Message recorded at " + text());
@@ -46,7 +47,7 @@ QTableItemMessage::QTableItemMessage(const QString& Message, const QLogger::Mess
 		}
 	}
 	
-	setTextColor(TextColor);
+//	setTextColor(TextColor);
 
 	setToolTip(ToolTipPrefix + Message);
 	setStatusTip(ToolTipPrefix + Message);
@@ -63,7 +64,7 @@ QTableItemProgress::QTableItemProgress(const QString& Event, const float& Progre
 
 	setText(ProgressString);
 	setFont(QFont("Arial", 7));
-	setTextColor(Qt::blue);
+//	setTextColor(Qt::blue);
 }
 
 QLogWidget::QLogWidget(QWidget* pParent /*= NULL*/) :
@@ -104,6 +105,7 @@ void QLogWidget::SetLogger(QLogger* pLogger)
 	else
 	{
 		QObject::connect(m_pLogger, SIGNAL(Log(const QString&, const int&)), this, SLOT(OnLog(const QString&, const int&)));
+		QObject::connect(m_pLogger, SIGNAL(Log(const QString&, const QString&)), this, SLOT(OnLog(const QString&, const QString&)));
 		QObject::connect(m_pLogger, SIGNAL(LogProgress(const QString&, const float&)), this, SLOT(OnLogProgress(const QString&, const float&)));
 	}
 }
@@ -112,26 +114,38 @@ void QLogWidget::OnLog(const QString& Message, const int& Type)
 {
 	insertRow(0);
 
-	QIcon Icon;
+	QIcon ItemIcon;
 
 	switch (Type)
 	{
 		case (int)QLogger::Normal:
 		{
-			Icon = GetIcon("information");
+			ItemIcon = GetIcon("information");
 			break;
 		}
 
 		case (int)QLogger::Critical:
 		{
-			Icon = GetIcon("exclamation-red");
+			ItemIcon = GetIcon("exclamation-red");
 			break;
 		}
 	}
+	
+ 	setItem(0, 0, new QTimeTableWidgetItem());
+ 	setItem(0, 1, new QTableWidgetItem(ItemIcon, ""));
+ 	setItem(0, 2, new QTableItemMessage(Message, (QLogger::MessageType)Type));
+ 	setRowHeight(0, 18);
+}
+
+void QLogWidget::OnLog(const QString& Message, const QString& Icon)
+{
+	insertRow(0);
+
+	QIcon ItemIcon = GetIcon(Icon);
 
 	setItem(0, 0, new QTimeTableWidgetItem());
-	setItem(0, 1, new QTableWidgetItem(Icon, ""));
-	setItem(0, 2, new QTableItemMessage(Message, (QLogger::MessageType)Type));
+	setItem(0, 1, new QTableWidgetItem(ItemIcon, ""));
+	setItem(0, 2, new QTableItemMessage(Message, QLogger::Normal));
 	setRowHeight(0, 18);
 }
 
@@ -169,13 +183,17 @@ void QLogWidget::OnClear(void)
 void QLogWidget::OnClearAll(void)
 {
 	clear();
+	setRowCount(0);
 }
 
 void QLogWidget::contextMenuEvent(QContextMenuEvent* pContextMenuEvent)
 {
 	QMenu ContextMenu(this);
 	ContextMenu.setTitle("Log");
-	ContextMenu.addAction("Clear", this, SLOT(OnClear()));
-	ContextMenu.addAction("Clear All", this, SLOT(OnClearAll()));
+
+	if (currentRow() > 0)
+		ContextMenu.addAction(GetIcon("cross-small"), "Clear", this, SLOT(OnClear()));
+
+	ContextMenu.addAction(GetIcon("cross"), "Clear All", this, SLOT(OnClearAll()));
 	ContextMenu.exec(pContextMenuEvent->globalPos());
 }
