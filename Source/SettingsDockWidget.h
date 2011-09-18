@@ -39,9 +39,9 @@ private slots:
 
 private:
 	QGridLayout		m_MainLayout;
-	QDoubleSlider	m_KernelWidthSlider;
+	QSlider			m_KernelWidthSlider;
 	QSpinBox		m_KernelWidthSpinBox;
-	QDoubleSlider	m_KernelHeightSlider;
+	QSlider			m_KernelHeightSlider;
 	QSpinBox		m_KernelHeightSpinBox;
 	QCheckBox		m_LockKernelHeightCheckBox;
 };

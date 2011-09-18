@@ -140,7 +140,7 @@ void CVtkWidget::SetupRenderView(void)
 {
 	// Create and configure scene renderer
 	m_SceneRenderer = vtkRenderer::New();
-	m_SceneRenderer->SetBackground(0.15, 0.15, 0.15);
+	m_SceneRenderer->SetBackground(0.25, 0.25, 0.25);
 	m_SceneRenderer->SetBackground2(0.25, 0.25, 0.25);
 	m_SceneRenderer->SetGradientBackground(true);
 	m_SceneRenderer->GetActiveCamera()->SetPosition(0.0, 0.0, 1.0);

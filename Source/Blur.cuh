@@ -77,7 +77,7 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D
 // ToDo: Add description
 void BlurImageXyz(CColorXyz* pImage, CColorXyz* pTempImage, const CResolution2D& Resolution, const float& Radius)
 {
-	const dim3 KernelBlock(32, 8);
+	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)Resolution.GetResY() / (float)KernelBlock.y));
 
 	// Create gaussian filter

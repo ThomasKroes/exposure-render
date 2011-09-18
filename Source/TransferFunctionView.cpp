@@ -110,7 +110,7 @@ void QTransferFunctionView::Update(void)
 	{
 		QNode& Node = TransferFunction.GetNode(i);
 
-		const float Intensity = Scene()->m_IntensityRange.m_Min + Scene()->m_IntensityRange.m_Length * Node.GetIntensity();
+		const float Intensity = TransferFunction.GetRangeMin() + TransferFunction.GetRange() * Node.GetIntensity();
 
 		// Positions
 		Scene()->m_TransferFunctions.m_Opacity.m_P[i]		= Intensity;

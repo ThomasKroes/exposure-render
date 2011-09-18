@@ -65,21 +65,19 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 
 	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
-	CRay EyeRay, RayCopy;
+	CRay Re;
 
  	// Generate the camera ray
- 	pScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), EyeRay.m_O, EyeRay.m_D);
+ 	pScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
 
-	EyeRay.m_MinT = 0.0f; 
-	EyeRay.m_MaxT = FLT_MAX;
-
-	CColorXyz;
+	Re.m_MinT = 0.0f; 
+	Re.m_MaxT = FLT_MAX;
 
 	Vec3f Pe, Normal;
 	
-	if (SampleDistanceRM(EyeRay, RNG, Pe, pScene, 0))
+	if (SampleDistanceRM(Re, RNG, Pe, pScene, 0))
 	{
-		if (NearestLight(pScene, CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, (Pe - EyeRay.m_O).Length()), Li))
+		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li))
 		{
 			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
 			return;
@@ -92,19 +90,13 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		const float		Tr = GetOpacity(pScene, D).r;
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
 		
-		// Compute outgoing direction
-		const Vec3f Wo = Normalize(-EyeRay.m_D);
-
-		// Obtain normal
-		Normal = NormalizedGradient(pScene, Pe);
-
 		// Estimate direct light at eye point
-	 	Lv += Ke + UniformSampleOneLight(pScene, Wo, Pe, Normal, RNG, 0.001f);
+	 	Lv = Ke + UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, 0.001f);
 	}
 	else
 	{
-		if (NearestLight(pScene, CRay(EyeRay.m_O, EyeRay.m_D, 0.0f, INF_MAX), Li))
-			Lv += Li;
+		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li))
+			Lv = Li;
 	}
 
 	// Contribute
@@ -114,7 +106,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 // Traces the volume
 void SingleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	const dim3 KernelBlock(16, 8);
+	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	// Execute kernel

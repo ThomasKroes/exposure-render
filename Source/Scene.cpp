@@ -16,7 +16,7 @@ CScene::CScene(void) :
 	m_TransferFunctions(),
 	m_MaxNoBounces(1),
 	m_IntensityRange(),
-	m_KernelSize(16, 8),
+	m_KernelSize(16, 4),
 	m_SigmaMax(0.0f),
 	m_DensityScale(5000),
 	m_MacrocellSize(32)
