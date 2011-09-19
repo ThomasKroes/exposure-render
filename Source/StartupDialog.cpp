@@ -9,6 +9,7 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_MainLayout(),
 	m_DemoFilesGroupBox(),
 	m_DemoFilesLayout(),
+	m_ResampleNote(),
 	m_ReadMeGroupBox(),
 	m_ReadMeLayout(),
 	m_ReadMe(),
@@ -28,7 +29,18 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_DemoFilesGroupBox.setStatusTip("Demo files");
 
 	m_DemoFilesLayout.setAlignment(Qt::AlignTop);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Bonsai", "Loads the bonsai data set, along with transfer function, lighting and camera presets", ""), 0, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Manix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", ""), 0, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Backpack", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", ""), 0, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Bonsai", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www9.informatik.uni-erlangen.de/External/vollib/'>Volume Library</a>", ""), 1, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Macoessix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", ""), 1, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Engine", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", ""), 2, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Artifix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", ""), 2, 1);
+
+	m_ResampleNote.setText("In order to reduce the size of the installer we distribute resampled volumes (sampled at 50%). The original volumes, as well as other volumes can be downloaded from the <a href='http://code.google.com/p/exposure-render/downloads'>Exposure Render Website</a>");
+	m_ResampleNote.setWordWrap(true);
+	m_ResampleNote.setContentsMargins(10, 10, 10, 2);
+	
+	m_DemoFilesLayout.addWidget(&m_ResampleNote, 3, 0, 1, 2);
 
 	m_MainLayout.addWidget(&m_ReadMeGroupBox, 1, 0, 1, 2);
 
@@ -82,7 +94,7 @@ QStartupDialog::~QStartupDialog(void)
 
 QSize QStartupDialog::sizeHint() const
 {
-	return QSize(500, 300);
+	return QSize(600, 300);
 }
 
 void QStartupDialog::accept()
@@ -116,17 +128,22 @@ QDemoWidget::QDemoWidget(const QString& Name, const QString& Description, const 
 	QWidget(pParent),
 	m_MainLayout(),
 	m_Demo(),
-	m_Label()
+	m_Name(),
+	m_Description()
 {
 	setLayout(&m_MainLayout);
 
-	m_MainLayout.addWidget(&m_Demo, 0, 0, 1, 1, Qt::AlignTop);
-	m_MainLayout.addWidget(&m_Label, 0, 1, 1, 1, Qt::AlignTop);
+	m_Demo.setFixedSize(72, 72);
 
-	m_Demo.setFixedSize(60, 60);
+	m_Name.setWordWrap(true);
+	m_Name.setText("<b>" + Name + "</b>");
 
-	m_Label.setWordWrap(true);
-	m_Label.setText("<b>" + Name + "</b>" + "<p>" + Description + "</p>");
+	m_Description.setWordWrap(true);
+	m_Description.setText(Description);
+
+	m_MainLayout.addWidget(&m_Demo, 0, 0, 2, 1, Qt::AlignTop);
+	m_MainLayout.addWidget(&m_Name, 0, 1, Qt::AlignTop);
+	m_MainLayout.addWidget(&m_Description, 1, 1, Qt::AlignTop);
 }
 
 QDemoWidget::~QDemoWidget(void)

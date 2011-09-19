@@ -10,7 +10,8 @@ public:
 
 	QGridLayout		m_MainLayout;
 	QPushButton		m_Demo;
-	QLabel			m_Label;
+	QLabel			m_Name;
+	QLabel			m_Description;
 };
 
 class QStartupDialog : public QDialog
@@ -39,6 +40,7 @@ private:
 	QGridLayout			m_MainLayout;
 	QGroupBox			m_DemoFilesGroupBox;
 	QGridLayout			m_DemoFilesLayout;
+	QLabel				m_ResampleNote;
 	QGroupBox			m_ReadMeGroupBox;
 	QGridLayout			m_ReadMeLayout;
 	QTextEdit			m_ReadMe;
