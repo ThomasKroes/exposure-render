@@ -9,14 +9,6 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_MainLayout(),
 	m_DemoFilesGroupBox(),
 	m_DemoFilesLayout(),
-	m_Demo1(),
-	m_Label1(),
-	m_Demo2(),
-	m_Label2(),
-	m_Demo3(),
-	m_Label3(),
-	m_Demo4(),
-	m_Label4(),
 	m_ReadMeGroupBox(),
 	m_ReadMeLayout(),
 	m_ReadMe(),
@@ -35,45 +27,8 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_DemoFilesGroupBox.setToolTip("Demo Files");
 	m_DemoFilesGroupBox.setStatusTip("Demo files");
 
-	m_Demo1.setFixedSize(70, 70);
-	m_Demo2.setFixedSize(70, 70);
-	m_Demo3.setFixedSize(70, 70);
-	m_Demo4.setFixedSize(70, 70);
-
-	m_Demo1.setText("");
-	m_Demo2.setText("");
-	m_Demo3.setText("");
-	m_Demo4.setText("");
-
-	m_Demo1.setToolTip("Bonsai");
-	m_Demo2.setToolTip("Manix");
-	m_Demo3.setToolTip("Backpack");
-	m_Demo4.setToolTip("Backpack");
-
-	m_Label1.setWordWrap(true);
-	m_Label2.setWordWrap(true);
-	m_Label3.setWordWrap(true);
-	m_Label4.setWordWrap(true);
-
-// 	m_Label1.setAlignment(32);
-// 	m_Label2.setAlignment(Qt::AlignTop);
-// 	m_Label3.setAlignment(Qt::AlignTop);
-// 	m_Label4.setAlignment(Qt::AlignTop);
-// 
-	m_Label1.setText("<b>Bonsai</b><br><p>Loads the bonsai data set, along with transfer function, lighting and camera presets</p>");
-	m_Label2.setText("<b>Manix</b><br><p>Loads the manix data set, along with transfer function, lighting and camera presets</p>");
-	m_Label3.setText("<b>Backpack</b><br><p>Loads the backpack data set, along with transfer function, lighting and camera presets</p>");
-	m_Label4.setText("<b>Backpack</b><br><p>Loads the backpack data set, along with transfer function, lighting and camera presets</p>");
-
 	m_DemoFilesLayout.setAlignment(Qt::AlignTop);
-	m_DemoFilesLayout.addWidget(&m_Demo1, 0, 0);
-	m_DemoFilesLayout.addWidget(&m_Label1, 0, 1);
-	m_DemoFilesLayout.addWidget(&m_Demo2, 1, 0);
-	m_DemoFilesLayout.addWidget(&m_Label2, 1, 1);
-	m_DemoFilesLayout.addWidget(&m_Demo3, 0, 2);
-	m_DemoFilesLayout.addWidget(&m_Label3, 0, 3);
-	m_DemoFilesLayout.addWidget(&m_Demo4, 1, 2);
-	m_DemoFilesLayout.addWidget(&m_Label4, 1, 3);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Bonsai", "Loads the bonsai data set, along with transfer function, lighting and camera presets", ""), 0, 0);
 
 	m_MainLayout.addWidget(&m_ReadMeGroupBox, 1, 0, 1, 2);
 
@@ -105,15 +60,15 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	LoadReadMe("Readme.txt");
 
 	QSignalMapper* pSignalMapper = new QSignalMapper(this);
-	pSignalMapper->setMapping(&m_Demo1, QString("Bonsai.mhd"));
-	pSignalMapper->setMapping(&m_Demo2, QString("Manix.mhd"));
-	pSignalMapper->setMapping(&m_Demo3, QString("Backpack.mhd"));
-	pSignalMapper->setMapping(&m_Demo4, QString("Backpack.mhd"));
+// 	pSignalMapper->setMapping(&m_Demo1, QString("Bonsai.mhd"));
+// 	pSignalMapper->setMapping(&m_Demo2, QString("Manix.mhd"));
+// 	pSignalMapper->setMapping(&m_Demo3, QString("Backpack.mhd"));
+// 	pSignalMapper->setMapping(&m_Demo4, QString("Backpack.mhd"));
 
-	connect(&m_Demo1, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
-	connect(&m_Demo2, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
-	connect(&m_Demo3, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
-	connect(&m_Demo4, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
+// 	connect(&m_Demo1, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
+// 	connect(&m_Demo2, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
+// 	connect(&m_Demo3, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
+// 	connect(&m_Demo4, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
 
 	connect(pSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(OnLoadDemo(const QString&)));
 };
@@ -155,4 +110,25 @@ void QStartupDialog::LoadReadMe(const QString& FileName)
 	DocumentArray = File.readAll();
 
 	m_ReadMe.setPlainText(DocumentArray);
+}
+
+QDemoWidget::QDemoWidget(const QString& Name, const QString& Description, const QString& Image, QWidget* pParent /*= NULL*/) :
+	QWidget(pParent),
+	m_MainLayout(),
+	m_Demo(),
+	m_Label()
+{
+	setLayout(&m_MainLayout);
+
+	m_MainLayout.addWidget(&m_Demo, 0, 0, 1, 1, Qt::AlignTop);
+	m_MainLayout.addWidget(&m_Label, 0, 1, 1, 1, Qt::AlignTop);
+
+	m_Demo.setFixedSize(60, 60);
+
+	m_Label.setWordWrap(true);
+	m_Label.setText("<b>" + Name + "</b>" + "<p>" + Description + "</p>");
+}
+
+QDemoWidget::~QDemoWidget(void)
+{
 }

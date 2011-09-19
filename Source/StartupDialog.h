@@ -1,5 +1,18 @@
 #pragma once
 
+class QDemoWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+	QDemoWidget(const QString& Name, const QString& Description, const QString& Image, QWidget* pParent = NULL);
+	virtual ~QDemoWidget(void);
+
+	QGridLayout		m_MainLayout;
+	QPushButton		m_Demo;
+	QLabel			m_Label;
+};
+
 class QStartupDialog : public QDialog
 {
 	Q_OBJECT
@@ -26,14 +39,6 @@ private:
 	QGridLayout			m_MainLayout;
 	QGroupBox			m_DemoFilesGroupBox;
 	QGridLayout			m_DemoFilesLayout;
-	QPushButton			m_Demo1;
-	QLabel				m_Label1;
-	QPushButton			m_Demo2;
-	QLabel				m_Label2;
-	QPushButton			m_Demo3;
-	QLabel				m_Label3;
-	QPushButton			m_Demo4;
-	QLabel				m_Label4;
 	QGroupBox			m_ReadMeGroupBox;
 	QGridLayout			m_ReadMeLayout;
 	QTextEdit			m_ReadMe;
