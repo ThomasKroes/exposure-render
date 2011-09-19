@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Controls.h"
 #include "Projection.h"
 
 class QProjectionWidget : public QGroupBox

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Controls.h"
-
-class QTransferFunction;
 class QNode;
 
 class QNodePropertiesWidget : public QGroupBox

@@ -112,6 +112,7 @@ SET(ExposureRenderSources
 	Sample.cpp
 	LightTransport.cpp
 	StartupDialog.cpp
+	Utilities.cpp
 
 	# Logging
 	Logger.cpp
@@ -194,6 +195,7 @@ SET(ExposureRenderHeaders
 	LightTransport.h
 	LogWidget.h
 	StartupDialog.h
+	Utilities.h
 
 	# Logging
 	Logger.h
@@ -441,6 +443,7 @@ SET(CoreSources
 	Sample.h
 	LightTransport.h
 	StartupDialog.h
+	Utilities.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
@@ -462,6 +465,7 @@ SET(CoreSources
 	Sample.cpp
 	LightTransport.cpp
 	StartupDialog.cpp
+	Utilities.cpp
 )
 
 # Make the core group

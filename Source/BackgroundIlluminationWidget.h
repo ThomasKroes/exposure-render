@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Controls.h"
-
 class QLight;
 
 class QBackgroundIlluminationWidget : public QGroupBox

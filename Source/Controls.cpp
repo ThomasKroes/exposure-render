@@ -2,8 +2,6 @@
 // Precompiled headers
 #include "Stable.h"
 
-#include "Controls.h"
-
 QColorPushButton::QColorPushButton(QWidget* pParent) :
 	QPushButton(pParent),
 	m_Margin(5),

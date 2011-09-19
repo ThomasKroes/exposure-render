@@ -3,7 +3,6 @@
 #include "Stable.h"
 
 #include "LightsWidget.h"
-#include "Controls.h"
 
 QLightsWidget::QLightsWidget(QWidget* pParent) :
 	QGroupBox(pParent),

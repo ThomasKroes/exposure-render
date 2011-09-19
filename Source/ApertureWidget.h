@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Controls.h"
 #include "Aperture.h"
 
 class QApertureWidget : public QGroupBox

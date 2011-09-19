@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Controls.h"
 #include "Logger.h"
 
 class QTimeTableWidgetItem : public QTableWidgetItem

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Controls.h"
 #include "Focus.h"
 
 class QFocusWidget : public QGroupBox

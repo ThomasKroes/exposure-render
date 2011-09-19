@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Preset.h"
-#include "Controls.h"
 
 class QPresetsWidgetBase : public QGroupBox
 {

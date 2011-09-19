@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Controls.h"
 #include "Film.h"
 
 class QFilmWidget : public QGroupBox

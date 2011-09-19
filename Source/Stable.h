@@ -1,9 +1,10 @@
 #pragma once
 
 #include <QtGui>
-#include <QtXml\qdom.h>
 
 #include "Logger.h"
+#include "Controls.h"
+#include "Utilities.h"
 
 inline QIcon GetIcon(const QString& Name)
 {

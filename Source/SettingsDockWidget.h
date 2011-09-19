@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Controls.h"
-
 class CTracerSettingsWidget : public QGroupBox
 {
     Q_OBJECT

@@ -105,6 +105,7 @@ QDomElement QCamera::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	m_Projection.WriteXML(DOM, Camera);
 	m_Focus.WriteXML(DOM, Camera);
 
+	
 	return Camera;
 }
 
