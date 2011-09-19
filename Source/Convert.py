@@ -2,14 +2,18 @@ from vtk import*
 
 import os
 
-Path = "C:\\Volumes"  # insert the path to the directory of interest
+Path = "C:\\Volumes"
+
 DirList = os.listdir(Path)
   
-print "Removing pre-existing resampled volumes"
+RemoveOld = False;
+
+if (RemoveOld):
+    print "Removing pre-existing resampled volumes"
 
 for FileName in DirList:
     BaseName, Extension = os.path.splitext(FileName)
-    if (BaseName.endswith("_small")):
+    if (BaseName.endswith("_small") and RemoveOld == True):
         print "Removing: " + BaseName + Extension
         os.remove(Path + "\\" + FileName)
 
@@ -19,40 +23,43 @@ for FileName in DirList:
     BaseName, Extension = os.path.splitext(FileName)
     if (Extension == ".mhd" and not BaseName.endswith("_small")):
 
-        print("Reading meta image " + FileName)
+        if (not os.path.exists(Path + "\\" + BaseName + "_small.mhd") and not os.path.exists(Path + "\\" + BaseName + "_small.raw")):
+            print("Reading meta image " + FileName)
         
-        Reader = vtkMetaImageReader()
+            Reader = vtkMetaImageReader()
 
-        MhdFileName = Path + "\\" + FileName
+            MhdFileName = Path + "\\" + FileName
         
-        Reader.SetFileName(MhdFileName)
-        Reader.Update()
+            Reader.SetFileName(MhdFileName)
+            Reader.Update()
 
-        Resample = vtkImageResample()
+            Resample = vtkImageResample()
 
-        ResampleFactor = 0.5
+            ResampleFactor = 0.5
 
-        print("Resampling image at " + str(100.0 * ResampleFactor) + "% of original volume")
+            print("Resampling image at " + str(100.0 * ResampleFactor) + "% of original volume")
         
-        Resample.SetInput(Reader.GetOutput())
-        Resample.SetAxisMagnificationFactor(0, ResampleFactor)
-        Resample.SetAxisMagnificationFactor(1, ResampleFactor)
-        Resample.SetAxisMagnificationFactor(2, ResampleFactor)
+            Resample.SetInput(Reader.GetOutput())
+            Resample.SetAxisMagnificationFactor(0, ResampleFactor)
+            Resample.SetAxisMagnificationFactor(1, ResampleFactor)
+            Resample.SetAxisMagnificationFactor(2, ResampleFactor)
 
-        Resample.Update()
+            Resample.Update()
 
-        MetaImageWriter = vtkMetaImageWriter()
+            MetaImageWriter = vtkMetaImageWriter()
 
-        MetaImageWriter.SetFileName(Path + "\\" + BaseName + "_small.mhd")
-        MetaImageWriter.SetRAWFileName(Path + "\\" + BaseName + "_small.raw")
+            MetaImageWriter.SetFileName(Path + "\\" + BaseName + "_small.mhd")
+            MetaImageWriter.SetRAWFileName(Path + "\\" + BaseName + "_small.raw")
         
-        MetaImageWriter.SetInput(Resample.GetOutput())
+            MetaImageWriter.SetInput(Resample.GetOutput())
 
-        print("Writing resampled " + Path + "\\" + BaseName + "_small.mhd")
-        print("Writing resampled " + Path + "\\" + BaseName + "_small.raw")
+            print("Writing resampled " + Path + "\\" + BaseName + "_small.mhd")
+            print("Writing resampled " + Path + "\\" + BaseName + "_small.raw")
         
-        MetaImageWriter.Write()
-
-print "Done with re-sampling"
+            MetaImageWriter.Write()
+        else:
+            print "Skipping " + BaseName
+            
+print "Done with re-sampling volumes"
 
 
