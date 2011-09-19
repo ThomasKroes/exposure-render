@@ -14,6 +14,7 @@ class QCamera : public QPresetXML
 
 public:
 	QCamera(QObject* pParent = NULL);
+	virtual ~QCamera(void);
 	QCamera::QCamera(const QCamera& Other);
 	QCamera& QCamera::operator=(const QCamera& Other);
 
@@ -36,7 +37,7 @@ public slots:
 	void OnFocusChanged(void);
 
 signals:
-	void Changed(void);
+	void Changed();
 
 private:
 	QFilm			m_Film;

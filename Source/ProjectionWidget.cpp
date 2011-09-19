@@ -32,8 +32,8 @@ QProjectionWidget::QProjectionWidget(QWidget* pParent) :
 	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), &m_FieldOfViewSpinner, SLOT(setValue(double)));
 	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFieldOfView(double)));
 	connect(&m_FieldOfViewSpinner, SIGNAL(valueChanged(double)), &m_FieldOfViewSlider, SLOT(setValue(double)));
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+ 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+ 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetProjection(), SIGNAL(Changed(const QProjection&)), this, SLOT(OnProjectionChanged(const QProjection&)));
 
 	emit gRenderStatus.StatisticChanged("Camera", "Projection", "", "", "");
@@ -46,7 +46,7 @@ void QProjectionWidget::SetFieldOfView(const double& FieldOfView)
 
 void QProjectionWidget::OnRenderBegin(void)
 {
-	OnProjectionChanged(gCamera.GetProjection());
+	gCamera.GetProjection().Reset();
 }
 
 void QProjectionWidget::OnRenderEnd(void)

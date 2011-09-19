@@ -34,6 +34,8 @@ private:
 	QLabel				m_Label2;
 	QPushButton			m_Demo3;
 	QLabel				m_Label3;
+	QPushButton			m_Demo4;
+	QLabel				m_Label4;
 	QGroupBox			m_ReadMeGroupBox;
 	QGridLayout			m_ReadMeLayout;
 	QTextEdit			m_ReadMe;

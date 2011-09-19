@@ -10,16 +10,16 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_GridLayout(),
 	m_WidthSlider(),
-	m_WidthSpinBox(),
+	m_WidthSpinner(),
 	m_HeightSlider(),
-	m_HeightSpinBox(),
+	m_HeightSpinner(),
+	m_ExposureSlider(),
+	m_ExposureSpinner(),
 	m_LockSizeCheckBox()
 {
 	setTitle("Film");
 	setStatusTip("Film properties");
 	setToolTip("Film properties");
-
-	setEnabled(false);
 
 	// Create grid layout
 //	m_GridLayout.setColSpacing(0, 70);
@@ -32,12 +32,15 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_WidthSlider.setRange(4, 1024);
 	m_GridLayout.addWidget(&m_WidthSlider, 0, 1);
 	
-    m_WidthSpinBox.setRange(4, 1024);
-	m_GridLayout.addWidget(&m_WidthSpinBox, 0, 2);
+    m_WidthSpinner.setRange(4, 1024);
+	m_GridLayout.addWidget(&m_WidthSpinner, 0, 2);
 	
-	connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_WidthSpinBox, SLOT(setValue(int)));
-	connect(&m_WidthSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmWidth(int)));
-	connect(&m_WidthSpinBox, SIGNAL(valueChanged(int)), &m_WidthSlider, SLOT(setValue(int)));
+	QObject::connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_WidthSpinner, SLOT(setValue(int)));
+	QObject::connect(&m_WidthSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmWidth(int)));
+	QObject::connect(&m_WidthSpinner, SIGNAL(valueChanged(int)), &m_WidthSlider, SLOT(setValue(int)));
+
+	m_WidthSlider.setEnabled(false);
+	m_WidthSpinner.setEnabled(false);
 
 	// Film height
 	m_GridLayout.addWidget(new QLabel("Film height"), 2, 0);
@@ -46,18 +49,37 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_HeightSlider.setRange(4, 1024);
 	m_GridLayout.addWidget(&m_HeightSlider, 2, 1);
 	
-    m_HeightSpinBox.setRange(0, 1024);
-	m_GridLayout.addWidget(&m_HeightSpinBox, 2, 2);
+    m_HeightSpinner.setRange(0, 1024);
+	m_GridLayout.addWidget(&m_HeightSpinner, 2, 2);
 	
-	m_GridLayout.addWidget(new QCheckBox("Lock Height"), 2, 3);
+	QObject::connect(&m_HeightSlider, SIGNAL(valueChanged(int)), &m_HeightSpinner, SLOT(setValue(int)));
+	QObject::connect(&m_HeightSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmHeight(int)));
+	QObject::connect(&m_HeightSpinner, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
 
-	connect(&m_HeightSlider, SIGNAL(valueChanged(int)), &m_HeightSpinBox, SLOT(setValue(int)));
-	connect(&m_HeightSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmHeight(int)));
-	connect(&m_HeightSpinBox, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
-	connect(&m_LockSizeCheckBox, SIGNAL(stateChanged(int)), this, SLOT(LockFilmHeight(int)));
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
+	m_GridLayout.addWidget(new QCheckBox("Lock"), 2, 3);
+
+	QObject::connect(&m_LockSizeCheckBox, SIGNAL(stateChanged(int)), this, SLOT(LockFilmHeight(int)));
+
+	m_HeightSlider.setEnabled(false);
+	m_HeightSpinner.setEnabled(false);
+
+	// Exposure
+	m_GridLayout.addWidget(new QLabel("Exposure"), 4, 0);
+
+	m_ExposureSlider.setOrientation(Qt::Horizontal);
+	m_ExposureSlider.setRange(0.001f, 1000.0f);
+	m_GridLayout.addWidget(&m_ExposureSlider, 4, 1);
+
+	m_ExposureSpinner.setRange(0.001f, 1000.0f);
+	m_GridLayout.addWidget(&m_ExposureSpinner, 4, 2);
+
+	QObject::connect(&m_ExposureSlider, SIGNAL(valueChanged(double)), &m_ExposureSpinner, SLOT(setValue(double)));
+	QObject::connect(&m_ExposureSlider, SIGNAL(valueChanged(double)), this, SLOT(SetExposure(double)));
+	QObject::connect(&m_ExposureSpinner, SIGNAL(valueChanged(double)), &m_ExposureSlider, SLOT(setValue(double)));
+
+	QObject::connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	QObject::connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
 
 	emit gRenderStatus.StatisticChanged("Camera", "Film", "", "", "");
 }
@@ -65,35 +87,40 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 void QFilmWidget::LockFilmHeight(const int& Lock)
 {
 	m_HeightSlider.setEnabled(!Lock);
-	m_HeightSpinBox.setEnabled(!Lock);
+	m_HeightSpinner.setEnabled(!Lock);
 
 	if (Lock)
 	{
 		connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
-		connect(&m_WidthSpinBox, SIGNAL(valueChanged(int)), &m_HeightSpinBox, SLOT(setValue(int)));
+		connect(&m_WidthSpinner, SIGNAL(valueChanged(int)), &m_HeightSpinner, SLOT(setValue(int)));
 
 		m_HeightSlider.setValue(m_WidthSlider.value());
 	}
 	else
 	{
 		disconnect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
-		disconnect(&m_WidthSpinBox, SIGNAL(valueChanged(int)), &m_HeightSpinBox, SLOT(setValue(int)));
+		disconnect(&m_WidthSpinner, SIGNAL(valueChanged(int)), &m_HeightSpinner, SLOT(setValue(int)));
 	}
 }
 
 void QFilmWidget::SetFilmWidth(const int& FilmWidth)
 {
-// 	gCamera.GetFilm().SetWidth(FilmWidth);
+ 	gCamera.GetFilm().SetWidth(FilmWidth);
 }
 
 void QFilmWidget::SetFilmHeight(const int& FilmHeight)
 {
-// 	gCamera.GetFilm().SetHeight(FilmHeight);
+ 	gCamera.GetFilm().SetHeight(FilmHeight);
+}
+
+void QFilmWidget::SetExposure(const double& Exposure)
+{
+	gCamera.GetFilm().SetExposure(Exposure);
 }
 
 void QFilmWidget::OnRenderBegin(void)
 {
-	OnFilmChanged(gCamera.GetFilm());
+	gCamera.GetFilm().Reset();
 }
 
 void QFilmWidget::OnRenderEnd(void)
@@ -105,19 +132,23 @@ void QFilmWidget::OnFilmChanged(const QFilm& Film)
 {
 	// Width
 	m_WidthSlider.blockSignals(true);
-	m_WidthSpinBox.blockSignals(true);
+	m_WidthSpinner.blockSignals(true);
 	m_WidthSlider.setValue(Film.GetWidth());
-	m_WidthSpinBox.setValue(Film.GetWidth());
+	m_WidthSpinner.setValue(Film.GetWidth());
 	m_WidthSlider.blockSignals(false);
-	m_WidthSpinBox.blockSignals(false);
+	m_WidthSpinner.blockSignals(false);
 
 	// Height
 	m_HeightSlider.blockSignals(true);
-	m_HeightSpinBox.blockSignals(true);
+	m_HeightSpinner.blockSignals(true);
 	m_HeightSlider.setValue(Film.GetHeight());
-	m_HeightSpinBox.setValue(Film.GetHeight());
+	m_HeightSpinner.setValue(Film.GetHeight());
 	m_HeightSlider.blockSignals(false);
-	m_HeightSpinBox.blockSignals(false);
+	m_HeightSpinner.blockSignals(false);
+
+	// Exposure
+	m_ExposureSlider.setValue(Film.GetExposure(), true);
+	m_ExposureSpinner.setValue(Film.GetExposure(), true);
 
 	emit gRenderStatus.StatisticChanged("Film", "Width", QString::number(Film.GetWidth()), "Pixels");
 	emit gRenderStatus.StatisticChanged("Film", "Height", QString::number(Film.GetHeight()), "Pixels");

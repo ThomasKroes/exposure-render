@@ -6,7 +6,7 @@
 
 QProjection::QProjection(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
-	m_FieldOfView(35)
+	m_FieldOfView(35.0f)
 {
 }
 

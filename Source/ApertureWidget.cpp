@@ -46,7 +46,7 @@ void QApertureWidget::SetAperture(const double& Aperture)
 
 void QApertureWidget::OnRenderBegin(void)
 {
-	OnApertureChanged(gCamera.GetAperture());
+	gCamera.GetAperture().Reset();
 }
 
 void QApertureWidget::OnRenderEnd(void)

@@ -18,7 +18,7 @@ public:
 	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
-	void Changed(const QFocus&);
+	void Changed(const QFocus& Focus);
 
 private:
 	float		m_FocalDistance;

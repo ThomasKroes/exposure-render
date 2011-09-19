@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(ExposureRender)
 
+### Set Build Type ###
+SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
+
 FIND_PACKAGE(CUDA)
 
 IF(NOT VTK_BINARY_DIR)
@@ -11,6 +14,8 @@ IF(NOT VTK_DIR)
 ENDIF(NOT VTK_DIR)
 INCLUDE(${VTK_USE_FILE})
 ENDIF(NOT VTK_BINARY_DIR)
+
+MESSAGE(STATUS "vv" ${CMAKE_INSTALL_PREFIX})
 
 # use what QVTK built with
 SET(QT_MOC_EXECUTABLE ${VTK_QT_MOC_EXECUTABLE} CACHE FILEPATH "")
@@ -513,21 +518,13 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkViews
 )
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt ${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt COPYONLY)
-
 if (MSVC)
    set_target_properties(ExposureRender PROPERTIES COMPILE_FLAGS "/YuStable.h")
    set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
 endif(MSVC)
 
-# Precompiled headers
+### Precompiled headers ###
 set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
-
-
-
-
-
-MESSAGE( STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 
 ### VTK dependencies ###
 FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")
@@ -540,6 +537,21 @@ INSTALL_FILES(/Bin FILES ${CudaDlls})
 ### QT dependencies ###
 SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll)
 INSTALL_FILES(/Bin FILES ${QtDlls})
+
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED}/${CMAKE_BUILD_TYPE})
+
+
+SET(CMAKE_INSTALL_PREFIX_CACHED ${CMAKE_INSTALL_PREFIX})
+SET(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}")
+
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED})
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
+
+# INSTALL_FILES("${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt" FILES "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt")
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Readme.txt COPYONLY)
+
+### Put back the original cached prefix string ###
+SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX_CACHED})
 
 ### Example .mhd and .raw files ###
 # INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.mhd")
@@ -554,7 +566,7 @@ FILE(GLOB Icons "${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png")
 INSTALL_FILES(/Bin/Icons FILES ${Icons})
 
 ### ReadMe and Copyright ###
-INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
+# INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
 INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
 
 INSTALL_TARGETS(/Bin ExposureRender)
@@ -562,6 +574,7 @@ INSTALL_TARGETS(/Bin ExposureRender)
 # Requires re-distributables
 INCLUDE(InstallRequiredSystemLibraries)
 
+### Configure NSIS ###
 SET(CPACK_GENERATOR NSIS)
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Exposure Render")
 SET(CPACK_PACKAGE_VENDOR "TU Delft")
@@ -596,3 +609,5 @@ SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 SET(CPACK_PACKAGE_EXECUTABLES "bin\\\\ExposureRender;Exposure Render")
 
 INCLUDE(CPack)
+
+

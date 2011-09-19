@@ -8,6 +8,7 @@ QFilm::QFilm(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
 	m_Width(640),
 	m_Height(480),
+	m_Exposure(500.0f),
 	m_Dirty(false)
 {
 }
@@ -23,6 +24,7 @@ QFilm& QFilm::operator=(const QFilm& Other)
 
 	m_Width		= Other.m_Width;
 	m_Height	= Other.m_Height;
+	m_Exposure	= Other.m_Exposure;
 	m_Dirty		= Other.m_Dirty;
 
 	emit Changed(*this);
@@ -56,13 +58,31 @@ void QFilm::SetHeight(const int& Height)
 	emit Changed(*this);
 }
 
+float QFilm::GetExposure(void) const
+{
+	return m_Exposure;
+}
+
+void QFilm::SetExposure(const float& Exposure)
+{
+	m_Exposure = Exposure;
+
+	emit Changed(*this);
+}
+
 void QFilm::Reset(void)
 {
 	m_Width		= 640;
 	m_Height	= 480;
+	m_Exposure	= 500.0f;
 	m_Dirty		= true;
 
 	emit Changed(*this);
+}
+
+bool QFilm::IsDirty(void) const
+{
+	return m_Dirty;
 }
 
 void QFilm::ReadXML(QDomElement& Parent)

@@ -18,7 +18,7 @@ public:
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
-	void Changed(const QAperture&);
+	void Changed(const QAperture& Aperture);
 
 private:
 	float			m_Size;

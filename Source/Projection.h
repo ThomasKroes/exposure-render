@@ -18,8 +18,8 @@ public:
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
-	void Changed(const QProjection&);
+	void Changed(const QProjection& Projection);
 
 private:
-	float				m_FieldOfView;
+	float			m_FieldOfView;
 };

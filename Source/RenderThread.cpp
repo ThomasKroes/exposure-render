@@ -278,10 +278,7 @@ void QRenderThread::run()
  		return;
  	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
-	m_Scene.m_Camera.m_Film.m_Exposure = 50.0f;
- 	m_Scene.m_Camera.m_Aperture.m_Size = 0.001f;
- 	m_Scene.m_Camera.m_Focus.m_FocalDistance = (m_Scene.m_Camera.m_Target - m_Scene.m_Camera.m_From).Length();
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(640, 480));
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
  	m_Scene.m_Camera.Update();
@@ -289,7 +286,6 @@ void QRenderThread::run()
 	// Force the render thread to allocate the necessary buffers, do not remove this line
 	m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
 
-// 	Load(m_FileName);
  	CreateVolume();
 
 	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
@@ -626,19 +622,16 @@ bool QRenderThread::Load(QString& FileName)
 	double* pSpacing = m_pImageDataVolume->GetSpacing();
 	
 	// Voxel spacing is typically in mm exposure render work in meters so convert to meters
-	m_Scene.m_Spacing.x = /*0.001f * */(float)pSpacing[0];
-	m_Scene.m_Spacing.y = /*0.001f * */(float)pSpacing[1];
-	m_Scene.m_Spacing.z = /*0.001f * */(float)pSpacing[2];
-
-	// Sigma max
-	m_Scene.m_SigmaMax = 0.0f;//gTransferFunction.GetRange();
+	m_Scene.m_Spacing.x = (float)pSpacing[0];
+	m_Scene.m_Spacing.y = (float)pSpacing[1];
+	m_Scene.m_Spacing.z = (float)pSpacing[2];
 
 	// Compute physical size
 	const Vec3f PhysicalSize(Vec3f(m_Scene.m_Spacing.x * (float)m_Scene.m_Resolution.GetResX(), m_Scene.m_Spacing.y * (float)m_Scene.m_Resolution.GetResY(), m_Scene.m_Spacing.z * (float)m_Scene.m_Resolution.GetResZ()));
 
 	// Compute the volume's bounding box
 	m_Scene.m_BoundingBox.m_MinP	= Vec3f(0.0f);
-	m_Scene.m_BoundingBox.m_MaxP	= Vec3f(1.0f);//PhysicalSize / (float)m_Scene.m_Resolution.GetResXYZ().Max();
+	m_Scene.m_BoundingBox.m_MaxP	= PhysicalSize / PhysicalSize.Max();
 
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
@@ -659,11 +652,11 @@ bool QRenderThread::Load(QString& FileName)
 
 	emit gRenderStatus.StatisticChanged("Volume", "File", QFileInfo(m_FileName).fileName(), "");
 	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", "", "");
-	emit gRenderStatus.StatisticChanged("Bounding Box", "Min", FormatVector(1000.0f * m_Scene.m_BoundingBox.m_MinP, 2), "mm");
-	emit gRenderStatus.StatisticChanged("Bounding Box", "Max", FormatVector(1000.0f * m_Scene.m_BoundingBox.m_MaxP, 2), "mm");
-	emit gRenderStatus.StatisticChanged("Volume", "Physical Size", FormatSize(1000.0f * PhysicalSize, 2), "mm");
+	emit gRenderStatus.StatisticChanged("Bounding Box", "Min", FormatVector(m_Scene.m_BoundingBox.m_MinP, 2), "m");
+	emit gRenderStatus.StatisticChanged("Bounding Box", "Max", FormatVector(m_Scene.m_BoundingBox.m_MaxP, 2), "m");
+	emit gRenderStatus.StatisticChanged("Volume", "Physical Size", FormatSize(PhysicalSize, 2), "mm");
 	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatSize(m_Scene.m_Resolution.GetResXYZ()), "Voxels");
-	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(1000.0f * m_Scene.m_Spacing, 2), "mm");
+	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(m_Scene.m_Spacing, 2), "mm");
 //	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(1000.0f * m_Scene.m_Scale, 2), "");
 	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.GetNoElements()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");

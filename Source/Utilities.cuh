@@ -8,19 +8,19 @@
 
 DEV float Density(CScene* pScene, const Vec3f& P)
 {
-	return (float)((SHRT_MAX) * tex3D(gTexDensity, P.x, P.y, P.z));
+	return (float)((SHRT_MAX) * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
 }
 
 DEV float Extinction(CScene* pScene, const Vec3f& P)
 {
-	return tex3D(gTexExtinction, P.x, P.y, P.z);
+	return tex3D(gTexExtinction, P.x * pScene->m_BoundingBox.m_MaxP.x, P.y * pScene->m_BoundingBox.m_MaxP.z, P.z * pScene->m_BoundingBox.m_MaxP.y);
 }
 
 __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 {
 	Vec3f Normal;
 
-	float Delta = 0.0001f;
+	float Delta = 0.001f * pScene->m_Spacing.Min();
 
 	Normal.x = Density(pScene, P + Vec3f(Delta, 0.0f, 0.0f)) - Density(pScene, P - Vec3f(Delta, 0.0f, 0.0f));
 	Normal.y = Density(pScene, P + Vec3f(0.0f, Delta, 0.0f)) - Density(pScene, P - Vec3f(0.0f, Delta, 0.0f));
