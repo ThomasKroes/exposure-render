@@ -522,13 +522,12 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkViews
 )
 
+### Precompiled headers ###
 if (MSVC)
    set_target_properties(ExposureRender PROPERTIES COMPILE_FLAGS "/YuStable.h")
    set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
+  # set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcUtilities.h")
 endif(MSVC)
-
-### Precompiled headers ###
-set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
 
 ### VTK dependencies ###
 FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")
