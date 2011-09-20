@@ -10,7 +10,8 @@
 QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	QGraphicsView(pParent),
 	m_Scene(),
-	m_Background(NULL)
+	m_Background(NULL),
+	m_Histogram(NULL)
 {
 	// Styling
 // 	setFrameShadow(Sunken);
@@ -36,6 +37,16 @@ void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 	QGraphicsView::resizeEvent(pResizeEvent);
 
 	m_Background.setRect(rect());
+}
+
+void QTFView::SetHistogram(QHistogram& Histogram)
+{
+	m_Histogram.SetHistogram(Histogram);
+}
+
+void QTFView::UpdateHistogram(void)
+{
+	
 }
 
 QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :

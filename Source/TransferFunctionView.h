@@ -58,6 +58,96 @@ private:
 	QPen	m_PenDisabled;
 };
 
+
+
+class QHistogramItem : public QGraphicsRectItem
+{
+public:
+	QHistogramItem(QGraphicsItem* pParent) :
+		QGraphicsRectItem(pParent),
+		m_PolygonItem(pParent),
+		m_Brush(),
+		m_Pen()
+	{
+	}
+
+	QHistogramItem::QHistogramItem(const QHistogramItem& Other)
+	{
+		*this = Other;
+	}
+
+	QHistogramItem& operator = (const QHistogramItem& Other)			
+	{
+		m_Brush	= Other.m_Brush;
+		m_Pen	= Other.m_Pen;
+
+		return *this;
+	}
+
+	void SetHistogram(QHistogram& Histogram)
+	{
+		setVisible(Histogram.GetEnabled());
+
+		if (!Histogram.GetEnabled())
+			return;
+
+		QPolygonF Polygon;
+
+		// Set the gradient stops
+		for (int i = 0; i < Histogram.GetBins().size(); i++)
+		{
+			// Compute polygon point in scene coordinates
+			QPointF ScenePoint = QPointF(i, logf((float)gHistogram.GetBins()[i]) / logf(1.5f * (float)gHistogram.GetMax()));
+
+			if (i == 0)
+			{
+				QPointF CenterCopy = ScenePoint;
+
+				CenterCopy.setY(rect().height());
+
+				Polygon.append(CenterCopy);
+			}
+
+			Polygon.append(ScenePoint);
+
+			if (i == (gHistogram.GetBins().size() - 1))
+			{
+				QPointF CenterCopy = ScenePoint;
+
+				CenterCopy.setY(rect().height());
+
+				Polygon.append(CenterCopy);
+			}
+		}
+
+		QLinearGradient LinearGradient;
+
+		LinearGradient.setStart(0, rect().bottom());
+		LinearGradient.setFinalStop(0, rect().top());
+
+		QGradientStops GradientStops;
+
+		GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 100, 150, 0)));
+		GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 100, 150, 255)));
+
+		LinearGradient.setStops(GradientStops);
+
+		// Update the polygon geometry
+		m_PolygonItem.setPolygon(Polygon);
+		m_PolygonItem.setBrush(QBrush(LinearGradient));
+	}
+
+public:
+	QGraphicsPolygonItem	m_PolygonItem;
+	QBrush					m_Brush;
+	QPen					m_Pen;
+};
+
+
+
+
+
+
 class QTFView : public QGraphicsView
 {
 	Q_OBJECT
@@ -67,9 +157,13 @@ public:
 
 	void resizeEvent(QResizeEvent* pResizeEvent);
 
+	void SetHistogram(QHistogram& Histogram);
+	void UpdateHistogram(void);
+
 private:
 	QGraphicsScene			m_Scene;
 	QBackgroundRectangle	m_Background;
+	QHistogramItem			m_Histogram;
 };
 
 class QTransferFunctionView : public QGraphicsView
