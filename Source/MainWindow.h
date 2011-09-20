@@ -32,7 +32,6 @@ public slots:
 	void OnLoadDemo(const QString& FileName);
 
 private:
-    void								CreateActions(void);
     void								CreateMenus(void);
     void								CreateToolBars(void);
     void								CreateStatusBar(void);
@@ -64,14 +63,6 @@ private:
 	QStatisticsDockWidget				m_StatisticsDockWidget;
 	QCameraDockWidget					m_CameraDockWidget;
 	QSettingsDockWidget					m_SettingsDockWidget;
-
-	// Actions
-    QAction*							m_pOpenAct;
-	QAction*							m_pCloseAct;
-    QAction*							m_pExitAct;
-    QAction*							m_pAboutAct;
-    QAction*							m_pAboutQtAct;
-	QAction*							m_pSeparatorAction;
 
 	enum
 	{

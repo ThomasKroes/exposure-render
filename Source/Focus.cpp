@@ -6,7 +6,7 @@
 
 QFocus::QFocus(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
-	m_FocalDistance(1.0f)
+	m_FocalDistance(1.5f)
 {
 }
 
