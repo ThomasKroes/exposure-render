@@ -4,7 +4,7 @@
 
 #include "NodeItem.h"
 #include "TransferFunction.h"
-#include "TransferFunctionCanvas.h"
+#include "TransferFunctionItem.h"
 
 #define NODE_POSITION_EPSILON 0.01f
 
@@ -17,9 +17,9 @@ QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.5);
 QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 150, 50)), 1.5);
 QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 100)), 1.5);
 
-QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode) :
-	QGraphicsEllipseItem(pTransferFunctionCanvas),
-	m_pTransferFunctionCanvas(pTransferFunctionCanvas),
+QNodeItem::QNodeItem(QTransferFunctionItem* pTransferFunctionItem, QNode* pNode) :
+	QGraphicsEllipseItem(pTransferFunctionItem),
+	m_pTransferFunctionItem(pTransferFunctionItem),
 	m_pNode(pNode),
 	m_Cursor(),
 	m_LastPos(),
@@ -33,12 +33,33 @@ QNodeItem::QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pN
 
 	// Make item movable
 	setFlag(QGraphicsItem::ItemIsMovable);
-	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-	setFlag(QGraphicsItem::ItemIsSelectable);
+//	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+//	setFlag(QGraphicsItem::ItemIsSelectable);
 
 	// Tooltip
 	UpdateTooltip();
+
+	setParentItem(m_pTransferFunctionItem);
 };
+
+QNodeItem::QNodeItem(const QNodeItem& Other)
+{
+	*this = Other;
+};
+
+QNodeItem& QNodeItem::operator=(const QNodeItem& Other)
+{
+	m_pTransferFunctionItem		= Other.m_pTransferFunctionItem;
+	m_pNode						= Other.m_pNode;
+	m_Cursor					= Other.m_Cursor;
+	m_LastPos					= Other.m_LastPos;
+	m_CachePen					= Other.m_CachePen;
+	m_CacheBrush				= Other.m_CacheBrush;
+	m_pNodeID					= Other.m_pNodeID;
+	m_SuspendUpdate				= Other.m_SuspendUpdate;
+
+	return *this;
+}
 
 QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 {
@@ -46,8 +67,11 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
  
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionChange)
 	{
-		QPointF NodeRangeMin = m_pTransferFunctionCanvas->TransferFunctionToScene(QPointF(m_pNode->GetMinX(), m_pNode->GetMinY()));
-		QPointF NodeRangeMax = m_pTransferFunctionCanvas->TransferFunctionToScene(QPointF(m_pNode->GetMaxX(), m_pNode->GetMaxY()));
+		const float Width	= m_pTransferFunctionItem->rect().width();
+		const float Height	= m_pTransferFunctionItem->rect().height();
+
+		QPointF NodeRangeMin = QPointF(m_pNode->GetMinX() * Width, m_pNode->GetMinY() * Height);
+		QPointF NodeRangeMax = QPointF(m_pNode->GetMaxX() * Width, m_pNode->GetMaxY() * Height);
 
 		NewScenePoint.setX(qMin(NodeRangeMax.x() - NODE_POSITION_EPSILON, qMax(NewScenePoint.x(), NodeRangeMin.x() + NODE_POSITION_EPSILON)));
 		NewScenePoint.setY(qMin(NodeRangeMin.y(), qMax(NewScenePoint.y(), NodeRangeMax.y())));
@@ -57,15 +81,15 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionHasChanged)
 	{
-		QPointF NewTfPoint = m_pTransferFunctionCanvas->SceneToTransferFunction(NewScenePoint);
+		QPointF NewTfPoint(NewScenePoint.x() / rect().width(), NewScenePoint.y() / rect().height());
 
-		m_pTransferFunctionCanvas->m_AllowUpdateNodes = false;
+		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
 
 		m_pNode->SetIntensity(NewTfPoint.x());
 		m_pNode->SetOpacity(NewTfPoint.y());
 
-		m_pTransferFunctionCanvas->m_AllowUpdateNodes = true;
-
+		m_pTransferFunctionItem->m_AllowUpdateNodes = true;
+ 
 		return NewScenePoint;
 	}
 

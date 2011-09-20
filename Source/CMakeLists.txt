@@ -70,6 +70,8 @@ SET(ExposureRenderSources
 	Node.cpp
 	GradientRamp.cpp
 	HistogramItem.cpp
+	BackgroundItem.cpp
+	TransferFunctionItem.cpp
 
 	# Camera
 	Camera.cpp
@@ -151,6 +153,8 @@ SET(ExposureRenderHeaders
 	Node.h
 	GradientRamp.h
 	HistogramItem.h
+	BackgroundItem.h
+	TransferFunctionItem.h
 
 	# Camera
 	Camera.h
@@ -336,6 +340,8 @@ SET(AppearanceSources
 	Node.h
 	GradientRamp.h
 	HistogramItem.h
+	BackgroundItem.h
+	TransferFunctionItem.h
 	AppearanceDockWidget.cpp
 	TransferFunction.cpp
 	TransferFunctionCanvas.cpp
@@ -350,6 +356,8 @@ SET(AppearanceSources
 	Node.cpp
 	GradientRamp.cpp
 	HistogramItem.cpp
+	BackgroundItem.cpp
+	TransferFunctionItem.cpp
 )
 
 # Make the appearance group

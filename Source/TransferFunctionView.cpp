@@ -12,7 +12,8 @@ QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	m_Margin(10, 10, 10, 10),
 	m_Scene(),
 	m_Background(NULL),
-	m_HistogramItem(NULL)
+	m_HistogramItem(NULL),
+	m_TransferFunctionItem(NULL)
 {
 	// Styling
  	setFrameShadow(Sunken);
@@ -29,14 +30,20 @@ QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	// Turn anti-aliasing on
 	setRenderHint(QPainter::Antialiasing);
 
-	m_Scene.addItem(&m_Background);
-	m_Scene.addItem(&m_HistogramItem);
+	m_TransferFunctionItem.SetTransferFunction(&gTransferFunction);
+
+//	m_Scene.addItem(&m_Background);
+//	m_Scene.addItem(&m_HistogramItem);
+	m_Scene.addItem(&m_TransferFunctionItem);
 
 	m_Background.setZValue(0);
 	m_HistogramItem.setZValue(100);
 
 // 	m_Background.translate(m_Margin.GetLeft(), m_Margin.GetTop());
  	m_HistogramItem.translate(m_Margin.GetLeft(), m_Margin.GetTop());
+	m_TransferFunctionItem.translate(m_Margin.GetLeft(), m_Margin.GetTop());
+
+	QObject::connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnTransferFunctionChanged()));
 }
 
 void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
@@ -48,10 +55,11 @@ void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 	Rectangle.adjust(m_Margin.GetLeft(),  m_Margin.GetTop(), -m_Margin.GetRight(), -m_Margin.GetBottom());
 
 	m_Background.setRect(Rectangle);
-
-// 	m_Background.rect().setWidth(Rectangle.width() - m_Margin.GetLeft() - m_Margin.GetRight());
-// 	m_Background.rect().setHeight(Rectangle.height() - m_Margin.GetTop() - m_Margin.GetBottom());
 	m_HistogramItem.SetRectangle(Rectangle);
+	m_TransferFunctionItem.setRect(Rectangle);
+
+
+	m_TransferFunctionItem.Update();
 
 	setSceneRect(rect());
 }
@@ -59,6 +67,11 @@ void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 void QTFView::SetHistogram(QHistogram& Histogram)
 {
 	m_HistogramItem.SetHistogram(Histogram);
+}
+
+void QTFView::OnTransferFunctionChanged(void)
+{
+	m_TransferFunctionItem.Update();
 }
 
 QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
@@ -136,15 +149,6 @@ void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
 	}
 }
 
-void QTransferFunctionView::OnHistogramChanged(void)
-{
-	m_TransferFunctionCanvas.UpdateHistogram();
-}
-
-void QTransferFunctionView::resizeEvent(QResizeEvent* pResizeEvent)
-{
-}
-
 void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 {
 	/*
@@ -198,29 +202,4 @@ void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
 		}
 	}
 	*/
-}
-
-void QBackgroundRectangle::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
-{
-	if (isEnabled())
-	{
-		setBrush(m_BrushEnabled);
-		setPen(m_PenEnabled);
-	}
-	else
-	{
-		setBrush(m_BrushDisabled);
-		setPen(m_PenDisabled);
-	}
-
-	QGraphicsRectItem::paint(pPainter, pOption, pWidget);
-}
-
-QBackgroundRectangle::QBackgroundRectangle(QGraphicsItem* pParent) :
-	QGraphicsRectItem(pParent),
-	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170))),
-	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 230))),
-	m_PenEnabled(QPen(QColor::fromHsl(0, 0, 140))),
-	m_PenDisabled(QPen(QColor::fromHsl(0, 0, 190)))
-{
 }

@@ -2,19 +2,21 @@
 // Precompiled headers
 #include "Stable.h"
 
-#include "NodeItem.h"
+#include "EdgeItem.h"
 #include "TransferFunction.h"
-#include "TransferFunctionCanvas.h"
+#include "TransferFunctionItem.h"
 
 QPen QEdgeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.3);
 QPen QEdgeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.3);
 QPen QEdgeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 150)), 1.3);
 
-QEdgeItem::QEdgeItem(QTransferFunctionCanvas* pTransferFunctionCanvas) :
-	QGraphicsLineItem(pTransferFunctionCanvas),
-	m_pTransferFunctionCanvas(pTransferFunctionCanvas)
+QEdgeItem::QEdgeItem(QTransferFunctionItem* pTransferFunctionItem) :
+	QGraphicsLineItem(pTransferFunctionItem),
+	m_pTransferFunctionItem(pTransferFunctionItem)
 {
 	setPen(m_PenNormal);
+
+	setParentItem(m_pTransferFunctionItem);
 };
 
 void QEdgeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)

@@ -6,20 +6,8 @@
 #include "TransferFunction.h"
 #include "NodeItem.h"
 
-QGridLine::QGridLine(QTransferFunctionCanvas* pTransferFunctionCanvas) :
-	QGraphicsLineItem(pTransferFunctionCanvas),
-	m_pTransferFunctionCanvas(pTransferFunctionCanvas)
-{
-}
-
 QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphicsScene* pGraphicsScene) :
 	QGraphicsRectItem(pParent, pGraphicsScene),
-	m_BackgroundRectangle(),
-	m_BackgroundBrush(),
-	m_BackgroundPen(),
-	m_GridLines(),
-	m_GridPenHorizontal(),
-	m_GridPenVertical(),
 	m_Polygon(),
 	m_PolygonGradient(),
 	m_Histogram(),
@@ -43,31 +31,10 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 	m_Histogram.setParentItem(this);
 	m_Histogram.setPen(QPen(QBrush(QColor::fromHsl(0, 100, 110)), 0.65f));
 
-	// Background styling
-	m_BackgroundBrush.setColor(QColor(Qt::gray));
-	m_BackgroundBrush.setStyle(Qt::SolidPattern);
-
-	// Make sure the background rectangle is drawn behind everything else
-	setZValue(m_BackgroundZ);
-
-	m_BackgroundRectangle.setParentItem(this);
-	m_BackgroundRectangle.setZValue(10);
-	m_BackgroundRectangle.setPen(Qt::NoPen);
-	m_BackgroundRectangle.setBrush(Qt::gray);
-
 	// Grid
 	QVector<qreal> dashes;
 	dashes << 13 << 13;
 
-	m_GridPenHorizontal.setColor(QColor(100, 100, 100, 100));
-	m_GridPenHorizontal.setWidthF(0.6f);
-	m_GridPenHorizontal.setStyle(Qt::DashLine);
-	m_GridPenHorizontal.setDashPattern(dashes);
-
-	m_GridPenVertical.setColor(QColor(100, 100, 100, 200));
-	m_GridPenVertical.setWidthF(0.6f);
-	m_GridPenVertical.setStyle(Qt::SolidLine);
-//	m_GridPenVertical.setDashPattern(dashes);
 
 	// Update the canvas
 	Update();
@@ -80,9 +47,6 @@ QTransferFunctionCanvas::QTransferFunctionCanvas(QGraphicsItem* pParent, QGraphi
 
 QTransferFunctionCanvas::~QTransferFunctionCanvas(void)
 {
-	for (int i = 0; i < m_GridLines.size(); i++)
-		scene()->removeItem(m_GridLines[i]);
-
 	for (int i = 0; i < m_Nodes.size(); i++)
 		scene()->removeItem(m_Nodes[i]);
 
@@ -96,106 +60,16 @@ void QTransferFunctionCanvas::Update(void)
 	UpdateEdges();
 	UpdateGradient();
 	UpdatePolygon();
-
-	m_BackgroundRectangle.setRect(rect());
 }
 
 void QTransferFunctionCanvas::UpdateGrid(void)
 {
-	for (int i = 0; i < m_GridLines.size(); i++)
-		scene()->removeItem(m_GridLines[i]);
-
-	// Clear the edges list
-	m_GridLines.clear();
-
-	// Horizontal grid lines
-	const float DeltaY = 0.1f * rect().height();
-
-	for (int i = 1; i < 10; i++)
-	{
-		QGridLine* pGridLine = new QGridLine(this);
-		m_GridLines.append(pGridLine);
-
-		pGridLine->setLine(QLineF(0, i * DeltaY, rect().width(), i * DeltaY));
-		pGridLine->setPen(m_GridPenHorizontal);
-		pGridLine->setZValue(m_GridZ);
-	}
-
-	float GridInterval = 50.0f;
-
-	int Num = ceilf(rect().width() / GridInterval);
-
-	for (int i = 0; i < Num; i++)
-	{
-		QGridLine* pGridLine = new QGridLine(this);
-		m_GridLines.append(pGridLine);
-
-		pGridLine->setLine(QLineF(i * GridInterval, 0.0f, i * GridInterval, rect().height()));
-		pGridLine->setPen(m_GridPenVertical);
-		pGridLine->setZValue(m_GridZ);
-	}
-}
-
-void QTransferFunctionCanvas::UpdateHistogram(void)
-{
-	return;
-
-	m_Histogram.setVisible(gHistogram.GetEnabled());
-
-	if (!gHistogram.GetEnabled())
-		return;
-
-	QPolygonF Polygon;
-
-	QLinearGradient LinearGradient;
-
-	LinearGradient.setStart(0, rect().bottom());
-	LinearGradient.setFinalStop(0, rect().top());
-
-	QGradientStops GradientStops;
-
-	GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 100, 150, 0)));
-	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 100, 150, 255)));
-
-	LinearGradient.setStops(GradientStops);
-
-	// Set the gradient stops
-	for (int i = 0; i < gHistogram.GetBins().size(); i++)
-	{
-		// Compute polygon point in scene coordinates
-		QPointF ScenePoint = TransferFunctionToScene(QPointF(i, logf((float)gHistogram.GetBins()[i]) / logf(1.5f * (float)gHistogram.GetMax())));
-
-		if (i == 0)
-		{
-			QPointF CenterCopy = ScenePoint;
-
-			CenterCopy.setY(rect().height());
-
-			Polygon.append(CenterCopy);
-		}
-
-		Polygon.append(ScenePoint);
-
-		if (i == (gHistogram.GetBins().size() - 1))
-		{
-			QPointF CenterCopy = ScenePoint;
-
-			CenterCopy.setY(rect().height());
-
-			Polygon.append(CenterCopy);
-		}
-	}
-
-	// Depth order
-	m_Histogram.setZValue(m_HistogramZ);
-
-	// Update the polygon geometry
-	m_Histogram.setPolygon(Polygon);
-	m_Histogram.setBrush(QBrush(LinearGradient));
+	
 }
 
 void QTransferFunctionCanvas::UpdateNodes(void)
 {
+	/*
 	if (!m_AllowUpdateNodes)
 		return;
 
@@ -232,27 +106,12 @@ void QTransferFunctionCanvas::UpdateNodes(void)
 				m_Nodes[i]->setSelected(true);
 		}
 	}
+	*/
 }
 
 void QTransferFunctionCanvas::UpdateEdges(void)
 {
-	for (int i = 0; i < m_Edges.size(); i++)
-		scene()->removeItem(m_Edges[i]);
 
-	// Clear the edges list
-	m_Edges.clear();
-
-	for (int i = 1; i < m_Nodes.size(); i++)
-	{
-		QPointF PtFrom(m_Nodes[i - 1]->pos());
-		QPointF PtTo(m_Nodes[i]->pos());
-
-		QEdgeItem* pEdge = new QEdgeItem(this);
-		m_Edges.append(pEdge);
-
-		pEdge->setLine(QLineF(PtFrom, PtTo));		
-		pEdge->setZValue(m_EdgeZ);
-	}
 }
 
 void QTransferFunctionCanvas::UpdateGradient(void)

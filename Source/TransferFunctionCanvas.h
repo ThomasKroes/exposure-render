@@ -4,27 +4,6 @@
 #include "NodeItem.h"
 #include "EdgeItem.h"
 
-class QGridLine : public QGraphicsLineItem
-{
-public:
-	QGridLine(QTransferFunctionCanvas* pTransferFunctionCanvas);
-
-	QGridLine::QGridLine(const QGridLine& Other)
-	{
-		*this = Other;
-	};
-
-	QGridLine& operator = (const QGridLine& Other)			
-	{
-		m_pTransferFunctionCanvas = Other.m_pTransferFunctionCanvas;
-
-		return *this;
-	}
-
-private:
-	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
-};
-
 class QTransferFunctionCanvas : public QGraphicsRectItem
 {
 public:
@@ -33,9 +12,7 @@ public:
 
 public:
 	void Update(void);
-	void UpdateBackground(void);
 	void UpdateGrid(void);
-	void UpdateHistogram(void);
 	void UpdateEdges(void);
 	void UpdateNodes(void);
 	void UpdateGradient(void);
@@ -45,12 +22,6 @@ public:
 	QPointF TransferFunctionToScene(const QPointF& TfPoint);
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 protected:
-	QGraphicsRectItem		m_BackgroundRectangle;
-	QBrush					m_BackgroundBrush;
-	QPen					m_BackgroundPen;
-	QList<QGridLine*>		m_GridLines;
-	QPen					m_GridPenHorizontal;
-	QPen					m_GridPenVertical;
 	QGraphicsPolygonItem	m_Polygon;
 	QLinearGradient			m_PolygonGradient;
 	QGraphicsPolygonItem	m_Histogram;

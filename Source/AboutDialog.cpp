@@ -37,7 +37,7 @@ QAboutDialog::QAboutDialog(QWidget* pParent /*= NULL*/) :
 		AboutString += "<b><li>Qt</b>The <a href='http://qt.nokia.com/products/'>Qt SDK</a> combines the Qt framework with tools designed to streamline the creation of applications for Symbian and Maemo, MeeGo (Nokia N9) in addition to desktop platforms, such as Microsoft Windows, Mac OS X, and Linux</li><br>";
 	AboutString += "</ul>";
 	AboutString += "<br>";
-	AboutString += "<b>Acknowledgements</b><br>VolVis and Volume Library website for hosting data sets, J. Clarenburg <a href='http://www.clarenburg.nl/'>Studio Clarenburg</a> for the logo design";
+	AboutString += "<b>Acknowledgements</b><br>VolVis and Volume Library website for hosting data sets, J. E. Clarenburg <a href='http://www.clarenburg.nl/'>Studio Clarenburg</a> for the logo design";
 	AboutString += "<br><br>";
 	AboutString += "For more information please refer to the <a href='http://code.google.com/p/exposure-render/'>Exposure Render</a> website or to the <a href='http://graphics.tudelft.nl'>TU Delft Graphics Website</a>. You can also contact me directly: t.kroes@tudelft.nl";
 

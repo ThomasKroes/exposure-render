@@ -1,12 +1,11 @@
 #pragma once
 
-class QNode;
-class QTransferFunctionCanvas;
+class QTransferFunctionItem;
 
 class QEdgeItem : public QGraphicsLineItem
 {
 public:
-	QEdgeItem(QTransferFunctionCanvas* pTransferFunctionCanvas);
+	QEdgeItem(QTransferFunctionItem* pTransferFunctionItem);
 
 	QEdgeItem::QEdgeItem(const QEdgeItem& Other)
 	{
@@ -15,7 +14,7 @@ public:
 
 	QEdgeItem& operator = (const QEdgeItem& Other)			
 	{
-		m_pTransferFunctionCanvas = Other.m_pTransferFunctionCanvas;
+		m_pTransferFunctionItem = Other.m_pTransferFunctionItem;
 
 		return *this;
 	}
@@ -26,9 +25,8 @@ public:
 	void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
 
 public:
-	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
-
-	static QPen					m_PenNormal;
-	static QPen					m_PenHighlight;
-	static QPen					m_PenDisabled;
+	QTransferFunctionItem*	m_pTransferFunctionItem;
+	static QPen				m_PenNormal;
+	static QPen				m_PenHighlight;
+	static QPen				m_PenDisabled;
 };

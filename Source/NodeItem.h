@@ -1,31 +1,14 @@
 #pragma once
 
 class QNode;
-class QTransferFunctionCanvas;
+class QTransferFunctionItem;
 
 class QNodeItem : public QGraphicsEllipseItem
 {
 public:
-	QNodeItem(QTransferFunctionCanvas* pTransferFunctionCanvas, QNode* pNode);
-
-	QNodeItem::QNodeItem(const QNodeItem& Other)
-	{
-		*this = Other;
-	};
-
-	QNodeItem& operator = (const QNodeItem& Other)			
-	{
-		m_pTransferFunctionCanvas	= Other.m_pTransferFunctionCanvas;
-		m_pNode						= Other.m_pNode;
-		m_Cursor					= Other.m_Cursor;
-		m_LastPos					= Other.m_LastPos;
-		m_CachePen					= Other.m_CachePen;
-		m_CacheBrush				= Other.m_CacheBrush;
-		m_pNodeID					= Other.m_pNodeID;
-		m_SuspendUpdate				= Other.m_SuspendUpdate;
-
-		return *this;
-	}
+	QNodeItem(QTransferFunctionItem* pTransferFunctionItem, QNode* pNode);
+	QNodeItem::QNodeItem(const QNodeItem& Other);
+	QNodeItem& operator = (const QNodeItem& Other);
 
 	void UpdateTooltip(void);
 	
@@ -39,20 +22,20 @@ protected:
 	virtual void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
 
 public:
-	QTransferFunctionCanvas*	m_pTransferFunctionCanvas;
-	QNode*						m_pNode;
-	QCursor						m_Cursor;
-	QPointF						m_LastPos;
-	QPen						m_CachePen;
-	QBrush						m_CacheBrush;
-	QGraphicsTextItem*			m_pNodeID;
-	bool						m_SuspendUpdate;
+	QTransferFunctionItem*	m_pTransferFunctionItem;
+	QNode*					m_pNode;
+	QCursor					m_Cursor;
+	QPointF					m_LastPos;
+	QPen					m_CachePen;
+	QBrush					m_CacheBrush;
+	QGraphicsTextItem*		m_pNodeID;
+	bool					m_SuspendUpdate;
 
-	static float				m_Radius;
-	static QBrush				m_BrushNormal;
-	static QBrush				m_BrushHighlight;
-	static QBrush				m_BrushDisabled;
-	static QPen					m_PenNormal;
-	static QPen					m_PenHighlight;
-	static QPen					m_PenDisabled;
+	static float			m_Radius;
+	static QBrush			m_BrushNormal;
+	static QBrush			m_BrushHighlight;
+	static QBrush			m_BrushDisabled;
+	static QPen				m_PenNormal;
+	static QPen				m_PenHighlight;
+	static QPen				m_PenDisabled;
 };

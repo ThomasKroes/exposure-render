@@ -4,7 +4,6 @@
 
 #include "HistogramItem.h"
 
-
 QHistogramItem::QHistogramItem(QGraphicsItem* pParent) :
 	QGraphicsPolygonItem(pParent),
 	m_Histogram(),
@@ -46,7 +45,10 @@ void QHistogramItem::Update(void)
 	for (int i = 0; i < m_Histogram.GetBins().size(); i++)
 	{
 		// Compute polygon point in scene coordinates
-		QPointF ScenePoint = QPointF(GetRectangle().width() * ((float)i / (float)m_Histogram.GetBins().size()), GetRectangle().height() * logf((float)m_Histogram.GetBins()[i]) / logf(1.5f * (float)m_Histogram.GetMax()));
+		QPointF ScenePoint;
+		ScenePoint.setX(GetRectangle().width() * ((float)i / (float)m_Histogram.GetBins().size()));
+//		ScenePoint.setY(GetRectangle().height() * logf((float)m_Histogram.GetBins()[i]) / (0.1f + logf(1.5f * (float)m_Histogram.GetMax())));
+		ScenePoint.setY(((float)m_Histogram.GetBins()[i] / (float)m_Histogram.GetMax()) * GetRectangle().height());
 
 		if (i == 0)
 		{
