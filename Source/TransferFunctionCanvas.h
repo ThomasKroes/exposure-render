@@ -43,7 +43,7 @@ public:
 
 	QPointF SceneToTransferFunction(const QPointF& ScenePoint);
 	QPointF TransferFunctionToScene(const QPointF& TfPoint);
-
+	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 protected:
 	QGraphicsRectItem		m_BackgroundRectangle;
 	QBrush					m_BackgroundBrush;

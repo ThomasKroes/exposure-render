@@ -75,7 +75,7 @@ void CMainWindow::CreateMenus(void)
 
 	m_pFileMenu->addAction(GetIcon("star"), "Welcome screen", this, SLOT(ShowStartupDialog()));
 
-	 m_pFileMenu->addSeparator();
+	m_pFileMenu->addSeparator();
 
 	m_pFileMenu->addAction("Close", this, SLOT(Close()));
     m_pFileMenu->addSeparator();
@@ -92,6 +92,9 @@ void CMainWindow::CreateMenus(void)
     m_pHelpMenu->addAction(GetIcon("question"), "About Exposure Render", this, SLOT(About()));
 	m_pHelpMenu->addAction(GetIcon("question-white"), "About Qt", qApp, SLOT(aboutQt()));
 
+	m_pHelpMenu->addSeparator();
+
+	m_pHelpMenu->addAction(GetIcon("globe"), "Visit Website", this, SLOT(OnVisitWebsite()));
 
 	UpdateRecentFileActions();
 }
@@ -312,4 +315,9 @@ void CMainWindow::ShowStartupDialog(void)
 	connect(&StartupDialog, SIGNAL(LoadDemo(const QString&)), gpMainWindow, SLOT(OnLoadDemo(const QString&)));
 
 	StartupDialog.exec();
+}
+
+void CMainWindow::OnVisitWebsite(void)
+{
+	QDesktopServices::openUrl(QUrl("http://code.google.com/p/exposure-render/"));
 }

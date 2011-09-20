@@ -27,6 +27,7 @@ public slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
 	void ShowStartupDialog(void);
+	void OnVisitWebsite(void);
 
 public slots:
 	void OnLoadDemo(const QString& FileName);

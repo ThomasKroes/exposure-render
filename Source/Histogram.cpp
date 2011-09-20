@@ -10,7 +10,8 @@ QHistogram::QHistogram(QObject* pParent /*= NULL*/) :
 	QObject(pParent),
 	m_Enabled(false),
 	m_Bins(),
-	m_Max(0)
+	m_Max(0),
+	m_pPixMap(NULL)
 {
 }
 
@@ -72,13 +73,26 @@ void QHistogram::SetBins(const int* pBins, const int& NoBins)
 
 	m_Enabled = true;
 
-	/*
+	// Inform others that the histogram has changed
+	emit HistogramChanged();
+}
+
+void QHistogram::CreatePixMap(void)
+{
+	
 	QRect Rect(0, 0, 500, 500);
 
 	QPainter Painter;
 
-	Painter.begin(&m_PixMap);
-		
+	m_pPixMap = new QPixmap();
+
+	Painter.begin(m_pPixMap);
+
+	Painter.drawRect(Rect);
+
+	Painter.end();
+
+		/*
 	QPolygonF Polygon;
 
 	QLinearGradient LinearGradient;
@@ -92,7 +106,7 @@ void QHistogram::SetBins(const int* pBins, const int& NoBins)
 	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 100, 150, 255)));
 
 	LinearGradient.setStops(GradientStops);
-
+	
 	// Set the gradient stops
 	for (int i = 0; i < GetBins().size(); i++)
 	{
@@ -122,9 +136,11 @@ void QHistogram::SetBins(const int* pBins, const int& NoBins)
 
 	Painter.end();
 	*/
+}
 
-	// Inform others that the histogram has changed
-	emit HistogramChanged();
+QPixmap* QHistogram::GetPixMap(void)
+{
+	return m_pPixMap;
 }
 
 int QHistogram::GetMax(void) const

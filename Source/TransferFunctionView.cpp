@@ -59,9 +59,8 @@ QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
 
 	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
 
-	// Inform us when rendering begins and ends
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	QObject::connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 
 	QGraphicsGridLayout *layout = new QGraphicsGridLayout;
 	layout->setSpacing(10);
