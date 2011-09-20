@@ -638,14 +638,14 @@ bool QRenderThread::Load(QString& FileName)
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
  	Histogram->SetInputConnection(ImageCast->GetOutputPort());
- 	Histogram->SetComponentExtent(0, 2048, 0, 0, 0, 0);
+ 	Histogram->SetComponentExtent(0, 512, 0, 0, 0, 0);
  	Histogram->SetComponentOrigin(0, 0, 0);
  	Histogram->SetComponentSpacing(1, 0, 0);
  	Histogram->IgnoreZeroOn();
  	Histogram->Update();
  
 	// Update the histogram in the transfer function
-	gHistogram.SetBins((int*)Histogram->GetOutput()->GetScalarPointer(), 2048);
+	gHistogram.SetBins((int*)Histogram->GetOutput()->GetScalarPointer(), 512);
 	
 	// Delete progress dialog
 //	gpProgressDialog->close();

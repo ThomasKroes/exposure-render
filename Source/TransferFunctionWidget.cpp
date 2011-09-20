@@ -53,8 +53,10 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_Canvas.setContentsMargins(15, 0, 0, 0);
 	m_Canvas.setEnabled(true);
 
+	m_BottomLayout.setContentsMargins(10, 0, 10, 0);
+
 	m_GradientRampDiffuse.setContentsMargins(10, 0, 10, 0);
-	m_GradientRampSpecular.setContentsMargins(10, 0, 10, 0);
+	m_GradientRampSpecular.setContentsMargins(100, 0, 10, 0);
 	m_GradientRampEmission.setContentsMargins(10, 0, 10, 0);
 
 	QGradientStops DiffuseGradientStops, SpecularGradientStops, EmissionGradientStops;
@@ -83,11 +85,13 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 void QTransferFunctionWidget::OnRenderBegin(void)
 {
 	m_Canvas.setEnabled(true);
+	m_Canvas.SetHistogram(gHistogram);
 }
 
 void QTransferFunctionWidget::OnRenderEnd(void)
 {
 	m_Canvas.setEnabled(false);
+	m_Canvas.SetHistogram(QHistogram());
 }
 
 void QTransferFunctionWidget::OnUpdateGradients(void)

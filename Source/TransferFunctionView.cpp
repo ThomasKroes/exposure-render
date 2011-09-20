@@ -9,44 +9,56 @@
 
 QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	QGraphicsView(pParent),
+	m_Margin(10, 10, 10, 10),
 	m_Scene(),
 	m_Background(NULL),
-	m_Histogram(NULL)
+	m_HistogramItem(NULL)
 {
 	// Styling
-// 	setFrameShadow(Sunken);
-// 	setFrameShape(NoFrame);
+ 	setFrameShadow(Sunken);
+ 	setFrameShape(NoFrame);
 
 	// Never show scrollbars
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-	// Create scene and apply
+	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
+
 	setScene(&m_Scene);
 
 	// Turn anti-aliasing on
 	setRenderHint(QPainter::Antialiasing);
 
 	m_Scene.addItem(&m_Background);
-//	m_Background.setParentItem(&m_Scene);
+	m_Scene.addItem(&m_HistogramItem);
 
+	m_Background.setZValue(0);
+	m_HistogramItem.setZValue(100);
+
+// 	m_Background.translate(m_Margin.GetLeft(), m_Margin.GetTop());
+ 	m_HistogramItem.translate(m_Margin.GetLeft(), m_Margin.GetTop());
 }
 
 void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 {
 	QGraphicsView::resizeEvent(pResizeEvent);
 
-	m_Background.setRect(rect());
+	QRect Rectangle = rect();
+
+	Rectangle.adjust(m_Margin.GetLeft(),  m_Margin.GetTop(), -m_Margin.GetRight(), -m_Margin.GetBottom());
+
+	m_Background.setRect(Rectangle);
+
+// 	m_Background.rect().setWidth(Rectangle.width() - m_Margin.GetLeft() - m_Margin.GetRight());
+// 	m_Background.rect().setHeight(Rectangle.height() - m_Margin.GetTop() - m_Margin.GetBottom());
+	m_HistogramItem.SetRectangle(Rectangle);
+
+	setSceneRect(rect());
 }
 
 void QTFView::SetHistogram(QHistogram& Histogram)
 {
-	m_Histogram.SetHistogram(Histogram);
-}
-
-void QTFView::UpdateHistogram(void)
-{
-	
+	m_HistogramItem.SetHistogram(Histogram);
 }
 
 QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
