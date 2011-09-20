@@ -3,35 +3,7 @@
 #include "Stable.h"
 
 #include "StartupDialog.h"
-
-QDemoWidget::QDemoWidget(const QString& Name, const QString& Description, const QString& Image, QWidget* pParent /*= NULL*/) :
-QWidget(pParent),
-	m_MainLayout(),
-	m_Demo(),
-	m_Name(),
-	m_Description()
-{
-	setLayout(&m_MainLayout);
-
-	m_Demo.setFixedSize(72, 72);
-	m_Demo.setIcon(GetIcon(Image));
-	m_Demo.setIconSize(QSize(60, 60));
-	m_Demo.setText("");
-
-	m_Name.setWordWrap(true);
-	m_Name.setText("<b>" + Name + "</b>");
-
-	m_Description.setWordWrap(true);
-	m_Description.setText(Description);
-
-	m_MainLayout.addWidget(&m_Demo, 0, 0, 2, 1, Qt::AlignTop);
-	m_MainLayout.addWidget(&m_Name, 0, 1, Qt::AlignTop);
-	m_MainLayout.addWidget(&m_Description, 1, 1, Qt::AlignTop);
-}
-
-QDemoWidget::~QDemoWidget(void)
-{
-}
+#include "MainWindow.h"
 
 QStartupDialog::QStartupDialog(QWidget* pParent) :
 	QDialog(pParent),
@@ -58,12 +30,12 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_DemoFilesGroupBox.setStatusTip("Demo files");
 
 	m_DemoFilesLayout.setAlignment(Qt::AlignTop);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Manix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "manix"), 0, 0);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Backpack", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", ""), 0, 1);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Bonsai", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www9.informatik.uni-erlangen.de/External/vollib/'>Volume Library</a>", ""), 1, 0);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Macoessix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", ""), 1, 1);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Engine", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", ""), 2, 0);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Artifix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", ""), 2, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Manix", "manix_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "manix"), 0, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Backpack", "backpack_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", "backpack"), 0, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Bonsai", "bonsai_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www9.informatik.uni-erlangen.de/External/vollib/'>Volume Library</a>", ""), 1, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Macoessix", "macoessix_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "macoessix"), 1, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Engine", "engine_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", ""), 2, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Artifix", "artifix_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "artifix"), 2, 1);
 
 	m_ResampleNote.setText("In order to reduce the size of the installer we distribute resampled volumes (sampled at 50%). The original volumes, as well as other volumes can be downloaded from the <a href='http://code.google.com/p/exposure-render/downloads'>Exposure Render Website</a>");
 	m_ResampleNote.setWordWrap(true);
@@ -99,19 +71,6 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 
 	// Load the read me file
 	LoadReadMe("Readme.txt");
-
-	QSignalMapper* pSignalMapper = new QSignalMapper(this);
-// 	pSignalMapper->setMapping(&m_Demo1, QString("Bonsai.mhd"));
-// 	pSignalMapper->setMapping(&m_Demo2, QString("Manix.mhd"));
-// 	pSignalMapper->setMapping(&m_Demo3, QString("Backpack.mhd"));
-// 	pSignalMapper->setMapping(&m_Demo4, QString("Backpack.mhd"));
-
-// 	connect(&m_Demo1, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
-// 	connect(&m_Demo2, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
-// 	connect(&m_Demo3, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
-// 	connect(&m_Demo4, SIGNAL(clicked()), pSignalMapper, SLOT (map()));
-
-	connect(pSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(OnLoadDemo(const QString&)));
 };
 
 QStartupDialog::~QStartupDialog(void)
@@ -131,12 +90,6 @@ void QStartupDialog::accept()
 	QDialog::accept();
 }
 
-void QStartupDialog::OnLoadDemo(const QString& FileName)
-{
-	emit LoadDemo(FileName);
-	accept();
-}
-
 void QStartupDialog::LoadReadMe(const QString& FileName)
 {
 	QFile File(QApplication::applicationDirPath() + "/Readme.txt");
@@ -151,4 +104,48 @@ void QStartupDialog::LoadReadMe(const QString& FileName)
 	DocumentArray = File.readAll();
 
 	m_ReadMe.setPlainText(DocumentArray);
+}
+
+void QStartupDialog::LoadDemoFile(const QString& BaseName)
+{
+	emit LoadDemo(BaseName);
+	accept();
+}
+
+QDemoWidget::QDemoWidget(QStartupDialog* pStartupDialog, const QString& NameUI, const QString& BaseName, const QString& Description, const QString& Image, QWidget* pParent /*= NULL*/) :
+	QWidget(pParent),
+	m_pStartupDialog(pStartupDialog),
+	m_MainLayout(),
+	m_Demo(),
+	m_Name(),
+	m_Description(),
+	m_BaseName(BaseName)
+{
+	setLayout(&m_MainLayout);
+
+	m_Demo.setFixedSize(72, 72);
+	m_Demo.setIcon(GetIcon(Image));
+	m_Demo.setIconSize(QSize(56, 56));
+	m_Demo.setText("");
+
+	m_Name.setWordWrap(true);
+	m_Name.setText("<b>" + NameUI + "</b>");
+
+	m_Description.setWordWrap(true);
+	m_Description.setText(Description);
+
+	m_MainLayout.addWidget(&m_Demo, 0, 0, 2, 1, Qt::AlignTop);
+	m_MainLayout.addWidget(&m_Name, 0, 1, Qt::AlignTop);
+	m_MainLayout.addWidget(&m_Description, 1, 1, Qt::AlignTop);
+
+	QObject::connect(&m_Demo, SIGNAL(clicked()), this, SLOT(OnLoadDemo()));
+}
+
+QDemoWidget::~QDemoWidget(void)
+{
+}
+
+void QDemoWidget::OnLoadDemo(void)
+{
+	m_pStartupDialog->LoadDemoFile(m_BaseName);
 }

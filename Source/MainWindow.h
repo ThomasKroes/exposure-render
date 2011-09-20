@@ -17,9 +17,7 @@ public:
     CMainWindow(void);
 	virtual ~CMainWindow(void);
 
-	virtual void ShowStartupDialog(void); 
-
-private slots:
+public slots:
 	void Open(void);
 	void Open(QString FilePath);
 	void OpenRecentFile(void);
@@ -28,7 +26,8 @@ private slots:
     void About(void);
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
-	
+	void ShowStartupDialog(void);
+
 public slots:
 	void OnLoadDemo(const QString& FileName);
 

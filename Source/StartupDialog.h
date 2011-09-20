@@ -1,19 +1,5 @@
 #pragma once
 
-class QDemoWidget : public QWidget
-{
-	Q_OBJECT
-
-public:
-	QDemoWidget(const QString& Name, const QString& Description, const QString& Image, QWidget* pParent = NULL);
-	virtual ~QDemoWidget(void);
-
-	QGridLayout		m_MainLayout;
-	QPushButton		m_Demo;
-	QLabel			m_Name;
-	QLabel			m_Description;
-};
-
 class QStartupDialog : public QDialog
 {
 	Q_OBJECT
@@ -26,12 +12,10 @@ public:
 	virtual QSize sizeHint() const;
 
 public:
+	void LoadDemoFile(const QString& BaseName);
 
 private:
 	void LoadReadMe(const QString& FileName);
-
-private slots:
-	void OnLoadDemo(const QString& FileName);
 
 signals:
 	void LoadDemo(const QString& FileName);
@@ -46,4 +30,24 @@ private:
 	QTextEdit			m_ReadMe;
 	QDialogButtonBox	m_DialogButtons;
 	QCheckBox			m_ShowNextTime;
+};
+
+class QDemoWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+	QDemoWidget(QStartupDialog* pStartupDialog, const QString& NameUI, const QString& BaseName, const QString& Description, const QString& Image, QWidget* pParent = NULL);
+	virtual ~QDemoWidget(void);
+
+private:
+	QStartupDialog*		m_pStartupDialog;
+	QGridLayout			m_MainLayout;
+	QPushButton			m_Demo;
+	QLabel				m_Name;
+	QLabel				m_Description;
+	QString				m_BaseName;
+
+private slots:
+	void OnLoadDemo(void);
 };

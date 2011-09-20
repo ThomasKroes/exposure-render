@@ -121,6 +121,9 @@ void CMainWindow::CreateMenus(void)
     
 	menuBar()->addSeparator();
 
+	m_pFileMenu->addAction(GetIcon("star"), "Welcome screen", this, SLOT(ShowStartupDialog()));
+
+
 	m_pViewMenu = menuBar()->addMenu(tr("&View"));
 
     menuBar()->addSeparator();
