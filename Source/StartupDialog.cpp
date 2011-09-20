@@ -4,6 +4,35 @@
 
 #include "StartupDialog.h"
 
+QDemoWidget::QDemoWidget(const QString& Name, const QString& Description, const QString& Image, QWidget* pParent /*= NULL*/) :
+QWidget(pParent),
+	m_MainLayout(),
+	m_Demo(),
+	m_Name(),
+	m_Description()
+{
+	setLayout(&m_MainLayout);
+
+	m_Demo.setFixedSize(72, 72);
+	m_Demo.setIcon(GetIcon(Image));
+	m_Demo.setIconSize(QSize(60, 60));
+	m_Demo.setText("");
+
+	m_Name.setWordWrap(true);
+	m_Name.setText("<b>" + Name + "</b>");
+
+	m_Description.setWordWrap(true);
+	m_Description.setText(Description);
+
+	m_MainLayout.addWidget(&m_Demo, 0, 0, 2, 1, Qt::AlignTop);
+	m_MainLayout.addWidget(&m_Name, 0, 1, Qt::AlignTop);
+	m_MainLayout.addWidget(&m_Description, 1, 1, Qt::AlignTop);
+}
+
+QDemoWidget::~QDemoWidget(void)
+{
+}
+
 QStartupDialog::QStartupDialog(QWidget* pParent) :
 	QDialog(pParent),
 	m_MainLayout(),
@@ -29,7 +58,7 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_DemoFilesGroupBox.setStatusTip("Demo files");
 
 	m_DemoFilesLayout.setAlignment(Qt::AlignTop);
-	m_DemoFilesLayout.addWidget(new QDemoWidget("Manix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", ""), 0, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget("Manix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "manix"), 0, 0);
 	m_DemoFilesLayout.addWidget(new QDemoWidget("Backpack", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", ""), 0, 1);
 	m_DemoFilesLayout.addWidget(new QDemoWidget("Bonsai", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www9.informatik.uni-erlangen.de/External/vollib/'>Volume Library</a>", ""), 1, 0);
 	m_DemoFilesLayout.addWidget(new QDemoWidget("Macoessix", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", ""), 1, 1);
@@ -122,30 +151,4 @@ void QStartupDialog::LoadReadMe(const QString& FileName)
 	DocumentArray = File.readAll();
 
 	m_ReadMe.setPlainText(DocumentArray);
-}
-
-QDemoWidget::QDemoWidget(const QString& Name, const QString& Description, const QString& Image, QWidget* pParent /*= NULL*/) :
-	QWidget(pParent),
-	m_MainLayout(),
-	m_Demo(),
-	m_Name(),
-	m_Description()
-{
-	setLayout(&m_MainLayout);
-
-	m_Demo.setFixedSize(72, 72);
-
-	m_Name.setWordWrap(true);
-	m_Name.setText("<b>" + Name + "</b>");
-
-	m_Description.setWordWrap(true);
-	m_Description.setText(Description);
-
-	m_MainLayout.addWidget(&m_Demo, 0, 0, 2, 1, Qt::AlignTop);
-	m_MainLayout.addWidget(&m_Name, 0, 1, Qt::AlignTop);
-	m_MainLayout.addWidget(&m_Description, 1, 1, Qt::AlignTop);
-}
-
-QDemoWidget::~QDemoWidget(void)
-{
 }
