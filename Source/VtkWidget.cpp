@@ -88,15 +88,14 @@ void CVtkWidget::OnRenderBegin(void)
 {
 	
 	m_ImageImport->SetDataSpacing(1, 1, 1);
-	m_ImageImport->SetDataOrigin(-400, -300, 0);
-	m_ImageImport->SetImportVoidPointer((void*)malloc(3 * 800 * 600 * sizeof(unsigned char)));
-	m_ImageImport->SetWholeExtent(0, 800 - 1, 0, 600 - 1, 0, 0);
+	m_ImageImport->SetDataOrigin(-0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResY(), 0);
+	m_ImageImport->SetImportVoidPointer((void*)malloc(3 * Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
+	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
 	m_ImageImport->SetDataExtentToWholeExtent();
 	m_ImageImport->SetDataScalarTypeToUnsignedChar();
 	m_ImageImport->SetNumberOfScalarComponents(3);
 	m_ImageImport->Update();
 
-	
 	m_ImageActor->SetInterpolate(1);
 	m_ImageActor->SetInput(m_ImageImport->GetOutput());
 	m_ImageActor->SetScale(1, -1, -1);
@@ -134,6 +133,20 @@ void CVtkWidget::OnPostRenderFrame(void)
 {
 	if (!Scene())
 		return;
+
+	gpRenderThread->m_Mutex.lock();
+
+	if (gpRenderThread->GetRenderImage())
+	{
+ 		m_ImageImport->SetImportVoidPointer(NULL);
+		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+
+		m_ImageActor->SetInput(m_ImageImport->GetOutput());
+
+		m_RenderWindow->GetInteractor()->Render();
+	}
+
+	gpRenderThread->m_Mutex.unlock();
 }
 
 void CVtkWidget::SetupRenderView(void)
@@ -184,17 +197,7 @@ void CVtkWidget::OnRenderLoopTimer(void)
 	if (!Scene())
 		return;
 
-	if (gpRenderThread->GetRenderImage())
-	{
-		m_ImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
-		m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
-		m_ImageImport->SetImportVoidPointer(NULL);
-		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
-
-		m_ImageActor->SetInput(m_ImageImport->GetOutput());
-
-		m_RenderWindow->GetInteractor()->Render();
-	}
+	
 }
 
 void CVtkWidget::OnResize(void)

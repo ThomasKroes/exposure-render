@@ -7,6 +7,7 @@
 #include "VtkWidget.h"
 #include "Scene.h"
 #include "StartupDialog.h"
+#include "AboutDialog.h"
 
 // Main window singleton
 CMainWindow* gpMainWindow = NULL;
@@ -264,11 +265,8 @@ void CMainWindow::Exit(void)
 
 void CMainWindow::About()
 {
-	QMessageBox::about(this, tr("About Exposure Render"),
-		tr("This application illustrates the concepts from the paper: <b>Raytraced lighting in direct volume rendering</b>\n"
-		"For more information visit: <b>graphics.tudelft.nl</b>"));
-
-	// Acknowledgments niet vergeten!
+	QAboutDialog AboutDialog;
+	AboutDialog.exec();
 }
 
 void CMainWindow::OnRenderBegin(void)
