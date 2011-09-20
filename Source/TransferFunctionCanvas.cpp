@@ -92,8 +92,6 @@ QTransferFunctionCanvas::~QTransferFunctionCanvas(void)
 
 void QTransferFunctionCanvas::Update(void)
 {
-	return;
-
 	UpdateNodes();
 	UpdateEdges();
 	UpdateGradient();
@@ -366,6 +364,6 @@ QPointF QTransferFunctionCanvas::TransferFunctionToScene(const QPointF& TfPoint)
 
 void QTransferFunctionCanvas::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget /*= 0*/)
 {
-	if (gHistogram.GetPixMap())
-		painter->drawPixmap(0, 0, 100, 100, *gHistogram.GetPixMap());
+// 	if (gHistogram.GetPixMap())
+// 		painter->drawPixmap(0, 0, 100, 100, *gHistogram.GetPixMap());
 }

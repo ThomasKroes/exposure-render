@@ -85,6 +85,9 @@ private:
 	void CreateVolume(void);
 	void CreateExtinctionVolume(float* pDensityBuffer, cudaExtent Resolution);
 
+public slots:
+	void OnUpdateTransferFunction(void);
+
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);

@@ -71,7 +71,7 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
-	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
+//	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
 	connect(&gRenderStatus, SIGNAL(Resize()), this, SLOT(OnResize()));
 	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 
@@ -106,7 +106,6 @@ void CVtkWidget::OnRenderBegin(void)
 
 	// Scale
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
-	/**/
 
 	// Start the timer
 	m_RenderLoopTimer.start(10);
@@ -134,7 +133,7 @@ void CVtkWidget::OnPostRenderFrame(void)
 	if (!Scene())
 		return;
 
-	gpRenderThread->m_Mutex.lock();
+	/*gpRenderThread->m_Mutex.lock();
 
 	if (gpRenderThread->GetRenderImage())
 	{
@@ -146,7 +145,7 @@ void CVtkWidget::OnPostRenderFrame(void)
 		m_RenderWindow->GetInteractor()->Render();
 	}
 
-	gpRenderThread->m_Mutex.unlock();
+	gpRenderThread->m_Mutex.unlock();*/
 }
 
 void CVtkWidget::SetupRenderView(void)
@@ -197,7 +196,19 @@ void CVtkWidget::OnRenderLoopTimer(void)
 	if (!Scene())
 		return;
 
-	
+	gpRenderThread->m_Mutex.lock();
+
+	if (gpRenderThread->GetRenderImage())
+	{
+		m_ImageImport->SetImportVoidPointer(NULL);
+		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+
+		m_ImageActor->SetInput(m_ImageImport->GetOutput());
+
+		m_RenderWindow->GetInteractor()->Render();
+	}
+
+	gpRenderThread->m_Mutex.unlock();
 }
 
 void CVtkWidget::OnResize(void)

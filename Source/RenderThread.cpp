@@ -298,6 +298,8 @@ void QRenderThread::run()
 	// Let others know that we are starting with rendering
 	emit gRenderStatus.RenderBegin();
 	
+	QObject::connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnUpdateTransferFunction()));
+
 	// Try to load appearance/lighting/camera presets with the same name as the loaded file
 	emit gRenderStatus.LoadPreset(QFileInfo(m_FileName).baseName());
 
@@ -752,6 +754,40 @@ void QRenderThread::HandleCudaError(const cudaError_t CudaError)
 	Log(cudaGetErrorString(CudaError));
 }
 
+void QRenderThread::OnUpdateTransferFunction(void)
+{
+	QTransferFunction TransferFunction = gTransferFunction;
+
+	m_Scene.m_TransferFunctions.m_Opacity.m_NoNodes		= TransferFunction.GetNodes().size();
+	m_Scene.m_TransferFunctions.m_Diffuse.m_NoNodes		= TransferFunction.GetNodes().size();
+	m_Scene.m_TransferFunctions.m_Specular.m_NoNodes	= TransferFunction.GetNodes().size();
+	m_Scene.m_TransferFunctions.m_Emission.m_NoNodes	= TransferFunction.GetNodes().size();
+	m_Scene.m_TransferFunctions.m_Roughness.m_NoNodes	= TransferFunction.GetNodes().size();
+
+	for (int i = 0; i < TransferFunction.GetNodes().size(); i++)
+	{
+		QNode& Node = TransferFunction.GetNode(i);
+
+		const float Intensity = TransferFunction.GetRangeMin() + TransferFunction.GetRange() * Node.GetIntensity();
+
+		// Positions
+		m_Scene.m_TransferFunctions.m_Opacity.m_P[i]	= Intensity;
+		m_Scene.m_TransferFunctions.m_Diffuse.m_P[i]	= Intensity;
+		m_Scene.m_TransferFunctions.m_Specular.m_P[i]	= Intensity;
+		m_Scene.m_TransferFunctions.m_Emission.m_P[i]	= Intensity;
+		m_Scene.m_TransferFunctions.m_Roughness.m_P[i]	= Intensity;
+
+		// Colors
+		m_Scene.m_TransferFunctions.m_Opacity.m_C[i]	= CColorRgbHdr(Node.GetOpacity());
+		m_Scene.m_TransferFunctions.m_Diffuse.m_C[i]	= CColorRgbHdr(Node.GetDiffuse().redF(), Node.GetDiffuse().greenF(), Node.GetDiffuse().blueF());
+		m_Scene.m_TransferFunctions.m_Specular.m_C[i]	= CColorRgbHdr(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
+		m_Scene.m_TransferFunctions.m_Emission.m_C[i]	= CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
+		m_Scene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Node.GetRoughness());
+	}
+
+	m_Scene.m_DirtyFlags.SetFlag(TransferFunctionDirty);
+}
+
 CScene* Scene(void)
 {
 	return gpRenderThread ? gpRenderThread->GetScene() : NULL;
@@ -786,3 +822,4 @@ void KillRenderThread(void)
 	delete gpRenderThread;
 	gpRenderThread = NULL;
 }
+

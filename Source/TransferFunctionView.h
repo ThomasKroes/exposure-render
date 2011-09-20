@@ -29,6 +29,49 @@ public:
 	QString	m_Text;
 };
 
+class QBackgroundRectangle : public QGraphicsRectItem
+{
+public:
+	QBackgroundRectangle(QGraphicsItem* pParent);
+
+	QBackgroundRectangle::QBackgroundRectangle(const QBackgroundRectangle& Other)
+	{
+		*this = Other;
+	};
+
+	QBackgroundRectangle& operator = (const QBackgroundRectangle& Other)			
+	{
+		m_BrushEnabled	= Other.m_BrushEnabled;
+		m_BrushDisabled	= Other.m_BrushDisabled;
+		m_PenEnabled	= Other.m_PenEnabled;
+		m_PenDisabled	= Other.m_PenDisabled;
+
+		return *this;
+	}
+
+	virtual void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
+
+private:
+	QBrush	m_BrushEnabled;
+	QBrush	m_BrushDisabled;
+	QPen	m_PenEnabled;
+	QPen	m_PenDisabled;
+};
+
+class QTFView : public QGraphicsView
+{
+	Q_OBJECT
+
+public:
+	QTFView(QWidget* pParent = NULL);
+
+	void resizeEvent(QResizeEvent* pResizeEvent);
+
+private:
+	QGraphicsScene			m_Scene;
+	QBackgroundRectangle	m_Background;
+};
+
 class QTransferFunctionView : public QGraphicsView
 {
     Q_OBJECT
@@ -36,25 +79,18 @@ class QTransferFunctionView : public QGraphicsView
 public:
     QTransferFunctionView(QWidget* pParent = NULL);
 
-	void drawBackground(QPainter* pPainter, const QRectF& Rectangle);
 	void resizeEvent(QResizeEvent* pResizeEvent);
 	void mousePressEvent(QMouseEvent* pEvent);
 
 public slots:
 	void OnNodeSelectionChanged(QNode* pNode);
 	void OnHistogramChanged(void);
-	void Update(void);
-	void OnRenderBegin(void);
-	void OnRenderEnd(void);
 
 public:
 	QGraphicsScene				m_GraphicsScene;
 	QTransferFunctionCanvas		m_TransferFunctionCanvas;
-	QTransferFunctionGradient	m_TransferFunctionGradient;
-	float						m_MarginTop;
-	float						m_MarginBottom;
-	float						m_MarginLeft;
-	float						m_MarginRight;
 	QAxisLabel					m_AxisLabelX;
 	QAxisLabel					m_AxisLabelY;
+
+	
 };
