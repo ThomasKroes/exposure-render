@@ -28,6 +28,7 @@ protected:
 	QGridLayout			m_BottomRightLayout;
 
 	QTFView				m_Canvas;
+	QLabel				m_LabelIntensity;
 	QGradientRamp		m_GradientRampDiffuse;
 	QGradientRamp		m_GradientRampSpecular;
 	QGradientRamp		m_GradientRampEmission;

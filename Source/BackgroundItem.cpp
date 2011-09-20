@@ -7,9 +7,9 @@
 QBackgroundItem::QBackgroundItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),
 	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170))),
-	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 230))),
+	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 200))),
 	m_PenEnabled(QPen(QColor::fromHsl(0, 0, 140))),
-	m_PenDisabled(QPen(QColor::fromHsl(0, 0, 190)))
+	m_PenDisabled(QPen(QColor::fromHsl(0, 0, 160)))
 {
 }
 

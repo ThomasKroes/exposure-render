@@ -11,11 +11,11 @@
 float	QNodeItem::m_Radius			= 4.0f;
 QBrush	QNodeItem::m_BrushNormal	= QBrush(QColor::fromHsl(0, 100, 150));
 QBrush	QNodeItem::m_BrushHighlight	= QBrush(QColor::fromHsl(0, 100, 150));
-QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 150));
+QBrush	QNodeItem::m_BrushDisabled	= QBrush(QColor::fromHsl(0, 0, 230));
 
-QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.5);
-QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 150, 50)), 1.5);
-QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 100)), 1.5);
+QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.0);
+QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 150, 50)), 1.0);
+QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 200)), 1.0);
 
 QNodeItem::QNodeItem(QTransferFunctionItem* pTransferFunctionItem, QNode* pNode) :
 	QGraphicsEllipseItem(pTransferFunctionItem),
@@ -83,12 +83,12 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 	{
 		QPointF NewTfPoint(NewScenePoint.x() / rect().width(), (NewScenePoint.y() / rect().height()));
 
-// 		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
-// 
-// 		m_pNode->SetIntensity(NewTfPoint.x());
-// 		m_pNode->SetOpacity(NewTfPoint.y());
-// 
-// 		m_pTransferFunctionItem->m_AllowUpdateNodes = true;
+		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
+
+//		m_pNode->SetIntensity(NewTfPoint.x());
+//		m_pNode->SetOpacity(NewTfPoint.y());
+
+		m_pTransferFunctionItem->m_AllowUpdateNodes = true;
  
 		return NewScenePoint;
 	}

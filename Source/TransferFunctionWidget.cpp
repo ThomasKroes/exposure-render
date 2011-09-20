@@ -19,6 +19,7 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_BottomLayout(),
 	m_BottomRightLayout(),
 	m_Canvas(),
+	m_LabelIntensity(),
 	m_GradientRampDiffuse("diffuse"),
 	m_GradientRampSpecular("specular"),
 	m_GradientRampEmission("emission")
@@ -50,8 +51,7 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 
 	m_MiddleLayout.addWidget(&m_Canvas);
 
-	m_Canvas.setContentsMargins(15, 0, 0, 0);
-	m_Canvas.setEnabled(true);
+	m_Canvas.setContentsMargins(0, 0, 0, 0);
 
 	m_BottomLayout.setContentsMargins(10, 0, 10, 0);
 
@@ -69,13 +69,16 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_GradientRampSpecular.SetGradientStops(SpecularGradientStops);
 	m_GradientRampEmission.SetGradientStops(EmissionGradientStops);
 
-	m_GradientRampDiffuse.setFixedHeight(16);
-	m_GradientRampSpecular.setFixedHeight(16);
-	m_GradientRampEmission.setFixedHeight(16);
+	m_GradientRampDiffuse.setFixedHeight(20);
+	m_GradientRampSpecular.setFixedHeight(14);
+	m_GradientRampEmission.setFixedHeight(14);
 
+	m_LabelIntensity.setText("Intensity");
+
+	m_BottomLayout.addWidget(&m_LabelIntensity, 0, 0, Qt::AlignCenter);
 	m_BottomLayout.addWidget(&m_GradientRampDiffuse);
-// 	m_BottomLayout.addWidget(&m_GradientRampSpecular);
-// 	m_BottomLayout.addWidget(&m_GradientRampEmission);
+ 	m_BottomLayout.addWidget(&m_GradientRampSpecular);
+ 	m_BottomLayout.addWidget(&m_GradientRampEmission);
 
 	QObject::connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
@@ -86,12 +89,16 @@ void QTransferFunctionWidget::OnRenderBegin(void)
 {
 	m_Canvas.setEnabled(true);
 	m_Canvas.SetHistogram(gHistogram);
+
+	m_LabelIntensity.setText("Intensity [" + QString::number(gTransferFunction.GetRangeMin()) + " - " + QString::number(gTransferFunction.GetRangeMax()) + "]");
 }
 
 void QTransferFunctionWidget::OnRenderEnd(void)
 {
 	m_Canvas.setEnabled(false);
 	m_Canvas.SetHistogram(QHistogram());
+
+	m_LabelIntensity.setText("Intensity");
 }
 
 void QTransferFunctionWidget::OnUpdateGradients(void)

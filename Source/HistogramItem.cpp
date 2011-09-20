@@ -51,7 +51,7 @@ void QHistogramItem::Update(void)
 		if (m_Histogram.GetBins()[i] <= 0.0f)
 			ScenePoint.setY(GetRectangle().height());
 		else
-			ScenePoint.setY(GetRectangle().height() - (GetRectangle().height() * logf((float)m_Histogram.GetBins()[i]) / (logf((float)m_Histogram.GetMax()))));
+			ScenePoint.setY(GetRectangle().height() - (GetRectangle().height() * logf((float)m_Histogram.GetBins()[i]) / (1.2f * logf((float)m_Histogram.GetMax()))));
 
 		if (i == 0)
 		{

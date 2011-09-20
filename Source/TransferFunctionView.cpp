@@ -33,7 +33,11 @@ QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 
 	m_TransferFunctionItem.SetTransferFunction(&gTransferFunction);
 
- 	m_Scene.addItem(&m_Background);
+	m_Background.setEnabled(false);
+	m_HistogramItem.setEnabled(false);
+	m_TransferFunctionItem.setEnabled(false);
+
+	m_Scene.addItem(&m_Background);
  	m_Scene.addItem(&m_HistogramItem);
 	m_Scene.addItem(&m_TransferFunctionItem);
 
@@ -60,7 +64,6 @@ void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 	m_Background.setRect(m_CanvasRectangle);
 	m_HistogramItem.SetRectangle(m_CanvasRectangle);
 	m_TransferFunctionItem.setRect(m_CanvasRectangle);
-
 
 	m_TransferFunctionItem.Update();
 
