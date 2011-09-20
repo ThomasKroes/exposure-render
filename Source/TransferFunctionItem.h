@@ -23,8 +23,6 @@ protected:
 	QTransferFunction*		m_pTransferFunction;
 	QBrush					m_BrushEnabled;
 	QBrush					m_BrushDisabled;
-	QPen					m_PenEnabled;
-	QPen					m_PenDisabled;
 	QGraphicsPolygonItem	m_PolygonItem;
 	QPolygon				m_Polygon;
 	QList<QNodeItem*>		m_Nodes;
@@ -32,4 +30,5 @@ protected:
 	bool					m_AllowUpdateNodes;
 
 	friend class QNodeItem;
+	friend class QTFView;
 };

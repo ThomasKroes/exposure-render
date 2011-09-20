@@ -47,8 +47,11 @@ void QHistogramItem::Update(void)
 		// Compute polygon point in scene coordinates
 		QPointF ScenePoint;
 		ScenePoint.setX(GetRectangle().width() * ((float)i / (float)m_Histogram.GetBins().size()));
-//		ScenePoint.setY(GetRectangle().height() * logf((float)m_Histogram.GetBins()[i]) / (0.1f + logf(1.5f * (float)m_Histogram.GetMax())));
-		ScenePoint.setY(((float)m_Histogram.GetBins()[i] / (float)m_Histogram.GetMax()) * GetRectangle().height());
+		
+		if (m_Histogram.GetBins()[i] <= 0.0f)
+			ScenePoint.setY(GetRectangle().height());
+		else
+			ScenePoint.setY(GetRectangle().height() - (GetRectangle().height() * logf((float)m_Histogram.GetBins()[i]) / (logf((float)m_Histogram.GetMax()))));
 
 		if (i == 0)
 		{
@@ -78,15 +81,15 @@ void QHistogramItem::Update(void)
 
 	QGradientStops GradientStops;
 
-	GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 100, 150, 0)));
-	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 100, 150, 255)));
+	GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 60, 150, 0)));
+	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 60, 150, 100)));
 
 	LinearGradient.setStops(GradientStops);
 
 	// Update the polygon geometry
 	setPolygon(Polygon);
 	setBrush(QBrush(LinearGradient));
-	setPen(QPen(QColor::fromHsl(0, 100, 150)));
+	setPen(QPen(QColor::fromHsl(0, 60, 150)));
 }
 
 QRectF QHistogramItem::GetRectangle(void) const

@@ -33,8 +33,8 @@ QNodeItem::QNodeItem(QTransferFunctionItem* pTransferFunctionItem, QNode* pNode)
 
 	// Make item movable
 	setFlag(QGraphicsItem::ItemIsMovable);
-//	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-//	setFlag(QGraphicsItem::ItemIsSelectable);
+	setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+	setFlag(QGraphicsItem::ItemIsSelectable);
 
 	// Tooltip
 	UpdateTooltip();
@@ -67,28 +67,28 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
  
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionChange)
 	{
-		const float Width	= m_pTransferFunctionItem->rect().width();
-		const float Height	= m_pTransferFunctionItem->rect().height();
-
-		QPointF NodeRangeMin = QPointF(m_pNode->GetMinX() * Width, m_pNode->GetMinY() * Height);
-		QPointF NodeRangeMax = QPointF(m_pNode->GetMaxX() * Width, m_pNode->GetMaxY() * Height);
-
-		NewScenePoint.setX(qMin(NodeRangeMax.x() - NODE_POSITION_EPSILON, qMax(NewScenePoint.x(), NodeRangeMin.x() + NODE_POSITION_EPSILON)));
-		NewScenePoint.setY(qMin(NodeRangeMin.y(), qMax(NewScenePoint.y(), NodeRangeMax.y())));
+// 		const float Width	= m_pTransferFunctionItem->rect().width();
+// 		const float Height	= m_pTransferFunctionItem->rect().height();
+// 
+// 		QPointF NodeRangeMin = QPointF(m_pNode->GetMinX() * Width, m_pNode->GetMinY() * Height);
+// 		QPointF NodeRangeMax = QPointF(m_pNode->GetMaxX() * Width, m_pNode->GetMaxY() * Height);
+// 
+// 		NewScenePoint.setX(qMin(NodeRangeMax.x() - NODE_POSITION_EPSILON, qMax(NewScenePoint.x(), NodeRangeMin.x() + NODE_POSITION_EPSILON)));
+// 		NewScenePoint.setY(qMin(NodeRangeMin.y(), qMax(NewScenePoint.y(), NodeRangeMax.y())));
 
 		return NewScenePoint;
 	}
 
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionHasChanged)
 	{
-		QPointF NewTfPoint(NewScenePoint.x() / rect().width(), NewScenePoint.y() / rect().height());
+		QPointF NewTfPoint(NewScenePoint.x() / rect().width(), (NewScenePoint.y() / rect().height()));
 
-		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
-
-		m_pNode->SetIntensity(NewTfPoint.x());
-		m_pNode->SetOpacity(NewTfPoint.y());
-
-		m_pTransferFunctionItem->m_AllowUpdateNodes = true;
+// 		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
+// 
+// 		m_pNode->SetIntensity(NewTfPoint.x());
+// 		m_pNode->SetOpacity(NewTfPoint.y());
+// 
+// 		m_pTransferFunctionItem->m_AllowUpdateNodes = true;
  
 		return NewScenePoint;
 	}
@@ -104,8 +104,6 @@ void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
 		{
 			setBrush(m_BrushHighlight);
 			setPen(m_PenHighlight);
-
-//			pPainter->drawEllipse(rect().center(), 10, 10);
 		}
 		else
 		{

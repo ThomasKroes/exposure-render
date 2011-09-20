@@ -74,8 +74,8 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_GradientRampEmission.setFixedHeight(16);
 
 	m_BottomLayout.addWidget(&m_GradientRampDiffuse);
-	m_BottomLayout.addWidget(&m_GradientRampSpecular);
-	m_BottomLayout.addWidget(&m_GradientRampEmission);
+// 	m_BottomLayout.addWidget(&m_GradientRampSpecular);
+// 	m_BottomLayout.addWidget(&m_GradientRampEmission);
 
 	QObject::connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));

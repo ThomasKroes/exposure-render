@@ -40,14 +40,18 @@ public:
 	QTFView(QWidget* pParent = NULL);
 
 	void resizeEvent(QResizeEvent* pResizeEvent);
+	void mousePressEvent(QMouseEvent* pEvent);
 
 	void SetHistogram(QHistogram& Histogram);
+	void setEnabled(bool Enabled);
 
 public slots:
 	void OnTransferFunctionChanged(void);
+	void OnNodeSelectionChanged(QNode* pNode);
 
 private:
 	QMargin					m_Margin;
+	QRect					m_CanvasRectangle;
 	QGraphicsScene			m_Scene;
 	QBackgroundItem			m_Background;
 	QHistogramItem			m_HistogramItem;

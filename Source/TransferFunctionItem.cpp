@@ -9,21 +9,17 @@
 QTransferFunctionItem::QTransferFunctionItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),
 	m_pTransferFunction(NULL),
-	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170))),
-	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 230))),
-	m_PenEnabled(QPen(QColor::fromHsl(0, 0, 140))),
-	m_PenDisabled(QPen(QColor::fromHsl(0, 0, 190))),
+	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170, 50))),
+	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 230, 50))),
 	m_PolygonItem(),
 	m_Polygon(),
 	m_Nodes(),
 	m_Edges(),
 	m_AllowUpdateNodes(true)
 {
-	setBrush(Qt::NoBrush);
 	setPen(Qt::NoPen);
 
 	m_PolygonItem.setParentItem(this);
-	m_PolygonItem.setBrush(QColor(100, 100, 100, 100));
 	m_PolygonItem.setPen(Qt::NoPen);
 }
 
@@ -53,16 +49,28 @@ QTransferFunctionItem::QTransferFunctionItem(const QTransferFunctionItem& Other)
 
 QTransferFunctionItem& QTransferFunctionItem::operator=(const QTransferFunctionItem& Other)
 {
-	m_BrushEnabled	= Other.m_BrushEnabled;
-	m_BrushDisabled	= Other.m_BrushDisabled;
-	m_PenEnabled	= Other.m_PenEnabled;
-	m_PenDisabled	= Other.m_PenDisabled;
+	m_pTransferFunction	= Other.m_pTransferFunction;
+	m_BrushEnabled		= Other.m_BrushEnabled;
+	m_BrushDisabled		= Other.m_BrushDisabled;
+	m_Polygon			= Other.m_Polygon;
+	m_Nodes				= Other.m_Nodes;
+	m_Edges				= Other.m_Edges;
+	m_AllowUpdateNodes	= Other.m_AllowUpdateNodes;
 
 	return *this;
 }
 
 void QTransferFunctionItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
+	if (isEnabled())
+	{
+		m_PolygonItem.setBrush(m_BrushEnabled);
+	}
+	else
+	{
+		m_PolygonItem.setBrush(m_BrushDisabled);
+	}
+
 	QGraphicsRectItem::paint(pPainter, pOption, pWidget);
 }
 
@@ -130,13 +138,16 @@ void QTransferFunctionItem::Update(void)
 			m_Polygon.append(CenterCopy);
 		}
 
-		QNodeItem* pNodeItem = new QNodeItem(this, &m_pTransferFunction->GetNode(i));
+		if (m_AllowUpdateNodes)
+		{
+			QNodeItem* pNodeItem = new QNodeItem(this, &m_pTransferFunction->GetNode(i));
 
-		QPointF NodeCenter(Node.GetIntensity() * rect().width(), (1.0 - Node.GetOpacity()) * rect().height());
-		pNodeItem->setPos(NodeCenter);
-		pNodeItem->setZValue(100000);
+			QPointF NodeCenter(Node.GetIntensity() * rect().width(), (1.0 - Node.GetOpacity()) * rect().height());
+			pNodeItem->setPos(NodeCenter);
+			pNodeItem->setZValue(100000);
 
-		m_Nodes.append(pNodeItem);
+			m_Nodes.append(pNodeItem);
+		}
 	}
 
 	m_PolygonItem.setPolygon(m_Polygon);

@@ -173,7 +173,7 @@ void QTransferFunction::AddNode(const QNode& Node)
 		m_Nodes[i].m_ID = i;
 
 	// Update ranges
-	UpdateNodeRanges();
+//	UpdateNodeRanges();
 
 	// Notify us when the node changes
 	connect(&CacheNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
@@ -240,7 +240,7 @@ void QTransferFunction::DeNormalizeIntensity(void)
 		m_Nodes[i].m_Intensity = m_RangeMin + m_Nodes[i].m_Intensity * m_Range;
 
 	// Update node's range
-	UpdateNodeRanges();
+//	UpdateNodeRanges();
 
 	// Inform others that the transfer function has changed
 	emit FunctionChanged();
@@ -248,6 +248,8 @@ void QTransferFunction::DeNormalizeIntensity(void)
 
 void QTransferFunction::UpdateNodeRanges(void)
 {
+	return;
+
 	// Compute the node ranges
 	for (int i = 0; i < m_Nodes.size(); i++)
 	{
