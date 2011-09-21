@@ -415,8 +415,8 @@ void QRenderThread::run()
 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-//			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
-//			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
+			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
+			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
 
 			// Reset no. iterations
 			m_N = 0.0f;
@@ -426,15 +426,15 @@ void QRenderThread::run()
 		m_Scene.m_DirtyFlags.ClearAllFlags();
 
 		CCudaTimer Timer;
-
+// Increase the number of iterations performed so far
+		m_N++;
 		// Execute the rendering kernels
   		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_pDevRgbLdrDisp, m_N);
 		HandleCudaError(cudaGetLastError());
 		
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
-		// Increase the number of iterations performed so far
-		m_N++;
+		
 
 		FPS.AddDuration(1000.0f / CudaTimer.StopTimer());
 
@@ -511,13 +511,6 @@ CScene* QRenderThread::GetScene(void)
 bool QRenderThread::Load(QString& FileName)
 {
 	m_FileName = FileName;
- 	QLoadSettingsDialog LoadSettingsDialog;
- 
- 	// Make it a modal dialog
- 	LoadSettingsDialog.setWindowModality(Qt::WindowModal);
- 	 
- 	// Show it
- 	LoadSettingsDialog.exec();
 
 	// Create meta image reader
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
@@ -562,46 +555,6 @@ bool QRenderThread::Load(QString& FileName)
 
 	m_pImageDataVolume = ImageCast->GetOutput();
 	
-	
-// 	if (LoadSettingsDialog.GetResample())
-// 	{
-		Log("Resampling volume at " + QString::number(LoadSettingsDialog.GetResampleX(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleY(), 'f', 2) + " x " + QString::number(LoadSettingsDialog.GetResampleZ(), 'f', 2));
-
-		// Create resampler
-		vtkSmartPointer<vtkImageResample> ImageResample = vtkImageResample::New();
-
-		// Progress handling
-		ImageResample->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
-
-		ImageResample->SetInput(m_pImageDataVolume);
-
-		// Obtain resampling scales from dialog input
-		m_Scene.m_Scale.x = LoadSettingsDialog.GetResampleX();
-		m_Scene.m_Scale.y = LoadSettingsDialog.GetResampleY();
-		m_Scene.m_Scale.z = LoadSettingsDialog.GetResampleZ();
-
-		// Apply scaling factors
-		ImageResample->SetAxisMagnificationFactor(0, m_Scene.m_Scale.x);
-		ImageResample->SetAxisMagnificationFactor(1, m_Scene.m_Scale.y);
-		ImageResample->SetAxisMagnificationFactor(2, m_Scene.m_Scale.z);
-	
-		// Resample
-		ImageResample->Update();
-
-		m_pImageDataVolume = ImageResample->GetOutput();
-//	}
-
-	/*
-	// Create magnitude volume
-	vtkSmartPointer<vtkImageGradientMagnitude> ImageGradientMagnitude = vtkImageGradientMagnitude::New();
-	
-	// Progress handling
-	ImageGradientMagnitude->AddObserver(vtkCommand::ProgressEvent, ProgressCallback);
-	
-	ImageGradientMagnitude->SetInput(pImageData);
-	ImageGradientMagnitude->Update();
-	*/
-
 	// Scalar range
 	double* pRange = m_pImageDataVolume->GetScalarRange();
 	m_Scene.m_IntensityRange.SetMin((float)pRange[0]);

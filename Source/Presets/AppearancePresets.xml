@@ -13,8 +13,8 @@
 <Node>
 <NormalizedIntensity Value="0.235606"/>
 <Opacity Value="0"/>
-<Diffuse G="0" R="170" B="0"/>
-<Specular G="50" R="50" B="50"/>
+<Diffuse G="7" R="78" B="2"/>
+<Specular G="17" R="26" B="13"/>
 <Emission G="0" R="0" B="0"/>
 <Roughness Value="0.076"/>
 </Node>
@@ -43,7 +43,7 @@
 <Roughness Value="100"/>
 </Node>
 </Nodes>
-<DensityScale Value="0.207"/>
+<DensityScale Value="10"/>
 </Preset>
 <Preset Name="manix_smallddd">
 <Nodes>
@@ -133,7 +133,7 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
-<DensityScale Value="1"/>
+<DensityScale Value="10"/>
 </Preset>
 <Preset Name="engine_small">
 <Nodes>
@@ -223,7 +223,7 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
-<DensityScale Value="1"/>
+<DensityScale Value="10"/>
 </Preset>
 <Preset Name="artifix_small">
 <Nodes>

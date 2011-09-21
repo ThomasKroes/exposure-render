@@ -49,14 +49,12 @@ public:
     QMenu*								m_pFileMenu;
     QMenu*								m_pViewMenu;
     QMenu*								m_pHelpMenu;
+	CVtkWidget							m_VtkWidget;
 
 private:
 	// Toolbars
     QToolBar*							m_pFileToolBar;
 	QToolBar*							m_pPlaybackToolBar;
-    
-	// Qt-VTK widget					
-	CVtkWidget							m_VtkWidget;
 
 	// Dock widgets
 	QLogDockWidget						m_LogDockWidget;

@@ -45,6 +45,7 @@ private:
 	QGridLayout									m_MainLayout;
 	QVTKWidget									m_QtVtkWidget;
 
+public:
 	vtkSmartPointer<vtkImageImport>				m_ImageImport;
 	vtkSmartPointer<vtkImageActor>				m_ImageActor;
 	vtkSmartPointer<vtkInteractorStyleImage>	m_InteractorStyleImage;

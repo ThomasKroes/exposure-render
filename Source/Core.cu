@@ -40,47 +40,23 @@ void BindDensityVolume(short* densityBuffer, cudaExtent densityBufferSize)
 
 void BindExtinctionVolume(float* extinction, cudaExtent extinctionSize)
 {
-/*
-	cudaArray* gpExtinction = NULL;
-
-	// create 3D array
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
-	cudaMalloc3DArray(&gpExtinction, &ChannelDesc, Size);
-
-	// copy data to 3D array
-	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(pExtinctionBuffer, Size.width * sizeof(float), Size.width, Size.height);
-	copyParams.dstArray				= gpExtinction;
-	copyParams.extent				= Size;
-	copyParams.kind					= cudaMemcpyHostToDevice;
-	cudaMemcpy3D(&copyParams);
-
-	// Set texture parameters
-	gTexExtinction.normalized		= true;
-	gTexExtinction.filterMode		= cudaFilterModePoint;      
-	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
-	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
-// 	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;*/
-
-	// Bind array to 3D texture
-//	cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc);
 	cudaArray* volArray;
-	 cudaExtent volExtent = make_cudaExtent(extinctionSize.width, extinctionSize.height, extinctionSize.depth);
-  cudaChannelFormatDesc volChannelDesc = cudaCreateChannelDesc<float>();
-  cudaMalloc3DArray(&volArray, &volChannelDesc, volExtent);
-  cudaMemcpy3DParms copyParams = {0};
-  copyParams.srcPtr = make_cudaPitchedPtr((void*)extinction, volExtent.width * sizeof(float), volExtent.width, volExtent.height);
-  copyParams.dstArray = volArray;
-  copyParams.extent = volExtent;
-  copyParams.kind = cudaMemcpyHostToDevice;
-  CUDA_SAFE_CALL( cudaMemcpy3D(&copyParams));
+	cudaExtent volExtent = make_cudaExtent(extinctionSize.width, extinctionSize.height, extinctionSize.depth);
+	cudaChannelFormatDesc volChannelDesc = cudaCreateChannelDesc<float>();
+	cudaMalloc3DArray(&volArray, &volChannelDesc, volExtent);
+	cudaMemcpy3DParms copyParams = {0};
+	copyParams.srcPtr = make_cudaPitchedPtr((void*)extinction, volExtent.width * sizeof(float), volExtent.width, volExtent.height);
+	copyParams.dstArray = volArray;
+	copyParams.extent = volExtent;
+	copyParams.kind = cudaMemcpyHostToDevice;
+	CUDA_SAFE_CALL( cudaMemcpy3D(&copyParams));
 
-  gTexExtinction.normalized = true;
-  gTexExtinction.filterMode = cudaFilterModePoint;
-  gTexExtinction.addressMode[0] = cudaAddressModeClamp;
-  gTexExtinction.addressMode[1] = cudaAddressModeClamp;
+	gTexExtinction.normalized = true;
+	gTexExtinction.filterMode = cudaFilterModePoint;
+	gTexExtinction.addressMode[0] = cudaAddressModeClamp;
+	gTexExtinction.addressMode[1] = cudaAddressModeClamp;
 
-  cudaBindTextureToArray( gTexExtinction, volArray, volChannelDesc);
+	cudaBindTextureToArray( gTexExtinction, volArray, volChannelDesc);
 }
 
 void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, unsigned char* pDevEstRgbLdr, unsigned char* pDevEstRgbLdrDisp, int N)

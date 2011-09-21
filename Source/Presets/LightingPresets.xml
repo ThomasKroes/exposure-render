@@ -6,29 +6,29 @@
 <Theta Value="61.875"/>
 <Phi Value="5.625"/>
 <Distance Value="2.25"/>
-<Width Value="1.7"/>
-<Height Value="1.7"/>
+<Width Value="1.459"/>
+<Height Value="1.459"/>
 <LockSize Value="1"/>
 <Color G="170" R="85" B="255"/>
-<Intensity Value="3906.25"/>
+<Intensity Value="19847.3"/>
 </Light>
 <Light Name="Key">
 <Theta Value="236.25"/>
 <Phi Value="36.34"/>
-<Distance Value="1.82"/>
-<Width Value="1"/>
-<Height Value="1"/>
+<Distance Value="4.885"/>
+<Width Value="0.01"/>
+<Height Value="0.01"/>
 <LockSize Value="1"/>
 <Color G="198" R="255" B="65"/>
-<Intensity Value="12500"/>
+<Intensity Value="51145"/>
 </Light>
 </Lights>
 <Background>
-<Enable Value="0"/>
+<Enable Value="1"/>
 <TopColor G="170" R="0" B="255"/>
-<MiddleColor G="170" R="255" B="0"/>
-<BottomColor G="170" R="0" B="127"/>
-<Intensity Value="421.053"/>
+<MiddleColor G="85" R="170" B="0"/>
+<BottomColor G="170" R="255" B="0"/>
+<Intensity Value="7.353"/>
 <UseTexture Value="0"/>
 <File Value=""/>
 </Background>
