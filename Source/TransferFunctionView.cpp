@@ -9,7 +9,7 @@
 
 QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	QGraphicsView(pParent),
-	m_Margin(10, 10, 10, 10),
+	m_Margin(25, 15, 10, 15),
 	m_CanvasRectangle(),
 	m_Scene(),
 	m_Background(NULL),

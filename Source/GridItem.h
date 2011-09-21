@@ -15,4 +15,5 @@ private:
 	QPen	m_PenEnabled;
 	QPen	m_PenDisabled;
 	int		m_NumY;
+	QFont	m_Font;
 };

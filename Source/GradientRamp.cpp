@@ -11,7 +11,7 @@ QGradientRamp::QGradientRamp(const QString& Name, QWidget* pParent /*= NULL*/) :
 	m_LinearGradient(),
 	m_CheckerDimEnabled(QColor::fromHsl(0, 0, 140)),
 	m_CheckerDimDisabled(QColor::fromHsl(0, 0, 170)),
-	m_CheckerBrightEnabled(QColor::fromHsl(0, 0, 255)),
+	m_CheckerBrightEnabled(QColor::fromHsl(0, 0, 245)),
 	m_CheckerBrightDisabled(QColor::fromHsl(0, 0, 230)),
 	m_PenEnabled(QColor::fromHsl(0, 0, 100)),
 	m_PenDisabled(QColor::fromHsl(0, 0, 150)),

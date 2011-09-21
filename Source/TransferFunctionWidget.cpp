@@ -53,7 +53,7 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 
 	m_Canvas.setContentsMargins(0, 0, 0, 0);
 
-	m_BottomLayout.setContentsMargins(10, 0, 10, 0);
+	m_BottomLayout.setContentsMargins(25, 0, 15, 0);
 
 	QGradientStops DiffuseGradientStops, SpecularGradientStops, EmissionGradientStops;
 	
@@ -94,7 +94,6 @@ void QTransferFunctionWidget::OnRenderEnd(void)
 {
 	m_Canvas.setEnabled(false);
 	m_Canvas.SetHistogram(QHistogram());
-
 	m_LabelIntensity.setText("Intensity");
 }
 
