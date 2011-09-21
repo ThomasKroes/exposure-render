@@ -27,6 +27,8 @@ public:
 	void						SelectNextNode(void);
 	void						SelectLastNode(void);
 	int							GetNodeIndex(QNode* pNode);
+	float						GetDensityScale(void) const;
+	void						SetDensityScale(const float& DensityScale);
 	void						ReadXML(QDomElement& Parent);
 	QDomElement					WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	static QTransferFunction	Default(void);
@@ -35,12 +37,13 @@ private slots:
 	void	OnNodeChanged(QNode* pNode);
 
 signals:
-	void	FunctionChanged(void);
+	void	Changed(void);
 	void	SelectionChanged(QNode* pNode);
 	
 private:
 	QNodeList	m_Nodes;
 	QNode*		m_pSelectedNode;
+	float		m_DensityScale;
 
 	friend class QNode;
 };

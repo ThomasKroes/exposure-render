@@ -73,6 +73,7 @@ SET(ExposureRenderSources
 	NodeSelectionWidget.cpp
 	GridItem.cpp
 	AppearanceSettingsWidget.cpp
+	Appearance.cpp
 
 	# Camera
 	Camera.cpp
@@ -157,6 +158,7 @@ SET(ExposureRenderHeaders
 	NodeSelectionWidget.h
 	GridItem.h
 	AppearanceSettingsWidget.h
+	Appearance.h
 
 	# Camera
 	Camera.h
@@ -347,6 +349,7 @@ SET(AppearanceSources
 	NodeSelectionWidget.h
 	GridItem.h
 	AppearanceSettingsWidget.h
+	Appearance.h
 	AppearanceDockWidget.cpp
 	TransferFunction.cpp
 	TransferFunctionView.cpp
@@ -364,6 +367,7 @@ SET(AppearanceSources
 	NodeSelectionWidget.cpp
 	GridItem.cpp
 	AppearanceSettingsWidget.cpp
+	Appearance.cpp
 )
 
 # Make the appearance group

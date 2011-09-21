@@ -332,23 +332,21 @@ void CMainWindow::OnSaveImage(void)
 	if (!gpRenderThread)
 		return;
 
-	Log("Saving Image", "image-export");
-
 	gpRenderThread->PauseRendering(true);
 
 	QString FilePath = GetSaveFileName("Save Image", "PNG Files (*.png)", "image-export");
 
-	Log(FilePath);
-// 	QPixmap p;
-// 
-// 	bool OK = p.loadFromData(gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), "PNG");
-// 
-// 	p.save(FilePath, "PNG");
+	if (!FilePath.isEmpty())
+	{
+		QImage* pTempImage = new QImage(gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY(),  QImage::Format_RGB888);
 
-	QImage *tempImage = new QImage( gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY(),  QImage::Format_RGB888);
+		if (!pTempImage->save(FilePath, "PNG") )
+			Log("Unable to save image");
+		else
+			Log(FilePath + " saved", "image-export");
 
-	if (!tempImage->save(FilePath, "PNG") )
-		Log("can't save image");
+		delete pTempImage;
+	}
 
 	gpRenderThread->PauseRendering(false);
 }

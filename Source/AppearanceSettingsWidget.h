@@ -8,8 +8,11 @@ class QAppearanceSettingsWidget : public QGroupBox
 public:
     QAppearanceSettingsWidget(QWidget* pParent = NULL);
 
-private slots:
+public slots:
+	void OnRenderBegin(void);
+	void OnRenderEnd(void);
 	void OnSetDensityScale(double DensityScale);
+	void OnTransferFunctionChanged(void);
 
 private:
 	QGridLayout		m_MainLayout;

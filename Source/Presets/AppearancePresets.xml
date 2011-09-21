@@ -43,6 +43,7 @@
 <Roughness Value="100"/>
 </Node>
 </Nodes>
+<DensityScale Value="0.207"/>
 </Preset>
 <Preset Name="manix_smallddd">
 <Nodes>
@@ -79,6 +80,7 @@
 <Roughness Value="100"/>
 </Node>
 </Nodes>
+<DensityScale Value="0"/>
 </Preset>
 <Preset Name="bonsai_small">
 <Nodes>
@@ -131,6 +133,7 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
+<DensityScale Value="1"/>
 </Preset>
 <Preset Name="engine_small">
 <Nodes>
@@ -167,6 +170,7 @@
 <Roughness Value="0"/>
 </Node>
 </Nodes>
+<DensityScale Value="1"/>
 </Preset>
 <Preset Name="backpack_small">
 <Nodes>
@@ -219,6 +223,7 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
+<DensityScale Value="1"/>
 </Preset>
 <Preset Name="artifix_small">
 <Nodes>
@@ -263,6 +268,7 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
+<DensityScale Value="0.645"/>
 </Preset>
 <Preset Name="macoessix_small">
 <Nodes>
@@ -323,5 +329,6 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
+<DensityScale Value="1"/>
 </Preset>
 </Presets>

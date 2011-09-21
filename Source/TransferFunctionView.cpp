@@ -54,7 +54,7 @@ QTFView::QTFView(QWidget* pParent /*= NULL*/) :
  	m_HistogramItem.translate(m_Margin.GetLeft(), m_Margin.GetTop());
 	m_TransferFunctionItem.translate(m_Margin.GetLeft(), m_Margin.GetTop());
 
-	QObject::connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnTransferFunctionChanged()));
+	QObject::connect(&gTransferFunction, SIGNAL(Changed()), this, SLOT(OnTransferFunctionChanged()));
 	QObject::connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
 }
 

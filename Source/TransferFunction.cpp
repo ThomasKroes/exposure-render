@@ -37,13 +37,15 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 	for (int i = 0; i < m_Nodes.size(); i++)
 		connect(&m_Nodes[i], SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 
+	m_DensityScale	= Other.m_DensityScale;
+
 	// Update node's range
 	UpdateNodeRanges();
 
 	blockSignals(false);
 
 	// Notify others that the function has changed selection has changed
-	emit FunctionChanged();
+	emit Changed();
 
 	SetSelectedNode(NULL);
 
@@ -55,7 +57,7 @@ void QTransferFunction::OnNodeChanged(QNode* pNode)
 	// Update node's range
 	UpdateNodeRanges();
 
-	emit FunctionChanged();
+	emit Changed();
 }
 
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)
@@ -179,7 +181,7 @@ void QTransferFunction::AddNode(const QNode& Node)
 	}
 
 	// Inform others that the transfer function has changed
-	emit FunctionChanged();
+	emit Changed();
 
 	Log("Inserted node", "layer-select-point");
 }
@@ -211,7 +213,7 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 	SetSelectedNode(NodeIndex);
 
 	// Inform others that the transfer function has changed
-	emit FunctionChanged();
+	emit Changed();
 
 	Log("Removed node", "layer-select-point");
 }
@@ -254,6 +256,21 @@ QNode& QTransferFunction::GetNode(const int& Index)
 	return m_Nodes[Index];
 }
 
+float QTransferFunction::GetDensityScale(void) const
+{
+	return m_DensityScale;
+}
+
+void QTransferFunction::SetDensityScale(const float& DensityScale)
+{
+	if (DensityScale == m_DensityScale)
+		return;
+
+	m_DensityScale = DensityScale;
+
+	emit Changed();
+}
+
 void QTransferFunction::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
@@ -276,8 +293,11 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 	// Update node's range
 	UpdateNodeRanges();
 
+	// Density Scale
+	m_DensityScale = Parent.firstChildElement("DensityScale").attribute("Value").toFloat();
+
 	// Inform others that the transfer function has changed
-	emit FunctionChanged();
+	emit Changed();
 }
 
 QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -296,6 +316,11 @@ QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	for (int i = 0; i < m_Nodes.size(); i++)
 		m_Nodes[i].WriteXML(DOM, Nodes);
+
+	// Density Scale
+	QDomElement DensityScale = DOM.createElement("DensityScale");
+	DensityScale.setAttribute("Value", GetDensityScale());
+	Preset.appendChild(DensityScale);
 
 	return Preset;
 }
