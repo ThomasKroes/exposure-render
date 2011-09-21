@@ -613,8 +613,8 @@ bool QRenderThread::Load(QString& FileName)
 
 	// Scalar range
 	double* pRange = m_pImageDataVolume->GetScalarRange();
-	m_Scene.m_IntensityRange.m_Min	= (float)pRange[0];
-	m_Scene.m_IntensityRange.m_Max	= (float)pRange[1];
+	m_Scene.m_IntensityRange.SetMin((float)pRange[0]);
+	m_Scene.m_IntensityRange.SetMax((float)pRange[1]);
 
 	// Get extent
 	int* pExtent = m_pImageDataVolume->GetExtent();
@@ -661,12 +661,12 @@ bool QRenderThread::Load(QString& FileName)
 	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(m_Scene.m_Spacing, 2), "mm");
 //	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(1000.0f * m_Scene.m_Scale, 2), "");
 	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.GetNoElements()), "Voxels");
-	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "");
+	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.GetMin()) + ", " + QString::number(m_Scene.m_IntensityRange.GetMax()) + "]", "");
 
 	Log("Bounding box: " + FormatVector(m_Scene.m_BoundingBox.m_MinP, 2) + " - " + FormatVector(m_Scene.m_BoundingBox.m_MaxP), "grid");
 	Log("Spacing: " + FormatSize(m_Scene.m_Spacing, 2), "grid");
 	Log("Resolution after re-sampling: " + FormatSize(m_Scene.m_Resolution.GetResXYZ()) + " mm", "grid");
-	Log("Density range: [" + QString::number(m_Scene.m_IntensityRange.m_Min) + ", " + QString::number(m_Scene.m_IntensityRange.m_Max) + "]", "grid");
+	Log("Density range: [" + QString::number(m_Scene.m_IntensityRange.GetMin()) + ", " + QString::number(m_Scene.m_IntensityRange.GetMax()) + "]", "grid");
 
 	// Print scene data
 //	m_Scene.PrintSelf();

@@ -55,8 +55,14 @@ void QGradientRamp::paintEvent(QPaintEvent * pe)
 		{
 			const QColor OriginalColor = GradientStops[i].second;
 
-			GradientStops[i].second = QColor::fromHsl(OriginalColor.hue(), 0, 200, OriginalColor.alpha());
+			GradientStops[i].second = QColor::fromHsl(OriginalColor.hue(), 0, 200, 0.8 * OriginalColor.alpha());
 		}
+	}
+
+	for (int i = 0; i < GradientStops.size(); i++)
+	{
+		const QColor OriginalColor = GradientStops[i].second;
+		GradientStops[i].second.setAlphaF(0.8 * GradientStops[i].second.alphaF());
 	}
 
 	m_LinearGradient.setStops(GradientStops);

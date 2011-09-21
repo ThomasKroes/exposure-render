@@ -15,10 +15,11 @@ public:
 
 	virtual void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
 
-	void Update(void);
-
 	void SetTransferFunction(QTransferFunction* pTransferFunction);
-
+	void UpdateNodes(void);
+	void UpdateEdges(void);
+	void UpdatePolygon(void);
+	
 protected:
 	QTransferFunction*		m_pTransferFunction;
 	QBrush					m_BrushEnabled;

@@ -69,9 +69,9 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_GradientRampSpecular.SetGradientStops(SpecularGradientStops);
 	m_GradientRampEmission.SetGradientStops(EmissionGradientStops);
 
-	m_GradientRampDiffuse.setFixedHeight(20);
-	m_GradientRampSpecular.setFixedHeight(14);
-	m_GradientRampEmission.setFixedHeight(14);
+	m_GradientRampDiffuse.setFixedHeight(18);
+	m_GradientRampSpecular.setFixedHeight(18);
+	m_GradientRampEmission.setFixedHeight(18);
 
 	m_LabelIntensity.setText("Intensity");
 
@@ -90,7 +90,7 @@ void QTransferFunctionWidget::OnRenderBegin(void)
 	m_Canvas.setEnabled(true);
 	m_Canvas.SetHistogram(gHistogram);
 
-	m_LabelIntensity.setText("Intensity [" + QString::number(gTransferFunction.GetRangeMin()) + " - " + QString::number(gTransferFunction.GetRangeMax()) + "]");
+	m_LabelIntensity.setText("Intensity [" + QString::number(Scene()->m_IntensityRange.GetMin()) + " - " + QString::number(Scene()->m_IntensityRange.GetMax()) + "]");
 }
 
 void QTransferFunctionWidget::OnRenderEnd(void)

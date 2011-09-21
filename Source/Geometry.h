@@ -1030,18 +1030,9 @@ public:
 class EXPOSURE_RENDER_DLL CRange
 {
 public:
-	float	m_Min;			/*!< Minimum range */
-	float	m_InvMin;		/*!< Minimum range reciprocal */
-	float	m_Max;			/*!< Maximum range */
-	float	m_InvMax;		/*!< Maximum range reciprocal */
-	float	m_Length;		/*!< Length */
-	float	m_InvLength;	/*!< Length reciprocal */
-
 	HOD CRange(void) :
 		m_Min(0.0f),
-		m_InvMin(m_Min != 0.0f ? 1.0f / m_Min : 0.0f),
 		m_Max(100.0f),
-		m_InvMax(m_Max != 0.0f ? 1.0f / m_Max : 0.0f),
 		m_Length(m_Max - m_Min),
 		m_InvLength(1.0f / m_Length)
 	{
@@ -1049,9 +1040,7 @@ public:
 
 	HOD CRange(const float& MinRange, const float& MaxRange) :
 		m_Min(MinRange),
-		m_InvMin(m_Min != 0.0f ? 1.0f / m_Min : 0.0f),
 		m_Max(MaxRange),
-		m_InvMax(m_Max != 0.0f ? 1.0f / m_Max : 0.0f),
 		m_Length(m_Max - m_Min),
 		m_InvLength(1.0f / m_Length)
 	{
@@ -1067,10 +1056,22 @@ public:
 		return *this;
 	}
 
+	HOD float	GetMin(void) const			{ return m_Min;								}
+	HOD void	SetMin(const float& Min)	{ m_Min = Min; m_Length = m_Max - m_Min;	}
+	HOD float	GetMax(void) const			{ return m_Max;								}
+	HOD void	SetMax(const float& Max)	{ m_Max = Max; m_Length = m_Max - m_Min;	}
+	HOD float	GetLength(void) const		{ return m_Length;							}
+
 	void PrintSelf(void)
 	{
 		printf("[%4.2f - %4.2f]\n", m_Min, m_Max);
 	}
+
+private:
+	float	m_Min;			/*!< Minimum range */
+	float	m_Max;			/*!< Maximum range */
+	float	m_Length;		/*!< Length */
+	float	m_InvLength;	/*!< Length reciprocal */
 };
 
 class EXPOSURE_RENDER_DLL CBoundingBox

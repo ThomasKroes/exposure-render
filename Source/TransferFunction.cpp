@@ -33,9 +33,9 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 
 	blockSignals(true);
 	
-	m_RangeMin		= Other.m_RangeMin;
-	m_RangeMax		= Other.m_RangeMax;
-	m_Range			= Other.m_Range;
+// 	m_RangeMin		= Other.m_RangeMin;
+// 	m_RangeMax		= Other.m_RangeMax;
+// 	m_Range			= Other.m_Range;
 	m_Nodes			= Other.m_Nodes;
 	m_pSelectedNode	= Other.m_pSelectedNode;
 

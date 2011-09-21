@@ -32,18 +32,7 @@ void QAppearanceWidget::OnLoadPreset(const QString& Name)
 		return;
 
 	QTransferFunction TransferFunction = m_PresetsWidget.GetPreset(Name);
-
-	
-	if (Scene())
-	{
-		TransferFunction.SetRangeMin(Scene()->m_IntensityRange.m_Min);
-		TransferFunction.SetRangeMax(Scene()->m_IntensityRange.m_Max);
-	}
-
 	gTransferFunction = TransferFunction;
-
-	// De-normalize node intensity
-// 	TransferFunction.DeNormalizeIntensity();
 }
 
 void QAppearanceWidget::OnSavePreset(const QString& Name)

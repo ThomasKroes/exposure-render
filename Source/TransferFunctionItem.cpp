@@ -74,12 +74,15 @@ void QTransferFunctionItem::paint(QPainter* pPainter, const QStyleOptionGraphics
 	QGraphicsRectItem::paint(pPainter, pOption, pWidget);
 }
 
-void QTransferFunctionItem::Update(void)
+void QTransferFunctionItem::SetTransferFunction(QTransferFunction* pTransferFunction)
+{
+	m_pTransferFunction = pTransferFunction;
+}
+
+void QTransferFunctionItem::UpdateNodes(void)
 {
 	if (!m_pTransferFunction)
 		return;
-
-	m_Polygon.clear();
 
 	for (int i = 0; i < m_Nodes.size(); i++)
 	{
@@ -89,6 +92,38 @@ void QTransferFunctionItem::Update(void)
 
 	m_Nodes.clear();
 
+	for (int i = 0; i < m_pTransferFunction->GetNodes().size(); i++)
+	{
+		QNode& Node = m_pTransferFunction->GetNode(i);
+
+		QPoint CanvasPoint;
+
+		CanvasPoint.setX(Node.GetIntensity() * rect().width());
+		CanvasPoint.setY((1.0f - Node.GetOpacity()) * rect().height());
+
+		if (m_AllowUpdateNodes)
+		{
+			QNodeItem* pNodeItem = new QNodeItem(this, &m_pTransferFunction->GetNode(i));
+
+			QPointF NodeCenter(Node.GetIntensity() * rect().width(), (1.0 - Node.GetOpacity()) * rect().height());
+
+			pNodeItem->m_SuspendUpdate = true;
+
+			pNodeItem->setPos(NodeCenter);
+			pNodeItem->setZValue(100000);
+
+			pNodeItem->m_SuspendUpdate = false;
+
+			m_Nodes.append(pNodeItem);
+		}
+	}
+}
+
+void QTransferFunctionItem::UpdateEdges(void)
+{
+	if (!m_pTransferFunction)
+		return;
+
 	for (int i = 0; i < m_Edges.size(); i++)
 	{
 		scene()->removeItem(m_Edges[i]);
@@ -96,7 +131,7 @@ void QTransferFunctionItem::Update(void)
 	}
 
 	m_Edges.clear();
-	
+
 	QPoint CachedCanvasPoint;
 
 	for (int i = 0; i < m_pTransferFunction->GetNodes().size(); i++)
@@ -107,7 +142,7 @@ void QTransferFunctionItem::Update(void)
 
 		CanvasPoint.setX(Node.GetIntensity() * rect().width());
 		CanvasPoint.setY((1.0f - Node.GetOpacity()) * rect().height());
-		
+
 		if (i > 0)
 		{
 			QEdgeItem* pEdgeItem = new QEdgeItem(this);
@@ -116,8 +151,6 @@ void QTransferFunctionItem::Update(void)
 			m_Edges.append(pEdgeItem);
 		}
 
-		CachedCanvasPoint = CanvasPoint;
-		
 		if (i == 0)
 		{
 			QPoint CenterCopy = CanvasPoint;
@@ -126,8 +159,6 @@ void QTransferFunctionItem::Update(void)
 
 			m_Polygon.append(CenterCopy);
 		}
-
-		m_Polygon.append(CanvasPoint);
 
 		if (i == m_pTransferFunction->GetNodes().size() - 1)
 		{
@@ -138,24 +169,30 @@ void QTransferFunctionItem::Update(void)
 			m_Polygon.append(CenterCopy);
 		}
 
-		if (m_AllowUpdateNodes)
-		{
-			QNodeItem* pNodeItem = new QNodeItem(this, &m_pTransferFunction->GetNode(i));
+		CachedCanvasPoint = CanvasPoint;
+	}
+}
 
-			QPointF NodeCenter(Node.GetIntensity() * rect().width(), (1.0 - Node.GetOpacity()) * rect().height());
-			pNodeItem->setPos(NodeCenter);
-			pNodeItem->setZValue(100000);
+void QTransferFunctionItem::UpdatePolygon(void)
+{
+	if (!m_pTransferFunction)
+		return;
 
-			m_Nodes.append(pNodeItem);
-		}
+	m_Polygon.clear();
+
+	QPoint CachedCanvasPoint;
+
+	for (int i = 0; i < m_pTransferFunction->GetNodes().size(); i++)
+	{
+		QNode& Node = m_pTransferFunction->GetNode(i);
+
+		QPoint CanvasPoint;
+
+		CanvasPoint.setX(Node.GetIntensity() * rect().width());
+		CanvasPoint.setY((1.0f - Node.GetOpacity()) * rect().height());
+
+		m_Polygon.append(CanvasPoint);
 	}
 
 	m_PolygonItem.setPolygon(m_Polygon);
 }
-
-void QTransferFunctionItem::SetTransferFunction(QTransferFunction* pTransferFunction)
-{
-	m_pTransferFunction = pTransferFunction;
-}
-
-

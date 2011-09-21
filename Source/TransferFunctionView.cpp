@@ -65,7 +65,9 @@ void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 	m_HistogramItem.SetRectangle(m_CanvasRectangle);
 	m_TransferFunctionItem.setRect(m_CanvasRectangle);
 
-	m_TransferFunctionItem.Update();
+	m_TransferFunctionItem.UpdateNodes();
+	m_TransferFunctionItem.UpdateEdges();
+	m_TransferFunctionItem.UpdatePolygon();
 
 	setSceneRect(rect());
 }
@@ -77,7 +79,9 @@ void QTFView::SetHistogram(QHistogram& Histogram)
 
 void QTFView::OnTransferFunctionChanged(void)
 {
-	m_TransferFunctionItem.Update();
+	m_TransferFunctionItem.UpdateNodes();
+	m_TransferFunctionItem.UpdateEdges();
+	m_TransferFunctionItem.UpdatePolygon();
 }
 
 void QTFView::OnNodeSelectionChanged(QNode* pNode)
@@ -132,7 +136,9 @@ void QTFView::mousePressEvent(QMouseEvent* pEvent)
 			gTransferFunction.AddNode(NewNode);
 
 			// Redraw
-			m_TransferFunctionItem.Update();
+			m_TransferFunctionItem.UpdateNodes();
+			m_TransferFunctionItem.UpdateEdges();
+			m_TransferFunctionItem.UpdatePolygon();
 		}
 
 		if (pEvent->button() == Qt::RightButton)
@@ -156,134 +162,4 @@ void QTFView::mousePressEvent(QMouseEvent* pEvent)
 				gTransferFunction.RemoveNode(pNodeItem->m_pNode);
 		}
 	}
-}
-
-QTransferFunctionView::QTransferFunctionView(QWidget* pParent) :
-	QGraphicsView(pParent),
-	m_GraphicsScene(),
-	m_TransferFunctionCanvas(NULL, &m_GraphicsScene),
-	m_AxisLabelX(NULL, ""),
-	m_AxisLabelY(NULL, "")
-{
-	
-	// Styling
-	setFrameShadow(Sunken);
-	setFrameShape(NoFrame);
-
-	// Never show scrollbars
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-/*
-	// Status and tooltip
-	setStatusTip("Transfer function editor");
-	setToolTip("Transfer function editor");
-
-	// Create scene and apply
-	setScene(&m_GraphicsScene);
-
-	// Turn anti-aliasing on
-	setRenderHint(QPainter::Antialiasing);
-
-	// Respond to changes in the transfer function
-	connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(Update()));
-
-	// Create the transfer function canvas and add it to the scene
-	m_TransferFunctionCanvas.translate(m_MarginLeft, m_MarginTop);
-	
-	// Respond to changes in node selection
-	connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
-
-	// X-axis label
-	m_AxisLabelX.m_Text =  "Density";
-	m_GraphicsScene.addItem(&m_AxisLabelX);
-
-	// Y-axis label
-	m_AxisLabelY.m_Text = "Opacity";
-	m_GraphicsScene.addItem(&m_AxisLabelY);
-
-	// Notify us when the histogram changes
-	connect(&gHistogram, SIGNAL(HistogramChanged()), this, SLOT(OnHistogramChanged()));
-
-	setBackgroundBrush(QBrush(QColor(240, 240, 240)));
-
-	
-
-	QGraphicsGridLayout *layout = new QGraphicsGridLayout;
-	layout->setSpacing(10);
-	*/
-
-	
-}
-
-
-
-void QTransferFunctionView::OnNodeSelectionChanged(QNode* pNode)
-{
-	// Deselect all nodes
- 	for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
- 		m_TransferFunctionCanvas.m_Nodes[i]->setSelected(false);
-
-	if (pNode)
-	{
-		for (int i = 0; i < m_TransferFunctionCanvas.m_Nodes.size(); i++)
-		{
-			if (m_TransferFunctionCanvas.m_Nodes[i]->m_pNode->GetID() == pNode->GetID())
-				m_TransferFunctionCanvas.m_Nodes[i]->setSelected(true);
-		}
-	}
-}
-
-void QTransferFunctionView::mousePressEvent(QMouseEvent* pEvent)
-{
-	/*
-	QGraphicsView::mousePressEvent(pEvent);
-
-	// Get node item under cursor
-	QNodeItem* pNodeItem = dynamic_cast<QNodeItem*>(scene()->itemAt(pEvent->posF()));
-
-	if (!pNodeItem)
-	{
-		// Add a new node if the user clicked the left button
-		if (pEvent->button() == Qt::LeftButton && m_TransferFunctionCanvas.rect().contains(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop)))
-		{
-			// Convert picked position to transfer function coordinates
-			QPointF TfPoint = m_TransferFunctionCanvas.SceneToTransferFunction(pEvent->posF() - QPointF(m_MarginLeft, m_MarginTop));
-
-			// Generate random color
-			int R = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int G = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int B = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-
-			// Create new transfer function node
-			QNode NewNode(&gTransferFunction, TfPoint.x(), TfPoint.y(), QColor(R, G, B, 255));
-
-			// Add to node list
-			gTransferFunction.AddNode(NewNode);
-
-			// Redraw
-			m_TransferFunctionCanvas.Update();
-		}
-
-		if (pEvent->button() == Qt::RightButton)
-		{
-			// Other wise no node selection
-			gTransferFunction.SetSelectedNode((QNode*)NULL);
-		}
-	}
-	else
-	{
-		if (pEvent->button() == Qt::LeftButton)
-		{
-			gTransferFunction.SetSelectedNode(pNodeItem->m_pNode);
-		}
-		else if (pEvent->button() == Qt::RightButton)
-		{
-			const int Index = gTransferFunction.GetNodes().indexOf(*pNodeItem->m_pNode);
-
-			// Remove transfer function node if not the first or last node
-			if (Index != 0 && Index != gTransferFunction.GetNodes().size() - 1)
-				gTransferFunction.RemoveNode(pNodeItem->m_pNode);
-		}
-	}
-	*/
 }

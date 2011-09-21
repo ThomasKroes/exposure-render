@@ -155,38 +155,38 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QObject::connect(&m_OpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnOpacityChanged(double)));
 
 	// Diffuse
-	m_MainLayout.addWidget(new QLabel("Diffuse"), 3, 1);
+	m_MainLayout.addWidget(new QLabel("Diffuse"), 3, 0);
 	m_Diffuse.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_Diffuse, 4, 1);
+	m_MainLayout.addWidget(&m_Diffuse, 3, 1);
 
 	QObject::connect(&m_Diffuse, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseChanged(const QColor&)));
 
 	// Specular
-	m_MainLayout.addWidget(new QLabel("Specular"), 3, 2);
+	m_MainLayout.addWidget(new QLabel("Specular"), 4, 0);
 	m_Specular.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_Specular, 4, 2);
+	m_MainLayout.addWidget(&m_Specular, 4, 1);
 
 	QObject::connect(&m_Specular, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularChanged(const QColor&)));
 
 	// Emission
-	m_MainLayout.addWidget(new QLabel("Emission"), 3, 3);
+	m_MainLayout.addWidget(new QLabel("Emission"), 5, 0);
 	m_Emission.setFixedWidth(120);
-	m_MainLayout.addWidget(&m_Emission, 4, 3);
+	m_MainLayout.addWidget(&m_Emission, 5, 1);
 
 	QObject::connect(&m_Emission, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnEmissionChanged(const QColor&)));
 
 	// Roughness
 	m_ShinyLabel.setText("Shiny");
-	m_MainLayout.addWidget(&m_ShinyLabel, 5, 0);
+	m_MainLayout.addWidget(&m_ShinyLabel, 6, 0);
 
 	m_RoughnessSlider.setOrientation(Qt::Horizontal);
 	m_RoughnessSlider.setStatusTip("Roughness");
 	m_RoughnessSlider.setToolTip("Roughness");
 	m_RoughnessSlider.setRange(0.0f, 1000.0f);
-	m_MainLayout.addWidget(&m_RoughnessSlider, 5, 1, 1, 2);
+	m_MainLayout.addWidget(&m_RoughnessSlider, 6, 1, 1, 2);
 
 	m_DullLabel.setText("Dull");
-	m_MainLayout.addWidget(&m_DullLabel, 5, 3);
+	m_MainLayout.addWidget(&m_DullLabel, 6, 3);
 
 	QObject::connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));
 	QObject::connect(&m_RoughnessSpinBox, SIGNAL(valueChanged(double)), &m_RoughnessSlider, SLOT(setValue(double)));

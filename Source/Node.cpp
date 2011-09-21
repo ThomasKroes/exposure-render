@@ -20,7 +20,7 @@ QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const
 	m_Emission(Emission),
 	m_Roughness(Roughness),
 	m_MinX(0.0f),
-	m_MaxX(0.0f),
+	m_MaxX(1.0f),
 	m_MinY(0.0f),
 	m_MaxY(1.0f),
 	m_ID(0)
@@ -50,6 +50,11 @@ bool QNode::operator==(const QNode& Other) const
 	return m_ID == Other.m_ID;
 }
 
+QTransferFunction* QNode::GetTransferFunction(void)
+{
+	return m_pTransferFunction;
+}
+
 float QNode::GetIntensity(void) const
 {
 	return m_Intensity;
@@ -57,7 +62,12 @@ float QNode::GetIntensity(void) const
 
 void QNode::SetIntensity(const float& Intensity)
 {
+	if (Intensity == m_Intensity)
+		return;
+
 	m_Intensity = qMin(m_MaxX, qMax(Intensity, m_MinX));
+
+	SetDirty(true);
 
 	emit NodeChanged(this);
 	emit IntensityChanged(this);
@@ -80,8 +90,12 @@ float QNode::GetOpacity(void) const
 
 void QNode::SetOpacity(const float& Opacity)
 {
+	if (Opacity == m_Opacity)
+		return;
+
 	m_Opacity = qMin(m_MaxY, qMax(Opacity, m_MinY));
-	m_Opacity = Opacity;
+
+	SetDirty(true);
 
 	emit NodeChanged(this);
 	emit OpacityChanged(this);
@@ -94,7 +108,12 @@ QColor QNode::GetDiffuse(void) const
 
 void QNode::SetDiffuse(const QColor& Diffuse)
 {
+	if (Diffuse == m_Diffuse)
+		return;
+
 	m_Diffuse = Diffuse;
+
+	SetDirty(true);
 
 	emit NodeChanged(this);
 	emit DiffuseChanged(this);
@@ -107,7 +126,12 @@ QColor QNode::GetSpecular(void) const
 
 void QNode::SetSpecular(const QColor& Specular)
 {
+	if (Specular == m_Specular)
+		return;
+
 	m_Specular = Specular;
+
+	SetDirty(true);
 
 	emit NodeChanged(this);
 	emit SpecularChanged(this);
@@ -120,7 +144,12 @@ QColor QNode::GetEmission(void) const
 
 void QNode::SetEmission(const QColor& Emission)
 {
+	if (Emission == m_Emission)
+		return;
+
 	m_Emission = Emission;
+
+	SetDirty(true);
 
 	emit NodeChanged(this);
 	emit EmissionChanged(this);
@@ -133,7 +162,12 @@ float QNode::GetRoughness(void) const
 
 void QNode::SetRoughness(const float& Roughness)
 {
+	if (Roughness == m_Roughness)
+		return;
+
 	m_Roughness = Roughness;
+
+	SetDirty(true);
 
 	emit NodeChanged(this);
 	emit RoughnessChanged(this);
@@ -146,7 +180,12 @@ float QNode::GetMinX(void) const
 
 void QNode::SetMinX(const float& MinX)
 {
+	if (MinX == m_MinX)
+		return;
+
 	m_MinX = MinX;
+
+	SetDirty(true);
 
 	emit RangeChanged(this);
 }
@@ -158,7 +197,12 @@ float QNode::GetMaxX(void) const
 
 void QNode::SetMaxX(const float& MaxX)
 {
+	if (MaxX == m_MaxX)
+		return;
+
 	m_MaxX = MaxX;
+
+	SetDirty(true);
 
 	emit RangeChanged(this);
 }
@@ -170,7 +214,12 @@ float QNode::GetMinY(void) const
 
 void QNode::SetMinY(const float& MinY)
 {
+	if (MinY == m_MinY)
+		return;
+
 	m_MinY = MinY;
+
+	SetDirty(true);
 
 	emit RangeChanged(this);
 }
@@ -182,7 +231,12 @@ float QNode::GetMaxY(void) const
 
 void QNode::SetMaxY(const float& MaxY)
 {
+	if (MaxY == m_MaxY)
+		return;
+
 	m_MaxY = MaxY;
+
+	SetDirty(true);
 
 	emit RangeChanged(this);
 }
@@ -195,6 +249,16 @@ bool QNode::InRange(const QPointF& Point)
 int QNode::GetID(void) const
 {
 	return m_ID;
+}
+
+bool QNode::GetDirty(void) const
+{
+	return m_Dirty;
+}
+
+void QNode::SetDirty(const bool& Dirty)
+{
+	m_Dirty = Dirty;
 }
 
 void QNode::ReadXML(QDomElement& Parent)

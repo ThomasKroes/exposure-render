@@ -81,15 +81,11 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionHasChanged)
 	{
-		QPointF NewTfPoint(NewScenePoint.x() / rect().width(), (NewScenePoint.y() / rect().height()));
+		QPointF TransferFunctionPoint(NewScenePoint.x() / rect().width(), ((float)NewScenePoint.y() / (float)rect().height()));
 
-		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
+//		m_pNode->SetIntensity(TransferFunctionPoint.x());
+//		m_pNode->SetOpacity(TransferFunctionPoint.y());
 
-//		m_pNode->SetIntensity(NewTfPoint.x());
-//		m_pNode->SetOpacity(NewTfPoint.y());
-
-		m_pTransferFunctionItem->m_AllowUpdateNodes = true;
- 
 		return NewScenePoint;
 	}
 
@@ -155,6 +151,9 @@ void QNodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* pEvent)
 
 void QNodeItem::setPos(const QPointF& Pos)
 {
+	if (Pos == pos())
+		return;
+
 	QGraphicsEllipseItem::setPos(Pos);
 
 	QRectF EllipseRect;

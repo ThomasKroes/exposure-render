@@ -57,22 +57,3 @@ private:
 	QHistogramItem			m_HistogramItem;
 	QTransferFunctionItem	m_TransferFunctionItem;
 };
-
-class QTransferFunctionView : public QGraphicsView
-{
-    Q_OBJECT
-
-public:
-    QTransferFunctionView(QWidget* pParent = NULL);
-
-	void mousePressEvent(QMouseEvent* pEvent);
-
-public slots:
-	void OnNodeSelectionChanged(QNode* pNode);
-
-public:
-	QGraphicsScene				m_GraphicsScene;
-	QTransferFunctionCanvas		m_TransferFunctionCanvas;
-	QAxisLabel					m_AxisLabelX;
-	QAxisLabel					m_AxisLabelY;
-};
