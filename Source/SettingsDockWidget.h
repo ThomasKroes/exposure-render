@@ -10,15 +10,12 @@ public:
 private slots:
 	void OnSetNoBounces(const int& NoBounces);
 	void OnSetPhase(const double& Phase);
-	void OnSetDensityScale(double DensityScale);
 
 private:
 	QGridLayout		m_MainLayout;
 	QComboBox		m_RenderTypeComboBox;
 	QSlider			m_NoBouncesSlider;
 	QSpinBox		m_NoBouncesSpinBox;
-	QDoubleSlider	m_DensityScaleSlider;
-	QDoubleSpinner	m_DensityScaleSpinner;
 	QGridLayout		m_ScatteringLayout;
 	QDoubleSlider	m_PhaseSlider;
 };

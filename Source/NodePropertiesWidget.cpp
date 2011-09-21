@@ -20,8 +20,8 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_Specular(),
 	m_ShinyLabel(),
 	m_RoughnessSlider(),
-	m_RoughnessSpinBox(),
-	m_DullLabel()
+	m_DullLabel(),
+	m_Emission()
 {
 	setTitle("Node Properties");
 	setToolTip("Node Properties");
@@ -79,21 +79,21 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 
 	// Diffuse
 	m_MainLayout.addWidget(new QLabel("Diffuse"), 3, 0);
-	m_Diffuse.setFixedWidth(120);
+	m_Diffuse.setFixedWidth(50);
 	m_MainLayout.addWidget(&m_Diffuse, 3, 1);
 
 	QObject::connect(&m_Diffuse, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnDiffuseChanged(const QColor&)));
 
 	// Specular
 	m_MainLayout.addWidget(new QLabel("Specular"), 4, 0);
-	m_Specular.setFixedWidth(120);
+	m_Specular.setFixedWidth(50);
 	m_MainLayout.addWidget(&m_Specular, 4, 1);
 
 	QObject::connect(&m_Specular, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnSpecularChanged(const QColor&)));
 
 	// Emission
 	m_MainLayout.addWidget(new QLabel("Emission"), 5, 0);
-	m_Emission.setFixedWidth(120);
+	m_Emission.setFixedWidth(50);
 	m_MainLayout.addWidget(&m_Emission, 5, 1);
 
 	QObject::connect(&m_Emission, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnEmissionChanged(const QColor&)));
@@ -111,8 +111,6 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_DullLabel.setText("Dull");
 	m_MainLayout.addWidget(&m_DullLabel, 6, 3);
 
-	QObject::connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), &m_RoughnessSpinBox, SLOT(setValue(double)));
-	QObject::connect(&m_RoughnessSpinBox, SIGNAL(valueChanged(double)), &m_RoughnessSlider, SLOT(setValue(double)));
 	QObject::connect(&m_RoughnessSlider, SIGNAL(valueChanged(double)), this, SLOT(OnRoughnessChanged(double)));
 	QObject::connect(&gTransferFunction, SIGNAL(SelectionChanged(QNode*)), this, SLOT(OnNodeSelectionChanged(QNode*)));
 
@@ -268,10 +266,8 @@ void QNodePropertiesWidget::OnNodeRoughnessChanged(QNode* pNode)
 	if (pNode)
 	{
 		m_RoughnessSlider.setValue((double)pNode->GetRoughness(), true);
-		m_RoughnessSpinBox.setValue((double)pNode->GetRoughness(), true);
 	}
 
 	m_ShinyLabel.setEnabled(Enable);
 	m_RoughnessSlider.setEnabled(Enable);
-	m_RoughnessSpinBox.setEnabled(Enable);
 }

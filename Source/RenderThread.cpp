@@ -638,14 +638,14 @@ bool QRenderThread::Load(QString& FileName)
 	// Build the histogram
 	vtkSmartPointer<vtkImageAccumulate> Histogram = vtkSmartPointer<vtkImageAccumulate>::New();
  	Histogram->SetInputConnection(ImageCast->GetOutputPort());
- 	Histogram->SetComponentExtent(0, 512, 0, 0, 0, 0);
- 	Histogram->SetComponentOrigin(0, 0, 0);
- 	Histogram->SetComponentSpacing(1, 0, 0);
+ 	Histogram->SetComponentExtent(0, 256, 0, 0, 0, 0);
+ 	Histogram->SetComponentOrigin(m_Scene.m_IntensityRange.GetMin(), 0, 0);
+ 	Histogram->SetComponentSpacing(m_Scene.m_IntensityRange.GetLength() / 256.0f, 0, 0);
  	Histogram->IgnoreZeroOn();
  	Histogram->Update();
  
 	// Update the histogram in the transfer function
-	gHistogram.SetBins((int*)Histogram->GetOutput()->GetScalarPointer(), 512);
+	gHistogram.SetBins((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
 	
 	// Delete progress dialog
 //	gpProgressDialog->close();
@@ -781,7 +781,7 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		m_Scene.m_TransferFunctions.m_Opacity.m_C[i]	= CColorRgbHdr(Node.GetOpacity());
 		m_Scene.m_TransferFunctions.m_Diffuse.m_C[i]	= CColorRgbHdr(Node.GetDiffuse().redF(), Node.GetDiffuse().greenF(), Node.GetDiffuse().blueF());
 		m_Scene.m_TransferFunctions.m_Specular.m_C[i]	= CColorRgbHdr(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
-		m_Scene.m_TransferFunctions.m_Emission.m_C[i]	= CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
+		m_Scene.m_TransferFunctions.m_Emission.m_C[i]	= 500.0f * CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
 		m_Scene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Node.GetRoughness());
 	}
 

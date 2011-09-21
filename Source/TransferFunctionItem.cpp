@@ -17,6 +17,7 @@ QTransferFunctionItem::QTransferFunctionItem(QGraphicsItem* pParent) :
 	m_Edges(),
 	m_AllowUpdateNodes(true)
 {
+	setBrush(Qt::NoBrush);
 	setPen(Qt::NoPen);
 
 	m_PolygonItem.setParentItem(this);

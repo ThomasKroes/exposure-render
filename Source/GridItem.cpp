@@ -8,8 +8,9 @@ QGridItem::QGridItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),
 	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170))),
 	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 210))),
-	m_PenEnabled(QPen(QColor::fromHsl(0, 0, 140))),
-	m_PenDisabled(QPen(QColor::fromHsl(0, 0, 160)))
+	m_PenEnabled(QPen(QColor::fromHsl(0, 0, 140), 0.1)),
+	m_PenDisabled(QPen(QColor::fromHsl(0, 0, 190))),
+	m_NumY(10)
 {
 }
 
@@ -30,16 +31,23 @@ QGridItem& QGridItem::operator=(const QGridItem& Other)
 
 void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
+	pPainter->setRenderHint(QPainter::RenderHint::Antialiasing, false);
+
 	if (isEnabled())
 	{
-		setBrush(m_BrushEnabled);
-		setPen(m_PenEnabled);
+		pPainter->setBrush(m_BrushEnabled);
+		pPainter->setPen(m_PenEnabled);
 	}
 	else
 	{
-		setBrush(m_BrushDisabled);
-		setPen(m_PenDisabled);
+		pPainter->setBrush(m_BrushDisabled);
+		pPainter->setPen(m_PenDisabled);
 	}
 
-	QGraphicsRectItem::paint(pPainter, pOption, pWidget);
+	const float DY = rect().height() / (float)m_NumY;
+
+	for (int i = 1; i < m_NumY; i++)
+	{
+		pPainter->drawLine(QPointF(0, i * DY), QPointF(rect().width(), i * DY));
+	}
 }

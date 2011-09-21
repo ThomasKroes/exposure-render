@@ -25,18 +25,17 @@ private slots:
 	void OnNodeRoughnessChanged(QNode* pNode);
 
 private:
-	QGridLayout				m_MainLayout;
-	QLabel					m_IntensityLabel;
-	QDoubleSlider			m_IntensitySlider;
-	QDoubleSpinner			m_IntensitySpinBox;
-	QLabel					m_OpacityLabel;
-	QDoubleSlider			m_OpacitySlider;
-	QDoubleSpinner			m_OpacitySpinBox;
-	QColorPushButton		m_Diffuse;
-	QColorPushButton		m_Specular;
-	QColorPushButton		m_Emission;
-	QLabel					m_ShinyLabel;
-	QDoubleSlider			m_RoughnessSlider;
-	QDoubleSpinner			m_RoughnessSpinBox;
-	QLabel					m_DullLabel;
+	QGridLayout			m_MainLayout;
+	QLabel				m_IntensityLabel;
+	QDoubleSlider		m_IntensitySlider;
+	QDoubleSpinner		m_IntensitySpinBox;
+	QLabel				m_OpacityLabel;
+	QDoubleSlider		m_OpacitySlider;
+	QDoubleSpinner		m_OpacitySpinBox;
+	QColorPushButton	m_Diffuse;
+	QColorPushButton	m_Specular;
+	QLabel				m_ShinyLabel;
+	QDoubleSlider		m_RoughnessSlider;
+	QLabel				m_DullLabel;
+	QColorPushButton	m_Emission;
 };

@@ -4,21 +4,24 @@
 
 #include "GradientRamp.h"
 
-QGradientRamp::QGradientRamp(const QString& Name /*= "Gradient Ramp"*/, QWidget* pParent /*= NULL*/) :
+QGradientRamp::QGradientRamp(const QString& Name, QWidget* pParent /*= NULL*/) :
 	QWidget(pParent),
-	m_Name(Name),
+	m_Name(Name.toLower()),
 	m_GradientStops(),
 	m_LinearGradient(),
-	m_CheckerDimEnabled(QColor::fromHsl(0, 0, 100)),
+	m_CheckerDimEnabled(QColor::fromHsl(0, 0, 140)),
 	m_CheckerDimDisabled(QColor::fromHsl(0, 0, 170)),
 	m_CheckerBrightEnabled(QColor::fromHsl(0, 0, 255)),
 	m_CheckerBrightDisabled(QColor::fromHsl(0, 0, 230)),
 	m_PenEnabled(QColor::fromHsl(0, 0, 100)),
 	m_PenDisabled(QColor::fromHsl(0, 0, 150)),
-	m_Font("Arial", 6, 50),
-	m_TextEnabled(QColor::fromHsl(0, 0, 50)),
-	m_TextDisabled(QColor::fromHsl(0, 0, 120))
+	m_Font("Arial"),
+	m_TextForegroundEnabled(QColor::fromHsl(0, 0, 250)),
+	m_TextForegroundDisabled(QColor::fromHsl(0, 0, 230)),
+	m_TextBackgroundEnabled(QColor::fromHsl(0, 0, 20)),
+	m_TextBackgroundDisabled(QColor::fromHsl(0, 0, 150))
 {
+	m_Font.setPointSize(7);
 }
 
 void QGradientRamp::paintEvent(QPaintEvent * pe)
@@ -26,8 +29,7 @@ void QGradientRamp::paintEvent(QPaintEvent * pe)
 	QPainter Painter(this);
 
 	const float CheckerSize = 0.5f * rect().height();
-	//		Painter.setRenderHint(QPainter::Antialiasing);
-
+	
 	const int NumX = ceilf((float)rect().width() / CheckerSize);
 
 	QColor CheckerDim		= isEnabled() ? m_CheckerDimEnabled : m_CheckerDimDisabled;
@@ -47,7 +49,7 @@ void QGradientRamp::paintEvent(QPaintEvent * pe)
 		Painter.fillRect(RectBottom, BrushBottom);
 	}
 
-	QGradientStops GradientStops = m_GradientStops;
+	QGradientStops GradientStops = m_GradientStops, TextGradientStops = GradientStops;
 
 	if (!isEnabled())
 	{
@@ -65,14 +67,18 @@ void QGradientRamp::paintEvent(QPaintEvent * pe)
 		GradientStops[i].second.setAlphaF(0.8 * GradientStops[i].second.alphaF());
 	}
 
-	m_LinearGradient.setStops(GradientStops);
+	for (int i = 0; i < TextGradientStops.size(); i++)
+	{
+		TextGradientStops[i].second = QColor::fromHsl(0, 0, 255 - TextGradientStops[i].second.lightness(), 255);
+	}
+	
 
-	QBrush Brush(m_LinearGradient);
+	m_LinearGradient.setStops(GradientStops);
 
 	Painter.setPen(isEnabled() ? QPen(Qt::darkGray) : QPen(Qt::lightGray));
 
 	// Draw the gradient
-	Painter.fillRect(rect(), Brush);
+	Painter.fillRect(rect(), QBrush(m_LinearGradient));
 
 	QRect R(rect());
 
@@ -82,9 +88,20 @@ void QGradientRamp::paintEvent(QPaintEvent * pe)
 
 	Painter.drawRect(R);
 
-	Painter.setPen(isEnabled() ? m_TextEnabled : m_TextDisabled);
+	Painter.setFont(m_Font);
+	
+	Painter.setPen(QPen(isEnabled() ? m_TextBackgroundEnabled : m_TextBackgroundDisabled));
 
 	Painter.drawText(rect(), Qt::AlignCenter, m_Name);
+
+	Painter.translate(-0.55, -0.25);
+
+	Painter.setFont(m_Font);
+	Painter.setPen(QPen(isEnabled() ? m_TextForegroundEnabled : m_TextForegroundDisabled));
+
+	const QRectF RectWhite = QRectF(-0.55, -0.25, rect().width(), rect().height());
+
+	Painter.drawText(RectWhite, Qt::AlignCenter, m_Name);
 }
 
 void QGradientRamp::resizeEvent(QResizeEvent* pResizeEvent)

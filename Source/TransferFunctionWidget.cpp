@@ -20,9 +20,9 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_BottomRightLayout(),
 	m_Canvas(),
 	m_LabelIntensity(),
-	m_GradientRampDiffuse("diffuse"),
-	m_GradientRampSpecular("specular"),
-	m_GradientRampEmission("emission")
+	m_GradientRampDiffuse("Diffuse"),
+	m_GradientRampSpecular("Specular"),
+	m_GradientRampEmission("Emission")
 {
 	// Set the size policy, making sure the widget fits nicely in the layout
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -34,7 +34,7 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 
 	setLayout(&m_MainLayout);
 
-	m_MainLayout.setContentsMargins(20, 20, 20, 20);
+	m_MainLayout.setContentsMargins(5, 5, 5, 15);
 	m_MainLayout.setSpacing(10);
 
 	m_MainLayout.addLayout(&m_TopLeftLayout, 0, 0);
@@ -55,10 +55,6 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 
 	m_BottomLayout.setContentsMargins(10, 0, 10, 0);
 
-	m_GradientRampDiffuse.setContentsMargins(10, 0, 10, 0);
-	m_GradientRampSpecular.setContentsMargins(100, 0, 10, 0);
-	m_GradientRampEmission.setContentsMargins(10, 0, 10, 0);
-
 	QGradientStops DiffuseGradientStops, SpecularGradientStops, EmissionGradientStops;
 	
 	DiffuseGradientStops << QGradientStop(0, QColor(100, 100, 100, 50)) << QGradientStop(1, QColor::fromHsl(30, 150, 100));
@@ -76,9 +72,10 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_LabelIntensity.setText("Intensity");
 
 	m_BottomLayout.addWidget(&m_LabelIntensity, 0, 0, Qt::AlignCenter);
-	m_BottomLayout.addWidget(&m_GradientRampDiffuse);
- 	m_BottomLayout.addWidget(&m_GradientRampSpecular);
- 	m_BottomLayout.addWidget(&m_GradientRampEmission);
+	
+	m_BottomLayout.addWidget(&m_GradientRampDiffuse, 1, 0);
+	m_BottomLayout.addWidget(&m_GradientRampSpecular, 2, 0);
+ 	m_BottomLayout.addWidget(&m_GradientRampEmission, 3, 0);
 
 	QObject::connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));

@@ -14,4 +14,5 @@ private:
 	QBrush	m_BrushDisabled;
 	QPen	m_PenEnabled;
 	QPen	m_PenDisabled;
+	int		m_NumY;
 };

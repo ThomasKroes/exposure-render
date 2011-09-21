@@ -9,10 +9,11 @@
 
 QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	QGraphicsView(pParent),
-	m_Margin(14, 14, 14, 14),
+	m_Margin(10, 10, 10, 10),
 	m_CanvasRectangle(),
 	m_Scene(),
 	m_Background(NULL),
+	m_Grid(NULL),
 	m_HistogramItem(NULL),
 	m_TransferFunctionItem(NULL)
 {
@@ -34,18 +35,22 @@ QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	m_TransferFunctionItem.SetTransferFunction(&gTransferFunction);
 
 	m_Background.setEnabled(false);
+	m_Grid.setEnabled(false);
 	m_HistogramItem.setEnabled(false);
 	m_TransferFunctionItem.setEnabled(false);
 
 	m_Scene.addItem(&m_Background);
+	m_Scene.addItem(&m_Grid);
  	m_Scene.addItem(&m_HistogramItem);
 	m_Scene.addItem(&m_TransferFunctionItem);
 
 	m_Background.setZValue(0);
-	m_HistogramItem.setZValue(100);
-	m_TransferFunctionItem.setZValue(200);
+	m_Grid.setZValue(100);
+	m_HistogramItem.setZValue(200);
+	m_TransferFunctionItem.setZValue(300);
 
-// 	m_Background.translate(m_Margin.GetLeft(), m_Margin.GetTop());
+ 	m_Background.translate(m_Margin.GetLeft(), m_Margin.GetTop());
+	m_Grid.translate(m_Margin.GetLeft(), m_Margin.GetTop());
  	m_HistogramItem.translate(m_Margin.GetLeft(), m_Margin.GetTop());
 	m_TransferFunctionItem.translate(m_Margin.GetLeft(), m_Margin.GetTop());
 
@@ -62,9 +67,11 @@ void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 	m_CanvasRectangle.adjust(m_Margin.GetLeft(),  m_Margin.GetTop(), -m_Margin.GetRight(), -m_Margin.GetBottom());
 
 	m_Background.setRect(m_CanvasRectangle);
-	m_HistogramItem.SetRectangle(m_CanvasRectangle);
+	m_Grid.setRect(m_CanvasRectangle);
+	m_HistogramItem.setRect(m_CanvasRectangle);
 	m_TransferFunctionItem.setRect(m_CanvasRectangle);
 
+	m_HistogramItem.Update();
 	m_TransferFunctionItem.Update();
 
 	setSceneRect(rect());
@@ -101,6 +108,7 @@ void QTFView::setEnabled(bool Enabled)
 	QGraphicsView::setEnabled(Enabled);
 
 	m_Background.setEnabled(Enabled);
+	m_Grid.setEnabled(Enabled);
 	m_HistogramItem.setEnabled(Enabled);
 	m_TransferFunctionItem.setEnabled(Enabled);
 }

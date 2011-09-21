@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BackgroundItem.h"
+#include "GridItem.h"
 #include "HistogramItem.h"
 #include "TransferFunctionItem.h"
 
@@ -52,6 +53,7 @@ private:
 	QRect					m_CanvasRectangle;
 	QGraphicsScene			m_Scene;
 	QBackgroundItem			m_Background;
+	QGridItem				m_Grid;
 	QHistogramItem			m_HistogramItem;
 	QTransferFunctionItem	m_TransferFunctionItem;
 };

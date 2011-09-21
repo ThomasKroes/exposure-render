@@ -3,7 +3,7 @@
 class QGradientRamp : public QWidget
 {
 public:
-	QGradientRamp(const QString& Name = "Gradient Ramp", QWidget* pParent = NULL);
+	QGradientRamp(const QString& Name, QWidget* pParent = NULL);
 
 	void				paintEvent(QPaintEvent * pe);
 	virtual void		resizeEvent(QResizeEvent* pResizeEvent);
@@ -22,6 +22,8 @@ private:
 	QPen				m_PenEnabled;
 	QPen				m_PenDisabled;
 	QFont				m_Font;
-	QPen				m_TextEnabled;
-	QPen				m_TextDisabled;
+	QColor				m_TextForegroundEnabled;
+	QColor				m_TextForegroundDisabled;
+	QColor				m_TextBackgroundEnabled;
+	QColor				m_TextBackgroundDisabled;
 };

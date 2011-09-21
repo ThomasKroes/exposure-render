@@ -5,12 +5,26 @@
 #include "HistogramItem.h"
 
 QHistogramItem::QHistogramItem(QGraphicsItem* pParent) :
-	QGraphicsPolygonItem(pParent),
+	QGraphicsRectItem(pParent),
 	m_Histogram(),
 	m_Brush(),
 	m_Pen(),
-	m_Rectangle()
+	m_PolygonItem(this),
+	m_Lines()
 {
+	setBrush(Qt::NoBrush);
+	setPen(Qt::NoPen);
+}
+
+QHistogramItem::~QHistogramItem(void)
+{
+	for (int i = 0; i < m_Lines.size(); i++)
+	{
+		scene()->removeItem(m_Lines[i]);
+		delete m_Lines[i];
+	}
+
+	m_Lines.clear();
 }
 
 QHistogramItem::QHistogramItem(const QHistogramItem& Other)
@@ -39,66 +53,74 @@ void QHistogramItem::Update(void)
 	if (!m_Histogram.GetEnabled())
 		return;
 
+	for (int i = 0; i < m_Lines.size(); i++)
+	{
+		scene()->removeItem(m_Lines[i]);
+		delete m_Lines[i];
+	}
+
+	m_Lines.clear();
+
 	QPolygonF Polygon;
+
+	QPointF CachedCanvasPoint;
 
 	// Set the gradient stops
 	for (int i = 0; i < m_Histogram.GetBins().size(); i++)
 	{
 		// Compute polygon point in scene coordinates
-		QPointF ScenePoint;
-		ScenePoint.setX(GetRectangle().width() * ((float)i / (float)m_Histogram.GetBins().size()));
+		QPointF CanvasPoint;
+		CanvasPoint.setX(rect().width() * ((float)i / (float)m_Histogram.GetBins().size()));
 		
 		if (m_Histogram.GetBins()[i] <= 0.0f)
-			ScenePoint.setY(GetRectangle().height());
+			CanvasPoint.setY(rect().height());
 		else
-			ScenePoint.setY(GetRectangle().height() - (GetRectangle().height() * logf((float)m_Histogram.GetBins()[i]) / (1.2f * logf((float)m_Histogram.GetMax()))));
+			CanvasPoint.setY(rect().height() - (rect().height() * logf((float)m_Histogram.GetBins()[i]) / (1.2f * logf((float)m_Histogram.GetMax()))));
 
 		if (i == 0)
 		{
-			QPointF CenterCopy = ScenePoint;
+			QPointF CenterCopy = CanvasPoint;
 
-			CenterCopy.setY(GetRectangle().height());
+			CenterCopy.setY(rect().height());
 
 			Polygon.append(CenterCopy);
 		}
 
-		Polygon.append(ScenePoint);
+		Polygon.append(CanvasPoint);
 
 		if (i == (m_Histogram.GetBins().size() - 1))
 		{
-			QPointF CenterCopy = ScenePoint;
+			QPointF CenterCopy = CanvasPoint;
 
-			CenterCopy.setY(GetRectangle().height());
+			CenterCopy.setY(rect().height());
 
 			Polygon.append(CenterCopy);
 		}
+
+		QGraphicsLineItem* pLineItem = new QGraphicsLineItem(this);
+
+		pLineItem->setLine(QLineF(CachedCanvasPoint, CanvasPoint));
+		pLineItem->setPen(QPen(QColor::fromHsl(0, 30, 140)));
+
+		m_Lines.append(pLineItem);
+
+		CachedCanvasPoint = CanvasPoint;
 	}
 
 	QLinearGradient LinearGradient;
 
-	LinearGradient.setStart(0, GetRectangle().bottom());
-	LinearGradient.setFinalStop(0, GetRectangle().top());
+	LinearGradient.setStart(0, rect().bottom());
+	LinearGradient.setFinalStop(0, rect().top());
 
 	QGradientStops GradientStops;
 
-	GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 60, 150, 0)));
-	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 60, 150, 100)));
+	GradientStops.append(QGradientStop(0, QColor::fromHsl(0, 10, 150, 0)));
+	GradientStops.append(QGradientStop(1, QColor::fromHsl(0, 100, 150, 150)));
 
 	LinearGradient.setStops(GradientStops);
 
 	// Update the polygon geometry
-	setPolygon(Polygon);
-	setBrush(QBrush(LinearGradient));
-	setPen(QPen(QColor::fromHsl(0, 60, 150)));
-}
-
-QRectF QHistogramItem::GetRectangle(void) const
-{
-	return m_Rectangle;
-}
-
-void QHistogramItem::SetRectangle(const QRectF& Rectangle)
-{
-	m_Rectangle = Rectangle;
-	Update();
+	m_PolygonItem.setPolygon(Polygon);
+	m_PolygonItem.setBrush(QBrush(LinearGradient));
+	m_PolygonItem.setPen(Qt::NoPen);
 }

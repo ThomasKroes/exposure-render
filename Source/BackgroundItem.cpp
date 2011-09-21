@@ -6,7 +6,7 @@
 
 QBackgroundItem::QBackgroundItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),
-	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170))),
+	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 185))),
 	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 210))),
 	m_PenEnabled(QPen(QColor::fromHsl(0, 0, 140))),
 	m_PenDisabled(QPen(QColor::fromHsl(0, 0, 160)))
@@ -30,16 +30,18 @@ QBackgroundItem& QBackgroundItem::operator=(const QBackgroundItem& Other)
 
 void QBackgroundItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
+	pPainter->setRenderHint(QPainter::RenderHint::Antialiasing, false);
+
 	if (isEnabled())
 	{
-		setBrush(m_BrushEnabled);
-		setPen(m_PenEnabled);
+		pPainter->setBrush(m_BrushEnabled);
+		pPainter->setPen(m_PenEnabled);
 	}
 	else
 	{
-		setBrush(m_BrushDisabled);
-		setPen(m_PenDisabled);
+		pPainter->setBrush(m_BrushDisabled);
+		pPainter->setPen(m_PenDisabled);
 	}
 
-	QGraphicsRectItem::paint(pPainter, pOption, pWidget);
+	pPainter->drawRect(QRectF(0, 0, rect().width(), rect().height()));
 }

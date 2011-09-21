@@ -13,7 +13,7 @@ QColorPushButton::QColorPushButton(QWidget* pParent) :
 
 QSize QColorPushButton::sizeHint() const
 {
-	return QSize(100, 20);
+	return QSize(20, 20);
 }
 
 void QColorPushButton::paintEvent(QPaintEvent* pPaintEvent)
@@ -28,7 +28,7 @@ void QColorPushButton::paintEvent(QPaintEvent* pPaintEvent)
 	QRect ColorRectangle = pPaintEvent->rect();
 
 	// Deflate it
-	ColorRectangle.adjust(m_Margin, m_Margin, -(m_Margin + 75), -m_Margin);
+	ColorRectangle.adjust(m_Margin, m_Margin, -m_Margin, -m_Margin);
 
 	// Use anti aliasing
 	Painter.setRenderHints(QPainter::Antialiasing);
@@ -39,15 +39,6 @@ void QColorPushButton::paintEvent(QPaintEvent* pPaintEvent)
 
 	// Draw
 	Painter.drawRoundedRect(ColorRectangle, m_Radius, Qt::AbsoluteSize);
-
-	// Move rectangle to the right
-	ColorRectangle.setLeft(ColorRectangle.right() + 3);
-	ColorRectangle.setWidth(rect().width() - ColorRectangle.left());
-
-	// Draw text
-	Painter.setFont(QFont("Arial", 7));
-	Painter.setPen(QPen(isEnabled() ? QColor(25, 25, 25) : Qt::gray));
-	Painter.drawText(ColorRectangle, Qt::AlignCenter, "[" + QString::number(m_Color.red()) + ", " + QString::number(m_Color.green()) + ", " + QString::number(m_Color.blue()) + "]");
 }
 
 void QColorPushButton::mousePressEvent(QMouseEvent* pEvent)
