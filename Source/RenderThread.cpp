@@ -768,7 +768,7 @@ void QRenderThread::OnUpdateTransferFunction(void)
 	{
 		QNode& Node = TransferFunction.GetNode(i);
 
-		const float Intensity = TransferFunction.GetRangeMin() + TransferFunction.GetRange() * Node.GetIntensity();
+		const float Intensity = Scene()->m_IntensityRange.GetMin() + Scene()->m_IntensityRange.GetLength() * Node.GetIntensity();
 
 		// Positions
 		m_Scene.m_TransferFunctions.m_Opacity.m_P[i]	= Intensity;

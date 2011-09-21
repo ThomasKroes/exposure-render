@@ -16,8 +16,6 @@ public:
 	void						AddNode(const float& Intensity, const float& Opacity, const QColor& Diffuse, const QColor& Specular, const QColor& Emission, const float& Roughness);
 	void						AddNode(const QNode& pNode);
 	void						RemoveNode(QNode* pNode);
-	void						NormalizeIntensity(void);
-	void						DeNormalizeIntensity(void);
 	void						UpdateNodeRanges(void);
 	const QNodeList&			GetNodes(void) const;
 	QNode&						GetNode(const int& Index);
@@ -29,11 +27,6 @@ public:
 	void						SelectNextNode(void);
 	void						SelectLastNode(void);
 	int							GetNodeIndex(QNode* pNode);
-	float						GetRangeMin(void);
-	void						SetRangeMin(const float& RangeMin);
-	float						GetRangeMax(void);
-	void						SetRangeMax(const float& RangeMax);
-	float						GetRange(void);
 	void						ReadXML(QDomElement& Parent);
 	QDomElement					WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	static QTransferFunction	Default(void);
@@ -48,9 +41,6 @@ signals:
 private:
 	QNodeList	m_Nodes;
 	QNode*		m_pSelectedNode;
-	float		m_RangeMin;
-	float		m_RangeMax;
-	float		m_Range;
 
 	friend class QNode;
 };

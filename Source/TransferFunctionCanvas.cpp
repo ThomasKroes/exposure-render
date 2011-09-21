@@ -135,7 +135,7 @@ void QTransferFunctionCanvas::UpdateGradient(void)
 			Color.setAlphaF(0.5f * Alpha);
 
 			// Add a new gradient stop
-			GradientStops.append(QGradientStop(Node.GetNormalizedIntensity(), Color));	
+//			GradientStops.append(QGradientStop(Node.GetNormalizedIntensity(), Color));	
 		}
 
 		m_PolygonGradient.setStops(GradientStops);

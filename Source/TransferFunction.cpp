@@ -15,10 +15,7 @@ bool CompareNodes(QNode NodeA, QNode NodeB)
 QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	QPresetXML(pParent),
 	m_Nodes(),
-	m_pSelectedNode(NULL),
-	m_RangeMin(0.0f),
-	m_RangeMax(1.0f),
-	m_Range(1.0f)
+	m_pSelectedNode(NULL)
 {
 }
 
@@ -222,30 +219,6 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 	Log("Removed node", "layer-select-point");
 }
 
-void QTransferFunction::NormalizeIntensity(void)
-{
-	for (int i = 0; i < m_Nodes.size(); i++)
-		m_Nodes[i].m_Intensity = (m_Nodes[i].m_Intensity - m_RangeMin) / m_Range;
-
-	// Update node's range
-	UpdateNodeRanges();
-
-	// Inform others that the transfer function has changed
-	emit FunctionChanged();
-}
-
-void QTransferFunction::DeNormalizeIntensity(void)
-{
-	for (int i = 0; i < m_Nodes.size(); i++)
-		m_Nodes[i].m_Intensity = m_RangeMin + m_Nodes[i].m_Intensity * m_Range;
-
-	// Update node's range
-//	UpdateNodeRanges();
-
-	// Inform others that the transfer function has changed
-	emit FunctionChanged();
-}
-
 void QTransferFunction::UpdateNodeRanges(void)
 {
 	return;
@@ -284,33 +257,6 @@ const QNodeList& QTransferFunction::GetNodes(void) const
 QNode& QTransferFunction::GetNode(const int& Index)
 {
 	return m_Nodes[Index];
-}
-
-float QTransferFunction::GetRangeMin(void)
-{
-	return m_RangeMin;
-}
-
-void QTransferFunction::SetRangeMin(const float& RangeMin)
-{
-	m_RangeMin	= RangeMin;
-	m_Range		= GetRange();
-}
-
-float QTransferFunction::GetRangeMax(void)
-{
-	return m_RangeMax;
-}
-
-void QTransferFunction::SetRangeMax(const float& RangeMax)
-{
-	m_RangeMax	= RangeMax;
-	m_Range		= GetRange();
-}
-
-float QTransferFunction::GetRange(void)
-{
-	return m_RangeMax - m_RangeMin;
 }
 
 void QTransferFunction::ReadXML(QDomElement& Parent)

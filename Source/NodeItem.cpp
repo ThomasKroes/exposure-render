@@ -81,10 +81,10 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionHasChanged)
 	{
-		QPointF TransferFunctionPoint(NewScenePoint.x() / rect().width(), ((float)NewScenePoint.y() / (float)rect().height()));
+		QPointF TransferFunctionPoint(abs(NewScenePoint.x()) / rect().width(), ((float)fabs(NewScenePoint.y()) / 100));
 
-//		m_pNode->SetIntensity(TransferFunctionPoint.x());
-//		m_pNode->SetOpacity(TransferFunctionPoint.y());
+		m_pNode->SetIntensity(TransferFunctionPoint.x());
+//		m_pNode->SetOpacity(abs(NewScenePoint.y()) / 500.0f);
 
 		return NewScenePoint;
 	}

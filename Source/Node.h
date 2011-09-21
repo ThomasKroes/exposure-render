@@ -17,8 +17,6 @@ public:
 	QTransferFunction*	GetTransferFunction(void);
 	float				GetIntensity(void) const;
 	void				SetIntensity(const float& Intensity);
-	float				GetNormalizedIntensity(void) const;
-	void				SetNormalizedIntensity(const float& NormalizedX);
 	float				GetOpacity(void) const;
 	void				SetOpacity(const float& Opacity);
 	QColor				GetDiffuse(void) const;
