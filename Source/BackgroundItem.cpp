@@ -44,4 +44,6 @@ void QBackgroundItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* 
 	}
 
 	pPainter->drawRect(QRectF(0, 0, rect().width(), rect().height()));
+
+	pPainter->setBrush(QBrush(Qt::red));
 }

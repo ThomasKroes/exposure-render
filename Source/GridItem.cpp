@@ -16,6 +16,8 @@ QGridItem::QGridItem(QGraphicsItem* pParent) :
 {
 	m_Font.setFamily("Arial");
 	m_Font.setPointSize(6);
+
+	setAcceptHoverEvents(true);
 }
 
 QGridItem::QGridItem(const QGridItem& Other)

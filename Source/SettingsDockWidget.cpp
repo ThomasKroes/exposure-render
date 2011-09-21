@@ -9,9 +9,7 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_MainLayout(),
 	m_NoBouncesSlider(),
-	m_NoBouncesSpinBox(),
-	m_ScatteringLayout(),
-	m_PhaseSlider()
+	m_NoBouncesSpinBox()
 {
 	setTitle("Tracer");
 	setTitle("Tracer Properties");
@@ -45,20 +43,6 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 
 	// Phase
 	m_MainLayout.addWidget(new QLabel("Scattering"), 3, 0);
-
-	// Create scattering layout
-	m_MainLayout.addLayout(&m_ScatteringLayout, 3, 1, 1, 2);
-
-	m_ScatteringLayout.addWidget(new QLabel("Backward"), 0, 0);
-
-	m_PhaseSlider.setOrientation(Qt::Horizontal);
-	m_PhaseSlider.setRange(-1.0, 1.0);
-	m_PhaseSlider.setToolTip("Move slider to the left to increase <i>backward</i> scattering and right to increase <i>forward</i> scattering");
-	m_ScatteringLayout.addWidget(&m_PhaseSlider, 0, 1);
-	
-	m_ScatteringLayout.addWidget(new QLabel("Forward"), 0, 2);
-	
-	connect(&m_PhaseSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetPhase(double)));
 }
 
 void CTracerSettingsWidget::OnSetNoBounces(const int& NoBounces)
@@ -70,17 +54,6 @@ void CTracerSettingsWidget::OnSetNoBounces(const int& NoBounces)
 		// Flag the render params as dirty, this will restart the rendering
 		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 	}
-}
-
-void CTracerSettingsWidget::OnSetPhase(const double& Phase)
-{
-	if (!Scene())
-		return;
-
-	Scene()->m_PhaseG = (float)Phase;
-		
-	// Flag the render params as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :

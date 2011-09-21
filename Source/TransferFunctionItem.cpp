@@ -9,18 +9,17 @@
 QTransferFunctionItem::QTransferFunctionItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),
 	m_pTransferFunction(NULL),
-	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170, 50))),
-	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 230, 50))),
-	m_PolygonItem(),
+	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170, 100))),
+	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 230, 100))),
+	m_PolygonItem(this),
 	m_Polygon(),
 	m_Nodes(),
 	m_Edges(),
 	m_AllowUpdateNodes(true)
 {
-	setBrush(Qt::NoBrush);
-	setPen(Qt::NoPen);
+ 	setBrush(Qt::NoBrush);
+ 	setPen(Qt::NoPen);
 
-	m_PolygonItem.setParentItem(this);
 	m_PolygonItem.setPen(Qt::NoPen);
 }
 
@@ -177,9 +176,30 @@ void QTransferFunctionItem::UpdatePolygon(void)
 	if (!m_pTransferFunction)
 		return;
 
-	m_Polygon.clear();
+	QLinearGradient LinearGradient;
 
-	QPoint CachedCanvasPoint;
+	LinearGradient.setStart(0, rect().top());
+	LinearGradient.setFinalStop(0, rect().bottom());
+
+	QGradientStops GradientStopsEnabled;
+
+	GradientStopsEnabled.append(QGradientStop(0, QColor::fromHsl(0, 0, 255, 150)));
+	GradientStopsEnabled.append(QGradientStop(1, QColor::fromHsl(0, 0, 255, 15)));
+
+	LinearGradient.setStops(GradientStopsEnabled);
+
+	m_BrushEnabled = QBrush(LinearGradient);
+
+	QGradientStops GradientStopsDisabled;
+
+	GradientStopsDisabled.append(QGradientStop(0, QColor::fromHsl(0, 0, 255, 150)));
+	GradientStopsDisabled.append(QGradientStop(1, QColor::fromHsl(0, 0, 255, 15)));
+
+	LinearGradient.setStops(GradientStopsDisabled);
+
+	m_BrushDisabled = QBrush(LinearGradient);
+
+	m_Polygon.clear();
 
 	for (int i = 0; i < m_pTransferFunction->GetNodes().size(); i++)
 	{
@@ -190,7 +210,7 @@ void QTransferFunctionItem::UpdatePolygon(void)
 		CanvasPoint.setX(Node.GetIntensity() * rect().width());
 		CanvasPoint.setY((1.0f - Node.GetOpacity()) * rect().height());
 
-		if (i > 0)
+		if (i == 0)
 		{
 			CanvasPoint.setY(rect().height());
 			m_Polygon.append(CanvasPoint);

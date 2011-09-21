@@ -9,15 +9,12 @@ public:
 
 private slots:
 	void OnSetNoBounces(const int& NoBounces);
-	void OnSetPhase(const double& Phase);
 
 private:
 	QGridLayout		m_MainLayout;
 	QComboBox		m_RenderTypeComboBox;
 	QSlider			m_NoBouncesSlider;
 	QSpinBox		m_NoBouncesSpinBox;
-	QGridLayout		m_ScatteringLayout;
-	QDoubleSlider	m_PhaseSlider;
 };
 
 class CKernelSettingsWidget : public QGroupBox
