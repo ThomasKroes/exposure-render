@@ -81,7 +81,7 @@ void QTransferFunctionItem::SetTransferFunction(QTransferFunction* pTransferFunc
 
 void QTransferFunctionItem::UpdateNodes(void)
 {
-	if (!m_pTransferFunction)
+	if (!m_pTransferFunction || !m_AllowUpdateNodes)
 		return;
 
 	for (int i = 0; i < m_Nodes.size(); i++)
@@ -115,6 +115,15 @@ void QTransferFunctionItem::UpdateNodes(void)
 			pNodeItem->m_SuspendUpdate = false;
 
 			m_Nodes.append(pNodeItem);
+		}
+	}
+
+	if (gTransferFunction.GetSelectedNode())
+	{
+		for (int i = 0; i < m_Nodes.size(); i++)
+		{
+			if (m_Nodes[i]->m_pNode->GetID() == gTransferFunction.GetSelectedNode()->GetID())
+				m_Nodes[i]->setSelected(true);
 		}
 	}
 }

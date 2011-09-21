@@ -67,24 +67,28 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
  
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionChange)
 	{
-// 		const float Width	= m_pTransferFunctionItem->rect().width();
-// 		const float Height	= m_pTransferFunctionItem->rect().height();
-// 
-// 		QPointF NodeRangeMin = QPointF(m_pNode->GetMinX() * Width, m_pNode->GetMinY() * Height);
-// 		QPointF NodeRangeMax = QPointF(m_pNode->GetMaxX() * Width, m_pNode->GetMaxY() * Height);
-// 
-// 		NewScenePoint.setX(qMin(NodeRangeMax.x() - NODE_POSITION_EPSILON, qMax(NewScenePoint.x(), NodeRangeMin.x() + NODE_POSITION_EPSILON)));
-// 		NewScenePoint.setY(qMin(NodeRangeMin.y(), qMax(NewScenePoint.y(), NodeRangeMax.y())));
+		const float Width	= m_pTransferFunctionItem->rect().width();
+		const float Height	= m_pTransferFunctionItem->rect().height();
+
+		QPointF NodeRangeMin = QPointF(m_pNode->GetMinX() * Width, m_pNode->GetMinY() * Height);
+		QPointF NodeRangeMax = QPointF(m_pNode->GetMaxX() * Width, m_pNode->GetMaxY() * Height);
+
+		NewScenePoint.setX(qMin(NodeRangeMax.x() - NODE_POSITION_EPSILON, qMax(NewScenePoint.x(), NodeRangeMin.x() + NODE_POSITION_EPSILON)));
+		NewScenePoint.setY(qMin(NodeRangeMax.y(), qMax(NewScenePoint.y(), NodeRangeMin.y())));
 
 		return NewScenePoint;
 	}
 
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionHasChanged)
 	{
-		QPointF TransferFunctionPoint(abs(NewScenePoint.x()) / rect().width(), ((float)fabs(NewScenePoint.y()) / 100));
+		Log("X: " + QString::number(NewScenePoint.x()) + "Width: " + QString::number(m_pTransferFunctionItem->rect().width()));
 
-		m_pNode->SetIntensity(TransferFunctionPoint.x());
-//		m_pNode->SetOpacity(abs(NewScenePoint.y()) / 500.0f);
+		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
+
+		m_pNode->SetIntensity(NewScenePoint.x() / m_pTransferFunctionItem->rect().width());
+		m_pNode->SetOpacity(1.0f - (NewScenePoint.y() / m_pTransferFunctionItem->rect().height()));
+
+		m_pTransferFunctionItem->m_AllowUpdateNodes = true;
 
 		return NewScenePoint;
 	}
