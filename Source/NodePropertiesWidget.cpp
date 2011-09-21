@@ -98,7 +98,7 @@ QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	m_GlossinessSlider.setOrientation(Qt::Horizontal);
 	m_GlossinessSlider.setStatusTip("Glossiness");
 	m_GlossinessSlider.setToolTip("Glossiness");
-	m_GlossinessSlider.setRange(0.0f, 1.0f);
+	m_GlossinessSlider.setRange(0.0, 1.0);
 	
 	m_MainLayout.addWidget(&m_GlossinessSlider, 5, 1);
 
@@ -182,10 +182,10 @@ void QNodePropertiesWidget::OnEmissionChanged(const QColor& Emission)
 		gTransferFunction.GetSelectedNode()->SetEmission(Emission);
 }
 
-void QNodePropertiesWidget::OnGlossinessChanged(const double& Roughness)
+void QNodePropertiesWidget::OnGlossinessChanged(const double& Glossiness)
 {
 	if (gTransferFunction.GetSelectedNode())
-		gTransferFunction.GetSelectedNode()->SetRoughness(Roughness);
+		gTransferFunction.GetSelectedNode()->SetGlossiness(Glossiness);
 }
 
 void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
@@ -273,7 +273,7 @@ void QNodePropertiesWidget::OnNodeGlossinessChanged(QNode* pNode)
 
 	if (pNode)
 	{
-		m_GlossinessSlider.setValue((double)pNode->GetRoughness(), true);
+		m_GlossinessSlider.setValue((double)pNode->GetGlossiness(), true);
 	}
 
 	m_GlossinessLabel.setEnabled(Enable);

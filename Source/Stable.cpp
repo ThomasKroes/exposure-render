@@ -1,14 +1,14 @@
 
 #include "Stable.h"
 
-QString GetOpenFileName(const QString& Caption, const QString& Filter)
+QString GetOpenFileName(const QString& Caption, const QString& Filter, const QString& Icon)
 {
 	QFileDialog FileDialog;
 
 	FileDialog.setWindowTitle(Caption);
 	FileDialog.setFilter(Filter);
 	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-	FileDialog.setWindowIcon(GetIcon("folder-open-document"));
+	FileDialog.setWindowIcon(Icon.isEmpty() ? GetIcon("disk") : GetIcon(Icon));
 
 	if (FileDialog.exec() == QMessageBox::Rejected)
 		return "";
@@ -16,14 +16,15 @@ QString GetOpenFileName(const QString& Caption, const QString& Filter)
 	return FileDialog.selectedFiles().value(0);
 }
 
-QString GetSaveFileName(const QString& Caption, const QString& Filter)
+QString GetSaveFileName(const QString& Caption, const QString& Filter, const QString& Icon)
 {
 	QFileDialog FileDialog;
 
 	FileDialog.setWindowTitle(Caption);
 	FileDialog.setFilter(Filter);
 	FileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-	FileDialog.setWindowIcon(GetIcon("disk"));
+	FileDialog.setWindowIcon(Icon.isEmpty() ? GetIcon("disk") : GetIcon(Icon));
+	FileDialog.setAcceptMode(QFileDialog::AcceptSave);
 
 	if (FileDialog.exec() == QMessageBox::Rejected)
 		return "";

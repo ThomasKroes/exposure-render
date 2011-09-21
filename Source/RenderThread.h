@@ -53,6 +53,7 @@ public:
 	CScene*			GetScene(void);
 	bool			Load(QString& FileName);
 	void			Close(void);
+	void			PauseRendering(const bool& Pause);
 
 private:
 	void HandleCudaError(const cudaError_t CudaError);
@@ -80,6 +81,7 @@ public:
 	QMutex					m_Mutex;
 	bool					m_Abort;
 	CScene					m_Scene;
+	bool					m_Pause;
 
 private:
 	void CreateVolume(void);

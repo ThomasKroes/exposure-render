@@ -160,7 +160,7 @@ public:
 		if (ChoosePath)
 		{
 			// Create open file dialog
-			XmlFile.setFileName(GetOpenFileName("Load " + m_UserInterfaceName + " presets from file", "XML Preset Files (*.xml)"));
+			XmlFile.setFileName(GetOpenFileName("Load " + m_UserInterfaceName + " presets from file", "XML Preset Files (*.xml)", "star"));
 		}
 		else
 		{
@@ -226,7 +226,7 @@ public:
 		if (ChoosePath)
 		{
 			// Create open file dialog
-			XmlFile.setFileName(GetSaveFileName("Save " + m_UserInterfaceName + " presets to file", "XML Preset Files (*.xml)"));
+			XmlFile.setFileName(GetSaveFileName("Save " + m_UserInterfaceName + " presets to file", "XML Preset Files (*.xml)", "star"));
 		}
 		else
 		{

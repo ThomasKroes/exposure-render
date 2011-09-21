@@ -1,41 +1,326 @@
 <!DOCTYPE Appearance>
 <Presets>
-<Preset Name="Bonsai" RangeMin="0" RangeMax="255">
+<Preset Name="manix_small">
 <Nodes>
-<Node Name="">
+<Node>
 <NormalizedIntensity Value="0"/>
-<NormalizedOpacity Value="0.897059"/>
-<DiffuseColor G="176" R="233" B="255"/>
-<SpecularColor G="255" R="255" B="255"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
 <Roughness Value="100"/>
 </Node>
-<Node Name="">
-<NormalizedIntensity Value="0.215103"/>
-<NormalizedOpacity Value="0.6875"/>
-<DiffuseColor G="255" R="255" B="0"/>
-<SpecularColor G="255" R="255" B="255"/>
-<Roughness Value="562.069"/>
+<Node>
+<NormalizedIntensity Value="0.235606"/>
+<Opacity Value="0"/>
+<Diffuse G="0" R="170" B="0"/>
+<Specular G="50" R="50" B="50"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.076"/>
 </Node>
-<Node Name="">
-<NormalizedIntensity Value="0.540046"/>
-<NormalizedOpacity Value="0.944853"/>
-<DiffuseColor G="149" R="206" B="122"/>
-<SpecularColor G="255" R="255" B="255"/>
+<Node>
+<NormalizedIntensity Value="0.351154"/>
+<Opacity Value="0.0618557"/>
+<Diffuse G="0" R="170" B="0"/>
+<Specular G="36" R="39" B="18"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.038"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.485644"/>
+<Opacity Value="1"/>
+<Diffuse G="170" R="170" B="127"/>
+<Specular G="85" R="170" B="0"/>
+<Emission G="0" R="0" B="0"/>
 <Roughness Value="100"/>
 </Node>
-<Node Name="">
-<NormalizedIntensity Value="0.78032"/>
-<NormalizedOpacity Value="0.665441"/>
-<DiffuseColor G="85" R="255" B="127"/>
-<SpecularColor G="255" R="255" B="255"/>
-<Roughness Value="100"/>
-</Node>
-<Node Name="">
+<Node>
 <NormalizedIntensity Value="1"/>
-<NormalizedOpacity Value="1"/>
-<DiffuseColor G="255" R="255" B="255"/>
-<SpecularColor G="255" R="255" B="255"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
 <Roughness Value="100"/>
+</Node>
+</Nodes>
+</Preset>
+<Preset Name="manix_smallddd">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.3"/>
+<Opacity Value="0"/>
+<Diffuse G="0" R="170" B="0"/>
+<Specular G="246" R="255" B="174"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.7"/>
+<Opacity Value="1"/>
+<Diffuse G="170" R="170" B="127"/>
+<Specular G="85" R="170" B="0"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+</Nodes>
+</Preset>
+<Preset Name="bonsai_small">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.096875"/>
+<Opacity Value="0"/>
+<Diffuse G="85" R="0" B="0"/>
+<Specular G="16" R="16" B="16"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.742"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.158302"/>
+<Opacity Value="0.766323"/>
+<Diffuse G="32" R="64" B="0"/>
+<Specular G="4" R="4" B="4"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.265"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.289931"/>
+<Opacity Value="0"/>
+<Diffuse G="88" R="212" B="88"/>
+<Specular G="50" R="50" B="50"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.22"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.7"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.152"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+</Nodes>
+</Preset>
+<Preset Name="engine_small">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="255" R="255" B="255"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.277273"/>
+<Opacity Value="0"/>
+<Diffuse G="45" R="45" B="45"/>
+<Specular G="255" R="255" B="255"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.334129"/>
+<Opacity Value="1"/>
+<Diffuse G="56" R="56" B="56"/>
+<Specular G="255" R="255" B="255"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="255" R="255" B="255"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0"/>
+</Node>
+</Nodes>
+</Preset>
+<Preset Name="backpack_small">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.0309172"/>
+<Opacity Value="0"/>
+<Diffuse G="55" R="55" B="55"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.011"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.0593163"/>
+<Opacity Value="1"/>
+<Diffuse G="34" R="34" B="34"/>
+<Specular G="217" R="217" B="217"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.047"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.159705"/>
+<Opacity Value="1"/>
+<Diffuse G="170" R="255" B="0"/>
+<Specular G="255" R="255" B="127"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.7"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+</Nodes>
+</Preset>
+<Preset Name="artifix_small">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.260568"/>
+<Opacity Value="0"/>
+<Diffuse G="0" R="127" B="0"/>
+<Specular G="40" R="61" B="30"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.011"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.434543"/>
+<Opacity Value="0.103093"/>
+<Diffuse G="244" R="255" B="196"/>
+<Specular G="50" R="50" B="50"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.022"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.7"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.028"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+</Nodes>
+</Preset>
+<Preset Name="macoessix_small">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.426656"/>
+<Opacity Value="0"/>
+<Diffuse G="60" R="170" B="10"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.426656"/>
+<Opacity Value="1"/>
+<Diffuse G="2" R="45" B="0"/>
+<Specular G="0" R="73" B="0"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.591475"/>
+<Opacity Value="0.900344"/>
+<Diffuse G="0" R="117" B="0"/>
+<Specular G="50" R="50" B="50"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.023"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.637216"/>
+<Opacity Value="0.800687"/>
+<Diffuse G="146" R="212" B="88"/>
+<Specular G="50" R="50" B="50"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="0.05"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.7"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
 </Node>
 </Nodes>
 </Preset>

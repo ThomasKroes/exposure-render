@@ -28,6 +28,7 @@ public slots:
 	void OnRenderEnd(void);
 	void ShowStartupDialog(void);
 	void OnVisitWebsite(void);
+	void OnSaveImage(void);
 
 public slots:
 	void OnLoadDemo(const QString& FileName);

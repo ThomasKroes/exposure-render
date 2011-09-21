@@ -87,7 +87,7 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 // 	m_LoadTexture.setFixedHeight(22);
 // 	m_MainLayout.addWidget(&m_LoadTexture, 5, 3);
 // 
-// 	QObject::connect(this, SIGNAL(toggled(bool)), this, SLOT(OnBackgroundIlluminationChanged(bool)));
+ 	QObject::connect(this, SIGNAL(toggled(bool)), this, SLOT(OnBackgroundIlluminationChanged(bool)));
 // 	QObject::connect(&m_UseTexture, SIGNAL(stateChanged(int)), this, SLOT(OnUseTextureChanged(int)));
 // 	QObject::connect(&m_LoadTexture, SIGNAL(clicked()), this, SLOT(OnLoadTexture()));
 

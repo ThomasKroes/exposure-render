@@ -25,8 +25,8 @@ public:
 	void				SetSpecular(const QColor& Specular); 
 	QColor				GetEmission(void) const;
 	void				SetEmission(const QColor& Emission);
-	float				GetRoughness(void) const;
-	void				SetRoughness(const float& Roughness);
+	float				GetGlossiness(void) const;
+	void				SetGlossiness(const float& Roughness);
 	float				GetMinX(void) const;
 	void				SetMinX(const float& MinX);
 	float				GetMaxX(void) const;
@@ -59,7 +59,7 @@ protected:
 	QColor				m_Diffuse;
 	QColor				m_Specular;
 	QColor				m_Emission;
-	float				m_Roughness;
+	float				m_Glossiness;
 	float				m_MinX;
 	float				m_MaxX;
 	float				m_MinY;

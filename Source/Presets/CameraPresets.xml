@@ -1,2 +1,93 @@
 <!DOCTYPE Camera>
-<Presets/>
+<Presets>
+<Preset Name="manix_small">
+<Film>
+<Width Value="640"/>
+<Height Value="480"/>
+</Film>
+<Aperture>
+<Size Value="0"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="35"/>
+</Projection>
+<Focus>
+<FocalDistance Value="1.435"/>
+</Focus>
+</Preset>
+<Preset Name="bonsai_small">
+<Film>
+<Width Value="640"/>
+<Height Value="480"/>
+</Film>
+<Aperture>
+<Size Value="0.016"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="35"/>
+</Projection>
+<Focus>
+<FocalDistance Value="0.87"/>
+</Focus>
+</Preset>
+<Preset Name="engine_small">
+<Film>
+<Width Value="640"/>
+<Height Value="480"/>
+</Film>
+<Aperture>
+<Size Value="0.166"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="19.18"/>
+</Projection>
+<Focus>
+<FocalDistance Value="2.304"/>
+</Focus>
+</Preset>
+<Preset Name="backpack_small">
+<Film>
+<Width Value="640"/>
+<Height Value="480"/>
+</Film>
+<Aperture>
+<Size Value="0"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="35"/>
+</Projection>
+<Focus>
+<FocalDistance Value="0.75"/>
+</Focus>
+</Preset>
+<Preset Name="artifix_small">
+<Film>
+<Width Value="640"/>
+<Height Value="480"/>
+</Film>
+<Aperture>
+<Size Value="0"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="35"/>
+</Projection>
+<Focus>
+<FocalDistance Value="0.75"/>
+</Focus>
+</Preset>
+<Preset Name="macoessix_small">
+<Film>
+<Width Value="640"/>
+<Height Value="480"/>
+</Film>
+<Aperture>
+<Size Value="0"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="35"/>
+</Projection>
+<Focus>
+<FocalDistance Value="1.217"/>
+</Focus>
+</Preset>
+</Presets>

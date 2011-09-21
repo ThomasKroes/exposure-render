@@ -342,8 +342,6 @@ void QLighting::SetSelectedLight(QLight* pSelectedLight)
 
 void QLighting::SetSelectedLight(const int& Index)
 {
-	QLight* pOldLight = m_pSelectedLight;
-
 	if (m_Lights.size() <= 0)
 	{
 		SetSelectedLight((QLight*)NULL);
@@ -352,6 +350,9 @@ void QLighting::SetSelectedLight(const int& Index)
 	{
 		// Compute new index
 		const int NewIndex = qMin(m_Lights.size() - 1, qMax(0, Index));
+
+		if (GetSelectedLight() && m_Lights.indexOf(*GetSelectedLight()) == NewIndex)
+			return;
 
 		// Set selected node
 		SetSelectedLight(&m_Lights[NewIndex]);

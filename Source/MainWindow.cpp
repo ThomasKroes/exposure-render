@@ -75,6 +75,10 @@ void CMainWindow::CreateMenus(void)
 
 	m_pFileMenu->addAction("Close", this, SLOT(Close()));
 
+	m_pFileMenu->addSeparator();
+
+	m_pFileMenu->addAction(GetIcon("image-export"), "Save Image", this, SLOT(OnSaveImage()));
+
     m_pFileMenu->addSeparator();
 
 	m_pFileMenu->addAction(GetIcon("star"), "Welcome screen", this, SLOT(ShowStartupDialog()));
@@ -233,7 +237,7 @@ QString CMainWindow::StrippedName(const QString& FullFileName)
 void CMainWindow::Open()
 {
 	// Create open file dialog
-    QString FileName = GetOpenFileName("Open volume", "Meta Image Volume Files (*.mhd)");
+    QString FileName = GetOpenFileName("Open volume", "Meta Image Volume Files (*.mhd)", "grid");
 
 	// Exit empty
 	if (FileName.isEmpty())
@@ -321,4 +325,30 @@ void CMainWindow::ShowStartupDialog(void)
 void CMainWindow::OnVisitWebsite(void)
 {
 	QDesktopServices::openUrl(QUrl("http://code.google.com/p/exposure-render/"));
+}
+
+void CMainWindow::OnSaveImage(void)
+{
+	if (!gpRenderThread)
+		return;
+
+	Log("Saving Image", "image-export");
+
+	gpRenderThread->PauseRendering(true);
+
+	QString FilePath = GetSaveFileName("Save Image", "PNG Files (*.png)", "image-export");
+
+	Log(FilePath);
+// 	QPixmap p;
+// 
+// 	bool OK = p.loadFromData(gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), "PNG");
+// 
+// 	p.save(FilePath, "PNG");
+
+	QImage *tempImage = new QImage( gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY(),  QImage::Format_RGB888);
+
+	if (!tempImage->save(FilePath, "PNG") )
+		Log("can't save image");
+
+	gpRenderThread->PauseRendering(false);
 }

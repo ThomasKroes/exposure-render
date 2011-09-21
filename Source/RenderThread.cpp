@@ -156,7 +156,8 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pDevRgbLdrDisp(NULL),
 	m_pImageCanvas(NULL),
 	m_pSeeds(NULL),
-	m_Abort(false)
+	m_Abort(false),
+	m_Pause()
 {
 }
 
@@ -277,7 +278,7 @@ void QRenderThread::run()
  		return;
  	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(640, 480));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
  	m_Scene.m_Camera.Update();
@@ -310,6 +311,9 @@ void QRenderThread::run()
 
 	while (!m_Abort)
 	{
+		if (m_Pause)
+			continue;
+
 		// Let others know we are starting with a new frame
 		emit gRenderStatus.PreRenderFrame();
 
@@ -759,7 +763,7 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		m_Scene.m_TransferFunctions.m_Diffuse.m_C[i]	= CColorRgbHdr(Node.GetDiffuse().redF(), Node.GetDiffuse().greenF(), Node.GetDiffuse().blueF());
 		m_Scene.m_TransferFunctions.m_Specular.m_C[i]	= CColorRgbHdr(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
 		m_Scene.m_TransferFunctions.m_Emission.m_C[i]	= 500.0f * CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
-		m_Scene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Node.GetRoughness());
+		m_Scene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(0.0001f + (10000.0f * powf(Node.GetGlossiness(), 2.0f)));
 	}
 
 	m_Scene.m_DirtyFlags.SetFlag(TransferFunctionDirty);
@@ -834,6 +838,11 @@ void QRenderThread::OnUpdateLighting(void)
 	}
 
 	Scene()->m_DirtyFlags.SetFlag(LightsDirty);
+}
+
+void QRenderThread::PauseRendering(const bool& Pause)
+{
+	m_Pause = Pause;
 }
 
 CScene* Scene(void)

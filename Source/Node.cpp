@@ -18,7 +18,7 @@ QNode::QNode(QTransferFunction* pTransferFunction, const float& Intensity, const
 	m_Diffuse(Diffuse),
 	m_Specular(Specular),
 	m_Emission(Emission),
-	m_Roughness(Roughness),
+	m_Glossiness(Roughness),
 	m_MinX(0.0f),
 	m_MaxX(1.0f),
 	m_MinY(0.0f),
@@ -35,7 +35,7 @@ QNode& QNode::operator=(const QNode& Other)
 	m_Diffuse			= Other.m_Diffuse;
 	m_Specular			= Other.m_Specular;
 	m_Emission			= Other.m_Emission;
-	m_Roughness			= Other.m_Roughness;
+	m_Glossiness			= Other.m_Glossiness;
 	m_MinX				= Other.m_MinX;
 	m_MaxX				= Other.m_MaxX;
 	m_MinY				= Other.m_MinY;
@@ -145,17 +145,17 @@ void QNode::SetEmission(const QColor& Emission)
 	emit EmissionChanged(this);
 }
 
-float QNode::GetRoughness(void) const
+float QNode::GetGlossiness(void) const
 {
-	return m_Roughness;
+	return m_Glossiness;
 }
 
-void QNode::SetRoughness(const float& Roughness)
+void QNode::SetGlossiness(const float& Roughness)
 {
-	if (Roughness == m_Roughness)
+	if (Roughness == m_Glossiness)
 		return;
 
-	m_Roughness = Roughness;
+	m_Glossiness = Roughness;
 
 	SetDirty(true);
 
@@ -278,7 +278,7 @@ void QNode::ReadXML(QDomElement& Parent)
 	m_Emission.setBlue(Emission.attribute("B").toInt());
 
 	// Roughness
-	m_Roughness = Parent.firstChildElement("Roughness").attribute("Value").toFloat();
+	m_Glossiness = Parent.firstChildElement("Roughness").attribute("Value").toFloat();
 }
 
 QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -320,7 +320,7 @@ QDomElement QNode::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	// Roughness
 	QDomElement Roughness = DOM.createElement("Roughness");
-	Roughness.setAttribute("Value", m_Roughness);
+	Roughness.setAttribute("Value", m_Glossiness);
 	Node.appendChild(Roughness);
 
 	return Node;

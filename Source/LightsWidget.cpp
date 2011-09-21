@@ -89,14 +89,14 @@ void QLightsWidget::UpdateLightList(void)
 // 		}
 	}
 
-// 	QLight* pSelectedLight = gLighting.GetSelectedLight();
-// 
-// 	if (pSelectedLight != NULL)
-// 	{
-// 		m_LightList.blockSignals(true);
-// 		m_LightList.setCurrentRow(gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight()), QItemSelectionModel::Select);
-// 		m_LightList.blockSignals(false);
-// 	}
+	QLight* pSelectedLight = gLighting.GetSelectedLight();
+
+	if (pSelectedLight != NULL)
+	{
+		m_LightList.blockSignals(true);
+//		m_LightList.setCurrentRow(gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight()), QItemSelectionModel::Select);
+		m_LightList.blockSignals(false);
+	}
 
 	m_RemoveLight.setEnabled(m_LightList.currentRow() >= 0);
 	m_RenameLight.setEnabled(m_LightList.currentRow() >= 0);
