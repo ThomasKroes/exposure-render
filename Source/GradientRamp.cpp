@@ -9,16 +9,16 @@ QGradientRamp::QGradientRamp(const QString& Name, QWidget* pParent /*= NULL*/) :
 	m_Name(Name.toLower()),
 	m_GradientStops(),
 	m_LinearGradient(),
-	m_CheckerDimEnabled(QColor::fromHsl(0, 0, 140)),
-	m_CheckerDimDisabled(QColor::fromHsl(0, 0, 170)),
-	m_CheckerBrightEnabled(QColor::fromHsl(0, 0, 245)),
-	m_CheckerBrightDisabled(QColor::fromHsl(0, 0, 230)),
+	m_CheckerDimEnabled(QColor::fromHsl(0, 0, 160)),
+	m_CheckerDimDisabled(QColor::fromHsl(0, 0, 180)),
+	m_CheckerBrightEnabled(QColor::fromHsl(0, 0, 230)),
+	m_CheckerBrightDisabled(QColor::fromHsl(0, 0, 210)),
 	m_PenEnabled(QColor::fromHsl(0, 0, 100)),
 	m_PenDisabled(QColor::fromHsl(0, 0, 150)),
 	m_Font("Arial"),
-	m_TextForegroundEnabled(QColor::fromHsl(0, 0, 250)),
+	m_TextForegroundEnabled(QColor::fromHsl(0, 0, 230)),
 	m_TextForegroundDisabled(QColor::fromHsl(0, 0, 230)),
-	m_TextBackgroundEnabled(QColor::fromHsl(0, 0, 20)),
+	m_TextBackgroundEnabled(QColor::fromHsl(0, 0, 80)),
 	m_TextBackgroundDisabled(QColor::fromHsl(0, 0, 150))
 {
 	m_Font.setPointSize(7);

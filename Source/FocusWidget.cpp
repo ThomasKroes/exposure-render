@@ -34,10 +34,10 @@ QFocusWidget::QFocusWidget(QWidget* pParent) :
 
 	m_FocalDistanceSlider.setOrientation(Qt::Horizontal);
     m_FocalDistanceSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_FocalDistanceSlider.setRange(0.0, 10.0);
+	m_FocalDistanceSlider.setRange(0.0, 5.0);
 	m_GridLayout.addWidget(&m_FocalDistanceSlider, 0, 1);
 	
-    m_FocalDistanceSpinner.setRange(0.0, 10.0);
+    m_FocalDistanceSpinner.setRange(0.0, 5.0);
 	m_FocalDistanceSpinner.setSuffix(" mm");
 	m_GridLayout.addWidget(&m_FocalDistanceSpinner, 0, 2);
 	

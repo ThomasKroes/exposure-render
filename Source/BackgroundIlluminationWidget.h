@@ -16,24 +16,22 @@ public slots:
 	void OnGradientColorTopChanged(const QColor& Color);
 	void OnGradientColorMiddleChanged(const QColor& Color);
 	void OnGradientColorBottomChanged(const QColor& Color);
-	void OnTopIntensityChanged(double Intensity);
-	void OnMiddleIntensityChanged(double Intensity);
-	void OnBottomIntensityChanged(double Intensity);
+	void OnIntensityChanged(double Intensity);
 	void OnUseTextureChanged(int UseTexture);
 	void OnLoadTexture(void);
 	void OnBackgroundChanged(void);
 
 protected:
 	QGridLayout			m_MainLayout;
-	QColorPushButton	m_GradientColorTop;
-	QDoubleSlider		m_IntensitySliderTop;
-	QDoubleSpinner		m_IntensitySpinBoxTop;
-	QColorPushButton	m_GradientColorMiddle;
-	QDoubleSlider		m_IntensitySliderMiddle;
-	QDoubleSpinner		m_IntensitySpinBoxMiddle;
-	QColorPushButton	m_GradientColorBottom;
-	QDoubleSlider		m_IntensitySliderBottom;
-	QDoubleSpinner		m_IntensitySpinBoxBottom;
+	QLabel				m_GradientColorTopLabel;
+	QColorSelector		m_GradientColorTop;
+	QLabel				m_GradientColorMiddleLabel;
+	QColorSelector		m_GradientColorMiddle;
+	QLabel				m_GradientColorBottomLabel;
+	QColorSelector		m_GradientColorBottom;
+	QLabel				m_IntensityLabel;
+	QDoubleSlider		m_IntensitySlider;
+	QDoubleSpinner		m_IntensitySpinner;
 	QCheckBox			m_UseTexture;
 	QLineEdit			m_TextureFilePath;
 	QPushButton			m_LoadTexture;

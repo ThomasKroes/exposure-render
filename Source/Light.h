@@ -298,6 +298,9 @@ public:
 
 			L	= Le(Vec2f(1.0f) - 2.0f * UV);
 
+			if (pPdf)
+				*pPdf = powf(m_SkyRadius, 2.0f) / m_Area;
+
 			return true;
 		}
 
@@ -342,7 +345,7 @@ public:
 	HOD CColorXyz Le(const Vec2f& UV)
 	{
 		if (m_T == 0)
-			return CColorXyz::FromRGB(m_Color.r, m_Color.g, m_Color.b);
+			return CColorXyz::FromRGB(m_Color.r, m_Color.g, m_Color.b) / m_Area;
 
 		if (m_T == 1)
 		{

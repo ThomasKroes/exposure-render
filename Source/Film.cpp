@@ -8,7 +8,7 @@ QFilm::QFilm(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
 	m_Width(640),
 	m_Height(480),
-	m_Exposure(500.0f),
+	m_Exposure(0.75f),
 	m_Dirty(false)
 {
 }

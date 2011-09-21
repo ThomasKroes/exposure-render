@@ -6,7 +6,7 @@
 
 QAperture::QAperture(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
-	m_Size(0.01f)
+	m_Size(0.05f)
 {
 }
 

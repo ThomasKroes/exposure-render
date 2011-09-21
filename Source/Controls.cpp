@@ -5,7 +5,7 @@
 QColorPushButton::QColorPushButton(QWidget* pParent) :
 	QPushButton(pParent),
 	m_Margin(5),
-	m_Radius(9),
+	m_Radius(4),
 	m_Color(Qt::gray)
 {
 	setText("");
@@ -31,11 +31,11 @@ void QColorPushButton::paintEvent(QPaintEvent* pPaintEvent)
 	ColorRectangle.adjust(m_Margin, m_Margin, -m_Margin, -m_Margin);
 
 	// Use anti aliasing
-	Painter.setRenderHints(QPainter::Antialiasing);
+	Painter.setRenderHint(QPainter::Antialiasing);
 
 	// Rectangle styling
-	Painter.setBrush(QBrush(isEnabled() ? m_Color : Qt::gray));
-	Painter.setPen(QPen(isEnabled() ? QColor(25, 25, 25) : Qt::gray, 0.7));
+	Painter.setBrush(QBrush(isEnabled() ? m_Color : Qt::lightGray));
+	Painter.setPen(QPen(isEnabled() ? QColor(25, 25, 25) : Qt::darkGray, 0.5));
 
 	// Draw
 	Painter.drawRoundedRect(ColorRectangle, m_Radius, Qt::AbsoluteSize);
@@ -96,6 +96,38 @@ void QColorPushButton::OnCurrentColorChanged(const QColor& Color)
 	SetColor(Color);
 
 	emit currentColorChanged(m_Color);
+}
+
+QColorSelector::QColorSelector(QWidget* pParent /*= NULL*/) :
+	QFrame(pParent),
+	m_ColorButton(),
+	m_ColorCombo()
+{
+	setLayout(&m_MainLayout);
+
+	m_MainLayout.addWidget(&m_ColorButton, 0, 0);
+	m_MainLayout.addWidget(&m_ColorCombo, 0, 1);
+
+	m_MainLayout.setContentsMargins(0, 0, 0, 0);
+	
+	m_ColorButton.setFixedWidth(30);
+
+	QObject::connect(&m_ColorButton, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
+}
+
+QColor QColorSelector::GetColor(void) const
+{
+	return m_ColorButton.GetColor();
+}
+
+void QColorSelector::SetColor(const QColor& Color, bool BlockSignals /*= false*/)
+{
+	m_ColorButton.SetColor(Color, BlockSignals);
+}
+
+void QColorSelector::OnCurrentColorChanged(const QColor& Color)
+{
+	emit currentColorChanged(Color);
 }
 
 QDoubleSlider::QDoubleSlider(QWidget* pParent /*= NULL*/) :

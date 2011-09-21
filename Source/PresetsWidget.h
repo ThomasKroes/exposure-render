@@ -120,6 +120,9 @@ public:
 			return;
 		}
 
+// 		if (QMessageBox::question(this, "Remove preset", "Are you sure you want to remove " + PresetName, QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+// 			return;
+
 		// Get selected row index
 		const int CurrentRow = m_PresetName.currentIndex();
 

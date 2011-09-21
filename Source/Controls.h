@@ -19,7 +19,7 @@ public:
 	void	SetColor(const QColor& Color, bool BlockSignals = false);
 
 private slots:
-	void	OnCurrentColorChanged(const QColor& Color);
+	void OnCurrentColorChanged(const QColor& Color);
 
 signals:
 	void currentColorChanged(const QColor&);
@@ -28,6 +28,30 @@ private:
 	int		m_Margin;
 	int		m_Radius;
 	QColor	m_Color;
+};
+
+class QColorSelector : public QFrame
+{
+	Q_OBJECT
+
+public:
+	QColorSelector(QWidget* pParent = NULL);
+
+//	virtual QSize sizeHint() const;
+
+	QColor	GetColor(void) const;
+	void	SetColor(const QColor& Color, bool BlockSignals = false);
+
+private slots:
+	void	OnCurrentColorChanged(const QColor& Color);
+
+signals:
+	void currentColorChanged(const QColor&);
+
+private:
+	QGridLayout			m_MainLayout;
+	QColorPushButton	m_ColorButton;
+	QComboBox			m_ColorCombo;
 };
 
 class QDoubleSlider : public QSlider

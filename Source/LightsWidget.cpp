@@ -52,31 +52,13 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_RenameLight.setFixedHeight(24);
 	m_MainLayout.addWidget(&m_RenameLight, 1, 2);
 
-	// Copy light
-	m_CopyLight.setIcon(GetIcon("document-copy"));
-	m_CopyLight.setToolTip("Copy light");
-	m_CopyLight.setStatusTip("Copy the selected light");
- 	m_CopyLight.setFixedWidth(24);
-	m_CopyLight.setFixedHeight(24);
-	m_MainLayout.addWidget(&m_CopyLight, 1, 3);
-
-	// Reset
-	m_Reset.setIcon(GetIcon("document-copy"));
-	m_Reset.setToolTip("Reset Lighting");
-	m_Reset.setStatusTip("Reset lighting to defaults");
-	m_Reset.setFixedWidth(24);
-	m_Reset.setFixedHeight(24);
-	m_MainLayout.addWidget(&m_Reset, 1, 4);
-	
-	// Inform us when the light selection changes, a light is added/removed/renamed/copied
  	connect(&m_LightList, SIGNAL(itemSelectionChanged()), this, SLOT(OnLightSelectionChanged()));
 	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*)), this, SLOT(OnLightSelectionChanged(QLight*)));
  	connect(&m_AddLight, SIGNAL(clicked()), this, SLOT(OnAddLight()));
  	connect(&m_RemoveLight, SIGNAL(clicked()), this, SLOT(OnRemoveLight()));
 	connect(&m_RenameLight, SIGNAL(clicked()), this, SLOT(OnRenameLight()));
-	connect(&m_CopyLight, SIGNAL(clicked()), this, SLOT(OnCopyLight()));
  	connect(&m_LightList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(OnLightItemChanged(QListWidgetItem*)));
- 	connect(&gLighting, SIGNAL(LightingChanged()), this, SLOT(UpdateLightList()));
+ 	connect(&gLighting, SIGNAL(Changed()), this, SLOT(UpdateLightList()));
 
 	OnLightSelectionChanged();
 }
@@ -107,14 +89,14 @@ void QLightsWidget::UpdateLightList(void)
 // 		}
 	}
 
-	QLight* pSelectedLight = gLighting.GetSelectedLight();
-
-	if (pSelectedLight != NULL)
-	{
-		m_LightList.blockSignals(true);
-		m_LightList.setCurrentRow(gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight()), QItemSelectionModel::Select);
-		m_LightList.blockSignals(false);
-	}
+// 	QLight* pSelectedLight = gLighting.GetSelectedLight();
+// 
+// 	if (pSelectedLight != NULL)
+// 	{
+// 		m_LightList.blockSignals(true);
+// 		m_LightList.setCurrentRow(gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight()), QItemSelectionModel::Select);
+// 		m_LightList.blockSignals(false);
+// 	}
 
 	m_RemoveLight.setEnabled(m_LightList.currentRow() >= 0);
 	m_RenameLight.setEnabled(m_LightList.currentRow() >= 0);
@@ -195,16 +177,4 @@ void QLightsWidget::OnRenameLight(void)
 		return;
 
 	gLighting.RenameLight(m_LightList.currentRow(), InputDialog.textValue());
-}
-
-void QLightsWidget::OnCopyLight(void)
-{
-	if (m_LightList.currentRow() < 0)
-		return;
-
-	gLighting.CopySelectedLight();
-}
-
-void QLightsWidget::OnReset(void)
-{
 }

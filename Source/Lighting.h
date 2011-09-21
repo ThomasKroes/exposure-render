@@ -81,6 +81,7 @@ public:
 	void				CopySelectedLight(void);
 	void				RenameLight(const int& Index, const QString& Name);
 	QBackground&		Background(void);
+	QLightList&			GetLights(void);
 	void				SetSelectedLight(QLight* pSelectedLight);
 	void				SetSelectedLight(const int& Index);
 	QLight*				GetSelectedLight(void);
@@ -92,10 +93,10 @@ public:
 
 public slots:
 	void OnLightPropertiesChanged(QLight* pLight);
-	void Update(void);
+	void OnBackgroundChanged(void);
 
 signals:
-	void LightingChanged(void);
+	void Changed(void);
 	void LightSelectionChanged(QLight*);
 
 protected:

@@ -3,7 +3,6 @@
 #include "Stable.h"
 
 #include "Lighting.h"
-#include "RenderThread.h"
 
 QLighting gLighting;
 
@@ -261,7 +260,7 @@ QLighting& QLighting::operator=(const QLighting& Other)
 
 	m_Background = Other.m_Background;
 
-	emit LightingChanged();
+	emit Changed();
 
 	for (int i = 0; i < m_Lights.size(); i++)
 	{
@@ -273,51 +272,12 @@ QLighting& QLighting::operator=(const QLighting& Other)
 
 void QLighting::OnLightPropertiesChanged(QLight* pLight)
 {
-	Update();
+	emit Changed();
 }
 
-void QLighting::Update(void)
+void QLighting::OnBackgroundChanged(void)
 {
-	if (!Scene())
-		return;
-
-	Scene()->m_Lighting.Reset();
-
-	if (Background().GetEnabled())
-	{
-		CLight BackgroundLight;
-
-		BackgroundLight.m_T	= 1;
-		
-		BackgroundLight.m_ColorTop		= Background().GetTopIntensity() * CColorRgbHdr(Background().GetTopColor().redF(), Background().GetTopColor().greenF(), Background().GetTopColor().blueF());
-		BackgroundLight.m_ColorMiddle	= Background().GetMiddleIntensity() * CColorRgbHdr(Background().GetMiddleColor().redF(), Background().GetMiddleColor().greenF(), Background().GetMiddleColor().blueF());
-		BackgroundLight.m_ColorBottom	= Background().GetBottomIntensity() * CColorRgbHdr(Background().GetBottomColor().redF(), Background().GetBottomColor().greenF(), Background().GetBottomColor().blueF());
-
-		BackgroundLight.Update(Scene()->m_BoundingBox);
-
-		Scene()->m_Lighting.AddLight(BackgroundLight);
-	}
-	
-	for (int i = 0; i < m_Lights.size(); i++)
-	{
-		QLight& Light = m_Lights[i];
-
-		CLight AreaLight;
-
-		AreaLight.m_T			= 0;
-		AreaLight.m_Theta		= Light.GetTheta() / RAD_F;
-		AreaLight.m_Phi			= Light.GetPhi() / RAD_F;
-		AreaLight.m_Width		= Light.GetWidth();
-		AreaLight.m_Height		= Light.GetHeight();
-		AreaLight.m_Distance	= Light.GetDistance();
-		AreaLight.m_Color		= Light.GetIntensity() * CColorRgbHdr(Light.GetColor().redF(), Light.GetColor().greenF(), Light.GetColor().blueF());
-
-		AreaLight.Update(Scene()->m_BoundingBox);
-
-		Scene()->m_Lighting.AddLight(AreaLight);
-	}
-
-	Scene()->m_DirtyFlags.SetFlag(LightsDirty);
+	emit Changed();
 }
 
 void QLighting::AddLight(QLight& Light)
@@ -331,13 +291,10 @@ void QLighting::AddLight(QLight& Light)
 	// Connect
 	connect(&m_Lights.back(), SIGNAL(LightPropertiesChanged(QLight*)), this, SLOT(OnLightPropertiesChanged(QLight*)));
 
-	// Update the scene
-	Update();
-
 	Log("'" + Light.GetName() + "' added to the scene", "light-bulb");
 
 	// Let others know the lighting has changed
-	emit LightingChanged();
+	emit Changed();
 }
 
 void QLighting::RemoveLight(QLight* pLight)
@@ -355,11 +312,8 @@ void QLighting::RemoveLight(QLight* pLight)
 	// Deselect
 	SetSelectedLight(NULL);
 
-	// Update the scene
-	Update();
-
 	// Let others know the lighting has changed
-	emit LightingChanged();
+	emit Changed();
 }
 
 void QLighting::RemoveLight(const int& Index)
@@ -373,6 +327,11 @@ void QLighting::RemoveLight(const int& Index)
 QBackground& QLighting::Background(void)
 {
 	return m_Background;
+}
+
+QLightList& QLighting::GetLights(void)
+{
+	return m_Lights;
 }
 
 void QLighting::SetSelectedLight(QLight* pSelectedLight)
@@ -452,7 +411,7 @@ void QLighting::CopyLight(QLight* pLight)
 	AddLight(LightCopy);
 
 	// Let others know the lighting has changed
-	emit LightingChanged();
+	emit Changed();
 }
 
 void QLighting::CopySelectedLight(void)
@@ -470,7 +429,7 @@ void QLighting::RenameLight(const int& Index, const QString& Name)
 	m_Lights[Index].SetName(Name);
 
 	// Let others know the lighting has changed
-	emit LightingChanged();
+	emit Changed();
 }
 
 void QLighting::ReadXML(QDomElement& Parent)
@@ -552,9 +511,7 @@ QLighting QLighting::Default(void)
 	DefaultLighting.Background().SetMiddleColor(QColor(185, 213, 255));
 	DefaultLighting.Background().SetBottomColor(QColor(185, 213, 255));
 
-	DefaultLighting.Background().SetTopIntensity(300.0f);
-	DefaultLighting.Background().SetMiddleIntensity(300.0f);
-	DefaultLighting.Background().SetBottomIntensity(300.0f);
+	DefaultLighting.Background().SetIntensity(300.0f);
 
 	return DefaultLighting;
 }

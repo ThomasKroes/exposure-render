@@ -87,6 +87,8 @@ private:
 
 public slots:
 	void OnUpdateTransferFunction(void);
+	void OnUpdateCamera(void);
+	void OnUpdateLighting(void);
 
 signals:
 	void RenderBegin(void);

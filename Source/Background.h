@@ -22,12 +22,8 @@ public:
 	void		SetMiddleColor(const QColor& MiddleColor);
 	QColor		GetBottomColor(void) const;
 	void		SetBottomColor(const QColor& BottomColor);
-	float		GetTopIntensity(void) const;
-	void		SetTopIntensity(const float& TopIntensity);
-	float		GetMiddleIntensity(void) const;
-	void		SetMiddleIntensity(const float& MiddleIntensity);
-	float		GetBottomIntensity(void) const;
-	void		SetBottomIntensity(const float& BottomIntensity);
+	float		GetIntensity(void) const;
+	void		SetIntensity(const float& Intensity);
 	bool		GetUseTexture(void) const;
 	void		SetUseTexture(const bool& UseTexture);
 	QString		GetFile(void) const;
@@ -37,16 +33,14 @@ public:
 	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 
 signals:
-	void BackgroundChanged();
+	void Changed();
 
 protected:
 	bool		m_Enable;
 	QColor		m_ColorTop;
 	QColor		m_ColorMiddle;
 	QColor		m_ColorBottom;
-	float		m_IntensityTop;
-	float		m_IntensityMiddle;
-	float		m_IntensityBottom;
+	float		m_Intensity;
 	bool		m_UseTexture;
 	QString		m_File;
 };

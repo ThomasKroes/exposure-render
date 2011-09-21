@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "MainWindow.h"
 #include "LoadSettingsDialog.h"
+#include "Lighting.h"
 
 // CUDA kernels
 #include "Core.cuh"
@@ -87,8 +88,6 @@ private:
 	cudaEvent_t 	m_EventStart;
 	cudaEvent_t 	m_EventStop;
 };
-
-QProgressDialog* gpProgressDialog = NULL;
 
 void OnProgress(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* CallData)
 {
@@ -299,6 +298,9 @@ void QRenderThread::run()
 	emit gRenderStatus.RenderBegin();
 	
 	QObject::connect(&gTransferFunction, SIGNAL(FunctionChanged()), this, SLOT(OnUpdateTransferFunction()));
+	QObject::connect(&gCamera, SIGNAL(Changed()), this, SLOT(OnUpdateCamera()));
+	QObject::connect(&gLighting, SIGNAL(Changed()), this, SLOT(OnUpdateLighting()));
+	QObject::connect(&gLighting.Background(), SIGNAL(Changed()), this, SLOT(OnUpdateLighting()));
 
 	// Try to load appearance/lighting/camera presets with the same name as the loaded file
 	emit gRenderStatus.LoadPreset(QFileInfo(m_FileName).baseName());
@@ -513,16 +515,6 @@ bool QRenderThread::Load(QString& FileName)
  	// Show it
  	LoadSettingsDialog.exec();
 
-	// Create and configure progress dialog
-//	gpProgressDialog = new QProgressDialog("Volume loading in progress", "Abort", 0, 100);
-//	gpProgressDialog->setWindowTitle("Progress");
-//	gpProgressDialog->setMinimumDuration(10);
-//	gpProgressDialog->setWindowFlags(Qt::Popup);
-//	gpProgressDialog->show();
-
-// 	emit gRenderStatus.StatisticChanged("Memory", "CUDA", "", "", "memory");
-// 	emit gRenderStatus.StatisticChanged("Memory", "Host", "", "", "memory");
-
 	// Create meta image reader
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
@@ -558,8 +550,6 @@ bool QRenderThread::Load(QString& FileName)
 	MetaImageReader->Update();
 
 	vtkSmartPointer<vtkImageCast> ImageCast = vtkImageCast::New();
-
-//	Log("Casting volume data type to short");
 
 	ImageCast->SetOutputScalarTypeToShort();
 	ImageCast->SetInput(MetaImageReader->GetOutput());
@@ -608,9 +598,6 @@ bool QRenderThread::Load(QString& FileName)
 	ImageGradientMagnitude->Update();
 	*/
 
-//	emit gRenderStatus.StatisticChanged("Host", "Volume", QString::number((float)m_pImageDataVolume->GetActualMemorySize() / 1024.0f, 'f', 2), "MB");
-
-
 	// Scalar range
 	double* pRange = m_pImageDataVolume->GetScalarRange();
 	m_Scene.m_IntensityRange.SetMin((float)pRange[0]);
@@ -623,7 +610,6 @@ bool QRenderThread::Load(QString& FileName)
 	// Spacing
 	double* pSpacing = m_pImageDataVolume->GetSpacing();
 	
-	// Voxel spacing is typically in mm exposure render work in meters so convert to meters
 	m_Scene.m_Spacing.x = (float)pSpacing[0];
 	m_Scene.m_Spacing.y = (float)pSpacing[1];
 	m_Scene.m_Spacing.z = (float)pSpacing[2];
@@ -647,11 +633,6 @@ bool QRenderThread::Load(QString& FileName)
 	// Update the histogram in the transfer function
 	gHistogram.SetBins((int*)Histogram->GetOutput()->GetScalarPointer(), 256);
 	
-	// Delete progress dialog
-//	gpProgressDialog->close();
-//	delete gpProgressDialog;
-//	gpProgressDialog = NULL;
-
 	emit gRenderStatus.StatisticChanged("Volume", "File", QFileInfo(m_FileName).fileName(), "");
 	emit gRenderStatus.StatisticChanged("Volume", "Bounding Box", "", "");
 	emit gRenderStatus.StatisticChanged("Bounding Box", "Min", FormatVector(m_Scene.m_BoundingBox.m_MinP, 2), "m");
@@ -659,7 +640,6 @@ bool QRenderThread::Load(QString& FileName)
 	emit gRenderStatus.StatisticChanged("Volume", "Physical Size", FormatSize(PhysicalSize, 2), "mm");
 	emit gRenderStatus.StatisticChanged("Volume", "Resolution", FormatSize(m_Scene.m_Resolution.GetResXYZ()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Spacing", FormatSize(m_Scene.m_Spacing, 2), "mm");
-//	emit gRenderStatus.StatisticChanged("Volume", "Scale", FormatVector(1000.0f * m_Scene.m_Scale, 2), "");
 	emit gRenderStatus.StatisticChanged("Volume", "No. Voxels", QString::number(m_Scene.m_Resolution.GetNoElements()), "Voxels");
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.GetMin()) + ", " + QString::number(m_Scene.m_IntensityRange.GetMax()) + "]", "");
 
@@ -667,9 +647,6 @@ bool QRenderThread::Load(QString& FileName)
 	Log("Spacing: " + FormatSize(m_Scene.m_Spacing, 2), "grid");
 	Log("Resolution after re-sampling: " + FormatSize(m_Scene.m_Resolution.GetResXYZ()) + " mm", "grid");
 	Log("Density range: [" + QString::number(m_Scene.m_IntensityRange.GetMin()) + ", " + QString::number(m_Scene.m_IntensityRange.GetMax()) + "]", "grid");
-
-	// Print scene data
-//	m_Scene.PrintSelf();
 
 	return true;
 }
@@ -786,6 +763,77 @@ void QRenderThread::OnUpdateTransferFunction(void)
 	}
 
 	m_Scene.m_DirtyFlags.SetFlag(TransferFunctionDirty);
+}
+
+void QRenderThread::OnUpdateCamera(void)
+{
+	if (!Scene())
+		return;
+
+	// Film
+	Scene()->m_Camera.m_Film.m_Exposure = (1.001f - gCamera.GetFilm().GetExposure()) * 1000.0f;
+
+	if (gCamera.GetFilm().IsDirty())
+	{
+		// 		Scene()->m_Camera.m_Film.m_Resolution.SetResX(gCamera.GetFilm().GetWidth());
+		// 
+		// 		Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
+	}
+
+	// Aperture
+	Scene()->m_Camera.m_Aperture.m_Size	= gCamera.GetAperture().GetSize();
+
+	// Projection
+	Scene()->m_Camera.m_FovV = gCamera.GetProjection().GetFieldOfView();
+
+	// Focus
+	Scene()->m_Camera.m_Focus.m_FocalDistance = gCamera.GetFocus().GetFocalDistance();
+
+	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+}
+
+void QRenderThread::OnUpdateLighting(void)
+{
+	if (!Scene())
+		return;
+
+	Scene()->m_Lighting.Reset();
+
+	if (gLighting.Background().GetEnabled())
+	{
+		CLight BackgroundLight;
+
+		BackgroundLight.m_T	= 1;
+
+		BackgroundLight.m_ColorTop		= gLighting.Background().GetIntensity() * CColorRgbHdr(gLighting.Background().GetTopColor().redF(), gLighting.Background().GetTopColor().greenF(), gLighting.Background().GetTopColor().blueF());
+		BackgroundLight.m_ColorMiddle	= gLighting.Background().GetIntensity() * CColorRgbHdr(gLighting.Background().GetMiddleColor().redF(), gLighting.Background().GetMiddleColor().greenF(), gLighting.Background().GetMiddleColor().blueF());
+		BackgroundLight.m_ColorBottom	= gLighting.Background().GetIntensity() * CColorRgbHdr(gLighting.Background().GetBottomColor().redF(), gLighting.Background().GetBottomColor().greenF(), gLighting.Background().GetBottomColor().blueF());
+
+		BackgroundLight.Update(Scene()->m_BoundingBox);
+
+		Scene()->m_Lighting.AddLight(BackgroundLight);
+	}
+
+	for (int i = 0; i < gLighting.GetLights().size(); i++)
+	{
+		QLight& Light = gLighting.GetLights()[i];
+
+		CLight AreaLight;
+
+		AreaLight.m_T			= 0;
+		AreaLight.m_Theta		= Light.GetTheta() / RAD_F;
+		AreaLight.m_Phi			= Light.GetPhi() / RAD_F;
+		AreaLight.m_Width		= Light.GetWidth();
+		AreaLight.m_Height		= Light.GetHeight();
+		AreaLight.m_Distance	= Light.GetDistance();
+		AreaLight.m_Color		= Light.GetIntensity() * CColorRgbHdr(Light.GetColor().redF(), Light.GetColor().greenF(), Light.GetColor().blueF());
+
+		AreaLight.Update(Scene()->m_BoundingBox);
+
+		Scene()->m_Lighting.AddLight(AreaLight);
+	}
+
+	Scene()->m_DirtyFlags.SetFlag(LightsDirty);
 }
 
 CScene* Scene(void)

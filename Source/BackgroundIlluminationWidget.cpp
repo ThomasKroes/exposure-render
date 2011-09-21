@@ -9,15 +9,15 @@
 QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_MainLayout(),
+	m_GradientColorTopLabel(),
 	m_GradientColorTop(),
-	m_IntensitySliderTop(),
-	m_IntensitySpinBoxTop(),
+	m_GradientColorMiddleLabel(),
 	m_GradientColorMiddle(),
-	m_IntensitySliderMiddle(),
-	m_IntensitySpinBoxMiddle(),
+	m_GradientColorBottomLabel(),
 	m_GradientColorBottom(),
-	m_IntensitySliderBottom(),
-	m_IntensitySpinBoxBottom(),
+	m_IntensityLabel(),
+	m_IntensitySlider(),
+	m_IntensitySpinner(),
 	m_UseTexture(),
 	m_TextureFilePath(),
 	m_LoadTexture()
@@ -35,73 +35,63 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	setLayout(&m_MainLayout);
 
 	// Gradient color top
-	m_MainLayout.addWidget(new QLabel("Top"), 0, 0);
-	m_MainLayout.addWidget(&m_GradientColorTop, 0, 1);
+	m_GradientColorTopLabel.setText("Top");
+	m_GradientColorTopLabel.setFixedWidth(50);
+	m_MainLayout.addWidget(&m_GradientColorTopLabel, 0, 0);
+	m_MainLayout.addWidget(&m_GradientColorTop, 0, 1, 1, 3);
 
-	m_IntensitySliderTop.setOrientation(Qt::Horizontal);
-	m_IntensitySliderTop.setRange(0.01, 1000.0);
-	m_MainLayout.addWidget(&m_IntensitySliderTop, 0, 2);
-
-	m_IntensitySpinBoxTop.setRange(0.01, 1000.0);
-	m_MainLayout.addWidget(&m_IntensitySpinBoxTop, 0, 3);
-
-	connect(&m_GradientColorTop, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorTopChanged(const QColor&)));
-	connect(&m_IntensitySliderTop, SIGNAL(valueChanged(double)), &m_IntensitySpinBoxTop, SLOT(setValue(double)));
-	connect(&m_IntensitySpinBoxTop, SIGNAL(valueChanged(double)), &m_IntensitySliderTop, SLOT(setValue(double)));
-	connect(&m_IntensitySliderTop, SIGNAL(valueChanged(double)), this, SLOT(OnTopIntensityChanged(double)));
+	QObject::connect(&m_GradientColorTop, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorTopChanged(const QColor&)));
 
 	// Gradient color Middle
-	m_MainLayout.addWidget(new QLabel("Middle"), 1, 0);
-	m_MainLayout.addWidget(&m_GradientColorMiddle, 1, 1);
+	m_GradientColorMiddleLabel.setText("Middle");
+	m_MainLayout.addWidget(&m_GradientColorMiddleLabel, 1, 0);
+	m_MainLayout.addWidget(&m_GradientColorMiddle, 1, 1, 1, 3);
 
-	m_IntensitySliderMiddle.setOrientation(Qt::Horizontal);
-	m_IntensitySliderMiddle.setRange(0.01, 1000.0);
-	m_MainLayout.addWidget(&m_IntensitySliderMiddle, 1, 2);
-
-	m_IntensitySpinBoxMiddle.setRange(0.01, 1000.0);
-	m_MainLayout.addWidget(&m_IntensitySpinBoxMiddle, 1, 3);
-
-	connect(&m_GradientColorMiddle, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorMiddleChanged(const QColor&)));
-	connect(&m_IntensitySliderMiddle, SIGNAL(valueChanged(double)), &m_IntensitySpinBoxMiddle, SLOT(setValue(double)));
-	connect(&m_IntensitySpinBoxMiddle, SIGNAL(valueChanged(double)), &m_IntensitySliderMiddle, SLOT(setValue(double)));
-	connect(&m_IntensitySliderMiddle, SIGNAL(valueChanged(double)), this, SLOT(OnMiddleIntensityChanged(double)));
+	QObject::connect(&m_GradientColorMiddle, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorMiddleChanged(const QColor&)));
 
 	// Gradient color Bottom
-	m_MainLayout.addWidget(new QLabel("Bottom"), 2, 0);
-	m_MainLayout.addWidget(&m_GradientColorBottom, 2, 1);
+	m_GradientColorBottomLabel.setText("Bottom");
+	m_MainLayout.addWidget(&m_GradientColorBottomLabel, 2, 0);
+	m_MainLayout.addWidget(&m_GradientColorBottom, 2, 1, 1, 3);
 
-	m_IntensitySliderBottom.setOrientation(Qt::Horizontal);
-	m_IntensitySliderBottom.setRange(0.01, 1000.0);
-	m_MainLayout.addWidget(&m_IntensitySliderBottom, 2, 2);
+	QObject::connect(&m_GradientColorBottom, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorBottomChanged(const QColor&)));
 
-	m_IntensitySpinBoxBottom.setRange(0.01, 1000.0);
-	m_MainLayout.addWidget(&m_IntensitySpinBoxBottom, 2, 3);
+	// Intensity
+	m_IntensityLabel.setText("Intensity");
+	m_MainLayout.addWidget(&m_IntensityLabel, 3, 0);
 
-	connect(&m_GradientColorBottom, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnGradientColorBottomChanged(const QColor&)));
-	connect(&m_IntensitySliderBottom, SIGNAL(valueChanged(double)), &m_IntensitySpinBoxBottom, SLOT(setValue(double)));
-	connect(&m_IntensitySpinBoxBottom, SIGNAL(valueChanged(double)), &m_IntensitySliderBottom, SLOT(setValue(double)));
-	connect(&m_IntensitySliderBottom, SIGNAL(valueChanged(double)), this, SLOT(OnBottomIntensityChanged(double)));
+	m_IntensitySlider.setOrientation(Qt::Horizontal);
+	m_IntensitySlider.setRange(0.0, 1000.0);
+	m_MainLayout.addWidget(&m_IntensitySlider, 3, 1, 1, 2);
+
+	m_IntensitySpinner.setRange(0.0, 1000.0);
+	m_MainLayout.addWidget(&m_IntensitySpinner, 3, 3);
+
+	QObject::connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinner, SLOT(setValue(double)));
+	QObject::connect(&m_IntensitySpinner, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
+	QObject::connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
 
 	// Use Texture
-	m_UseTexture.setText("Use Texture");
-	m_MainLayout.addWidget(&m_UseTexture, 3, 1);
+// 	m_UseTexture.setText("Use Texture");
+// 	m_MainLayout.addWidget(&m_UseTexture, 4, 1);
 
 	// Texture
-	m_MainLayout.addWidget(new QLabel("Texture"), 4, 0);
+// 	m_MainLayout.addWidget(new QLabel("Texture"), 5, 0);
 
 	// Path
-	m_TextureFilePath.setFixedHeight(22);
-	m_MainLayout.addWidget(&m_TextureFilePath, 4, 1, 1, 2);
+// 	m_TextureFilePath.setFixedHeight(22);
+// 	m_MainLayout.addWidget(&m_TextureFilePath, 5, 1, 1, 2);
 
-	m_LoadTexture.setIcon(GetIcon("folder-open-image"));
-	m_LoadTexture.setFixedWidth(22);
-	m_LoadTexture.setFixedHeight(22);
-	m_MainLayout.addWidget(&m_LoadTexture, 4, 3);
+// 	m_LoadTexture.setIcon(GetIcon("folder-open-image"));
+// 	m_LoadTexture.setFixedWidth(22);
+// 	m_LoadTexture.setFixedHeight(22);
+// 	m_MainLayout.addWidget(&m_LoadTexture, 5, 3);
+// 
+// 	QObject::connect(this, SIGNAL(toggled(bool)), this, SLOT(OnBackgroundIlluminationChanged(bool)));
+// 	QObject::connect(&m_UseTexture, SIGNAL(stateChanged(int)), this, SLOT(OnUseTextureChanged(int)));
+// 	QObject::connect(&m_LoadTexture, SIGNAL(clicked()), this, SLOT(OnLoadTexture()));
 
-	connect(this, SIGNAL(toggled(bool)), this, SLOT(OnBackgroundIlluminationChanged(bool)));
-	connect(&m_UseTexture, SIGNAL(stateChanged(int)), this, SLOT(OnUseTextureChanged(int)));
-	connect(&m_LoadTexture, SIGNAL(clicked()), this, SLOT(OnLoadTexture()));
- 	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), this, SLOT(OnBackgroundChanged()));
+ 	QObject::connect(&gLighting.Background(), SIGNAL(Changed()), this, SLOT(OnBackgroundChanged()));
 
 	OnBackgroundChanged();
 }
@@ -126,19 +116,9 @@ void QBackgroundIlluminationWidget::OnGradientColorBottomChanged(const QColor& C
 	gLighting.Background().SetBottomColor(Color);
 }
 
-void QBackgroundIlluminationWidget::OnTopIntensityChanged(double Intensity)
+void QBackgroundIlluminationWidget::OnIntensityChanged(double Intensity)
 {
-	gLighting.Background().SetTopIntensity(Intensity);
-}
-
-void QBackgroundIlluminationWidget::OnMiddleIntensityChanged(double Intensity)
-{
-	gLighting.Background().SetMiddleIntensity(Intensity);
-}
-
-void QBackgroundIlluminationWidget::OnBottomIntensityChanged(double Intensity)
-{
-	gLighting.Background().SetBottomIntensity(Intensity);
+	gLighting.Background().SetIntensity(Intensity);
 }
 
 void QBackgroundIlluminationWidget::OnUseTextureChanged(int UseTexture)
@@ -148,7 +128,6 @@ void QBackgroundIlluminationWidget::OnUseTextureChanged(int UseTexture)
 
 void QBackgroundIlluminationWidget::OnLoadTexture(void)
 {
-
 }
 
 void QBackgroundIlluminationWidget::OnBackgroundChanged(void)
@@ -163,9 +142,7 @@ void QBackgroundIlluminationWidget::OnBackgroundChanged(void)
 	m_GradientColorMiddle.SetColor(gLighting.Background().GetMiddleColor());
 	m_GradientColorBottom.SetColor(gLighting.Background().GetBottomColor());
 
-	m_IntensitySliderTop.setValue((double)gLighting.Background().GetTopIntensity(), true);
-	m_IntensitySliderMiddle.setValue((double)gLighting.Background().GetMiddleIntensity(), true);
-	m_IntensitySliderBottom.setValue((double)gLighting.Background().GetBottomIntensity(), true);
+	m_IntensitySlider.setValue((double)gLighting.Background().GetIntensity(), true);
 
 	// Use texture
 	m_TextureFilePath.setEnabled(gLighting.Background().GetEnabled() && gLighting.Background().GetUseTexture());

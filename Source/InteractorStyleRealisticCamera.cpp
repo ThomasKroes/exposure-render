@@ -111,7 +111,7 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			Scene()->m_Camera.m_Aperture.m_Size = max(0.0f, Scene()->m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
+			gCamera.GetAperture().SetSize(max(0.0f, Scene()->m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 
@@ -122,7 +122,7 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			Scene()->m_Camera.m_FovV = max(0.0f, Scene()->m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
+			gCamera.GetProjection().SetFieldOfView(max(0.0f, Scene()->m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 

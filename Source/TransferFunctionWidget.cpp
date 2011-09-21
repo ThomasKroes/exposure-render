@@ -19,7 +19,6 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_BottomLayout(),
 	m_BottomRightLayout(),
 	m_Canvas(),
-	m_LabelIntensity(),
 	m_GradientRampDiffuse("Diffuse"),
 	m_GradientRampSpecular("Specular"),
 	m_GradientRampEmission("Emission")
@@ -69,13 +68,9 @@ QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	m_GradientRampSpecular.setFixedHeight(18);
 	m_GradientRampEmission.setFixedHeight(18);
 
-	m_LabelIntensity.setText("Intensity");
-
-	m_BottomLayout.addWidget(&m_LabelIntensity, 0, 0, Qt::AlignCenter);
-	
-	m_BottomLayout.addWidget(&m_GradientRampDiffuse, 1, 0);
-	m_BottomLayout.addWidget(&m_GradientRampSpecular, 2, 0);
- 	m_BottomLayout.addWidget(&m_GradientRampEmission, 3, 0);
+	m_BottomLayout.addWidget(&m_GradientRampDiffuse, 0, 0);
+	m_BottomLayout.addWidget(&m_GradientRampSpecular, 1, 0);
+ 	m_BottomLayout.addWidget(&m_GradientRampEmission, 2, 0);
 
 	QObject::connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
@@ -86,15 +81,12 @@ void QTransferFunctionWidget::OnRenderBegin(void)
 {
 	m_Canvas.setEnabled(true);
 	m_Canvas.SetHistogram(gHistogram);
-
-	m_LabelIntensity.setText("Intensity [" + QString::number(Scene()->m_IntensityRange.GetMin()) + " - " + QString::number(Scene()->m_IntensityRange.GetMax()) + "]");
 }
 
 void QTransferFunctionWidget::OnRenderEnd(void)
 {
 	m_Canvas.setEnabled(false);
 	m_Canvas.SetHistogram(QHistogram());
-	m_LabelIntensity.setText("Intensity");
 }
 
 void QTransferFunctionWidget::OnUpdateGradients(void)

@@ -67,10 +67,10 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(new QLabel("Exposure"), 4, 0);
 
 	m_ExposureSlider.setOrientation(Qt::Horizontal);
-	m_ExposureSlider.setRange(0.001f, 1000.0f);
+	m_ExposureSlider.setRange(0.0f, 1.0f);
 	m_GridLayout.addWidget(&m_ExposureSlider, 4, 1);
 
-	m_ExposureSpinner.setRange(0.001f, 1000.0f);
+	m_ExposureSpinner.setRange(0.0f, 1.0f);
 	m_GridLayout.addWidget(&m_ExposureSpinner, 4, 2);
 
 	QObject::connect(&m_ExposureSlider, SIGNAL(valueChanged(double)), &m_ExposureSpinner, SLOT(setValue(double)));

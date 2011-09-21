@@ -81,10 +81,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 
 	m_DistanceSlider.setOrientation(Qt::Horizontal);
     m_DistanceSlider.setTickPosition(QDoubleSlider::NoTicks);
-	m_DistanceSlider.setRange(0.01, 10.0);
+	m_DistanceSlider.setRange(0.0, 1.0);
 	m_MainLayout.addWidget(&m_DistanceSlider, 2, 1);
 	
-    m_DistanceSpinner.setRange(0.01, 10.0);
+    m_DistanceSpinner.setRange(0.0, 1.0);
 	m_DistanceSpinner.setSuffix(" mm");
 	m_MainLayout.addWidget(&m_DistanceSpinner, 2, 2);
 	
@@ -161,7 +161,6 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	connect(&m_IntensitySpinBox, SIGNAL(valueChanged(double)), &m_IntensitySlider, SLOT(setValue(double)));
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), this, SLOT(OnIntensityChanged(double)));
 	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*)), this, SLOT(OnLightSelectionChanged(QLight*)));
-	connect(&gLighting.Background(), SIGNAL(BackgroundChanged()), &gLighting, SLOT(Update()));
 
 	OnLightSelectionChanged(NULL);
 }

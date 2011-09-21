@@ -10,9 +10,7 @@ QBackground::QBackground(QObject* pParent) :
 	m_ColorTop(QColor(65, 135, 220)),
 	m_ColorMiddle(QColor(65, 135, 220)),
 	m_ColorBottom(QColor(65, 135, 220)),
-	m_IntensityTop(150.0f),
-	m_IntensityMiddle(150.0f),
-	m_IntensityBottom(150.0f),
+	m_Intensity(150.0f),
 	m_UseTexture(false),		
 	m_File("")
 {
@@ -35,13 +33,11 @@ QBackground& QBackground::operator=(const QBackground& Other)
 	m_ColorTop			= Other.m_ColorTop;
 	m_ColorMiddle		= Other.m_ColorMiddle;
 	m_ColorBottom		= Other.m_ColorBottom;
-	m_IntensityTop		= Other.m_IntensityTop;
-	m_IntensityMiddle	= Other.m_IntensityMiddle;
-	m_IntensityBottom	= Other.m_IntensityBottom;
+	m_Intensity			= Other.m_Intensity;
 	m_UseTexture		= Other.m_UseTexture;
 	m_File				= Other.m_File;
 
-	emit BackgroundChanged();
+	emit Changed();
 
 	return *this;
 }
@@ -55,7 +51,7 @@ void QBackground::SetEnabled(const bool& Enable)
 {
 	m_Enable = Enable;
 
-	emit BackgroundChanged();
+	emit Changed();
 }
 
 QColor QBackground::GetTopColor(void) const
@@ -67,7 +63,7 @@ void QBackground::SetTopColor(const QColor& TopColor)
 {
 	m_ColorTop = TopColor;
 
-	emit BackgroundChanged();
+	emit Changed();
 }
 
 QColor QBackground::GetMiddleColor(void) const
@@ -79,7 +75,7 @@ void QBackground::SetMiddleColor(const QColor& MiddleColor)
 {
 	m_ColorMiddle = MiddleColor;
 
-	emit BackgroundChanged();
+	emit Changed();
 }
 
 QColor QBackground::GetBottomColor(void) const
@@ -91,43 +87,19 @@ void QBackground::SetBottomColor(const QColor& BottomColor)
 {
 	m_ColorBottom = BottomColor;
 
-	emit BackgroundChanged();
+	emit Changed();
 }
 
-float QBackground::GetTopIntensity(void) const
+float QBackground::GetIntensity(void) const
 {
-	return m_IntensityTop;
+	return m_Intensity;
 }
 
-void QBackground::SetTopIntensity(const float& TopIntensity)
+void QBackground::SetIntensity(const float& Intensity)
 {
-	m_IntensityTop = TopIntensity;
+	m_Intensity = Intensity;
 
-	emit BackgroundChanged();
-}
-
-float QBackground::GetMiddleIntensity(void) const
-{
-	return m_IntensityMiddle;
-}
-
-void QBackground::SetMiddleIntensity(const float& MiddleIntensity)
-{
-	m_IntensityMiddle = MiddleIntensity;
-
-	emit BackgroundChanged();
-}
-
-float QBackground::GetBottomIntensity(void) const
-{
-	return m_IntensityBottom;
-}
-
-void QBackground::SetBottomIntensity(const float& BottomIntensity)
-{
-	m_IntensityBottom = BottomIntensity;
-
-	emit BackgroundChanged();
+	emit Changed();
 }
 
 bool QBackground::GetUseTexture(void) const
@@ -139,7 +111,7 @@ void QBackground::SetUseTexture(const bool& Texture)
 {
 	m_UseTexture = Texture;
 
-	emit BackgroundChanged();
+	emit Changed();
 }
 
 QString QBackground::GetFile(void) const
@@ -151,7 +123,7 @@ void QBackground::SetFile(const QString& File)
 {
 	m_File = File;
 
-	emit BackgroundChanged();
+	emit Changed();
 }
 
 void QBackground::ReadXML(QDomElement& Parent)
@@ -169,9 +141,7 @@ void QBackground::ReadXML(QDomElement& Parent)
 	QDomElement BottomColor = Parent.firstChildElement("BottomColor");
 	SetBottomColor(QColor(BottomColor.attribute("R").toInt(), BottomColor.attribute("G").toInt(), BottomColor.attribute("B").toInt()));
 
-	SetTopIntensity(Parent.firstChildElement("TopIntensity").attribute("Value").toFloat());
-	SetMiddleIntensity(Parent.firstChildElement("MiddleIntensity").attribute("Value").toFloat());
-	SetBottomIntensity(Parent.firstChildElement("BottomIntensity").attribute("Value").toFloat());
+	SetIntensity(Parent.firstChildElement("Intensity").attribute("Value").toFloat());
 
 	SetUseTexture(Parent.firstChildElement("UseTexture").attribute("Value").toInt());
 	SetFile(Parent.firstChildElement("Height").attribute("Value"));
@@ -209,20 +179,10 @@ QDomElement QBackground::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	BottomColor.setAttribute("B", m_ColorBottom.blue());
 	Background.appendChild(BottomColor);
 
-	// Top Intensity
-	QDomElement TopIntensity = DOM.createElement("TopIntensity");
-	TopIntensity.setAttribute("Value", m_IntensityTop);
-	Background.appendChild(TopIntensity);
-
-	// Middle Intensity
-	QDomElement MiddleIntensity = DOM.createElement("MiddleIntensity");
-	MiddleIntensity.setAttribute("Value", m_IntensityMiddle);
-	Background.appendChild(MiddleIntensity);
-
-	// Bottom Intensity
-	QDomElement BottomIntensity = DOM.createElement("BottomIntensity");
-	BottomIntensity.setAttribute("Value", m_IntensityBottom);
-	Background.appendChild(BottomIntensity);
+	// Intensity
+	QDomElement Intensity = DOM.createElement("Intensity");
+	Intensity.setAttribute("Value", m_Intensity);
+	Background.appendChild(Intensity);
 
 	// Use texture
 	QDomElement UseTexture = DOM.createElement("UseTexture");

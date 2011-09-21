@@ -73,18 +73,19 @@ void CMainWindow::CreateMenus(void)
 
     m_pFileMenu->addSeparator();
 
+	m_pFileMenu->addAction("Close", this, SLOT(Close()));
+
+    m_pFileMenu->addSeparator();
+
 	m_pFileMenu->addAction(GetIcon("star"), "Welcome screen", this, SLOT(ShowStartupDialog()));
 
 	m_pFileMenu->addSeparator();
 
-	m_pFileMenu->addAction("Close", this, SLOT(Close()));
-    m_pFileMenu->addSeparator();
     m_pFileMenu->addAction(GetIcon("door--arrow"), "Exit", this, SLOT(close()));
     
 	menuBar()->addSeparator();
 
 	m_pViewMenu = menuBar()->addMenu(tr("&View"));
-
 	
     menuBar()->addSeparator();
 
@@ -120,6 +121,12 @@ void CMainWindow::CreateStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
 	statusBar()->setSizeGripEnabled(true);
+
+	QProgressBar* pBar = new QProgressBar(this);
+	pBar->setValue(75);
+	pBar->setFormat("asdasd");
+
+	statusBar()->addPermanentWidget(pBar);
 }
 
 void CMainWindow::SetupDockingWidgets()
@@ -276,12 +283,6 @@ void CMainWindow::OnRenderBegin(void)
 {
 	Log("Rendering started", "control");
 
-	for (int i = 0; i < MaxRecentFiles; i++)
-	{
-		if (m_pRecentFileActions[i]) 
-			m_pRecentFileActions[i]->setEnabled(false);
-	}
-	
 	m_LightingDockWidget.setEnabled(true);
 	m_AppearanceDockWidget.setEnabled(true);
 	m_StatisticsDockWidget.setEnabled(true);

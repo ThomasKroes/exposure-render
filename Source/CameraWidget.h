@@ -17,7 +17,6 @@ public:
 public slots:
 	void OnLoadPreset(const QString& Name);
 	void OnSavePreset(const QString& Name);
-	void Update(void);
 
 private:
 	QGridLayout					m_MainLayout;

@@ -32,8 +32,6 @@ protected slots:
 	void OnAddLight(void);
 	void OnRemoveLight(void);
 	void OnRenameLight(void);
-	void OnCopyLight(void);
-	void OnReset(void);
 
 protected:
 	QGridLayout		m_MainLayout;
