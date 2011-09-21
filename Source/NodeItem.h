@@ -38,4 +38,6 @@ public:
 	static QPen				m_PenNormal;
 	static QPen				m_PenHighlight;
 	static QPen				m_PenDisabled;
+	static QBrush			m_SelectionBrush;
+	static QPen				m_SelectionPen;
 };

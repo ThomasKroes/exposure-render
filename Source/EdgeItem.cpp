@@ -8,7 +8,7 @@
 
 QPen QEdgeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.0);
 QPen QEdgeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 100, 150)), 1.0);
-QPen QEdgeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 200)), 1.0);
+QPen QEdgeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 180)), 1.0);
 
 QEdgeItem::QEdgeItem(QTransferFunctionItem* pTransferFunctionItem) :
 	QGraphicsLineItem(pTransferFunctionItem),

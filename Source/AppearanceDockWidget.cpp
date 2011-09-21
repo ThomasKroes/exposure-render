@@ -8,18 +8,20 @@
 QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
+	m_PresetsWidget(NULL, "Appearance", "Appearance"),
 	m_TransferFunctionWidget(),
-	m_NodePropertiesWidget(),
-	m_PresetsWidget(NULL, "Appearance", "Appearance")
+	m_NodeSelectionWidget(),
+	m_NodePropertiesWidget()
 {
 	// Create main layout
 	m_MainLayout.setAlignment(Qt::AlignTop);
 	setLayout(&m_MainLayout);
 
-	m_MainLayout.addWidget(&m_TransferFunctionWidget, 1, 0);
-	m_MainLayout.addWidget(&m_NodePropertiesWidget, 2, 0);
 	m_MainLayout.addWidget(&m_PresetsWidget, 0, 0);
-
+	m_MainLayout.addWidget(&m_TransferFunctionWidget, 1, 0);
+	m_MainLayout.addWidget(&m_NodeSelectionWidget, 2, 0);
+	m_MainLayout.addWidget(&m_NodePropertiesWidget, 3, 0);
+	
 	QObject::connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&gRenderStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));

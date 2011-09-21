@@ -17,6 +17,9 @@ QPen	QNodeItem::m_PenNormal		= QPen(QBrush(QColor::fromHsl(0, 100, 100)), 1.0);
 QPen	QNodeItem::m_PenHighlight	= QPen(QBrush(QColor::fromHsl(0, 150, 50)), 1.0);
 QPen	QNodeItem::m_PenDisabled	= QPen(QBrush(QColor::fromHsl(0, 0, 200)), 1.0);
 
+QBrush	QNodeItem::m_SelectionBrush	= QBrush(QColor::fromHsl(43, 150, 150, 255));
+QPen	QNodeItem::m_SelectionPen	= QPen(QBrush(QColor::fromHsl(0, 150, 100, 150)), 1.0);
+
 QNodeItem::QNodeItem(QTransferFunctionItem* pTransferFunctionItem, QNode* pNode) :
 	QGraphicsEllipseItem(pTransferFunctionItem),
 	m_pTransferFunctionItem(pTransferFunctionItem),
@@ -96,26 +99,41 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 
 void QNodeItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
+	QBrush Brush;
+	QPen Pen;
+
 	if (isEnabled())
 	{
 		if (isUnderMouse() || isSelected())
 		{
-			setBrush(m_BrushHighlight);
-			setPen(m_PenHighlight);
+			Brush	= QNodeItem::m_BrushHighlight;
+			Pen		= QNodeItem::m_PenHighlight;
 		}
 		else
 		{
-			setBrush(m_BrushNormal);
-			setPen(m_PenNormal);
+			Brush	= QNodeItem::m_BrushNormal;
+			Pen		= QNodeItem::m_PenNormal;
+		}
+
+		if (isUnderMouse() || isSelected())
+		{
+			QRectF SelRect = rect();
+			SelRect.adjust(-2.6, -2.6, 2.6, 2.6);
+
+			pPainter->setBrush(QNodeItem::m_SelectionBrush);
+			pPainter->setPen(QNodeItem::m_SelectionPen);
+			pPainter->drawEllipse(SelRect);
 		}
 	}
 	else
 	{
-		setBrush(m_BrushDisabled);
-		setPen(m_PenDisabled);
+		Brush	= QNodeItem::m_BrushDisabled;
+		Pen		= QNodeItem::m_PenDisabled;
 	}
 
-	QGraphicsEllipseItem::paint(pPainter, pOption, pWidget);
+	pPainter->setBrush(Brush);
+	pPainter->setPen(Pen);
+	pPainter->drawEllipse(rect());
 }
 
 void QNodeItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
@@ -169,6 +187,7 @@ void QNodeItem::setPos(const QPointF& Pos)
 
 void QNodeItem::UpdateTooltip(void)
 {
+	/*
 	QString ToolTipString;
 
 	const QString R = QString::number(m_pNode->GetDiffuse().red());
@@ -203,4 +222,5 @@ void QNodeItem::UpdateTooltip(void)
 
 	// Update the tooltip
 	setToolTip(ToolTipString);
+	*/
 }

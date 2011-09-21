@@ -1,7 +1,5 @@
 #pragma once
 
-#include "TransferFunctionCanvas.h"
-#include "TransferFunctionGradient.h"
 #include "BackgroundItem.h"
 #include "HistogramItem.h"
 #include "TransferFunctionItem.h"

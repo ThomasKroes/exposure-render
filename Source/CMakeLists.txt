@@ -58,9 +58,7 @@ SET(ExposureRenderSources
 
 	# Appearance
 	TransferFunction.cpp
-	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
-	TransferFunctionGradient.cpp
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
 	AppearanceDockWidget.cpp
@@ -72,6 +70,8 @@ SET(ExposureRenderSources
 	HistogramItem.cpp
 	BackgroundItem.cpp
 	TransferFunctionItem.cpp
+	NodeSelectionWidget.cpp
+	GridItem.cpp
 
 	# Camera
 	Camera.cpp
@@ -141,9 +141,7 @@ SET(ExposureRenderHeaders
 
 	# Appearance
 	TransferFunction.h
-	TransferFunctionCanvas.h
 	TransferFunctionView.h
-	TransferFunctionGradient.h
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
 	AppearanceDockWidget.h
@@ -155,6 +153,8 @@ SET(ExposureRenderHeaders
 	HistogramItem.h
 	BackgroundItem.h
 	TransferFunctionItem.h
+	NodeSelectionWidget.h
+	GridItem.h
 
 	# Camera
 	Camera.h
@@ -234,6 +234,7 @@ SET(ExposureRenderMocHeaders
 	AppearanceDockWidget.h
 	Histogram.h
 	Node.h
+	NodeSelectionWidget.h
 
 	# Camera
 	Camera.h
@@ -328,9 +329,7 @@ SOURCE_GROUP("Main" FILES ${MainSources})
 SET(AppearanceSources
 	AppearanceDockWidget.h
 	TransferFunction.h
-	TransferFunctionCanvas.h
 	TransferFunctionView.h
-	TransferFunctionGradient.h
 	TransferFunctionWidget.h
 	NodePropertiesWidget.h
 	AppearanceDockWidget.h
@@ -342,11 +341,11 @@ SET(AppearanceSources
 	HistogramItem.h
 	BackgroundItem.h
 	TransferFunctionItem.h
+	NodeSelectionWidget.h
+	GridItem.h
 	AppearanceDockWidget.cpp
 	TransferFunction.cpp
-	TransferFunctionCanvas.cpp
 	TransferFunctionView.cpp
-	TransferFunctionGradient.cpp
 	TransferFunctionWidget.cpp
 	NodePropertiesWidget.cpp
 	AppearanceDockWidget.cpp
@@ -358,6 +357,8 @@ SET(AppearanceSources
 	HistogramItem.cpp
 	BackgroundItem.cpp
 	TransferFunctionItem.cpp
+	NodeSelectionWidget.cpp
+	GridItem.cpp
 )
 
 # Make the appearance group

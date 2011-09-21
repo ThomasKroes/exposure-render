@@ -16,6 +16,7 @@ public:
 	virtual void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget);
 
 	void SetTransferFunction(QTransferFunction* pTransferFunction);
+	void Update(void);
 	void UpdateNodes(void);
 	void UpdateEdges(void);
 	void UpdatePolygon(void);

@@ -9,7 +9,7 @@
 
 QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	QGraphicsView(pParent),
-	m_Margin(10, 10, 10, 10),
+	m_Margin(14, 14, 14, 14),
 	m_CanvasRectangle(),
 	m_Scene(),
 	m_Background(NULL),
@@ -65,9 +65,7 @@ void QTFView::resizeEvent(QResizeEvent* pResizeEvent)
 	m_HistogramItem.SetRectangle(m_CanvasRectangle);
 	m_TransferFunctionItem.setRect(m_CanvasRectangle);
 
-	m_TransferFunctionItem.UpdateNodes();
-	m_TransferFunctionItem.UpdateEdges();
-	m_TransferFunctionItem.UpdatePolygon();
+	m_TransferFunctionItem.Update();
 
 	setSceneRect(rect());
 }
@@ -79,9 +77,7 @@ void QTFView::SetHistogram(QHistogram& Histogram)
 
 void QTFView::OnTransferFunctionChanged(void)
 {
-	m_TransferFunctionItem.UpdateNodes();
-	m_TransferFunctionItem.UpdateEdges();
-	m_TransferFunctionItem.UpdatePolygon();
+	m_TransferFunctionItem.Update();
 }
 
 void QTFView::OnNodeSelectionChanged(QNode* pNode)
@@ -124,21 +120,14 @@ void QTFView::mousePressEvent(QMouseEvent* pEvent)
 			// Convert picked position to transfer function coordinates
 			QPointF TransferFunctionPoint((pEvent->posF().x() - m_Margin.GetLeft()) / m_CanvasRectangle.width(), (pEvent->posF().y() - m_Margin.GetTop()) / m_CanvasRectangle.height());
 
-			// Generate random color
-			int R = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int G = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-			int B = 255;//(int)(((float)rand() / (float)RAND_MAX) * 255.0f);
-
 			// Create new transfer function node
-			QNode NewNode(&gTransferFunction, TransferFunctionPoint.x(), 1.0f - TransferFunctionPoint.y(), QColor(R, G, B, 255));
+			QNode NewNode(&gTransferFunction, TransferFunctionPoint.x(), 1.0f - TransferFunctionPoint.y(), QColor::fromHsl((int)(((float)rand() / (float)RAND_MAX) * 359.0f), 150, 150), QColor::fromHsl(0, 0, 50), QColor::fromHsl(0, 0, 0));
 
 			// Add to node list
 			gTransferFunction.AddNode(NewNode);
 
 			// Redraw
-			m_TransferFunctionItem.UpdateNodes();
-			m_TransferFunctionItem.UpdateEdges();
-			m_TransferFunctionItem.UpdatePolygon();
+			m_TransferFunctionItem.Update();
 		}
 
 		if (pEvent->button() == Qt::RightButton)

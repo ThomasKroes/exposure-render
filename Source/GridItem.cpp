@@ -2,9 +2,9 @@
 // Precompiled headers
 #include "Stable.h"
 
-#include "BackgroundItem.h"
+#include "GridItem.h"
 
-QBackgroundItem::QBackgroundItem(QGraphicsItem* pParent) :
+QGridItem::QGridItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),
 	m_BrushEnabled(QBrush(QColor::fromHsl(0, 0, 170))),
 	m_BrushDisabled(QBrush(QColor::fromHsl(0, 0, 210))),
@@ -13,12 +13,12 @@ QBackgroundItem::QBackgroundItem(QGraphicsItem* pParent) :
 {
 }
 
-QBackgroundItem::QBackgroundItem(const QBackgroundItem& Other)
+QGridItem::QGridItem(const QGridItem& Other)
 {
 	*this = Other;
 }
 
-QBackgroundItem& QBackgroundItem::operator=(const QBackgroundItem& Other)
+QGridItem& QGridItem::operator=(const QGridItem& Other)
 {
 	m_BrushEnabled	= Other.m_BrushEnabled;
 	m_BrushDisabled	= Other.m_BrushDisabled;
@@ -28,7 +28,7 @@ QBackgroundItem& QBackgroundItem::operator=(const QBackgroundItem& Other)
 	return *this;
 }
 
-void QBackgroundItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
+void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
 	if (isEnabled())
 	{
