@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PresetsWidget.h"
+#include "AppearanceSettingsWidget.h"
 #include "TransferFunctionWidget.h"
 #include "NodeSelectionWidget.h"
 #include "NodePropertiesWidget.h"
@@ -22,6 +23,7 @@ public slots:
 protected:
 	QGridLayout							m_MainLayout;
 	QPresetsWidget<QTransferFunction>	m_PresetsWidget;
+	QAppearanceSettingsWidget			m_AppearanceSettingsWidget;
 	QTransferFunctionWidget				m_TransferFunctionWidget;
 	QNodeSelectionWidget				m_NodeSelectionWidget;
 	QNodePropertiesWidget				m_NodePropertiesWidget;
