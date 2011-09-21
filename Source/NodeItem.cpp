@@ -81,8 +81,6 @@ QVariant QNodeItem::itemChange(GraphicsItemChange Change, const QVariant& Value)
 
 	if (!m_SuspendUpdate && Change == QGraphicsItem::ItemPositionHasChanged)
 	{
-		Log("X: " + QString::number(NewScenePoint.x()) + "Width: " + QString::number(m_pTransferFunctionItem->rect().width()));
-
 		m_pTransferFunctionItem->m_AllowUpdateNodes = false;
 
 		m_pNode->SetIntensity(NewScenePoint.x() / m_pTransferFunctionItem->rect().width());

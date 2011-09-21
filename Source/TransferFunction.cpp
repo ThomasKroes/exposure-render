@@ -30,9 +30,6 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 
 	blockSignals(true);
 	
-// 	m_RangeMin		= Other.m_RangeMin;
-// 	m_RangeMax		= Other.m_RangeMax;
-// 	m_Range			= Other.m_Range;
 	m_Nodes			= Other.m_Nodes;
 	m_pSelectedNode	= Other.m_pSelectedNode;
 
@@ -221,8 +218,6 @@ void QTransferFunction::RemoveNode(QNode* pNode)
 
 void QTransferFunction::UpdateNodeRanges(void)
 {
-	return;
-
 	// Compute the node ranges
 	for (int i = 0; i < m_Nodes.size(); i++)
 	{
