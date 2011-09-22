@@ -15,7 +15,8 @@ bool CompareNodes(QNode NodeA, QNode NodeB)
 QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	QPresetXML(pParent),
 	m_Nodes(),
-	m_pSelectedNode(NULL)
+	m_pSelectedNode(NULL),
+	m_DensityScale(5.0f)
 {
 }
 
