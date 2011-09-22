@@ -750,23 +750,27 @@ public:
 public:
 	HO CDenoiseParams(void)
 	{
-// 		m_Enabled			= true;
-// 		m_Noise				= 1.0f / (0.32f * 0.32f);
-// 		m_LerpC				= 0.2f;
-// 		m_WindowRadius		= 2.0f;
-// 		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
-// 		m_InvWindowArea		= 1.0f / m_WindowArea;
-// 		m_WeightThreshold	= 0.02f;
-// 		m_LerpThreshold		= 0.79f;
+/*
+		m_Enabled			= true;
+		m_Noise				= 1.0f / (0.32f * 0.32f);
+		m_LerpC				= 0.2f;
+		m_WindowRadius		= 2.0f;
+		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
+		m_InvWindowArea		= 1.0f / m_WindowArea;
+		m_WeightThreshold	= 0.02f;
+		m_LerpThreshold		= 0.79f;
+*/
+
 
 		m_Enabled			= true;
 		m_Noise				= 1.0f / (0.5f * 0.5f);
 		m_LerpC				= 0.2f;
-		m_WindowRadius		= 3.0f;
+		m_WindowRadius		= 6.0f;
 		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
 		m_InvWindowArea		= 1.0f / m_WindowArea;
-		m_WeightThreshold	= 0.05f;
-		m_LerpThreshold		= 0.9f;
+		m_WeightThreshold	= 0.01f;
+		m_LerpThreshold		= 0.1f;
+/**/
 	}
 
 	HO ~CDenoiseParams(void)
@@ -786,6 +790,13 @@ public:
 
 		return *this;
 	}
+
+	HOD void SetWindowRadius(const float& WindowRadius)
+	{
+		m_WindowRadius		= WindowRadius;
+		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
+		m_InvWindowArea		= 1.0f / m_WindowArea;
+	}
 };
 
 class EXPOSURE_RENDER_DLL CScene
@@ -798,21 +809,28 @@ public:
 
 	void PrintSelf(void);
 
-	CCamera					m_Camera;
-	CLighting				m_Lighting;
-	CResolution3D			m_Resolution;
-	CFlags					m_DirtyFlags;
-	Vec3f					m_Spacing;
-	Vec3f					m_Scale;
-	CBoundingBox			m_BoundingBox;
-	float					m_PhaseG;
-	CTransferFunctions		m_TransferFunctions;
-	int						m_MaxNoBounces;
-	CRange					m_IntensityRange;
-	Vec2f					m_KernelSize;
-	float					m_SigmaMax;
-	float					m_DensityScale;
-	int						m_MacrocellSize;
-	Vec3i					extinctionSize;
-	CDenoiseParams			m_DenoiseParams;
+	CCamera				m_Camera;
+	CLighting			m_Lighting;
+	CResolution3D		m_Resolution;
+	CFlags				m_DirtyFlags;
+	Vec3f				m_Spacing;
+	Vec3f				m_Scale;
+	CBoundingBox		m_BoundingBox;
+	float				m_PhaseG;
+	CTransferFunctions	m_TransferFunctions;
+	int					m_MaxNoBounces;
+	CRange				m_IntensityRange;
+	CRange				m_GradientMagnitudeRange;
+	Vec2f				m_KernelSize;
+	float				m_SigmaMax;
+	float				m_DensityScale;
+	int					m_MacrocellSize;
+	Vec3i				extinctionSize;
+	CDenoiseParams		m_DenoiseParams;
+
+	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
+	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}
+
+private:
+	int					m_NoIterations;
 };

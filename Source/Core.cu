@@ -3,6 +3,7 @@
 
 texture<short, 3, cudaReadModeNormalizedFloat >	gTexDensity;
 texture<short, 3, cudaReadModeNormalizedFloat >	gTexExtinction;
+texture<short, 3, cudaReadModeNormalizedFloat >	gTexGradientMagnitude;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -57,6 +58,30 @@ void BindExtinctionVolume(float* extinction, cudaExtent extinctionSize)
 	gTexExtinction.addressMode[1] = cudaAddressModeClamp;
 
 	cudaBindTextureToArray( gTexExtinction, volArray, volChannelDesc);
+}
+
+void BindGradientMagnitudeVolume(short* pBuffer, cudaExtent VolumeSize)
+{
+	cudaArray* pVolumeArray;
+
+	cudaChannelFormatDesc VolumeChannelDesc = cudaCreateChannelDesc<short>();
+	cudaMalloc3DArray(&pVolumeArray, &VolumeChannelDesc, VolumeSize);
+	
+	cudaMemcpy3DParms CopyParams = {0};
+
+	CopyParams.srcPtr	= make_cudaPitchedPtr((void*)pBuffer, VolumeSize.width * sizeof(short), VolumeSize.width, VolumeSize.height);
+	CopyParams.dstArray = pVolumeArray;
+	CopyParams.extent	= VolumeSize;
+	CopyParams.kind		= cudaMemcpyHostToDevice;
+
+	CUDA_SAFE_CALL(cudaMemcpy3D(&CopyParams));
+
+	gTexGradientMagnitude.normalized		= true;
+	gTexGradientMagnitude.filterMode		= cudaFilterModePoint;
+	gTexGradientMagnitude.addressMode[0]	= cudaAddressModeClamp;
+	gTexGradientMagnitude.addressMode[1]	= cudaAddressModeClamp;
+
+	cudaBindTextureToArray(gTexGradientMagnitude, pVolumeArray, VolumeChannelDesc);
 }
 
 void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, unsigned char* pDevEstRgbLdr, unsigned char* pDevEstRgbLdrDisp, int N)

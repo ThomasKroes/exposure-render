@@ -48,7 +48,6 @@ public:
 	QString			GetFileName(void) const;
 	void			SetFileName(const QString& FileName);
 	bool			InitializeCuda(void);
-	int				GetNoIterations(void) const;
 	unsigned char*	GetRenderImage(void) const;
 	CScene*			GetScene(void);
 	bool			Load(QString& FileName);
@@ -60,10 +59,10 @@ private:
 
 private:
 	QString					m_FileName;
-	int						m_N;
 	unsigned char*			m_pRenderImage;
 
-	vtkImageData*			m_pImageDataVolume;
+	vtkImageData*			m_pDensityBuffer;
+	short*					m_pGradientMagnitudeBuffer;
 
 	// CUDA allocations
 	CScene*					m_pScene;

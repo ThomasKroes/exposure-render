@@ -16,11 +16,13 @@ CScene::CScene(void) :
 	m_TransferFunctions(),
 	m_MaxNoBounces(1),
 	m_IntensityRange(),
+	m_GradientMagnitudeRange(),
 	m_KernelSize(16, 4),
 	m_SigmaMax(0.0f),
 	m_DensityScale(5000),
 	m_MacrocellSize(32),
-	m_DenoiseParams()
+	m_DenoiseParams(),
+	m_NoIterations(0)
 {
 }
 
@@ -51,6 +53,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_DensityScale		= Other.m_DensityScale;
 	m_MacrocellSize		= Other.m_MacrocellSize;
 	m_DenoiseParams		= Other.m_DenoiseParams;
+	m_NoIterations		= Other.m_NoIterations;
 
 	return *this;
 }

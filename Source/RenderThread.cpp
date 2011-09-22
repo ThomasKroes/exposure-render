@@ -144,9 +144,9 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	QThread(pParent),
 	m_Mutex(),
 	m_FileName(FileName),
-	m_N(0),
 	m_pRenderImage(NULL),
-	m_pImageDataVolume(NULL),
+	m_pDensityBuffer(NULL),
+	m_pGradientMagnitudeBuffer(NULL),
 // 	m_Scene(),
 	m_pScene(NULL),
 	m_pDevAccEstXyz(NULL),
@@ -172,7 +172,7 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_FileName				= Other.m_FileName;
 	m_pRenderImage			= Other.m_pRenderImage;
 	m_pRenderImage			= Other.m_pRenderImage;
-	m_pImageDataVolume		= Other.m_pImageDataVolume;
+	m_pDensityBuffer		= Other.m_pDensityBuffer;
 	m_Scene					= Other.m_Scene;
 	m_pScene				= Other.m_pScene;
 	m_pDevAccEstXyz			= Other.m_pDevAccEstXyz;
@@ -189,7 +189,7 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 
 QRenderThread::~QRenderThread(void)
 {
-	Log("Render thread destroyed");
+	free(m_pGradientMagnitudeBuffer);
 }
 
 bool QRenderThread::InitializeCuda(void)
@@ -278,7 +278,7 @@ void QRenderThread::run()
  		return;
  	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(800, 800));
+	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(512, 512));
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
  	m_Scene.m_Camera.Update();
@@ -287,6 +287,7 @@ void QRenderThread::run()
 	m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
 
  	CreateVolume();
+	BindGradientMagnitudeVolume((short*)m_pGradientMagnitudeBuffer, make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]));
 
 	emit gRenderStatus.StatisticChanged("Performance", "Timings", "");
 
@@ -400,7 +401,7 @@ void QRenderThread::run()
 			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SizeLdrFrameBuffer));
 
 			// Reset no. iterations
-			m_N = 0.0f;
+			m_Scene.SetNoIterations(0);
 
 			// Notify Inform others about the memory allocations
 			emit gRenderStatus.Resize();
@@ -419,27 +420,32 @@ void QRenderThread::run()
 			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
 
 			// Reset no. iterations
-			m_N = 0.0f;
+			m_Scene.SetNoIterations(0);
 		}
 
 		// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 		m_Scene.m_DirtyFlags.ClearAllFlags();
 
 		CCudaTimer Timer;
-// Increase the number of iterations performed so far
-		m_N++;
+
+		// Increase the number of iterations performed so far
+		m_Scene.SetNoIterations(m_Scene.GetNoIterations() + 1);
+
+		// Adjust de-noising parameters
+		const float Radius = 6.0f * (1.0f / (1.0f + 0.1 * (float)m_Scene.GetNoIterations()));
+
+		m_Scene.m_DenoiseParams.SetWindowRadius(Radius);
+
 		// Execute the rendering kernels
-  		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_pDevRgbLdrDisp, m_N);
+  		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations());
 		HandleCudaError(cudaGetLastError());
 		
 		emit gRenderStatus.StatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
 
-		
-
 		FPS.AddDuration(1000.0f / CudaTimer.StopTimer());
 
 		emit gRenderStatus.StatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
-		emit gRenderStatus.StatisticChanged("Performance", "No. Iterations", QString::number(m_N), "Iterations");
+		emit gRenderStatus.StatisticChanged("Performance", "No. Iterations", QString::number(m_Scene.GetNoIterations()), "Iterations");
 
 		// Blit
 		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
@@ -491,11 +497,6 @@ QString QRenderThread::GetFileName(void) const
 void QRenderThread::SetFileName(const QString& FileName)
 {
 	m_FileName = FileName;
-}
-
-int QRenderThread::GetNoIterations(void) const
-{
-	return m_N;
 }
 
 unsigned char* QRenderThread::GetRenderImage(void) const
@@ -553,19 +554,42 @@ bool QRenderThread::Load(QString& FileName)
 	
 	ImageCast->Update();
 
-	m_pImageDataVolume = ImageCast->GetOutput();
+	m_pDensityBuffer = ImageCast->GetOutput();
 	
 	// Scalar range
-	double* pRange = m_pImageDataVolume->GetScalarRange();
+	double* pRange = m_pDensityBuffer->GetScalarRange();
 	m_Scene.m_IntensityRange.SetMin((float)pRange[0]);
 	m_Scene.m_IntensityRange.SetMax((float)pRange[1]);
 
 	// Get extent
-	int* pExtent = m_pImageDataVolume->GetExtent();
+	int* pExtent = m_pDensityBuffer->GetExtent();
 	m_Scene.m_Resolution.SetResXYZ(Vec3i(pExtent[1] + 1, pExtent[3] + 1, pExtent[5] + 1));
 
+
+
+
+
+
+	// Gradient magnitude volume
+	vtkSmartPointer<vtkImageGradientMagnitude> GradientMagnitude = vtkImageGradientMagnitude::New();
+
+	GradientMagnitude->SetDimensionality(3);
+	GradientMagnitude->SetInput(m_pDensityBuffer);
+	GradientMagnitude->Update();
+
+	m_pGradientMagnitudeBuffer = (short*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(short));
+	memcpy(m_pGradientMagnitudeBuffer, GradientMagnitude->GetOutput()->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(short));
+
+	// Scalar range
+	double* pGradientMagnitudeRange = GradientMagnitude->GetOutput()->GetScalarRange();
+	
+	m_Scene.m_GradientMagnitudeRange.SetMin((float)pGradientMagnitudeRange[0]);
+	m_Scene.m_GradientMagnitudeRange.SetMax((float)pGradientMagnitudeRange[1]);
+
+	Log("Gradient magnitude range: [" + QString::number(m_Scene.m_GradientMagnitudeRange.GetMin(), 'f', 2) + " - " + QString::number(m_Scene.m_GradientMagnitudeRange.GetMax(), 'f', 2) + "]", "grid");
+
 	// Spacing
-	double* pSpacing = m_pImageDataVolume->GetSpacing();
+	double* pSpacing = m_pDensityBuffer->GetSpacing();
 	
 	m_Scene.m_Spacing.x = (float)pSpacing[0];
 	m_Scene.m_Spacing.y = (float)pSpacing[1];
@@ -618,8 +642,8 @@ void QRenderThread::CreateVolume(void)
 	short* pDensityBuffer = (short*)malloc(m_Scene.m_Resolution.GetNoElements() * sizeof(short));
 
 	// Copy density data from vtk image to density buffer
-	m_pImageDataVolume->Update();
-	memcpy(pDensityBuffer, m_pImageDataVolume->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(short));
+	m_pDensityBuffer->Update();
+	memcpy(pDensityBuffer, m_pDensityBuffer->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(short));
 
 	m_Scene.m_SigmaMax = 0.0f;
 
