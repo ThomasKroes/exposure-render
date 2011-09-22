@@ -30,7 +30,8 @@ __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 {
 	Vec3f Normal;
 
-	float Delta = 0.001f * pScene->m_Spacing.Min();
+// 	float Delta = 0.001f * pScene->m_Spacing.Min();
+	float Delta = pScene->m_BoundingBox.m_MaxP.Min() / (float)pScene->m_Resolution.GetResX();
 
 	Normal.x = Density(pScene, P + Vec3f(Delta, 0.0f, 0.0f)) - Density(pScene, P - Vec3f(Delta, 0.0f, 0.0f));
 	Normal.y = Density(pScene, P + Vec3f(0.0f, Delta, 0.0f)) - Density(pScene, P - Vec3f(0.0f, Delta, 0.0f));
