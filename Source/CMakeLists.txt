@@ -588,8 +588,9 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt ${CMAKE_CURRENT_BINARY_DIR
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX_CACHED})
 
 ### Example .mhd and .raw files ###
-# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.mhd")
-# INSTALL_FILES(/Examples FILES "${CMAKE_CURRENT_BINARY_DIR}\\\\Bonsai.raw")
+FILE(GLOB ExamplesMhd "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.mhd")
+FILE(GLOB ExamplesRaw "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.raw")
+INSTALL_FILES(../Examples FILES ${ExamplesMhd} ${ExamplesRaw})
 
 ### Preset files ###
 FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")

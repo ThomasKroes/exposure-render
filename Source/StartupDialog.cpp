@@ -30,12 +30,12 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_DemoFilesGroupBox.setStatusTip("Demo files");
 
 	m_DemoFilesLayout.setAlignment(Qt::AlignTop);
-	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Manix", "manix_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "manix"), 0, 0);
-	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Backpack", "backpack_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", "backpack"), 0, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Manix", "manix_small.mhd", "Loads the manix medical data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "manix"), 0, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Backpack", "backpack_small.mhd", "Loads the famous bacpack data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", "backpack"), 0, 1);
 	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Bonsai", "bonsai_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www9.informatik.uni-erlangen.de/External/vollib/'>Volume Library</a>", "bonsai"), 1, 0);
-	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Macoessix", "macoessix_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "macoessix"), 1, 1);
-	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Engine", "engine_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", "engine"), 2, 0);
-	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Artifix", "artifix_small.mhd", "Loads the bonsai data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "artifix"), 2, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Macoessix", "macoessix_small.mhd", "Loads the macoessix medical data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "macoessix"), 1, 1);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Engine", "engine_small.mhd", "Loads the engine data set, along with transfer function, lighting and camera presets<br><a href='http://www.volvis.org/'>Volvis Website</a>", "engine"), 2, 0);
+	m_DemoFilesLayout.addWidget(new QDemoWidget(this, "Artifix", "artifix_small.mhd", "Loads the artifix medical data set, along with transfer function, lighting and camera presets<br><a href='http://www.osirix-viewer.com/Downloads.html'>Osirix Website</a>", "artifix"), 2, 1);
 
 	m_ResampleNote.setText("In order to reduce the size of the installer we distribute resampled volumes (sampled at 50%). The original volumes, as well as other volumes can be downloaded from the <a href='http://code.google.com/p/exposure-render/downloads'>Exposure Render Website</a>");
 	m_ResampleNote.setWordWrap(true);
@@ -50,7 +50,7 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_ReadMeGroupBox.setToolTip("Special Notes");
 	m_ReadMeGroupBox.setStatusTip("Special Notes");
 
-	m_ReadMe.setEnabled(false);
+//	m_ReadMe.setEnabled(false);
 
 	// Add read me text
 	m_ReadMeLayout.addWidget(&m_ReadMe, 0, 0);
@@ -69,8 +69,10 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_ShowNextTime, 2, 0);
 	m_MainLayout.addWidget(&m_DialogButtons, 2, 1);
 
+	m_ReadMe.setReadOnly(true);
+
 	// Load the read me file
-	LoadReadMe("Readme.txt");
+	LoadReadMe(QApplication::applicationDirPath() + "/" + "Readme.rtf");
 };
 
 QStartupDialog::~QStartupDialog(void)
