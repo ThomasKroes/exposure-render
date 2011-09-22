@@ -66,16 +66,17 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 		case 0:
 		{
 			SingleScattering(pScene, pDevScene, pSeeds, pDevEstFrameXyz);
-			BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
-  			ComputeEstimate(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY(), pDevEstFrameXyz, pDevAccEstXyz, N, pScene->m_Camera.m_Film.m_Exposure, pDevEstRgbLdr);
-			Denoise(pScene, pDevScene, (CColorRgbLdr*)pDevEstRgbLdr, (CColorRgbLdr*)pDevEstRgbLdrDisp);
-
 			break;
 		}
 
 		case 1:
 		{
+			MultipleScattering(pScene, pDevScene, pSeeds, pDevEstFrameXyz);
 			break;
 		}
 	}
+
+	BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
+  	ComputeEstimate(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY(), pDevEstFrameXyz, pDevAccEstXyz, N, pScene->m_Camera.m_Film.m_Exposure, pDevEstRgbLdr);
+	Denoise(pScene, pDevScene, (CColorRgbLdr*)pDevEstRgbLdr, (CColorRgbLdr*)pDevEstRgbLdrDisp);
 }

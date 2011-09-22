@@ -537,6 +537,10 @@ ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
 
 list(APPEND CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20")
 
+IF(WIN32)
+	SET(GUI_TYPE WIN32)
+ENDIF(WIN32)
+
 # Create executable
 CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources})
 
@@ -562,27 +566,25 @@ endif(MSVC)
 
 ### VTK dependencies ###
 FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")
-INSTALL_FILES(/Bin FILES ${VtkDlls})
+INSTALL_FILES(/ FILES ${VtkDlls})
 
 ### CUDA dependencies ###
 SET(CudaDlls ${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart32_40_17.dll)
-INSTALL_FILES(/Bin FILES ${CudaDlls})
+INSTALL_FILES(/ FILES ${CudaDlls})
 
 ### QT dependencies ###
 SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll)
-INSTALL_FILES(/Bin FILES ${QtDlls})
+INSTALL_FILES(/ FILES ${QtDlls})
 
-MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED}/${CMAKE_BUILD_TYPE})
-
-
-SET(CMAKE_INSTALL_PREFIX_CACHED ${CMAKE_INSTALL_PREFIX})
-SET(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}")
-
-MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED})
-MESSAGE(STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
+### Testing ###
+# MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED}/${CMAKE_BUILD_TYPE})
+# SET(CMAKE_INSTALL_PREFIX_CACHED ${CMAKE_INSTALL_PREFIX})
+# SET(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}")
+# MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED})
+# MESSAGE(STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
 
 # INSTALL_FILES("${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt" FILES "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt")
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Readme.txt COPYONLY)
+# CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Readme.txt COPYONLY)
 
 ### Put back the original cached prefix string ###
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX_CACHED})
@@ -590,21 +592,22 @@ SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX_CACHED})
 ### Example .mhd and .raw files ###
 FILE(GLOB ExamplesMhd "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.mhd")
 FILE(GLOB ExamplesRaw "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.raw")
-INSTALL_FILES(../Examples FILES ${ExamplesMhd} ${ExamplesRaw})
+INSTALL_FILES(/Examples FILES ${ExamplesMhd} ${ExamplesRaw})
 
 ### Preset files ###
 FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")
-INSTALL_FILES(/Bin FILES ${Presets})
+INSTALL_FILES(/ FILES ${Presets})
 
 ### Icon files ###
 FILE(GLOB Icons "${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png")
-INSTALL_FILES(/Bin/Icons FILES ${Icons})
+INSTALL_FILES(/Icons FILES ${Icons})
 
 ### ReadMe and Copyright ###
-# INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
+INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
 INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
 
-INSTALL_TARGETS(/Bin ExposureRender)
+#### Install Exposure Render ###
+INSTALL_TARGETS(/ ExposureRender)
 
 # Requires re-distributables
 INCLUDE(InstallRequiredSystemLibraries)
@@ -616,7 +619,7 @@ SET(CPACK_PACKAGE_VENDOR "TU Delft")
 SET(CPACK_RESOURCE_FILE_WELCOME ${CMAKE_CURRENT_SOURCE_DIR}/Welcome.txt)
 SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt)
 SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt)
-SET(CPACK_PACKAGE_DEFAULT_LOCATION /bin)
+SET(CPACK_PACKAGE_DEFAULT_LOCATION /)
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "0")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
@@ -625,10 +628,13 @@ SET(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_NSIS_MENU_LINKS "http://graphics.tudelft.nl/" "TU Delft Graphics Website" "http://code.google.com/p/exposure-render/" "Exposure Render Website" "http://code.google.com/p/exposure-render/downloads" "Data sets" "http://code.google.com/p/exposure-render/wiki" "Wiki")
 
 # Icon in the add/remove control panel, this must be an .exe file 
-set(CPACK_NSIS_INSTALLED_ICON_NAME bin\\\\${EXE_TARGET_NAME}.exe)
+set(CPACK_NSIS_INSTALLED_ICON_NAME ${EXE_TARGET_NAME}.exe)
 
 # Install directory
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Exposure Render")
+
+# SET(SIDEBAR_IMAGE ${CMAKE_SOURCE_DIR}/bonsai.bmp}
+# SET(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${SIDEBAR_IMAGE}\\\")
 
 # SET(CPACK_PACKAGE_ICON "c:\\WindowsMovieMaker.bmp")
 SET(CPACK_NSIS_PACKAGE_NAME "Exposure Render")
@@ -636,12 +642,12 @@ SET(CPACK_NSIS_DISPLAY_NAME "Exposure Render")
 SET(CPACK_NSIS_CONTACT "t.kroes@tudelft.nl")
 SET(CPACK_NSIS_HELP_LINK "http://graphics.tudelft.nl/")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http://code.google.com/p/exposure-render/")
-SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "bin\\\\ExposureRender")
+SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "ExposureRender")
 
 SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 
 # Shortcut in start menu
-SET(CPACK_PACKAGE_EXECUTABLES "bin\\\\ExposureRender;Exposure Render")
+SET(CPACK_PACKAGE_EXECUTABLES "ExposureRender;Exposure Render")
 
 INCLUDE(CPack)
 

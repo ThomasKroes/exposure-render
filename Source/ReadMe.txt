@@ -1,4 +1,8 @@
-This application expresses the concepts and ideas expressed in the paper on Raytraced Lighting in DVR. For your convenience we have selected a number of demo files that have been supplied with appearance, lighting and camera presets.
+This application implements the concepts and ideas expressed in the paper on Raytraced Lighting in DVR. 
+
+Work flow tutorials (video's) will be put online as soon as possible.
+
+For a head start you can open one of the demo files, which come with appearance, lighting and camera presets.
 
 === Operating the camera ===
 - LMB to orbit the camera
@@ -20,3 +24,4 @@ This application expresses the concepts and ideas expressed in the paper on Rayt
 - Clipping
 - Mesh based lights
 - More advanced 2D sampling schemes
+- Turntable animation rendering

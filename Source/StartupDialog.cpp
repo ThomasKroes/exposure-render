@@ -129,6 +129,8 @@ QDemoWidget::QDemoWidget(QStartupDialog* pStartupDialog, const QString& NameUI, 
 	m_Demo.setIcon(GetIcon(Image));
 	m_Demo.setIconSize(QSize(56, 56));
 	m_Demo.setText("");
+	m_Demo.setToolTip("Load the '" + NameUI + "' demo file");
+	m_Demo.setStatusTip("Load the ''" + NameUI + "' demo file");
 
 	m_Name.setWordWrap(true);
 	m_Name.setText("<b>" + NameUI + "</b>");

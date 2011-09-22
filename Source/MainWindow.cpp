@@ -125,12 +125,6 @@ void CMainWindow::CreateStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
 	statusBar()->setSizeGripEnabled(true);
-
-	QProgressBar* pBar = new QProgressBar(this);
-	pBar->setValue(75);
-	pBar->setFormat("asdasd");
-
-	statusBar()->addPermanentWidget(pBar);
 }
 
 void CMainWindow::SetupDockingWidgets()

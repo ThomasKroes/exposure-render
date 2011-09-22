@@ -107,38 +107,52 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 	// Orbiting
 	if (gMouseButtonFlags.HasFlag(Left))
 	{
-		if (GetShiftKey())
+		if (GetShiftKey() && GetCtrlKey())
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			gCamera.GetAperture().SetSize(max(0.0f, Scene()->m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
+			gCamera.GetFocus().SetFocalDistance(max(0.0f, Scene()->m_Camera.m_Focus.m_FocalDistance + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 			// Flag the camera as dirty, this will restart the rendering
-			Scene()->m_DirtyFlags.SetFlag(CameraDirty);
-		}
-		else if (GetCtrlKey())
-		{
-			GetLastPos(m_NewPos[0], m_NewPos[1]);
-
-			gCamera.GetProjection().SetFieldOfView(max(0.0f, Scene()->m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
-
-			GetLastPos(m_OldPos[0], m_OldPos[1]);
-
-			/// Flag the camera as dirty, this will restart the rendering
 			Scene()->m_DirtyFlags.SetFlag(CameraDirty);
 		}
 		else
 		{
-			GetLastPos(m_NewPos[0], m_NewPos[1]);
+			if (GetShiftKey())
+			{
+				GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			Scene()->m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetResY()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetResX()));
+				gCamera.GetAperture().SetSize(max(0.0f, Scene()->m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
 
-			GetLastPos(m_OldPos[0], m_OldPos[1]);
+				GetLastPos(m_OldPos[0], m_OldPos[1]);
 
-			// Flag the camera as dirty, this will restart the rendering
-			Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+				// Flag the camera as dirty, this will restart the rendering
+				Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+			}
+			else if (GetCtrlKey())
+			{
+				GetLastPos(m_NewPos[0], m_NewPos[1]);
+
+				gCamera.GetProjection().SetFieldOfView(max(0.0f, Scene()->m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
+
+				GetLastPos(m_OldPos[0], m_OldPos[1]);
+
+				/// Flag the camera as dirty, this will restart the rendering
+				Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+			}
+			else
+			{
+				GetLastPos(m_NewPos[0], m_NewPos[1]);
+
+				Scene()->m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetResY()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetResX()));
+
+				GetLastPos(m_OldPos[0], m_OldPos[1]);
+
+				// Flag the camera as dirty, this will restart the rendering
+				Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+			}
 		}
 	}
 

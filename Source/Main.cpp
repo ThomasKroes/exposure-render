@@ -17,6 +17,8 @@ int main(int ArgumentCount, char* pArgv[])
 	// Application settings
 	QSettings Settings;
 
+	Settings.setValue("version", "1.0.0");
+
 	// Main window
 	CMainWindow MainWindow;
 
