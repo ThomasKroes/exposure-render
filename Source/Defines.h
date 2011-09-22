@@ -17,6 +17,7 @@
 #define TWO_PI_F											2.0f * PI_F
 #define INV_PI_F											0.31830988618379067154f
 #define INV_TWO_PI_F										0.15915494309189533577f
+#define INV_4_PI_F											1.0f / (4.0f * PI_F)
 #define	EULER_F												2.718281828f
 #define RAD_F												57.29577951308232f
 #define TWO_RAD_F											2.0f * RAD_F

@@ -44,8 +44,25 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		const float		Tr = GetOpacity(pScene, D).r;
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
 		
-		// Estimate direct light at eye point
-	 	Lv = Ke + UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, 0.001f);
+		Lv += Ke;
+
+		// Determine probabilities for picking brdf or phase function
+		float PdfBrdf = NormalizedGradientMagnitude(pScene, Pe), PdfPhase = 1.0f - PdfBrdf;
+
+		Lv = UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+
+// 		if (RNG.Get1() < PdfBrdf)
+// 		{
+// 			// Estimate direct light at eye point using BRDF shading
+// 			if (PdfBrdf > 0.0f)
+// 				Lv = UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true) / PdfBrdf;
+// 		}
+// 		else
+// 		{
+// 			// Estimate direct light at eye point using the phase function
+// 			if (PdfPhase > 0.0f)
+// 				Lv = UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false) / PdfPhase;
+// 		}
 	}
 	else
 	{

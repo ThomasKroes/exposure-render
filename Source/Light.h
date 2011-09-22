@@ -309,37 +309,29 @@ public:
 
 	HOD float Pdf(const Vec3f& P, const Vec3f& Wi)
 	{
-		/*
-		switch (m_Type)
+		CColorXyz L;
+		Vec2f UV;
+		float Pdf = 1.0f;
+
+		if (m_T == 0)
 		{
-			case 0:
-			{
-				// Hit distance
-				float T = 0.0f;
+			// Hit distance
+			float T = 0.0f;
+			
+			// Intersect ray with light surface
+			if (!Intersect(CRay(P, Wi, 0.0f, INF_MAX), T, L, NULL, &Pdf))
+				return 0.0f;
 
-				// Intersect ray with light surface
-				if (!Intersect(P, Wi, 0.0f, INF_MAX, T))
-					return INF_MAX;
-
-				// Ray is exactly co-planar with area light surface
-				if (AbsDot(m_N, -Wi) == 0.0f) 
-					return INF_MAX;
-
-				// Convert light sample weight to solid angle measure
-				return T / (AbsDot(m_N, -Wi) * m_Area);
-			}
-
-			case 1:
-			{
-				return 1.0f;
-			}
-
-			default:
-				return 1.0f;
+			// Convert light sample weight to solid angle measure
+			return powf(T, 2.0f) / (AbsDot(m_N, -Wi) * m_Area);
 		}
-		*/
 
-		return 1.0f;
+		if (m_T == 1)
+		{
+			return 1.0f;
+		}
+
+		return 0.0f;
 	}
 
 	HOD CColorXyz Le(const Vec2f& UV)

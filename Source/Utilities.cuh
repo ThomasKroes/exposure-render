@@ -11,6 +11,16 @@ DEV float Density(CScene* pScene, const Vec3f& P)
 	return (float)((SHRT_MAX) * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
 }
 
+DEV float GradientMagnitude(CScene* pScene, const Vec3f& P)
+{
+	return (float)((SHRT_MAX) * tex3D(gTexGradientMagnitude, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
+}
+
+DEV float NormalizedGradientMagnitude(CScene* pScene, const Vec3f& P)
+{
+	return GradientMagnitude(pScene, P) / pScene->m_GradientMagnitudeRange.GetLength();
+}
+
 DEV float Extinction(CScene* pScene, const Vec3f& P)
 {
 	return tex3D(gTexExtinction, P.x * pScene->m_BoundingBox.m_MaxP.x, P.y * pScene->m_BoundingBox.m_MaxP.z, P.z * pScene->m_BoundingBox.m_MaxP.y);
@@ -56,7 +66,7 @@ DEV CColorRgbHdr GetRoughness(CScene* pScene, const float& D)
 	return pScene->m_TransferFunctions.m_Roughness.F(D);
 }
 
-DEV bool NearestLight(CScene* pScene, CRay& R, CColorXyz& LightColor, Vec3f& Pl)
+DEV bool NearestLight(CScene* pScene, CRay& R, CColorXyz& LightColor, Vec3f& Pl, float* pPdf = NULL, CLight* pLight = NULL)
 {
 	// Whether a hit with a light was found or not 
 	bool Hit = false;
@@ -67,9 +77,11 @@ DEV bool NearestLight(CScene* pScene, CRay& R, CColorXyz& LightColor, Vec3f& Pl)
 
 	for (int i = 0; i < pScene->m_Lighting.m_NoLights; i++)
 	{
-		if (pScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor))
+		if (pScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor, NULL, pPdf))
 		{
-			Pl	= R(T);
+			Pl		= R(T);
+			pLight	= &pScene->m_Lighting.m_Lights[i];
+
 			Hit = true;
 		}
 	}

@@ -58,33 +58,29 @@ private:
 	void HandleCudaError(const cudaError_t CudaError);
 
 private:
-	QString					m_FileName;
-	unsigned char*			m_pRenderImage;
+	QString			m_FileName;
+	unsigned char*	m_pRenderImage;
 
-	vtkImageData*			m_pDensityBuffer;
-	short*					m_pGradientMagnitudeBuffer;
+	short*			m_pDensityBuffer;
+	short*			m_pGradientMagnitudeBuffer;
 
 	// CUDA allocations
-	CScene*					m_pScene;
-	CColorXyz*				m_pDevAccEstXyz;
-	CColorXyz*				m_pDevEstFrameXyz;
-	CColorXyz*				m_pDevEstFrameBlurXyz;
-	unsigned char*			m_pDevEstRgbLdr;
-	unsigned char*			m_pDevRgbLdrDisp;
+	CScene*			m_pScene;
+	CColorXyz*		m_pDevAccEstXyz;
+	CColorXyz*		m_pDevEstFrameXyz;
+	CColorXyz*		m_pDevEstFrameBlurXyz;
+	unsigned char*	m_pDevEstRgbLdr;
+	unsigned char*	m_pDevRgbLdrDisp;
 
 	// Host image buffers
-	unsigned char*			m_pImageCanvas;
-	unsigned int*			m_pSeeds;
+	unsigned char*	m_pImageCanvas;
+	unsigned int*	m_pSeeds;
 
 public:
-	QMutex					m_Mutex;
-	bool					m_Abort;
-	CScene					m_Scene;
-	bool					m_Pause;
-
-private:
-	void CreateVolume(void);
-	void CreateExtinctionVolume(float* pDensityBuffer, cudaExtent Resolution);
+	QMutex			m_Mutex;
+	bool			m_Abort;
+	CScene			m_Scene;
+	bool			m_Pause;
 
 public slots:
 	void OnUpdateTransferFunction(void);
