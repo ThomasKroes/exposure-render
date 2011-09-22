@@ -61,8 +61,8 @@ private:
 	QString			m_FileName;
 	unsigned char*	m_pRenderImage;
 
-	short*			m_pDensityBuffer;
-	short*			m_pGradientMagnitudeBuffer;
+	vtkImageData*	m_pVtkDensityBuffer;
+	vtkImageData*	m_pVtkGradientMagnitudeBuffer;
 
 	// CUDA allocations
 	CScene*			m_pScene;

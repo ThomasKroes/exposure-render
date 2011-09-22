@@ -38,9 +38,9 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 	// Sample the light with MIS
 	if (!Li.IsBlack() && BsdfPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, Rnd, P, pScene, 0))
 	{
-		const float Weight = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
-		Ld += F * Li * (AbsDot(Wi, N) * Weight / LightPdf);
+		Ld += F * Li * (AbsDot(Wi, N) * WeightMIS / LightPdf);
 	}
 
 	// Sample the BRDF with MIS
@@ -97,19 +97,34 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	// Sample the light with MIS
 	if (!Li.IsBlack() && LightPdf > 0.0f && !FreePathRM(Rl, Rnd, P, pScene, 0))
 	{
-		const float Weight = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
 
-		Ld += F * Li * Weight / LightPdf;
+		Ld += F * Li * WeightMIS / LightPdf;
 	}
 
 	// Sample the phase function with MIS
 	Wi = UniformSampleSphere(LS.m_BsdfSample.m_Dir);
 
-	if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, &LightPdf) && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene, 0))
+	if (!F.IsBlack() && BsdfPdf > 0.0f)
 	{
-		const float Weight = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+		float WeightMIS = 1.0f;
 
-		Ld += F * Li * Weight / BsdfPdf;
+		LightPdf = Light.Pdf(Pe, Wi);
+
+		if (LightPdf == 0.0f)
+			return Ld;
+
+		WeightMIS = PowerHeuristic(1.0f, BsdfPdf, 1.0f, LightPdf);
+
+		CLight* pLight = NULL;
+
+		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, &LightPdf) && pLight == &Light)
+		{
+			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene, 0)) 
+			{
+				Ld += F * Li * WeightMIS / BsdfPdf;
+			}
+		}
 	}
 
 	return Ld;
