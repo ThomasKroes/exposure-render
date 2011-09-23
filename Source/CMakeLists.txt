@@ -120,7 +120,7 @@ SET(ExposureRenderSources
 	StartupDialog.cpp
 	Utilities.cpp
 	AboutDialog.cpp
-	Cuda.cpp
+	CudaUtilities.cpp
 	Status.cpp
 
 	# Logging
@@ -212,7 +212,7 @@ SET(ExposureRenderHeaders
 	StartupDialog.h
 	Utilities.h
 	AboutDialog.h
-	Cuda.h
+	CudaUtilities.h
 	Status.h
 
 	# Logging
@@ -274,6 +274,7 @@ SET(ExposureRenderMocHeaders
 	VtkWidget.h
 	Controls.h
 	AboutDialog.h
+	Status.h
 
 	# Logging
 	Logger.h
@@ -478,7 +479,7 @@ SET(CoreSources
 	StartupDialog.h
 	Utilities.h
 	AboutDialog.h
-	Cuda.h
+	CudaUtilities.h
 	Status.h
 	Stable.cpp
 	Filter.cpp
@@ -503,7 +504,7 @@ SET(CoreSources
 	StartupDialog.cpp
 	Utilities.cpp
 	AboutDialog.cpp
-	Cuda.cpp
+	CudaUtilities.cpp
 	Status.cpp
 )
 

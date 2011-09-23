@@ -28,6 +28,9 @@ int main(int ArgumentCount, char* pArgv[])
 	// Show it
 	MainWindow.show();
 
+	// Load default presets
+	gStatus.SetLoadPreset("Default");
+
 	// Override the application setting to enforce the display of the startup dialog
 	Settings.setValue("startup/dialog/show", QVariant(true));
 

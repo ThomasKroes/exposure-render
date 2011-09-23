@@ -40,11 +40,11 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	PopulateTree();
 	
 	// Notify us when rendering begins and ends, and before/after each rendered frame
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
-	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
-	connect(&gRenderStatus, SIGNAL(StatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)), this, SLOT(OnStatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)));
+	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
+	connect(&gStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
+	connect(&gStatus, SIGNAL(StatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)), this, SLOT(OnStatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)));
 }
 
 QSize QStatisticsWidget::sizeHint() const

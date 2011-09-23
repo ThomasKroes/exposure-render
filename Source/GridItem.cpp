@@ -37,7 +37,7 @@ QGridItem& QGridItem::operator=(const QGridItem& Other)
 
 void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
-	pPainter->setRenderHint(QPainter::RenderHint::Antialiasing, false);
+	pPainter->setRenderHint(QPainter::Antialiasing, false);
 
 	if (isEnabled())
 	{

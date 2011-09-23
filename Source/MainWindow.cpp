@@ -44,8 +44,8 @@ CMainWindow::CMainWindow() :
 
 	setWindowFilePath(QString());
 
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 }
 
 CMainWindow::~CMainWindow(void)
@@ -310,6 +310,8 @@ void CMainWindow::OnRenderEnd(void)
 void CMainWindow::ShowStartupDialog(void)
 {
 	QStartupDialog StartupDialog;
+
+	StartupDialog.setModal(true);
 
 	connect(&StartupDialog, SIGNAL(LoadDemo(const QString&)), gpMainWindow, SLOT(OnLoadDemo(const QString&)));
 

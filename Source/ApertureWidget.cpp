@@ -32,11 +32,11 @@ QApertureWidget::QApertureWidget(QWidget* pParent) :
 	connect(&m_SizeSlider, SIGNAL(valueChanged(double)), &m_SizeSpinner, SLOT(setValue(double)));
 	connect(&m_SizeSpinner, SIGNAL(valueChanged(double)), &m_SizeSlider, SLOT(setValue(double)));
 	connect(&m_SizeSlider, SIGNAL(valueChanged(double)), this, SLOT(SetAperture(double)));
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetAperture(), SIGNAL(Changed(const QAperture&)), this, SLOT(OnApertureChanged(const QAperture&)));
 
-	emit gRenderStatus.StatisticChanged("Camera", "Aperture", "", "", "");
+	gStatus.SetStatisticChanged("Camera", "Aperture", "", "", "");
 }
 
 void QApertureWidget::SetAperture(const double& Aperture)
@@ -59,5 +59,5 @@ void QApertureWidget::OnApertureChanged(const QAperture& Aperture)
  	m_SizeSlider.setValue(Aperture.GetSize(), true);
 	m_SizeSpinner.setValue(Aperture.GetSize(), true);
 
-	emit gRenderStatus.StatisticChanged("Aperture", "Size", QString::number(Aperture.GetSize(), 'f', 3), "mm");
+	gStatus.SetStatisticChanged("Aperture", "Size", QString::number(Aperture.GetSize(), 'f', 3), "mm");
 }

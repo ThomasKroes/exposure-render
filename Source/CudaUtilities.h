@@ -1,6 +1,6 @@
 #pragma once
 
-#include "driver_types.h"
+#include <cutil_inline.h>
 
 class CCudaTimer
 {
@@ -17,4 +17,5 @@ private:
 	cudaEvent_t 	m_EventStop;
 };
 
+bool InitializeCuda(void);
 void HandleCudaError(const cudaError_t CudaError);

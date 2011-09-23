@@ -77,11 +77,11 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	QObject::connect(&m_ExposureSlider, SIGNAL(valueChanged(double)), this, SLOT(SetExposure(double)));
 	QObject::connect(&m_ExposureSpinner, SIGNAL(valueChanged(double)), &m_ExposureSlider, SLOT(setValue(double)));
 
-	QObject::connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	QObject::connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
 
-	emit gRenderStatus.StatisticChanged("Camera", "Film", "", "", "");
+	gStatus.SetStatisticChanged("Camera", "Film", "", "", "");
 }
 
 void QFilmWidget::LockFilmHeight(const int& Lock)
@@ -150,6 +150,6 @@ void QFilmWidget::OnFilmChanged(const QFilm& Film)
 	m_ExposureSlider.setValue(Film.GetExposure(), true);
 	m_ExposureSpinner.setValue(Film.GetExposure(), true);
 
-	emit gRenderStatus.StatisticChanged("Film", "Width", QString::number(Film.GetWidth()), "Pixels");
-	emit gRenderStatus.StatisticChanged("Film", "Height", QString::number(Film.GetHeight()), "Pixels");
+	gStatus.SetStatisticChanged("Film", "Width", QString::number(Film.GetWidth()), "Pixels");
+	gStatus.SetStatisticChanged("Film", "Height", QString::number(Film.GetHeight()), "Pixels");
 }

@@ -30,7 +30,7 @@ QBackgroundItem& QBackgroundItem::operator=(const QBackgroundItem& Other)
 
 void QBackgroundItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
-	pPainter->setRenderHint(QPainter::RenderHint::Antialiasing, false);
+	pPainter->setRenderHint(QPainter::Antialiasing, false);
 
 	if (isEnabled())
 	{

@@ -44,11 +44,11 @@ QFocusWidget::QFocusWidget(QWidget* pParent) :
 	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), &m_FocalDistanceSpinner, SLOT(setValue(double)));
 	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFocalDistance(double)));
 	connect(&m_FocalDistanceSpinner, SIGNAL(valueChanged(double)), &m_FocalDistanceSlider, SLOT(setValue(double)));
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetFocus(), SIGNAL(Changed(const QFocus&)), this, SLOT(OnFocusChanged(const QFocus&)));
 
-	emit gRenderStatus.StatisticChanged("Camera", "Focus", "", "", "");
+	gStatus.SetStatisticChanged("Camera", "Focus", "", "", "");
 }
 
 void QFocusWidget::SetFocalDistance(const double& FocalDistance)
@@ -71,5 +71,5 @@ void QFocusWidget::OnFocusChanged(const QFocus& Focus)
 	m_FocalDistanceSlider.setValue(Focus.GetFocalDistance(), true);
 	m_FocalDistanceSpinner.setValue(Focus.GetFocalDistance(), true);
 
-	emit gRenderStatus.StatisticChanged("Focus", "Focal Distance", QString::number(Focus.GetFocalDistance(), 'f', 2), "mm");
+	gStatus.SetStatisticChanged("Focus", "Focal Distance", QString::number(Focus.GetFocalDistance(), 'f', 2), "mm");
 }

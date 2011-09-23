@@ -65,11 +65,11 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	m_ImageActor = vtkImageActor::New();
 
 	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, when the rendering canvas is resized and when the timer has timed out
-	connect(&gRenderStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gRenderStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	connect(&gRenderStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
+	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	connect(&gStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
 //	connect(&gRenderStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
-	connect(&gRenderStatus, SIGNAL(Resize()), this, SLOT(OnResize()));
+	connect(&gStatus, SIGNAL(Resize()), this, SLOT(OnResize()));
 	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 
 	// Setup the render view
