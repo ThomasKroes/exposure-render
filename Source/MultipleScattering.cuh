@@ -29,9 +29,11 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorX
 
 	Vec3f Pe, Pl, Normal;
 	
+	CLight* pLight = NULL;
+
 	if (SampleDistanceRM(Re, RNG, Pe, pScene, 0))
 	{
-		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl))
+		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
 			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
 			return;
@@ -49,7 +51,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorX
 	}
 	else
 	{
-		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl))
+		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
 			Lv = Li;
 	}
 

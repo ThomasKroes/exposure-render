@@ -9,7 +9,7 @@
 
 DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd)
 {
-	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK;
+	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
 	const float D = Density(pScene, Pe);
 
@@ -24,11 +24,11 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 	// Incident light direction
 	Vec3f Wi, P, Pl;
 
-	CColorXyz F = SPEC_BLACK;
-	
 	// Sample the light source
  	Li = Light.SampleL(Pe, Rl, LightPdf, LS);
 	
+	CLight* pLight = NULL;
+
 	Wi = -Rl.m_D; 
 
 	F = Bsdf.F(Wo, Wi); 
@@ -54,12 +54,10 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 
 		if (LightPdf == 0.0f)
 			return Ld;
-
+		
 		WeightMIS = PowerHeuristic(1.0f, BsdfPdf, 1.0f, LightPdf);
 
-		CLight* pLight = NULL;
-
-		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, &LightPdf) && pLight == &Light)
+		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, pLight, &LightPdf) && pLight == &Light)
 		{
 			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene, 0)) 
 			{
@@ -73,10 +71,10 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 
 DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd)
 {
-	// Accumulated radiance
-	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK;
-
 	const float D = Density(pScene, Pe);
+
+	// Accumulated radiance
+	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = GetDiffuse(pScene, D).ToXYZ();
 
 	// Light/shadow ray
 	CRay Rl; 
@@ -87,8 +85,8 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	// Incident light direction
 	Vec3f Wi, P, Pl;
 
-	CColorXyz F = GetDiffuse(pScene, D).ToXYZ();
-	
+	CLight* pLight = NULL;
+
 	// Sample the light source
  	Li = Light.SampleL(Pe, Rl, LightPdf, LS);
 	
@@ -116,9 +114,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 
 		WeightMIS = PowerHeuristic(1.0f, BsdfPdf, 1.0f, LightPdf);
 
-		CLight* pLight = NULL;
-
-		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, &LightPdf) && pLight == &Light)
+		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, pLight, &LightPdf) && pLight == &Light)
 		{
 			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene, 0)) 
 			{

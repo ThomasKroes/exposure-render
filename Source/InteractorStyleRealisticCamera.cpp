@@ -10,9 +10,9 @@ CFlags gMouseButtonFlags;
 
 vtkStandardNewMacro(vtkRealisticCameraStyle);
 
-float vtkRealisticCameraStyle::m_OrbitSpeed				= 1000.0f;
-float vtkRealisticCameraStyle::m_PanSpeed				= 1000.0f;
-float vtkRealisticCameraStyle::m_ZoomSpeed				= 1000.0f;
+float vtkRealisticCameraStyle::m_OrbitSpeed				= 600.0f;
+float vtkRealisticCameraStyle::m_PanSpeed				= 300.0f;
+float vtkRealisticCameraStyle::m_ZoomSpeed				= 500.0f;
 float vtkRealisticCameraStyle::m_ContinuousZoomSpeed	= 0.000001f;
 float vtkRealisticCameraStyle::m_ApertureSpeed			= 0.001f;
 float vtkRealisticCameraStyle::m_FovSpeed				= 0.5f;

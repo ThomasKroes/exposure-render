@@ -218,7 +218,7 @@ public:
 		{
 			Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
 			Rl.m_D	= Normalize(P - Rl.m_O);
-			L		= Le(Vec2f(0.0f));
+			L		= Dot(Rl.m_D, m_N) > 0.0f ? Le(Vec2f(0.0f)) : SPEC_BLACK;
 			Pdf		= DistanceSquared(P, Rl.m_O) / (AbsDot(Rl.m_D, m_N) * m_Area);
 		}
 
@@ -226,7 +226,7 @@ public:
 		{
 			Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
 			Rl.m_D	= Normalize(P - Rl.m_O);
-			L		= Le(Vec2f(-1.0f) + 2.0f * LS.m_LightSample.m_Pos);
+			L		= Le(Vec2f(1.0f) - 2.0f * LS.m_LightSample.m_Pos);
 			Pdf		= DistanceSquared(P, Rl.m_O) / m_Area;
 		}
 
@@ -328,7 +328,8 @@ public:
 
 		if (m_T == 1)
 		{
-			return 1.0f;
+			// Convert light sample weight to solid angle measure
+			return powf(m_SkyRadius, 2.0f) / m_Area;
 		}
 
 		return 0.0f;

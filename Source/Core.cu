@@ -1,9 +1,9 @@
 
 #include "Core.cuh"
 
-texture<short, 3, cudaReadModeNormalizedFloat>			gTexDensity;
+texture<float, 3, cudaReadModeElementType>				gTexDensity;
 texture<short, 3, cudaReadModeNormalizedFloat>			gTexExtinction;
-texture<short, 3, cudaReadModeNormalizedFloat>			gTexGradientMagnitude;
+texture<float, 3, cudaReadModeElementType>				gTexGradientMagnitude;
 texture<unsigned char, 3, cudaReadModeNormalizedFloat>	gTexEstimateRgbLdr;
 
 #include "Blur.cuh"
@@ -15,17 +15,17 @@ texture<unsigned char, 3, cudaReadModeNormalizedFloat>	gTexEstimateRgbLdr;
 
 #include "CudaUtilities.h"
 
-void BindDensityVolume(short* densityBuffer, cudaExtent Extent)
+void BindDensityVolume(float* densityBuffer, cudaExtent Extent)
 {
 	cudaArray* pArray = NULL;
 
 	// create 3D array
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
 	cudaMalloc3DArray(&pArray, &ChannelDesc, Extent);
 
 	// copy data to 3D array
 	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(densityBuffer, Extent.width * sizeof(short), Extent.width, Extent.height);
+	copyParams.srcPtr				= make_cudaPitchedPtr(densityBuffer, Extent.width * sizeof(float), Extent.width, Extent.height);
 	copyParams.dstArray				= pArray;
 	copyParams.extent				= Extent;
 	copyParams.kind					= cudaMemcpyHostToDevice;
@@ -63,16 +63,16 @@ void BindExtinctionVolume(float* extinction, cudaExtent Extent)
 	cudaBindTextureToArray(gTexExtinction, volArray, volChannelDesc);
 }
 
-void BindGradientMagnitudeVolume(short* pBuffer, cudaExtent Extent)
+void BindGradientMagnitudeVolume(float* pBuffer, cudaExtent Extent)
 {
 	cudaArray* pVolumeArray;
 
-	cudaChannelFormatDesc VolumeChannelDesc = cudaCreateChannelDesc<short>();
+	cudaChannelFormatDesc VolumeChannelDesc = cudaCreateChannelDesc<float>();
 	cudaMalloc3DArray(&pVolumeArray, &VolumeChannelDesc, Extent);
 	
 	cudaMemcpy3DParms CopyParams = {0};
 
-	CopyParams.srcPtr	= make_cudaPitchedPtr((void*)pBuffer, Extent.width * sizeof(short), Extent.width, Extent.height);
+	CopyParams.srcPtr	= make_cudaPitchedPtr((void*)pBuffer, Extent.width * sizeof(float), Extent.width, Extent.height);
 	CopyParams.dstArray = pVolumeArray;
 	CopyParams.extent	= Extent;
 	CopyParams.kind		= cudaMemcpyHostToDevice;

@@ -23,6 +23,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkImageAccumulate.h>
 #include <vtkIntArray.h>
+#include <vtkImageShiftScale.h>
 
 // Render thread
 QRenderThread* gpRenderThread = NULL;
@@ -103,13 +104,15 @@ void QRenderThread::run()
 	gStatus.SetStatisticChanged("CUDA Memory", "Density Buffer", QString::number(m_Scene.m_Resolution.GetNoElements() * sizeof(short) / powf(1024.0f, 2.0f), 'f', 2), "MB", ":/Images/memory.png");
 
 	// Make a copy of the density buffer
-	short* pDensityBuffer = NULL;
+	float* pDensityBuffer = NULL;
 
-	cudaMallocHost(&pDensityBuffer, m_Scene.m_Resolution.GetNoElements() * sizeof(short));
-	cudaMemcpy(pDensityBuffer, m_pVtkDensityBuffer->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(short), cudaMemcpyHostToHost);
+	const int DensityBufferSize = m_Scene.m_Resolution.GetNoElements() * sizeof(float);
+
+	cudaMallocHost(&pDensityBuffer, DensityBufferSize);
+	cudaMemcpy(pDensityBuffer, m_pVtkDensityBuffer->GetScalarPointer(), DensityBufferSize, cudaMemcpyHostToHost);
 
 	// Bind density buffer to texture
-	BindDensityVolume((short*)pDensityBuffer, make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]));
+	BindDensityVolume((float*)pDensityBuffer, make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]));
 
 	cudaFreeHost(pDensityBuffer);
 
@@ -117,12 +120,15 @@ void QRenderThread::run()
 	gStatus.SetStatisticChanged("CUDA Memory", "Gradient Magnitude Buffer", QString::number(m_Scene.m_Resolution.GetNoElements() * sizeof(short) / powf(1024.0f, 2.0f), 'f', 2), "MB", ":/Images/memory.png");
 
 	// Make a copy of the gradient magnitude buffer
-	short* pGradientMagnitudeBuffer = NULL;
-	cudaMallocHost(&pGradientMagnitudeBuffer, m_Scene.m_Resolution.GetNoElements() * sizeof(short));
-	cudaMemcpy(pGradientMagnitudeBuffer, m_pVtkGradientMagnitudeBuffer->GetScalarPointer(), m_Scene.m_Resolution.GetNoElements() * sizeof(short), cudaMemcpyHostToHost);
+	float* pGradientMagnitudeBuffer = NULL;
+
+	const int GradientMagnitudeBufferSize = m_Scene.m_Resolution.GetNoElements() * sizeof(float);
+
+	cudaMallocHost(&pGradientMagnitudeBuffer, GradientMagnitudeBufferSize);
+	cudaMemcpy(pGradientMagnitudeBuffer, m_pVtkGradientMagnitudeBuffer->GetScalarPointer(), GradientMagnitudeBufferSize, cudaMemcpyHostToHost);
 	
 	// Bind gradient magnitude buffer to texture
-	BindGradientMagnitudeVolume((short*)pGradientMagnitudeBuffer, make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]));
+	BindGradientMagnitudeVolume((float*)pGradientMagnitudeBuffer, make_cudaExtent(m_Scene.m_Resolution[0], m_Scene.m_Resolution[1], m_Scene.m_Resolution[2]));
 
 	cudaFreeHost(pGradientMagnitudeBuffer);
 	
@@ -353,9 +359,9 @@ bool QRenderThread::Load(QString& FileName)
 
 	vtkSmartPointer<vtkImageCast> ImageCast = vtkImageCast::New();
 
-	Log("Casting volume data type to short", "grid");
+	Log("Casting volume data type to float", "grid");
 
-	ImageCast->SetOutputScalarTypeToShort();
+	ImageCast->SetOutputScalarTypeToFloat();
 	ImageCast->SetInput(MetaImageReader->GetOutput());
 	
 	ImageCast->Update();
@@ -406,6 +412,23 @@ bool QRenderThread::Load(QString& FileName)
 
 	// Scalar range of the gradient magnitude
 	double* pGradientMagnitudeRange = m_pVtkGradientMagnitudeBuffer->GetScalarRange();
+
+	m_Scene.m_GradientMagnitudeRange.SetMin((float)pGradientMagnitudeRange[0]);
+	m_Scene.m_GradientMagnitudeRange.SetMax((float)pGradientMagnitudeRange[1]);
+
+	Log("Gradient magnitude range: [" + QString::number(m_Scene.m_GradientMagnitudeRange.GetMin(), 'f', 2) + " - " + QString::number(m_Scene.m_GradientMagnitudeRange.GetMax(), 'f', 2) + "]", "grid");
+
+	Log("Normalizing the gradient magnitude volume", "grid");
+
+	vtkSmartPointer<vtkImageShiftScale> ImageShiftScale = vtkImageShiftScale::New();
+
+	ImageShiftScale->SetInput(m_pVtkGradientMagnitudeBuffer);
+	ImageShiftScale->SetScale(1.0f / m_Scene.m_GradientMagnitudeRange.GetLength());
+	ImageShiftScale->Update();
+
+	m_pVtkGradientMagnitudeBuffer = ImageShiftScale->GetOutput();
+
+	pGradientMagnitudeRange = m_pVtkGradientMagnitudeBuffer->GetScalarRange();
 
 	m_Scene.m_GradientMagnitudeRange.SetMin((float)pGradientMagnitudeRange[0]);
 	m_Scene.m_GradientMagnitudeRange.SetMax((float)pGradientMagnitudeRange[1]);
