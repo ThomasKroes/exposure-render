@@ -12,19 +12,23 @@ texture<short, 3, cudaReadModeNormalizedFloat >	gTexGradientMagnitude;
 #include "SingleScattering.cuh"
 #include "MultipleScattering.cuh"
 
+#include "CudaUtilities.h"
+
 void BindDensityVolume(short* densityBuffer, cudaExtent densityBufferSize)
 {
-	cudaArray* gpDensity = NULL;
+	cudaArray* pArray = NULL;
+
+	cudaExtent volExtent = make_cudaExtent(densityBufferSize.width, densityBufferSize.height, densityBufferSize.depth);
 
 	// create 3D array
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
-	cudaMalloc3DArray(&gpDensity, &ChannelDesc, densityBufferSize);
+	cudaMalloc3DArray(&pArray, &ChannelDesc, densityBufferSize);
 
 	// copy data to 3D array
 	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(densityBuffer, densityBufferSize.width * sizeof(short), densityBufferSize.width, densityBufferSize.height);
-	copyParams.dstArray				= gpDensity;
-	copyParams.extent				= densityBufferSize;
+	copyParams.srcPtr				= make_cudaPitchedPtr(densityBuffer, volExtent.width * sizeof(short), volExtent.width, volExtent.height);
+	copyParams.dstArray				= pArray;
+	copyParams.extent				= volExtent;
 	copyParams.kind					= cudaMemcpyHostToDevice;
 	cudaMemcpy3D(&copyParams);
 
@@ -36,7 +40,7 @@ void BindDensityVolume(short* densityBuffer, cudaExtent densityBufferSize)
  	gTexDensity.addressMode[2]		= cudaAddressModeClamp;
 
 	// Bind array to 3D texture
-	cudaBindTextureToArray(gTexDensity, gpDensity, ChannelDesc);
+	cudaBindTextureToArray(gTexDensity, pArray, ChannelDesc);
 }
 
 void BindExtinctionVolume(float* extinction, cudaExtent extinctionSize)
@@ -64,14 +68,16 @@ void BindGradientMagnitudeVolume(short* pBuffer, cudaExtent VolumeSize)
 {
 	cudaArray* pVolumeArray;
 
+	cudaExtent volExtent = make_cudaExtent(VolumeSize.width, VolumeSize.height, VolumeSize.depth);
+
 	cudaChannelFormatDesc VolumeChannelDesc = cudaCreateChannelDesc<short>();
 	cudaMalloc3DArray(&pVolumeArray, &VolumeChannelDesc, VolumeSize);
 	
 	cudaMemcpy3DParms CopyParams = {0};
 
-	CopyParams.srcPtr	= make_cudaPitchedPtr((void*)pBuffer, VolumeSize.width * sizeof(short), VolumeSize.width, VolumeSize.height);
+	CopyParams.srcPtr	= make_cudaPitchedPtr((void*)pBuffer, volExtent.width * sizeof(short), volExtent.width, volExtent.height);
 	CopyParams.dstArray = pVolumeArray;
-	CopyParams.extent	= VolumeSize;
+	CopyParams.extent	= volExtent;
 	CopyParams.kind		= cudaMemcpyHostToDevice;
 
 	CUDA_SAFE_CALL(cudaMemcpy3D(&CopyParams));
@@ -84,7 +90,7 @@ void BindGradientMagnitudeVolume(short* pBuffer, cudaExtent VolumeSize)
 	cudaBindTextureToArray(gTexGradientMagnitude, pVolumeArray, VolumeChannelDesc);
 }
 
-void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, unsigned char* pDevEstRgbLdr, unsigned char* pDevEstRgbLdrDisp, int N)
+void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, unsigned char* pDevEstRgbLdr, unsigned char* pDevEstRgbLdrDisp, int N, CTiming& Casting, CTiming& Blur, CTiming& ToneMap)
 {
 	switch (Type)
 	{
@@ -101,7 +107,10 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 		}
 	}
 
+// 	CCudaTimer TmrBlur;
 	BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 1.3f);
+// 	Blur.AddDuration(TmrBlur.StopTimer());
+
   	ComputeEstimate(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY(), pDevEstFrameXyz, pDevAccEstXyz, N, pScene->m_Camera.m_Film.m_Exposure, pDevEstRgbLdr);
 	Denoise(pScene, pDevScene, (CColorRgbLdr*)pDevEstRgbLdr, (CColorRgbLdr*)pDevEstRgbLdrDisp);
 }

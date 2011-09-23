@@ -122,6 +122,7 @@ SET(ExposureRenderSources
 	AboutDialog.cpp
 	CudaUtilities.cpp
 	Status.cpp
+	Timing.cpp
 
 	# Logging
 	Logger.cpp
@@ -214,6 +215,7 @@ SET(ExposureRenderHeaders
 	AboutDialog.h
 	CudaUtilities.h
 	Status.h
+	Timing.h
 
 	# Logging
 	Logger.h
@@ -481,6 +483,7 @@ SET(CoreSources
 	AboutDialog.h
 	CudaUtilities.h
 	Status.h
+	Timing.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
@@ -506,6 +509,7 @@ SET(CoreSources
 	AboutDialog.cpp
 	CudaUtilities.cpp
 	Status.cpp
+	Timing.cpp
 )
 
 # Make the core group
@@ -543,8 +547,6 @@ SET(LoggingSources
 SOURCE_GROUP("Logging" FILES ${LoggingSources})
 
 ADD_DEFINITIONS(-DQT_GUI_LIBS -DQT_CORE_LIB -DQT_XML_LIB -DQT3_SUPPORT)
-
-list(APPEND CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20")
 
 IF(WIN32)
 	SET(GUI_TYPE WIN32)
