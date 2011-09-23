@@ -121,7 +121,7 @@ SET(ExposureRenderSources
 	Utilities.cpp
 	AboutDialog.cpp
 	Cuda.cpp
-	RenderStatus.cpp
+	Status.cpp
 
 	# Logging
 	Logger.cpp
@@ -213,7 +213,7 @@ SET(ExposureRenderHeaders
 	Utilities.h
 	AboutDialog.h
 	Cuda.h
-	RenderStatus.h
+	Status.h
 
 	# Logging
 	Logger.h
@@ -479,7 +479,7 @@ SET(CoreSources
 	Utilities.h
 	AboutDialog.h
 	Cuda.h
-	RenderStatus.h
+	Status.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
@@ -504,7 +504,7 @@ SET(CoreSources
 	Utilities.cpp
 	AboutDialog.cpp
 	Cuda.cpp
-	RenderStatus.cpp
+	Status.cpp
 )
 
 # Make the core group

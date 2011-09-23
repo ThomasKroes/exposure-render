@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cutil_inline.h>
+#include "driver_types.h"
 
 class CCudaTimer
 {

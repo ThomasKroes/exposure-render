@@ -4,7 +4,6 @@
 
 #include "TransferFunctionWidget.h"
 #include "TransferFunction.h"
-#include "RenderStatus.h"
 
 QTransferFunctionWidget::QTransferFunctionWidget(QWidget* pParent) :
 	QGroupBox(pParent),

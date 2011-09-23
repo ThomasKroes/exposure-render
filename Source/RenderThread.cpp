@@ -3,8 +3,7 @@
 #include "Stable.h"
 
 #include "RenderThread.h"
-#include "RenderStatus.h"
-#include "Cuda.h"
+//#include "Cuda.h"
 #include "Scene.h"
 #include "MainWindow.h"
 #include "LoadSettingsDialog.h"
@@ -12,10 +11,6 @@
 
 // CUDA kernels
 #include "Core.cuh"
-
-#include <cuda_runtime.h>
-#include <cutil.h>
-#include <cutil_inline.h>
 
 // VTK
 #include <vtkSmartPointer.h>

@@ -4,7 +4,6 @@
 
 #include "AppearanceSettingsWidget.h"
 #include "TransferFunction.h"
-#include "RenderStatus.h"
 
 QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),

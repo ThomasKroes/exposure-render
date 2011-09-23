@@ -3,7 +3,6 @@
 #include "Stable.h"
 
 #include "LightingWidget.h"
-#include "RenderStatus.h"
 
 QLightingWidget::QLightingWidget(QWidget* pParent) :
 	QWidget(pParent),
