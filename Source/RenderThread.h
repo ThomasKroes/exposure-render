@@ -23,7 +23,7 @@ public:
 
 	QString			GetFileName(void) const						{	return m_FileName;		}
 	void			SetFileName(const QString& FileName)		{	m_FileName = FileName;	}
-	unsigned char*	GetRenderImage(void) const					{	return m_pRenderImage;	}
+	unsigned char*	GetRenderImage(void) const;
 	CScene*			GetScene(void)								{	return &m_Scene;		}
 	void			Close(void)									{	m_Abort = true;			}
 	void			PauseRendering(const bool& Pause)			{	m_Pause = Pause;		}

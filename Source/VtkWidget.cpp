@@ -105,7 +105,7 @@ void CVtkWidget::OnRenderBegin(void)
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
 	// Start the timer
-	m_RenderLoopTimer.start(10);
+	m_RenderLoopTimer.start(1000.0f / 35.0f);
 }
 
 void CVtkWidget::OnRenderEnd(void)

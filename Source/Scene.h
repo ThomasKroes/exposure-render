@@ -6,8 +6,6 @@
 #include "VolumePoint.h"
 #include "Flags.h"
 
-#define MAX_NO_DURATIONS 100
-
 class EXPOSURE_RENDER_DLL CCameraSample
 {
 public:

@@ -145,7 +145,7 @@ void QRenderThread::run()
 	gStatus.SetLoadPreset(QFileInfo(m_FileName).baseName());
 
 	// Keep track of frames/second
-	CTiming FPS, Casting, Blur, ToneMap;
+	CTiming FPS, RenderImage, BlurImage, PostProcessImage, DenoiseImage;
 
 	// Performance
 	while (!m_Abort)
@@ -157,7 +157,7 @@ void QRenderThread::run()
 		gStatus.SetPreRenderFrame();
 
 		// CUDA time for profiling
-// 		CCudaTimer CudaTimer;
+ 		CCudaTimer TmrFps;
 
 		// Make a local copy of the scene, this to prevent modification to the scene from outside this thread
 		CScene SceneCopy = m_Scene;
@@ -242,6 +242,8 @@ void QRenderThread::run()
 			// Notify Inform others about the memory allocations
 			gStatus.SetResize();
 
+			BindEstimateRgbLdr(m_pDevEstRgbLdr, m_Scene.m_Camera.m_Film.m_Resolution.GetResX(), m_Scene.m_Camera.m_Film.m_Resolution.GetResY());
+
 			gStatus.SetStatisticChanged("Camera", "Resolution", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()) + " x " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
 		}
 
@@ -250,10 +252,10 @@ void QRenderThread::run()
 		{
 			// Reset buffers to black
 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
-			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
+//			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
+// 			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
+//			HandleCudaError(cudaMemset(m_pDevEstRgbLdr, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
+//			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)));
 
 			// Reset no. iterations
 			m_Scene.SetNoIterations(0);
@@ -262,30 +264,30 @@ void QRenderThread::run()
 		// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 		m_Scene.m_DirtyFlags.ClearAllFlags();
 
-		CCudaTimer Timer;
-
 		// Increase the number of iterations performed so far
 		m_Scene.SetNoIterations(m_Scene.GetNoIterations() + 1);
 
 		// Adjust de-noising parameters
-		const float Radius = 0.0f;//6.0f * (1.0f / (1.0f + 0.1 * (float)m_Scene.GetNoIterations()));
+		const float Radius = 0.0f * (1.0f / (1.0f + 0.1 * (float)m_Scene.GetNoIterations()));
 
 		m_Scene.m_DenoiseParams.SetWindowRadius(Radius);
 
 		// Execute the rendering kernels
-  		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations(), Casting, Blur, ToneMap);
+  		Render(0, &SceneCopy, m_pScene, m_pSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 		HandleCudaError(cudaGetLastError());
 		
-// 		gStatus.SetStatisticChanged("Timings", "Integration + Tone Mapping", QString::number(Timer.StopTimer(), 'f', 2), "ms");
-// 		gStatus.SetStatisticChanged("Timings", "Blur", QString::number(Blur.m_FilteredDuration, 'f', 2), "ms.");
+		gStatus.SetStatisticChanged("Timings", "Render Image", QString::number(RenderImage.m_FilteredDuration, 'f', 2), "ms.");
+		gStatus.SetStatisticChanged("Timings", "Blur Estimate", QString::number(BlurImage.m_FilteredDuration, 'f', 2), "ms.");
+		gStatus.SetStatisticChanged("Timings", "Post Process Estimate", QString::number(PostProcessImage.m_FilteredDuration, 'f', 2), "ms.");
+		gStatus.SetStatisticChanged("Timings", "De-noise Image", QString::number(DenoiseImage.m_FilteredDuration, 'f', 2), "ms.");
 
-// 		FPS.AddDuration(1000.0f / CudaTimer.StopTimer());
+		FPS.AddDuration(1000.0f / TmrFps.ElapsedTime());
 
-// 		gStatus.SetStatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
-// 		gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(m_Scene.GetNoIterations()), "Iterations");
+ 		gStatus.SetStatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
+ 		gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(m_Scene.GetNoIterations()), "Iterations");
 
 		// Blit
-		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
+// 		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevEstRgbLdr/*m_pDevRgbLdrDisp*/, 3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
 
 		// Let others know we are finished with a frame
  		gStatus.SetPostRenderFrame();
@@ -543,6 +545,14 @@ void QRenderThread::OnUpdateLighting(void)
 	}
 
 	Scene()->m_DirtyFlags.SetFlag(LightsDirty);
+}
+
+unsigned char* QRenderThread::GetRenderImage(void) const
+{
+	// Blit
+	HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevEstRgbLdr/*m_pDevRgbLdrDisp*/, 3 * m_Scene.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
+
+	return m_pRenderImage;
 }
 
 CScene* Scene(void)

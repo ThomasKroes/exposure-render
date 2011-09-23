@@ -6,12 +6,13 @@
 
 CCudaTimer::CCudaTimer(void)
 {
+	StartTimer();
 }
 
 CCudaTimer::~CCudaTimer(void)
 {
-	if (m_Started)
-		StopTimer();
+	cudaEventDestroy(m_EventStart);
+	cudaEventDestroy(m_EventStop);
 }
 
 void CCudaTimer::StartTimer(void)
@@ -36,6 +37,23 @@ float CCudaTimer::StopTimer(void)
 	cudaEventElapsedTime(&TimeDelta, m_EventStart, m_EventStop);
 	cudaEventDestroy(m_EventStart);
 	cudaEventDestroy(m_EventStop);
+
+	m_Started = false;
+
+	return TimeDelta;
+}
+
+float CCudaTimer::ElapsedTime(void)
+{
+	if (!m_Started)
+		return 0.0f;
+
+	cudaEventRecord(m_EventStop, 0);
+	cudaEventSynchronize(m_EventStop);
+
+	float TimeDelta = 0.0f;
+
+	cudaEventElapsedTime(&TimeDelta, m_EventStart, m_EventStop);
 
 	m_Started = false;
 

@@ -10,6 +10,7 @@ public:
 
 	void	StartTimer(void);
 	float	StopTimer(void);
+	float	ElapsedTime(void);
 
 private:
 	bool			m_Started;

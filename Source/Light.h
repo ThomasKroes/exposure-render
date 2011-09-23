@@ -245,7 +245,7 @@ public:
 			const float DotN = Dot(R.m_D, m_N);
 
 			// Rays is co-planar with light surface
-			if (DotN == 0.0f)
+			if (DotN >= 0.0f)
 				return false;
 
 			// Compute hit distance
@@ -279,7 +279,7 @@ public:
  				L = SPEC_BLACK;
 
 			if (pPdf)
-				*pPdf = DistanceSquared(R.m_O, Pl) / m_Area;
+				*pPdf = DistanceSquared(R.m_O, Pl) / (DotN * m_Area);
 
 			return true;
 		}
