@@ -3,7 +3,7 @@
 #include "Stable.h"
 
 #include "AppearanceDockWidget.h"
-#include "RenderThread.h"
+#include "RenderStatus.h"
 
 QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 	QWidget(pParent),

@@ -3,6 +3,8 @@
 #include "Stable.h"
 
 #include "RenderThread.h"
+#include "RenderStatus.h"
+#include "Cuda.h"
 #include "Scene.h"
 #include "MainWindow.h"
 #include "LoadSettingsDialog.h"
@@ -10,6 +12,10 @@
 
 // CUDA kernels
 #include "Core.cuh"
+
+#include <cuda_runtime.h>
+#include <cutil.h>
+#include <cutil_inline.h>
 
 // VTK
 #include <vtkSmartPointer.h>
@@ -22,123 +28,8 @@
 #include <vtkImageAccumulate.h>
 #include <vtkIntArray.h>
 
-// Render status singleton
-CRenderStatus gRenderStatus;
-
 // Render thread
 QRenderThread* gpRenderThread = NULL;
-
-// This function wraps the CUDA Driver API into a template function
-template <class T>
-inline void getCudaAttribute(T *attribute, CUdevice_attribute device_attribute, int device)
-{
-	CUresult error = 	cuDeviceGetAttribute( attribute, device_attribute, device );
-
-	if( CUDA_SUCCESS != error) {
-		fprintf(stderr, "cuSafeCallNoSync() Driver API error = %04d from file <%s>, line %i.\n",
-			error, __FILE__, __LINE__);
-		exit(-1);
-	}
-}
-
-class CCudaTimer
-{
-public:
-	CCudaTimer(void)
-	{
-		StartTimer();
-	}
-
-	virtual ~CCudaTimer(void)
-	{
-		if (m_Started)
-			StopTimer();
-	}
-
-	void StartTimer(void)
-	{
-		cudaEventCreate(&m_EventStart);
-		cudaEventCreate(&m_EventStop);
-		cudaEventRecord(m_EventStart, 0);
-
-		m_Started = true;
-	}
-
-	float StopTimer(void)
-	{
-		if (!m_Started)
-			return 0.0f;
-
-		cudaEventRecord(m_EventStop, 0);
-		cudaEventSynchronize(m_EventStop);
-
-		float TimeDelta = 0.0f;
-
-		cudaEventElapsedTime(&TimeDelta, m_EventStart, m_EventStop);
-		cudaEventDestroy(m_EventStart);
-		cudaEventDestroy(m_EventStop);
-
-		m_Started = false;
-
-		return TimeDelta;
-	}
-
-private:
-	bool			m_Started;
-	cudaEvent_t 	m_EventStart;
-	cudaEvent_t 	m_EventStop;
-};
-
-void OnProgress(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* CallData)
-{
-	vtkMetaImageReader*			pMetaImageReader		= dynamic_cast<vtkMetaImageReader*>(pCaller);
-	vtkImageResample*			pImageResample			= dynamic_cast<vtkImageResample*>(pCaller);
-	vtkImageGradientMagnitude*	pImageGradientMagnitude	= dynamic_cast<vtkImageGradientMagnitude*>(pCaller);
-
-// 	if (gpProgressDialog)
-// 	{
-// 		gpProgressDialog->resize(400, 100);
-
-		if (pMetaImageReader)
-		{
-//			LogProgress("Loading Volume", (float)pMetaImageReader->GetProgress() * 100.0f);
-//			gpProgressDialog->setLabelText("Loading volume");
-//			gpProgressDialog->setValue((int)(pMetaImageReader->GetProgress() * 100.0));
-		}
-
-		if (pImageResample)
-		{
-//			gpProgressDialog->setLabelText("Resampling volume");
-//			gpProgressDialog->setValue((int)(pImageResample->GetProgress() * 100.0));
-		}
-
-		if (pImageGradientMagnitude)
-		{
-//			gpProgressDialog->setLabelText("Creating gradient magnitude volume");
-//			gpProgressDialog->setValue((int)(pImageGradientMagnitude->GetProgress() * 100.0));
-		}
-//	}
-}
-
-QString FormatVector(const Vec3f& Vector, const int& Precision = 2)
-{
-	return "[" + QString::number(Vector.x, 'f', Precision) + ", " + QString::number(Vector.y, 'f', Precision) + ", " + QString::number(Vector.z, 'f', Precision) + "]";
-}
-
-QString FormatVector(const Vec3i& Vector)
-{
-	return "[" + QString::number(Vector.x) + ", " + QString::number(Vector.y) + ", " + QString::number(Vector.z) + "]";
-}
-
-QString FormatSize(const Vec3f& Size, const int& Precision = 2)
-{
-	return QString::number(Size.x, 'f', Precision) + " x " + QString::number(Size.y, 'f', Precision) + " x " + QString::number(Size.z, 'f', Precision);
-}
-
-QString FormatSize(const Vec3i& Size)
-{
-	return QString::number(Size.x) + " x " + QString::number(Size.y) + " x " + QString::number(Size.z);
-}
 
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
 	QThread(pParent),
@@ -154,7 +45,6 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pDevEstFrameBlurXyz(NULL),
 	m_pDevEstRgbLdr(NULL),
 	m_pDevRgbLdrDisp(NULL),
-	m_pImageCanvas(NULL),
 	m_pSeeds(NULL),
 	m_Abort(false),
 	m_Pause()
@@ -179,7 +69,6 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 	m_pDevEstFrameBlurXyz	= Other.m_pDevEstFrameBlurXyz;
 	m_pDevEstRgbLdr			= Other.m_pDevEstRgbLdr;
 	m_pDevRgbLdrDisp		= Other.m_pDevRgbLdrDisp;
-	m_pImageCanvas			= Other.m_pImageCanvas;
 	m_Abort					= Other.m_Abort;
 	m_pSeeds				= m_pSeeds;
 
@@ -188,83 +77,6 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 
 QRenderThread::~QRenderThread(void)
 {
-}
-
-bool QRenderThread::InitializeCuda(void)
-{
-	// No CUDA enabled devices
-	int NoDevices = 0;
-
-	cudaError_t ErrorID = cudaGetDeviceCount(&NoDevices);
-
-
-	emit gRenderStatus.StatisticChanged("Graphics Card", "No. CUDA capable devices", QString::number(NoDevices));
-
-	Log("Found " + QString::number(NoDevices) + " CUDA enabled device(s)", "graphic-card");
-
-	int DriverVersion = 0, RuntimeVersion = 0; 
-
-	cudaDriverGetVersion(&DriverVersion);
-	cudaRuntimeGetVersion(&RuntimeVersion);
-
-	QString DriverVersionString		= QString::number(DriverVersion / 1000) + "." + QString::number(DriverVersion % 100);
-	QString RuntimeVersionString	= QString::number(RuntimeVersion / 1000) + "." + QString::number(RuntimeVersion % 100);
-
-	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Driver Version", DriverVersionString);
-	emit gRenderStatus.StatisticChanged("Graphics Card", "CUDA Runtime Version", RuntimeVersionString);
-
-	Log("Current CUDA driver version: " + DriverVersionString, "graphic-card");
-	Log("Current CUDA runtime version: " + RuntimeVersionString, "graphic-card");
-
-	for (int Device = 0; Device < NoDevices; Device++)
-	{
-		QString DeviceString = "Device " + QString::number(Device);
-
-		emit gRenderStatus.StatisticChanged("Graphics Card", DeviceString, "");
-
-		cudaDeviceProp DeviceProperties;
-		cudaGetDeviceProperties(&DeviceProperties, Device);
-
-		QString CudaCapabilityString = QString::number(DeviceProperties.major) + "." + QString::number(DeviceProperties.minor);
-		
-		emit gRenderStatus.StatisticChanged(DeviceString, "CUDA Capability", CudaCapabilityString);
-
-		// Memory
-		emit gRenderStatus.StatisticChanged(DeviceString, "On Board Memory", "", "", "memory");
-
-		emit gRenderStatus.StatisticChanged("On Board Memory", "Total Global Memory", QString::number((float)DeviceProperties.totalGlobalMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
-		emit gRenderStatus.StatisticChanged("On Board Memory", "Total Constant Memory", QString::number((float)DeviceProperties.totalConstMem / powf(1024.0f, 2.0f), 'f', 2), "MB");
-
-		int MemoryClock, MemoryBusWidth, L2CacheSize;
-		getCudaAttribute<int>(&MemoryClock, CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, Device);
-		getCudaAttribute<int>(&MemoryBusWidth, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, Device);
-		getCudaAttribute<int>(&L2CacheSize, CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, Device);
-
-		emit gRenderStatus.StatisticChanged("On Board Memory", "Memory Clock Rate", QString::number(MemoryClock * 1e-3f), "Mhz");
-		emit gRenderStatus.StatisticChanged("On Board Memory", "Memory Bus Width", QString::number(MemoryBusWidth), "bit");
-		emit gRenderStatus.StatisticChanged("On Board Memory", "L2 Cache Size", QString::number(L2CacheSize), "bytes");
-		emit gRenderStatus.StatisticChanged("On Board Memory", "Maximum Memory Pitch", QString::number((float)DeviceProperties.memPitch / powf(1024.0f, 2.0f), 'f', 2), "MB");
-		
-		// Processor
-		emit gRenderStatus.StatisticChanged(DeviceString, "Processor", "", "", "processor");
-		emit gRenderStatus.StatisticChanged("Processor", "No. Multiprocessors", QString::number(DeviceProperties.multiProcessorCount), "Processors");
-		emit gRenderStatus.StatisticChanged("Processor", "GPU Clock Speed", QString::number(DeviceProperties.clockRate * 1e-6f, 'f', 2), "GHz");
-		emit gRenderStatus.StatisticChanged("Processor", "Max. Block Size", QString::number(DeviceProperties.maxThreadsDim[0]) + " x " + QString::number(DeviceProperties.maxThreadsDim[1]) + " x " + QString::number(DeviceProperties.maxThreadsDim[2]), "Threads");
-		emit gRenderStatus.StatisticChanged("Processor", "Max. Grid Size", QString::number(DeviceProperties.maxGridSize[0]) + " x " + QString::number(DeviceProperties.maxGridSize[1]) + " x " + QString::number(DeviceProperties.maxGridSize[2]), "Blocks");
-		emit gRenderStatus.StatisticChanged("Processor", "Warp Size", QString::number(DeviceProperties.warpSize), "Threads");
-		emit gRenderStatus.StatisticChanged("Processor", "Max. No. Threads/Block", QString::number(DeviceProperties.maxThreadsPerBlock), "Threads");
-		emit gRenderStatus.StatisticChanged("Processor", "Max. Shared Memory Per Block", QString::number((float)DeviceProperties.sharedMemPerBlock / 1024.0f, 'f', 2), "KB");
-		emit gRenderStatus.StatisticChanged("Processor", "Registers Available Per Block", QString::number((float)DeviceProperties.regsPerBlock / 1024.0f, 'f', 2), "KB");
-
-		// Texture
-		emit gRenderStatus.StatisticChanged(DeviceString, "Texture", "", "", "checkerboard");
-		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 1D", QString::number(DeviceProperties.maxTexture1D), "Pixels");
-		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 2D", QString::number(DeviceProperties.maxTexture2D[0]) + " x " + QString::number(DeviceProperties.maxTexture2D[1]), "Pixels");
-		emit gRenderStatus.StatisticChanged("Texture", "Max. Dimension Size 3D", QString::number(DeviceProperties.maxTexture3D[0]) + " x " + QString::number(DeviceProperties.maxTexture3D[1]) + " x " + QString::number(DeviceProperties.maxTexture3D[2]), "Pixels");
-		emit gRenderStatus.StatisticChanged("Texture", "Alignment", QString::number((float)DeviceProperties.textureAlignment / powf(1024.0f, 2.0f), 'f', 2), "MB");
-	}	
-	
-	return cudaSetDevice(cutGetMaxGflopsDeviceId()) == cudaSuccess;
 }
 
 void QRenderThread::run()
@@ -639,14 +451,6 @@ bool QRenderThread::Load(QString& FileName)
 	emit gRenderStatus.StatisticChanged("Volume", "Density Range", "[" + QString::number(m_Scene.m_IntensityRange.GetMin()) + ", " + QString::number(m_Scene.m_IntensityRange.GetMax()) + "]", "");
 
 	return true;
-}
-
-void QRenderThread::HandleCudaError(const cudaError_t CudaError)
-{
-	if (CudaError == cudaSuccess)
-		return;
-
-	Log(cudaGetErrorString(CudaError));
 }
 
 void QRenderThread::OnUpdateTransferFunction(void)
