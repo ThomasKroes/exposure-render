@@ -35,7 +35,7 @@ private:
 	CColorXyz*		m_pDevAccEstXyz;
 	CColorXyz*		m_pDevEstFrameXyz;
 	CColorXyz*		m_pDevEstFrameBlurXyz;
-	unsigned char*	m_pDevEstRgbLdr;
+	CColorRgbaLdr*	m_pDevEstRgbaLdr;
 	unsigned char*	m_pDevRgbLdrDisp;
 
 	unsigned char*	m_pRenderImage;

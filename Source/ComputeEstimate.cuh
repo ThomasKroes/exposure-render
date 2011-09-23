@@ -2,7 +2,7 @@
 
 #include "Geometry.h"
 
-KERNEL void KrnlComputeEstimate(int Width, int Height, CColorXyz* gpEstFrameXyz, CColorXyz* pAccEstXyz, float N, float Exposure, unsigned char* pPixels)
+KERNEL void KrnlComputeEstimate(int Width, int Height, CColorXyz* gpEstFrameXyz, CColorXyz* pAccEstXyz, float N, float Exposure, CColorRgbaLdr* pPixels)
 {
 	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global Y
 	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global X
@@ -26,12 +26,12 @@ KERNEL void KrnlComputeEstimate(int Width, int Height, CColorXyz* gpEstFrameXyz,
 	RgbHdr.g = Clamp(1.0f - expf(-(RgbHdr.g / Exposure)), 0.0, 1.0f);
 	RgbHdr.b = Clamp(1.0f - expf(-(RgbHdr.b / Exposure)), 0.0, 1.0f);
 
-	pPixels[(3 * (Y * Width + X)) + 0] = (unsigned char)Clamp((255.0f * powf(RgbHdr.r, InvGamma)), 0.0f, 255.0f);
-	pPixels[(3 * (Y * Width + X)) + 1] = (unsigned char)Clamp((255.0f * powf(RgbHdr.g, InvGamma)), 0.0f, 255.0f);
-	pPixels[(3 * (Y * Width + X)) + 2] = (unsigned char)Clamp((255.0f * powf(RgbHdr.b, InvGamma)), 0.0f, 255.0f);
+	pPixels[PID].r = (unsigned char)Clamp((255.0f * powf(RgbHdr.r, InvGamma)), 0.0f, 255.0f);
+	pPixels[PID].g = (unsigned char)Clamp((255.0f * powf(RgbHdr.g, InvGamma)), 0.0f, 255.0f);
+	pPixels[PID].b = (unsigned char)Clamp((255.0f * powf(RgbHdr.b, InvGamma)), 0.0f, 255.0f);
 }
 
-void ComputeEstimate(int Width, int Height, CColorXyz* pEstFrameXyz, CColorXyz* pAccEstXyz, float N, float Exposure, unsigned char* pPixels)
+void ComputeEstimate(int Width, int Height, CColorXyz* pEstFrameXyz, CColorXyz* pAccEstXyz, float N, float Exposure, CColorRgbaLdr* pPixels)
 {
 	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)Width / (float)KernelBlock.x), (int)ceilf((float)Height / (float)KernelBlock.y));

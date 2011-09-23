@@ -1,10 +1,10 @@
 
 #include "Core.cuh"
 
-texture<float, 3, cudaReadModeElementType>				gTexDensity;
-texture<short, 3, cudaReadModeNormalizedFloat>			gTexExtinction;
-texture<float, 3, cudaReadModeElementType>				gTexGradientMagnitude;
-texture<unsigned char, 3, cudaReadModeNormalizedFloat>	gTexEstimateRgbLdr;
+texture<float, 3, cudaReadModeElementType>			gTexDensity;
+texture<short, 3, cudaReadModeNormalizedFloat>		gTexExtinction;
+texture<float, 3, cudaReadModeElementType>			gTexGradientMagnitude;
+texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexEstimateRgbLdr;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -90,31 +90,30 @@ void BindGradientMagnitudeVolume(float* pBuffer, cudaExtent Extent)
 
 void BindEstimateRgbLdr(unsigned char* pBuffer, int Width, int Height)
 {
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<unsigned char>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<uchar4>();
 
-	cudaBindTexture2D(0, gTexEstimateRgbLdr, pBuffer, ChannelDesc, Width, Height, Width * sizeof(unsigned char));
+	cudaBindTexture2D(0, gTexEstimateRgbLdr, pBuffer, ChannelDesc, Width, Height, Width * sizeof(uchar4));
 }
 
-
-void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, unsigned char* pDevEstRgbLdr, unsigned char* pDevEstRgbLdrDisp, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
+void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, CColorRgbaLdr* pDevEstRgbaLdr, unsigned char* pDevEstRgbLdrDisp, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
 {
 	CCudaTimer TmrRender;
 	
 	switch (Type)
 	{
 		case 0:
-		{
-			SingleScattering(pScene, pDevScene, pSeeds, pDevEstFrameXyz);
-			HandleCudaError(cudaGetLastError());
-			break;
-		}
+			{
+				SingleScattering(pScene, pDevScene, pSeeds, pDevEstFrameXyz);
+				HandleCudaError(cudaGetLastError());
+				break;
+			}
 
 		case 1:
-		{
-			MultipleScattering(pScene, pDevScene, pSeeds, pDevEstFrameXyz);
-			HandleCudaError(cudaGetLastError());
-			break;
-		}
+			{
+				MultipleScattering(pScene, pDevScene, pSeeds, pDevEstFrameXyz);
+				HandleCudaError(cudaGetLastError());
+				break;
+			}
 	}
 
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
@@ -125,12 +124,12 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;
-	ComputeEstimate(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY(), pDevEstFrameXyz, pDevAccEstXyz, N, pScene->m_Camera.m_Film.m_Exposure, pDevEstRgbLdr);
+	ComputeEstimate(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY(), pDevEstFrameXyz, pDevAccEstXyz, N, pScene->m_Camera.m_Film.m_Exposure, pDevEstRgbaLdr);
 	HandleCudaError(cudaGetLastError());
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
 
 	CCudaTimer TmrDenoise;
-//	Denoise(pScene, pDevScene, (CColorRgbLdr*)pDevEstRgbLdr, (CColorRgbLdr*)pDevEstRgbLdrDisp);
+	Denoise(pScene, pDevScene, pDevEstRgbaLdr, (CColorRgbLdr*)pDevEstRgbLdrDisp);
 	HandleCudaError(cudaGetLastError());
 	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
 }

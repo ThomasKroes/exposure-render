@@ -680,30 +680,7 @@ public:
 	float		m_LerpThreshold;		/*!< Linear interpolation threshold */
 
 public:
-	HO CDenoiseParams(void)
-	{
-/*
-		m_Enabled			= true;
-		m_Noise				= 1.0f / (0.32f * 0.32f);
-		m_LerpC				= 0.2f;
-		m_WindowRadius		= 2.0f;
-		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
-		m_InvWindowArea		= 1.0f / m_WindowArea;
-		m_WeightThreshold	= 0.02f;
-		m_LerpThreshold		= 0.79f;
-*/
-
-
-		m_Enabled			= true;
-		m_Noise				= 1.0f / (0.5f * 0.5f);
-		m_LerpC				= 0.2f;
-		m_WindowRadius		= 6.0f;
-		m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
-		m_InvWindowArea		= 1.0f / m_WindowArea;
-		m_WeightThreshold	= 0.01f;
-		m_LerpThreshold		= 0.1f;
-/**/
-	}
+	HO CDenoiseParams(void);
 
 	HO ~CDenoiseParams(void)
 	{

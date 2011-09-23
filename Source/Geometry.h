@@ -252,6 +252,133 @@ public:
 	unsigned char	b;
 };
 
+class EXPOSURE_RENDER_DLL CColorRgbaLdr
+{
+public:
+	HOD CColorRgbaLdr(void)
+	{
+		r = 0;
+		g = 0;
+		b = 0;
+		a = 0;
+	}
+
+	HOD CColorRgbaLdr(unsigned char R, unsigned char G, unsigned char B, unsigned char A)
+	{
+		r = R;
+		g = G;
+		b = B;
+		a = A;
+	}
+
+	HOD CColorRgbaLdr& operator = (const CColorRgbaLdr& Other)			
+	{
+		r = Other.r;
+		g = Other.g;
+		b = Other.b;
+		a = Other.a;
+
+		return *this;
+	}
+
+	HOD CColorRgbaLdr operator * (float f) const
+	{
+		return CColorRgbaLdr((unsigned char)(r * f), (unsigned char)(g * f), (unsigned char)(b * f), (unsigned char)(a * f));
+	}
+
+	HOD CColorRgbaLdr& operator *= (float f)
+	{
+		for (int i = 0; i < 4; i++)
+			(&r)[i] *= f;
+
+		return *this;
+	}
+
+	HOD CColorRgbaLdr operator / (float f) const
+	{
+		float inv = 1.0f / f;
+		return CColorRgbaLdr((unsigned char)(r * inv), (unsigned char)(g * inv), (unsigned char)(b * inv), (unsigned char)(a * inv));
+	}
+
+	HOD CColorRgbaLdr& operator /= (float f)
+	{
+		float inv = 1.0f / f;
+		
+		r = (unsigned char)((float)r * inv);
+		g = (unsigned char)((float)g * inv);
+		b = (unsigned char)((float)b * inv);
+		a = (unsigned char)((float)a * inv);
+		
+		return *this;
+	}
+
+	HOD float operator[](int i) const
+	{
+		return (&r)[i];
+	}
+
+	HOD float operator[](int i)
+	{
+		return (&r)[i];
+	}
+
+	HOD CColorRgbaLdr& operator += (CColorRgbaLdr& p)		
+	{
+		r += p.r;
+		g += p.g;
+		b += p.b;	
+		a += p.a;
+
+		return *this;
+	}
+
+	HOD CColorRgbaLdr Pow(float e)
+	{
+		return CColorRgbaLdr((unsigned char)powf(r, e), (unsigned char)powf(g, e), (unsigned char)powf(b, e), (unsigned char)powf(a, e));
+	}
+
+	HOD void FromXYZ(float x, float y, float z)
+	{
+		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
+		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
+		const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
+
+		float R, G, B;
+
+		R =	rWeight[0] * x +
+			rWeight[1] * y +
+			rWeight[2] * z;
+
+		G =	gWeight[0] * x +
+			gWeight[1] * y +
+			gWeight[2] * z;
+
+		B =	bWeight[0] * x +
+			bWeight[1] * y +
+			bWeight[2] * z;
+
+		clamp2(R, 0.0f, 1.0f);
+		clamp2(G, 0.0f, 1.0f);
+		clamp2(B, 0.0f, 1.0f);
+
+		r = (unsigned char)(R * 255.0f);
+		g = (unsigned char)(G * 255.0f);
+		b = (unsigned char)(B * 255.0f);
+		a = 255;
+	}
+
+	void PrintSelf(void)
+	{
+		printf("[%d, %d, %d, %d]\n", r, g, b, a);
+	}
+
+public:
+	unsigned char	r;
+	unsigned char	g;
+	unsigned char	b;
+	unsigned char	a;
+};
+
 class EXPOSURE_RENDER_DLL Vec2f
 {
 public:

@@ -102,8 +102,6 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 	if (!Scene())
 		return;
 
-	Scene()->m_Camera.m_Focus.m_FocalDistance = 1.0f;
-
 	// Orbiting
 	if (gMouseButtonFlags.HasFlag(Left))
 	{
