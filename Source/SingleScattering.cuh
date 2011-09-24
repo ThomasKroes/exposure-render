@@ -52,11 +52,11 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		Lv += Ke;
 
 		// Determine probabilities for picking brdf or phase function
-		float PdfBrdf = powf(0, GradientMagnitude(pScene, Pe)), PdfPhase = Clamp((1.0f - PdfBrdf) + 0.0000001f, 0.0f, 1.0f);
+		float PdfBrdf = pScene->m_TransferFunctions.m_Opacity.F(D).r * GradientMagnitude(pScene, Pe), PdfPhase = 1.0f - PdfBrdf;
 
 // 		Lv = UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 
-		if (GradientMagnitude(pScene, Pe) > 0.8f)//RNG.Get1() < PdfBrdf)
+		if ((Tr * GradientMagnitude(pScene, Pe)) > 0.2f)//RNG.Get1() < PdfBrdf)
 		{
 			// Estimate direct light at eye point using BRDF shading
   			Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);// / PdfBrdf;
