@@ -184,7 +184,8 @@ void QTransferFunction::AddNode(const QNode& Node)
 	// Inform others that the transfer function has changed
 	emit Changed();
 
-	Log("Inserted node", "layer-select-point");
+	if (!signalsBlocked())
+		Log("Inserted node", "layer-select-point");
 }
 
 void QTransferFunction::RemoveNode(QNode* pNode)
@@ -278,6 +279,8 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 
 	QDomElement Nodes = Parent.firstChild().toElement();
 
+	blockSignals(true);
+
 	// Read child nodes
 	for (QDomNode DomNode = Nodes.firstChild(); !DomNode.isNull(); DomNode = DomNode.nextSibling())
 	{
@@ -296,6 +299,8 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 
 	// Density Scale
 	m_DensityScale = Parent.firstChildElement("DensityScale").attribute("Value").toFloat();
+
+	blockSignals(false);
 
 	// Inform others that the transfer function has changed
 	emit Changed();

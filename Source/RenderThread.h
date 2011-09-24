@@ -3,9 +3,7 @@
 #include "Statistics.h"
 #include "Scene.h"
 
-class vtkImageData;
-class CScene;
-class CColorXyz;
+#include <cutil_inline.h>
 
 class QRenderThread : public QThread
 {
@@ -37,11 +35,13 @@ private:
 	CColorXyz*		m_pDevEstFrameBlurXyz;
 	CColorRgbaLdr*	m_pDevEstRgbaLdr;
 	unsigned char*	m_pDevRgbLdrDisp;
+	unsigned int*	m_pDevSeeds;
 
 	unsigned char*	m_pRenderImage;
-	unsigned int*	m_pSeeds;
-	vtkImageData*	m_pVtkDensityBuffer;
-	vtkImageData*	m_pVtkGradientMagnitudeBuffer;
+	float*			m_pDensityBuffer;
+	float*			m_pGradientMagnitudeBuffer;
+	float*			m_pExtinctionBuffer;
+	cudaExtent		m_ExtinctionSize;
 
 public:
 	QMutex			m_Mutex;

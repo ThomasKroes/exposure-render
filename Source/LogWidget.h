@@ -29,6 +29,8 @@ class QLogWidget : public QTableWidget
 public:
     QLogWidget(QWidget* pParent = NULL);
 
+	virtual QSize sizeHint() const;
+
 	void SetLogger(QLogger* pLogger);
 
 protected:

@@ -197,3 +197,8 @@ void QLogWidget::contextMenuEvent(QContextMenuEvent* pContextMenuEvent)
 	ContextMenu.addAction(GetIcon("cross"), "Clear All", this, SLOT(OnClearAll()));
 	ContextMenu.exec(pContextMenuEvent->globalPos());
 }
+
+QSize QLogWidget::sizeHint() const
+{
+	return QSize(100, 500);
+}

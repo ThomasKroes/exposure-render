@@ -155,5 +155,5 @@ void HandleCudaError(const cudaError_t CudaError)
 	if (CudaError == cudaSuccess)
 		return;
 
-	Log(cudaGetErrorString(CudaError));
+	Log("Cuda Error: " + QString(cudaGetErrorString(CudaError)), QLogger::Critical);
 }

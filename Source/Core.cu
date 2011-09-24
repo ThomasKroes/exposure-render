@@ -2,7 +2,7 @@
 #include "Core.cuh"
 
 texture<float, 3, cudaReadModeElementType>			gTexDensity;
-texture<short, 3, cudaReadModeNormalizedFloat>		gTexExtinction;
+texture<float, 3, cudaReadModeElementType>			gTexExtinction;
 texture<float, 3, cudaReadModeElementType>			gTexGradientMagnitude;
 texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexEstimateRgbLdr;
 
@@ -15,65 +15,69 @@ texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexEstimateRgbLdr;
 
 #include "CudaUtilities.h"
 
-void BindDensityVolume(float* densityBuffer, cudaExtent Extent)
+void BindDensityBuffer(float* pBuffer, cudaExtent Extent)
 {
 	cudaArray* pArray = NULL;
 
-	// create 3D array
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
 	cudaMalloc3DArray(&pArray, &ChannelDesc, Extent);
 
-	// copy data to 3D array
-	cudaMemcpy3DParms copyParams	= {0};
-	copyParams.srcPtr				= make_cudaPitchedPtr(densityBuffer, Extent.width * sizeof(float), Extent.width, Extent.height);
-	copyParams.dstArray				= pArray;
-	copyParams.extent				= Extent;
-	copyParams.kind					= cudaMemcpyHostToDevice;
-	cudaMemcpy3D(&copyParams);
+	cudaMemcpy3DParms CopyParams = {0};
+
+	CopyParams.srcPtr				= make_cudaPitchedPtr(pBuffer, Extent.width * sizeof(float), Extent.width, Extent.height);
+	CopyParams.dstArray				= pArray;
+	CopyParams.extent				= Extent;
+	CopyParams.kind					= cudaMemcpyHostToDevice;
+	
+	cudaMemcpy3D(&CopyParams);
 
 	// Set texture parameters
 	gTexDensity.normalized			= true;
 	gTexDensity.filterMode			= cudaFilterModeLinear;      
 	gTexDensity.addressMode[0]		= cudaAddressModeClamp;  
 	gTexDensity.addressMode[1]		= cudaAddressModeClamp;
- 	gTexDensity.addressMode[2]		= cudaAddressModeClamp;
+//  	gTexDensity.addressMode[2]		= cudaAddressModeClamp;
 
 	// Bind array to 3D texture
 	cudaBindTextureToArray(gTexDensity, pArray, ChannelDesc);
 }
 
-void BindExtinctionVolume(float* extinction, cudaExtent Extent)
+void BindExtinctionBuffer(float* pBuffer, cudaExtent Extent)
 {
-	cudaArray* volArray;
-	cudaExtent volExtent = make_cudaExtent(Extent.width, Extent.height, Extent.depth);
-	cudaChannelFormatDesc volChannelDesc = cudaCreateChannelDesc<float>();
-	cudaMalloc3DArray(&volArray, &volChannelDesc, volExtent);
-	cudaMemcpy3DParms copyParams = {0};
-	copyParams.srcPtr = make_cudaPitchedPtr((void*)extinction, Extent.width * sizeof(float), Extent.width, Extent.height);
-	copyParams.dstArray = volArray;
-	copyParams.extent = Extent;
-	copyParams.kind = cudaMemcpyHostToDevice;
-	CUDA_SAFE_CALL( cudaMemcpy3D(&copyParams));
+	cudaArray* pArray;
 
-	gTexExtinction.normalized = true;
-	gTexExtinction.filterMode = cudaFilterModePoint;
-	gTexExtinction.addressMode[0] = cudaAddressModeClamp;
-	gTexExtinction.addressMode[1] = cudaAddressModeClamp;
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
+	cudaMalloc3DArray(&pArray, &ChannelDesc, Extent);
+	
+	cudaMemcpy3DParms CopyParams = {0};
 
-	cudaBindTextureToArray(gTexExtinction, volArray, volChannelDesc);
+	CopyParams.srcPtr				= make_cudaPitchedPtr((void*)pBuffer, Extent.width * sizeof(float), Extent.width, Extent.height);
+	CopyParams.dstArray				= pArray;
+	CopyParams.extent				= Extent;
+	CopyParams.kind					= cudaMemcpyHostToDevice;
+
+	cudaMemcpy3D(&CopyParams);
+
+	gTexExtinction.normalized		= true;
+	gTexExtinction.filterMode		= cudaFilterModePoint;
+	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;
+	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
+// 	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
+
+	cudaBindTextureToArray(gTexExtinction, pArray, ChannelDesc);
 }
 
-void BindGradientMagnitudeVolume(float* pBuffer, cudaExtent Extent)
+void BindGradientMagnitudeBuffer(float* pBuffer, cudaExtent Extent)
 {
-	cudaArray* pVolumeArray;
+	cudaArray* pArray;
 
-	cudaChannelFormatDesc VolumeChannelDesc = cudaCreateChannelDesc<float>();
-	cudaMalloc3DArray(&pVolumeArray, &VolumeChannelDesc, Extent);
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
+	cudaMalloc3DArray(&pArray, &ChannelDesc, Extent);
 	
 	cudaMemcpy3DParms CopyParams = {0};
 
 	CopyParams.srcPtr	= make_cudaPitchedPtr((void*)pBuffer, Extent.width * sizeof(float), Extent.width, Extent.height);
-	CopyParams.dstArray = pVolumeArray;
+	CopyParams.dstArray = pArray;
 	CopyParams.extent	= Extent;
 	CopyParams.kind		= cudaMemcpyHostToDevice;
 
@@ -83,9 +87,9 @@ void BindGradientMagnitudeVolume(float* pBuffer, cudaExtent Extent)
 	gTexGradientMagnitude.filterMode		= cudaFilterModePoint;
 	gTexGradientMagnitude.addressMode[0]	= cudaAddressModeClamp;
 	gTexGradientMagnitude.addressMode[1]	= cudaAddressModeClamp;
-	gTexGradientMagnitude.addressMode[2]	= cudaAddressModeClamp;
+// 	gTexGradientMagnitude.addressMode[2]	= cudaAddressModeClamp;
 
-	cudaBindTextureToArray(gTexGradientMagnitude, pVolumeArray, VolumeChannelDesc);
+	cudaBindTextureToArray(gTexGradientMagnitude, pArray, ChannelDesc);
 }
 
 void BindEstimateRgbLdr(unsigned char* pBuffer, int Width, int Height)
