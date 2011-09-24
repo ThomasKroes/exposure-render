@@ -41,7 +41,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int Component)
+DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int Component)
 {
 // 	if (pScene->GetNoIterations() == 1)
 // 		return false;

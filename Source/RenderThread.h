@@ -3,8 +3,6 @@
 #include "Statistics.h"
 #include "Scene.h"
 
-#include <cutil_inline.h>
-
 class QRenderThread : public QThread
 {
 	Q_OBJECT
@@ -38,10 +36,8 @@ private:
 	unsigned int*	m_pDevSeeds;
 
 	unsigned char*	m_pRenderImage;
-	float*			m_pDensityBuffer;
-	float*			m_pGradientMagnitudeBuffer;
-	float*			m_pExtinctionBuffer;
-	cudaExtent		m_ExtinctionSize;
+	short*			m_pDensityBuffer;
+	short*			m_pGradientMagnitudeBuffer;
 
 public:
 	QMutex			m_Mutex;

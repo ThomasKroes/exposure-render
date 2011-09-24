@@ -31,6 +31,8 @@ int main(int ArgumentCount, char* pArgv[])
 	// Load default presets
 	gStatus.SetLoadPreset("Default");
 
+//	Log("Device memory: " + QString::number(GetUsedCudaMemory() / MB, 'f', 2) + "/" + QString::number(GetTotalCudaMemory() / MB, 'f', 2) + " MB", "memory");
+
 	// Override the application setting to enforce the display of the startup dialog
 	Settings.setValue("startup/dialog/show", QVariant(true));
 

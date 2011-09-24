@@ -15,7 +15,7 @@ KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D
 
 	// Compute filter extent
 	const int X0 = max((int)ceilf(X - GaussianFilter.xWidth), 0);
-	const int X1 = min((int)floorf(X + GaussianFilter.xWidth), (int)Resolution.GetResX());
+	const int X1 = min((int)floorf(X + GaussianFilter.xWidth), (int)Resolution.GetResX() - 1);
 
 	// Accumulated color
 	CColorXyz Sum;
@@ -81,7 +81,7 @@ void BlurImageXyz(CColorXyz* pImage, CColorXyz* pTempImage, const CResolution2D&
 	const dim3 KernelGrid((int)ceilf((float)Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)Resolution.GetResY() / (float)KernelBlock.y));
 
 	// Create gaussian filter
-	CGaussianFilter GaussianFilter(2.5f * Radius, 2.5f * Radius, 1.0f);
+	CGaussianFilter GaussianFilter(Radius, Radius, 0.33f * Radius);
 
 	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pImage, pTempImage, Resolution, GaussianFilter); 
 	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pImage, pTempImage, Resolution, GaussianFilter); 

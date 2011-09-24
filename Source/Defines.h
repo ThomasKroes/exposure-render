@@ -44,6 +44,7 @@
 #define MAX_NO_TF_POINTS									20
 #define MAX_NO_VOLUME_LIGHTS								3
 #define	MAX_BOKEH_DATA										12
+#define MB													powf(1024.0f, 2.0f)
 
 #define PRINT_CUDA_ERROR(call) {                                    \
 	cudaError err = call;                                                    \

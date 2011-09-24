@@ -7,6 +7,7 @@
 #include "Logger.h"
 #include "Status.h"
 #include "Controls.h"
+#include "CudaUtilities.h"
 
 inline void ReadVectorElement(QDomElement& Parent, const QString& Name, double& X, double& Y, double& Z)
 {

@@ -6,6 +6,8 @@
 #include "VolumePoint.h"
 #include "Flags.h"
 
+#include <cutil_inline.h>
+
 class EXPOSURE_RENDER_DLL CCameraSample
 {
 public:
@@ -736,6 +738,7 @@ public:
 	int					m_MacrocellSize;
 	Vec3i				extinctionSize;
 	CDenoiseParams		m_DenoiseParams;
+	cudaExtent			m_ExtinctionSize;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
 	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}

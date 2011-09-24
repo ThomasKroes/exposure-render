@@ -264,6 +264,8 @@ void CMainWindow::OnLoadDemo(const QString& FileName)
 void CMainWindow::Close(void)
 {
 	KillRenderThread();
+
+	Log("Device memory: " + QString::number(GetUsedCudaMemory() / MB, 'f', 2) + "/" + QString::number(GetTotalCudaMemory() / MB, 'f', 2) + " MB", "memory");
 }
 
 void CMainWindow::Exit(void)

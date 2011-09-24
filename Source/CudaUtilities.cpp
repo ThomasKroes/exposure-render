@@ -157,3 +157,24 @@ void HandleCudaError(const cudaError_t CudaError)
 
 	Log("Cuda Error: " + QString(cudaGetErrorString(CudaError)), QLogger::Critical);
 }
+
+int GetTotalCudaMemory(void)
+{
+	size_t Available = 0, Total = 0;
+	cudaMemGetInfo(&Available, &Total);
+	return Total;
+}
+
+int GetAvailableCudaMemory(void)
+{
+	size_t Available = 0, Total = 0;
+	cudaMemGetInfo(&Available, &Total);
+	return Available;
+}
+
+int GetUsedCudaMemory(void)
+{
+	size_t Available = 0, Total = 0;
+	cudaMemGetInfo(&Available, &Total);
+	return Total - Available;
+}

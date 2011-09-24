@@ -313,13 +313,15 @@ public:
 		Vec2f UV;
 		float Pdf = 1.0f;
 
+		CRay Rl = CRay(P, Wi, 0.0f, INF_MAX);
+
 		if (m_T == 0)
 		{
 			// Hit distance
 			float T = 0.0f;
 			
 			// Intersect ray with light surface
-			if (!Intersect(CRay(P, Wi, 0.0f, INF_MAX), T, L, NULL, &Pdf))
+			if (!Intersect(Rl, T, L, NULL, &Pdf))
 				return 0.0f;
 
 			// Convert light sample weight to solid angle measure

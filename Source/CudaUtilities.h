@@ -20,3 +20,6 @@ private:
 
 bool InitializeCuda(void);
 void HandleCudaError(const cudaError_t CudaError);
+int GetTotalCudaMemory(void);
+int GetAvailableCudaMemory(void);
+int GetUsedCudaMemory(void);
