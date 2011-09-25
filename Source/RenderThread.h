@@ -19,7 +19,7 @@ public:
 
 	QString			GetFileName(void) const						{	return m_FileName;		}
 	void			SetFileName(const QString& FileName)		{	m_FileName = FileName;	}
-	unsigned char*	GetRenderImage(void) const;
+	CColorRgbaLdr*	GetRenderImage(void) const;
 	CScene*			GetScene(void)								{	return &m_Scene;		}
 	void			Close(void)									{	m_Abort = true;			}
 	void			PauseRendering(const bool& Pause)			{	m_Pause = Pause;		}
@@ -32,10 +32,10 @@ private:
 	CColorXyz*		m_pDevEstFrameXyz;
 	CColorXyz*		m_pDevEstFrameBlurXyz;
 	CColorRgbaLdr*	m_pDevEstRgbaLdr;
-	unsigned char*	m_pDevRgbLdrDisp;
+	CColorRgbaLdr*	m_pDevRgbLdrDisp;
 	unsigned int*	m_pDevSeeds;
 
-	unsigned char*	m_pRenderImage;
+	CColorRgbaLdr*	m_pRenderImage;
 	short*			m_pDensityBuffer;
 	short*			m_pGradientMagnitudeBuffer;
 

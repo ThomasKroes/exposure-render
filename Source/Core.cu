@@ -78,14 +78,14 @@ void UnbindGradientMagnitudeBuffer(void)
 	cudaUnbindTexture(gTexGradientMagnitude);
 }
 
-void BindEstimateRgbLdr(unsigned char* pBuffer, int Width, int Height)
+void BindEstimateRgbLdr(CColorRgbaLdr* pBuffer, int Width, int Height)
 {
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<uchar4>();
 
-	cudaBindTexture2D(0, gTexEstimateRgbLdr, pBuffer, ChannelDesc, Width, Height, Width * sizeof(uchar4));
+	cudaBindTexture2D(0, gTexEstimateRgbLdr, (void*)pBuffer, ChannelDesc, Width, Height, Width * sizeof(uchar4));
 }
 
-void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, CColorRgbaLdr* pDevEstRgbaLdr, unsigned char* pDevEstRgbLdrDisp, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
+void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, CColorRgbaLdr* pDevEstRgbaLdr, CColorRgbaLdr* pDevEstRgbLdrDisp, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
 {
 	CCudaTimer TmrRender;
 	
@@ -109,7 +109,7 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
 
  	CCudaTimer TmrBlur;
-	BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 3.5f);
+	BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 5.0f);
 	HandleCudaError(cudaGetLastError());
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
@@ -119,7 +119,7 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
 
 	CCudaTimer TmrDenoise;
-	Denoise(pScene, pDevScene, pDevEstRgbaLdr, (CColorRgbLdr*)pDevEstRgbLdrDisp);
+	Denoise(pScene, pDevScene, pDevEstRgbaLdr, pDevEstRgbLdrDisp);
 	HandleCudaError(cudaGetLastError());
 	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
 }

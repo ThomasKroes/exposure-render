@@ -15,7 +15,7 @@ QLight::QLight(QObject* pParent) :
 	m_Height(1.0f),
 	m_LockSize(true),
 	m_Color(QColor(250, 231, 154)),
-	m_Intensity(200.0f)
+	m_Intensity(1000.0f)
 {
 }
 

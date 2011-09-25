@@ -4,14 +4,6 @@
 #include <cuda_runtime.h>
 #include <cutil.h>
 
-#define ONE_OVER_255			0.003921568f
-
-
-HOD float Length(CColorRgbHdr& A, CColorRgbHdr& B)
-{
-	return (B.r - A.r) * (B.r - A.r) + (B.g - A.g) * (B.g - A.g) + (B.b - A.b) * (B.b - A.b);
-}
-
 DEV float lerpf(float a, float b, float c){
 	return a + (b - a) * c;
 }
@@ -21,7 +13,7 @@ DEV float vecLen(float4 a, float4 b)
     return ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z));
 }
 
-KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
+KERNEL void KNN(CScene* pScene, CColorRgbaLdr* pOut)
 {
     const int ix = blockDim.x * blockIdx.x + threadIdx.x;
     const int iy = blockDim.y * blockIdx.y + threadIdx.y;
@@ -29,7 +21,7 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
     const float x = (float)ix + 0.5f;
     const float y = (float)iy + 0.5f;
 
-	int ID = pScene->m_Camera.m_Film.m_Resolution.GetResX() * iy + ix;
+	int ID = pScene->m_Camera.m_Film.m_Resolution.GetResX() * (pScene->m_Camera.m_Film.m_Resolution.GetResY() - iy) + ix;
 
     if(pScene->m_DenoiseParams.m_Enabled && ix < pScene->m_Camera.m_Film.m_Resolution.GetResX() && iy < pScene->m_Camera.m_Film.m_Resolution.GetResY())
 	{
@@ -92,9 +84,17 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
 	}
+
+	// Add edge around image
+// 	if (ix == 0 || ix == (pScene->m_Camera.m_Film.m_Resolution.GetResX() - 1) || iy == 0 || iy == (pScene->m_Camera.m_Film.m_Resolution.GetResY() - 1))
+// 	{
+// 		pOut[ID].r = 0;
+// 		pOut[ID].g = 0;
+// 		pOut[ID].b = 0;
+// 	}
 }
 
-void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbLdr* pOut)
+void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbaLdr* pOut)
 {
 	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));

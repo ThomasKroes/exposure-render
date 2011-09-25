@@ -336,7 +336,7 @@ void CMainWindow::OnSaveImage(void)
 
 	if (!FilePath.isEmpty())
 	{
-		QImage* pTempImage = new QImage(gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY(),  QImage::Format_RGB888);
+		QImage* pTempImage = new QImage((unsigned char*)gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY(),  QImage::Format_ARGB32);
 
 		if (!pTempImage->save(FilePath, "PNG") )
 			Log("Unable to save image");

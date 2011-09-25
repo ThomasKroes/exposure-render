@@ -41,13 +41,11 @@ public slots:
 
 private:
 	void SetupRenderView(void);
-
+	
 	QGridLayout									m_MainLayout;
 	QVTKWidget									m_QtVtkWidget;
 
 public:
-	vtkSmartPointer<vtkImageImport>				m_ImageImport;
-	vtkSmartPointer<vtkImageActor>				m_ImageActor;
 	vtkSmartPointer<vtkInteractorStyleImage>	m_InteractorStyleImage;
 	vtkSmartPointer<vtkRenderer>				m_SceneRenderer;
 	vtkSmartPointer<vtkRenderWindow>			m_RenderWindow;
