@@ -40,7 +40,6 @@ public slots:
 	void OnPreRenderFrame(void);
 	void OnPostRenderFrame(void);
 	void OnResize(void);
-	void OnRenderLoopTimer(void);
 
 private:
 	void SetupRenderView(void);
@@ -50,7 +49,7 @@ private:
 
 public:
 	vtkSmartPointer<vtkImageActor>				m_ImageActor;
-	vtkSmartPointer<vtkImageData>				m_DisplayImage;
+	vtkSmartPointer<vtkImageImport>				m_ImageImport;
 	vtkSmartPointer<vtkInteractorStyleImage>	m_InteractorStyleImage;
 	vtkSmartPointer<vtkRenderer>				m_SceneRenderer;
 	vtkSmartPointer<vtkRenderWindow>			m_RenderWindow;
@@ -58,6 +57,4 @@ public:
 	vtkSmartPointer<vtkCallbackCommand>			m_KeyPressCallback;
 	vtkSmartPointer<vtkCallbackCommand>			m_KeyReleaseCallback;
 	vtkSmartPointer<vtkRealisticCameraStyle>	m_InteractorStyleRealisticCamera;
-	vtkSmartPointer<vtkTextActor>				m_TextActor;
-	QTimer										m_RenderLoopTimer;
 };

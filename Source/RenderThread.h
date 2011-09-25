@@ -9,9 +9,9 @@ class QRenderThread : public QThread
 
 public:
 	QRenderThread(const QString& FileName = "", QObject* pParent = NULL);
-	virtual ~QRenderThread(void);
 	QRenderThread(const QRenderThread& Other);
-	QRenderThread& operator = (const QRenderThread& Other);
+	virtual ~QRenderThread(void);
+	QRenderThread& QRenderThread::operator=(const QRenderThread& Other);
 
 	void run();
 
@@ -27,7 +27,7 @@ public:
 private:
 	QString			m_FileName;
 	
-	CScene*			m_pScene;
+	CScene*			m_pDevScene;
 	CColorXyz*		m_pDevAccEstXyz;
 	CColorXyz*		m_pDevEstFrameXyz;
 	CColorXyz*		m_pDevEstFrameBlurXyz;
@@ -40,10 +40,13 @@ private:
 	short*			m_pGradientMagnitudeBuffer;
 
 public:
-	QMutex			m_Mutex;
 	bool			m_Abort;
 	CScene			m_Scene;
 	bool			m_Pause;
+
+public:
+	QList<int>		m_SaveFrames;
+	QString			m_SaveBaseName;
 
 public slots:
 	void OnUpdateTransferFunction(void);

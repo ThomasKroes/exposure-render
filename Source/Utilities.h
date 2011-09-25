@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Geometry.h"
+#include "Logger.h"
 
 class QMargin
 {

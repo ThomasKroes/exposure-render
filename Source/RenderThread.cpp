@@ -32,7 +32,7 @@ QRenderThread* gpRenderThread = NULL;
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
 	QThread(pParent),
 	m_FileName(FileName),
-	m_pScene(NULL),
+	m_pDevScene(NULL),
 	m_pDevAccEstXyz(NULL),
 	m_pDevEstFrameXyz(NULL),
 	m_pDevEstFrameBlurXyz(NULL),
@@ -42,11 +42,15 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_pDevSeeds(NULL),
 	m_pDensityBuffer(NULL),
 	m_pGradientMagnitudeBuffer(NULL),
-	m_Mutex(),
 	m_Abort(false),
 	m_Scene(),
-	m_Pause(false)
+	m_Pause(false),
+	m_SaveFrames(),
+	m_SaveBaseName("test")
 {
+//	m_SaveFrames << 2 << 10 << 15 << 20 << 25;
+
+	m_Scene.m_DenoiseParams.m_Enabled = false;
 }
 
 QRenderThread::QRenderThread(const QRenderThread& Other)
@@ -54,30 +58,31 @@ QRenderThread::QRenderThread(const QRenderThread& Other)
 	*this = Other;
 }
 
-QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
-{
-	m_FileName						= Other.m_FileName;
-	m_pScene						= Other.m_pScene;
-	m_pDevAccEstXyz					= Other.m_pDevAccEstXyz;
-	m_pDevEstFrameXyz				= Other.m_pDevEstFrameXyz;
-	m_pDevEstFrameBlurXyz			= Other.m_pDevEstFrameBlurXyz;
-	m_pDevEstRgbaLdr				= Other.m_pDevEstRgbaLdr;
-	m_pDevRgbLdrDisp				= Other.m_pDevRgbLdrDisp;
-	m_pRenderImage					= Other.m_pRenderImage;
-	m_pDevSeeds						= Other.m_pDevSeeds;
-	m_pDensityBuffer				= Other.m_pDensityBuffer;
-	m_pGradientMagnitudeBuffer		= Other.m_pGradientMagnitudeBuffer;
-//	m_Mutex							= Other.m_Mutex;
-	m_Abort							= Other.m_Abort;
-	m_Scene							= Other.m_Scene;
-	m_Pause							= Other.m_Pause;
-
-	return *this;
-}
-
 QRenderThread::~QRenderThread(void)
 {
 	free(m_pDensityBuffer);
+}
+
+QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
+{
+	m_FileName					= Other.m_FileName;
+	m_pDevScene					= Other.m_pDevScene;
+	m_pDevAccEstXyz				= Other.m_pDevAccEstXyz;
+	m_pDevEstFrameXyz			= Other.m_pDevEstFrameXyz;
+	m_pDevEstFrameBlurXyz		= Other.m_pDevEstFrameBlurXyz;
+	m_pDevEstRgbaLdr			= Other.m_pDevEstRgbaLdr;
+	m_pDevRgbLdrDisp			= Other.m_pDevRgbLdrDisp;
+	m_pDevSeeds					= Other.m_pDevSeeds;
+	m_pRenderImage				= Other.m_pRenderImage;
+	m_pDensityBuffer			= Other.m_pDensityBuffer;
+	m_pGradientMagnitudeBuffer	= Other.m_pGradientMagnitudeBuffer;
+	m_Abort						= Other.m_Abort;
+	m_Scene						= Other.m_Scene;
+	m_Pause						= Other.m_Pause;
+	m_SaveFrames				= Other.m_SaveFrames;
+	m_SaveBaseName				= Other.m_SaveBaseName;
+
+	return *this;
 }
 
 void QRenderThread::run()
@@ -91,7 +96,8 @@ void QRenderThread::run()
  		return;
  	}
 
-	m_Scene.m_Camera.m_Film.m_Resolution.Set(Vec2i(640, 480));
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResX(800);
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResY(600);
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
  	m_Scene.m_Camera.Update();
@@ -117,7 +123,7 @@ void QRenderThread::run()
 	gStatus.SetStatisticChanged("Performance", "Timings", "");
 
 	// Allocate CUDA memory for scene
-	HandleCudaError(cudaMalloc((void**)&m_pScene, sizeof(CScene)));
+	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));
 
 	gStatus.SetStatisticChanged("CUDA Memory", "Scene", QString::number(sizeof(CScene) / MB, 'f', 2), "MB");
 
@@ -154,19 +160,17 @@ void QRenderThread::run()
 
 		// Update the camera, do not remove
 		SceneCopy.m_Camera.Update();
-
+		
 		gStatus.SetStatisticChanged("Camera", "Position", FormatVector(m_Scene.m_Camera.m_From));
 		gStatus.SetStatisticChanged("Camera", "Target", FormatVector(m_Scene.m_Camera.m_Target));
 		gStatus.SetStatisticChanged("Camera", "Up Vector", FormatVector(m_Scene.m_Camera.m_Up));
 
 		// Copy scene from host to device
-		cudaMemcpy(m_pScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
+		cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
 
 		// Resizing the image canvas requires special attention
 		if (SceneCopy.m_DirtyFlags.HasFlag(FilmResolutionDirty))
 		{
-			m_Mutex.lock();
-
 			// Allocate host image buffer, this thread will blit it's frames to this buffer
 			free(m_pRenderImage);
 			m_pRenderImage = NULL;
@@ -177,8 +181,6 @@ void QRenderThread::run()
 				memset(m_pRenderImage, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbaLdr));
 			
 			gStatus.SetStatisticChanged("Host Memory", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbaLdr) / MB, 'f', 2), "MB");
-
-			m_Mutex.unlock();
 
 			const int NoRandomSeeds = SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * 2;
 
@@ -234,9 +236,18 @@ void QRenderThread::run()
 			// Notify Inform others about the memory allocations
 			gStatus.SetResize();
 
-			BindEstimateRgbLdr(m_pDevEstRgbaLdr, m_Scene.m_Camera.m_Film.m_Resolution.GetResX(), m_Scene.m_Camera.m_Film.m_Resolution.GetResY());
+			BindEstimateRgbLdr(m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
-			gStatus.SetStatisticChanged("Camera", "Resolution", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()) + " x " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
+			gStatus.SetStatisticChanged("Film", "Width m_Scene", QString::number(m_Scene.m_Camera.m_Film.m_Resolution.GetResX()), "Pixels");
+			gStatus.SetStatisticChanged("Film", "Height m_Scene", QString::number(m_Scene.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
+
+			gStatus.SetStatisticChanged("Film", "No Elements SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements()), "Pixels");
+			gStatus.SetStatisticChanged("Film", "No Elements m_Scene", QString::number(m_Scene.m_Camera.m_Film.m_Resolution.GetNoElements()), "Pixels");
+
+			
+
+			gStatus.SetStatisticChanged("Film", "Width SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()), "Pixels");
+			gStatus.SetStatisticChanged("Film", "Height SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
 		}
 
 		// Restart the rendering when when the camera, lights and render params are dirty
@@ -248,6 +259,12 @@ void QRenderThread::run()
 			// Reset no. iterations
 			m_Scene.SetNoIterations(0);
 		}
+
+		gStatus.SetStatisticChanged("Film", "Width m_Scene", QString::number(m_Scene.m_Camera.m_Film.m_Resolution.GetResX()), "Pixels");
+		gStatus.SetStatisticChanged("Film", "Height m_Scene", QString::number(m_Scene.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
+
+		gStatus.SetStatisticChanged("Film", "Width SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()), "Pixels");
+		gStatus.SetStatisticChanged("Film", "Height SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
 
 		// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 		m_Scene.m_DirtyFlags.ClearAllFlags();
@@ -274,7 +291,7 @@ void QRenderThread::run()
 	//	m_Scene.m_DenoiseParams.m_LerpC = 1.0f - Radius;
 
 		// Execute the rendering kernels
-  		Render(0, &SceneCopy, m_pScene, m_pDevSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbaLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
+  		Render(0, &SceneCopy, m_pDevScene, m_pDevSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstRgbaLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 		HandleCudaError(cudaGetLastError());
 		
 		gStatus.SetStatisticChanged("Timings", "Render Image", QString::number(RenderImage.m_FilteredDuration, 'f', 2), "ms.");
@@ -289,12 +306,19 @@ void QRenderThread::run()
 
 		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 
+		if (m_SaveFrames.indexOf(m_Scene.GetNoIterations()) > 0)
+		{
+			const QString ImageFilePath = QApplication::applicationDirPath() + "/Output/" + m_SaveBaseName + "_" + QString::number(m_Scene.GetNoIterations()) + ".png";
+
+			SaveImage((unsigned char*)m_pRenderImage, m_Scene.m_Camera.m_Film.m_Resolution.GetResX(), m_Scene.m_Camera.m_Film.m_Resolution.GetResY(), ImageFilePath);
+		}
+
 		// Let others know we are finished with a frame
  		gStatus.SetPostRenderFrame();
 	}
 
 	// Free CUDA buffers
-	HandleCudaError(cudaFree(m_pScene));
+	HandleCudaError(cudaFree(m_pDevScene));
 	HandleCudaError(cudaFree(m_pDevAccEstXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
@@ -302,7 +326,7 @@ void QRenderThread::run()
 	HandleCudaError(cudaFree(m_pDevRgbLdrDisp));
 	HandleCudaError(cudaFree(m_pDevSeeds));
 	
-	m_pScene				= NULL;
+	m_pDevScene				= NULL;
 	m_pDevSeeds				= NULL;
 	m_pDevAccEstXyz			= NULL;
 	m_pDevEstFrameXyz		= NULL;
@@ -511,9 +535,9 @@ void QRenderThread::OnUpdateCamera(void)
 
 	if (gCamera.GetFilm().IsDirty())
 	{
-		// 		Scene()->m_Camera.m_Film.m_Resolution.SetResX(gCamera.GetFilm().GetWidth());
-		// 
-		// 		Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
+// 		Scene()->m_Camera.m_Film.m_Resolution.SetResX(gCamera.GetFilm().GetWidth());
+// 		// 
+// 		Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
 	}
 
 	// Aperture

@@ -8,10 +8,8 @@ class QBackground : public QPresetXML
 
 public:
 	QBackground(QObject* pParent = NULL);
-	virtual ~QBackground(void);
-
 	QBackground::QBackground(const QBackground& Other);
-
+	virtual ~QBackground(void);
 	QBackground& QBackground::operator=(const QBackground& Other);
 
 	bool		GetEnabled(void) const;

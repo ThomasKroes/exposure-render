@@ -30,6 +30,7 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 
 	m_WidthSlider.setOrientation(Qt::Horizontal);
 	m_WidthSlider.setRange(4, 1024);
+	
 	m_GridLayout.addWidget(&m_WidthSlider, 0, 1);
 	
     m_WidthSpinner.setRange(4, 1024);
@@ -39,8 +40,8 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	QObject::connect(&m_WidthSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmWidth(int)));
 	QObject::connect(&m_WidthSpinner, SIGNAL(valueChanged(int)), &m_WidthSlider, SLOT(setValue(int)));
 
-	m_WidthSlider.setEnabled(false);
-	m_WidthSpinner.setEnabled(false);
+ 	m_WidthSlider.setEnabled(false);
+ 	m_WidthSpinner.setEnabled(false);
 
 	// Film height
 	m_GridLayout.addWidget(new QLabel("Film height"), 2, 0);
@@ -149,7 +150,4 @@ void QFilmWidget::OnFilmChanged(const QFilm& Film)
 	// Exposure
 	m_ExposureSlider.setValue(Film.GetExposure(), true);
 	m_ExposureSpinner.setValue(Film.GetExposure(), true);
-
-	gStatus.SetStatisticChanged("Film", "Width", QString::number(Film.GetWidth()), "Pixels");
-	gStatus.SetStatisticChanged("Film", "Height", QString::number(Film.GetHeight()), "Pixels");
 }

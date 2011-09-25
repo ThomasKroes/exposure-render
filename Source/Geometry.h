@@ -1482,7 +1482,7 @@ public:
 	// ToDo: Add description
 	HOD CResolution2D(void)
 	{
-		m_XY		= Vec2i(640, 480);
+		m_XY		= Vec2i(1024, 768);
 
 		Update();
 	}

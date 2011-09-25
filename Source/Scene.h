@@ -146,7 +146,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD CAperture& CAperture::operator=(const CAperture& Other)
+	CAperture& CAperture::operator=(const CAperture& Other)
 	{
 		m_Size		= Other.m_Size;
 		m_NoBlades	= Other.m_NoBlades;
@@ -202,7 +202,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD CBloom& CBloom::operator=(const CBloom& Other)
+	CBloom& CBloom::operator=(const CBloom& Other)
 	{
 		m_Radius		= Other.m_Radius;
 		m_Weight		= Other.m_Weight;
@@ -234,7 +234,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD CToneMap& CToneMap::operator=(const CToneMap& Other)
+	CToneMap& CToneMap::operator=(const CToneMap& Other)
 	{
 		m_Factor = Other.m_Factor;
 
@@ -280,23 +280,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD CFilm& CFilm::operator=(const CFilm& Other)
-	{
-		m_Resolution		= Other.m_Resolution;
-		m_Screen[0][0]		= Other.m_Screen[0][0];
-		m_Screen[0][1]		= Other.m_Screen[0][1];
-		m_Screen[1][0]		= Other.m_Screen[1][0];
-		m_Screen[1][1]		= Other.m_Screen[1][1];
-		m_InvScreen			= Other.m_InvScreen;
-		m_Iso				= Other.m_Iso;
-		m_Exposure			= Other.m_Exposure;
-		m_FStop				= Other.m_FStop;
-		m_Gamma				= Other.m_Gamma;
-		m_ToneMap			= Other.m_ToneMap;
-		m_Bloom				= Other.m_Bloom;
-
-		return *this;
-	}
+	CFilm& CFilm::operator=(const CFilm& Other);
 
 	// ToDo: Add description
 	HOD void Update(const float& FovV, const float& Aperture)
@@ -401,28 +385,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD CCamera& CCamera::operator=(const CCamera& Other)
-	{
-		m_CameraType			= Other.m_CameraType;
-		m_SceneBoundingBox		= Other.m_SceneBoundingBox;
-		m_Hither				= Other.m_Hither;
-		m_Yon					= Other.m_Yon;
-		m_EnableClippingPlanes	= Other.m_EnableClippingPlanes;
-		m_From					= Other.m_From;
-		m_Target				= Other.m_Target;
-		m_Up					= Other.m_Up;
-		m_FovV					= Other.m_FovV;
-		m_AreaPixel				= Other.m_AreaPixel;
-		m_N						= Other.m_N;
-		m_U						= Other.m_U;
-		m_V						= Other.m_V;
-		m_Film					= Other.m_Film;
-		m_Focus					= Other.m_Focus;
-		m_Aperture				= Other.m_Aperture;
-		m_Dirty					= Other.m_Dirty;
-
-		return *this;
-	}
+	CCamera& CCamera::operator=(const CCamera& Other);
 
 	// ToDo: Add description
 	HOD void Update(void)

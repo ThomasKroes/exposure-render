@@ -43,16 +43,14 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	m_MainLayout(),
 	m_QtVtkWidget(),
 	m_ImageActor(),
-	m_DisplayImage(),
+	m_ImageImport(),
 	m_InteractorStyleImage(),
 	m_SceneRenderer(),
 	m_RenderWindow(),
 	m_RenderWindowInteractor(),
 	m_KeyPressCallback(),
 	m_KeyReleaseCallback(),
-	m_InteractorStyleRealisticCamera(),
-	m_TextActor(),
-	m_RenderLoopTimer()
+	m_InteractorStyleRealisticCamera()
 {
 	// Create and apply main layout
 	setLayout(&m_MainLayout);
@@ -82,24 +80,23 @@ void CVtkWidget::OnRenderBegin(void)
 	// Scale
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
-	m_DisplayImage = vtkImageData::New();
- 	m_DisplayImage->SetDimensions(640, 480, 1);
-//	m_DisplayImage->SetDimensions(512,512,10);
-	m_DisplayImage->SetSpacing(1,1,1);
-	m_DisplayImage->SetScalarTypeToUnsignedChar();
-	m_DisplayImage->SetNumberOfScalarComponents(3);// the r,g,b value.
-	m_DisplayImage->SetOrigin(0.0,0.0,0.0);
-	m_DisplayImage->AllocateScalars();
-	
+	m_ImageImport->SetDataSpacing(1, 1, 1);
+	m_ImageImport->SetDataOrigin(-0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResY(), 0);
+	m_ImageImport->SetImportVoidPointer((void*)malloc(3 * Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)), 1);
+	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
+	m_ImageImport->SetDataExtentToWholeExtent();
+	m_ImageImport->SetDataScalarTypeToUnsignedChar();
+	m_ImageImport->SetNumberOfScalarComponents(3);
+	m_ImageImport->Update();
 
-	m_ImageActor = vtkImageActor::New();
-
-	// Configure image actor
 	m_ImageActor->SetInterpolate(1);
-	m_ImageActor->SetInput(m_DisplayImage);
+	m_ImageActor->SetInput(m_ImageImport->GetOutput());
 	m_ImageActor->SetScale(1, -1, -1);
 	m_ImageActor->VisibilityOn();
 
+	// Add the image actor
+	m_SceneRenderer->AddActor(m_ImageActor); 
+	
 	// Add the image actor
 	m_SceneRenderer->AddActor(m_ImageActor); 
 
@@ -112,9 +109,6 @@ void CVtkWidget::OnRenderBegin(void)
 void CVtkWidget::OnRenderEnd(void)
 {
 	m_RenderWindow->Render();
-
-	// Stop the timer
-	m_RenderLoopTimer.stop();
 }
 
 void CVtkWidget::OnPreRenderFrame(void)
@@ -128,7 +122,6 @@ void CVtkWidget::OnPostRenderFrame(void)
 	if (!Scene())
 		return;
 	
-//	gpRenderThread->m_Mutex.lock();
 
 	if (gpRenderThread->GetRenderImage())
 	{/*
@@ -156,7 +149,7 @@ void CVtkWidget::OnPostRenderFrame(void)
 //		m_ImageActor->Render(m_SceneRenderer);
 		m_RenderWindow->Render();
 
-		*/
+		
 
 		// Decide where to blit the image
 		const Vec2i CanvasSize(Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
@@ -165,9 +158,17 @@ void CVtkWidget::OnPostRenderFrame(void)
 		// Blit
 		m_RenderWindow->SetPixelData(max(0, Origin.x), max(0, Origin.y), Origin.x + CanvasSize.x - 1, Origin.y + CanvasSize.y - 1, (unsigned char*)gpRenderThread->GetRenderImage(), 1);
 
-	}
+	*/}
 
-// 	gpRenderThread->m_Mutex.unlock();
+	if (gpRenderThread->GetRenderImage())
+	{
+		m_ImageImport->SetImportVoidPointer(NULL);
+		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+
+		m_ImageActor->SetInput(m_ImageImport->GetOutput());
+
+		m_RenderWindow->GetInteractor()->Render();
+	}
 }
 
 void CVtkWidget::SetupRenderView(void)
@@ -204,18 +205,8 @@ void CVtkWidget::SetupRenderView(void)
 	m_RenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyPressEvent, m_KeyPressCallback);
 	m_RenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyReleaseEvent, m_KeyReleaseCallback);
 
-	// Setup the text and add it to the window
-	vtkSmartPointer<vtkTextActor> m_TextActor = vtkSmartPointer<vtkTextActor>::New();
-	m_TextActor->GetTextProperty()->SetFontSize(24);
-	m_TextActor->SetPosition2(10, 40);
-//	m_SceneRenderer->AddActor2D(m_TextActor);
-	m_TextActor->SetInput ( "Hello world" );
-	m_TextActor->GetTextProperty()->SetColor(1.0,0.0,0.0);
-}
-
-void CVtkWidget::OnRenderLoopTimer(void)
-{
-	
+	m_ImageImport = vtkImageImport::New();
+	m_ImageActor = vtkImageActor::New();
 }
 
 void CVtkWidget::OnResize(void)

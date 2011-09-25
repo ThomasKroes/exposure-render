@@ -54,8 +54,11 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		// Determine probabilities for picking brdf or phase function
 		float PdfBrdf = pScene->m_TransferFunctions.m_Opacity.F(D).r * GradientMagnitude(pScene, Pe), PdfPhase = 1.0f - PdfBrdf;
 
+		Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+
 // 		Lv = UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 
+/*
 		if ((Tr * GradientMagnitude(pScene, Pe)) > 0.2f)//RNG.Get1() < PdfBrdf)
 		{
 			// Estimate direct light at eye point using BRDF shading
@@ -66,6 +69,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 			// Estimate direct light at eye point using the phase function
   			Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);// / PdfPhase;
 		}
+*/
 
 // 		if (LB == 3)
 // 			Lv = SPEC_RED;
@@ -82,7 +86,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 
 void SingleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
+	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	// Execute kernel
