@@ -11,7 +11,10 @@ QCamera::QCamera(QObject* pParent /*= NULL*/) :
 	m_Film(),
 	m_Aperture(),
 	m_Projection(),
-	m_Focus()
+	m_Focus(),
+	m_From(1.0f),
+	m_Target(0.5f),
+	m_Up(0.0f, 1.0f, 0.0f)
 {
 }
 
@@ -34,6 +37,9 @@ QCamera& QCamera::operator=(const QCamera& Other)
 	m_Aperture		= Other.m_Aperture;
 	m_Projection	= Other.m_Projection;
 	m_Focus			= Other.m_Focus;
+	m_From			= Other.m_From;
+	m_Target		= Other.m_Target;
+	m_Up			= Other.m_Up;
 
 	blockSignals(false);
 
@@ -82,6 +88,42 @@ void QCamera::SetFocus(const QFocus& Focus)
 	m_Focus = Focus;
 }
 
+Vec3f QCamera::GetFrom(void) const
+{
+	return m_From;
+}
+
+void QCamera::SetFrom(const Vec3f& From)
+{
+	m_From = From;
+
+	emit Changed();
+}
+
+Vec3f QCamera::GetTarget(void) const
+{
+	return m_Target;
+}
+
+void QCamera::SetTarget(const Vec3f& Target)
+{
+	m_Target = Target;
+
+	emit Changed();
+}
+
+Vec3f QCamera::GetUp(void) const
+{
+	return m_Up;
+}
+
+void QCamera::SetUp(const Vec3f& Up)
+{
+	m_Up = Up;
+
+	emit Changed();
+}
+
 void QCamera::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
@@ -90,6 +132,10 @@ void QCamera::ReadXML(QDomElement& Parent)
 	m_Aperture.ReadXML(Parent.firstChildElement("Aperture"));
 	m_Projection.ReadXML(Parent.firstChildElement("Projection"));
 	m_Focus.ReadXML(Parent.firstChildElement("Focus"));
+
+	ReadVectorElement(Parent, "From", m_From.x, m_From.y, m_From.z);
+	ReadVectorElement(Parent, "Target", m_Target.x, m_Target.y, m_Target.z);
+	ReadVectorElement(Parent, "Up", m_Up.x, m_Up.y, m_Up.z);
 }
 
 QDomElement QCamera::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -105,7 +151,10 @@ QDomElement QCamera::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	m_Projection.WriteXML(DOM, Camera);
 	m_Focus.WriteXML(DOM, Camera);
 
-	
+	WriteVectorElement(DOM, Camera, "From", m_From.x, m_From.y, m_From.z);
+	WriteVectorElement(DOM, Camera, "Target", m_Target.x, m_Target.y, m_Target.z);
+	WriteVectorElement(DOM, Camera, "Up", m_Up.x, m_Up.y, m_Up.z);
+
 	return Camera;
 }
 
@@ -137,5 +186,3 @@ void QCamera::OnFocusChanged(void)
 {
 	emit Changed();
 }
-
-

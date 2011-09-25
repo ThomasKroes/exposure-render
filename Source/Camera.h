@@ -26,6 +26,12 @@ public:
 	void			SetProjection(const QProjection& Projection);
 	QFocus&			GetFocus(void);
 	void			SetFocus(const QFocus& Focus);
+	Vec3f			GetFrom(void) const;
+	void			SetFrom(const Vec3f& From);
+	Vec3f			GetTarget(void) const;
+	void			SetTarget(const Vec3f& Target);
+	Vec3f			GetUp(void) const;
+	void			SetUp(const Vec3f& Up);
 	void			ReadXML(QDomElement& Parent);
 	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	static QCamera	Default(void);
@@ -44,6 +50,9 @@ private:
 	QAperture		m_Aperture;
 	QProjection		m_Projection;
 	QFocus			m_Focus;
+	Vec3f			m_From;
+	Vec3f			m_Target;
+	Vec3f			m_Up;
 };
 
 // Camera singleton

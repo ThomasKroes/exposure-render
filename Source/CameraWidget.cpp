@@ -29,8 +29,8 @@ QCameraWidget::QCameraWidget(QWidget* pParent) :
 	QObject::connect(&gCamera.GetProjection(), SIGNAL(Changed(const QProjection&)), &gCamera, SLOT(OnProjectionChanged()));
 	QObject::connect(&gCamera.GetFocus(), SIGNAL(Changed(const QFocus&)), &gCamera, SLOT(OnFocusChanged()));
 	QObject::connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
-	QObject::connect(&gStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
+	QObject::connect(&gStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
 }
 
 void QCameraWidget::OnLoadPreset(const QString& Name)
@@ -40,12 +40,23 @@ void QCameraWidget::OnLoadPreset(const QString& Name)
 		return;
 
 	gCamera = m_PresetsWidget.GetPreset(Name);
+
+	if (Scene())
+	{
+		Scene()->m_Camera.m_Target	= gCamera.GetTarget();
+		Scene()->m_Camera.m_From	= gCamera.GetFrom();
+		Scene()->m_Camera.m_Up		= gCamera.GetUp();
+	}
 }
 
 void QCameraWidget::OnSavePreset(const QString& Name)
 {
 	QCamera Preset(gCamera);
 	Preset.SetName(Name);
+
+	Preset.SetFrom(Scene()->m_Camera.m_From);
+	Preset.SetTarget(Scene()->m_Camera.m_Target);
+	Preset.SetUp(Scene()->m_Camera.m_Up);
 
 	// Add the preset
 	m_PresetsWidget.SavePreset(Preset);

@@ -13,10 +13,10 @@
 <Node>
 <NormalizedIntensity Value="0.235606"/>
 <Opacity Value="0"/>
-<Diffuse G="7" R="78" B="2"/>
+<Diffuse G="0" R="24" B="0"/>
 <Specular G="17" R="26" B="13"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.076"/>
+<Roughness Value="0"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="0.351154"/>
@@ -43,7 +43,7 @@
 <Roughness Value="100"/>
 </Node>
 </Nodes>
-<DensityScale Value="10"/>
+<DensityScale Value="1.158"/>
 </Preset>
 <Preset Name="manix_smallddd">
 <Nodes>
@@ -146,20 +146,20 @@
 <Roughness Value="0"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.277273"/>
+<NormalizedIntensity Value="0.206112"/>
 <Opacity Value="0"/>
 <Diffuse G="45" R="45" B="45"/>
-<Specular G="255" R="255" B="255"/>
+<Specular G="14" R="40" B="170"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0"/>
+<Roughness Value="0.119"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="0.334129"/>
 <Opacity Value="1"/>
 <Diffuse G="56" R="56" B="56"/>
-<Specular G="255" R="255" B="255"/>
+<Specular G="235" R="255" B="187"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0"/>
+<Roughness Value="0.059"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="1"/>
@@ -177,7 +177,7 @@
 <Node>
 <NormalizedIntensity Value="0"/>
 <Opacity Value="0"/>
-<Diffuse G="160" R="160" B="164"/>
+<Diffuse G="0" R="0" B="0"/>
 <Specular G="10" R="10" B="10"/>
 <Emission G="0" R="0" B="0"/>
 <Roughness Value="1"/>
@@ -185,24 +185,24 @@
 <Node>
 <NormalizedIntensity Value="0.0309172"/>
 <Opacity Value="0"/>
-<Diffuse G="55" R="55" B="55"/>
+<Diffuse G="4" R="4" B="4"/>
 <Specular G="10" R="10" B="10"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.011"/>
+<Roughness Value="0.496"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="0.0593163"/>
 <Opacity Value="1"/>
 <Diffuse G="34" R="34" B="34"/>
-<Specular G="217" R="217" B="217"/>
+<Specular G="255" R="255" B="255"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.047"/>
+<Roughness Value="0.052"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.159705"/>
+<NormalizedIntensity Value="0.121012"/>
 <Opacity Value="1"/>
 <Diffuse G="170" R="255" B="0"/>
-<Specular G="255" R="255" B="127"/>
+<Specular G="18" R="18" B="18"/>
 <Emission G="0" R="0" B="0"/>
 <Roughness Value="0"/>
 </Node>
@@ -212,7 +212,7 @@
 <Diffuse G="160" R="160" B="164"/>
 <Specular G="10" R="10" B="10"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="1"/>
+<Roughness Value="0.096"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="1"/>
@@ -239,15 +239,15 @@
 <NormalizedIntensity Value="0.260568"/>
 <Opacity Value="0"/>
 <Diffuse G="0" R="127" B="0"/>
-<Specular G="40" R="61" B="30"/>
+<Specular G="19" R="19" B="19"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.011"/>
+<Roughness Value="0.104"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="0.434543"/>
 <Opacity Value="0.103093"/>
 <Diffuse G="244" R="255" B="196"/>
-<Specular G="50" R="50" B="50"/>
+<Specular G="170" R="255" B="127"/>
 <Emission G="0" R="0" B="0"/>
 <Roughness Value="0.022"/>
 </Node>
@@ -255,9 +255,9 @@
 <NormalizedIntensity Value="0.7"/>
 <Opacity Value="1"/>
 <Diffuse G="160" R="160" B="164"/>
-<Specular G="10" R="10" B="10"/>
+<Specular G="255" R="255" B="255"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.028"/>
+<Roughness Value="0"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="1"/>
@@ -268,7 +268,7 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
-<DensityScale Value="0.645"/>
+<DensityScale Value="3.802"/>
 </Preset>
 <Preset Name="macoessix_small">
 <Nodes>

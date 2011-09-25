@@ -46,9 +46,9 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_Scene(),
 	m_Pause(false),
 	m_SaveFrames(),
-	m_SaveBaseName("test")
+	m_SaveBaseName("without_noise_reduction")
 {
-//	m_SaveFrames << 2 << 10 << 15 << 20 << 25;
+//	m_SaveFrames << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
 
 	m_Scene.m_DenoiseParams.m_Enabled = false;
 }
@@ -96,8 +96,8 @@ void QRenderThread::run()
  		return;
  	}
 
- 	m_Scene.m_Camera.m_Film.m_Resolution.SetResX(800);
- 	m_Scene.m_Camera.m_Film.m_Resolution.SetResY(600);
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResX(512);
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResY(512);
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
  	m_Scene.m_Camera.Update();
@@ -539,6 +539,12 @@ void QRenderThread::OnUpdateCamera(void)
 // 		// 
 // 		Scene()->m_DirtyFlags.SetFlag(FilmResolutionDirty);
 	}
+
+// 	Scene()->m_Camera.m_From	= gCamera.GetFrom();
+// 	Scene()->m_Camera.m_Target	= gCamera.GetTarget();
+// 	Scene()->m_Camera.m_Up		= gCamera.GetUp();
+
+	Scene()->m_Camera.Update();
 
 	// Aperture
 	Scene()->m_Camera.m_Aperture.m_Size	= gCamera.GetAperture().GetSize();

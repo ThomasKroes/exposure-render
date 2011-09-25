@@ -2,56 +2,65 @@
 <Presets>
 <Preset Name="manix_small">
 <Film>
-<Width Value="640"/>
-<Height Value="480"/>
+<Width Value="800"/>
+<Height Value="600"/>
 </Film>
 <Aperture>
-<Size Value="0"/>
+<Size Value="0.048"/>
 </Aperture>
 <Projection>
-<FieldOfView Value="35"/>
+<FieldOfView Value="24.56"/>
 </Projection>
 <Focus>
-<FocalDistance Value="1.435"/>
+<FocalDistance Value="1.864"/>
 </Focus>
+<From X="1.67206" Y="-0.0815393" Z="-1.26295"/>
+<Target X="0.342087" Y="0.486853" Z="0.455705"/>
+<Up X="0.468284" Y="0.643832" Z="-0.605138"/>
 </Preset>
 <Preset Name="bonsai_small">
 <Film>
-<Width Value="640"/>
-<Height Value="480"/>
+<Width Value="800"/>
+<Height Value="600"/>
 </Film>
 <Aperture>
-<Size Value="0.016"/>
+<Size Value="0.039"/>
 </Aperture>
 <Projection>
-<FieldOfView Value="35"/>
+<FieldOfView Value="29.04"/>
 </Projection>
 <Focus>
-<FocalDistance Value="0.87"/>
+<FocalDistance Value="1.144"/>
 </Focus>
+<From X="-0.207622" Y="0.0736879" Z="-0.809941"/>
+<Target X="0.428569" Y="0.319915" Z="0.176761"/>
+<Up X="-0.39702" Y="0.680603" Z="-0.615759"/>
 </Preset>
 <Preset Name="engine_small">
 <Film>
-<Width Value="640"/>
-<Height Value="480"/>
+<Width Value="800"/>
+<Height Value="600"/>
 </Film>
 <Aperture>
-<Size Value="0.012"/>
+<Size Value="0.066"/>
 </Aperture>
 <Projection>
-<FieldOfView Value="19.18"/>
+<FieldOfView Value="51.44"/>
 </Projection>
 <Focus>
-<FocalDistance Value="2.304"/>
+<FocalDistance Value="0.805"/>
 </Focus>
+<From X="-0.226816" Y="0.267482" Z="-0.407347"/>
+<Target X="0.498413" Y="0.512655" Z="0.249961"/>
+<Up X="-0.180036" Y="0.970034" Z="-0.163176"/>
 </Preset>
 <Preset Name="backpack_small">
 <Film>
-<Width Value="640"/>
-<Height Value="480"/>
+<Width Value="800"/>
+<Height Value="600"/>
 </Film>
 <Aperture>
-<Size Value="0"/>
+<Size Value="0.018"/>
 </Aperture>
 <Projection>
 <FieldOfView Value="35"/>
@@ -59,11 +68,50 @@
 <Focus>
 <FocalDistance Value="0.75"/>
 </Focus>
+<From X="-0.0545588" Y="0.686387" Z="1.53835"/>
+<Target X="0.54854" Y="0.444092" Z="0.49375"/>
+<Up X="-0.202621" Y="0.914211" Z="0.35095"/>
 </Preset>
 <Preset Name="artifix_small">
 <Film>
-<Width Value="640"/>
-<Height Value="480"/>
+<Width Value="800"/>
+<Height Value="600"/>
+</Film>
+<Aperture>
+<Size Value="0.018"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="35"/>
+</Projection>
+<Focus>
+<FocalDistance Value="1.271"/>
+</Focus>
+<From X="0.479089" Y="0.720865" Z="-1.33305"/>
+<Target X="0.398574" Y="0.518947" Z="0.455058"/>
+<Up X="0.0216898" Y="0.876073" Z="-0.481697"/>
+</Preset>
+<Preset Name="macoessix_small">
+<Film>
+<Width Value="800"/>
+<Height Value="600"/>
+</Film>
+<Aperture>
+<Size Value="0.015"/>
+</Aperture>
+<Projection>
+<FieldOfView Value="35"/>
+</Projection>
+<Focus>
+<FocalDistance Value="0.466"/>
+</Focus>
+<From X="-0.154926" Y="0.415755" Z="-0.0354462"/>
+<Target X="0.281135" Y="0.429561" Z="0.390042"/>
+<Up X="-0.426361" Y="0.80321" Z="-0.416023"/>
+</Preset>
+<Preset Name="bonsai">
+<Film>
+<Width Value="800"/>
+<Height Value="600"/>
 </Film>
 <Aperture>
 <Size Value="0"/>
@@ -74,20 +122,8 @@
 <Focus>
 <FocalDistance Value="0.75"/>
 </Focus>
-</Preset>
-<Preset Name="macoessix_small">
-<Film>
-<Width Value="640"/>
-<Height Value="480"/>
-</Film>
-<Aperture>
-<Size Value="0"/>
-</Aperture>
-<Projection>
-<FieldOfView Value="35"/>
-</Projection>
-<Focus>
-<FocalDistance Value="1.217"/>
-</Focus>
+<From X="1" Y="1" Z="1"/>
+<Target X="0" Y="0" Z="0"/>
+<Up X="0" Y="0" Z="0"/>
 </Preset>
 </Presets>
