@@ -188,6 +188,7 @@ void QRenderThread::run()
 			float SizeHdrFrameBuffer			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
 			float SizeHdrBlurFrameBuffer		= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
 			float SizeRgbaLdrFrameBuffer		= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbaLdr);
+			float SizeRgbLdrFrameBuffer			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr);
 			
 			HandleCudaError(cudaFree(m_pDevSeeds));
 			HandleCudaError(cudaFree(m_pDevAccEstXyz));
@@ -202,13 +203,13 @@ void QRenderThread::run()
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameXyz, SizeHdrFrameBuffer));
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeHdrBlurFrameBuffer));
 			HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbaLdr, SizeRgbaLdrFrameBuffer));
-			HandleCudaError(cudaMalloc((void**)&m_pDevRgbLdrDisp, SizeRgbaLdrFrameBuffer));
+			HandleCudaError(cudaMalloc((void**)&m_pDevRgbLdrDisp, SizeRgbLdrFrameBuffer));
 
 			gStatus.SetStatisticChanged("CUDA Memory", "Random Seeds", QString::number(SizeRandomSeeds / MB, 'f', 2), "MB");
 			gStatus.SetStatisticChanged("CUDA Memory", "HDR Accumulation Buffer", QString::number(SizeHdrFrameBuffer / MB, 'f', 2), "MB");
 			gStatus.SetStatisticChanged("CUDA Memory", "HDR Frame Buffer Blur", QString::number(SizeHdrBlurFrameBuffer / MB, 'f', 2), "MB");
 			gStatus.SetStatisticChanged("CUDA Memory", "LDRA Estimate", QString::number(SizeRgbaLdrFrameBuffer / MB, 'f', 2), "MB");
-			gStatus.SetStatisticChanged("CUDA Memory", "LDR Estimate", QString::number(SizeRgbaLdrFrameBuffer / MB, 'f', 2), "MB");
+			gStatus.SetStatisticChanged("CUDA Memory", "LDR Estimate", QString::number(SizeRgbLdrFrameBuffer / MB, 'f', 2), "MB");
 			
 			// Create random seeds
 			unsigned int* pSeeds = (unsigned int*)malloc(SizeRandomSeeds);
@@ -225,7 +226,7 @@ void QRenderThread::run()
 			HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SizeHdrFrameBuffer));
 			HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SizeHdrBlurFrameBuffer));
 			HandleCudaError(cudaMemset(m_pDevEstRgbaLdr, 0, SizeRgbaLdrFrameBuffer));
-			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SizeRgbaLdrFrameBuffer));
+			HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SizeRgbLdrFrameBuffer));
 
 			// Reset no. iterations
 			m_Scene.SetNoIterations(0);
@@ -286,7 +287,7 @@ void QRenderThread::run()
  		gStatus.SetStatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
  		gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(m_Scene.GetNoIterations()), "Iterations");
 
-		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbaLdr), cudaMemcpyDeviceToHost));
+		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 
 		// Let others know we are finished with a frame
  		gStatus.SetPostRenderFrame();

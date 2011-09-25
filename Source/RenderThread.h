@@ -32,7 +32,7 @@ private:
 	CColorXyz*		m_pDevEstFrameXyz;
 	CColorXyz*		m_pDevEstFrameBlurXyz;
 	CColorRgbaLdr*	m_pDevEstRgbaLdr;
-	CColorRgbaLdr*	m_pDevRgbLdrDisp;
+	CColorRgbLdr*	m_pDevRgbLdrDisp;
 	unsigned int*	m_pDevSeeds;
 
 	CColorRgbaLdr*	m_pRenderImage;

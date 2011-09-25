@@ -13,7 +13,7 @@ DEV float vecLen(float4 a, float4 b)
     return ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z));
 }
 
-KERNEL void KNN(CScene* pScene, CColorRgbaLdr* pOut)
+KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 {
     const int ix = blockDim.x * blockIdx.x + threadIdx.x;
     const int iy = blockDim.y * blockIdx.y + threadIdx.y;
@@ -94,7 +94,7 @@ KERNEL void KNN(CScene* pScene, CColorRgbaLdr* pOut)
 // 	}
 }
 
-void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbaLdr* pOut)
+void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbLdr* pOut)
 {
 	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));

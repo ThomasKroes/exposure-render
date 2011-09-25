@@ -42,6 +42,8 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
 	m_QtVtkWidget(),
+	m_ImageActor(),
+	m_DisplayImage(),
 	m_InteractorStyleImage(),
 	m_SceneRenderer(),
 	m_RenderWindow(),
@@ -80,8 +82,31 @@ void CVtkWidget::OnRenderBegin(void)
 	// Scale
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
+	m_DisplayImage = vtkImageData::New();
+ 	m_DisplayImage->SetDimensions(640, 480, 1);
+//	m_DisplayImage->SetDimensions(512,512,10);
+	m_DisplayImage->SetSpacing(1,1,1);
+	m_DisplayImage->SetScalarTypeToUnsignedChar();
+	m_DisplayImage->SetNumberOfScalarComponents(3);// the r,g,b value.
+	m_DisplayImage->SetOrigin(0.0,0.0,0.0);
+	m_DisplayImage->AllocateScalars();
+	
+
+	m_ImageActor = vtkImageActor::New();
+
+	// Configure image actor
+	m_ImageActor->SetInterpolate(1);
+	m_ImageActor->SetInput(m_DisplayImage);
+	m_ImageActor->SetScale(1, -1, -1);
+	m_ImageActor->VisibilityOn();
+
+	// Add the image actor
+	m_SceneRenderer->AddActor(m_ImageActor); 
+
+	
+//	m_UcharArray->Allocate(Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
 	// Start the timer
-	m_RenderLoopTimer.start(10.0f);
+//	m_RenderLoopTimer.start(10.0f);
 }
 
 void CVtkWidget::OnRenderEnd(void)
@@ -102,20 +127,47 @@ void CVtkWidget::OnPostRenderFrame(void)
 {
 	if (!Scene())
 		return;
-
-	gpRenderThread->m_Mutex.lock();
+	
+//	gpRenderThread->m_Mutex.lock();
 
 	if (gpRenderThread->GetRenderImage())
-	{
+	{/*
+		const Vec2i CanvasSize(Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
+		const Vec2i Origin((int)(0.5f * (float)(width() - CanvasSize.x)), (int)(0.5f * (float)(height() - CanvasSize.y)));
+
+		
+		vtkSmartPointer<vtkUnsignedCharArray> m_UcharArray = vtkUnsignedCharArray::New();
+		
+//		m_UcharArray->Allocate(Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
+//		m_UcharArray->SetArray((unsigned char*)gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), 0, 1);
+//		m_UcharArray->SetVoidArray(NULL, Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), 0);
+//		m_UcharArray->SetVoidArray((void*)gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), 0);
+		
+		vtkUnsignedCharArray *_colors = (vtkUnsignedCharArray*)m_DisplayImage->GetPointData()->GetScalars();
+		
+		for (int i = 0; i < Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(); i++)
+		{
+// 			_colors->SetValue(i, gpRenderThread->GetRenderImage()[i].r);
+		}
+//		m_DisplayImage->Update();
+		m_DisplayImage->Modified();
+//		m_DisplayImage->SetDimensions(640, 480, 1);
+//		m_ImageActor->SetInput(m_DisplayImage);
+//		m_ImageActor->Render(m_SceneRenderer);
+		m_RenderWindow->Render();
+
+		*/
+
 		// Decide where to blit the image
-		const Vec2i CanvasSize(640, 480);//Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
+		const Vec2i CanvasSize(Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
 		const Vec2i Origin((int)(0.5f * (float)(width() - CanvasSize.x)), (int)(0.5f * (float)(height() - CanvasSize.y)));
 
 		// Blit
-		m_RenderWindow->SetRGBACharPixelData(Origin.x, Origin.y, Origin.x + CanvasSize.x - 1, Origin.y + CanvasSize.y - 1, (unsigned char*)gpRenderThread->GetRenderImage(), 1);
+		m_RenderWindow->SetPixelData(max(0, Origin.x), max(0, Origin.y), Origin.x + CanvasSize.x - 1, Origin.y + CanvasSize.y - 1, (unsigned char*)gpRenderThread->GetRenderImage(), 1);
+
 	}
 
-	gpRenderThread->m_Mutex.unlock();
+// 	gpRenderThread->m_Mutex.unlock();
 }
 
 void CVtkWidget::SetupRenderView(void)

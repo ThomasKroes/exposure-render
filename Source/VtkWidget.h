@@ -18,6 +18,9 @@
 #include <vtkVolumeMapper.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
+#include <vtkImageData.h>
+#include <vtkUnsignedCharArray.h>
+#include <vtkPointData.h>
 
 // Interactor
 #include "InteractorStyleRealisticCamera.h"
@@ -46,6 +49,8 @@ private:
 	QVTKWidget									m_QtVtkWidget;
 
 public:
+	vtkSmartPointer<vtkImageActor>				m_ImageActor;
+	vtkSmartPointer<vtkImageData>				m_DisplayImage;
 	vtkSmartPointer<vtkInteractorStyleImage>	m_InteractorStyleImage;
 	vtkSmartPointer<vtkRenderer>				m_SceneRenderer;
 	vtkSmartPointer<vtkRenderWindow>			m_RenderWindow;
