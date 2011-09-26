@@ -712,6 +712,7 @@ public:
 	Vec3i				extinctionSize;
 	CDenoiseParams		m_DenoiseParams;
 	cudaExtent			m_ExtinctionSize;
+	float				m_Variance;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
 	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}

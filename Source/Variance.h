@@ -9,9 +9,12 @@ public:
 	CVariance(void);
 	virtual ~CVariance(void);
 		
-	void Free(void);
-	void Resize(int Width, int Height);
-	void Reset(void);
+	void	Free(void);
+	void	Resize(int Width, int Height);
+	void	Reset(void);
+	float*	GetVarianceBuffer(void);
+	float	GetMeanVariance(void) const;
+	void	SetMeanVariance(const float& Variance);
 
 	HOD void Push(float x, int ID)
 	{
@@ -33,7 +36,7 @@ public:
 			m_pOldS[ID] = m_pNewS[ID];
 		}
 
-		m_pVariance[ID] = Variance(ID);
+		m_pVariance[ID] = GetVariance(ID);
 	}
 
 	HOD int NumDataValues(int ID) const
@@ -46,14 +49,14 @@ public:
 		return (m_pN[ID] > 0) ? m_pNewM[ID] : 0.0;
 	}
 
-	HOD float Variance(int ID) const
+	HOD float GetVariance(int ID) const
 	{
 		return ( (m_pN[ID] > 1) ? m_pNewS[ID]/(m_pN[ID] - 1) : 0.0f );
 	}
 
 	HOD float StandardDeviation(int ID) const
 	{
-		return sqrt( Variance(ID) );
+		return sqrt( GetVariance(ID) );
 	}
 
 private:
@@ -65,4 +68,5 @@ private:
 	float*		m_pOldS;
 	float*		m_pNewS;
 	float*		m_pVariance;
+	float		m_MeanVariance;
 };

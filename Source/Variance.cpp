@@ -5,14 +5,15 @@
 #include "Variance.h"
 
 CVariance::CVariance(void) : 
-m_Width(0),
+	m_Width(0),
 	m_Height(0),
 	m_pN(NULL),
 	m_pOldM(NULL),
 	m_pNewM(NULL),
 	m_pOldS(NULL),
 	m_pNewS(NULL),
-	m_pVariance(NULL)
+	m_pVariance(NULL),
+	m_MeanVariance(0)
 {
 }
 
@@ -41,6 +42,8 @@ void CVariance::Resize(int Width, int Height)
 
 	const int NoElements = m_Width * m_Height;
 
+	m_MeanVariance = 0;
+
 	Free();
 
 	gStatus.SetStatisticChanged("CUDA Memory", "Variance", "", "MB");
@@ -62,6 +65,8 @@ void CVariance::Resize(int Width, int Height)
 
 	cudaMalloc((void**)&m_pVariance, NoElements * sizeof(float));
 	gStatus.SetStatisticChanged("Variance", "Magnitude Buffer", QString::number((float)NoElements * sizeof(float) / MB, 'f', 2), "MB");
+
+	Reset();
 }
 
 void CVariance::Reset(void)
@@ -76,6 +81,17 @@ void CVariance::Reset(void)
 	cudaMemset(m_pVariance, 0, NoElements * sizeof(float));
 }
 
+float* CVariance::GetVarianceBuffer(void)
+{
+	return m_pVariance;
+}
 
+float CVariance::GetMeanVariance(void) const
+{
+	return m_MeanVariance;
+}
 
-
+void CVariance::SetMeanVariance(const float& Variance)
+{
+	m_MeanVariance = Variance;
+}
