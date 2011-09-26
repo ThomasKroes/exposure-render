@@ -11,10 +11,11 @@ cudaArray* gpGradientMagnitudeArray	= NULL;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
-#include "ComputeEstimate.cuh"
+#include "Estimate.cuh"
 #include "Utilities.cuh"
 #include "SingleScattering.cuh"
 #include "MultipleScattering.cuh"
+#include "Variance.cuh"
 
 #include "CudaUtilities.h"
 

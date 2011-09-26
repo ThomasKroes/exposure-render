@@ -3,6 +3,8 @@
 #include "Geometry.h"
 #include "Variance.h"
 
+__constant__ float SumVariance = 0;
+
 KERNEL void KrnlComputeVariance(int Width, int Height, CColorXyz* gpEstXyz, CColorXyz* pAccEstXyz, float N, float Exposure, CColorRgbaLdr* pPixels)
 {
 	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global Y
@@ -13,23 +15,23 @@ KERNEL void KrnlComputeVariance(int Width, int Height, CColorXyz* gpEstXyz, CCol
 	if (X >= Width || Y >= Height)
 		return;
 
-	pAccEstXyz[PID] += gpEstFrameXyz[PID];
+	const int MinX = gridDim.x * blockDim.x;
+	const int MinY = gridDim.y * blockDim.y;
 
-	const CColorXyz L = pAccEstXyz[PID] / (float)__max(1.0f, N);
+	__shared__ float LocalSum[8];
 
-	float InvGamma = 1.0f / 2.2f;
+	if (threadIdx.x == 0)
+	{
+		for (int x = MinX; x < MinX + blockDim.x; x++)
+		{
+// 			LocalSum[threadIdx.y] += ;
+		}
+	}
 
-	CColorRgbHdr RgbHdr;
-	
-	RgbHdr.FromXYZ(L.c[0], L.c[1], L.c[2]);
+	atomicAdd(&SumVariance, 1.0f);
 
-	RgbHdr.r = Clamp(1.0f - expf(-(RgbHdr.r / Exposure)), 0.0, 1.0f);
-	RgbHdr.g = Clamp(1.0f - expf(-(RgbHdr.g / Exposure)), 0.0, 1.0f);
-	RgbHdr.b = Clamp(1.0f - expf(-(RgbHdr.b / Exposure)), 0.0, 1.0f);
 
-	pPixels[PID].r = (unsigned char)Clamp((255.0f * powf(RgbHdr.r, InvGamma)), 0.0f, 255.0f);
-	pPixels[PID].g = (unsigned char)Clamp((255.0f * powf(RgbHdr.g, InvGamma)), 0.0f, 255.0f);
-	pPixels[PID].b = (unsigned char)Clamp((255.0f * powf(RgbHdr.b, InvGamma)), 0.0f, 255.0f);
+	__syncthreads();
 }
 
 void ComputeVariance(int Width, int Height, CColorXyz* pEstFrameXyz, CColorXyz* pAccEstXyz, float N, float Exposure, CColorRgbaLdr* pPixels)

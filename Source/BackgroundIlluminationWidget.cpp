@@ -61,10 +61,10 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_IntensityLabel, 3, 0);
 
 	m_IntensitySlider.setOrientation(Qt::Horizontal);
-	m_IntensitySlider.setRange(0.0, 10000.0);
+	m_IntensitySlider.setRange(0.0, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySlider, 3, 1, 1, 2);
 
-	m_IntensitySpinner.setRange(0.0, 10000.0);
+	m_IntensitySpinner.setRange(0.0, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySpinner, 3, 3);
 
 	QObject::connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinner, SLOT(setValue(double)));

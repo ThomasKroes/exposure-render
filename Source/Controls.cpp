@@ -48,7 +48,7 @@ void QColorPushButton::mousePressEvent(QMouseEvent* pEvent)
 	connect(&ColorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));
 
 	ColorDialog.setWindowIcon(GetIcon("color--pencil"));
-
+	ColorDialog.setCurrentColor(m_Color);
 	ColorDialog.exec();
 
 	disconnect(&ColorDialog, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(OnCurrentColorChanged(const QColor&)));

@@ -49,9 +49,9 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_Scene(),
 	m_Pause(false),
 	m_SaveFrames(),
-	m_SaveBaseName("without_noise_reduction")
+	m_SaveBaseName("phase_function")
 {
-//	m_SaveFrames << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
+//	m_SaveFrames << 0 << 100 << 200;
 
 	m_Scene.m_DenoiseParams.m_Enabled = false;
 }
@@ -111,10 +111,8 @@ void QRenderThread::run()
 	// Force the render thread to allocate the necessary buffers, do not remove this line
 	m_Scene.m_DirtyFlags.SetFlag(FilmResolutionDirty | CameraDirty);
 
-	gStatus.SetStatisticChanged("Memory", "CUDA Memory", "", "", ":/Images/memory.png");
-	gStatus.SetStatisticChanged("Memory", "Host Memory", "", "", ":/Images/memory.png");
-
-//	Load(m_FileName);
+	gStatus.SetStatisticChanged("Memory", "CUDA Memory", "", "", "memory");
+	gStatus.SetStatisticChanged("Memory", "Host Memory", "", "", "memory");
 
 	// Bind density buffer to texture
 	Log("Copying density volume to device", "grid");
@@ -323,7 +321,7 @@ void QRenderThread::run()
  		gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(m_Scene.GetNoIterations()), "Iterations");
 
 // 		gStatus.SetStatisticChanged("Test", "Magnitude", QString::number(SceneCopy.m_Variance), "ms.");
-		printf("%.2f", SceneCopy.m_Variance);
+//		printf("%.2f", SceneCopy.m_Variance);
 
 		HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 

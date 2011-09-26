@@ -74,7 +74,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	const float D = Density(pScene, Pe);
 
 	// Accumulated radiance
-	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = GetDiffuse(pScene, D).ToXYZ();
+	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = INV_4_PI_F * GetDiffuse(pScene, D).ToXYZ();
 
 	// Light/shadow ray
 	CRay Rl; 

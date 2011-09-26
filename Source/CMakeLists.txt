@@ -7,7 +7,7 @@ SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 FIND_PACKAGE(CUDA)
 
-SET(CUDA_NVCC_FLAGS "-arch;sm_13")
+SET(CUDA_NVCC_FLAGS "-arch;sm_20")
 
 IF(NOT VTK_BINARY_DIR)
 FIND_PACKAGE(VTK)
@@ -528,7 +528,7 @@ SET(CudaSources
 	Blur.cuh
 	Utilities.cuh
 	Core.cuh
-	ComputeEstimate.cuh
+	Estimate.cuh
 	Transport.cuh
 	RayMarching.cuh
 	Woodcock.cuh

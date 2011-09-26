@@ -13,7 +13,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	const float StepSizeFactor = pScene->GetNoIterations() == 1 ? 2.0f : 2.0f;
+	const float StepSizeFactor = 3.0f;//pScene->GetNoIterations() == 1 ? 2.0f : 2.0f;
 
 	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
 	float Dt		= StepSizeFactor * (1.0f / ((float)pScene->m_Resolution.GetResX()));
@@ -54,7 +54,7 @@ DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int 
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	const float StepSizeFactor = pScene->GetNoIterations() == 1 ? 2.0f : 2.0f;
+	const float StepSizeFactor = 5.0f;//pScene->GetNoIterations() == 1 ? 2.0f : 2.0f;
 
 	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
 	float Dt		= StepSizeFactor * (1.0f / ((float)pScene->m_Resolution.GetResX()));

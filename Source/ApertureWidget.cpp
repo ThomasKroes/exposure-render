@@ -22,10 +22,10 @@ QApertureWidget::QApertureWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(new QLabel("Size"), 3, 0);
 
 	m_SizeSlider.setOrientation(Qt::Horizontal);
-	m_SizeSlider.setRange(0.0, 0.5);
+	m_SizeSlider.setRange(0.0, 0.1);
 	m_GridLayout.addWidget(&m_SizeSlider, 3, 1);
 	
-    m_SizeSpinner.setRange(0.0, 0.5);
+    m_SizeSpinner.setRange(0.0, 0.1);
 	m_SizeSpinner.setSuffix(" mm");
 	m_GridLayout.addWidget(&m_SizeSpinner, 3, 2);
 	
