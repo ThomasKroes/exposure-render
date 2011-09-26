@@ -312,6 +312,16 @@ public:
 
 		m_ToneMap.m_Factor = m_Exposure / (Aperture * Aperture) * m_Iso / 10.0f * powf(118.0f / 255.0f, m_Gamma);
 	}
+
+	HOD int GetWidth(void) const
+	{
+		return m_Resolution.GetResX();
+	}
+
+	HOD int GetHeight(void) const
+	{
+		return m_Resolution.GetResY();
+	}
 };
 
 #define FPS1 30.0f

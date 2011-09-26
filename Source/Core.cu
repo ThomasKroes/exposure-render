@@ -85,7 +85,7 @@ void BindEstimateRgbLdr(CColorRgbaLdr* pBuffer, int Width, int Height)
 	cudaBindTexture2D(0, gTexEstimateRgbLdr, (void*)pBuffer, ChannelDesc, Width, Height, Width * sizeof(uchar4));
 }
 
-void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, CColorRgbaLdr* pDevEstRgbaLdr, CColorRgbLdr* pDevEstRgbLdrDisp, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
+void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz, CColorXyz* pDevEstFrameBlurXyz, CColorXyz* pDevAccEstXyz, CColorXyz* pDevEstXyz, CColorRgbaLdr* pDevEstRgbaLdr, CColorRgbLdr* pDevEstRgbLdrDisp, int N, CVariance* pVariance, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
 {
 	CCudaTimer TmrRender;
 	
@@ -114,7 +114,7 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;
-	ComputeEstimate(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY(), pDevEstFrameXyz, pDevAccEstXyz, N, pScene->m_Camera.m_Film.m_Exposure, pDevEstRgbaLdr);
+	ComputeEstimate(pScene, pDevScene, pDevEstFrameXyz, pDevAccEstXyz, pDevEstXyz, pDevEstRgbaLdr, N, pVariance);
 	HandleCudaError(cudaGetLastError());
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
 

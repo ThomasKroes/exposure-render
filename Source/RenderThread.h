@@ -2,6 +2,7 @@
 
 #include "Statistics.h"
 #include "Scene.h"
+#include "Variance.h"
 
 class QRenderThread : public QThread
 {
@@ -29,12 +30,16 @@ private:
 	
 	CScene*			m_pDevScene;
 	CColorXyz*		m_pDevAccEstXyz;
+	CColorXyz*		m_pDevEstXyz;
 	CColorXyz*		m_pDevEstFrameXyz;
 	CColorXyz*		m_pDevEstFrameBlurXyz;
 	CColorRgbaLdr*	m_pDevEstRgbaLdr;
 	CColorRgbLdr*	m_pDevRgbLdrDisp;
 	unsigned int*	m_pDevSeeds;
 
+	CVariance	m_Variance;
+	CVariance*	m_pDevVariance;
+	
 	CColorRgbaLdr*	m_pRenderImage;
 	short*			m_pDensityBuffer;
 	short*			m_pGradientMagnitudeBuffer;

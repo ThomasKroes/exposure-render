@@ -123,6 +123,7 @@ SET(ExposureRenderSources
 	CudaUtilities.cpp
 	Status.cpp
 	Timing.cpp
+	Variance.cpp
 
 	# Logging
 	Logger.cpp
@@ -216,6 +217,7 @@ SET(ExposureRenderHeaders
 	CudaUtilities.h
 	Status.h
 	Timing.h
+	Variance.h
 
 	# Logging
 	Logger.h
@@ -484,6 +486,7 @@ SET(CoreSources
 	CudaUtilities.h
 	Status.h
 	Timing.h
+	Variance.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
@@ -510,6 +513,7 @@ SET(CoreSources
 	CudaUtilities.cpp
 	Status.cpp
 	Timing.cpp
+	Variance.cpp
 )
 
 # Make the core group
@@ -527,6 +531,7 @@ SET(CudaSources
 	RayMarching.cuh
 	Woodcock.cuh
 	Denoise.cuh
+	Variance.cuh
 	Core.cu
 )
 

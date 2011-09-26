@@ -55,6 +55,11 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	// Create and apply main layout
 	setLayout(&m_MainLayout);
 
+	QMenu* pMenu = new QMenu();
+	pMenu->addAction("asd", this, SLOT(OnRenderBegin()));
+
+	m_MainLayout.addWidget(pMenu);
+
 	// Add VTK widget 
 	m_MainLayout.addWidget(&m_QtVtkWidget);
 
