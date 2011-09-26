@@ -13,9 +13,11 @@ public slots:
 	void OnRenderEnd(void);
 	void OnSetDensityScale(double DensityScale);
 	void OnTransferFunctionChanged(void);
+	void OnSetShadingType(int Index);
 
 private:
 	QGridLayout		m_MainLayout;
 	QDoubleSlider	m_DensityScaleSlider;
 	QDoubleSpinner	m_DensityScaleSpinner;
+	QComboBox		m_ShadingType;
 };

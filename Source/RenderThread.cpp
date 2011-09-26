@@ -542,7 +542,8 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		m_Scene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(0.0001f + (10000.0f * powf(Node.GetGlossiness(), 2.0f)));
 	}
 
-	m_Scene.m_DensityScale = TransferFunction.GetDensityScale();
+	m_Scene.m_DensityScale	= TransferFunction.GetDensityScale();
+	m_Scene.m_ShadingType	= TransferFunction.GetShadingType();
 
 	m_Scene.m_DirtyFlags.SetFlag(TransferFunctionDirty);
 }

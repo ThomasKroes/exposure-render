@@ -64,7 +64,8 @@ CScene::CScene(void) :
 	m_MacrocellSize(32),
 	m_DenoiseParams(),
 	m_NoIterations(0),
-	m_ExtinctionSize()
+	m_ExtinctionSize(),
+	m_ShadingType(2)
 {
 }
 
@@ -97,6 +98,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_DenoiseParams		= Other.m_DenoiseParams;
 	m_NoIterations		= Other.m_NoIterations;
 	m_ExtinctionSize	= Other.m_ExtinctionSize;
+	m_ShadingType		= Other.m_ShadingType;
 
 	return *this;
 }

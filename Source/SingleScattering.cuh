@@ -54,25 +54,38 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		// Determine probabilities for picking brdf or phase function
 		float PdfBrdf = pScene->m_TransferFunctions.m_Opacity.F(D).r * GradientMagnitude(pScene, Pe), PdfPhase = 1.0f - PdfBrdf;
 
-		Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
-
-// 		Lv = UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
-
-/*
-		if ((GradientMagnitude(pScene, Pe)) > 4.0f)//RNG.Get1() < PdfBrdf)
+		switch (pScene->m_ShadingType)
 		{
-			// Estimate direct light at eye point using BRDF shading
-  			Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);// / PdfBrdf;
-		}
-		else
-		{
-			// Estimate direct light at eye point using the phase function
-  			Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);// / PdfPhase;
-		}
-*/
+			case 0:
+			{
+				// Brdf Shading
+				Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+				break;
+			}
+		
+			case 1:
+			{
+				// Brdf Shading
+				Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+				break;
+			}
 
-// 		if (LB == 3)
-// 			Lv = SPEC_RED;
+			case 2:
+			{
+				if ((GradientMagnitude(pScene, Pe)) > 4.0f)//RNG.Get1() < PdfBrdf)
+				{
+					// Estimate direct light at eye point using BRDF shading
+  					Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);// / PdfBrdf;
+				}
+				else
+				{
+					// Estimate direct light at eye point using the phase function
+  					Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);// / PdfPhase;
+				}
+
+				break;
+			}
+		}
 	}
 	else
 	{

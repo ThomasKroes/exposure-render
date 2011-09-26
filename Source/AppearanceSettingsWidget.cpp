@@ -9,7 +9,8 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_MainLayout(),
 	m_DensityScaleSlider(),
-	m_DensityScaleSpinner()
+	m_DensityScaleSpinner(),
+	m_ShadingType()
 {
 	setTitle("Settings");
 	
@@ -28,9 +29,17 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_DensityScaleSpinner.setDecimals(3);
 	m_MainLayout.addWidget(&m_DensityScaleSpinner, 2, 2);
 
+	m_MainLayout.addWidget(new QLabel("Shading Type"), 3, 0);
+
+	m_ShadingType.addItem(GetIcon("palette"), "BRDF", 0);
+	m_ShadingType.addItem(GetIcon("palette"), "Phase Function", 1);
+	m_ShadingType.addItem(GetIcon("palette"), "Hybrid", 2);
+	m_MainLayout.addWidget(&m_ShadingType, 3, 1, 1, 2);
+
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSpinner, SIGNAL(valueChanged(double)), &m_DensityScaleSlider, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetDensityScale(double)));
+	QObject::connect(&m_ShadingType, SIGNAL(currentIndexChanged(int)), this, SLOT(OnSetShadingType(int)));
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	QObject::connect(&gTransferFunction, SIGNAL(Changed()), this, SLOT(OnTransferFunctionChanged()));
@@ -55,4 +64,9 @@ void QAppearanceSettingsWidget::OnTransferFunctionChanged(void)
 {
 	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale(), true);
 	m_DensityScaleSpinner.setValue(gTransferFunction.GetDensityScale(), true);
+}
+
+void QAppearanceSettingsWidget::OnSetShadingType(int Index)
+{
+	gTransferFunction.SetShadingType(Index);
 }

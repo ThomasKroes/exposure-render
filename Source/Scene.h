@@ -713,6 +713,7 @@ public:
 	CDenoiseParams		m_DenoiseParams;
 	cudaExtent			m_ExtinctionSize;
 	float				m_Variance;
+	int					m_ShadingType;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
 	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}

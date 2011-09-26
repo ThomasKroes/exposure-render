@@ -29,6 +29,8 @@ public:
 	int							GetNodeIndex(QNode* pNode);
 	float						GetDensityScale(void) const;
 	void						SetDensityScale(const float& DensityScale);
+	int							GetShadingType(void) const;
+	void						SetShadingType(const int& ShadingType);
 	void						ReadXML(QDomElement& Parent);
 	QDomElement					WriteXML(QDomDocument& DOM, QDomElement& Parent);
 	static QTransferFunction	Default(void);
@@ -44,6 +46,7 @@ private:
 	QNodeList	m_Nodes;
 	QNode*		m_pSelectedNode;
 	float		m_DensityScale;
+	int			m_ShadingType;
 
 	friend class QNode;
 };

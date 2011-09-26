@@ -16,7 +16,8 @@ QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	QPresetXML(pParent),
 	m_Nodes(),
 	m_pSelectedNode(NULL),
-	m_DensityScale(5.0f)
+	m_DensityScale(5.0f),
+	m_ShadingType(1)
 {
 }
 
@@ -39,6 +40,7 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 		connect(&m_Nodes[i], SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 
 	m_DensityScale	= Other.m_DensityScale;
+	m_ShadingType	= Other.m_ShadingType;
 
 	// Update node's range
 	UpdateNodeRanges();
@@ -273,6 +275,21 @@ void QTransferFunction::SetDensityScale(const float& DensityScale)
 	emit Changed();
 }
 
+int QTransferFunction::GetShadingType(void) const
+{
+	return m_ShadingType;
+}
+
+void QTransferFunction::SetShadingType(const int& ShadingType)
+{
+	if (ShadingType == m_ShadingType)
+		return;
+
+	m_ShadingType = ShadingType;
+
+	emit Changed();
+}
+
 void QTransferFunction::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
@@ -299,6 +316,9 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 
 	// Density Scale
 	m_DensityScale = Parent.firstChildElement("DensityScale").attribute("Value").toFloat();
+
+	// Shading type
+	m_ShadingType = Parent.firstChildElement("ShadingType").attribute("Value").toInt();
 
 	blockSignals(false);
 
@@ -327,6 +347,11 @@ QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 	QDomElement DensityScale = DOM.createElement("DensityScale");
 	DensityScale.setAttribute("Value", GetDensityScale());
 	Preset.appendChild(DensityScale);
+
+	// Shading Type
+	QDomElement ShadingType = DOM.createElement("ShadingType");
+	ShadingType.setAttribute("Value", GetShadingType());
+	Preset.appendChild(ShadingType);
 
 	return Preset;
 }
