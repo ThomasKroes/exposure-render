@@ -715,6 +715,12 @@ public:
 	float				m_Variance;
 	int					m_ShadingType;
 	bool				m_Spectral;
+	float				m_StepSizeFactor;
+	float				m_StepSizeFactorShadow;
+	float				m_GradientDelta;
+	float				m_IOR;
+	float				m_Test;
+	float				m_GradMagMean;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
 	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}

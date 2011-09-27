@@ -162,8 +162,8 @@ void CVtkWidget::OnPostRenderFrame(void)
 
 		// Blit
 		m_RenderWindow->SetPixelData(max(0, Origin.x), max(0, Origin.y), Origin.x + CanvasSize.x - 1, Origin.y + CanvasSize.y - 1, (unsigned char*)gpRenderThread->GetRenderImage(), 1);
-
-	*/}
+*/
+	}
 
 	if (gpRenderThread->GetRenderImage())
 	{
@@ -173,7 +173,7 @@ void CVtkWidget::OnPostRenderFrame(void)
 		m_ImageActor->SetInput(m_ImageImport->GetOutput());
 
 		m_RenderWindow->GetInteractor()->Render();
-	}
+	}/**/
 }
 
 void CVtkWidget::SetupRenderView(void)

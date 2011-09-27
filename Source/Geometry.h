@@ -1621,6 +1621,8 @@ public:
 	HOD void	SetResZ(const int& ResZ)			{ m_Dirty = m_XYZ.z != ResZ; m_XYZ.z = ResZ; Update(); }
 	HOD Vec3f	GetInv(void) const					{ return m_InvXYZ; }
 	HOD int		GetNoElements(void) const			{ return m_NoElements; }
+	HOD int		GetMin(void) const					{ return min(GetResX(), min(GetResY(), GetResZ()));		}
+	HOD int		GetMax(void) const					{ return max(GetResX(), max(GetResY(), GetResZ()));		}
 
 	HO void PrintSelf(void)
 	{

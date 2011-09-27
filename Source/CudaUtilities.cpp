@@ -155,7 +155,7 @@ void HandleCudaError(const cudaError_t CudaError)
 	if (CudaError == cudaSuccess)
 		return;
 
-	Log("Cuda Error: " + QString(cudaGetErrorString(CudaError)), QLogger::Critical);
+	throw new QString("Encountered a critical CUDA error: " + QString(cudaGetErrorString(CudaError)));
 }
 
 int GetTotalCudaMemory(void)

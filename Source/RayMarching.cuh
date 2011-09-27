@@ -3,7 +3,7 @@
 #include "Geometry.h"
 #include "Scene.h"
 
-DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, const bool& Spectral, int SpectralComponent)
+DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -13,10 +13,8 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	const float StepSizeFactor = 3.0f;//pScene->GetNoIterations() == 1 ? 2.0f : 2.0f;
-
 	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
-	float Dt		= StepSizeFactor * (1.0f / ((float)pScene->m_Resolution.GetResX()));
+	float Dt		= pScene->m_StepSizeFactor * (1.0f / ((float)pScene->m_Resolution.GetMin()));
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 	float D			= 0.0f;
@@ -34,10 +32,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 		
 		D = Density(pScene, samplePos);
 
-		if (Spectral)
-			SigmaT	= (1.0f - GetDiffuse(pScene, D)[SpectralComponent]) * GetOpacity(pScene, D)[SpectralComponent];
-		else
-			SigmaT	= GetOpacity(pScene, D).r;
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D).r;
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
@@ -48,11 +43,8 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, const bool& Spectral, int SpectralComponent)
+DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 {
-// 	if (pScene->GetNoIterations() == 1)
-// 		return false;
-
 	float MinT = 0.0f, MaxT = 0.0f;
 
 	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
@@ -61,10 +53,8 @@ DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, cons
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	const float StepSizeFactor = 5.0f;//pScene->GetNoIterations() == 1 ? 2.0f : 2.0f;
-
 	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
-	float Dt		= StepSizeFactor * (1.0f / ((float)pScene->m_Resolution.GetResX()));
+	float Dt		= pScene->m_StepSizeFactorShadow * (1.0f / ((float)pScene->m_Resolution.GetMin()));
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 	float D			= 0.0f;
@@ -77,16 +67,12 @@ DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, cons
 	{
 		samplePos = R.m_O + MinT * R.m_D;
 
-		// Free path, no collisions in between
 		if (MinT > MaxT)
 			return false;
 		
 		D = Density(pScene, samplePos);
 
-		if (Spectral)
-			SigmaT	= (1.0f - GetDiffuse(pScene, D)[SpectralComponent]) * GetOpacity(pScene, D)[SpectralComponent];
-		else
-			SigmaT	= GetOpacity(pScene, D).r;
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D).r;
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;

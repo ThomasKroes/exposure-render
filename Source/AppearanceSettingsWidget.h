@@ -14,10 +14,16 @@ public slots:
 	void OnSetDensityScale(double DensityScale);
 	void OnTransferFunctionChanged(void);
 	void OnSetShadingType(int Index);
+	void OnSetMaxGradientMagnitude(double MaxGradMag);
+	void OnSetIndexOfRefraction(double IOR);
 
 private:
 	QGridLayout		m_MainLayout;
 	QDoubleSlider	m_DensityScaleSlider;
 	QDoubleSpinner	m_DensityScaleSpinner;
 	QComboBox		m_ShadingType;
+	QDoubleSlider	m_MaxGradientMagnitudeSlider;
+	QDoubleSpinner	mm_MaxGradientMagnitudeSpinner;
+	QDoubleSlider	m_IndexOfRefractionSlider;
+	QDoubleSpinner	m_IndexOfRefractionSpinner;
 };

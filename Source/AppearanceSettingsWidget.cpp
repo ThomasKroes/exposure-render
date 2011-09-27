@@ -4,6 +4,7 @@
 
 #include "AppearanceSettingsWidget.h"
 #include "TransferFunction.h"
+#include "RenderThread.h"
 
 QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -36,9 +37,44 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_ShadingType.addItem("Hybrid", 2);
 	m_MainLayout.addWidget(&m_ShadingType, 3, 1, 1, 2);
 
+	m_MainLayout.addWidget(new QLabel("Max. Grad. Mag."), 4, 0);
+	
+	m_MaxGradientMagnitudeSlider.setOrientation(Qt::Horizontal);
+	m_MaxGradientMagnitudeSlider.setRange(0.001, 1000.0);
+	m_MaxGradientMagnitudeSlider.setValue(100.0);
+
+	m_MainLayout.addWidget(&m_MaxGradientMagnitudeSlider, 4, 1);
+
+	mm_MaxGradientMagnitudeSpinner.setRange(0.001, 1000.0);
+	mm_MaxGradientMagnitudeSpinner.setDecimals(3);
+
+	m_MainLayout.addWidget(&mm_MaxGradientMagnitudeSpinner, 4, 2);
+
+	m_MainLayout.addWidget(new QLabel("Index Of Refraction"), 5, 0);
+
+	m_IndexOfRefractionSlider.setOrientation(Qt::Horizontal);
+	m_IndexOfRefractionSlider.setRange(0.001, 50.0);
+	m_IndexOfRefractionSlider.setValue(10.0);
+
+	m_MainLayout.addWidget(&m_IndexOfRefractionSlider, 5, 1);
+
+	m_IndexOfRefractionSpinner.setRange(0.001, 50.0);
+	m_IndexOfRefractionSpinner.setDecimals(3);
+
+	m_MainLayout.addWidget(&m_IndexOfRefractionSpinner, 5, 2);
+
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSpinner, SIGNAL(valueChanged(double)), &m_DensityScaleSlider, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetDensityScale(double)));
+
+	QObject::connect(&m_MaxGradientMagnitudeSlider, SIGNAL(valueChanged(double)), &mm_MaxGradientMagnitudeSpinner, SLOT(setValue(double)));
+	QObject::connect(&mm_MaxGradientMagnitudeSpinner, SIGNAL(valueChanged(double)), &m_MaxGradientMagnitudeSlider, SLOT(setValue(double)));
+	QObject::connect(&m_MaxGradientMagnitudeSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetMaxGradientMagnitude(double)));
+
+	QObject::connect(&m_IndexOfRefractionSlider, SIGNAL(valueChanged(double)), &m_IndexOfRefractionSpinner, SLOT(setValue(double)));
+	QObject::connect(&m_IndexOfRefractionSpinner, SIGNAL(valueChanged(double)), &m_IndexOfRefractionSlider, SLOT(setValue(double)));
+	QObject::connect(&m_IndexOfRefractionSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetIndexOfRefraction(double)));
+
 	QObject::connect(&m_ShadingType, SIGNAL(currentIndexChanged(int)), this, SLOT(OnSetShadingType(int)));
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
@@ -69,4 +105,24 @@ void QAppearanceSettingsWidget::OnTransferFunctionChanged(void)
 void QAppearanceSettingsWidget::OnSetShadingType(int Index)
 {
 	gTransferFunction.SetShadingType(Index);
+}
+
+void QAppearanceSettingsWidget::OnSetMaxGradientMagnitude(double MaxGradMag)
+{
+	if (!Scene())
+		return;
+
+ 	Scene()->m_Test = (float)MaxGradMag;
+// 
+ 	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
+}
+
+void QAppearanceSettingsWidget::OnSetIndexOfRefraction(double IOR)
+{
+	if (!Scene())
+		return;
+
+	Scene()->m_IOR = IOR;
+	
+	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 }

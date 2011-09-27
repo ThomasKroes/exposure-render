@@ -15,12 +15,11 @@ __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 {
 	Vec3f Gradient;
 
-// 	float Delta = 0.001f * pScene->m_Spacing.Min();
-	float Delta = pScene->m_BoundingBox.m_MaxP.Min() / (float)pScene->m_Resolution.GetResX();
+	float Delta = pScene->m_GradientDelta;
 
-	Gradient.x = Density(pScene, P + Vec3f(Delta, 0.0f, 0.0f)) - Density(pScene, P - Vec3f(Delta, 0.0f, 0.0f));
-	Gradient.y = Density(pScene, P + Vec3f(0.0f, Delta, 0.0f)) - Density(pScene, P - Vec3f(0.0f, Delta, 0.0f));
-	Gradient.z = Density(pScene, P + Vec3f(0.0f, 0.0f, Delta)) - Density(pScene, P - Vec3f(0.0f, 0.0f, Delta));
+	Gradient.x = (Density(pScene, P + Vec3f(Delta, 0.0f, 0.0f)) - Density(pScene, P - Vec3f(Delta, 0.0f, 0.0f))) / Delta;
+	Gradient.y = (Density(pScene, P + Vec3f(0.0f, Delta, 0.0f)) - Density(pScene, P - Vec3f(0.0f, Delta, 0.0f))) / Delta;
+	Gradient.z = (Density(pScene, P + Vec3f(0.0f, 0.0f, Delta)) - Density(pScene, P - Vec3f(0.0f, 0.0f, Delta))) / Delta;
 
 	Gradient.Normalize();
 
@@ -29,12 +28,12 @@ __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 
 DEV float GradientMagnitude(CScene* pScene, const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z)) / 43.0f;//pScene->m_GradientMagnitudeRange.GetLength();
+	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z)) / pScene->m_GradientMagnitudeRange.GetLength();
 }
 
 DEV CColorRgbHdr GetOpacity(CScene* pScene, const float& D)
 {
-	return pScene->m_DensityScale * pScene->m_TransferFunctions.m_Opacity.F(D);
+	return pScene->m_TransferFunctions.m_Opacity.F(D);
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& D)

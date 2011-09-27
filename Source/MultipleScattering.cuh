@@ -31,7 +31,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorX
 	
 	CLight* pLight = NULL;
 
-	if (SampleDistanceRM(Re, RNG, Pe, pScene, 0, 0))
+	if (SampleDistanceRM(Re, RNG, Pe, pScene))
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
@@ -47,7 +47,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorX
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
 		
 		// Estimate direct light at eye point
-	 	Lv = Ke + UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, 0.001f, 0, false);
+	 	Lv = Ke + UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 	}
 	else
 	{

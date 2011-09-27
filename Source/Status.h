@@ -12,7 +12,7 @@ public:
 	void SetResize(void);
 	void SetLoadPreset(const QString& PresetName);
 	void SetStatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit = "", const QString& Icon = "");
-
+	
 signals:
 	void RenderBegin(void);
 	void RenderEnd(void);

@@ -29,10 +29,10 @@ KERNEL void KrnlEstimate(CScene* pScene, CColorXyz* pEstFrameXyz, CColorXyz* pAc
 	RgbHdr.b = Clamp(1.0f - expf(-(RgbHdr.b / pScene->m_Camera.m_Film.m_Exposure)), 0.0, 1.0f);
 
 	// Add sample variance
-	pVariance->Push(RgbHdr.g, PID);
+//	pVariance->Push(RgbHdr.g, PID);
 
 	// Get variance
-	const float Variance = pVariance->GetVariance(PID);
+//	const float Variance = pVariance->GetVariance(PID);
 
 	// Uncomment to show variance
 // 	pPixels[PID].r = (unsigned char)Clamp((255.0f * powf(Variance, InvGamma)), 0.0f, 255.0f);

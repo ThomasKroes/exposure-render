@@ -7,13 +7,13 @@
 #include "RayMarching.cuh"
 #include "Woodcock.cuh"
 
-DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const bool& Spectral, int SpectralComponent)
+DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd)
 {
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
 	const float D = Density(pScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, D).ToXYZ(), GetSpecular(pScene, D).ToXYZ(), 5.0f, 0.0001 * GetRoughness(pScene, D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, D).ToXYZ(), GetSpecular(pScene, D).ToXYZ(), pScene->m_IOR, GetRoughness(pScene, D).r);
 	
 	// Light/shadow ray
 	CRay Rl; 
@@ -36,7 +36,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 
 	// Sample the light with MIS
-	if (!Li.IsBlack() && BsdfPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, Rnd, P, pScene, Spectral, SpectralComponent))
+	if (!Li.IsBlack() && BsdfPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, Rnd, P, pScene))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
@@ -59,7 +59,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 
 		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, pLight, &LightPdf) && pLight == &Light)
 		{
-			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene, Spectral, SpectralComponent)) 
+			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene)) 
 			{
 				Ld += F * Li * AbsDot(Wi, N) * WeightMIS / BsdfPdf;
 			}
@@ -69,7 +69,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 	return Ld;
 }
 
-DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const bool& Spectral, int SpectralComponent)
+DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd)
 {
 	const float D = Density(pScene, Pe);
 
@@ -80,7 +80,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	CRay Rl; 
 
 	// Light probability
-	float LightPdf = 1.0f, BsdfPdf = INV_4_PI_F;
+	float LightPdf = 1.0f, PhasePdf = 1.0f;
 	
 	// Incident light direction
 	Vec3f Wi, P, Pl;
@@ -93,17 +93,19 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	Wi = -Rl.m_D; 
 
 	// Sample the light with MIS
-	if (!Li.IsBlack() && LightPdf > 0.0f && !FreePathRM(Rl, Rnd, P, pScene, Spectral, SpectralComponent))
+	if (!Li.IsBlack() && LightPdf > 0.0f && !FreePathRM(Rl, Rnd, P, pScene))
 	{
-		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
+		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, PhasePdf);
 
 		Ld += F * Li * WeightMIS / LightPdf;
 	}
 
+	PhasePdf = INV_4_PI_F;
+	
 	// Sample the phase function with MIS
 	Wi = UniformSampleSphere(LS.m_BsdfSample.m_Dir);
 
-	if (!F.IsBlack() && BsdfPdf > 0.0f)
+	if (!F.IsBlack() && PhasePdf > 0.0f)
 	{
 		float WeightMIS = 1.0f;
 
@@ -112,13 +114,13 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 		if (LightPdf == 0.0f)
 			return Ld;
 
-		WeightMIS = PowerHeuristic(1.0f, BsdfPdf, 1.0f, LightPdf);
+		WeightMIS = PowerHeuristic(1.0f, PhasePdf, 1.0f, LightPdf);
 
 		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, pLight, &LightPdf) && pLight == &Light)
 		{
-			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene, Spectral, SpectralComponent)) 
+			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene)) 
 			{
-				Ld += F * Li * WeightMIS / BsdfPdf;
+				Ld += F * Li * WeightMIS / PhasePdf;
 			}
 		}
 	}
@@ -126,7 +128,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	return Ld;
 }
 
-DEV CColorXyz UniformSampleOneLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const bool& Spectral, int SpectralComponent, const bool& Brdf)
+DEV CColorXyz UniformSampleOneLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const bool& Brdf)
 {
 	// Determine no. lights
 	const int NumLights = pScene->m_Lighting.m_NoLights;
@@ -147,7 +149,7 @@ DEV CColorXyz UniformSampleOneLight(CScene* pScene, const Vec3f& Wo, const Vec3f
 	CLight& Light = pScene->m_Lighting.m_Lights[WhichLight];
 
 	if (Brdf)
-		return (float)NumLights * EstimateDirectLightBrdf(pScene, Light, LS, Wo, Pe, N, Rnd, Spectral, SpectralComponent);
+		return (float)NumLights * EstimateDirectLightBrdf(pScene, Light, LS, Wo, Pe, N, Rnd);
 	else
-		return (float)NumLights * EstimateDirectLightPhase(pScene, Light, LS, Wo, Pe, N, Rnd, Spectral, SpectralComponent);
+		return (float)NumLights * EstimateDirectLightPhase(pScene, Light, LS, Wo, Pe, N, Rnd);
 }

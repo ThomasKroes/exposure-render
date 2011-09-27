@@ -81,7 +81,7 @@ void BlurImageXyz(CColorXyz* pImage, CColorXyz* pTempImage, const CResolution2D&
 	const dim3 KernelGrid((int)ceilf((float)Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)Resolution.GetResY() / (float)KernelBlock.y));
 
 	// Create gaussian filter
-	CGaussianFilter GaussianFilter(Radius, Radius, 0.33f * Radius);
+	CGaussianFilter GaussianFilter(Radius, Radius, 0.3f * Radius);
 
 	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pImage, pTempImage, Resolution, GaussianFilter); 
 	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pImage, pTempImage, Resolution, GaussianFilter); 
