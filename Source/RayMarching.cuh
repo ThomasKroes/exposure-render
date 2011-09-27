@@ -3,7 +3,7 @@
 #include "Geometry.h"
 #include "Scene.h"
 
-DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int Component)
+DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, const bool& Spectral, int SpectralComponent)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -19,6 +19,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	float Dt		= StepSizeFactor * (1.0f / ((float)pScene->m_Resolution.GetResX()));
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
+	float D			= 0.0f;
 
 	Vec3f samplePos; 
 
@@ -31,7 +32,13 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= GetOpacity(pScene, Density(pScene, samplePos)).r;
+		D = Density(pScene, samplePos);
+
+		if (Spectral)
+			SigmaT	= (1.0f - GetDiffuse(pScene, D)[SpectralComponent]) * GetOpacity(pScene, D)[SpectralComponent];
+		else
+			SigmaT	= GetOpacity(pScene, D).r;
+
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
@@ -41,7 +48,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int Component)
+DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, const bool& Spectral, int SpectralComponent)
 {
 // 	if (pScene->GetNoIterations() == 1)
 // 		return false;
@@ -60,6 +67,7 @@ DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int 
 	float Dt		= StepSizeFactor * (1.0f / ((float)pScene->m_Resolution.GetResX()));
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
+	float D			= 0.0f;
 
 	Vec3f samplePos; 
 
@@ -73,7 +81,13 @@ DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int 
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= GetOpacity(pScene, Density(pScene, samplePos)).r;
+		D = Density(pScene, samplePos);
+
+		if (Spectral)
+			SigmaT	= (1.0f - GetDiffuse(pScene, D)[SpectralComponent]) * GetOpacity(pScene, D)[SpectralComponent];
+		else
+			SigmaT	= GetOpacity(pScene, D).r;
+
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}

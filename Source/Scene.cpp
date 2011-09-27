@@ -65,7 +65,8 @@ CScene::CScene(void) :
 	m_DenoiseParams(),
 	m_NoIterations(0),
 	m_ExtinctionSize(),
-	m_ShadingType(2)
+	m_ShadingType(2),
+	m_Spectral(false)
 {
 }
 
@@ -99,6 +100,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_NoIterations		= Other.m_NoIterations;
 	m_ExtinctionSize	= Other.m_ExtinctionSize;
 	m_ShadingType		= Other.m_ShadingType;
+	m_Spectral			= Other.m_Spectral;
 
 	return *this;
 }

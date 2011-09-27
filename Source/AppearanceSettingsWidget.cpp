@@ -31,9 +31,9 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 
 	m_MainLayout.addWidget(new QLabel("Shading Type"), 3, 0);
 
-	m_ShadingType.addItem(GetIcon("palette"), "BRDF", 0);
-	m_ShadingType.addItem(GetIcon("palette"), "Phase Function", 1);
-	m_ShadingType.addItem(GetIcon("palette"), "Hybrid", 2);
+	m_ShadingType.addItem("BRDF Only", 0);
+	m_ShadingType.addItem("Phase Function Only", 1);
+	m_ShadingType.addItem("Hybrid", 2);
 	m_MainLayout.addWidget(&m_ShadingType, 3, 1, 1, 2);
 
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));

@@ -29,7 +29,7 @@ __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 
 DEV float GradientMagnitude(CScene* pScene, const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z)) / pScene->m_GradientMagnitudeRange.GetLength();
+	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z)) / 43.0f;//pScene->m_GradientMagnitudeRange.GetLength();
 }
 
 DEV CColorRgbHdr GetOpacity(CScene* pScene, const float& D)

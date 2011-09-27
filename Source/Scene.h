@@ -714,6 +714,7 @@ public:
 	cudaExtent			m_ExtinctionSize;
 	float				m_Variance;
 	int					m_ShadingType;
+	bool				m_Spectral;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
 	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}

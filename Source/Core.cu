@@ -5,6 +5,9 @@ texture<short, 3, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, 3, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
 texture<float, 3, cudaReadModeElementType>			gTexExtinction;
 texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexEstimateRgbLdr;
+texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexOpacity;
+texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexDiffuse;
+texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexSpecular;
 
 cudaArray* gpDensityArray			= NULL;
 cudaArray* gpGradientMagnitudeArray	= NULL;

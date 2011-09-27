@@ -105,8 +105,8 @@ QColorSelector::QColorSelector(QWidget* pParent /*= NULL*/) :
 {
 	setLayout(&m_MainLayout);
 
-	m_MainLayout.addWidget(&m_ColorButton, 0, 0);
-	m_MainLayout.addWidget(&m_ColorCombo, 0, 1);
+	m_MainLayout.addWidget(&m_ColorButton, 0, 0, Qt::AlignLeft);
+//	m_MainLayout.addWidget(&m_ColorCombo, 0, 1);
 
 	m_MainLayout.setContentsMargins(0, 0, 0, 0);
 	
