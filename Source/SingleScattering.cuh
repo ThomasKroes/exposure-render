@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <vector>
 
-DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, CCudaRNG& RNG)
+DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const float& D, CCudaRNG& RNG)
 {
 	switch (pScene->m_ShadingType)
 	{
@@ -28,16 +28,19 @@ DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, CC
 			// Get normalized gradient magnitude
 			const float GradMag = GradientMagnitude(pScene, Pe) / pScene->m_GradientMagnitudeRange.GetLength();
 
+			// Get opacity
+			const float Tr = GetOpacity(pScene, D)[0];
+
 			// Determine BRDF vs Phase Function scattering
-			const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
+			const float PdfBrdf = 1.0f - __expf(-pScene->m_GradientFactor * GradMag);
 
 			if (RNG.Get1() < PdfBrdf)
 			{
-  				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true);// / PdfBrdf;
+  				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true);
 			}
 			else
 			{
-				return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);// / (1.0f - PdfBrdf);
+				return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 			}
 		}
 
@@ -86,15 +89,11 @@ KERNEL void KrnlSingleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz
 		// Fetch density
 		const float D = Density(pScene, Pe);
 
-		// Get opacity at eye point
-		const float		Tr = GetOpacity(pScene, D)[0];
-		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
-		
 		// Add emission
-		Lv += Ke;
+		Lv += GetEmission(pScene, D).ToXYZ();
 
 		// Add incident light
-		Lv += IncidentLight(pScene, -Re.m_D, Pe, RNG);
+		Lv += IncidentLight(pScene, -Re.m_D, Pe, D, RNG);
 	}
 	else
 	{
