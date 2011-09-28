@@ -4,6 +4,7 @@
 
 KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
+	/*
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
 	
@@ -57,6 +58,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorX
 
 	// Contribute
 	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Lv;
+	*/
 }
 
 void MultipleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)

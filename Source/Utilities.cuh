@@ -99,3 +99,16 @@ DEV int intersectBox(CRay r, Vec3f boxmin, Vec3f boxmax, float *tnear, float *tf
 
   return smallest_tmax > largest_tmin;
 }
+
+class CSpectral
+{
+public:
+	DEV CSpectral(const bool& Enable, const int& Component) :
+		m_Enable(Enable),
+		m_Component(Component)
+	{
+	}
+
+	bool	m_Enable;
+	int		m_Component;
+};

@@ -5,20 +5,20 @@
 #include <algorithm>
 #include <vector>
 
-DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const float& D, CCudaRNG& RNG)
+DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const float& D, CCudaRNG& RNG, CSpectral& Spectral)
 {
 	switch (pScene->m_ShadingType)
 	{
 		// Do BRDF shading
 		case 0:
 		{
-			return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+			return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true, Spectral);
 		}
 		
 		// Do phase function shading
 		case 1:
 		{
-			return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+			return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false, Spectral);
 			break;
 		}
 
@@ -36,11 +36,11 @@ DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, co
 
 			if (RNG.Get1() < PdfBrdf)
 			{
-  				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+  				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true, Spectral);
 			}
 			else
 			{
-				return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+				return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false, Spectral);
 			}
 		}
 
@@ -78,7 +78,9 @@ KERNEL void KrnlSingleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz
 	
 	CLight* pLight = NULL;
 
-	if (SampleDistanceRM(Re, RNG, Pe, pScene))
+	CSpectral Spectral(false, floorf(RNG.Get1() * 3.0f));
+
+	if (SampleDistanceRM(Re, RNG, Pe, pScene, Spectral))
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
@@ -93,7 +95,18 @@ KERNEL void KrnlSingleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz
 		Lv += GetEmission(pScene, D).ToXYZ();
 
 		// Add incident light
-		Lv += IncidentLight(pScene, -Re.m_D, Pe, D, RNG);
+		if (Spectral.m_Enable)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				Spectral.m_Component = i;
+				Lv.c[i] += IncidentLight(pScene, -Re.m_D, Pe, D, RNG, Spectral).c[i];
+			}
+		}
+		else
+		{
+			Lv += IncidentLight(pScene, -Re.m_D, Pe, D, RNG, Spectral);
+		}
 	}
 	else
 	{
