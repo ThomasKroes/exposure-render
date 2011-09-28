@@ -11,7 +11,7 @@ DEV float Density(CScene* pScene, const Vec3f& P)
 	return (float)SHRT_MAX * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z);
 }
 
-__device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
+DEV inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 {
 	Vec3f Gradient;
 

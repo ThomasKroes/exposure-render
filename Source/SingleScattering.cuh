@@ -5,7 +5,48 @@
 #include <algorithm>
 #include <vector>
 
-KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
+DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, CCudaRNG& RNG)
+{
+	switch (pScene->m_ShadingType)
+	{
+		// Do BRDF shading
+		case 0:
+		{
+			return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+		}
+		
+		// Do phase function shading
+		case 1:
+		{
+			return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+			break;
+		}
+
+		// Do hybrid shading (BRDF + phase function)
+		case 2:
+		{
+			// Get normalized gradient magnitude
+			const float GradMag = GradientMagnitude(pScene, Pe) / pScene->m_GradientMagnitudeRange.GetLength();
+
+			// Determine BRDF vs Phase Function scattering
+			const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
+
+			if (RNG.Get1() < PdfBrdf)
+			{
+  				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true);// / PdfBrdf;
+			}
+			else
+			{
+				return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);// / (1.0f - PdfBrdf);
+			}
+		}
+
+		default:
+			return SPEC_BLACK;
+	}
+}
+
+KERNEL void KrnlSingleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
@@ -52,45 +93,8 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		// Add emission
 		Lv += Ke;
 
-		switch (pScene->m_ShadingType)
-		{
-			// Do BRDF shading
-			case 0:
-			{
-				Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
-				break;
-			}
-		
-			// Do phase function shading
-			case 1:
-			{
-				Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
-				break;
-			}
-
-			// Do hybrid shading (BRDF + phase function)
-			case 2:
-			{
-				const float GradMag = GradientMagnitude(pScene, Pe) / pScene->m_GradientMagnitudeRange.GetLength();
-
-				const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
-
-				if (RNG.Get1() < PdfBrdf)
-				{
-					// Estimate direct light at eye point using BRDF shading
-//					if (PdfBrdf > 0.0f)
-  						Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);// / PdfBrdf;
-				}
-				else
-				{
-					// Estimate direct light at eye point using the phase function
-// 					if (1.0f - PdfBrdf > 0.0f)
- 						Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);// / (1.0f - PdfBrdf);
-				}
-
-				break;
-			}
-		}
+		// Add incident light
+		Lv += IncidentLight(pScene, -Re.m_D, Pe, RNG);
 	}
 	else
 	{
@@ -106,5 +110,5 @@ void SingleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, C
 	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
-	KrnlSS<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);
+	KrnlSingleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);
 }
