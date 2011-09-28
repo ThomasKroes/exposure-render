@@ -504,6 +504,7 @@ bool QRenderThread::Load(QString& FileName)
 	GradMagHistogram->Update();
 
 	m_Scene.m_GradMagMean = (float)GradMagHistogram->GetMean()[0];
+	m_Scene.m_GradientFactor = m_Scene.m_GradMagMean;
 
 	Log("Mean gradient magnitude: " + QString::number(m_Scene.m_GradMagMean, 'f', 2), "grid");
 
@@ -567,9 +568,9 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		m_Scene.m_TransferFunctions.m_Specular.m_C[i]	= CColorRgbHdr(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
 		m_Scene.m_TransferFunctions.m_Emission.m_C[i]	= 500.0f * CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
 
-		const float Roughness =  (1.0f - expf(-(1.0f * Node.GetGlossiness()))) * 10000000.0f;
+		const float Roughness = 1.0f - expf(-Node.GetGlossiness());
 
-		m_Scene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(10000000.0f - Roughness);
+		m_Scene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Roughness * 100);
 	}
 
 	m_Scene.m_DensityScale	= TransferFunction.GetDensityScale();

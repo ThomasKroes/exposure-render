@@ -39,16 +39,16 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 
 	m_MainLayout.addWidget(new QLabel("Max. Grad. Mag."), 4, 0);
 	
-	m_MaxGradientMagnitudeSlider.setOrientation(Qt::Horizontal);
-	m_MaxGradientMagnitudeSlider.setRange(0.001, 1000.0);
-	m_MaxGradientMagnitudeSlider.setValue(100.0);
+	m_GradientFactorSlider.setOrientation(Qt::Horizontal);
+	m_GradientFactorSlider.setRange(0.001, 100.0);
+	m_GradientFactorSlider.setValue(100.0);
 
-	m_MainLayout.addWidget(&m_MaxGradientMagnitudeSlider, 4, 1);
+	m_MainLayout.addWidget(&m_GradientFactorSlider, 4, 1);
 
-	mm_MaxGradientMagnitudeSpinner.setRange(0.001, 1000.0);
-	mm_MaxGradientMagnitudeSpinner.setDecimals(3);
+	m_GradientFactorSpinner.setRange(0.001, 100.0);
+	m_GradientFactorSpinner.setDecimals(3);
 
-	m_MainLayout.addWidget(&mm_MaxGradientMagnitudeSpinner, 4, 2);
+	m_MainLayout.addWidget(&m_GradientFactorSpinner, 4, 2);
 
 	m_MainLayout.addWidget(new QLabel("Index Of Refraction"), 5, 0);
 
@@ -67,9 +67,9 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	QObject::connect(&m_DensityScaleSpinner, SIGNAL(valueChanged(double)), &m_DensityScaleSlider, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetDensityScale(double)));
 
-	QObject::connect(&m_MaxGradientMagnitudeSlider, SIGNAL(valueChanged(double)), &mm_MaxGradientMagnitudeSpinner, SLOT(setValue(double)));
-	QObject::connect(&mm_MaxGradientMagnitudeSpinner, SIGNAL(valueChanged(double)), &m_MaxGradientMagnitudeSlider, SLOT(setValue(double)));
-	QObject::connect(&m_MaxGradientMagnitudeSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetMaxGradientMagnitude(double)));
+	QObject::connect(&m_GradientFactorSlider, SIGNAL(valueChanged(double)), &m_GradientFactorSpinner, SLOT(setValue(double)));
+	QObject::connect(&m_GradientFactorSpinner, SIGNAL(valueChanged(double)), &m_GradientFactorSlider, SLOT(setValue(double)));
+	QObject::connect(&m_GradientFactorSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetMaxGradientMagnitude(double)));
 
 	QObject::connect(&m_IndexOfRefractionSlider, SIGNAL(valueChanged(double)), &m_IndexOfRefractionSpinner, SLOT(setValue(double)));
 	QObject::connect(&m_IndexOfRefractionSpinner, SIGNAL(valueChanged(double)), &m_IndexOfRefractionSlider, SLOT(setValue(double)));
@@ -84,6 +84,11 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 void QAppearanceSettingsWidget::OnRenderBegin(void)
 {
 	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale());
+
+	if (!Scene())
+		return;
+
+	m_GradientFactorSlider.setValue(Scene()->m_GradientFactor);
 }
 
 void QAppearanceSettingsWidget::OnRenderEnd(void)
@@ -112,7 +117,7 @@ void QAppearanceSettingsWidget::OnSetMaxGradientMagnitude(double MaxGradMag)
 	if (!Scene())
 		return;
 
- 	Scene()->m_Test = (float)MaxGradMag;
+ 	Scene()->m_GradientFactor = (float)MaxGradMag;
 // 
  	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 }

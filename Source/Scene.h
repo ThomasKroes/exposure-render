@@ -719,7 +719,7 @@ public:
 	float				m_StepSizeFactorShadow;
 	float				m_GradientDelta;
 	float				m_IOR;
-	float				m_Test;
+	float				m_GradientFactor;
 	float				m_GradMagMean;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}

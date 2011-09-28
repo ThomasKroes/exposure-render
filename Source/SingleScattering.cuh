@@ -71,7 +71,9 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 			// Do hybrid shading (BRDF + phase function)
 			case 2:
 			{
-				const float PdfBrdf = Tr * (1.0f - __expf(-10.0f * pScene->m_GradMagMean * GradientMagnitude(pScene, Pe)));
+				const float GradMag = GradientMagnitude(pScene, Pe) / pScene->m_GradientMagnitudeRange.GetLength();
+
+				const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
 
 				if (RNG.Get1() < PdfBrdf)
 				{

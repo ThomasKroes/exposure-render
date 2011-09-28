@@ -22,8 +22,8 @@ private:
 	QDoubleSlider	m_DensityScaleSlider;
 	QDoubleSpinner	m_DensityScaleSpinner;
 	QComboBox		m_ShadingType;
-	QDoubleSlider	m_MaxGradientMagnitudeSlider;
-	QDoubleSpinner	mm_MaxGradientMagnitudeSpinner;
+	QDoubleSlider	m_GradientFactorSlider;
+	QDoubleSpinner	m_GradientFactorSpinner;
 	QDoubleSlider	m_IndexOfRefractionSlider;
 	QDoubleSpinner	m_IndexOfRefractionSpinner;
 };

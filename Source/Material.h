@@ -152,10 +152,10 @@ public:
 class CMicrofacet
 {
 public:
-	HOD CMicrofacet(const CColorXyz& Reflectance, const float& Ior, const float& Roughness) :
+	HOD CMicrofacet(const CColorXyz& Reflectance, const float& Ior, const float& Exponent) :
 	  m_R(Reflectance),
 		  m_Fresnel(Ior, 1.0f),
-		  m_Blinn(1.0f / Roughness)
+		  m_Blinn(Exponent)
 	  {
 	  }
 
@@ -221,9 +221,9 @@ public:
 class CBSDF
 {
 public:
-	HOD CBSDF(const Vec3f& N, const Vec3f& W, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ior, const float& Roughness) :
+	HOD CBSDF(const Vec3f& N, const Vec3f& W, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ior, const float& Exponent) :
 	  m_Lambertian(Kd),
-		  m_Microfacet(Ks, Ior, Roughness),
+		  m_Microfacet(Ks, Ior, Exponent),
 		  m_Nn(N),
 		  m_Nu(Normalize(Cross(N, W))),
 		  m_Nv(Normalize(Cross(N, m_Nu)))
