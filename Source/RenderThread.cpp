@@ -27,6 +27,7 @@
 #include <vtkErrorCode.h>
 #include <vtkImageGradient.h>
 #include <vtkExtractVectorComponents.h>
+
 // Render thread
 QRenderThread* gpRenderThread = NULL;
 
@@ -52,7 +53,7 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_SaveFrames(),
 	m_SaveBaseName("with_noise_reduction")
 {
-	m_SaveFrames << 0 << 1 << 3 << 7 << 15;
+//	m_SaveFrames << 0 << 1 << 3 << 7 << 15;
 
 	m_Scene.m_DenoiseParams.m_Enabled = false;
 }
@@ -103,8 +104,8 @@ void QRenderThread::run()
  		return;
  	}
 
- 	m_Scene.m_Camera.m_Film.m_Resolution.SetResX(512);
- 	m_Scene.m_Camera.m_Film.m_Resolution.SetResY(512);
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResX(800);
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResY(800);
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
  	m_Scene.m_Camera.Update();
@@ -290,7 +291,7 @@ void QRenderThread::run()
 // 			gStatus.SetStatisticChanged("Denoise", "Radius", QString::number(LerpC, 'f', 2), "ms.");
 
 			m_Scene.m_DenoiseParams.SetWindowRadius(7.0f);
-			m_Scene.m_DenoiseParams.m_LerpC				= 1.0f;//0.9f * expf(-0.02f * (float)m_Scene.GetNoIterations()); 
+			m_Scene.m_DenoiseParams.m_LerpC				= 1.0f * expf(-0.02f * (float)m_Scene.GetNoIterations()); 
 //			m_Scene.m_DenoiseParams.m_WeightThreshold	= expf(-0.02f * (float)m_Scene.GetNoIterations());
 			
 		//	m_Scene.m_DenoiseParams.m_LerpC = 1.0f - Radius;
