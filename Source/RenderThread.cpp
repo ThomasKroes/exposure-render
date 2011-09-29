@@ -50,9 +50,9 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_Scene(),
 	m_Pause(false),
 	m_SaveFrames(),
-	m_SaveBaseName("hybrid_manix")
+	m_SaveBaseName("with_noise_reduction")
 {
-	m_SaveFrames << 0 << 500;
+	m_SaveFrames << 0 << 1 << 3 << 7 << 15;
 
 	m_Scene.m_DenoiseParams.m_Enabled = false;
 }
@@ -284,29 +284,22 @@ void QRenderThread::run()
 			// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 			m_Scene.m_DirtyFlags.ClearAllFlags();
 
-			// Increase the number of iterations performed so far
-			m_Scene.SetNoIterations(m_Scene.GetNoIterations() + 1);
-
 			// Adjust de-noising parameters
-			const float Radius = 0.03 * (float)m_Scene.GetNoIterations();
+// 			const float LerpC = 1.0f - ;
+// 
+// 			gStatus.SetStatisticChanged("Denoise", "Radius", QString::number(LerpC, 'f', 2), "ms.");
 
-			gStatus.SetStatisticChanged("Denoise", "Radius", QString::number(Radius, 'f', 2), "ms.");
-
-			if (Radius < 1.0f)
-			{
-				m_Scene.m_DenoiseParams.m_Enabled = true;
-				m_Scene.m_DenoiseParams.SetWindowRadius(6.0f);
-				m_Scene.m_DenoiseParams.m_LerpC = Radius;
-			}
-			else
-			{
-				m_Scene.m_DenoiseParams.m_Enabled = false;
-			}
+			m_Scene.m_DenoiseParams.SetWindowRadius(7.0f);
+			m_Scene.m_DenoiseParams.m_LerpC				= 1.0f;//0.9f * expf(-0.02f * (float)m_Scene.GetNoIterations()); 
+//			m_Scene.m_DenoiseParams.m_WeightThreshold	= expf(-0.02f * (float)m_Scene.GetNoIterations());
 			
 		//	m_Scene.m_DenoiseParams.m_LerpC = 1.0f - Radius;
 
 			cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
 			cudaMemcpy(m_pDevVariance, &m_Variance, sizeof(CVariance), cudaMemcpyHostToDevice);
+
+			// Increase the number of iterations performed so far
+			m_Scene.SetNoIterations(m_Scene.GetNoIterations() + 1);
 
 			// Execute the rendering kernels
   			Render(0, &SceneCopy, m_pDevScene, m_pDevSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstXyz, m_pDevEstRgbaLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations(), m_pDevVariance, m_Variance.GetVarianceBuffer(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);

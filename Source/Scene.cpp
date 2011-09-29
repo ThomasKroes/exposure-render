@@ -67,12 +67,13 @@ CScene::CScene(void) :
 	m_ExtinctionSize(),
 	m_ShadingType(2),
 	m_Spectral(false),
-	m_StepSizeFactor(1.0f),
-	m_StepSizeFactorShadow(1.0f),
+	m_StepSizeFactor(2.0f),
+	m_StepSizeFactorShadow(8.0f),
 	m_GradientDelta(1.0f),
 	m_IOR(2.5f),
 	m_GradientFactor(1.0f),
-	m_GradMagMean(1.0f)
+	m_GradMagMean(1.0f),
+	m_Denoise(true)
 {
 }
 
@@ -114,6 +115,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_IOR						= Other.m_IOR;
 	m_GradientFactor			= Other.m_GradientFactor;
 	m_GradMagMean				= Other.m_GradMagMean;
+	m_Denoise					= Other.m_Denoise;
 
 	return *this;
 }
@@ -158,12 +160,12 @@ HO CDenoiseParams::CDenoiseParams(void)
 
 
 	m_Enabled			= true;
-	m_Noise				= 1.0f;// / (0.1f * 0.1f);
+	m_Noise				= 0.01f;// / (0.1f * 0.1f);
 	m_LerpC				= 0.01f;
 	m_WindowRadius		= 6.0f;
 	m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
 	m_InvWindowArea		= 1.0f / m_WindowArea;
-	m_WeightThreshold	= 0.01f;
-	m_LerpThreshold		= 0.01f;
+	m_WeightThreshold	= 1.0f;
+	m_LerpThreshold		= 0.89f;
 	/**/
 }

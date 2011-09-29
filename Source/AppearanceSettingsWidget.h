@@ -16,6 +16,7 @@ public slots:
 	void OnSetShadingType(int Index);
 	void OnSetMaxGradientMagnitude(double MaxGradMag);
 	void OnSetIndexOfRefraction(double IOR);
+	void OnDenoise(int State);
 
 private:
 	QGridLayout		m_MainLayout;
@@ -26,4 +27,5 @@ private:
 	QDoubleSpinner	m_GradientFactorSpinner;
 	QDoubleSlider	m_IndexOfRefractionSlider;
 	QDoubleSpinner	m_IndexOfRefractionSpinner;
+	QCheckBox		m_Denoise;
 };
