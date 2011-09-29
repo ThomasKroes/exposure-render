@@ -36,11 +36,11 @@ DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, co
 
 			if (RNG.Get1() < PdfBrdf)
 			{
-  				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true, Spectral);
+  				return 2.0f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true, Spectral);
 			}
 			else
 			{
-				return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false, Spectral);
+				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false, Spectral);
 			}
 		}
 	}

@@ -50,9 +50,9 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_Scene(),
 	m_Pause(false),
 	m_SaveFrames(),
-	m_SaveBaseName("phase_function")
+	m_SaveBaseName("hybrid_manix")
 {
-//	m_SaveFrames << 0 << 100 << 200;
+	m_SaveFrames << 0 << 500;
 
 	m_Scene.m_DenoiseParams.m_Enabled = false;
 }
@@ -288,7 +288,7 @@ void QRenderThread::run()
 			m_Scene.SetNoIterations(m_Scene.GetNoIterations() + 1);
 
 			// Adjust de-noising parameters
-			const float Radius = 0.015 * (float)m_Scene.GetNoIterations();
+			const float Radius = 0.03 * (float)m_Scene.GetNoIterations();
 
 			gStatus.SetStatisticChanged("Denoise", "Radius", QString::number(Radius, 'f', 2), "ms.");
 
