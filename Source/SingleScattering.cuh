@@ -43,10 +43,9 @@ DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, co
 				return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false, Spectral);
 			}
 		}
-
-		default:
-			return SPEC_BLACK;
 	}
+
+	return SPEC_BLACK;
 }
 
 KERNEL void KrnlSingleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)

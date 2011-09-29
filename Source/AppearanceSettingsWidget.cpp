@@ -84,6 +84,7 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 void QAppearanceSettingsWidget::OnRenderBegin(void)
 {
 	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale());
+	m_ShadingType.setCurrentIndex(0);
 
 	if (!Scene())
 		return;
