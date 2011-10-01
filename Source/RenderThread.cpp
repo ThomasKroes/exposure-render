@@ -33,15 +33,9 @@ QRenderThread* gpRenderThread = NULL;
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
 	QThread(pParent),
 	m_FileName(FileName),
+	m_CudaFrameBuffers(),
 	m_pDevScene(NULL),
-	m_pDevAccEstXyz(NULL),
-	m_pDevEstXyz(NULL),
-	m_pDevEstFrameXyz(NULL),
-	m_pDevEstFrameBlurXyz(NULL),
-	m_pDevEstRgbaLdr(NULL),
-	m_pDevRgbLdrDisp(NULL),
 	m_pRenderImage(NULL),
-	m_pDevSeeds(NULL),
 	m_Variance(),
 	m_pDevVariance(NULL),
 	m_pDensityBuffer(NULL),
@@ -70,14 +64,8 @@ QRenderThread::~QRenderThread(void)
 QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 {
 	m_FileName					= Other.m_FileName;
+	m_CudaFrameBuffers			= Other.m_CudaFrameBuffers;
 	m_pDevScene					= Other.m_pDevScene;
-	m_pDevAccEstXyz				= Other.m_pDevAccEstXyz;
-	m_pDevEstXyz				= Other.m_pDevEstXyz;
-	m_pDevEstFrameXyz			= Other.m_pDevEstFrameXyz;
-	m_pDevEstFrameBlurXyz		= Other.m_pDevEstFrameBlurXyz;
-	m_pDevEstRgbaLdr			= Other.m_pDevEstRgbaLdr;
-	m_pDevRgbLdrDisp			= Other.m_pDevRgbLdrDisp;
-	m_pDevSeeds					= Other.m_pDevSeeds;
 	m_Variance					= Other.m_Variance;
 	m_pDevVariance				= Other.m_pDevVariance;
 	m_pRenderImage				= Other.m_pRenderImage;
@@ -189,59 +177,7 @@ void QRenderThread::run()
 			
 				gStatus.SetStatisticChanged("Host Memory", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbaLdr) / MB, 'f', 2), "MB");
 
-				const int NoRandomSeeds = SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * 2;
-
-				// Compute size of the CUDA buffers
- 				int SizeRandomSeeds			= NoRandomSeeds * sizeof(unsigned int);
-				int SizeAccEstXyz			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
-				int SizeEstXyz				= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
-				int SizeEstFrameXyz			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
-				int SizeEstFrameBlurXyz		= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz);
-				int SizeEstRgbaLdr			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbaLdr);
-				int SizeRgbLdrDisp			= SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr);
-			
-				HandleCudaError(cudaFree(m_pDevSeeds));
-				HandleCudaError(cudaFree(m_pDevAccEstXyz));
-				HandleCudaError(cudaFree(m_pDevEstXyz));
-				HandleCudaError(cudaFree(m_pDevEstFrameXyz));
-				HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
-				HandleCudaError(cudaFree(m_pDevEstRgbaLdr));
-				HandleCudaError(cudaFree(m_pDevRgbLdrDisp));
-
-				// Allocate device buffers
-				HandleCudaError(cudaMalloc((void**)&m_pDevSeeds, SizeRandomSeeds));
-				HandleCudaError(cudaMalloc((void**)&m_pDevAccEstXyz, SizeAccEstXyz));
-				HandleCudaError(cudaMalloc((void**)&m_pDevEstXyz, SizeEstXyz));
-				HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameXyz, SizeEstFrameXyz));
-				HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeEstFrameBlurXyz));
-				HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbaLdr, SizeEstRgbaLdr));
-				HandleCudaError(cudaMalloc((void**)&m_pDevRgbLdrDisp, SizeRgbLdrDisp));
-
-				gStatus.SetStatisticChanged("CUDA Memory", "Random Seeds", QString::number((float)SizeRandomSeeds / MB, 'f', 2), "MB");
-				gStatus.SetStatisticChanged("Frame Buffers", "Accumulated Estimate (XYZ color)", QString::number((float)SizeAccEstXyz / MB, 'f', 2), "MB");
-				gStatus.SetStatisticChanged("Frame Buffers", "Estimate (XYZ color)", QString::number((float)SizeEstXyz / MB, 'f', 2), "MB");
-				gStatus.SetStatisticChanged("Frame Buffers", "Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameXyz / MB, 'f', 2), "MB");
-				gStatus.SetStatisticChanged("Frame Buffers", "Blur Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameBlurXyz / MB, 'f', 2), "MB");
-				gStatus.SetStatisticChanged("Frame Buffers", "Estimate (RGB color)", QString::number((float)SizeEstRgbaLdr / MB, 'f', 2), "MB");
-				gStatus.SetStatisticChanged("Frame Buffers", "Estimate Screen (RGB color)", QString::number((float)SizeRgbLdrDisp / MB, 'f', 2), "MB");
-			
-				// Create random seeds
-				unsigned int* pSeeds = (unsigned int*)malloc(SizeRandomSeeds);
-
-				for (int i = 0; i < NoRandomSeeds; i++)
-					pSeeds[i] = qrand();
-
-				HandleCudaError(cudaMemcpy(m_pDevSeeds, pSeeds, SizeRandomSeeds, cudaMemcpyHostToDevice));
-
-				free(pSeeds);
-
-				// Reset buffers to black
-				HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SizeAccEstXyz));
-				HandleCudaError(cudaMemset(m_pDevEstXyz, 0, SizeEstXyz));
-				HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SizeEstFrameXyz));
-				HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SizeEstFrameBlurXyz));
-				HandleCudaError(cudaMemset(m_pDevEstRgbaLdr, 0, SizeEstRgbaLdr));
-				HandleCudaError(cudaMemset(m_pDevRgbLdrDisp, 0, SizeRgbLdrDisp));
+				m_CudaFrameBuffers.Resize(Vec2i(SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight()));
 
 				// Reset no. iterations
 				m_Scene.SetNoIterations(0);
@@ -249,24 +185,15 @@ void QRenderThread::run()
 				// Notify Inform others about the memory allocations
 				gStatus.SetResize();
 
-				BindEstimateRgbLdr(m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+				BindEstimateRgbLdr(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
 				m_Variance.Resize(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-
-				gStatus.SetStatisticChanged("Film", "Width SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()), "Pixels");
-				gStatus.SetStatisticChanged("Film", "Height SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
 			}
 
 			// Restart the rendering when when the camera, lights and render params are dirty
 			if (SceneCopy.m_DirtyFlags.HasFlag(CameraDirty | LightsDirty | RenderParamsDirty | TransferFunctionDirty))
 			{
-				// Reset buffers to black
-				HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-				HandleCudaError(cudaMemset(m_pDevEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-				HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-				HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-	// 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-	// 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
+				m_CudaFrameBuffers.Reset();
 
 				// Reset no. iterations
 				m_Scene.SetNoIterations(0);
@@ -309,7 +236,7 @@ void QRenderThread::run()
 			cudaMemcpy(m_pDevVariance, &m_Variance, sizeof(CVariance), cudaMemcpyHostToDevice);
 
 			// Execute the rendering kernels
-  			Render(0, &SceneCopy, m_pDevScene, m_pDevSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstXyz, m_pDevEstRgbaLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations(), m_pDevVariance, m_Variance.GetVarianceBuffer(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
+  			Render(0, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, m_Scene.GetNoIterations(), m_pDevVariance, m_Variance.GetVarianceBuffer(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 			HandleCudaError(cudaGetLastError());
 		
 			gStatus.SetStatisticChanged("Timings", "Render Image", QString::number(RenderImage.m_FilteredDuration, 'f', 2), "ms.");
@@ -325,7 +252,7 @@ void QRenderThread::run()
 	// 		gStatus.SetStatisticChanged("Test", "Magnitude", QString::number(SceneCopy.m_Variance), "ms.");
 	//		printf("%.2f", SceneCopy.m_Variance);
 
-			HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
+			HandleCudaError(cudaMemcpy(m_pRenderImage, m_CudaFrameBuffers.m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 
 			if (m_SaveFrames.indexOf(m_Scene.GetNoIterations()) > 0)
 			{
@@ -345,23 +272,10 @@ void QRenderThread::run()
 
 	// Free CUDA buffers
 	HandleCudaError(cudaFree(m_pDevScene));
-	HandleCudaError(cudaFree(m_pDevAccEstXyz));
-	HandleCudaError(cudaFree(m_pDevEstXyz));
-	HandleCudaError(cudaFree(m_pDevEstFrameXyz));
-	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
-	HandleCudaError(cudaFree(m_pDevEstRgbaLdr));
-	HandleCudaError(cudaFree(m_pDevRgbLdrDisp));
-	HandleCudaError(cudaFree(m_pDevSeeds));
 	HandleCudaError(cudaFree(m_pDevVariance));
 	
-	m_pDevScene				= NULL;
-	m_pDevSeeds				= NULL;
-	m_pDevAccEstXyz			= NULL;
-	m_pDevEstFrameXyz		= NULL;
-	m_pDevEstFrameBlurXyz	= NULL;
-	m_pDevEstRgbaLdr		= NULL;
-	m_pDevSeeds				= NULL;
-	m_pDevVariance			= NULL;
+	m_pDevScene		= NULL;
+	m_pDevVariance	= NULL;
 
 	// Free render image buffer
 	free(m_pRenderImage);

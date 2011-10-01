@@ -126,6 +126,7 @@ SET(ExposureRenderSources
 	Status.cpp
 	Timing.cpp
 	Variance.cpp
+	CudaFrameBuffers.cpp
 
 	# Logging
 	Logger.cpp
@@ -220,6 +221,7 @@ SET(ExposureRenderHeaders
 	Status.h
 	Timing.h
 	Variance.h
+	CudaFrameBuffers.h
 
 	# Logging
 	Logger.h
@@ -489,6 +491,7 @@ SET(CoreSources
 	Status.h
 	Timing.h
 	Variance.h
+	CudaFrameBuffers.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
@@ -516,6 +519,7 @@ SET(CoreSources
 	Status.cpp
 	Timing.cpp
 	Variance.cpp
+	CudaFrameBuffers.cpp
 )
 
 # Make the core group

@@ -3,6 +3,8 @@
 #include "Statistics.h"
 #include "Scene.h"
 #include "Variance.h"
+#include "CudaFrameBuffers.h"
+
 
 class QRenderThread : public QThread
 {
@@ -26,23 +28,17 @@ public:
 	void			PauseRendering(const bool& Pause)			{	m_Pause = Pause;		}
 	
 private:
-	QString			m_FileName;
+	QString				m_FileName;
+	CCudaFrameBuffers	m_CudaFrameBuffers;
+	CScene*				m_pDevScene;
 	
-	CScene*			m_pDevScene;
-	CColorXyz*		m_pDevAccEstXyz;
-	CColorXyz*		m_pDevEstXyz;
-	CColorXyz*		m_pDevEstFrameXyz;
-	CColorXyz*		m_pDevEstFrameBlurXyz;
-	CColorRgbaLdr*	m_pDevEstRgbaLdr;
-	CColorRgbLdr*	m_pDevRgbLdrDisp;
-	unsigned int*	m_pDevSeeds;
 
-	CVariance	m_Variance;
-	CVariance*	m_pDevVariance;
+	CVariance			m_Variance;
+	CVariance*			m_pDevVariance;
 	
-	CColorRgbaLdr*	m_pRenderImage;
-	short*			m_pDensityBuffer;
-	short*			m_pGradientMagnitudeBuffer;
+	CColorRgbaLdr*		m_pRenderImage;
+	short*				m_pDensityBuffer;
+	short*				m_pGradientMagnitudeBuffer;
 
 public:
 	bool			m_Abort;
