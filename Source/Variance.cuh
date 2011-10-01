@@ -28,7 +28,7 @@ KERNEL void KrnlComputeVariance(int Width, int Height, CColorXyz* gpEstXyz, CCol
 		}
 	}
 
-//	atomicAdd(&SumVariance, 1.0f);
+	atomicAdd(&SumVariance, 1.0f);
 
 
 	__syncthreads();

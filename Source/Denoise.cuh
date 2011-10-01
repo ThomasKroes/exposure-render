@@ -21,11 +21,11 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
     const float x = (float)ix + 0.5f;
     const float y = (float)iy + 0.5f;
 
-	int ID = (pScene->m_Camera.m_Film.GetHeight() - iy - 1) * pScene->m_Camera.m_Film.m_Resolution.GetResX() + ix;
+	int ID = iy * pScene->m_Camera.m_Film.m_Resolution.GetResX() + ix;
 
 	ID = min(ID, pScene->m_Camera.m_Film.m_Resolution.GetNoElements() - 1);
 
-    if (pScene->m_Denoise && ix < pScene->m_Camera.m_Film.m_Resolution.GetResX() && iy < pScene->m_Camera.m_Film.m_Resolution.GetResY())
+    if(pScene->m_DenoiseParams.m_Enabled && ix < pScene->m_Camera.m_Film.m_Resolution.GetResX() && iy < pScene->m_Camera.m_Film.m_Resolution.GetResY())
 	{
         //Normalized counter for the weight threshold
         float fCount = 0;
@@ -85,7 +85,7 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 		pOut[ID].r = 255 * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
- 	}
+	}
 }
 
 void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbLdr* pOut)

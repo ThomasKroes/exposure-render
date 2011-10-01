@@ -721,7 +721,6 @@ public:
 	float				m_IOR;
 	float				m_GradientFactor;
 	float				m_GradMagMean;
-	bool				m_Denoise;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
 	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}

@@ -3,8 +3,6 @@
 #include "Geometry.h"
 #include "Scene.h"
 
-#include "Utilities.cuh"
-
 DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
@@ -14,8 +12,6 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
-
-	MinT += RNG.Get1() * pScene->m_GradientDelta;
 
 	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
 	float Dt		= pScene->m_StepSizeFactor * pScene->m_GradientDelta;
@@ -36,7 +32,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 		
 		D = Density(pScene, samplePos);
 
-		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D)[0];
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D).r;
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
@@ -47,7 +43,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
+DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -56,8 +52,6 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
-
-	MinT += RNG.Get1() * pScene->m_GradientDelta;
 
 	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
 	float Dt		= pScene->m_StepSizeFactorShadow * pScene->m_GradientDelta;
@@ -78,7 +72,7 @@ DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 		
 		D = Density(pScene, samplePos);
 
-		SigmaT = pScene->m_DensityScale * GetOpacity(pScene, D)[0];
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D).r;
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;

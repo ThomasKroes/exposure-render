@@ -113,7 +113,7 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, unsigned int* pS
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
 
  	CCudaTimer TmrBlur;
-	BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 3.0f);
+	BlurImageXyz(pDevEstFrameXyz, pDevEstFrameBlurXyz, CResolution2D(pScene->m_Camera.m_Film.m_Resolution.GetResX(), pScene->m_Camera.m_Film.m_Resolution.GetResY()), 5.0f);
 	HandleCudaError(cudaGetLastError());
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 

@@ -27,7 +27,6 @@
 #include <vtkErrorCode.h>
 #include <vtkImageGradient.h>
 #include <vtkExtractVectorComponents.h>
-
 // Render thread
 QRenderThread* gpRenderThread = NULL;
 
@@ -51,9 +50,9 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	m_Scene(),
 	m_Pause(false),
 	m_SaveFrames(),
-	m_SaveBaseName("with_noise_reduction")
+	m_SaveBaseName("phase_function")
 {
-//	m_SaveFrames << 0 << 1 << 3 << 7 << 15;
+//	m_SaveFrames << 0 << 100 << 200;
 
 	m_Scene.m_DenoiseParams.m_Enabled = false;
 }
@@ -104,8 +103,8 @@ void QRenderThread::run()
  		return;
  	}
 
- 	m_Scene.m_Camera.m_Film.m_Resolution.SetResX(640);
- 	m_Scene.m_Camera.m_Film.m_Resolution.SetResY(480);
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResX(512);
+ 	m_Scene.m_Camera.m_Film.m_Resolution.SetResY(512);
  	m_Scene.m_Camera.m_SceneBoundingBox = m_Scene.m_BoundingBox;
  	m_Scene.m_Camera.SetViewMode(ViewModeFront);
  	m_Scene.m_Camera.Update();
@@ -172,9 +171,9 @@ void QRenderThread::run()
 			// Update the camera, do not remove
 			SceneCopy.m_Camera.Update();
 		
-// 			gStatus.SetStatisticChanged("Camera", "Position", FormatVector(m_Scene.m_Camera.m_From));
-// 			gStatus.SetStatisticChanged("Camera", "Target", FormatVector(m_Scene.m_Camera.m_Target));
-// 			gStatus.SetStatisticChanged("Camera", "Up Vector", FormatVector(m_Scene.m_Camera.m_Up));
+			gStatus.SetStatisticChanged("Camera", "Position", FormatVector(m_Scene.m_Camera.m_From));
+			gStatus.SetStatisticChanged("Camera", "Target", FormatVector(m_Scene.m_Camera.m_Target));
+			gStatus.SetStatisticChanged("Camera", "Up Vector", FormatVector(m_Scene.m_Camera.m_Up));
 
 			// Resizing the image canvas requires special attention
 			if (SceneCopy.m_DirtyFlags.HasFlag(FilmResolutionDirty))
@@ -263,9 +262,9 @@ void QRenderThread::run()
 			{
 				// Reset buffers to black
 				HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-// 				HandleCudaError(cudaMemset(m_pDevEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-// 				HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
-// 				HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
+				HandleCudaError(cudaMemset(m_pDevEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
+				HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
+				HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 	// 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 	// 			HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorXyz)));
 
@@ -276,17 +275,38 @@ void QRenderThread::run()
 	//			m_Variance.Reset();
 			}
 
+			gStatus.SetStatisticChanged("Film", "Width m_Scene", QString::number(m_Scene.m_Camera.m_Film.m_Resolution.GetResX()), "Pixels");
+			gStatus.SetStatisticChanged("Film", "Height m_Scene", QString::number(m_Scene.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
+
+			gStatus.SetStatisticChanged("Film", "Width SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()), "Pixels");
+			gStatus.SetStatisticChanged("Film", "Height SceneCopy", QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()), "Pixels");
+
 			// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 			m_Scene.m_DirtyFlags.ClearAllFlags();
 
-			m_Scene.m_DenoiseParams.SetWindowRadius(5.0f);
-			m_Scene.m_DenoiseParams.m_LerpC				= 1.0f * expf(-0.06f * (float)m_Scene.GetNoIterations()); 
+			// Increase the number of iterations performed so far
+			m_Scene.SetNoIterations(m_Scene.GetNoIterations() + 1);
+
+			// Adjust de-noising parameters
+			const float Radius = 0.015 * (float)m_Scene.GetNoIterations();
+
+			gStatus.SetStatisticChanged("Denoise", "Radius", QString::number(Radius, 'f', 2), "ms.");
+
+			if (Radius < 1.0f)
+			{
+				m_Scene.m_DenoiseParams.m_Enabled = true;
+				m_Scene.m_DenoiseParams.SetWindowRadius(6.0f);
+				m_Scene.m_DenoiseParams.m_LerpC = Radius;
+			}
+			else
+			{
+				m_Scene.m_DenoiseParams.m_Enabled = false;
+			}
+			
+		//	m_Scene.m_DenoiseParams.m_LerpC = 1.0f - Radius;
 
 			cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
 			cudaMemcpy(m_pDevVariance, &m_Variance, sizeof(CVariance), cudaMemcpyHostToDevice);
-
-			// Increase the number of iterations performed so far
-			m_Scene.SetNoIterations(m_Scene.GetNoIterations() + 1);
 
 			// Execute the rendering kernels
   			Render(0, &SceneCopy, m_pDevScene, m_pDevSeeds, m_pDevEstFrameXyz, m_pDevEstFrameBlurXyz, m_pDevAccEstXyz, m_pDevEstXyz, m_pDevEstRgbaLdr, m_pDevRgbLdrDisp, m_Scene.GetNoIterations(), m_pDevVariance, m_Variance.GetVarianceBuffer(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
@@ -297,10 +317,13 @@ void QRenderThread::run()
 			gStatus.SetStatisticChanged("Timings", "Post Process Estimate", QString::number(PostProcessImage.m_FilteredDuration, 'f', 2), "ms.");
 			gStatus.SetStatisticChanged("Timings", "De-noise Image", QString::number(DenoiseImage.m_FilteredDuration, 'f', 2), "ms.");
 
-//			FPS.AddDuration(1000.0f / TmrFps.ElapsedTime());
+			FPS.AddDuration(1000.0f / TmrFps.ElapsedTime());
 
- 			gStatus.SetStatisticChanged("Performance", "FPS", QString::number(1000.0f / TmrFps.ElapsedTime(), 'f', 1), "Frames/Sec.");
+ 			gStatus.SetStatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
  			gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(m_Scene.GetNoIterations()), "Iterations");
+
+	// 		gStatus.SetStatisticChanged("Test", "Magnitude", QString::number(SceneCopy.m_Variance), "ms.");
+	//		printf("%.2f", SceneCopy.m_Variance);
 
 			HandleCudaError(cudaMemcpy(m_pRenderImage, m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 

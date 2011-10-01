@@ -11,12 +11,7 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_MainLayout(),
 	m_DensityScaleSlider(),
 	m_DensityScaleSpinner(),
-	m_ShadingType(),
-	m_GradientFactorSlider(),
-	m_GradientFactorSpinner(),
-	m_IndexOfRefractionSlider(),
-	m_IndexOfRefractionSpinner(),
-	m_Denoise()
+	m_ShadingType()
 {
 	setTitle("Settings");
 	
@@ -42,7 +37,7 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_ShadingType.addItem("Hybrid", 2);
 	m_MainLayout.addWidget(&m_ShadingType, 3, 1, 1, 2);
 
-	m_MainLayout.addWidget(new QLabel("Gradient Factor"), 4, 0);
+	m_MainLayout.addWidget(new QLabel("Max. Grad. Mag."), 4, 0);
 	
 	m_GradientFactorSlider.setOrientation(Qt::Horizontal);
 	m_GradientFactorSlider.setRange(0.001, 100.0);
@@ -68,9 +63,6 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 
 	m_MainLayout.addWidget(&m_IndexOfRefractionSpinner, 5, 2);
 
-	m_Denoise.setText("Enable Denoise Filtering");
-	m_MainLayout.addWidget(&m_Denoise, 6, 1);
-
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSpinner, SIGNAL(valueChanged(double)), &m_DensityScaleSlider, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetDensityScale(double)));
@@ -87,15 +79,11 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	QObject::connect(&gTransferFunction, SIGNAL(Changed()), this, SLOT(OnTransferFunctionChanged()));
-
-	QObject::connect(&m_Denoise, SIGNAL(stateChanged(int)), this, SLOT(OnDenoise(int)));
 }
 
 void QAppearanceSettingsWidget::OnRenderBegin(void)
 {
 	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale());
-	m_ShadingType.setCurrentIndex(0);
-	m_Denoise.setChecked(true);
 
 	if (!Scene())
 		return;
@@ -141,15 +129,5 @@ void QAppearanceSettingsWidget::OnSetIndexOfRefraction(double IOR)
 
 	Scene()->m_IOR = IOR;
 	
-	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
-}
-
-void QAppearanceSettingsWidget::OnDenoise(int State)
-{
-	if (!Scene())
-		return;
-
-	Scene()->m_Denoise = (State == 2 ? true : false);
-
 	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 }

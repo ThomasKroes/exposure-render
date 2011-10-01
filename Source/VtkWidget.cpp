@@ -42,7 +42,6 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
 	m_QtVtkWidget(),
-	m_RenderLoopTimer(),
 	m_ImageActor(),
 	m_ImageImport(),
 	m_InteractorStyleImage(),
@@ -68,9 +67,9 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
-// 	connect(&gStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
+	connect(&gStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
 	connect(&gStatus, SIGNAL(Resize()), this, SLOT(OnResize()));
-	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
+//	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 
 	// Setup the render view
 	SetupRenderView();
@@ -84,7 +83,7 @@ QVTKWidget* CVtkWidget::GetQtVtkWidget(void)
 void CVtkWidget::OnRenderBegin(void)
 {
 	// Scale
-	m_SceneRenderer->GetActiveCamera()->SetParallelScale(700.0f);
+	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
 	m_ImageImport->SetDataSpacing(1, 1, 1);
 	m_ImageImport->SetDataOrigin(-0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResY(), 0);
@@ -109,7 +108,7 @@ void CVtkWidget::OnRenderBegin(void)
 	
 //	m_UcharArray->Allocate(Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
 	// Start the timer
-	m_RenderLoopTimer.start(30.0f);
+//	m_RenderLoopTimer.start(10.0f);
 }
 
 void CVtkWidget::OnRenderEnd(void)
@@ -165,7 +164,7 @@ void CVtkWidget::OnPostRenderFrame(void)
 		m_RenderWindow->SetPixelData(max(0, Origin.x), max(0, Origin.y), Origin.x + CanvasSize.x - 1, Origin.y + CanvasSize.y - 1, (unsigned char*)gpRenderThread->GetRenderImage(), 1);
 */
 	}
-/*
+
 	if (gpRenderThread->GetRenderImage())
 	{
 		m_ImageImport->SetImportVoidPointer(NULL);
@@ -174,7 +173,7 @@ void CVtkWidget::OnPostRenderFrame(void)
 		m_ImageActor->SetInput(m_ImageImport->GetOutput());
 
 		m_RenderWindow->GetInteractor()->Render();
-	}*/
+	}/**/
 }
 
 void CVtkWidget::SetupRenderView(void)
@@ -184,10 +183,9 @@ void CVtkWidget::SetupRenderView(void)
 	m_SceneRenderer->SetBackground(0.25, 0.25, 0.25);
 	m_SceneRenderer->SetBackground2(0.25, 0.25, 0.25);
 	m_SceneRenderer->SetGradientBackground(true);
-	m_SceneRenderer->GetActiveCamera()->SetPosition(0.0, 0.0, 500.5);
+	m_SceneRenderer->GetActiveCamera()->SetPosition(0.0, 0.0, 1.0);
 	m_SceneRenderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
 	m_SceneRenderer->GetActiveCamera()->ParallelProjectionOn();
-	m_SceneRenderer->GetActiveCamera()->SetParallelScale(0.01);
 
 	// Get render window and configure
 	m_RenderWindow = GetQtVtkWidget()->GetRenderWindow();
@@ -205,7 +203,6 @@ void CVtkWidget::SetupRenderView(void)
 	m_InteractorStyleRealisticCamera = vtkSmartPointer<vtkRealisticCameraStyle>::New();
 	m_InteractorStyleImage = vtkInteractorStyleImage::New();
 
-	
 	// Add observers
 	m_RenderWindow->GetInteractor()->SetInteractorStyle(m_InteractorStyleRealisticCamera);
 //	m_RenderWindow->GetInteractor()->SetInteractorStyle(m_InteractorStyleImage);
@@ -229,24 +226,4 @@ void CVtkWidget::OnResize(void)
 	m_pImageImport->SetImportVoidPointer(NULL);
 	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
 	*/
-}
-
-void CVtkWidget::OnRenderLoopTimer(void)
-{
-// 	if (gpRenderThread->GetRenderImage())
-// 	{
-// 		m_ImageImport->SetImportVoidPointer(NULL);
-// 		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
-// 
-// 		m_ImageActor->SetInput(m_ImageImport->GetOutput());
-// 
-// 		m_RenderWindow->GetInteractor()->Render();
-// 	}
-
-	// Decide where to blit the image
-	const Vec2i CanvasSize(Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
-	const Vec2i Origin((int)(0.5f * (float)(width() - CanvasSize.x)), (int)(0.5f * (float)(height() - CanvasSize.y)));
-
-	// Blit
-	m_RenderWindow->SetPixelData(max(0, Origin.x), max(0, Origin.y), Origin.x + CanvasSize.x - 1, Origin.y + CanvasSize.y - 1, (unsigned char*)gpRenderThread->GetRenderImage(), 1);
 }
