@@ -5,7 +5,7 @@
 
 #include "Utilities.cuh"
 
-DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, CSpectral& Spectral)
+DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -36,10 +36,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 		
 		D = Density(pScene, samplePos);
 
-		if (Spectral.m_Enable)
-			SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D)[Spectral.m_Component] * (1.0f - GetDiffuse(pScene, D)[Spectral.m_Component]);
-		else
-			SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D)[0];
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D)[0];
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
@@ -50,7 +47,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, CSpectral& Spectral)
+DEV inline bool FreePathRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -81,10 +78,7 @@ DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, CSpe
 		
 		D = Density(pScene, samplePos);
 
-		if (Spectral.m_Enable)
-			SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D)[Spectral.m_Component] * (1.0f - GetDiffuse(pScene, D)[Spectral.m_Component]);
-		else
-			SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D)[0];
+		SigmaT = pScene->m_DensityScale * GetOpacity(pScene, D)[0];
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;

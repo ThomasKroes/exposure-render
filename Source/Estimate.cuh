@@ -39,7 +39,7 @@ KERNEL void KrnlEstimate(CScene* pScene, CColorXyz* pEstFrameXyz, CColorXyz* pAc
 // 	pPixels[PID].g = (unsigned char)Clamp((255.0f * powf(Variance, InvGamma)), 0.0f, 255.0f);
 // 	pPixels[PID].b = (unsigned char)Clamp((255.0f * powf(Variance, InvGamma)), 0.0f, 255.0f);
 	
-	// Uncomment to show normal image
+	// Uncomment to show normal estimate
 	pPixels[PID].r = (unsigned char)Clamp((255.0f * powf(RgbHdr.r, InvGamma)), 0.0f, 255.0f);
 	pPixels[PID].g = (unsigned char)Clamp((255.0f * powf(RgbHdr.g, InvGamma)), 0.0f, 255.0f);
 	pPixels[PID].b = (unsigned char)Clamp((255.0f * powf(RgbHdr.b, InvGamma)), 0.0f, 255.0f);

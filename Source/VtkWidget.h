@@ -40,13 +40,14 @@ public slots:
 	void OnPreRenderFrame(void);
 	void OnPostRenderFrame(void);
 	void OnResize(void);
-//	void OnStandardView(const int& View);
+	void OnRenderLoopTimer(void);
 	
 private:
 	void SetupRenderView(void);
 	
 	QGridLayout									m_MainLayout;
 	QVTKWidget									m_QtVtkWidget;
+	QTimer										m_RenderLoopTimer;
 
 public:
 	vtkSmartPointer<vtkImageActor>				m_ImageActor;

@@ -5,42 +5,38 @@
 #include <algorithm>
 #include <vector>
 
-DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const float& D, CCudaRNG& RNG, CSpectral& Spectral)
+DEV CColorXyz IncidentLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const float& D, CCudaRNG& RNG)
 {
 	switch (pScene->m_ShadingType)
 	{
 		// Do BRDF shading
 		case 0:
 		{
-			return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true, Spectral);
+			return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 		}
 		
 		// Do phase function shading
 		case 1:
 		{
-			return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false, Spectral);
-			break;
+			return 0.5f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 		}
 
 		// Do hybrid shading (BRDF + phase function)
 		case 2:
 		{
 			// Get normalized gradient magnitude
-			const float GradMag = GradientMagnitude(pScene, Pe) / pScene->m_GradientMagnitudeRange.GetLength();
-
-			// Get opacity
-			const float Tr = GetOpacity(pScene, D)[0];
+			const float GradientMagnitude = GetGradientMagnitude(pScene, Pe) / pScene->m_GradientMagnitudeRange.GetLength();
 
 			// Determine BRDF vs Phase Function scattering
-			const float PdfBrdf = 1.0f - __expf(-pScene->m_GradientFactor * GradMag);
+			const float PdfBrdf = 1.0f - __expf(-pScene->m_GradientFactor * GradientMagnitude);
 
 			if (RNG.Get1() < PdfBrdf)
 			{
-  				return 2.0f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true, Spectral);
+  				return 2.0f * UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, true);
 			}
 			else
 			{
-				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false, Spectral);
+				return UniformSampleOneLight(pScene, Normalize(Wo), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 			}
 		}
 	}
@@ -77,9 +73,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz
 	
 	CLight* pLight = NULL;
 
-	CSpectral Spectral(false, floorf(RNG.Get1() * 3.0f));
-
-	if (SampleDistanceRM(Re, RNG, Pe, pScene, Spectral))
+	if (SampleDistanceRM(Re, RNG, Pe, pScene))
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
@@ -94,18 +88,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz
 		Lv += GetEmission(pScene, D).ToXYZ();
 
 		// Add incident light
-		if (Spectral.m_Enable)
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				Spectral.m_Component = i;
-				Lv.c[i] += IncidentLight(pScene, -Re.m_D, Pe, D, RNG, Spectral).c[i];
-			}
-		}
-		else
-		{
-			Lv += IncidentLight(pScene, -Re.m_D, Pe, D, RNG, Spectral);
-		}
+		Lv += IncidentLight(pScene, -Re.m_D, Pe, D, RNG);
 	}
 	else
 	{

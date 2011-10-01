@@ -149,7 +149,7 @@ void QAppearanceSettingsWidget::OnDenoise(int State)
 	if (!Scene())
 		return;
 
-	Scene()->m_Denoise = true;//(State == 2 ? true : false);
+	Scene()->m_Denoise = (State == 2 ? true : false);
 
 	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
 }

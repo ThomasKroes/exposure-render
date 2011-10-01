@@ -68,7 +68,7 @@ CScene::CScene(void) :
 	m_ShadingType(2),
 	m_Spectral(false),
 	m_StepSizeFactor(2.0f),
-	m_StepSizeFactorShadow(8.0f),
+	m_StepSizeFactorShadow(5.0f),
 	m_GradientDelta(1.0f),
 	m_IOR(2.5f),
 	m_GradientFactor(1.0f),
