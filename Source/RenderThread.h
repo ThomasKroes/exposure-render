@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Statistics.h"
 #include "Variance.h"
 #include "CudaFrameBuffers.h"
 

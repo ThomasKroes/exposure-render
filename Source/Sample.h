@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Random.h"
+#include "RNG.h"
 
 class CLightSample
 {

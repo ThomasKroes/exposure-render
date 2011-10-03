@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Random.h"
+#include "RNG.h"
 #include "Light.h"
-#include "VolumePoint.h"
 #include "Flags.h"
 
 class EXPOSURE_RENDER_DLL CCameraSample

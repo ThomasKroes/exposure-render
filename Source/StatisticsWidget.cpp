@@ -4,7 +4,6 @@
 
 #include "StatisticsWidget.h"
 #include "MainWindow.h"
-#include "Statistics.h"
 #include "RenderThread.h"
 
 QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :

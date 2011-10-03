@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Random.h"
+#include "RNG.h"
 
 DEV inline float CumulativeMovingAverage(const float i, const float Ai, const float Xi)
 {
