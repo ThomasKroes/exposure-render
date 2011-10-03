@@ -74,7 +74,7 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
         clr.y = lerpf(clr.y, clr00.y, lerpQ);
         clr.z = lerpf(clr.z, clr00.z, lerpQ);
 
-		pOut[ID].r = 255;//255 * clr.x;
+		pOut[ID].r = 255 * clr.x;
 		pOut[ID].g = 255 * clr.y;
 		pOut[ID].b = 255 * clr.z;
     }

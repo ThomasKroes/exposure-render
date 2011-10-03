@@ -15,7 +15,6 @@ public slots:
 	void OnSetFilmWidth(void);
 	void SetFilmHeight(const int& FilmHeight);
 	void OnSetFilmHeight(void);
-	void OnStartResize(void);
 	void SetExposure(const double& Exposure);
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
