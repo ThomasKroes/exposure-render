@@ -72,35 +72,26 @@ void vtkRealisticCameraStyle::OnMouseWheelForward(void)
 {
 	vtkInteractorStyleUser::OnMouseWheelForward();
 
-	if (!Scene())
-		return;
-
-	Scene()->m_Camera.Zoom(-m_ZoomSpeed);
+	gScene.m_Camera.Zoom(-m_ZoomSpeed);
 
 	// Flag the camera as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+	gScene.m_DirtyFlags.SetFlag(CameraDirty);
 };
 	
 void vtkRealisticCameraStyle::OnMouseWheelBackward(void)
 {
 	vtkInteractorStyleUser::OnMouseWheelBackward();
 
-	if (!Scene())
-		return;
-
-	Scene()->m_Camera.Zoom(m_ZoomSpeed);
+	gScene.m_Camera.Zoom(m_ZoomSpeed);
 
 	// Flag the camera as dirty, this will restart the rendering
-	Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+	gScene.m_DirtyFlags.SetFlag(CameraDirty);
 };
 
 void vtkRealisticCameraStyle::OnMouseMove(void) 
 {
 	// Forward events
 	vtkInteractorStyleUser::OnMouseMove();
-
-	if (!Scene())
-		return;
 
 	// Orbiting
 	if (gMouseButtonFlags.HasFlag(Left))
@@ -109,12 +100,12 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 		{
 			GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-			gCamera.GetFocus().SetFocalDistance(max(0.0f, Scene()->m_Camera.m_Focus.m_FocalDistance + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
+			gCamera.GetFocus().SetFocalDistance(max(0.0f, gScene.m_Camera.m_Focus.m_FocalDistance + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
 
 			GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 			// Flag the camera as dirty, this will restart the rendering
-			Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+			gScene.m_DirtyFlags.SetFlag(CameraDirty);
 		}
 		else
 		{
@@ -122,34 +113,34 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 			{
 				GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-				gCamera.GetAperture().SetSize(max(0.0f, Scene()->m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
+				gCamera.GetAperture().SetSize(max(0.0f, gScene.m_Camera.m_Aperture.m_Size + m_ApertureSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
 
 				GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 				// Flag the camera as dirty, this will restart the rendering
-				Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+				gScene.m_DirtyFlags.SetFlag(CameraDirty);
 			}
 			else if (GetCtrlKey())
 			{
 				GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-				gCamera.GetProjection().SetFieldOfView(max(0.0f, Scene()->m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
+				gCamera.GetProjection().SetFieldOfView(max(0.0f, gScene.m_Camera.m_FovV - m_FovSpeed * (float)(m_NewPos[1] - m_OldPos[1])));
 
 				GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 				/// Flag the camera as dirty, this will restart the rendering
-				Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+				gScene.m_DirtyFlags.SetFlag(CameraDirty);
 			}
 			else
 			{
 				GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-				Scene()->m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetResY()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetResX()));
+				gScene.m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / gScene.m_Camera.m_Film.m_Resolution.GetResY()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / gScene.m_Camera.m_Film.m_Resolution.GetResX()));
 
 				GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 				// Flag the camera as dirty, this will restart the rendering
-				Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+				gScene.m_DirtyFlags.SetFlag(CameraDirty);
 			}
 		}
 	}
@@ -159,12 +150,12 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 	{
 		GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-		Scene()->m_Camera.Pan(m_PanSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / Scene()->m_Camera.m_Film.m_Resolution.GetResY()), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / Scene()->m_Camera.m_Film.m_Resolution.GetResX()));
+		gScene.m_Camera.Pan(m_PanSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / gScene.m_Camera.m_Film.m_Resolution.GetResY()), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / gScene.m_Camera.m_Film.m_Resolution.GetResX()));
 
 		GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 		// Flag the camera as dirty, this will restart the rendering
-		Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+		gScene.m_DirtyFlags.SetFlag(CameraDirty);
 	}
 
 	// Zooming
@@ -172,11 +163,11 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 	{
 		GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-		Scene()->m_Camera.Zoom(-0.000001f * m_ContinuousZoomSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
+		gScene.m_Camera.Zoom(-0.000001f * m_ContinuousZoomSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
 
 		GetLastPos(m_OldPos[0], m_OldPos[1]);
 
 		// Flag the camera as dirty, this will restart the rendering
-		Scene()->m_DirtyFlags.SetFlag(CameraDirty);
+		gScene.m_DirtyFlags.SetFlag(CameraDirty);
 	}
 }

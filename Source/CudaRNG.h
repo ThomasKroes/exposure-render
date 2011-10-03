@@ -2,10 +2,10 @@
 
 #include "Geometry.h"
 
-class CCudaRNG
+class CRNG
 {
 public:
-	HOD CCudaRNG(unsigned int* pSeed0, unsigned int* pSeed1)
+	HOD CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
 	{
 		m_pSeed0 = pSeed0;
 		m_pSeed1 = pSeed1;

@@ -84,11 +84,7 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 void QAppearanceSettingsWidget::OnRenderBegin(void)
 {
 	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale());
-
-	if (!Scene())
-		return;
-
-	m_GradientFactorSlider.setValue(Scene()->m_GradientFactor);
+	m_GradientFactorSlider.setValue(gScene.m_GradientFactor);
 }
 
 void QAppearanceSettingsWidget::OnRenderEnd(void)
@@ -114,20 +110,12 @@ void QAppearanceSettingsWidget::OnSetShadingType(int Index)
 
 void QAppearanceSettingsWidget::OnSetMaxGradientMagnitude(double MaxGradMag)
 {
-	if (!Scene())
-		return;
-
- 	Scene()->m_GradientFactor = (float)MaxGradMag;
-// 
- 	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
+ 	gScene.m_GradientFactor = (float)MaxGradMag;
+	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 void QAppearanceSettingsWidget::OnSetIndexOfRefraction(double IOR)
 {
-	if (!Scene())
-		return;
-
-	Scene()->m_IOR = IOR;
-	
-	Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
+	gScene.m_IOR = IOR;
+	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }

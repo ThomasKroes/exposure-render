@@ -8,6 +8,7 @@
 #include "Status.h"
 #include "Controls.h"
 #include "CudaUtilities.h"
+#include "Scene.h"
 
 inline void ReadVectorElement(QDomElement& Parent, const QString& Name, float& X, float& Y, float& Z)
 {

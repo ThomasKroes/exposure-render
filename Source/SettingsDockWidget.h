@@ -8,7 +8,6 @@ public:
     CTracerSettingsWidget(QWidget* pParent = NULL);
 
 private slots:
-	void OnSetNoBounces(const int& NoBounces);
 
 private:
 	QGridLayout		m_MainLayout;

@@ -12,12 +12,15 @@ public:
 public slots:
 	void LockFilmHeight(const int& State);
 	void SetFilmWidth(const int& FilmWidth);
+	void OnSetFilmWidth(void);
 	void SetFilmHeight(const int& FilmHeight);
+	void OnSetFilmHeight(void);
+	void OnStartResize(void);
 	void SetExposure(const double& Exposure);
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
 	void OnFilmChanged(const QFilm& Film);
-
+	
 private:
 	QGridLayout		m_GridLayout;
 	QSlider			m_WidthSlider;

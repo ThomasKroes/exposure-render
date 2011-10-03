@@ -19,6 +19,7 @@ public:
 	void		SetExposure(const float& Exposure);
 	void		Reset(void);
 	bool		IsDirty(void) const;
+	void		UnDirty(void);
 	void		ReadXML(QDomElement& Parent);
 	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
 

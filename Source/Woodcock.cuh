@@ -34,7 +34,7 @@ struct Photon{
 
 
 
-DEV inline bool SampleDistanceDdaWoodcock(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene, int Component)
+DEV inline bool SampleDistanceDdaWoodcock(CRay R, CRNG& RNG, Vec3f& P, CScene* pScene, int Component)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 

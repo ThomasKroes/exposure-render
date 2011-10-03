@@ -37,16 +37,16 @@ public:
 public slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
-	void OnPreRenderFrame(void);
-	void OnPostRenderFrame(void);
-	void OnResize(void);
-//	void OnStandardView(const int& View);
-	
+	void OnFilmChanged(const QFilm& Film);
+	void OnRenderLoopTimer(void);
+
 private:
 	void SetupRenderView(void);
 	
 	QGridLayout									m_MainLayout;
 	QVTKWidget									m_QtVtkWidget;
+	unsigned char*								m_pPixels;
+	QTimer										m_RenderLoopTimer;
 
 public:
 	vtkSmartPointer<vtkImageActor>				m_ImageActor;

@@ -18,7 +18,7 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		return;
 	
 	// Init random number generator
-	CCudaRNG RNG(&pSeeds[SID * 2], &pSeeds[SID * 2 + 1]);
+	CRNG RNG(&pSeeds[SID * 2], &pSeeds[SID * 2 + 1]);
 
 	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
 

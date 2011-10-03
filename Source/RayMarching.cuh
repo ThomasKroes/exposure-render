@@ -3,7 +3,7 @@
 #include "Geometry.h"
 #include "Scene.h"
 
-DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
+DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& P, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -43,7 +43,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CCudaRNG& RNG, Vec3f& P, CScene* pScen
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay R, CCudaRNG& RNG, Vec3f& P, CScene* pScene)
+DEV inline bool FreePathRM(CRay R, CRNG& RNG, Vec3f& P, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 

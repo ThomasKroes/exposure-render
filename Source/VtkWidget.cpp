@@ -42,6 +42,7 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
 	m_QtVtkWidget(),
+	m_pPixels(NULL),
 	m_ImageActor(),
 	m_ImageImport(),
 	m_InteractorStyleImage(),
@@ -66,10 +67,8 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, when the rendering canvas is resized and when the timer has timed out
 	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	connect(&gStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
-	connect(&gStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
-	connect(&gStatus, SIGNAL(Resize()), this, SLOT(OnResize()));
-//	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
+	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
+	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
 
 	// Setup the render view
 	SetupRenderView();
@@ -86,9 +85,12 @@ void CVtkWidget::OnRenderBegin(void)
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
 
 	m_ImageImport->SetDataSpacing(1, 1, 1);
-	m_ImageImport->SetDataOrigin(-0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)Scene()->m_Camera.m_Film.m_Resolution.GetResY(), 0);
-	m_ImageImport->SetImportVoidPointer((void*)malloc(3 * Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char)), 1);
-	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
+	m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResY(), 0);
+
+	m_pPixels = (unsigned char*)malloc(3 * gScene.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char));
+
+	m_ImageImport->SetImportVoidPointer((void*)m_pPixels, 1);
+	m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, gScene.m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
 	m_ImageImport->SetDataExtentToWholeExtent();
 	m_ImageImport->SetDataScalarTypeToUnsignedChar();
 	m_ImageImport->SetNumberOfScalarComponents(3);
@@ -106,74 +108,14 @@ void CVtkWidget::OnRenderBegin(void)
 	m_SceneRenderer->AddActor(m_ImageActor); 
 
 	
-//	m_UcharArray->Allocate(Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
+//	m_UcharArray->Allocate(gScene.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
 	// Start the timer
-//	m_RenderLoopTimer.start(10.0f);
+	m_RenderLoopTimer.start(1000.0f / 35.0f);
 }
 
 void CVtkWidget::OnRenderEnd(void)
 {
 	m_RenderWindow->Render();
-}
-
-void CVtkWidget::OnPreRenderFrame(void)
-{
-	if (!Scene())
-		return;
-}
-
-void CVtkWidget::OnPostRenderFrame(void)
-{
-	if (!Scene())
-		return;
-	
-
-	if (gpRenderThread->GetRenderImage())
-	{/*
-		const Vec2i CanvasSize(Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
-		const Vec2i Origin((int)(0.5f * (float)(width() - CanvasSize.x)), (int)(0.5f * (float)(height() - CanvasSize.y)));
-
-		
-		vtkSmartPointer<vtkUnsignedCharArray> m_UcharArray = vtkUnsignedCharArray::New();
-		
-//		m_UcharArray->Allocate(Scene()->m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
-//		m_UcharArray->SetArray((unsigned char*)gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), 0, 1);
-//		m_UcharArray->SetVoidArray(NULL, Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), 0);
-//		m_UcharArray->SetVoidArray((void*)gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(), 0);
-		
-		vtkUnsignedCharArray *_colors = (vtkUnsignedCharArray*)m_DisplayImage->GetPointData()->GetScalars();
-		
-		for (int i = 0; i < Scene()->m_Camera.m_Film.m_Resolution.GetNoElements(); i++)
-		{
-// 			_colors->SetValue(i, gpRenderThread->GetRenderImage()[i].r);
-		}
-//		m_DisplayImage->Update();
-		m_DisplayImage->Modified();
-//		m_DisplayImage->SetDimensions(640, 480, 1);
-//		m_ImageActor->SetInput(m_DisplayImage);
-//		m_ImageActor->Render(m_SceneRenderer);
-		m_RenderWindow->Render();
-
-		
-
-		// Decide where to blit the image
-		const Vec2i CanvasSize(Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
-		const Vec2i Origin((int)(0.5f * (float)(width() - CanvasSize.x)), (int)(0.5f * (float)(height() - CanvasSize.y)));
-
-		// Blit
-		m_RenderWindow->SetPixelData(max(0, Origin.x), max(0, Origin.y), Origin.x + CanvasSize.x - 1, Origin.y + CanvasSize.y - 1, (unsigned char*)gpRenderThread->GetRenderImage(), 1);
-*/
-	}
-
-	if (gpRenderThread->GetRenderImage())
-	{
-		m_ImageImport->SetImportVoidPointer(NULL);
-		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
-
-		m_ImageActor->SetInput(m_ImageImport->GetOutput());
-
-		m_RenderWindow->GetInteractor()->Render();
-	}/**/
 }
 
 void CVtkWidget::SetupRenderView(void)
@@ -214,16 +156,59 @@ void CVtkWidget::SetupRenderView(void)
 	m_ImageActor = vtkImageActor::New();
 }
 
-void CVtkWidget::OnResize(void)
+void CVtkWidget::OnFilmChanged(const QFilm& Film)
 {
-	if (!Scene())
-		return;
-	/*
- 	m_ImageImport->SetDataExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
- 	m_ImageImport->SetWholeExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
-// 	m_ImageActor->SetDisplayExtent(0, Scene()->m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, Scene()->m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
+// 	free(m_pPixels);
+// 	m_pPixels = (unsigned char*)malloc(3 * Film.GetWidth() * Film.GetHeight() * sizeof(unsigned char));
+// 
+// 	m_ImageImport->SetDataOrigin(-0.5f * (float)Film.GetWidth(), -0.5f * (float)Film.GetHeight(), 0);
+// 	m_ImageImport->SetImportVoidPointer((void*)m_pPixels, 1);
+// 	m_ImageImport->SetDataExtent(0, Film.GetWidth() - 1, 0, Film.GetHeight() - 1, 0, 0);
+// 	m_ImageImport->SetWholeExtent(0, Film.GetWidth() - 1, 0, Film.GetHeight() - 1, 0, 0);
+// 	m_ImageImport->SetDataExtentToWholeExtent();
 
-	m_pImageImport->SetImportVoidPointer(NULL);
-	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
-	*/
+// 	m_ImageImport->SetImportVoidPointer(NULL);
+// 	m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+// 	// 
+// 	m_ImageActor->SetInput(m_ImageImport->GetOutput());
+
+	// 	m_ImageActor->SetDisplayExtent(0, gScene.m_Camera.m_Film.m_Resolution.GetWidth() - 1, 0, gScene.m_Camera.m_Film.m_Resolution.GetHeight() - 1, 0, 0);
+
+//	m_ImageImport->SetImportVoidPointer(NULL);
+	// 	m_pImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+	/**/
+}
+
+void CVtkWidget::OnRenderLoopTimer(void)
+{
+	if (!gpRenderThread)
+		return;
+
+ 	return;
+// 
+// 	QMutexLocker MutexLocker(&gpRenderThread->m_Mutex);
+// 
+	if (m_ImageImport->GetDataExtent()[1] != gScene.m_Camera.m_Film.GetWidth() || m_ImageImport->GetDataExtent()[3] != gScene.m_Camera.m_Film.GetHeight())
+	{
+		m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.GetWidth(), -0.5f * (float)gScene.m_Camera.m_Film.GetHeight(), 0);
+		m_ImageImport->SetDataExtent(0, gScene.m_Camera.m_Film.GetWidth() - 1, 0, gScene.m_Camera.m_Film.GetHeight() - 1, 0, 0);
+		m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.GetWidth() - 1, 0, gScene.m_Camera.m_Film.GetHeight() - 1, 0, 0);
+		m_ImageImport->SetDataExtentToWholeExtent();
+	}
+
+	if (!gpRenderThread->m_Pause && gpRenderThread->GetRenderImage())
+	{
+		// 		if (gCamera.GetFilm().IsDirty())
+		// 		{
+
+		//		}
+
+ 		m_ImageImport->SetImportVoidPointer(NULL);
+ 		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+
+// 		m_ImageImport->SetImportVoidPointer(m_pPixels);
+ 		m_ImageActor->SetInput(m_ImageImport->GetOutput());
+
+ 		m_RenderWindow->GetInteractor()->Render();
+	}
 }

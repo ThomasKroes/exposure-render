@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Statistics.h"
-#include "Scene.h"
 #include "Variance.h"
 #include "CudaFrameBuffers.h"
-
 
 class QRenderThread : public QThread
 {
@@ -23,7 +21,6 @@ public:
 	QString			GetFileName(void) const						{	return m_FileName;		}
 	void			SetFileName(const QString& FileName)		{	m_FileName = FileName;	}
 	CColorRgbaLdr*	GetRenderImage(void) const;
-	CScene*			GetScene(void)								{	return &m_Scene;		}
 	void			Close(void)									{	m_Abort = true;			}
 	void			PauseRendering(const bool& Pause)			{	m_Pause = Pause;		}
 	
@@ -42,8 +39,8 @@ private:
 
 public:
 	bool			m_Abort;
-	CScene			m_Scene;
 	bool			m_Pause;
+	QMutex			m_Mutex;
 
 public:
 	QList<int>		m_SaveFrames;
@@ -58,6 +55,5 @@ public slots:
 // Render thread
 extern QRenderThread* gpRenderThread;
 
-CScene* Scene(void);
 void StartRenderThread(QString& FileName);
 void KillRenderThread(void);

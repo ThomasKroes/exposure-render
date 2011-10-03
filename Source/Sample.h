@@ -23,7 +23,7 @@ public:
 		return *this;
 	}
 
-	DEV void LargeStep(CCudaRNG& Rnd)
+	DEV void LargeStep(CRNG& Rnd)
 	{
 		m_Pos		= Rnd.Get2();
 		m_Component	= Rnd.Get1();
@@ -56,7 +56,7 @@ public:
 		return *this;
 	}
 
-	DEV void LargeStep(CCudaRNG& Rnd)
+	DEV void LargeStep(CRNG& Rnd)
 	{
 		m_Component	= Rnd.Get1();
 		m_Dir		= Rnd.Get2();
@@ -84,7 +84,7 @@ public:
 		return *this;
 	}
 
-	DEV void LargeStep(CCudaRNG& Rnd)
+	DEV void LargeStep(CRNG& Rnd)
 	{
 		m_BsdfSample.LargeStep(Rnd);
 		m_LightSample.LargeStep(Rnd);

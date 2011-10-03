@@ -48,7 +48,11 @@ SET(ExposureRenderSources
 	# Main
 	MainWindow.cpp
 	Main.cpp 
-	
+	LoadSettingsDialog.cpp
+	StartupDialog.cpp
+	AboutDialog.cpp
+	SettingsDockWidget.cpp
+
 	# Lighting
 	LightSettingsWidget.cpp 
 	LightingDockWidget.cpp 
@@ -105,23 +109,16 @@ SET(ExposureRenderSources
 	Geometry.cpp
 	Light.cpp
 	MonteCarlo.cpp
-	Random.cpp
+	RNG.cpp
 	Spectrum.cpp
-	Statistics.cpp
-	VolumePoint.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
-	SettingsDockWidget.cpp
-	LoadSettingsDialog.cpp
 	VtkWidget.cpp
 	Scene.cpp
 	Controls.cpp
 	Material.cpp
 	Sample.cpp
-	LightTransport.cpp
-	StartupDialog.cpp
 	Utilities.cpp
-	AboutDialog.cpp
 	CudaUtilities.cpp
 	Status.cpp
 	Timing.cpp
@@ -138,6 +135,10 @@ SET(ExposureRenderHeaders
 	
 	# Main
 	MainWindow.h
+	LoadSettingsDialog.h
+	StartupDialog.h
+	AboutDialog.h
+	SettingsDockWidget.h
 
 	# Lighting
 	LightSettingsWidget.h
@@ -193,35 +194,28 @@ SET(ExposureRenderHeaders
 	Defines.h
 	Dll.h
 	Enumerations.h
-	Exception.h
 	Filter.h
 	Flags.h
 	Geometry.h
 	Light.h
 	MonteCarlo.h
-	Random.h
+	RNG.h
 	Spectrum.h
-	Statistics.h
-	VolumePoint.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
-	SettingsDockWidget.h
-	LoadSettingsDialog.h
 	VtkWidget.h
 	Scene.h
 	Controls.h
 	Material.h
 	Sample.h
-	LightTransport.h
 	LogWidget.h
-	StartupDialog.h
 	Utilities.h
-	AboutDialog.h
 	CudaUtilities.h
 	Status.h
 	Timing.h
 	Variance.h
 	CudaFrameBuffers.h
+	CameraInline.h
 
 	# Logging
 	Logger.h
@@ -232,6 +226,10 @@ SET(ExposureRenderHeaders
 SET(ExposureRenderMocHeaders 
 	# Main
 	MainWindow.h
+	SettingsDockWidget.h
+	LoadSettingsDialog.h
+	StartupDialog.h
+	AboutDialog.h
 
 	# Lighting
 	LightSettingsWidget.h
@@ -276,12 +274,8 @@ SET(ExposureRenderMocHeaders
 	
 	# Core
 	RenderThread.h
-	SettingsDockWidget.h
-	LoadSettingsDialog.h
-	StartupDialog.h
 	VtkWidget.h
 	Controls.h
-	AboutDialog.h
 	Status.h
 
 	# Logging
@@ -336,8 +330,16 @@ SOURCE_GROUP("Generated" FILES
 # Main sources
 SET(MainSources
 	MainWindow.h
+	LoadSettingsDialog.h
+	StartupDialog.h
+	AboutDialog.h
+	SettingsDockWidget.h
 	MainWindow.cpp
 	Main.cpp
+	LoadSettingsDialog.cpp
+	StartupDialog.cpp
+	AboutDialog.cpp
+	SettingsDockWidget.cpp
 )
 
 # Make the main group
@@ -464,62 +466,44 @@ SET(CoreSources
 	Defines.h
 	Dll.h
 	Enumerations.h
-	Exception.h
 	Filter.h
 	Flags.h
 	Geometry.h
 	Light.h
 	MonteCarlo.h
-	Random.h
 	Spectrum.h
-	Statistics.h
-	VolumePoint.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
-	SettingsDockWidget.h
-	LoadSettingsDialog.h
 	VtkWidget.h
 	Scene.h
 	Controls.h
 	Material.h
 	Sample.h
-	LightTransport.h
-	StartupDialog.h
 	Utilities.h
-	AboutDialog.h
-	CudaUtilities.h
 	Status.h
 	Timing.h
 	Variance.h
-	CudaFrameBuffers.h
+	CameraInline.h
+	RNG.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
 	Light.cpp
 	MonteCarlo.cpp
-	Random.cpp
 	Spectrum.cpp
-	Statistics.cpp
-	VolumePoint.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
-	SettingsDockWidget.cpp
-	LoadSettingsDialog.cpp
 	VtkWidget.cpp
 	Scene.cpp
 	Controls.cpp
 	Material.cpp
 	Sample.cpp
-	LightTransport.cpp
-	StartupDialog.cpp
 	Utilities.cpp
-	AboutDialog.cpp
-	CudaUtilities.cpp
 	Status.cpp
 	Timing.cpp
 	Variance.cpp
-	CudaFrameBuffers.cpp
+	RNG.cpp
 )
 
 # Make the core group
@@ -539,6 +523,10 @@ SET(CudaSources
 	Denoise.cuh
 	Variance.cuh
 	Core.cu
+	CudaFrameBuffers.h
+	CudaUtilities.h
+	CudaFrameBuffers.cpp
+	CudaUtilities.cpp
 )
 
 # Make the CUDA group

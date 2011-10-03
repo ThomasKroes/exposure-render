@@ -7,7 +7,7 @@
 #include "RayMarching.cuh"
 #include "Woodcock.cuh"
 
-DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd)
+DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& Rnd)
 {
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
@@ -69,7 +69,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 	return Ld;
 }
 
-DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd)
+DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& Rnd)
 {
 	const float D = Density(pScene, Pe);
 
@@ -128,7 +128,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	return Ld;
 }
 
-DEV CColorXyz UniformSampleOneLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CCudaRNG& Rnd, const bool& Brdf)
+DEV CColorXyz UniformSampleOneLight(CScene* pScene, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& Rnd, const bool& Brdf)
 {
 	// Determine no. lights
 	const int NumLights = pScene->m_Lighting.m_NoLights;

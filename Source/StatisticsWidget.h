@@ -24,8 +24,6 @@ private:
 public slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
-	void OnPreRenderFrame(void);
-	void OnPostRenderFrame(void);
 	void OnStatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit, const QString& Icon = "");
 	
 private:

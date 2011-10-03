@@ -41,12 +41,9 @@ void QCameraWidget::OnLoadPreset(const QString& Name)
 
 	gCamera = m_PresetsWidget.GetPreset(Name);
 
-	if (Scene())
-	{
-		Scene()->m_Camera.m_Target	= gCamera.GetTarget();
-		Scene()->m_Camera.m_From	= gCamera.GetFrom();
-		Scene()->m_Camera.m_Up		= gCamera.GetUp();
-	}
+	gScene.m_Camera.m_Target	= gCamera.GetTarget();
+	gScene.m_Camera.m_From		= gCamera.GetFrom();
+	gScene.m_Camera.m_Up		= gCamera.GetUp();
 }
 
 void QCameraWidget::OnSavePreset(const QString& Name)
@@ -54,9 +51,9 @@ void QCameraWidget::OnSavePreset(const QString& Name)
 	QCamera Preset(gCamera);
 	Preset.SetName(Name);
 
-	Preset.SetFrom(Scene()->m_Camera.m_From);
-	Preset.SetTarget(Scene()->m_Camera.m_Target);
-	Preset.SetUp(Scene()->m_Camera.m_Up);
+	Preset.SetFrom(gScene.m_Camera.m_From);
+	Preset.SetTarget(gScene.m_Camera.m_Target);
+	Preset.SetUp(gScene.m_Camera.m_Up);
 
 	// Add the preset
 	m_PresetsWidget.SavePreset(Preset);

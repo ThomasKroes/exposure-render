@@ -42,8 +42,6 @@ QStatisticsWidget::QStatisticsWidget(QWidget* pParent) :
 	// Notify us when rendering begins and ends, and before/after each rendered frame
 	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	connect(&gStatus, SIGNAL(PreRenderFrame()), this, SLOT(OnPreRenderFrame()));
-	connect(&gStatus, SIGNAL(PostRenderFrame()), this, SLOT(OnPostRenderFrame()));
 	connect(&gStatus, SIGNAL(StatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)), this, SLOT(OnStatisticChanged(const QString&, const QString&, const QString&, const QString&, const QString&)));
 }
 
@@ -126,18 +124,6 @@ void QStatisticsWidget::OnRenderEnd(void)
 	RemoveChildren("Memory");
 	RemoveChildren("Camera");
 	RemoveChildren("Graphics Card");
-}
-
-void QStatisticsWidget::OnPreRenderFrame(void)
-{
-	if (!Scene())
-		return;
-}
-
-void QStatisticsWidget::OnPostRenderFrame(void)
-{
-	if (!Scene())
-		return;
 }
 
 void QStatisticsWidget::OnStatisticChanged(const QString& Group, const QString& Name, const QString& Value, const QString& Unit /*= ""*/, const QString& Icon /*= ""*/)

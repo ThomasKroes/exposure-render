@@ -5,7 +5,6 @@
 #include "MainWindow.h"
 
 #include "VtkWidget.h"
-#include "Scene.h"
 #include "StartupDialog.h"
 #include "AboutDialog.h"
 
@@ -332,7 +331,7 @@ void CMainWindow::OnSaveImage(void)
 
 	gpRenderThread->PauseRendering(true);
 
-	SaveImage((unsigned char*)gpRenderThread->GetRenderImage(), Scene()->m_Camera.m_Film.m_Resolution.GetResX(), Scene()->m_Camera.m_Film.m_Resolution.GetResY());
+	SaveImage((unsigned char*)gpRenderThread->GetRenderImage(), gScene.m_Camera.m_Film.m_Resolution.GetResX(), gScene.m_Camera.m_Film.m_Resolution.GetResY());
 
 	gpRenderThread->PauseRendering(false);
 }

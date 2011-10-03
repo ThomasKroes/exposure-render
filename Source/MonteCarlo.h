@@ -8,7 +8,7 @@ DEV inline float CumulativeMovingAverage(const float i, const float Ai, const fl
 	return Ai + (Xi - Ai)/(i+1);
 }
 
-DEV inline void MutateMetro(CCudaRNG& Rnd, float& v)
+DEV inline void MutateMetro(CRNG& Rnd, float& v)
 {
 	const float a = 1.0f / 1024.f, b = 1.0f / 64.0f;
 	const float logRatio = -logf(b / a);
@@ -26,7 +26,7 @@ DEV inline void MutateMetro(CCudaRNG& Rnd, float& v)
 	}
 }
 
-DEV inline void MutateScreen(CCudaRNG& Rnd, float* pV, float Min = 0.0f, float Max = 1.0f)
+DEV inline void MutateScreen(CRNG& Rnd, float* pV, float Min = 0.0f, float Max = 1.0f)
 {
 	if (Min == Max)
 	{

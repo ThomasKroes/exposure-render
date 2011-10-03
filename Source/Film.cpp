@@ -109,3 +109,8 @@ QDomElement QFilm::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	return Film;
 }
+
+void QFilm::UnDirty(void)
+{
+	m_Dirty = false;
+}

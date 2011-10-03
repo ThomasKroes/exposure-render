@@ -39,21 +39,9 @@ CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	
 	connect(&m_NoBouncesSlider, SIGNAL(valueChanged(int)), &m_NoBouncesSpinBox, SLOT(setValue(int)));
 	connect(&m_NoBouncesSpinBox, SIGNAL(valueChanged(int)), &m_NoBouncesSlider, SLOT(setValue(int)));
-	connect(&m_NoBouncesSlider, SIGNAL(valueChanged(int)), this, SLOT(OnSetNoBounces(int)));
 
 	// Phase
 	m_MainLayout.addWidget(new QLabel("Scattering"), 3, 0);
-}
-
-void CTracerSettingsWidget::OnSetNoBounces(const int& NoBounces)
-{
-	if (Scene())
-	{
-		Scene()->m_MaxNoBounces	= NoBounces;
-		
-		// Flag the render params as dirty, this will restart the rendering
-		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
-	}
 }
 
 CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
@@ -111,24 +99,18 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 
 void CKernelSettingsWidget::SetKernelWidth(const int& KernelWidth)
 {
-	if (Scene())
-	{
-		Scene()->m_KernelSize.x	= KernelWidth;
+	gScene.m_KernelSize.x	= KernelWidth;
 		
-		// Flag the render params as dirty, this will restart the rendering
-		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
-	}
+	// Flag the render params as dirty, this will restart the rendering
+	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 void CKernelSettingsWidget::SetKernelHeight(const int& KernelHeight)
 {
-	if (Scene())
-	{
-		Scene()->m_KernelSize.y	= KernelHeight;
+	gScene.m_KernelSize.y	= KernelHeight;
 		
-		// Flag the render params as dirty, this will restart the rendering
-		Scene()->m_DirtyFlags.SetFlag(RenderParamsDirty);
-	}
+	// Flag the render params as dirty, this will restart the rendering
+	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 void CKernelSettingsWidget::LockKernelHeight(const int& Lock)
