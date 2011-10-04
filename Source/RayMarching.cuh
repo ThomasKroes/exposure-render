@@ -19,26 +19,24 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& P, CScene* pScene)
 	float SigmaT	= 0.0f;
 	float D			= 0.0f;
 
-	Vec3f samplePos; 
+	Vec3f Ps; 
 
 	MinT += RNG.Get1() * Dt;
 
 	while (Sum < S)
 	{
-		samplePos = R.m_O + MinT * R.m_D;
+		Ps = R.m_O + MinT * R.m_D;
 
 		if (MinT > MaxT)
 			return false;
 		
-		D = Density(pScene, samplePos);
-
-		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D).r;
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, Ps);
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
 
-	P = samplePos;
+	P = Ps;
 
 	return true;
 }
@@ -59,26 +57,24 @@ DEV inline bool FreePathRM(CRay R, CRNG& RNG, Vec3f& P, CScene* pScene)
 	float SigmaT	= 0.0f;
 	float D			= 0.0f;
 
-	Vec3f samplePos; 
+	Vec3f Ps; 
 
 	MinT += RNG.Get1() * Dt;
 
 	while (Sum < S)
 	{
-		samplePos = R.m_O + MinT * R.m_D;
+		Ps = R.m_O + MinT * R.m_D;
 
 		if (MinT > MaxT)
 			return false;
 		
-		D = Density(pScene, samplePos);
-
-		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, D).r;
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, Ps);
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
 	}
 
-	P = samplePos;
+	P = Ps;
 
 	return true;
 }

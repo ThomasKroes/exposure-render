@@ -184,7 +184,7 @@ void CVtkWidget::OnRenderLoopTimer(void)
 	if (!gpRenderThread)
 		return;
 
- 	return;
+// 	return;
 // 
 // 	QMutexLocker MutexLocker(&gpRenderThread->m_Mutex);
 // 

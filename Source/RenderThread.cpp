@@ -221,6 +221,8 @@ void QRenderThread::run()
 
 //			msleep(10);
 			
+			BindOpacity(SceneCopy.m_TransferFunctions.m_Opacity);
+
 			// Execute the rendering kernels
   			Render(0, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 			HandleCudaError(cudaGetLastError());
@@ -461,7 +463,8 @@ void QRenderThread::OnUpdateTransferFunction(void)
 	{
 		QNode& Node = TransferFunction.GetNode(i);
 
-		const float Intensity = gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetLength() * Node.GetIntensity();
+//		const float Intensity = gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetLength() * Node.GetIntensity();
+		const float Intensity = Node.GetIntensity();
 
 		// Positions
 		gScene.m_TransferFunctions.m_Opacity.m_P[i]		= Intensity;
@@ -485,6 +488,24 @@ void QRenderThread::OnUpdateTransferFunction(void)
 	gScene.m_ShadingType	= TransferFunction.GetShadingType();
 
 	gScene.m_DirtyFlags.SetFlag(TransferFunctionDirty);
+
+	FILE * pFile;
+   int n;
+   char name [100];
+
+   pFile = fopen ("c:\\tf.txt","w");
+
+   if (pFile)
+   {
+	   for (int i = 0; i < 255; i++)
+		{
+			fprintf(pFile, "%0.2f\n", gScene.m_TransferFunctions.m_Opacity.F((float)i / 255.0f).r);
+		}
+   }
+
+   fclose (pFile);
+
+	
 }
 
 void QRenderThread::OnUpdateCamera(void)

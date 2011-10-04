@@ -46,7 +46,6 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 		const float D = Density(pScene, Pe);
 
 		// Get opacity at eye point
-		const float		Tr = GetOpacity(pScene, D)[0];
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
 		
 		// Add emission

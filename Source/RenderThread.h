@@ -31,6 +31,7 @@ private:
 	short*				m_pDensityBuffer;
 	short*				m_pGradientMagnitudeBuffer;
 
+
 public:
 	bool			m_Abort;
 	bool			m_Pause;

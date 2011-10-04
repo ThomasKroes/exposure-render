@@ -43,7 +43,6 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevE
 		const float D = Density(pScene, Pe);
 
 		// Get opacity at eye point
-		const float		Tr = GetOpacity(pScene, D).r;
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
 		
 		// Estimate direct light at eye point
