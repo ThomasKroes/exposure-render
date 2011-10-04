@@ -61,6 +61,8 @@ void QTransferFunction::OnNodeChanged(QNode* pNode)
 	UpdateNodeRanges();
 
 	emit Changed();
+
+	SetDirty();
 }
 
 void QTransferFunction::SetSelectedNode(QNode* pSelectedNode)

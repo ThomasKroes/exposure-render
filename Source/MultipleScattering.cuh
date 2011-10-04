@@ -2,7 +2,7 @@
 
 #include "Transport.cuh"
 
-KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
+KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
@@ -59,7 +59,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, unsigned int* pSeeds, CColorX
 	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Lv;
 }
 
-void MultipleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
+void MultipleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));

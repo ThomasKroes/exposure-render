@@ -150,48 +150,6 @@ public:
 	}
 };
 
-class EXPOSURE_RENDER_DLL CBloom
-{
-public:
-	float	m_Radius;
-	float	m_Weight;
-	int		m_NoSamples;
-
-	HOD CBloom(void)
-	{
-		m_Radius		= 100.0f;
-		m_Weight		= 0.1f;
-		m_NoSamples		= 12;
-	}
-
-	CBloom& CBloom::operator=(const CBloom& Other)
-	{
-		m_Radius		= Other.m_Radius;
-		m_Weight		= Other.m_Weight;
-		m_NoSamples		= Other.m_NoSamples;
-
-		return *this;
-	}
-};
-
-class EXPOSURE_RENDER_DLL CToneMap
-{
-public:
-	float	m_Factor;
-
-	HOD CToneMap(void)
-	{
-		m_Factor = 1.0f;
-	}
-
-	CToneMap& CToneMap::operator=(const CToneMap& Other)
-	{
-		m_Factor = Other.m_Factor;
-
-		return *this;
-	}
-};
-
 class EXPOSURE_RENDER_DLL CFilm
 {
 public:
@@ -202,8 +160,6 @@ public:
 	float			m_Exposure;
 	float			m_FStop;
 	float			m_Gamma;
-	CToneMap		m_ToneMap;
-	CBloom			m_Bloom;
 
 	// ToDo: Add description
 	HOD CFilm(void)
@@ -231,8 +187,6 @@ public:
 		m_Exposure			= Other.m_Exposure;
 		m_FStop				= Other.m_FStop;
 		m_Gamma				= Other.m_Gamma;
-		m_ToneMap			= Other.m_ToneMap;
-		m_Bloom				= Other.m_Bloom;
 
 		return *this;
 	}
@@ -262,8 +216,6 @@ public:
 		m_InvScreen.y = (m_Screen[1][1] - m_Screen[1][0]) / m_Resolution.GetResY();
 
 		m_Resolution.Update();
-
-		m_ToneMap.m_Factor = m_Exposure / (Aperture * Aperture) * m_Iso / 10.0f * powf(118.0f / 255.0f, m_Gamma);
 	}
 
 	HOD int GetWidth(void) const
@@ -298,16 +250,6 @@ public:
 class EXPOSURE_RENDER_DLL CCamera 
 {
 public:
-	enum EType
-	{
-		Perspective,
-		Orthographic,
-		Environment,
-		Realistic,
-		FishEye
-	};
-
-	EType				m_CameraType;
 	CBoundingBox		m_SceneBoundingBox;
 	float				m_Hither;
 	float				m_Yon;
@@ -327,7 +269,6 @@ public:
 
 	HOD CCamera(void)
 	{
-		m_CameraType			= DEF_CAMERA_TYPE;
 		m_Hither				= DEF_CAMERA_HITHER;
 		m_Yon					= DEF_CAMERA_YON;
 		m_EnableClippingPlanes	= DEF_CAMERA_ENABLE_CLIPPING;
@@ -343,7 +284,6 @@ public:
 
 	CCamera& CCamera::operator=(const CCamera& Other)
 	{
-		m_CameraType			= Other.m_CameraType;
 		m_SceneBoundingBox		= Other.m_SceneBoundingBox;
 		m_Hither				= Other.m_Hither;
 		m_Yon					= Other.m_Yon;
@@ -488,47 +428,6 @@ public:
 		}
 	}
 
-	HOD Vec2f SampleTSD(const Vec2f& U) const
-	{
-		Vec2f u = U;
-
-		float fn = (float)m_Aperture.m_NoBlades;
-
-		int idx = int(u.x * fn);
-
-		u.x = (u.x - ((float)idx) / fn) * fn;
-
-		const float b1 = u.x * u.y;
-		const float b0 = u.x - b1;
-
-		idx <<= 1;
-
-		return Vec2f(m_Aperture.m_Data[idx] * b0 + m_Aperture.m_Data[idx + 2] * b1, m_Aperture.m_Data[idx + 1] * b0 + m_Aperture.m_Data[idx + 3] * b1);
-	}
-
-	HOD Vec2f GetLensUV(const Vec2f& U)
-	{
-		switch (m_Aperture.m_NoBlades)
-		{
-			case 2:
-				return ConcentricSampleDisk(U);
-
-			case 3:
-			case 4:
-			case 5:
-			case 6:
-			case 7:
-			case 8:
-			case 9:
-			case 10:
-			case 11:
-			case 12:
-				return SampleTSD(U);
-		}
-
-		return Vec2f(0.0f);
-	}
-
 	HOD void GenerateRay(const Vec2f& Pixel, const Vec2f& ApertureRnd, Vec3f& RayO, Vec3f& RayD)
 	{
 		Vec2f ScreenPoint;
@@ -541,37 +440,11 @@ public:
 
 		if (m_Aperture.m_Size != 0.0f)
 		{
-			Vec2f LensUV = m_Aperture.m_Size * GetLensUV(ApertureRnd);
+			Vec2f LensUV = m_Aperture.m_Size * ConcentricSampleDisk(ApertureRnd);
 
 			Vec3f LI = m_U * LensUV.x + m_V * LensUV.y;
 			RayO += LI;
 			RayD = Normalize((RayD * m_Focus.m_FocalDistance) - LI);
 		}
-	}
-
-	HOD bool Project(const Vec3f& w, float& u, float& v, float& pdf)
-	{
-		const Vec3f La	= ((1.0f / Dot(w, m_N)) * w);
-		const Vec3f Laa	= La - m_N;
-		const float U	= -Dot(Laa, m_U);
-		const float V	= -Dot(Laa, m_V);
-
-		if (Dot(w, m_N) < 0.0f || U < m_Film.m_Screen[0][0] || U > m_Film.m_Screen[0][1] || V < m_Film.m_Screen[1][0] || V > m_Film.m_Screen[1][1])
-			return false;
-
-		const float Ua	= U / fabs(m_Film.m_Screen[0][1]);
-		const float Va	= V / fabs(m_Film.m_Screen[1][1]);
-
-		const float HalfW 	= 0.5f * m_Film.m_Resolution.GetResX();
-		const float HalfH 	= 0.5f * m_Film.m_Resolution.GetResY();
-
-		u	= HalfW + Ua * HalfW;
-		v	= HalfH + Va * HalfH;
-
-		float cos_wo = AbsDot(w, m_N);
-
-		pdf = 8.f * PI_F / (m_AreaPixel *  cos_wo * cos_wo * cos_wo );
-
-		return true;
 	}
 };

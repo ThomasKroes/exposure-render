@@ -58,12 +58,12 @@ void QFocusWidget::SetFocalDistance(const double& FocalDistance)
 
 void QFocusWidget::OnRenderBegin(void)
 {
-	gCamera.GetFocus().Reset();
+//	gCamera.GetFocus().Reset();
 }
 
 void QFocusWidget::OnRenderEnd(void)
 {
-	gCamera.GetFocus().Reset();
+//	gCamera.GetFocus().Reset();
 }
 
 void QFocusWidget::OnFocusChanged(const QFocus& Focus)

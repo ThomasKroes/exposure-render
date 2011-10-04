@@ -170,19 +170,23 @@ QCamera QCamera::Default(void)
 void QCamera::OnFilmChanged(void)
 {
 	emit Changed();
+	SetDirty();
 }
 
 void QCamera::OnApertureChanged(void)
 {
 	emit Changed();
+	SetDirty();
 }
 
 void QCamera::OnProjectionChanged(void)
 {
  	emit Changed();
+	SetDirty();
 }
 
 void QCamera::OnFocusChanged(void)
 {
 	emit Changed();
+	SetDirty();
 }

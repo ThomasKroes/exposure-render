@@ -19,5 +19,5 @@ public:
 	CColorXyz*		m_pDevEstFrameBlurXyz;
 	CColorRgbaLdr*	m_pDevEstRgbaLdr;
 	CColorRgbLdr*	m_pDevRgbLdrDisp;
-	unsigned int*	m_pDevSeeds;
+	int*			m_pDevSeeds;
 };

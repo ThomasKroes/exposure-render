@@ -30,12 +30,7 @@ QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 
 void QAppearanceWidget::OnLoadPreset(const QString& Name)
 {
-	// Only load the preset when it exists
-	if (!m_PresetsWidget.HasPreset(Name))
-		return;
-
-	QTransferFunction TransferFunction = m_PresetsWidget.GetPreset(Name);
-	gTransferFunction = TransferFunction;
+	m_PresetsWidget.LoadPreset(gTransferFunction, Name);
 }
 
 void QAppearanceWidget::OnSavePreset(const QString& Name)

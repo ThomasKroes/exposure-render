@@ -51,3 +51,5 @@ extern QRenderThread* gpRenderThread;
 
 void StartRenderThread(QString& FileName);
 void KillRenderThread(void);
+
+extern QMutex gSceneMutex;

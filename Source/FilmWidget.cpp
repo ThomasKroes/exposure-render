@@ -29,11 +29,12 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(new QLabel("Film width"), 0, 0);
 
 	m_WidthSlider.setOrientation(Qt::Horizontal);
-	m_WidthSlider.setRange(4, 1024);
-	
+	m_WidthSlider.setRange(4, 2048);
+	m_WidthSlider.setSingleStep(1);
+
 	m_GridLayout.addWidget(&m_WidthSlider, 0, 1);
 	
-    m_WidthSpinner.setRange(4, 1024);
+    m_WidthSpinner.setRange(4, 2048);
 	m_GridLayout.addWidget(&m_WidthSpinner, 0, 2);
 	
  	QObject::connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_WidthSpinner, SLOT(setValue(int)));
@@ -45,10 +46,12 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(new QLabel("Film height"), 2, 0);
 
 	m_HeightSlider.setOrientation(Qt::Horizontal);
-	m_HeightSlider.setRange(4, 1024);
+	m_HeightSlider.setRange(4, 2048);
+	m_HeightSlider.setSingleStep(1);
+
 	m_GridLayout.addWidget(&m_HeightSlider, 2, 1);
 	
-    m_HeightSpinner.setRange(0, 1024);
+    m_HeightSpinner.setRange(0, 2048);
 	m_GridLayout.addWidget(&m_HeightSpinner, 2, 2);
 	
  	QObject::connect(&m_HeightSlider, SIGNAL(valueChanged(int)), &m_HeightSpinner, SLOT(setValue(int)));
@@ -102,17 +105,21 @@ void QFilmWidget::LockFilmHeight(const int& Lock)
 
 void QFilmWidget::SetFilmWidth(const int& FilmWidth)
 {
-//  	gCamera.GetFilm().SetWidth(FilmWidth);
+//	gScene.m_Camera.m_Film.m_Resolution.SetResX(FilmWidth);
+//	gScene.m_DirtyFlags.SetFlag(FilmResolutionDirty);
+	gCamera.GetFilm().SetWidth(FilmWidth);
 }
 
 void QFilmWidget::SetFilmHeight(const int& FilmHeight)
 {
-// 	gCamera.GetFilm().SetHeight(FilmHeight);
+//	gScene.m_Camera.m_Film.m_Resolution.SetResY(FilmHeight);
+//	gScene.m_DirtyFlags.SetFlag(FilmResolutionDirty);
+ 	gCamera.GetFilm().SetHeight(FilmHeight);
 }
 
 void QFilmWidget::SetExposure(const double& Exposure)
 {
-	gCamera.GetFilm().SetExposure(Exposure);
+//	gCamera.GetFilm().SetExposure(Exposure);
 }
 
 void QFilmWidget::OnRenderBegin(void)
@@ -125,7 +132,7 @@ void QFilmWidget::OnRenderBegin(void)
 
 void QFilmWidget::OnRenderEnd(void)
 {
-	gCamera.GetFilm().Reset();
+//	gCamera.GetFilm().Reset();
 }
 
 void QFilmWidget::OnFilmChanged(const QFilm& Film)
@@ -153,10 +160,10 @@ void QFilmWidget::OnFilmChanged(const QFilm& Film)
 
 void QFilmWidget::OnSetFilmWidth(void)
 {
- 	gCamera.GetFilm().SetWidth(m_WidthSlider.value());
+//	gCamera.GetFilm().SetWidth(m_WidthSlider.value());
 }
 
 void QFilmWidget::OnSetFilmHeight(void)
 {
-	gCamera.GetFilm().SetHeight(m_HeightSlider.value());
+//	gCamera.GetFilm().SetHeight(m_HeightSlider.value());
 }

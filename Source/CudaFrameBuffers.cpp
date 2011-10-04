@@ -6,6 +6,7 @@
 #include "CudaUtilities.h"
 
 CCudaFrameBuffers::CCudaFrameBuffers(void) :
+	m_Resolution(),
 	m_pDevAccEstXyz(NULL),
 	m_pDevEstXyz(NULL),
 	m_pDevEstFrameXyz(NULL),
@@ -44,19 +45,18 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 {
 	m_Resolution = Resolution;
 
-	const int NoPixels = Resolution.x * Resolution.y;
-
-	const int NoRandomSeeds = NoPixels * 2;
-
-	int SizeAccEstXyz		= NoPixels * sizeof(CColorXyz);
-	int SizeEstXyz			= NoPixels * sizeof(CColorXyz);
-	int SizeEstFrameXyz		= NoPixels * sizeof(CColorXyz);
-	int SizeEstFrameBlurXyz	= NoPixels * sizeof(CColorXyz);
-	int SizeEstRgbaLdr		= NoPixels * sizeof(CColorRgbaLdr);
-	int SizeRgbLdrDisp		= NoPixels * sizeof(CColorRgbLdr);
-	int SizeRandomSeeds		= NoRandomSeeds * sizeof(unsigned int);
-
 	Free();
+
+	long NoPixels				= Resolution.x * Resolution.y;
+	long NoRandomSeeds			= NoPixels * 2;
+	long SizeAccEstXyz			= NoPixels * sizeof(CColorXyz);
+	long SizeEstXyz				= NoPixels * sizeof(CColorXyz);
+	long SizeEstFrameXyz		= NoPixels * sizeof(CColorXyz);
+	long SizeEstFrameBlurXyz	= NoPixels * sizeof(CColorXyz);
+	long SizeEstRgbaLdr			= NoPixels * sizeof(CColorRgbaLdr);
+	long SizeRgbLdrDisp			= NoPixels * sizeof(CColorRgbLdr);
+	long SizeRandomSeeds		= NoRandomSeeds * sizeof(int);
+	long Total					= SizeAccEstXyz + SizeEstXyz + SizeEstFrameXyz + SizeEstFrameBlurXyz + SizeEstRgbaLdr + SizeRgbLdrDisp + SizeRandomSeeds;
 
 	HandleCudaError(cudaMalloc((void**)&m_pDevSeeds, SizeRandomSeeds));
 	HandleCudaError(cudaMalloc((void**)&m_pDevAccEstXyz, SizeAccEstXyz));
@@ -67,7 +67,9 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 	HandleCudaError(cudaMalloc((void**)&m_pDevRgbLdrDisp, SizeRgbLdrDisp));
 
 	// Create random seeds
-	unsigned int* pSeeds = (unsigned int*)malloc(SizeRandomSeeds);
+	int* pSeeds = (int*)malloc(SizeRandomSeeds);
+
+	memset(pSeeds, 0, SizeRandomSeeds);
 
 	for (int i = 0; i < NoRandomSeeds; i++)
 		pSeeds[i] = qrand();
@@ -79,16 +81,18 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 	// Reset buffers to black
 	Reset();
 
-	gStatus.SetStatisticChanged("CUDA Memory", "Random Seeds", QString::number((float)SizeRandomSeeds / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Accumulated Estimate (XYZ color)", QString::number((float)SizeAccEstXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Estimate (XYZ color)", QString::number((float)SizeEstXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Blur Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameBlurXyz / MB, 'f', 2), "MB");
-	gStatus.SetStatisticChanged("Frame Buffers", "Estimate (RGB color)", QString::number((float)SizeEstRgbaLdr / MB, 'f', 2), "MB");
+	gStatus.SetStatisticChanged("Frame Buffers", "Estimate (RGBA color)", QString::number((float)SizeEstRgbaLdr / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Estimate Screen (RGB color)", QString::number((float)SizeRgbLdrDisp / MB, 'f', 2), "MB");
+	gStatus.SetStatisticChanged("Frame Buffers", "Random Seeds", QString::number((float)SizeRandomSeeds / MB, 'f', 2), "MB");
 
 	gStatus.SetStatisticChanged("Film", "Width SceneCopy", QString::number(m_Resolution.x), "Pixels");
 	gStatus.SetStatisticChanged("Film", "Height SceneCopy", QString::number(m_Resolution.y), "Pixels");
+
+	gStatus.SetStatisticChanged("CUDA Memory", "Frame Buffers", QString::number((float)Total / MB, 'f', 2), "MB");
 }
 
 void CCudaFrameBuffers::Reset(void)

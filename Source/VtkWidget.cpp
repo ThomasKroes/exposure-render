@@ -184,11 +184,11 @@ void CVtkWidget::OnRenderLoopTimer(void)
 	if (!gpRenderThread)
 		return;
 
- 	return;
+// 	return;
 // 
 // 	QMutexLocker MutexLocker(&gpRenderThread->m_Mutex);
 // 
-	if (m_ImageImport->GetDataExtent()[1] != gScene.m_Camera.m_Film.GetWidth() || m_ImageImport->GetDataExtent()[3] != gScene.m_Camera.m_Film.GetHeight())
+	if (m_ImageImport->GetDataExtent()[1] != gScene.m_Camera.m_Film.GetWidth() - 1 || m_ImageImport->GetDataExtent()[3] != gScene.m_Camera.m_Film.GetHeight() - 1)
 	{
 		m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.GetWidth(), -0.5f * (float)gScene.m_Camera.m_Film.GetHeight(), 0);
 		m_ImageImport->SetDataExtent(0, gScene.m_Camera.m_Film.GetWidth() - 1, 0, gScene.m_Camera.m_Film.GetHeight() - 1, 0, 0);

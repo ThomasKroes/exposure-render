@@ -6,7 +6,8 @@
 
 QPresetXML::QPresetXML(QObject* pParent /*= NULL*/, const QString& Name /*= ""*/) :
 	QObject(pParent),
-	m_Name(Name)
+	m_Name(Name),
+	m_Dirty(false)
 {
 }
 
@@ -25,6 +26,17 @@ QString QPresetXML::GetName(void) const
 void QPresetXML::SetName(const QString& Name)
 {
 	m_Name = Name;
+	SetDirty();
+}
+
+bool QPresetXML::GetDirty(void) const
+{
+	return m_Dirty;
+}
+
+void QPresetXML::SetDirty(const bool& Dirty /*= true*/)
+{
+	m_Dirty = Dirty;
 }
 
 void QPresetXML::ReadXML(QDomElement& Parent)

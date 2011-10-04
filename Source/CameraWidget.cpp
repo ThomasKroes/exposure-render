@@ -35,11 +35,7 @@ QCameraWidget::QCameraWidget(QWidget* pParent) :
 
 void QCameraWidget::OnLoadPreset(const QString& Name)
 {
-	// Only load the preset when it exists
-	if (!m_PresetsWidget.HasPreset(Name))
-		return;
-
-	gCamera = m_PresetsWidget.GetPreset(Name);
+	m_PresetsWidget.LoadPreset(gCamera, Name);
 
 	gScene.m_Camera.m_Target	= gCamera.GetTarget();
 	gScene.m_Camera.m_From		= gCamera.GetFrom();

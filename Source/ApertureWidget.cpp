@@ -46,12 +46,12 @@ void QApertureWidget::SetAperture(const double& Aperture)
 
 void QApertureWidget::OnRenderBegin(void)
 {
-	gCamera.GetAperture().Reset();
+//	gCamera.GetAperture().Reset();
 }
 
 void QApertureWidget::OnRenderEnd(void)
 {
-	gCamera.GetAperture().Reset();
+//	gCamera.GetAperture().Reset();
 }
 
 void QApertureWidget::OnApertureChanged(const QAperture& Aperture)

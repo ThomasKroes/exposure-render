@@ -5,27 +5,27 @@
 #include <algorithm>
 #include <vector>
 
-KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
+KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
 	
-	// Compute sample ID
-	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
+	// Compute pixel ID
+	const int PID = (Y * pScene->m_Camera.m_Film.GetWidth()) + X;
 
-	// Exit if beyond kernel boundaries
-	if (X >= pScene->m_Camera.m_Film.GetWidth() || Y >= pScene->m_Camera.m_Film.GetHeight())
+	// Exit if beyond render canvas boundaries
+	if (X >= pScene->m_Camera.m_Film.GetWidth() || Y >= pScene->m_Camera.m_Film.GetHeight() || PID >= pScene->m_Camera.m_Film.GetWidth() * pScene->m_Camera.m_Film.GetHeight())
 		return;
 	
 	// Init random number generator
-	CRNG RNG(&pSeeds[SID * 2], &pSeeds[SID * 2 + 1]);
+	CRNG RNG(&pSeeds[2 * PID], &pSeeds[2 * PID + 1]);
 
 	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	CRay Re;
-
- 	// Generate the camera ray
- 	pScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
+	
+	// Generate the camera ray
+ 	pScene->m_Camera.GenerateRay(Vec2f(X, Y) + RNG.Get2(), RNG.Get2(), Re.m_O, Re.m_D);
 
 	Re.m_MinT = 0.0f; 
 	Re.m_MaxT = FLT_MAX;
@@ -38,10 +38,10 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
-			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
+			pDevEstFrameXyz[PID] = Li;
 			return;
 		}
-
+		 
 		// Fetch density
 		const float D = Density(pScene, Pe);
 
@@ -97,14 +97,14 @@ KERNEL void KrnlSS(CScene* pScene, unsigned int* pSeeds, CColorXyz* pDevEstFrame
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
 			Lv = Li;
 	}
-
-	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Lv;
+	
+	pDevEstFrameXyz[PID] = Lv;
 }
 
-void SingleScattering(CScene* pScene, CScene* pDevScene, unsigned int* pSeeds, CColorXyz* pDevEstFrameXyz)
+void SingleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
-	KrnlSS<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);
+	KrnlSingleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);
 }

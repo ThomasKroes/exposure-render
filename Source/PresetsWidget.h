@@ -44,7 +44,6 @@ protected:
 	QString			m_UserInterfaceName;
 	QGridLayout		m_MainLayout;
 	QComboBox		m_PresetName;
-	QPushButton		m_LoadPreset;
 	QPushButton		m_SavePreset;
 	QPushButton		m_RenamePreset;
 	QPushButton		m_RemovePreset;
@@ -86,18 +85,24 @@ public:
 		}
 	}
 
-	void SavePreset(T Preset)
+	void SavePreset(T Preset, const bool& PromptOverwrite = true)
 	{
 		for (int i = 0; i < m_Presets.size(); i++)
 		{
 			if (m_Presets[i].GetName() == Preset.GetName())
 			{
-				int Result = QMessageBox::question(this, "Preset already exists", "Overwrite?", QMessageBox::Yes | QMessageBox::No);
+				if (PromptOverwrite)
+				{
+					int Result = QMessageBox::question(this, "Preset already exists", "Overwrite?", QMessageBox::Yes | QMessageBox::No);
 				
-				if (Result == QMessageBox::No)
-					return;
+					if (Result == QMessageBox::No)
+						return;
+				}
 
 				m_Presets[i] = Preset;
+
+				Log(QString("'" + Preset.GetName() + "' " + m_UserInterfaceName.toLower() + " preset saved"));
+
 				return;
 			}
 		}
@@ -327,6 +332,35 @@ public:
 
 		return T::Default();
 	}
+
+	void LoadPreset(T& PresetDestination, const QString& Name)
+	{
+		// Only load the preset when it exists
+		if (!HasPreset(Name))
+			return;
+
+		T SourcePreset = GetPreset(Name);
+
+		if (PresetDestination.GetDirty())
+		{
+			int Result = QMessageBox::question(this, "Unsaved changes", "Save changes to " + PresetDestination.GetName() + "?", QMessageBox::Yes | QMessageBox::No);
+				
+			if (Result == QMessageBox::Yes)
+			{
+				T Preset = PresetDestination;
+				Preset.SetName(Name);
+
+				// Save the preset
+				SavePreset(Preset, false);
+			}
+		}
+
+		// Copy the transfer function
+		PresetDestination = SourcePreset;
+
+		// The global transfer function is not dirty
+		PresetDestination.SetDirty(false);
+	};
 
 private:
 	QList<T>	m_Presets;

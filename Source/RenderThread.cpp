@@ -26,8 +26,11 @@
 #include <vtkErrorCode.h>
 #include <vtkImageGradient.h>
 #include <vtkExtractVectorComponents.h>
+
 // Render thread
 QRenderThread* gpRenderThread = NULL;
+
+QMutex gSceneMutex;
 
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
 	QThread(pParent),
@@ -84,6 +87,8 @@ void QRenderThread::run()
 
 	CScene SceneCopy;
 	
+	gScene.m_Camera.m_Film.m_Resolution.SetResX(512);
+	gScene.m_Camera.m_Film.m_Resolution.SetResY(512);
  	gScene.m_Camera.m_SceneBoundingBox = gScene.m_BoundingBox;
 	gScene.m_Camera.SetViewMode(ViewModeFront);
  	gScene.m_Camera.Update();
@@ -135,7 +140,7 @@ void QRenderThread::run()
 			if (m_Pause)
 				continue;
 
-			msleep(1);
+			
 
 			// Let others know we are starting with a new frame
 			gStatus.SetPreRenderFrame();
@@ -143,7 +148,9 @@ void QRenderThread::run()
 			// CUDA time for profiling
  			CCudaTimer TmrFps;
 
+			gSceneMutex.lock();
 			SceneCopy = gScene;
+			gSceneMutex.unlock();
 //			SceneCopy.m_Camera.Update();
 
 			gStatus.SetStatisticChanged("Camera", "Position", FormatVector(SceneCopy.m_Camera.m_From));
@@ -170,7 +177,7 @@ void QRenderThread::run()
 				SceneCopy.SetNoIterations(0);
 
 				// Notify Inform others about the memory allocations
-				gStatus.SetResize();
+//				gStatus.SetResize();
 
 				BindEstimateRgbLdr(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
@@ -210,8 +217,12 @@ void QRenderThread::run()
 			
 		//	SceneCopy.m_DenoiseParams.m_LerpC = 1.0f - Radius;
 
-			cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice);
+			SceneCopy.m_Camera.Update();
 
+			HandleCudaError(cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice));
+
+//			msleep(10);
+			
 			// Execute the rendering kernels
   			Render(0, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 			HandleCudaError(cudaGetLastError());
@@ -234,7 +245,7 @@ void QRenderThread::run()
 
 				SaveImage((unsigned char*)m_pRenderImage, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), ImageFilePath);
 			}
-
+			/**/
 			// Let others know we are finished with a frame
  			gStatus.SetPostRenderFrame();
 		}
@@ -438,6 +449,8 @@ bool QRenderThread::Load(QString& FileName)
 
 void QRenderThread::OnUpdateTransferFunction(void)
 {
+	QMutexLocker Locker(&gSceneMutex);
+
 	QTransferFunction TransferFunction = gTransferFunction;
 
 	gScene.m_TransferFunctions.m_Opacity.m_NoNodes		= TransferFunction.GetNodes().size();
@@ -478,6 +491,8 @@ void QRenderThread::OnUpdateTransferFunction(void)
 
 void QRenderThread::OnUpdateCamera(void)
 {
+	QMutexLocker Locker(&gSceneMutex);
+
 	gScene.m_Camera.m_Film.m_Exposure = (1.001f - gCamera.GetFilm().GetExposure()) * 1000.0f;
 
 	if (gCamera.GetFilm().IsDirty())
@@ -487,7 +502,7 @@ void QRenderThread::OnUpdateCamera(void)
 
  		gScene.m_Camera.m_Film.m_Resolution.SetResX(FilmWidth);
 		gScene.m_Camera.m_Film.m_Resolution.SetResY(FilmHeight);
-
+		gScene.m_Camera.Update();
 		gCamera.GetFilm().UnDirty();
 // 		// 
  		gScene.m_DirtyFlags.SetFlag(FilmResolutionDirty);
@@ -513,6 +528,8 @@ void QRenderThread::OnUpdateCamera(void)
 
 void QRenderThread::OnUpdateLighting(void)
 {
+	QMutexLocker Locker(&gSceneMutex);
+
 	gScene.m_Lighting.Reset();
 
 	if (gLighting.Background().GetEnabled())

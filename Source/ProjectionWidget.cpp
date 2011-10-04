@@ -46,12 +46,12 @@ void QProjectionWidget::SetFieldOfView(const double& FieldOfView)
 
 void QProjectionWidget::OnRenderBegin(void)
 {
-	gCamera.GetProjection().Reset();
+//	gCamera.GetProjection().Reset();
 }
 
 void QProjectionWidget::OnRenderEnd(void)
 {
-	gCamera.GetProjection().Reset();
+//	gCamera.GetProjection().Reset();
 }
 
 void QProjectionWidget::OnProjectionChanged(const QProjection& Projection)
