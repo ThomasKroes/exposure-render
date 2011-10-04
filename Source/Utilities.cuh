@@ -33,7 +33,7 @@ DEV float GradientMagnitude(CScene* pScene, const Vec3f& P)
 
 DEV float GetOpacity(CScene* pScene, const Vec3f& P)
 {
-	return tex1D(gTexOpacity, 255.0f * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z)).x;
+	return tex1D(gTexOpacity, 255.0f * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
 }
 
 DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& D)

@@ -5,7 +5,7 @@ texture<short, 3, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, 3, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
 texture<float, 3, cudaReadModeElementType>			gTexExtinction;
 texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexEstimateRgbLdr;
-texture<float4, 1, cudaReadModeElementType>			gTexOpacity;
+texture<float, 1, cudaReadModeElementType>			gTexOpacity;
 texture<float4, 1, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, 1, cudaReadModeElementType>			gTexSpecular;
 
@@ -96,38 +96,23 @@ void BindEstimateRgbLdr(CColorRgbaLdr* pBuffer, int Width, int Height)
 
 void BindOpacity(CTransferFunction& Opacity)
 {
-	float4 Val[TF_NO_SAMPLES];
+	float Val[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
-		Val[i].x = Opacity.F(i * INV_TF_NO_SAMPLES).r;
+		Val[i] = Opacity.F(i * INV_TF_NO_SAMPLES).r;
 	
-	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float4>();
-	
-	if (gpOpacityArray == NULL)
-		cudaMallocArray(&gpOpacityArray, &channelDesc, TF_NO_SAMPLES, 1);
-
-	cudaMemcpyToArray(gpOpacityArray, 0, 0, Val, TF_NO_SAMPLES * sizeof(float4),  cudaMemcpyHostToDevice);
-
-	gTexOpacity.normalized		= true;
-	gTexOpacity.filterMode		= cudaFilterModeLinear;
-	gTexOpacity.addressMode[0] = cudaAddressModeClamp;
-	
-		cudaBindTextureToArray(gTexOpacity, gpOpacityArray, channelDesc);
-		
-/*
-	if (gpOpacity == NULL)
-		cudaMalloc(&gpOpacity, TF_NO_SAMPLES * sizeof(float));
-
-	cudaMemcpy(gpOpacity, &Val, TF_NO_SAMPLES * sizeof(float), cudaMemcpyHostToDevice);
-
-
-	gTexOpacity.normalized		= true;
-	gTexOpacity.filterMode		= cudaFilterModeLinear;
-	gTexOpacity.addressMode[0]	= cudaAddressModeWrap;
-
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
 	
-	cudaBindTexture(0, gTexOpacity, gpOpacity, ChannelDesc, TF_NO_SAMPLES * sizeof(float));*/  
+	if (gpOpacityArray == NULL)
+		cudaMallocArray(&gpOpacityArray, &ChannelDesc, TF_NO_SAMPLES, 1);
+
+	cudaMemcpyToArray(gpOpacityArray, 0, 0, Val, TF_NO_SAMPLES * sizeof(float),  cudaMemcpyHostToDevice);
+
+	gTexOpacity.normalized		= true;
+	gTexOpacity.filterMode		= cudaFilterModeLinear;
+	gTexOpacity.addressMode[0]	= cudaAddressModeClamp;
+	
+	cudaBindTextureToArray(gTexOpacity, gpOpacityArray, ChannelDesc);
 }
 
 void Render(const int& Type, CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
