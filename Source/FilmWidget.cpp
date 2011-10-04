@@ -29,12 +29,12 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(new QLabel("Film width"), 0, 0);
 
 	m_WidthSlider.setOrientation(Qt::Horizontal);
-	m_WidthSlider.setRange(4, 2048);
+	m_WidthSlider.setRange(64, 2048);
 	m_WidthSlider.setTracking(false);
 
 	m_GridLayout.addWidget(&m_WidthSlider, 0, 1);
 	
-    m_WidthSpinner.setRange(4, 2048);
+    m_WidthSpinner.setRange(64, 2048);
 	m_GridLayout.addWidget(&m_WidthSpinner, 0, 2);
 	
  	QObject::connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_WidthSpinner, SLOT(setValue(int)));
@@ -45,12 +45,12 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(new QLabel("Film height"), 2, 0);
 
 	m_HeightSlider.setOrientation(Qt::Horizontal);
-	m_HeightSlider.setRange(4, 2048);
+	m_HeightSlider.setRange(64, 2048);
 	m_HeightSlider.setTracking(false);
 
 	m_GridLayout.addWidget(&m_HeightSlider, 2, 1);
 	
-    m_HeightSpinner.setRange(0, 2048);
+    m_HeightSpinner.setRange(64, 2048);
 	m_GridLayout.addWidget(&m_HeightSpinner, 2, 2);
 	
  	QObject::connect(&m_HeightSlider, SIGNAL(valueChanged(int)), &m_HeightSpinner, SLOT(setValue(int)));

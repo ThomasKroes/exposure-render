@@ -87,8 +87,6 @@ void QRenderThread::run()
 
 	CScene SceneCopy;
 	
-	gScene.m_Camera.m_Film.m_Resolution.SetResX(512);
-	gScene.m_Camera.m_Film.m_Resolution.SetResY(512);
  	gScene.m_Camera.m_SceneBoundingBox = gScene.m_BoundingBox;
 	gScene.m_Camera.SetViewMode(ViewModeFront);
  	gScene.m_Camera.Update();
