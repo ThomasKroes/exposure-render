@@ -36,24 +36,27 @@ DEV float GetOpacity(CScene* pScene, const Vec3f& P)
 	return tex1D(gTexOpacity, 255.0f * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
 }
 
-DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& D)
+DEV CColorRgbHdr GetDiffuse(CScene* pScene, const Vec3f& P)
 {
-	return pScene->m_TransferFunctions.m_Diffuse.F(D);
+	float4 Diffuse = tex1D(gTexDiffuse, 255.0f * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
+	return CColorRgbHdr(Diffuse.x, Diffuse.y, Diffuse.z);
 }
 
-DEV CColorRgbHdr GetSpecular(CScene* pScene, const float& D)
+DEV CColorRgbHdr GetSpecular(CScene* pScene, const Vec3f& P)
 {
-	return pScene->m_TransferFunctions.m_Specular.F(D);
+	float4 Specular = tex1D(gTexSpecular, 255.0f * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
+	return CColorRgbHdr(Specular.x, Specular.y, Specular.z);
 }
 
-DEV CColorRgbHdr GetEmission(CScene* pScene, const float& D)
+DEV float GetRoughness(CScene* pScene, const Vec3f& P)
 {
-	return pScene->m_TransferFunctions.m_Emission.F(D);
+	return tex1D(gTexRoughness, 255.0f * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
 }
 
-DEV CColorRgbHdr GetRoughness(CScene* pScene, const float& D)
+DEV CColorRgbHdr GetEmission(CScene* pScene, const Vec3f& P)
 {
-	return pScene->m_TransferFunctions.m_Roughness.F(D);
+	float4 Emission = tex1D(gTexEmission, 255.0f * tex3D(gTexDensity, P.x / pScene->m_BoundingBox.m_MaxP.x, P.y / pScene->m_BoundingBox.m_MaxP.y, P.z / pScene->m_BoundingBox.m_MaxP.z));
+	return CColorRgbHdr(Emission.x, Emission.y, Emission.z);
 }
 
 DEV bool NearestLight(CScene* pScene, CRay R, CColorXyz& LightColor, Vec3f& Pl, CLight*& pLight, float* pPdf = NULL)

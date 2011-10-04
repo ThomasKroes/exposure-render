@@ -13,7 +13,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 	
 	const float D = Density(pScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, D).ToXYZ(), GetSpecular(pScene, D).ToXYZ(), 50.0f/*pScene->m_IOR*/, GetRoughness(pScene, D).r);
+	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, Pe).ToXYZ(), GetSpecular(pScene, Pe).ToXYZ(), 50.0f/*pScene->m_IOR*/, GetRoughness(pScene, Pe));
 	
 	// Light/shadow ray
 	CRay Rl; 
@@ -74,7 +74,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 	const float D = Density(pScene, Pe);
 
 	// Accumulated radiance
-	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = INV_4_PI_F * GetDiffuse(pScene, D).ToXYZ();
+	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = INV_4_PI_F * GetDiffuse(pScene, Pe).ToXYZ();
 
 	// Light/shadow ray
 	CRay Rl; 

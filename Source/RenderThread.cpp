@@ -221,7 +221,7 @@ void QRenderThread::run()
 
 //			msleep(10);
 			
-			BindOpacity(SceneCopy.m_TransferFunctions.m_Opacity);
+			BindTransferFunctions(SceneCopy.m_TransferFunctions);
 
 			// Execute the rendering kernels
   			Render(0, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);

@@ -25,6 +25,7 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 
 	ID = min(ID, pScene->m_Camera.m_Film.m_Resolution.GetNoElements() - 1);
 
+	/*
     if(pScene->m_DenoiseParams.m_Enabled && ix < pScene->m_Camera.m_Film.m_Resolution.GetResX() && iy < pScene->m_Camera.m_Film.m_Resolution.GetResY())
 	{
         //Normalized counter for the weight threshold
@@ -79,13 +80,13 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 		pOut[ID].b = 255 * clr.z;
     }
 	else
-	{
+	{*/
 		float4 clr00 = tex2D(gTexEstimateRgbLdr, x, y);
 
 		pOut[ID].r = 255 * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
-	}
+//	}
 }
 
 void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbLdr* pOut)
