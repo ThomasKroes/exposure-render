@@ -12,12 +12,13 @@ public:
 	void Reset(void);
 	void Free(void);
 
-	Vec2i			m_Resolution;
-	CColorXyz*		m_pDevAccEstXyz;
-	CColorXyz*		m_pDevEstXyz;
-	CColorXyz*		m_pDevEstFrameXyz;
-	CColorXyz*		m_pDevEstFrameBlurXyz;
-	CColorRgbaLdr*	m_pDevEstRgbaLdr;
-	CColorRgbLdr*	m_pDevRgbLdrDisp;
-	int*			m_pDevSeeds;
+	Vec2i				m_Resolution;
+	CColorXyz*			m_pDevAccEstXyz;
+	CColorXyz*			m_pDevEstXyz;
+	CColorXyz*			m_pDevEstFrameXyz;
+	CColorXyz*			m_pDevEstFrameBlurXyz;
+	CColorRgbaLdr*		m_pDevEstRgbaLdr;
+	CColorRgbLdr*		m_pDevRgbLdrDisp;
+	int*				m_pDevSeeds;
+	int*				m_pNoEstimates;
 };

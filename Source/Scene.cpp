@@ -24,7 +24,7 @@ CScene::CScene(void) :
 	m_ShadingType(2),
 	m_Spectral(false),
 	m_StepSizeFactor(2.0f),
-	m_StepSizeFactorShadow(5.0f),
+	m_StepSizeFactorShadow(8.0f),
 	m_GradientDelta(1.0f),
 	m_IOR(2.5f),
 	m_GradientFactor(1.0f),
@@ -63,7 +63,7 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_GradientDelta				= Other.m_GradientDelta;
 	m_GradientMagnitudeRange	= Other.m_GradientMagnitudeRange;
 	m_IOR						= Other.m_IOR;
-	m_GradientFactor						= Other.m_GradientFactor;
+	m_GradientFactor			= Other.m_GradientFactor;
 	m_GradMagMean				= Other.m_GradMagMean;
 
 	return *this;

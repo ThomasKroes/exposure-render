@@ -30,7 +30,7 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 
 	m_WidthSlider.setOrientation(Qt::Horizontal);
 	m_WidthSlider.setRange(4, 2048);
-	m_WidthSlider.setSingleStep(1);
+	m_WidthSlider.setTracking(false);
 
 	m_GridLayout.addWidget(&m_WidthSlider, 0, 1);
 	
@@ -40,14 +40,13 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
  	QObject::connect(&m_WidthSlider, SIGNAL(valueChanged(int)), &m_WidthSpinner, SLOT(setValue(int)));
  	QObject::connect(&m_WidthSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmWidth(int)));
  	QObject::connect(&m_WidthSpinner, SIGNAL(valueChanged(int)), &m_WidthSlider, SLOT(setValue(int)));
-	QObject::connect(&m_WidthSlider, SIGNAL(sliderReleased()), this, SLOT(OnSetFilmWidth()));
 	
 	// Film height
 	m_GridLayout.addWidget(new QLabel("Film height"), 2, 0);
 
 	m_HeightSlider.setOrientation(Qt::Horizontal);
 	m_HeightSlider.setRange(4, 2048);
-	m_HeightSlider.setSingleStep(1);
+	m_HeightSlider.setTracking(false);
 
 	m_GridLayout.addWidget(&m_HeightSlider, 2, 1);
 	
@@ -57,7 +56,6 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
  	QObject::connect(&m_HeightSlider, SIGNAL(valueChanged(int)), &m_HeightSpinner, SLOT(setValue(int)));
  	QObject::connect(&m_HeightSlider, SIGNAL(valueChanged(int)), this, SLOT(SetFilmHeight(int)));
  	QObject::connect(&m_HeightSpinner, SIGNAL(valueChanged(int)), &m_HeightSlider, SLOT(setValue(int)));
-	QObject::connect(&m_HeightSlider, SIGNAL(sliderReleased()), this, SLOT(OnSetFilmHeight()));
 
 	m_GridLayout.addWidget(&m_LockSizeCheckBox, 2, 3);
 
@@ -156,14 +154,4 @@ void QFilmWidget::OnFilmChanged(const QFilm& Film)
 	// Exposure
 	m_ExposureSlider.setValue(Film.GetExposure(), true);
 	m_ExposureSpinner.setValue(Film.GetExposure(), true);
-}
-
-void QFilmWidget::OnSetFilmWidth(void)
-{
-//	gCamera.GetFilm().SetWidth(m_WidthSlider.value());
-}
-
-void QFilmWidget::OnSetFilmHeight(void)
-{
-//	gCamera.GetFilm().SetHeight(m_HeightSlider.value());
 }

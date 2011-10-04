@@ -121,11 +121,9 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, CCudaFrameBuffer
 	Estimate(pScene, pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevAccEstXyz, CudaFrameBuffers.m_pDevEstXyz, CudaFrameBuffers.m_pDevEstRgbaLdr, N);
 	HandleCudaError(cudaGetLastError());
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
-	/**/
 
 	CCudaTimer TmrDenoise;
 	Denoise(pScene, pDevScene, CudaFrameBuffers.m_pDevEstRgbaLdr, CudaFrameBuffers.m_pDevRgbLdrDisp);
 	HandleCudaError(cudaGetLastError());
 	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
-	
 }
