@@ -463,7 +463,6 @@ void QRenderThread::OnUpdateTransferFunction(void)
 	{
 		QNode& Node = TransferFunction.GetNode(i);
 
-//		const float Intensity = gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetLength() * Node.GetIntensity();
 		const float Intensity = Node.GetIntensity();
 
 		// Positions
@@ -484,28 +483,28 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		gScene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Roughness * 100);
 	}
 
-	gScene.m_DensityScale	= TransferFunction.GetDensityScale();
+	gScene.m_DensityScale	= 5.0f * (expf(5.0f * TransferFunction.GetDensityScale()) / expf(5.0f));
 	gScene.m_ShadingType	= TransferFunction.GetShadingType();
 
 	gScene.m_DirtyFlags.SetFlag(TransferFunctionDirty);
 
+	/*
 	FILE * pFile;
-   int n;
-   char name [100];
+	int n;
+	char name [100];
 
-   pFile = fopen ("c:\\tf.txt","w");
+	pFile = fopen ("c:\\tf.txt","w");
 
-   if (pFile)
-   {
-	   for (int i = 0; i < 255; i++)
+	if (pFile)
+	{
+		for (int i = 0; i < 255; i++)
 		{
-			fprintf(pFile, "%0.2f\n", gScene.m_TransferFunctions.m_Opacity.F((float)i / 255.0f).r);
+			fprintf(pFile, "%0.2f\n", gScene.m_TransferFunctions.m_Roughness.F((float)i / 255.0f));
 		}
-   }
+	}
 
-   fclose (pFile);
-
-	
+	fclose (pFile);
+	*/
 }
 
 void QRenderThread::OnUpdateCamera(void)
