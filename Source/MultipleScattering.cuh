@@ -40,7 +40,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevE
 		}
 
 		// Fetch density
-		const float D = Density(pScene, Pe);
+		const float D = GetDensity(pScene, Pe);
 
 		// Get opacity at eye point
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();

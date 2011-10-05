@@ -30,7 +30,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& P, CScene* pScene)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, Ps);
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, GetDensity(pScene, Ps));
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;
@@ -68,7 +68,7 @@ DEV inline bool FreePathRM(CRay R, CRNG& RNG, Vec3f& P, CScene* pScene)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, Ps);
+		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, GetDensity(pScene, Ps));
 
 		Sum		+= SigmaT * Dt;
 		MinT	+= Dt;

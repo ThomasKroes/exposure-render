@@ -11,9 +11,9 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 {
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	const float D = Density(pScene, Pe);
+	const float D = GetDensity(pScene, Pe);
 
-	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, Pe).ToXYZ(), GetSpecular(pScene, Pe).ToXYZ(), 50.0f/*pScene->m_IOR*/, GetRoughness(pScene, Pe));
+	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, D).ToXYZ(), GetSpecular(pScene, D).ToXYZ(), 50.0f/*pScene->m_IOR*/, GetRoughness(pScene, D));
 	
 	// Light/shadow ray
 	CRay Rl; 
@@ -71,10 +71,10 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, CLight& Light, CLightingSa
 
 DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& Rnd)
 {
-	const float D = Density(pScene, Pe);
+	const float D = GetDensity(pScene, Pe);
 
 	// Accumulated radiance
-	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = INV_4_PI_F * GetDiffuse(pScene, Pe).ToXYZ();
+	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = INV_4_PI_F * GetDiffuse(pScene, D).ToXYZ();
 
 	// Light/shadow ray
 	CRay Rl; 
@@ -100,6 +100,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 		Ld += F * Li * WeightMIS / LightPdf;
 	}
 
+	/*
 	PhasePdf = INV_4_PI_F;
 	
 	// Sample the phase function with MIS
@@ -124,6 +125,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, CLight& Light, CLightingS
 			}
 		}
 	}
+	*/
 
 	return Ld;
 }

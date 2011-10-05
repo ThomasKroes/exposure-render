@@ -110,7 +110,7 @@ void CVtkWidget::OnRenderBegin(void)
 	
 //	m_UcharArray->Allocate(gScene.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
 	// Start the timer
-	m_RenderLoopTimer.start(1000.0f / 35.0f);
+	m_RenderLoopTimer.start(1000.0f / 40.0f);
 }
 
 void CVtkWidget::OnRenderEnd(void)

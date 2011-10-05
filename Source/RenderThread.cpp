@@ -221,7 +221,11 @@ void QRenderThread::run()
 
 //			msleep(10);
 			
-			BindTransferFunctions(SceneCopy.m_TransferFunctions);
+			BindTransferFunctionOpacity(SceneCopy.m_TransferFunctions.m_Opacity);
+			BindTransferFunctionDiffuse(SceneCopy.m_TransferFunctions.m_Diffuse);
+			BindTransferFunctionSpecular(SceneCopy.m_TransferFunctions.m_Specular);
+			BindTransferFunctionRoughness(SceneCopy.m_TransferFunctions.m_Roughness);
+			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
 
 			// Execute the rendering kernels
   			Render(0, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
@@ -274,6 +278,12 @@ void QRenderThread::run()
 	m_pRenderImage = NULL;
 
 	UnbindDensityBuffer();
+
+	UnbindTransferFunctionOpacity();
+	UnbindTransferFunctionDiffuse();
+	UnbindTransferFunctionSpecular();
+	UnbindTransferFunctionRoughness();
+	UnbindTransferFunctionEmission();
 
 	// Let others know that we have stopped rendering
 	gStatus.SetRenderEnd();

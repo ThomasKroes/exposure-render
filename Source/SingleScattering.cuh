@@ -42,13 +42,10 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 			return;
 		}
 		 
-		// Fetch density
-		const float D = Density(pScene, Pe);
+		const float D = GetDensity(pScene, Pe);
 
-		// Get opacity at eye point
 		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
 		
-		// Add emission
 		Lv += Ke;
 
 		switch (pScene->m_ShadingType)
@@ -75,17 +72,9 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 				const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
 
 				if (RNG.Get1() < PdfBrdf)
-				{
-					// Estimate direct light at eye point using BRDF shading
-//					if (PdfBrdf > 0.0f)
-  						Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);// / PdfBrdf;
-				}
+  					Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
 				else
-				{
-					// Estimate direct light at eye point using the phase function
-// 					if (1.0f - PdfBrdf > 0.0f)
- 						Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);// / (1.0f - PdfBrdf);
-				}
+ 					Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 
 				break;
 			}

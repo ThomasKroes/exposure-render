@@ -99,110 +99,151 @@ void BindEstimateRgbLdr(CColorRgbaLdr* pBuffer, int Width, int Height)
 	cudaBindTexture2D(0, gTexEstimateRgbLdr, (void*)pBuffer, ChannelDesc, Width, Height, Width * sizeof(uchar4));
 }
 
-void BindTransferFunctions(CTransferFunctions& TransferFunctions)
+void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity)
 {
-	cudaChannelFormatDesc ChannelDesc;
+	gTexOpacity.normalized		= true;
+	gTexOpacity.filterMode		= cudaFilterModeLinear;
+	gTexOpacity.addressMode[0]	= cudaAddressModeClamp;
 
-	gTexOpacity.normalized			= true;
-	gTexDiffuse.normalized			= true;
-	gTexSpecular.normalized			= true;
-	gTexRoughness.normalized		= true;
-	gTexEmission.normalized			= true;
-
-	gTexOpacity.filterMode			= cudaFilterModeLinear;
-	gTexDiffuse.filterMode			= cudaFilterModeLinear;
-	gTexSpecular.filterMode			= cudaFilterModeLinear;
-	gTexRoughness.filterMode		= cudaFilterModeLinear;
-	gTexEmission.filterMode			= cudaFilterModeLinear;
-
-	gTexOpacity.addressMode[0]		= cudaAddressModeClamp;
-	gTexDiffuse.addressMode[0]		= cudaAddressModeClamp;
-	gTexSpecular.addressMode[0]		= cudaAddressModeClamp;
-	gTexRoughness.addressMode[0]	= cudaAddressModeClamp;
-	gTexEmission.addressMode[0]		= cudaAddressModeClamp;
-
-	// Opacity
 	float Opacity[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
-		Opacity[i] = TransferFunctions.m_Opacity.F((float)i * INV_TF_NO_SAMPLES).r;
+		Opacity[i] = TransferFunctionOpacity.F((float)i * INV_TF_NO_SAMPLES).r;
 	
-	ChannelDesc = cudaCreateChannelDesc<float>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
 
 	if (gpOpacityArray == NULL)
 		cudaMallocArray(&gpOpacityArray, &ChannelDesc, TF_NO_SAMPLES, 1);
 
-	cudaMemcpyToArray(gpOpacityArray, 0, 0, Opacity, TF_NO_SAMPLES * sizeof(float),  cudaMemcpyHostToDevice);
+	cudaMemcpyToArray(gpOpacityArray, 0, 0, Opacity, TF_NO_SAMPLES * sizeof(float), cudaMemcpyHostToDevice);
 	cudaBindTextureToArray(gTexOpacity, gpOpacityArray, ChannelDesc);
-//	float4* pDevOpacity = NULL;
-//	cudaMalloc(&pDevOpacity, 256 * sizeof(float4));
-//	cudaBindTexture(0, gTexOpacity, pDevOpacity, ChannelDesc, 256 * sizeof(float4));
+}
 
-	// Diffuse
+void UnbindTransferFunctionOpacity(void)
+{
+	cudaFreeArray(gpOpacityArray);
+	gpOpacityArray = NULL;
+	cudaUnbindTexture(gTexOpacity);
+}
+
+void BindTransferFunctionDiffuse(CTransferFunction& TransferFunctionDiffuse)
+{
+	gTexDiffuse.normalized		= true;
+	gTexDiffuse.filterMode		= cudaFilterModeLinear;
+	gTexDiffuse.addressMode[0]	= cudaAddressModeClamp;
+
 	float4 Diffuse[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
 	{
-		Diffuse[i].x = TransferFunctions.m_Diffuse.F((float)i * INV_TF_NO_SAMPLES).r;
-		Diffuse[i].y = TransferFunctions.m_Diffuse.F((float)i * INV_TF_NO_SAMPLES).g;
-		Diffuse[i].z = TransferFunctions.m_Diffuse.F((float)i * INV_TF_NO_SAMPLES).b;
+		Diffuse[i].x = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES).r;
+		Diffuse[i].y = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES).g;
+		Diffuse[i].z = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES).b;
 	}
 
-	ChannelDesc = cudaCreateChannelDesc<float4>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float4>();
 	
 	if (gpDiffuseArray == NULL)
 		cudaMallocArray(&gpDiffuseArray, &ChannelDesc, TF_NO_SAMPLES, 1);
 
-	cudaMemcpyToArray(gpDiffuseArray, 0, 0, Diffuse, TF_NO_SAMPLES * sizeof(float4),  cudaMemcpyHostToDevice);
+	cudaMemcpyToArray(gpDiffuseArray, 0, 0, Diffuse, TF_NO_SAMPLES * sizeof(float4), cudaMemcpyHostToDevice);
 	cudaBindTextureToArray(gTexDiffuse, gpDiffuseArray, ChannelDesc);
+}
 
-	// Specular
+void UnbindTransferFunctionDiffuse(void)
+{
+	cudaFreeArray(gpDiffuseArray);
+	gpDiffuseArray = NULL;
+	cudaUnbindTexture(gTexDiffuse);
+}
+
+void BindTransferFunctionSpecular(CTransferFunction& TransferFunctionSpecular)
+{
+	gTexSpecular.normalized		= true;
+	gTexSpecular.filterMode		= cudaFilterModeLinear;
+	gTexSpecular.addressMode[0]	= cudaAddressModeClamp;
+
 	float4 Specular[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
 	{
-		Specular[i].x = TransferFunctions.m_Specular.F((float)i * INV_TF_NO_SAMPLES).r;
-		Specular[i].y = TransferFunctions.m_Specular.F((float)i * INV_TF_NO_SAMPLES).g;
-		Specular[i].z = TransferFunctions.m_Specular.F((float)i * INV_TF_NO_SAMPLES).b;
+		Specular[i].x = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES).r;
+		Specular[i].y = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES).g;
+		Specular[i].z = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES).b;
 	}
 
-	ChannelDesc = cudaCreateChannelDesc<float4>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float4>();
 	
 	if (gpSpecularArray == NULL)
 		cudaMallocArray(&gpSpecularArray, &ChannelDesc, TF_NO_SAMPLES, 1);
 
-	cudaMemcpyToArray(gpSpecularArray, 0, 0, Specular, TF_NO_SAMPLES * sizeof(float4),  cudaMemcpyHostToDevice);
+	cudaMemcpyToArray(gpSpecularArray, 0, 0, Specular, TF_NO_SAMPLES * sizeof(float4), cudaMemcpyHostToDevice);
 	cudaBindTextureToArray(gTexSpecular, gpSpecularArray, ChannelDesc);
+}
 
-	// Roughness
+void UnbindTransferFunctionSpecular(void)
+{
+	cudaFreeArray(gpSpecularArray);
+	gpSpecularArray = NULL;
+	cudaUnbindTexture(gTexSpecular);
+}
+
+void BindTransferFunctionRoughness(CTransferFunction& TransferFunctionRoughness)
+{
+	gTexRoughness.normalized		= true;
+	gTexRoughness.filterMode		= cudaFilterModeLinear;
+	gTexRoughness.addressMode[0]	= cudaAddressModeClamp;
+
 	float Roughness[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
-		Roughness[i] = TransferFunctions.m_Roughness.F((float)i * INV_TF_NO_SAMPLES).r;
+		Roughness[i] = TransferFunctionRoughness.F((float)i * INV_TF_NO_SAMPLES).r;
 	
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
+
 	if (gpRoughnessArray == NULL)
 		cudaMallocArray(&gpRoughnessArray, &ChannelDesc, TF_NO_SAMPLES, 1);
 
 	cudaMemcpyToArray(gpRoughnessArray, 0, 0, Roughness, TF_NO_SAMPLES * sizeof(float),  cudaMemcpyHostToDevice);
 	cudaBindTextureToArray(gTexRoughness, gpRoughnessArray, ChannelDesc);
+}
 
-	// Emission
+void UnbindTransferFunctionRoughness(void)
+{
+	cudaFreeArray(gpRoughnessArray);
+	gpRoughnessArray = NULL;
+	cudaUnbindTexture(gTexRoughness);
+}
+
+void BindTransferFunctionEmission(CTransferFunction& TransferFunctionEmission)
+{
+	gTexEmission.normalized		= true;
+	gTexEmission.filterMode		= cudaFilterModeLinear;
+	gTexEmission.addressMode[0]	= cudaAddressModeClamp;
+
 	float4 Emission[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
 	{
-		Emission[i].x = TransferFunctions.m_Emission.F((float)i * INV_TF_NO_SAMPLES).r;
-		Emission[i].y = TransferFunctions.m_Emission.F((float)i * INV_TF_NO_SAMPLES).g;
-		Emission[i].z = TransferFunctions.m_Emission.F((float)i * INV_TF_NO_SAMPLES).b;
+		Emission[i].x = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES).r;
+		Emission[i].y = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES).g;
+		Emission[i].z = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES).b;
 	}
 
-	ChannelDesc = cudaCreateChannelDesc<float4>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float4>();
 	
 	if (gpEmissionArray == NULL)
 		cudaMallocArray(&gpEmissionArray, &ChannelDesc, TF_NO_SAMPLES, 1);
 
 	cudaMemcpyToArray(gpEmissionArray, 0, 0, Emission, TF_NO_SAMPLES * sizeof(float4),  cudaMemcpyHostToDevice);
 	cudaBindTextureToArray(gTexEmission, gpEmissionArray, ChannelDesc);
+}
+
+void UnbindTransferFunctionEmission(void)
+{
+	cudaFreeArray(gpEmissionArray);
+	gpEmissionArray = NULL;
+	cudaUnbindTexture(gTexEmission);
 }
 
 void Render(const int& Type, CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
