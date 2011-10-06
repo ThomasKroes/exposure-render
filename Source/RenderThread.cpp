@@ -138,7 +138,7 @@ void QRenderThread::run()
 			if (m_Pause)
 				continue;
 
-			
+			BindConstants(&gScene);
 
 			// Let others know we are starting with a new frame
 			gStatus.SetPreRenderFrame();
@@ -416,7 +416,7 @@ bool QRenderThread::Load(QString& FileName)
 	GradMagHistogram->SetInputConnection(GradientMagnitude->GetOutputPort());
 	GradMagHistogram->SetComponentExtent(0, 255, 0, 0, 0, 0);
 	GradMagHistogram->SetComponentOrigin(0, 0, 0);
-	GradMagHistogram->SetComponentSpacing(gScene.m_GradientMagnitudeRange.GetLength() / 256.0f, 0, 0);
+	GradMagHistogram->SetComponentSpacing(gScene.m_GradientMagnitudeRange.GetRange() / 256.0f, 0, 0);
 //	GradMagHistogram->IgnoreZeroOn();
 	GradMagHistogram->Update();
 
@@ -435,7 +435,7 @@ bool QRenderThread::Load(QString& FileName)
  	Histogram->SetInputConnection(ImageCast->GetOutputPort());
  	Histogram->SetComponentExtent(0, 256, 0, 0, 0, 0);
  	Histogram->SetComponentOrigin(gScene.m_IntensityRange.GetMin(), 0, 0);
- 	Histogram->SetComponentSpacing(gScene.m_IntensityRange.GetLength() / 256.0f, 0, 0);
+ 	Histogram->SetComponentSpacing(gScene.m_IntensityRange.GetRange() / 256.0f, 0, 0);
  	Histogram->IgnoreZeroOn();
  	Histogram->Update();
  

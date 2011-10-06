@@ -73,7 +73,7 @@ void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
 	for (int i = 1; i < NumNegX; i++)
 	{
 		const float Intensity = i * -DX;
-		const float NormalizedIntensity = ((Intensity) - gScene.m_IntensityRange.GetMin()) / gScene.m_IntensityRange.GetLength();
+		const float NormalizedIntensity = ((Intensity) - gScene.m_IntensityRange.GetMin()) / gScene.m_IntensityRange.GetRange();
 
 		float X = NormalizedIntensity * rect().width();
 
@@ -86,7 +86,7 @@ void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
 	for (int i = 0; i < NumPosX; i++)
 	{
 		const float Intensity = i * DX;
-		const float NormalizedIntensity = ((Intensity) - gScene.m_IntensityRange.GetMin()) / gScene.m_IntensityRange.GetLength();
+		const float NormalizedIntensity = ((Intensity) - gScene.m_IntensityRange.GetMin()) / gScene.m_IntensityRange.GetRange();
 
 		float X = NormalizedIntensity * rect().width();
 

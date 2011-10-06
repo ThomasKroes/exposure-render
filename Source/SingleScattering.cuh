@@ -2,8 +2,9 @@
 
 #include "Transport.cuh"
 
-#include <algorithm>
-#include <vector>
+#define KRNL_SS_BLOCK_W		32
+#define KRNL_SS_BLOCK_H		8
+#define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
 
 KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
@@ -11,10 +12,10 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
 	
 	// Compute pixel ID
-	const int PID = (Y * pScene->m_Camera.m_Film.GetWidth()) + X;
+	const int PID = (Y * gFilmWidth) + X;
 
 	// Exit if beyond render canvas boundaries
-	if (X >= pScene->m_Camera.m_Film.GetWidth() || Y >= pScene->m_Camera.m_Film.GetHeight() || PID >= pScene->m_Camera.m_Film.GetWidth() * pScene->m_Camera.m_Film.GetHeight())
+	if (X >= gFilmWidth || Y >= gFilmHeight || PID >= gFilmNoPixels)
 		return;
 	
 	// Init random number generator
@@ -44,37 +45,35 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 		 
 		const float D = GetDensity(pScene, Pe);
 
-		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
-		
-		Lv += Ke;
+		Lv += GetEmission(pScene, D).ToXYZ();
 
 		switch (pScene->m_ShadingType)
 		{
 			// Do BRDF shading
 			case 0:
 			{
-				Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+				Lv += UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
 				break;
 			}
 		
 			// Do phase function shading
 			case 1:
 			{
-				Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+				Lv += 0.5f * UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 				break;
 			}
 
 			// Do hybrid shading (BRDF + phase function)
 			case 2:
 			{
-				const float GradMag = GradientMagnitude(pScene, Pe) / pScene->m_GradientMagnitudeRange.GetLength();
+				const float GradMag = GradientMagnitude(pScene, Pe) * gIntensityInvRange;
 
 				const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
 
 				if (RNG.Get1() < PdfBrdf)
-  					Lv += UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
+  					Lv += UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
 				else
- 					Lv += 0.5f * UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+ 					Lv += 0.5f * UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 
 				break;
 			}
@@ -91,7 +90,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 
 void SingleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	const dim3 KernelBlock(16, 8);
+	const dim3 KernelBlock(KRNL_SS_BLOCK_W, KRNL_SS_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	KrnlSingleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);

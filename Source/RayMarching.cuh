@@ -3,25 +3,21 @@
 #include "Geometry.h"
 #include "Scene.h"
 
-DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& P, CScene* pScene)
+DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
-	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+	if (!IntersectBox(R, &MinT, &MaxT))
 		return false;
 
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
-	float Dt		= pScene->m_StepSizeFactor * pScene->m_GradientDelta;
+	float S			= -log(RNG.Get1()) * gIntensityInvRange;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
-	float D			= 0.0f;
 
-	Vec3f Ps; 
-
-	MinT += RNG.Get1() * Dt;
+	MinT += RNG.Get1() * gStepSize;
 
 	while (Sum < S)
 	{
@@ -30,36 +26,32 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& P, CScene* pScene)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, GetDensity(pScene, Ps));
+		SigmaT	= gDensityScale * GetOpacity(pScene, GetDensity(pScene, Ps));
 
-		Sum		+= SigmaT * Dt;
-		MinT	+= Dt;
+		Sum		+= SigmaT * gStepSize;
+		MinT	+= gStepSize;
 	}
-
-	P = Ps;
 
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay R, CRNG& RNG, Vec3f& P, CScene* pScene)
+DEV inline bool FreePathRM(CRay R, CRNG& RNG, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
-	if (!pScene->m_BoundingBox.Intersect(R, &MinT, &MaxT))
+	if (!IntersectBox(R, &MinT, &MaxT))
 		return false;
 
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	float S			= -log(RNG.Get1()) / pScene->m_IntensityRange.GetLength();
-	float Dt		= pScene->m_StepSizeFactorShadow * pScene->m_GradientDelta;
+	float S			= -log(RNG.Get1()) * gIntensityInvRange;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
-	float D			= 0.0f;
 
 	Vec3f Ps; 
 
-	MinT += RNG.Get1() * Dt;
+	MinT += RNG.Get1() * gStepSizeShadow;
 
 	while (Sum < S)
 	{
@@ -68,13 +60,11 @@ DEV inline bool FreePathRM(CRay R, CRNG& RNG, Vec3f& P, CScene* pScene)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= pScene->m_DensityScale * GetOpacity(pScene, GetDensity(pScene, Ps));
+		SigmaT	= gDensityScale * GetOpacity(pScene, GetDensity(pScene, Ps));
 
-		Sum		+= SigmaT * Dt;
-		MinT	+= Dt;
+		Sum		+= SigmaT * gStepSizeShadow;
+		MinT	+= gStepSizeShadow;
 	}
-
-	P = Ps;
 
 	return true;
 }

@@ -2,87 +2,76 @@
 
 #include "Geometry.h"
 #include "Filter.h"
+#include "Scene.h"
 
-KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D Resolution, CGaussianFilter GaussianFilter)
+#define KRNL_BLUR_BLOCK_W		32
+#define KRNL_BLUR_BLOCK_H		8
+#define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
+
+KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage)
 {
-	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
-	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-	const int PID	= (Y * Resolution.GetResX()) + X;				// Get pixel ID	
+	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;
+	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
+	const int PID	= (Y * gFilmWidth) + X;
 
-	// Exit if beyond image boundaries
-	if (X >= Resolution.GetResX() || Y >= Resolution.GetResY())
+	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	// Compute filter extent
-	const int X0 = max((int)ceilf(X - GaussianFilter.xWidth), 0);
-	const int X1 = min((int)floorf(X + GaussianFilter.xWidth), (int)Resolution.GetResX() - 1);
+	const int X0 = max((int)ceilf(X - gFilterWidth), 0);
+	const int X1 = min((int)floorf(X + gFilterWidth), (int)gFilmWidth - 1);
 
-	// Accumulated color
 	CColorXyz Sum;
 
-	// Weights
 	float FW = 1.0f, SumW = 0.0f;
 
 	for (int x = X0; x <= X1; x++)
 	{
-		// Compute filter weight
-		FW = GaussianFilter.Evaluate(fabs((float)(x - X) / (0.5f * GaussianFilter.xWidth)), 0.0f);
+		FW = gFilterWeights[(int)fabs((float)x - X)];
 
-		Sum		+= FW * pImage[(Y * (int)Resolution.GetResX()) + x];
+		Sum		+= FW * pImage[(Y * gFilmWidth) + x];
 		SumW	+= FW;
 	}
 
 	__syncthreads();
 
-	// Write to temporary image
 	pTempImage[PID] = Sum / SumW;
 }
 
-// ToDo: Add description
-KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage, CResolution2D Resolution, CGaussianFilter GaussianFilter)
+KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage)
 {
-	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
-	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-	const int PID	= (Y * Resolution.GetResX()) + X;				// Get pixel ID	
+	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;
+	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
+	const int PID	= (Y * gFilmWidth) + X;
+	const int TID	= (threadIdx.y * blockDim.x) + threadIdx.x;
 
-	// Exit if beyond image boundaries
-	if (X >= Resolution.GetResX() || Y >= Resolution.GetResY())
+	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	// Compute filter extent
-	const int Y0 = max((int)ceilf (Y - GaussianFilter.yWidth), 0);
-	const int Y1 = min((int)floorf(Y + GaussianFilter.yWidth), (int)Resolution.GetResY() - 1);
+	const int Y0 = max((int)ceilf (Y - gFilterWidth), 0);
+	const int Y1 = min((int)floorf(Y + gFilterWidth), gFilmHeight - 1);
 
-	// Accumulated color
 	CColorXyz Sum;
 
-	// Weights
 	float FW = 1.0f, SumW = 0.0f;
 
 	for (int y = Y0; y <= Y1; y++)
 	{
-		// Compute filter weight
-		FW = GaussianFilter.Evaluate(0.0f, fabs((float)(y - Y) / (0.5f * GaussianFilter.yWidth)));
+		FW = gFilterWeights[(int)fabs((float)y - Y)];
 
-		Sum		+= FW * pTempImage[(y * (int)Resolution.GetResX()) + X];
+		Sum		+= FW * pTempImage[(y * gFilmWidth) + X];
 		SumW	+= FW;
 	}
 
 	__syncthreads();
 
-	// Write to image
 	pImage[PID]	= Sum / SumW;
 }
 
-// ToDo: Add description
-void BlurImageXyz(CColorXyz* pImage, CColorXyz* pTempImage, const CResolution2D& Resolution, const float& Radius)
+void BlurImageXyz(CScene* pScene, CScene* pDevScene, CColorXyz* pImage, CColorXyz* pTempImage)
 {
-	const dim3 KernelBlock(16, 8);
-	const dim3 KernelGrid((int)ceilf((float)Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)Resolution.GetResY() / (float)KernelBlock.y));
+	const dim3 KernelBlock(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
+	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	// Create gaussian filter
-	CGaussianFilter GaussianFilter(Radius, Radius, 0.3f * Radius);
-
-	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pImage, pTempImage, Resolution, GaussianFilter); 
-	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pImage, pTempImage, Resolution, GaussianFilter); 
+	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pImage, pTempImage); 
+	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pImage, pTempImage); 
 }

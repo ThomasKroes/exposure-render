@@ -1160,16 +1160,16 @@ public:
 	HOD CRange(void) :
 		m_Min(0.0f),
 		m_Max(100.0f),
-		m_Length(m_Max - m_Min),
-		m_InvLength(1.0f / m_Length)
+		m_Range(m_Max - m_Min),
+		m_InvRange(1.0f / m_Range)
 	{
 	}
 
 	HOD CRange(const float& MinRange, const float& MaxRange) :
 		m_Min(MinRange),
 		m_Max(MaxRange),
-		m_Length(m_Max - m_Min),
-		m_InvLength(1.0f / m_Length)
+		m_Range(m_Max - m_Min),
+		m_InvRange(1.0f / m_Range)
 	{
 	}
 
@@ -1177,17 +1177,18 @@ public:
 	{
 		m_Min		= Other.m_Min; 
 		m_Max		= Other.m_Max; 
-		m_Length	= Other.m_Length;
-		m_InvLength	= Other.m_InvLength;
+		m_Range		= Other.m_Range;
+		m_InvRange	= Other.m_InvRange;
 
 		return *this;
 	}
 
 	HOD float	GetMin(void) const			{ return m_Min;								}
-	HOD void	SetMin(const float& Min)	{ m_Min = Min; m_Length = m_Max - m_Min;	}
+	HOD void	SetMin(const float& Min)	{ m_Min = Min; m_Range = m_Max - m_Min;		}
 	HOD float	GetMax(void) const			{ return m_Max;								}
-	HOD void	SetMax(const float& Max)	{ m_Max = Max; m_Length = m_Max - m_Min;	}
-	HOD float	GetLength(void) const		{ return m_Length;							}
+	HOD void	SetMax(const float& Max)	{ m_Max = Max; m_Range = m_Max - m_Min;		}
+	HOD float	GetRange(void) const		{ return m_Range;							}
+	HOD float	GetInvRange(void) const		{ return m_InvRange;						}
 
 	void PrintSelf(void)
 	{
@@ -1195,10 +1196,10 @@ public:
 	}
 
 private:
-	float	m_Min;			/*!< Minimum range */
-	float	m_Max;			/*!< Maximum range */
-	float	m_Length;		/*!< Length */
-	float	m_InvLength;	/*!< Length reciprocal */
+	float	m_Min;
+	float	m_Max;
+	float	m_Range;
+	float	m_InvRange;
 };
 
 class EXPOSURE_RENDER_DLL CBoundingBox
@@ -1331,10 +1332,12 @@ public:
 		return (LengthX() > LengthY() && LengthX() > LengthZ()) ? AxisX : ((LengthY() > LengthZ()) ? AxisY : AxisZ);
 	}
 
-	HOD	Vec3f				GetMinP(void) const		{ return m_MinP;	}
-	HOD	void				SetMinP(Vec3f MinP)		{ m_MinP = MinP;	}
-	HOD	Vec3f				GetMaxP(void) const		{ return m_MaxP;	}
-	HOD	void				SetMaxP(Vec3f MaxP)		{ m_MaxP = MaxP;	}
+	HOD	Vec3f				GetMinP(void) const		{ return m_MinP;				}
+	HOD	Vec3f				GetInvMinP(void) const	{ return Vec3f(1.0f) / m_MinP;	}
+	HOD	void				SetMinP(Vec3f MinP)		{ m_MinP = MinP;				}
+	HOD	Vec3f				GetMaxP(void) const		{ return m_MaxP;				}
+	HOD	Vec3f				GetInvMaxP(void) const	{ return Vec3f(1.0f) / m_MaxP;	}
+	HOD	void				SetMaxP(Vec3f MaxP)		{ m_MaxP = MaxP;				}
 
 	HO float GetMaxLength(EAxis* pAxis = NULL) const
 	{
