@@ -200,7 +200,7 @@ void QRenderThread::run()
 			gScene.SetNoIterations(gScene.GetNoIterations() + 1);
 
 			// Adjust de-noising parameters
-			const float Radius = 0.015 * (float)SceneCopy.GetNoIterations();
+			const float Radius = 0.04 * (float)SceneCopy.GetNoIterations();
 
 			gStatus.SetStatisticChanged("Denoise", "Radius", QString::number(Radius, 'f', 2), "ms.");
 
@@ -230,7 +230,7 @@ void QRenderThread::run()
 			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
 
 			// Execute the rendering kernels
-  			Render(0, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
+  			Render(1, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 			HandleCudaError(cudaGetLastError());
 		
 			gStatus.SetStatisticChanged("Timings", "Render Image", QString::number(RenderImage.m_FilteredDuration, 'f', 2), "ms.");
@@ -495,7 +495,7 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		gScene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Roughness * 100);
 	}
 
-	gScene.m_DensityScale	= 5.0f * (expf(5.0f * TransferFunction.GetDensityScale()) / expf(5.0f));
+	gScene.m_DensityScale	= 100.0f * (expf(5.0f * TransferFunction.GetDensityScale()) / expf(5.0f));
 	gScene.m_ShadingType	= TransferFunction.GetShadingType();
 
 	gScene.m_DirtyFlags.SetFlag(TransferFunctionDirty);

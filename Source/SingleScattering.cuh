@@ -2,31 +2,28 @@
 
 #include "Transport.cuh"
 
-#define KRNL_SS_BLOCK_W		32
+#define KRNL_SS_BLOCK_W		16
 #define KRNL_SS_BLOCK_H		8
 #define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
 
 KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
-	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-	
-	// Compute pixel ID
-	const int PID = (Y * gFilmWidth) + X;
+	const int X		= (blockIdx.x * blockDim.x) + threadIdx.x;
+	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
+	const int PID	= (Y * gFilmWidth) + X;
 
-	// Exit if beyond render canvas boundaries
 	if (X >= gFilmWidth || Y >= gFilmHeight || PID >= gFilmNoPixels)
 		return;
 	
-	// Init random number generator
 	CRNG RNG(&pSeeds[2 * PID], &pSeeds[2 * PID + 1]);
 
 	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	CRay Re;
 	
-	// Generate the camera ray
- 	pScene->m_Camera.GenerateRay(Vec2f(X, Y) + RNG.Get2(), RNG.Get2(), Re.m_O, Re.m_D);
+	const Vec2f UV = Vec2f(X, Y) + RNG.Get2();
+
+ 	pScene->m_Camera.GenerateRay(UV, RNG.Get2(), Re.m_O, Re.m_D);
 
 	Re.m_MinT = 0.0f; 
 	Re.m_MaxT = FLT_MAX;
@@ -49,21 +46,18 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 
 		switch (pScene->m_ShadingType)
 		{
-			// Do BRDF shading
 			case 0:
 			{
 				Lv += UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, true);
 				break;
 			}
 		
-			// Do phase function shading
 			case 1:
 			{
 				Lv += 0.5f * UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
 				break;
 			}
 
-			// Do hybrid shading (BRDF + phase function)
 			case 2:
 			{
 				const float GradMag = GradientMagnitude(pScene, Pe) * gIntensityInvRange;
@@ -85,6 +79,8 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 			Lv = Li;
 	}
 	
+	__syncthreads();
+
 	pDevEstFrameXyz[PID] = Lv;
 }
 

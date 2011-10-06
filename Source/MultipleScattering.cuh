@@ -8,60 +8,65 @@
 
 KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	/*
-	const int X = (blockIdx.x * blockDim.x) + threadIdx.x;		// Get global y
-	const int Y	= (blockIdx.y * blockDim.y) + threadIdx.y;		// Get global x
-	
-	// Compute sample ID
-	const int SID = (Y * (gridDim.x * blockDim.x)) + X;
+	const int X		= (blockIdx.x * blockDim.x) + threadIdx.x;
+	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
+	const int PID	= (Y * gFilmWidth) + X;
 
-	// Exit if beyond kernel boundaries
-	if (X >= pScene->m_Camera.m_Film.m_Resolution.GetResX() || Y >= pScene->m_Camera.m_Film.m_Resolution.GetResY())
+	if (X >= gFilmWidth || Y >= gFilmHeight || PID >= gFilmNoPixels)
 		return;
 	
-	// Init random number generator
-	CRNG RNG(&pSeeds[SID * 2], &pSeeds[SID * 2 + 1]);
+	CRNG RNG(&pSeeds[2 * PID], &pSeeds[2 * PID + 1]);
 
-	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
+	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK, Tr = SPEC_WHITE;
 
 	CRay Re;
+	
+	const Vec2f UV = Vec2f(X, Y) + RNG.Get2();
 
- 	// Generate the camera ray
- 	pScene->m_Camera.GenerateRay(Vec2f(X, Y), RNG.Get2(), Re.m_O, Re.m_D);
+ 	pScene->m_Camera.GenerateRay(UV, RNG.Get2(), Re.m_O, Re.m_D);
 
 	Re.m_MinT = 0.0f; 
 	Re.m_MaxT = FLT_MAX;
 
-	Vec3f Pe, Pl, Normal;
+	Vec3f Pe, Pl;
 	
 	CLight* pLight = NULL;
 
-	if (SampleDistanceRM(Re, RNG, Pe, pScene))
+	for (int i = 0; i < 2; i++)
 	{
-		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
+		if (SampleDistanceRM(Re, RNG, Pe, pScene))
 		{
-			pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Li;
-			return;
+			if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
+			{
+				pDevEstFrameXyz[PID] = Li;
+				return;
+			}
+		 
+			const float D = GetNormalizedIntensity(pScene, Pe);
+
+			Lv += Tr * GetEmission(pScene, D).ToXYZ();
+
+			Lv += Tr * 0.5f * UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+		}
+		else
+		{
+			if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
+				Lv += Tr * Li;
+
+			break;
 		}
 
-		// Fetch density
-		const float D = GetDensity(pScene, Pe);
+		Re.m_O		= Pe;
+		Re.m_D		= UniformSampleSphere(RNG.Get2());
+		Re.m_MinT	= 0.0f;
+		Re.m_MaxT	= INF_MAX;
 
-		// Get opacity at eye point
-		const CColorXyz	Ke = GetEmission(pScene, D).ToXYZ();
-		
-		// Estimate direct light at eye point
-	 	Lv = Ke + UniformSampleOneLight(pScene, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
-	}
-	else
-	{
-		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
-			Lv = Li;
+		Tr *= INV_4_PI_F;
 	}
 
-	// Contribute
-	pDevEstFrameXyz[Y * (int)pScene->m_Camera.m_Film.m_Resolution.GetResX() + X] = Lv;
-	*/
+	__syncthreads();
+
+	pDevEstFrameXyz[PID] = Lv;
 }
 
 void MultipleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)

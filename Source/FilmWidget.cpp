@@ -117,7 +117,7 @@ void QFilmWidget::SetFilmHeight(const int& FilmHeight)
 
 void QFilmWidget::SetExposure(const double& Exposure)
 {
-//	gCamera.GetFilm().SetExposure(Exposure);
+	gCamera.GetFilm().SetExposure(Exposure);
 }
 
 void QFilmWidget::OnRenderBegin(void)

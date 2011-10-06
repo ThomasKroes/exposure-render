@@ -4,6 +4,10 @@
 #include <cuda_runtime.h>
 #include <cutil.h>
 
+#define KRNL_DENOISE_BLOCK_W		32
+#define KRNL_DENOISE_BLOCK_H		8
+#define KRNL_DENOISE_BLOCK_SIZE	KRNL_DENOISE_BLOCK_W * KRNL_DENOISE_BLOCK_H
+
 DEV float lerpf(float a, float b, float c){
 	return a + (b - a) * c;
 }
@@ -17,16 +21,16 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 {
     const int ix = blockDim.x * blockIdx.x + threadIdx.x;
     const int iy = blockDim.y * blockIdx.y + threadIdx.y;
-    //Add half of a texel to always address exact texel centers
+
     const float x = (float)ix + 0.5f;
     const float y = (float)iy + 0.5f;
 
-	int ID = iy * pScene->m_Camera.m_Film.m_Resolution.GetResX() + ix;
+	int ID = iy * gFilmWidth + ix;
 
-	ID = min(ID, pScene->m_Camera.m_Film.m_Resolution.GetNoElements() - 1);
+	ID = min(ID, gFilmNoPixels - 1);
 
-	/*
-    if(pScene->m_DenoiseParams.m_Enabled && ix < pScene->m_Camera.m_Film.m_Resolution.GetResX() && iy < pScene->m_Camera.m_Film.m_Resolution.GetResY())
+	
+    if(pScene->m_DenoiseParams.m_Enabled && ix < gFilmWidth && iy < gFilmHeight)
 	{
         //Normalized counter for the weight threshold
         float fCount = 0;
@@ -80,18 +84,18 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 		pOut[ID].b = 255 * clr.z;
     }
 	else
-	{*/
+	{/**/
 		float4 clr00 = tex2D(gTexEstimateRgbLdr, x, y);
 
 		pOut[ID].r = 255 * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
-//	}
+	}
 }
 
 void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbLdr* pOut)
 {
-	const dim3 KernelBlock(16, 8);
+	const dim3 KernelBlock(KRNL_DENOISE_BLOCK_W, KRNL_DENOISE_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
 	KNN<<<KernelGrid, KernelBlock>>>(pDevScene, pOut);
