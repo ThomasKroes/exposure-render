@@ -62,7 +62,6 @@ public:
 	int					m_MaxNoBounces;
 	CRange				m_IntensityRange;
 	CRange				m_GradientMagnitudeRange;
-	Vec2f				m_KernelSize;
 	float				m_SigmaMax;
 	float				m_DensityScale;
 	CDenoiseParams		m_DenoiseParams;

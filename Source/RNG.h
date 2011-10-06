@@ -16,7 +16,7 @@ public:
 		*m_pSeed0 = 36969 * ((*m_pSeed0) & 65535) + ((*m_pSeed0) >> 16);
 		*m_pSeed1 = 18000 * ((*m_pSeed1) & 65535) + ((*m_pSeed1) >> 16);
 
-		int ires = ((*m_pSeed0) << 16) + (*m_pSeed1);
+		const int ires = ((*m_pSeed0) << 16) + (*m_pSeed1);
 
 		union
 		{
@@ -26,7 +26,7 @@ public:
 
 		res.ui = (ires & 0x007fffff) | 0x40000000;
 
-		return (res.f - 2.f) / 2.f;
+		return 0.5f * (res.f - 2.0f);
 	}
 
 	DEV Vec2f Get2(void)

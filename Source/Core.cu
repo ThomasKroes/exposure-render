@@ -31,6 +31,7 @@ __constant__ float	gStepSize;
 __constant__ float	gStepSizeShadow;
 __constant__ float	gDensityScale;
 __constant__ float	gGradientDelta;
+__constant__ float	gInvGradientDelta;
 __constant__ int	gFilmWidth;
 __constant__ int	gFilmHeight;
 __constant__ int	gFilmNoPixels;
@@ -77,24 +78,6 @@ void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
   	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexDensity, gpDensityArray, ChannelDesc));
-	/*
-
-	gTexDensity.normalized		= true;
-	gTexDensity.filterMode		= cudaFilterModeLinear;      
-	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
-	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
-  	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
-
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>((int)Extent.width, (int)Extent.height, (int)Extent.depth, 0, cudaChannelFormatKindSigned);
-
-	short* pData = NULL;
-
-	const int Size = Extent.width * Extent.height * Extent.depth * sizeof(short);
-
-	HandleCudaError(cudaMalloc(&pData, Size));
-	HandleCudaError(cudaMemcpy(pData, pBuffer, Size, cudaMemcpyHostToDevice));
-
-	cudaBindTexture(0, gTexDensity, pData, &ChannelDesc, Size);*/
 }
 
 void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent)
@@ -305,7 +288,7 @@ void BindConstants(CScene* pScene)
 	const float IntensityMin		= pScene->m_IntensityRange.GetMin();
 	const float IntensityMax		= pScene->m_IntensityRange.GetMax();
 	const float IntensityRange		= pScene->m_IntensityRange.GetRange();
-	const float IntensityInvRange	= pScene->m_IntensityRange.GetInvRange();
+	const float IntensityInvRange	= 1.0f / IntensityRange;
 
 	HandleCudaError(cudaMemcpyToSymbol("gIntensityMin", &IntensityMin, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gIntensityMax", &IntensityMax, sizeof(float)));
@@ -322,10 +305,12 @@ void BindConstants(CScene* pScene)
 
 	HandleCudaError(cudaMemcpyToSymbol("gDensityScale", &DensityScale, sizeof(float)));
 	
-	const float GradientDelta = pScene->m_GradientDelta;
+	const float GradientDelta		= pScene->m_GradientDelta;
+	const float InvGradientDelta	= 1.0f / GradientDelta;
 
 	HandleCudaError(cudaMemcpyToSymbol("gGradientDelta", &GradientDelta, sizeof(float)));
-
+	HandleCudaError(cudaMemcpyToSymbol("gInvGradientDelta", &InvGradientDelta, sizeof(float)));
+	
 	const int FilmWidth		= pScene->m_Camera.m_Film.GetWidth();
 	const int Filmheight	= pScene->m_Camera.m_Film.GetHeight();
 	const int FilmNoPixels	= pScene->m_Camera.m_Film.m_Resolution.GetNoElements();

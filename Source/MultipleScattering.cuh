@@ -2,6 +2,10 @@
 
 #include "Transport.cuh"
 
+#define KRNL_MS_BLOCK_W		32
+#define KRNL_MS_BLOCK_H		8
+#define KRNL_MS_BLOCK_SIZE	KRNL_MS_BLOCK_W * KRNL_MS_BLOCK_H
+
 KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
 	/*
@@ -62,7 +66,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevE
 
 void MultipleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	const dim3 KernelBlock(pScene->m_KernelSize.x, pScene->m_KernelSize.y);
+	const dim3 KernelBlock(KRNL_MS_BLOCK_W, KRNL_MS_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	KrnlMultipleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);

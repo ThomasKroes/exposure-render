@@ -37,7 +37,7 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_ShadingType.addItem("Hybrid", 2);
 	m_MainLayout.addWidget(&m_ShadingType, 3, 1, 1, 2);
 
-	m_MainLayout.addWidget(new QLabel("Max. Grad. Mag."), 4, 0);
+	m_MainLayout.addWidget(new QLabel("Gradient Factor"), 4, 0);
 	
 	m_GradientFactorSlider.setOrientation(Qt::Horizontal);
 	m_GradientFactorSlider.setRange(0.001, 100.0);

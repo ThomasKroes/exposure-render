@@ -138,6 +138,8 @@ void QRenderThread::run()
 			if (m_Pause)
 				continue;
 
+			msleep(2);
+
 			BindConstants(&gScene);
 
 			// Let others know we are starting with a new frame

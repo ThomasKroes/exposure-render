@@ -15,7 +15,6 @@ CScene::CScene(void) :
 	m_MaxNoBounces(1),
 	m_IntensityRange(),
 	m_GradientMagnitudeRange(),
-	m_KernelSize(16, 4),
 	m_SigmaMax(0.0f),
 	m_DensityScale(5000),
 	m_DenoiseParams(),
@@ -23,8 +22,8 @@ CScene::CScene(void) :
 	m_ExtinctionSize(),
 	m_ShadingType(2),
 	m_Spectral(false),
-	m_StepSizeFactor(1.0f),
-	m_StepSizeFactorShadow(5.0f),
+	m_StepSizeFactor(2.0f),
+	m_StepSizeFactorShadow(6.0f),
 	m_GradientDelta(1.0f),
 	m_IOR(2.5f),
 	m_GradientFactor(1.0f),
@@ -50,7 +49,6 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_TransferFunctions			= Other.m_TransferFunctions;
 	m_MaxNoBounces				= Other.m_MaxNoBounces;
 	m_IntensityRange			= Other.m_IntensityRange;
-	m_KernelSize				= Other.m_KernelSize;
 	m_SigmaMax					= Other.m_SigmaMax;
 	m_DensityScale				= Other.m_DensityScale;
 	m_DenoiseParams				= Other.m_DenoiseParams;

@@ -99,16 +99,12 @@ CKernelSettingsWidget::CKernelSettingsWidget(QWidget* pParent) :
 
 void CKernelSettingsWidget::SetKernelWidth(const int& KernelWidth)
 {
-	gScene.m_KernelSize.x	= KernelWidth;
-		
 	// Flag the render params as dirty, this will restart the rendering
 	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 void CKernelSettingsWidget::SetKernelHeight(const int& KernelHeight)
 {
-	gScene.m_KernelSize.y	= KernelHeight;
-		
 	// Flag the render params as dirty, this will restart the rendering
 	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }

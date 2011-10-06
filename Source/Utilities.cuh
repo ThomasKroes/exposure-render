@@ -6,64 +6,38 @@
 #include <cutil.h>
 #include <cutil_math.h>
 
-DEV float GetDensity(CScene* pScene, const Vec3f& P)
+DEV float GetNormalizedIntensity(CScene* pScene, const Vec3f& P)
 {
-	return (float)SHRT_MAX * tex3D(gTexDensity, P.x * gInvAaBbMax.x, P.y * gInvAaBbMax.y, P.z * gInvAaBbMax.z);
+	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, P.x * gInvAaBbMax.x, P.y * gInvAaBbMax.y, P.z * gInvAaBbMax.z));
+
+	return (Intensity - gIntensityMin) * gIntensityInvRange;
 }
 
-DEV float GetOpacity(CScene* pScene, const Vec3f& P)
+DEV float GetOpacity(CScene* pScene, const float& NormalizedIntensity)
 {
-	return tex1D(gTexOpacity, GetDensity(pScene, P) * gIntensityInvRange);
+	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEV float GetOpacity(CScene* pScene, const float& Density)
+DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& NormalizedIntensity)
 {
-	return tex1D(gTexOpacity, (Density - gIntensityMin) * gIntensityInvRange);
-}
-
-DEV CColorRgbHdr GetDiffuse(CScene* pScene, const Vec3f& P)
-{
-	float4 Diffuse = tex1D(gTexDiffuse, GetDensity(pScene, P) * gIntensityInvRange);
+	float4 Diffuse = tex1D(gTexDiffuse, NormalizedIntensity);
 	return CColorRgbHdr(Diffuse.x, Diffuse.y, Diffuse.z);
 }
 
-DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& Density)
+DEV CColorRgbHdr GetSpecular(CScene* pScene, const float& NormalizedIntensity)
 {
-	float4 Diffuse = tex1D(gTexDiffuse, (Density - gIntensityMin) * gIntensityInvRange);
-	return CColorRgbHdr(Diffuse.x, Diffuse.y, Diffuse.z);
-}
-
-DEV CColorRgbHdr GetSpecular(CScene* pScene, const Vec3f& P)
-{
-	float4 Specular = tex1D(gTexSpecular, GetDensity(pScene, P) * gIntensityInvRange);
+	float4 Specular = tex1D(gTexSpecular, NormalizedIntensity);
 	return CColorRgbHdr(Specular.x, Specular.y, Specular.z);
 }
 
-DEV CColorRgbHdr GetSpecular(CScene* pScene, const float& Density)
+DEV float GetRoughness(CScene* pScene, const float& NormalizedIntensity)
 {
-	float4 Specular = tex1D(gTexSpecular, (Density - gIntensityMin) * gIntensityInvRange);
-	return CColorRgbHdr(Specular.x, Specular.y, Specular.z);
+	return tex1D(gTexRoughness, NormalizedIntensity);
 }
 
-DEV float GetRoughness(CScene* pScene, const Vec3f& P)
+DEV CColorRgbHdr GetEmission(CScene* pScene, const float& NormalizedIntensity)
 {
-	return tex1D(gTexRoughness, GetDensity(pScene, P) * gIntensityInvRange);
-}
-
-DEV float GetRoughness(CScene* pScene, const float& Density)
-{
-	return tex1D(gTexRoughness, (Density - gIntensityMin) * gIntensityInvRange);
-}
-
-DEV CColorRgbHdr GetEmission(CScene* pScene, const Vec3f& P)
-{
-	float4 Emission = tex1D(gTexEmission, GetDensity(pScene, P) * gIntensityInvRange);
-	return CColorRgbHdr(Emission.x, Emission.y, Emission.z);
-}
-
-DEV CColorRgbHdr GetEmission(CScene* pScene, const float& Density)
-{
-	float4 Emission = tex1D(gTexEmission, (Density - gIntensityMin) * gIntensityInvRange);
+	float4 Emission = tex1D(gTexEmission, NormalizedIntensity);
 	return CColorRgbHdr(Emission.x, Emission.y, Emission.z);
 }
 
@@ -73,9 +47,9 @@ __device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 
 	const float Delta = gGradientDelta;
 
-	Gradient.x = (GetDensity(pScene, P + Vec3f(Delta, 0.0f, 0.0f)) - GetDensity(pScene, P - Vec3f(Delta, 0.0f, 0.0f))) / Delta;
-	Gradient.y = (GetDensity(pScene, P + Vec3f(0.0f, Delta, 0.0f)) - GetDensity(pScene, P - Vec3f(0.0f, Delta, 0.0f))) / Delta;
-	Gradient.z = (GetDensity(pScene, P + Vec3f(0.0f, 0.0f, Delta)) - GetDensity(pScene, P - Vec3f(0.0f, 0.0f, Delta))) / Delta;
+	Gradient.x = (GetNormalizedIntensity(pScene, P + Vec3f(Delta, 0.0f, 0.0f)) - GetNormalizedIntensity(pScene, P - Vec3f(Delta, 0.0f, 0.0f))) * gInvGradientDelta;
+	Gradient.y = (GetNormalizedIntensity(pScene, P + Vec3f(0.0f, Delta, 0.0f)) - GetNormalizedIntensity(pScene, P - Vec3f(0.0f, Delta, 0.0f))) * gInvGradientDelta;
+	Gradient.z = (GetNormalizedIntensity(pScene, P + Vec3f(0.0f, 0.0f, Delta)) - GetNormalizedIntensity(pScene, P - Vec3f(0.0f, 0.0f, Delta))) * gInvGradientDelta;
 
 	Gradient.Normalize();
 

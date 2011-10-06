@@ -43,7 +43,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEst
 			return;
 		}
 		 
-		const float D = GetDensity(pScene, Pe);
+		const float D = GetNormalizedIntensity(pScene, Pe);
 
 		Lv += GetEmission(pScene, D).ToXYZ();
 

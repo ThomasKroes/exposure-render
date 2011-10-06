@@ -96,7 +96,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 		Ld += F * Li * WeightMIS / LightPdf;
 	}
 
-	/*
+	
 	PhasePdf = INV_4_PI_F;
 	
 	// Sample the phase function with MIS
@@ -115,13 +115,12 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 
 		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, pLight, &LightPdf) && pLight == &Light)
 		{
-			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, P, pScene)) 
+			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd, pScene)) 
 			{
 				Ld += F * Li * WeightMIS / PhasePdf;
 			}
 		}
 	}
-	*/
 
 	return Ld;
 }
