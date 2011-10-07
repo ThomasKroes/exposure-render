@@ -453,8 +453,6 @@ public:
 	float c[3];
 };
 
-#endif
-
 class EXPOSURE_RENDER_DLL CSpectrumSample
 {
 public:

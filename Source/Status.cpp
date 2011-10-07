@@ -27,6 +27,11 @@ void CStatus::SetPostRenderFrame(void)
 	emit PostRenderFrame();
 }
 
+void CStatus::SetRenderPause(const bool& Pause)
+{
+	emit RenderPause(Pause);
+}
+
 void CStatus::SetResize(void)
 {
 	emit Resize();

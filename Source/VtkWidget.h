@@ -25,6 +25,8 @@
 // Interactor
 #include "InteractorStyleRealisticCamera.h"
 
+#include "RenderThread.h"
+
 class CVtkWidget : public QWidget
 {
     Q_OBJECT
@@ -34,11 +36,14 @@ public:
 	
 	QVTKWidget*		GetQtVtkWidget(void);
 
+	QFrameBuffer	m_FrameBuffer;
+
 public slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
 	void OnFilmChanged(const QFilm& Film);
 	void OnRenderLoopTimer(void);
+	void OnRenderPause(const bool& Pause);
 
 private:
 	void SetupRenderView(void);
@@ -47,6 +52,7 @@ private:
 	QVTKWidget									m_QtVtkWidget;
 	unsigned char*								m_pPixels;
 	QTimer										m_RenderLoopTimer;
+	bool										m_Pause;
 
 public:
 	vtkSmartPointer<vtkImageActor>				m_ImageActor;

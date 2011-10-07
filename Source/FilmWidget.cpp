@@ -105,14 +105,24 @@ void QFilmWidget::SetFilmWidth(const int& FilmWidth)
 {
 //	gScene.m_Camera.m_Film.m_Resolution.SetResX(FilmWidth);
 //	gScene.m_DirtyFlags.SetFlag(FilmResolutionDirty);
+
+	gStatus.SetRenderPause(true);
+
 	gCamera.GetFilm().SetWidth(FilmWidth);
+
+	gStatus.SetRenderPause(false);
 }
 
 void QFilmWidget::SetFilmHeight(const int& FilmHeight)
 {
 //	gScene.m_Camera.m_Film.m_Resolution.SetResY(FilmHeight);
 //	gScene.m_DirtyFlags.SetFlag(FilmResolutionDirty);
+
+	gStatus.SetRenderPause(true);
+
  	gCamera.GetFilm().SetHeight(FilmHeight);
+
+	gStatus.SetRenderPause(false);
 }
 
 void QFilmWidget::SetExposure(const double& Exposure)

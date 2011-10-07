@@ -1887,3 +1887,74 @@ inline float RandomFloat(void)
 {
 	return (float)rand() / RAND_MAX;
 }
+
+template <class T>
+class CVec2
+{
+public:
+
+	T	m_D[3];
+};
+
+template <class T>
+class CVec3
+{
+public:
+
+	T	m_D[3];
+};
+
+template <class T>
+class CVec4
+{
+public:
+
+	T	m_D[3];
+};
+
+/*
+typedef Vec2c CVec2<char>;
+typedef Vec2uc CVec2<unsigned char>;
+typedef Vec2s CVec2<short>;
+typedef Vec2us CVec2<unsigned short>;
+typedef Vec2ui CVec2<int>;
+typedef Vec2ui CVec2<unsigned int>;
+typedef Vec2l CVec2<long>;
+typedef Vec2ul CVec2<unsigned long>;
+typedef Vec2f CVec2<float>;
+typedef Vec2uf CVec2<unsigned float>;
+typedef Vec2d CVec2<double>;
+typedef Vec2ud CVec2<unsigned double>;
+
+typedef Vec3c CVec3<char>;
+typedef Vec3uc CVec3<unsigned char>;
+typedef Vec3s CVec3<short>;
+typedef Vec3us CVec3<unsigned short>;
+typedef Vec3ui CVec3<int>;
+typedef Vec3ui CVec3<unsigned int>;
+typedef Vec3l CVec3<long>;
+typedef Vec3ul CVec3<unsigned long>;
+typedef Vec3f CVec3<float>;
+typedef Vec3uf CVec3<unsigned float>;
+typedef Vec3d CVec3<double>;
+typedef Vec3ud CVec3<unsigned double>;
+
+typedef Vec4c CVec4<char>;
+typedef Vec4uc CVec4<unsigned char>;
+typedef Vec4s CVec4<short>;
+typedef Vec4us CVec4<unsigned short>;
+typedef Vec4ui CVec4<int>;
+typedef Vec4ui CVec4<unsigned int>;
+typedef Vec4l CVec4<long>;
+typedef Vec4ul CVec4<unsigned long>;
+typedef Vec4f CVec4<float>;
+typedef Vec4uf CVec4<unsigned float>;
+typedef Vec4d CVec4<double>;
+typedef Vec4ud CVec4<unsigned double>;
+
+template <class T>
+class CColorRGBA : public CVec4<Vec4uc>
+{
+	public:
+};
+*/

@@ -3,7 +3,6 @@
 #include "Stable.h"
 
 #include "VtkWidget.h"
-#include "RenderThread.h"
 #include "MainWindow.h"
 
 // Key press callback
@@ -43,6 +42,7 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	m_MainLayout(),
 	m_QtVtkWidget(),
 	m_pPixels(NULL),
+	m_Pause(false),
 	m_ImageActor(),
 	m_ImageImport(),
 	m_InteractorStyleImage(),
@@ -65,10 +65,11 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_QtVtkWidget, 0, 0, 1, 2);
 
 	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, when the rendering canvas is resized and when the timer has timed out
-	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
+	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
+	QObject::connect(&gStatus, SIGNAL(RenderPause(const bool&)), this, SLOT(OnRenderPause(const bool&)));
 
 	// Setup the render view
 	SetupRenderView();
@@ -87,7 +88,7 @@ void CVtkWidget::OnRenderBegin(void)
 	m_ImageImport->SetDataSpacing(1, 1, 1);
 	m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResY(), 0);
 
-	m_pPixels = (unsigned char*)malloc(3 * gScene.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(unsigned char));
+	m_pPixels = (unsigned char*)malloc(3 * 2048 * 2048 * sizeof(unsigned char));
 
 	m_ImageImport->SetImportVoidPointer((void*)m_pPixels, 1);
 	m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, gScene.m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
@@ -188,27 +189,46 @@ void CVtkWidget::OnRenderLoopTimer(void)
 // 
 // 	QMutexLocker MutexLocker(&gpRenderThread->m_Mutex);
 // 
+	/*
 	if (m_ImageImport->GetDataExtent()[1] != gScene.m_Camera.m_Film.GetWidth() - 1 || m_ImageImport->GetDataExtent()[3] != gScene.m_Camera.m_Film.GetHeight() - 1)
 	{
 		m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.GetWidth(), -0.5f * (float)gScene.m_Camera.m_Film.GetHeight(), 0);
 		m_ImageImport->SetDataExtent(0, gScene.m_Camera.m_Film.GetWidth() - 1, 0, gScene.m_Camera.m_Film.GetHeight() - 1, 0, 0);
 		m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.GetWidth() - 1, 0, gScene.m_Camera.m_Film.GetHeight() - 1, 0, 0);
-		m_ImageImport->SetDataExtentToWholeExtent();
+//		m_ImageImport->SetDataExtentToWholeExtent();
 	}
+	*/
 
-	if (!gpRenderThread->m_Pause && gpRenderThread->GetRenderImage())
-	{
-		// 		if (gCamera.GetFilm().IsDirty())
-		// 		{
+	QMutexLocker(&gFrameBuffer.m_Mutex);
 
-		//		}
+	m_FrameBuffer = gFrameBuffer;
 
- 		m_ImageImport->SetImportVoidPointer(NULL);
- 		m_ImageImport->SetImportVoidPointer(gpRenderThread->GetRenderImage());
+	if (m_FrameBuffer.GetPixels() == NULL)
+		return;
 
-// 		m_ImageImport->SetImportVoidPointer(m_pPixels);
- 		m_ImageActor->SetInput(m_ImageImport->GetOutput());
+//	m_ImageActor->SetDisplayExtent(0, 0, 0, 0, 0, 0);
+	
+	m_ImageImport->SetWholeExtent(0, 0, 0, 0, 0, 0);
+	m_ImageImport->SetDataExtentToWholeExtent();
+//	m_ImageImport->Update();
 
- 		m_RenderWindow->GetInteractor()->Render();
-	}
+	m_ImageImport->SetImportVoidPointer(NULL);
+	m_ImageImport->SetImportVoidPointer(m_pPixels, 1);
+	m_ImageImport->SetDataOrigin(-0.5f * (float)m_FrameBuffer.GetWidth(), -0.5f * (float)m_FrameBuffer.GetHeight(), 0);
+//		m_ImageImport->Update();
+//		m_ImageImport->UpdateDisplayExtent();
+	m_ImageImport->SetWholeExtent(0, m_FrameBuffer.GetWidth() - 1, 0, m_FrameBuffer.GetHeight() - 1, 0, 0);
+	m_ImageImport->SetDataExtentToWholeExtent();
+	m_ImageImport->UpdateWholeExtent();
+	m_ImageImport->Update();
+		
+//	m_ImageActor->SetDisplayExtent(0, m_FrameBuffer.GetWidth() - 1, 0, m_FrameBuffer.GetHeight() - 1, 0, 0);
+	
+	m_ImageActor->SetInput(m_ImageImport->GetOutput());
+	m_RenderWindow->GetInteractor()->Render();
+}
+
+void CVtkWidget::OnRenderPause(const bool& Pause)
+{
+	m_Pause = Pause;
 }

@@ -29,8 +29,71 @@
 
 // Render thread
 QRenderThread* gpRenderThread = NULL;
+QFrameBuffer gFrameBuffer;
 
 QMutex gSceneMutex;
+
+QFrameBuffer::QFrameBuffer(void) :
+	m_pPixels(NULL),
+	m_Width(0),
+	m_Height(0),
+	m_NoPixels(0),
+	m_Mutex()
+{
+}
+
+QFrameBuffer::QFrameBuffer(const QFrameBuffer& Other)
+{
+	*this = Other;
+}
+
+QFrameBuffer& QFrameBuffer::operator=(const QFrameBuffer& Other)
+{
+	m_Width		= Other.m_Width;
+	m_Height	= Other.m_Height;
+	m_NoPixels	= Other.m_NoPixels;
+
+	if (Other.m_pPixels != NULL)
+	{
+		const int Size = m_NoPixels * sizeof(unsigned char);
+
+		m_pPixels = (unsigned char*)malloc(Size);
+		memcpy(m_pPixels, Other.m_pPixels, Size); 
+	}
+	else
+	{
+		m_pPixels = NULL;
+	}
+
+	return *this;
+}
+
+QFrameBuffer::~QFrameBuffer(void)
+{
+	free(m_pPixels);
+}
+
+void QFrameBuffer::Set(unsigned char* pPixels, const int& Width, const int& Height)
+{
+	const bool Dirty = Width != m_Width || Height != m_Height;
+
+	m_Width		= Width;
+	m_Height	= Height;
+	m_NoPixels	= m_Width * m_Height;
+
+	if (m_NoPixels <= 0)
+		return;
+
+	const int Size = m_NoPixels * sizeof(unsigned char);
+
+	if (Dirty)
+	{
+		free(m_pPixels);
+		m_pPixels = (unsigned char*)malloc(Size);
+	}
+
+//	memcpy(m_pPixels, pPixels, Size); 
+}
 
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
 	QThread(pParent),
@@ -119,6 +182,8 @@ void QRenderThread::run()
 	QObject::connect(&gCamera, SIGNAL(Changed()), this, SLOT(OnUpdateCamera()));
 	QObject::connect(&gLighting, SIGNAL(Changed()), this, SLOT(OnUpdateLighting()));
 	QObject::connect(&gLighting.Background(), SIGNAL(Changed()), this, SLOT(OnUpdateLighting()));
+
+	QObject::connect(&gStatus, SIGNAL(RenderPause(const bool&)), this, SLOT(OnRenderPause(const bool&)));
 
 	// Try to load appearance/lighting/camera presets with the same name as the loaded file
 	gStatus.SetLoadPreset(QFileInfo(m_FileName).baseName());
@@ -224,6 +289,12 @@ void QRenderThread::run()
  			gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(SceneCopy.GetNoIterations()), "Iterations");
 
 			HandleCudaError(cudaMemcpy(m_pRenderImage, m_CudaFrameBuffers.m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
+
+			gFrameBuffer.m_Mutex.lock();
+
+			gFrameBuffer.Set((unsigned char*)m_pRenderImage, SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight());
+
+			gFrameBuffer.m_Mutex.unlock();
 
 			if (m_SaveFrames.indexOf(SceneCopy.GetNoIterations()) > 0)
 			{
@@ -573,6 +644,11 @@ void QRenderThread::OnUpdateLighting(void)
 	}
 
 	gScene.m_DirtyFlags.SetFlag(LightsDirty);
+}
+
+void QRenderThread::OnRenderPause(const bool& Pause)
+{
+	m_Pause = Pause;
 }
 
 CColorRgbaLdr* QRenderThread::GetRenderImage(void) const
