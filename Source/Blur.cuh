@@ -42,7 +42,6 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage)
 	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;
 	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
 	const int PID	= (Y * gFilmWidth) + X;
-	const int TID	= (threadIdx.y * blockDim.x) + threadIdx.x;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;

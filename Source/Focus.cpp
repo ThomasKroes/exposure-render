@@ -26,6 +26,18 @@ QFocus& QFocus::operator=(const QFocus& Other)
 	return *this;
 }
 
+int QFocus::GetType(void) const
+{
+	return m_Type;
+}
+
+void QFocus::SetType(const int& Type)
+{
+	m_Type = Type;
+
+	emit Changed(*this);
+}
+
 float QFocus::GetFocalDistance(void) const
 {
 	return m_FocalDistance;

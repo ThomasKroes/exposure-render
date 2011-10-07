@@ -16,6 +16,7 @@ QProjectionWidget::QProjectionWidget(QWidget* pParent) :
 	setStatusTip("Projection properties");
 	setToolTip("Projection properties");
 
+	m_GridLayout.setColumnMinimumWidth(0, 75);
 	setLayout(&m_GridLayout);
 
 	// Field of view
@@ -32,8 +33,6 @@ QProjectionWidget::QProjectionWidget(QWidget* pParent) :
 	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), &m_FieldOfViewSpinner, SLOT(setValue(double)));
 	connect(&m_FieldOfViewSlider, SIGNAL(valueChanged(double)), this, SLOT(SetFieldOfView(double)));
 	connect(&m_FieldOfViewSpinner, SIGNAL(valueChanged(double)), &m_FieldOfViewSlider, SLOT(setValue(double)));
- 	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
- 	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetProjection(), SIGNAL(Changed(const QProjection&)), this, SLOT(OnProjectionChanged(const QProjection&)));
 
 	gStatus.SetStatisticChanged("Camera", "Projection", "", "", "");
@@ -42,16 +41,6 @@ QProjectionWidget::QProjectionWidget(QWidget* pParent) :
 void QProjectionWidget::SetFieldOfView(const double& FieldOfView)
 {
 	gCamera.GetProjection().SetFieldOfView(FieldOfView);
-}
-
-void QProjectionWidget::OnRenderBegin(void)
-{
-//	gCamera.GetProjection().Reset();
-}
-
-void QProjectionWidget::OnRenderEnd(void)
-{
-//	gCamera.GetProjection().Reset();
 }
 
 void QProjectionWidget::OnProjectionChanged(const QProjection& Projection)

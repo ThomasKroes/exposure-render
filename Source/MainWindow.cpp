@@ -128,12 +128,6 @@ void CMainWindow::CreateStatusBar()
 
 void CMainWindow::SetupDockingWidgets()
 {
-	// Log dock widget
-	m_LogDockWidget.setEnabled(false);
-	m_LogDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
-	addDockWidget(Qt::RightDockWidgetArea, &m_LogDockWidget);
-	m_pViewMenu->addAction(m_LogDockWidget.toggleViewAction());
-
 	// Lighting dock widget
 	m_LightingDockWidget.setEnabled(false);
     m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -146,17 +140,23 @@ void CMainWindow::SetupDockingWidgets()
 	addDockWidget(Qt::LeftDockWidgetArea, &m_AppearanceDockWidget);
     m_pViewMenu->addAction(m_AppearanceDockWidget.toggleViewAction());
 
-	// Statistics dock widget
-	m_StatisticsDockWidget.setEnabled(false);
-	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::RightDockWidgetArea, &m_StatisticsDockWidget);
-    m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());
-
 	// Camera dock widget
 	m_CameraDockWidget.setEnabled(false);
 	m_CameraDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_CameraDockWidget);
     m_pViewMenu->addAction(m_CameraDockWidget.toggleViewAction());
+
+	// Log dock widget
+	m_LogDockWidget.setEnabled(false);
+	m_LogDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::RightDockWidgetArea, &m_LogDockWidget);
+	m_pViewMenu->addAction(m_LogDockWidget.toggleViewAction());
+
+	// Statistics dock widget
+	m_StatisticsDockWidget.setEnabled(false);
+	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::RightDockWidgetArea, &m_StatisticsDockWidget);
+    m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());
 
 	// Settings dock widget
 // 	m_SettingsDockWidget.setEnabled(false);
@@ -165,7 +165,7 @@ void CMainWindow::SetupDockingWidgets()
 //  m_pViewMenu->addAction(m_SettingsDockWidget.toggleViewAction());
 
 	tabifyDockWidget(&m_AppearanceDockWidget, &m_LightingDockWidget);
-	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);
+//	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);
 //	tabifyDockWidget(&m_CameraDockWidget, &m_SettingsDockWidget);
 
 	m_AppearanceDockWidget.raise();

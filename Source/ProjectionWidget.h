@@ -11,8 +11,6 @@ public:
 
 private slots:
 	void SetFieldOfView(const double& FieldOfView);
-	void OnRenderBegin(void);
-	void OnRenderEnd(void);
 	void OnProjectionChanged(const QProjection& Film);
 
 private:

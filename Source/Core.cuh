@@ -3,6 +3,7 @@
 #include "Geometry.h"
 #include "Timing.h"
 #include "Variance.h"
+#include "Scene.h"
 #include "CudaFrameBuffers.h"
 
 #include <cuda_runtime.h>
@@ -27,4 +28,4 @@ extern "C" void UnbindTransferFunctionSpecular(void);
 extern "C" void UnbindTransferFunctionRoughness(void);
 extern "C" void UnbindTransferFunctionEmission(void);
 extern "C" void BindConstants(CScene* pScene);
-extern "C" void Render(const int& Type, CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage);
+extern "C" void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage);

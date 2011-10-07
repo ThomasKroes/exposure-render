@@ -14,4 +14,10 @@ QCameraDockWidget::QCameraDockWidget(QWidget* pParent) :
 	setWindowIcon(GetIcon("camera"));
 
 	setWidget(&m_CameraWidget);
+
+	QSizePolicy SizePolicy;
+
+	SizePolicy.setVerticalPolicy(QSizePolicy::Maximum);
+
+	setSizePolicy(SizePolicy);
 }

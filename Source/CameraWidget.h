@@ -14,6 +14,8 @@ class QCameraWidget : public QWidget
 public:
     QCameraWidget(QWidget* pParent = NULL);
 
+	virtual QSize sizeHint() const;
+
 public slots:
 	void OnLoadPreset(const QString& Name);
 	void OnSavePreset(const QString& Name);

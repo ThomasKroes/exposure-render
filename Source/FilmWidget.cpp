@@ -22,7 +22,7 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	setToolTip("Film properties");
 
 	// Create grid layout
-//	m_GridLayout.setColSpacing(0, 70);
+	m_GridLayout.setColumnMinimumWidth(0, 75);
 	setLayout(&m_GridLayout);
 
 	// Film width

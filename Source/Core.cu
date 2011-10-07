@@ -19,28 +19,35 @@ cudaArray* gpSpecularArray				= NULL;
 cudaArray* gpRoughnessArray				= NULL;
 cudaArray* gpEmissionArray				= NULL;
 
-__constant__ float3	gAaBbMin;
-__constant__ float3	gAaBbMax;
-__constant__ float3	gInvAaBbMin;
-__constant__ float3	gInvAaBbMax;
-__constant__ float	gIntensityMin;
-__constant__ float	gIntensityMax;
-__constant__ float	gIntensityRange;
-__constant__ float	gIntensityInvRange;
-__constant__ float	gStepSize;
-__constant__ float	gStepSizeShadow;
-__constant__ float	gDensityScale;
-__constant__ float	gGradientDelta;
-__constant__ float	gInvGradientDelta;
-__constant__ int	gFilmWidth;
-__constant__ int	gFilmHeight;
-__constant__ int	gFilmNoPixels;
-__constant__ int	gFilterWidth;
-__constant__ float	gFilterWeights[3];
-__constant__ float	gExposure;
-__constant__ float	gInvExposure;
-__constant__ float	gGamma;
-__constant__ float	gInvGamma;
+__constant__ float3		gAaBbMin;
+__constant__ float3		gAaBbMax;
+__constant__ float3		gInvAaBbMin;
+__constant__ float3		gInvAaBbMax;
+__constant__ float		gIntensityMin;
+__constant__ float		gIntensityMax;
+__constant__ float		gIntensityRange;
+__constant__ float		gIntensityInvRange;
+__constant__ float		gStepSize;
+__constant__ float		gStepSizeShadow;
+__constant__ float		gDensityScale;
+__constant__ float		gGradientDelta;
+__constant__ float		gInvGradientDelta;
+__constant__ int		gFilmWidth;
+__constant__ int		gFilmHeight;
+__constant__ int		gFilmNoPixels;
+__constant__ int		gFilterWidth;
+__constant__ float		gFilterWeights[3];
+__constant__ float		gExposure;
+__constant__ float		gInvExposure;
+__constant__ float		gGamma;
+__constant__ float		gInvGamma;
+__constant__ float		gDenoiseEnabled;
+__constant__ float		gDenoiseWindowRadius;
+__constant__ float		gDenoiseInvWindowArea;
+__constant__ float		gDenoiseNoise;
+__constant__ float		gDenoiseWeightThreshold;
+__constant__ float		gDenoiseLerpThreshold;
+__constant__ float		gDenoiseLerpC;
 
 #define TF_NO_SAMPLES		256
 #define INV_TF_NO_SAMPLES	0.00390625f
@@ -52,6 +59,7 @@ __constant__ float	gInvGamma;
 #include "SingleScattering.cuh"
 #include "MultipleScattering.cuh"
 #include "Variance.cuh"
+#include "NearestIntersection.cuh"
 
 #include "CudaUtilities.h"
 
@@ -120,6 +128,8 @@ void UnbindGradientMagnitudeBuffer(void)
 void BindEstimateRgbLdr(CColorRgbaLdr* pBuffer, int Width, int Height)
 {
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<uchar4>();
+
+	gTexEstimateRgbLdr.filterMode = cudaFilterModeLinear;     
 
 	HandleCudaError(cudaBindTexture2D(0, gTexEstimateRgbLdr, (void*)pBuffer, ChannelDesc, Width, Height, Width * sizeof(uchar4)));
 }
@@ -336,24 +346,42 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gInvExposure", &InvExposure, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gGamma", &Gamma, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gInvGamma", &InvGamma, sizeof(float)));
+
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseEnabled", &pScene->m_DenoiseParams.m_Enabled, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseWindowRadius", &pScene->m_DenoiseParams.m_WindowRadius, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseInvWindowArea", &pScene->m_DenoiseParams.m_InvWindowArea, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseNoise", &pScene->m_DenoiseParams.m_Noise, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseWeightThreshold", &pScene->m_DenoiseParams.m_WeightThreshold, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseLerpThreshold", &pScene->m_DenoiseParams.m_LerpThreshold, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseLerpC", &pScene->m_DenoiseParams.m_LerpC, sizeof(float)));
 }
 
-void Render(const int& Type, CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
+void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers, int N, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
 {
+	CScene* pDevScene = NULL;
+
+	HandleCudaError(cudaMalloc(&pDevScene, sizeof(CScene)));
+	HandleCudaError(cudaMemcpy(pDevScene, &Scene, sizeof(CScene), cudaMemcpyHostToDevice));
+
+	if (Scene.m_Camera.m_Focus.m_Type == 0)
+		Scene.m_Camera.m_Focus.m_FocalDistance = NearestIntersection(pDevScene);
+
+	HandleCudaError(cudaMemcpy(pDevScene, &Scene, sizeof(CScene), cudaMemcpyHostToDevice));
+
 	CCudaTimer TmrRender;
 	
 	switch (Type)
 	{
 		case 0:
 		{
-			SingleScattering(pScene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers.m_pDevEstFrameXyz);
+			SingleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers.m_pDevEstFrameXyz);
 			HandleCudaError(cudaGetLastError());
 			break;
 		}
 
 		case 1:
 		{
-			MultipleScattering(pScene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers.m_pDevEstFrameXyz);
+			MultipleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers.m_pDevEstFrameXyz);
 			HandleCudaError(cudaGetLastError());
 			break;
 		}
@@ -362,17 +390,19 @@ void Render(const int& Type, CScene* pScene, CScene* pDevScene, CCudaFrameBuffer
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
 	
  	CCudaTimer TmrBlur;
-	BlurImageXyz(pScene, pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevEstFrameBlurXyz);
+	BlurImageXyz(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevEstFrameBlurXyz);
 	HandleCudaError(cudaGetLastError());
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;
-	Estimate(pScene, pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevAccEstXyz, CudaFrameBuffers.m_pDevEstXyz, CudaFrameBuffers.m_pDevEstRgbaLdr, N);
+	Estimate(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevAccEstXyz, CudaFrameBuffers.m_pDevEstXyz, CudaFrameBuffers.m_pDevEstRgbaLdr, N);
 	HandleCudaError(cudaGetLastError());
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
 
 	CCudaTimer TmrDenoise;
-	Denoise(pScene, pDevScene, CudaFrameBuffers.m_pDevEstRgbaLdr, CudaFrameBuffers.m_pDevRgbLdrDisp);
+	Denoise(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstRgbaLdr, CudaFrameBuffers.m_pDevRgbLdrDisp);
 	HandleCudaError(cudaGetLastError());
 	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
+
+	HandleCudaError(cudaFree(pDevScene));
 }

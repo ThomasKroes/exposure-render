@@ -54,3 +54,8 @@ void QCameraWidget::OnSavePreset(const QString& Name)
 	// Add the preset
 	m_PresetsWidget.SavePreset(Preset);
 }
+
+QSize QCameraWidget::sizeHint() const
+{
+	return QSize(20, 20);
+}

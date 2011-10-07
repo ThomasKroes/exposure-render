@@ -26,7 +26,6 @@ public:
 private:
 	QString				m_FileName;
 	CCudaFrameBuffers	m_CudaFrameBuffers;
-	CScene*				m_pDevScene;
 	CColorRgbaLdr*		m_pRenderImage;
 	short*				m_pDensityBuffer;
 	short*				m_pGradientMagnitudeBuffer;

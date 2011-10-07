@@ -25,66 +25,54 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
     const float x = (float)ix + 0.5f;
     const float y = (float)iy + 0.5f;
 
-	int ID = iy * gFilmWidth + ix;
+	const int ID = iy * gFilmWidth + ix;
 
-	ID = min(ID, gFilmNoPixels - 1);
+//	ID = min(ID, gFilmNoPixels - 1);
 
-	
-    if(pScene->m_DenoiseParams.m_Enabled && ix < gFilmWidth && iy < gFilmHeight)
+	if (gDenoiseEnabled && gDenoiseLerpC > 0.0f && ix < gFilmWidth && iy < gFilmHeight)
 	{
-        //Normalized counter for the weight threshold
-        float fCount = 0;
-        //Total sum of pixel weights
-        float sumWeights = 0;
-        //Result accumulator
-        float3 clr = {0, 0, 0};
-        //Center of the KNN window
-        float4 clr00 = tex2D(gTexEstimateRgbLdr, x, y);
+        float	fCount		= 0;
+        float	SumWeights	= 0;
+        float3	clr			= { 0, 0, 0 };
+        float4	clr00		= tex2D(gTexEstimateRgbLdr, x, y);
 
-        //Cycle through KNN window, surrounding (x, y) texel
-        for(float i = -pScene->m_DenoiseParams.m_WindowRadius; i <= pScene->m_DenoiseParams.m_WindowRadius; i++)
-            for(float j = -pScene->m_DenoiseParams.m_WindowRadius; j <= pScene->m_DenoiseParams.m_WindowRadius; j++)
+        for (float i = -gDenoiseWindowRadius; i <= gDenoiseWindowRadius; i++)
+		{
+            for (float j = -gDenoiseWindowRadius; j <= gDenoiseWindowRadius; j++)
             {
-                float4     clrIJ = tex2D(gTexEstimateRgbLdr, x + j, y + i);
-                float distanceIJ = vecLen(clr00, clrIJ);
+                const float4 clrIJ = tex2D(gTexEstimateRgbLdr, x + j, y + i);
+                const float distanceIJ = vecLen(clr00, clrIJ);
 
-                //Derive final weight from color distance
-                float   weightIJ = __expf( - (distanceIJ * pScene->m_DenoiseParams.m_Noise + (i * i + j * j) * pScene->m_DenoiseParams.m_InvWindowArea) );
+                const float weightIJ = __expf(-(distanceIJ * gDenoiseNoise + (i * i + j * j) * gDenoiseInvWindowArea));
 
-                //Accumulate (x + j, y + i) texel color with computed weight
                 clr.x += clrIJ.x * weightIJ;
                 clr.y += clrIJ.y * weightIJ;
                 clr.z += clrIJ.z * weightIJ;
 
-                //Sum of weights for color normalization to [0..1] range
-                sumWeights     += weightIJ;
+                SumWeights += weightIJ;
 
-                //Update weight counter, if KNN weight for current window texel
-                //exceeds the weight threshold
-                fCount         += (weightIJ > pScene->m_DenoiseParams.m_WeightThreshold) ? pScene->m_DenoiseParams.m_InvWindowArea : 0;
+                fCount += (weightIJ > gDenoiseWeightThreshold) ? gDenoiseInvWindowArea : 0;
             }
+		}
+		
+		SumWeights = 1.0f / SumWeights;
 
-        //Normalize result color by sum of weights
-        sumWeights = 1.0f / sumWeights;
-        clr.x *= sumWeights;
-        clr.y *= sumWeights;
-        clr.z *= sumWeights;
+		clr.x *= SumWeights;
+		clr.y *= SumWeights;
+		clr.z *= SumWeights;
 
-        //Choose LERP quotent basing on how many texels
-        //within the KNN window exceeded the weight threshold
-        float lerpQ = (fCount > pScene->m_DenoiseParams.m_LerpThreshold) ? pScene->m_DenoiseParams.m_LerpC : 1.0f - pScene->m_DenoiseParams.m_LerpC;
+		const float LerpQ = (fCount > gDenoiseLerpThreshold) ? gDenoiseLerpC : 1.0f - gDenoiseLerpC;
 
-        // Write final result to global memory
-        clr.x = lerpf(clr.x, clr00.x, lerpQ);
-        clr.y = lerpf(clr.y, clr00.y, lerpQ);
-        clr.z = lerpf(clr.z, clr00.z, lerpQ);
+		clr.x = lerpf(clr.x, clr00.x, LerpQ);
+		clr.y = lerpf(clr.y, clr00.y, LerpQ);
+		clr.z = lerpf(clr.z, clr00.z, LerpQ);
 
 		pOut[ID].r = 255 * clr.x;
 		pOut[ID].g = 255 * clr.y;
 		pOut[ID].b = 255 * clr.z;
     }
 	else
-	{/**/
+	{
 		float4 clr00 = tex2D(gTexEstimateRgbLdr, x, y);
 
 		pOut[ID].r = 255 * clr00.x;

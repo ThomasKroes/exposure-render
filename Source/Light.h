@@ -5,87 +5,7 @@
 
 #define MAX_NO_LIGHTS 32
 
-class CSurfacePoint
-{
-public:
-	Vec3f			m_Ns;				/*!< Shading normal at surface point */
-	Vec3f			m_Ng;				/*!< Geometric normal at surface point */
-	Vec3f			m_P;				/*!< World position of the surface point */
-	bool			m_HasUV;			/*!< Determines whether UV coordinates are known at the surface point */
-	int				m_PrimitiveID;		/*!< ID of the primitive at the surface point */
-	int				m_ObjectID;			/*!< ID of the object at the surface point */
-	Vec2f			m_UV;				/*!< UV texture coordinate at the surface point */
-	Vec3f  			m_NU; 				/*!< Second vector building orthogonal shading space with N */
-	Vec3f  			m_NV; 				/*!< Third vector building orthogonal shading space with N */
-	Vec3f 			m_dPdU; 			/*!< u-axis in world space */
-	Vec3f 			m_dPdV; 			/*!< v-axis in world space */
-	Vec3f 			m_dSdU; 			/*!< u-axis in shading space (NU, NV, N) */
-	Vec3f 			m_dSdV; 			/*!< v-axis in shading space (NU, NV, N) */
-	float			m_sU; 				/*!< Raw surface parametric coordinate; required to evaluate vmaps */
-	float			m_sV; 				/*!< Raw surface parametric coordinate; required to evaluate vmaps */
-	Vec2f			m_DuDv;				/*!< Raw surface parametric coordinate; required to evaluate vmaps */
-
-	// ToDo: Add description
-	HOD CSurfacePoint(void)
-	{
-		m_Ns			= Vec3f(0.0f);
-		m_Ng			= Vec3f(0.0f);
-		m_P				= Vec3f(0.0f);
-		m_HasUV			= false;
-		m_PrimitiveID	= -1;
-		m_ObjectID		= -1;
-		m_UV			= Vec2f(0.0f);			
-		m_NU			= Vec3f(0.0f);			
-		m_NV			= Vec3f(0.0f);				
-		m_dPdU			= Vec3f(0.0f);
-		m_dPdV			= Vec3f(0.0f);
-		m_dSdU			= Vec3f(0.0f);
-		m_dSdV			= Vec3f(0.0f);
-		m_sU			= 0.0f;
-		m_sV			= 0.0f;			
-		m_DuDv			= Vec2f(0.0f);	
-	}
-
-	// ToDo: Add description
-	HOD ~CSurfacePoint(void)
-	{
-	}
-
-	// ToDo: Add description
-	DEV CSurfacePoint& CSurfacePoint::operator=(const CSurfacePoint& Other)
-	{
-		m_Ns			= Other.m_Ns;			
-		m_Ng			= Other.m_Ng;	
-		m_P				= Other.m_P;			
-		m_HasUV			= Other.m_HasUV;		
-		m_PrimitiveID	= Other.m_PrimitiveID;		
-		m_ObjectID		= Other.m_ObjectID;		
-		m_UV			= Other.m_UV;			
-		m_NU			= Other.m_NU; 			
-		m_NV			= Other.m_NV; 			
-		m_dPdU			= Other.m_dPdU; 		
-		m_dPdV			= Other.m_dPdV; 		
-		m_dSdU			= Other.m_dSdU; 		
-		m_dSdV			= Other.m_dSdV; 		
-		m_sU			= Other.m_sU; 			
-		m_sV			= Other.m_sV; 
-
-		return *this;
-	}
-
-	
-	// ToDo: Add description
-	DEV void ComputeBump(void)
-	{
-		m_NU += m_DuDv.x * m_Ng;
-		m_NV += m_DuDv.y * m_Ng;
-		m_Ng = Normalize(Cross(m_NU, m_NV));
-		m_NU.Normalize();
-		m_NV = Cross(m_Ng, m_NU);
-	}
-};
-
-class CLight
+class EXPOSURE_RENDER_DLL CLight
 {
 public:
 	float			m_Theta;
@@ -354,7 +274,7 @@ public:
 	}
 };
 
-class CLighting
+class EXPOSURE_RENDER_DLL CLighting
 {
 public:
 	CLighting(void) :

@@ -62,7 +62,7 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(pMenu);
 
 	// Add VTK widget 
-	m_MainLayout.addWidget(&m_QtVtkWidget);
+	m_MainLayout.addWidget(&m_QtVtkWidget, 0, 0, 1, 2);
 
 	// Notify us when rendering begins and ends, before/after each rendered frame, when stuff becomes dirty, when the rendering canvas is resized and when the timer has timed out
 	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
@@ -82,7 +82,7 @@ QVTKWidget* CVtkWidget::GetQtVtkWidget(void)
 void CVtkWidget::OnRenderBegin(void)
 {
 	// Scale
-	m_SceneRenderer->GetActiveCamera()->SetParallelScale(600.0f);
+	m_SceneRenderer->GetActiveCamera()->SetParallelScale(500.0f);
 
 	m_ImageImport->SetDataSpacing(1, 1, 1);
 	m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResY(), 0);

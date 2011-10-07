@@ -16,6 +16,7 @@ QApertureWidget::QApertureWidget(QWidget* pParent) :
 	setStatusTip("Aperture properties");
 	setToolTip("Aperture properties");
 
+	m_GridLayout.setColumnMinimumWidth(0, 75);
 	setLayout(&m_GridLayout);
 
 	// Aperture size
@@ -27,13 +28,12 @@ QApertureWidget::QApertureWidget(QWidget* pParent) :
 	
     m_SizeSpinner.setRange(0.0, 0.1);
 	m_SizeSpinner.setSuffix(" mm");
+	m_SizeSpinner.setDecimals(3);
 	m_GridLayout.addWidget(&m_SizeSpinner, 3, 2);
 	
 	connect(&m_SizeSlider, SIGNAL(valueChanged(double)), &m_SizeSpinner, SLOT(setValue(double)));
 	connect(&m_SizeSpinner, SIGNAL(valueChanged(double)), &m_SizeSlider, SLOT(setValue(double)));
 	connect(&m_SizeSlider, SIGNAL(valueChanged(double)), this, SLOT(SetAperture(double)));
-	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	connect(&gCamera.GetAperture(), SIGNAL(Changed(const QAperture&)), this, SLOT(OnApertureChanged(const QAperture&)));
 
 	gStatus.SetStatisticChanged("Camera", "Aperture", "", "", "");
@@ -42,16 +42,6 @@ QApertureWidget::QApertureWidget(QWidget* pParent) :
 void QApertureWidget::SetAperture(const double& Aperture)
 {
 	gCamera.GetAperture().SetSize(Aperture);
-}
-
-void QApertureWidget::OnRenderBegin(void)
-{
-//	gCamera.GetAperture().Reset();
-}
-
-void QApertureWidget::OnRenderEnd(void)
-{
-//	gCamera.GetAperture().Reset();
 }
 
 void QApertureWidget::OnApertureChanged(const QAperture& Aperture)

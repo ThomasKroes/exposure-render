@@ -95,7 +95,6 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 
 		Ld += F * Li * WeightMIS / LightPdf;
 	}
-
 	
 	PhasePdf = INV_4_PI_F;
 	

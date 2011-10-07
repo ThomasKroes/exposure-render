@@ -36,7 +36,6 @@ QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*
 	QThread(pParent),
 	m_FileName(FileName),
 	m_CudaFrameBuffers(),
-	m_pDevScene(NULL),
 	m_pRenderImage(NULL),
 	m_pDensityBuffer(NULL),
 	m_pGradientMagnitudeBuffer(NULL),
@@ -62,7 +61,6 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 {
 	m_FileName					= Other.m_FileName;
 	m_CudaFrameBuffers			= Other.m_CudaFrameBuffers;
-	m_pDevScene					= Other.m_pDevScene;
 	m_pRenderImage				= Other.m_pRenderImage;
 	m_pDensityBuffer			= Other.m_pDensityBuffer;
 	m_pGradientMagnitudeBuffer	= Other.m_pGradientMagnitudeBuffer;
@@ -109,9 +107,6 @@ void QRenderThread::run()
 
 	gStatus.SetStatisticChanged("Performance", "Timings", "");
 
-	// Allocate CUDA memory for scene
-	HandleCudaError(cudaMalloc((void**)&m_pDevScene, sizeof(CScene)));
-
 	gStatus.SetStatisticChanged("CUDA Memory", "Scene", QString::number(sizeof(CScene) / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("CUDA Memory", "Frame Buffers", "", "");
 
@@ -138,9 +133,9 @@ void QRenderThread::run()
 			if (m_Pause)
 				continue;
 
-			msleep(2);
+//			msleep(2);
 
-			BindConstants(&gScene);
+			
 
 			// Let others know we are starting with a new frame
 			gStatus.SetPreRenderFrame();
@@ -200,29 +195,14 @@ void QRenderThread::run()
 			gScene.SetNoIterations(gScene.GetNoIterations() + 1);
 
 			// Adjust de-noising parameters
-			const float Radius = 0.04 * (float)SceneCopy.GetNoIterations();
-
-			gStatus.SetStatisticChanged("Denoise", "Radius", QString::number(Radius, 'f', 2), "ms.");
-
-			if (Radius < 1.0f)
-			{
-				SceneCopy.m_DenoiseParams.m_Enabled = true;
-				SceneCopy.m_DenoiseParams.SetWindowRadius(6.0f);
-				SceneCopy.m_DenoiseParams.m_LerpC = Radius;
-			}
-			else
-			{
-				SceneCopy.m_DenoiseParams.m_Enabled = false;
-			}
+			SceneCopy.m_DenoiseParams.SetWindowRadius(3.0f);
 			
-		//	SceneCopy.m_DenoiseParams.m_LerpC = 1.0f - Radius;
-
+			SceneCopy.m_DenoiseParams.m_LerpC = 1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
+			
 			SceneCopy.m_Camera.Update();
 
-			HandleCudaError(cudaMemcpy(m_pDevScene, &SceneCopy, sizeof(CScene), cudaMemcpyHostToDevice));
+			BindConstants(&SceneCopy);
 
-//			msleep(10);
-			
 			BindTransferFunctionOpacity(SceneCopy.m_TransferFunctions.m_Opacity);
 			BindTransferFunctionDiffuse(SceneCopy.m_TransferFunctions.m_Diffuse);
 			BindTransferFunctionSpecular(SceneCopy.m_TransferFunctions.m_Specular);
@@ -230,7 +210,7 @@ void QRenderThread::run()
 			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
 
 			// Execute the rendering kernels
-  			Render(1, &SceneCopy, m_pDevScene, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
+  			Render(0, SceneCopy, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 			HandleCudaError(cudaGetLastError());
 		
 			gStatus.SetStatisticChanged("Timings", "Render Image", QString::number(RenderImage.m_FilteredDuration, 'f', 2), "ms.");
@@ -269,11 +249,6 @@ void QRenderThread::run()
 
 		return;
 	}
-
-	// Free CUDA buffers
-	HandleCudaError(cudaFree(m_pDevScene));
-	
-	m_pDevScene = NULL;
 
 	// Free render image buffer
 	free(m_pRenderImage);
@@ -551,6 +526,7 @@ void QRenderThread::OnUpdateCamera(void)
 	gScene.m_Camera.m_FovV = gCamera.GetProjection().GetFieldOfView();
 
 	// Focus
+	gScene.m_Camera.m_Focus.m_Type			= (CFocus::EType)gCamera.GetFocus().GetType();
 	gScene.m_Camera.m_Focus.m_FocalDistance = gCamera.GetFocus().GetFocalDistance();
 
 	gScene.m_DirtyFlags.SetFlag(CameraDirty);

@@ -11,8 +11,6 @@ public:
 
 public slots:
 	void SetAperture(const double& Aperture);
-	void OnRenderBegin(void);
-	void OnRenderEnd(void);
 	void OnApertureChanged(const QAperture& Aperture);
 
 private:

@@ -10,9 +10,8 @@ public:
     QFocusWidget(QWidget* pParent = NULL);
 
 private slots:
+	void SetFocusType(int FocusType);
 	void SetFocalDistance(const double& FocalDistance);
-	void OnRenderBegin(void);
-	void OnRenderEnd(void);
 	void OnFocusChanged(const QFocus& Focus);
 
 private:

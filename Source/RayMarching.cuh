@@ -68,3 +68,30 @@ DEV inline bool FreePathRM(CRay R, CRNG& RNG, CScene* pScene)
 
 	return true;
 }
+
+DEV inline bool NearestIntersection(CRay R, CScene* pScene, float& T)
+{
+	float MinT = 0.0f, MaxT = 0.0f;
+
+	if (!IntersectBox(R, &MinT, &MaxT))
+		return false;
+
+	MinT = max(MinT, R.m_MinT);
+	MaxT = min(MaxT, R.m_MaxT);
+
+	Vec3f Ps; 
+
+	T = MinT;
+
+	while (T < MaxT)
+	{
+		Ps = R.m_O + T * R.m_D;
+
+		if (GetOpacity(pScene, GetNormalizedIntensity(pScene, Ps)) > 0.0f)
+			return true;
+
+		T += gStepSize;
+	}
+
+	return false;
+}

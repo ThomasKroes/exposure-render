@@ -132,11 +132,13 @@ void QColorSelector::OnCurrentColorChanged(const QColor& Color)
 
 QDoubleSlider::QDoubleSlider(QWidget* pParent /*= NULL*/) :
 	QSlider(pParent),
-	m_Multiplier(1000.0)
+	m_Multiplier(10000.0)
 {
 	connect(this, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
 
 	setSingleStep(1);
+
+	setOrientation(Qt::Horizontal);
 }
 
 void QDoubleSlider::setValue(int Value)

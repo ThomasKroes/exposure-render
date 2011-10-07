@@ -22,8 +22,8 @@ CScene::CScene(void) :
 	m_ExtinctionSize(),
 	m_ShadingType(2),
 	m_Spectral(false),
-	m_StepSizeFactor(1.0f),
-	m_StepSizeFactorShadow(1.0f),
+	m_StepSizeFactor(2.0f),
+	m_StepSizeFactorShadow(5.0f),
 	m_GradientDelta(1.0f),
 	m_IOR(2.5f),
 	m_GradientFactor(1.0f),
@@ -82,13 +82,13 @@ HO CDenoiseParams::CDenoiseParams(void)
 
 
 	m_Enabled			= true;
-	m_Noise				= 1.0f;// / (0.1f * 0.1f);
+	m_Noise				= 0.3f;//0.32f * 0.32f;// / (0.1f * 0.1f);
 	m_LerpC				= 0.01f;
 	m_WindowRadius		= 6.0f;
 	m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
 	m_InvWindowArea		= 1.0f / m_WindowArea;
-	m_WeightThreshold	= 0.01f;
-	m_LerpThreshold		= 0.01f;
+	m_WeightThreshold	= 0.1f;
+	m_LerpThreshold		= 0.1f;
 	/**/
 }
 

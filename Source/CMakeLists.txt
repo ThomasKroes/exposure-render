@@ -522,6 +522,7 @@ SET(CudaSources
 	Woodcock.cuh
 	Denoise.cuh
 	Variance.cuh
+	NearestIntersection.cuh
 	Core.cu
 	CudaFrameBuffers.h
 	CudaUtilities.h
