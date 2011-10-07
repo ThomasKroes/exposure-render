@@ -60,12 +60,12 @@ __constant__ float		gDenoiseLerpC;
 #include "MultipleScattering.cuh"
 #include "Variance.cuh"
 #include "NearestIntersection.cuh"
+#include "SpecularBloom.cuh"
 
 #include "CudaUtilities.h"
 
 void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
 {
-	
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
 
 	HandleCudaError(cudaMalloc3DArray(&gpDensityArray, &ChannelDesc, Extent));

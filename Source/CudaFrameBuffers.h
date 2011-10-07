@@ -19,6 +19,7 @@ public:
 	CColorXyz*			m_pDevEstFrameBlurXyz;
 	CColorRgbaLdr*		m_pDevEstRgbaLdr;
 	CColorRgbLdr*		m_pDevRgbLdrDisp;
+	CColorXyz*			m_pDevSpecularBloom;
 	int*				m_pDevSeeds;
 	int*				m_pNoEstimates;
 };

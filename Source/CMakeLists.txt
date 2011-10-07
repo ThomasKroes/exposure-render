@@ -523,6 +523,7 @@ SET(CudaSources
 	Denoise.cuh
 	Variance.cuh
 	NearestIntersection.cuh
+	SpecularBloom.cuh
 	Core.cu
 	CudaFrameBuffers.h
 	CudaUtilities.h
