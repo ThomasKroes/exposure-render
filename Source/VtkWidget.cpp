@@ -60,7 +60,7 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	pMenu->addAction("asd", this, SLOT(OnRenderBegin()));
 
 	m_MainLayout.addWidget(pMenu);
-
+	
 	// Add VTK widget 
 	m_MainLayout.addWidget(&m_QtVtkWidget, 0, 0, 1, 2);
 
@@ -185,44 +185,20 @@ void CVtkWidget::OnRenderLoopTimer(void)
 	if (!gpRenderThread)
 		return;
 
-// 	return;
-// 
-// 	QMutexLocker MutexLocker(&gpRenderThread->m_Mutex);
-// 
-	/*
-	if (m_ImageImport->GetDataExtent()[1] != gScene.m_Camera.m_Film.GetWidth() - 1 || m_ImageImport->GetDataExtent()[3] != gScene.m_Camera.m_Film.GetHeight() - 1)
-	{
-		m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.GetWidth(), -0.5f * (float)gScene.m_Camera.m_Film.GetHeight(), 0);
-		m_ImageImport->SetDataExtent(0, gScene.m_Camera.m_Film.GetWidth() - 1, 0, gScene.m_Camera.m_Film.GetHeight() - 1, 0, 0);
-		m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.GetWidth() - 1, 0, gScene.m_Camera.m_Film.GetHeight() - 1, 0, 0);
-//		m_ImageImport->SetDataExtentToWholeExtent();
-	}
-	*/
-
-	QMutexLocker(&gFrameBuffer.m_Mutex);
+	QMutexLocker(&gpRenderThread->m_Mutex);
 
 	m_FrameBuffer = gFrameBuffer;
 
 	if (m_FrameBuffer.GetPixels() == NULL)
 		return;
 
-//	m_ImageActor->SetDisplayExtent(0, 0, 0, 0, 0, 0);
-	
-	m_ImageImport->SetWholeExtent(0, 0, 0, 0, 0, 0);
-	m_ImageImport->SetDataExtentToWholeExtent();
-//	m_ImageImport->Update();
-
 	m_ImageImport->SetImportVoidPointer(NULL);
-	m_ImageImport->SetImportVoidPointer(m_pPixels, 1);
+	m_ImageImport->SetImportVoidPointer(m_FrameBuffer.GetPixels());
 	m_ImageImport->SetDataOrigin(-0.5f * (float)m_FrameBuffer.GetWidth(), -0.5f * (float)m_FrameBuffer.GetHeight(), 0);
-//		m_ImageImport->Update();
-//		m_ImageImport->UpdateDisplayExtent();
 	m_ImageImport->SetWholeExtent(0, m_FrameBuffer.GetWidth() - 1, 0, m_FrameBuffer.GetHeight() - 1, 0, 0);
 	m_ImageImport->SetDataExtentToWholeExtent();
 	m_ImageImport->UpdateWholeExtent();
-	m_ImageImport->Update();
-		
-//	m_ImageActor->SetDisplayExtent(0, m_FrameBuffer.GetWidth() - 1, 0, m_FrameBuffer.GetHeight() - 1, 0, 0);
+//	m_ImageImport->Update();
 	
 	m_ImageActor->SetInput(m_ImageImport->GetOutput());
 	m_RenderWindow->GetInteractor()->Render();

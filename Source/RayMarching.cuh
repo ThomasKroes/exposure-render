@@ -35,7 +35,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, CScene* pScene)
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay R, CRNG& RNG, CScene* pScene)
+DEV inline bool FreePathRM(CRay& R, CRNG& RNG, CScene* pScene)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 

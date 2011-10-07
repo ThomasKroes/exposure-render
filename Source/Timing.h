@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_NO_DURATIONS 30
+#define MAX_NO_DURATIONS 100
 
 class CTiming
 {

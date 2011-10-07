@@ -49,15 +49,22 @@ QFrameBuffer::QFrameBuffer(const QFrameBuffer& Other)
 
 QFrameBuffer& QFrameBuffer::operator=(const QFrameBuffer& Other)
 {
+	const bool Dirty = m_Width != Other.m_Width || m_Height != Other.m_Height;
+
 	m_Width		= Other.m_Width;
 	m_Height	= Other.m_Height;
 	m_NoPixels	= Other.m_NoPixels;
 
 	if (Other.m_pPixels != NULL)
 	{
-		const int Size = m_NoPixels * sizeof(unsigned char);
+		const int Size = 3 * m_NoPixels * sizeof(unsigned char);
 
-		m_pPixels = (unsigned char*)malloc(Size);
+		if (Dirty)
+		{
+			free(m_pPixels);
+			m_pPixels = (unsigned char*)malloc(Size);
+		}
+
 		memcpy(m_pPixels, Other.m_pPixels, Size); 
 	}
 	else
@@ -84,7 +91,7 @@ void QFrameBuffer::Set(unsigned char* pPixels, const int& Width, const int& Heig
 	if (m_NoPixels <= 0)
 		return;
 
-	const int Size = m_NoPixels * sizeof(unsigned char);
+	const int Size = 3 * m_NoPixels * sizeof(unsigned char);
 
 	if (Dirty)
 	{
@@ -92,7 +99,7 @@ void QFrameBuffer::Set(unsigned char* pPixels, const int& Width, const int& Heig
 		m_pPixels = (unsigned char*)malloc(Size);
 	}
 
-//	memcpy(m_pPixels, pPixels, Size); 
+	memcpy(m_pPixels, pPixels, Size); 
 }
 
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
@@ -290,11 +297,7 @@ void QRenderThread::run()
 
 			HandleCudaError(cudaMemcpy(m_pRenderImage, m_CudaFrameBuffers.m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 
-			gFrameBuffer.m_Mutex.lock();
-
 			gFrameBuffer.Set((unsigned char*)m_pRenderImage, SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight());
-
-			gFrameBuffer.m_Mutex.unlock();
 
 			if (m_SaveFrames.indexOf(SceneCopy.GetNoIterations()) > 0)
 			{
@@ -302,8 +305,7 @@ void QRenderThread::run()
 
 				SaveImage((unsigned char*)m_pRenderImage, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY(), ImageFilePath);
 			}
-			/**/
-			// Let others know we are finished with a frame
+
  			gStatus.SetPostRenderFrame();
 		}
 	}
