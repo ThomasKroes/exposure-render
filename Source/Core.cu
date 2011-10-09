@@ -1,16 +1,24 @@
 
 #include "Core.cuh"
 
+surface<void, 2>									gSurfRunningEstimateXyza;
+surface<void, 2>									gSurfFrameEstimateXyza;
+surface<void, 2>									gSurfRunningEstimateRgba;
+
 texture<short, 3, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, 3, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
 texture<float, 3, cudaReadModeElementType>			gTexExtinction;
-texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexEstimateRgbLdr;
-surface<void, 2>									gSurfEstimateRgbLdr;
 texture<float, 1, cudaReadModeElementType>			gTexOpacity;
 texture<float4, 1, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, 1, cudaReadModeElementType>			gTexSpecular;
 texture<float, 1, cudaReadModeElementType>			gTexRoughness;
 texture<float4, 1, cudaReadModeElementType>			gTexEmission;
+
+texture<float4, 2, cudaReadModeElementType>			gTexRunningEstimateXyza;
+texture<float4, 2, cudaReadModeElementType>			gTexFrameEstimateXyza;
+texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexRunningEstimateRgba;
+
+
 
 cudaArray* gpDensityArray				= NULL;
 cudaArray* gpGradientMagnitudeArray		= NULL;
@@ -127,10 +135,22 @@ void UnbindGradientMagnitudeBuffer(void)
 	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
 }
 
-void BindEstimateRgbLdr(cudaArray* pBuffer, int Width, int Height)
+void BindRunningEstimateXyza(cudaArray* pCudaArray, int Width, int Height)
 {
-	HandleCudaError(cudaBindSurfaceToArray(gSurfEstimateRgbLdr, pBuffer));
-	HandleCudaError(cudaBindTextureToArray(gTexEstimateRgbLdr, pBuffer));
+	HandleCudaError(cudaBindSurfaceToArray(gSurfRunningEstimateXyza, pCudaArray));
+	HandleCudaError(cudaBindTextureToArray(gTexRunningEstimateXyza, pCudaArray));
+}
+
+void BindFrameEstimateXyza(cudaArray* pCudaArray, int Width, int Height)
+{
+	HandleCudaError(cudaBindSurfaceToArray(gSurfFrameEstimateXyza, pCudaArray));
+	HandleCudaError(cudaBindTextureToArray(gTexFrameEstimateXyza, pCudaArray));
+}
+
+void BindRunningEstimateRgba(cudaArray* pCudaArray, int Width, int Height)
+{
+	HandleCudaError(cudaBindSurfaceToArray(gSurfRunningEstimateRgba, pCudaArray));
+	HandleCudaError(cudaBindTextureToArray(gTexRunningEstimateRgba, pCudaArray));
 }
 
 void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity)
@@ -373,15 +393,13 @@ void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers,
 	{
 		case 0:
 		{
-			SingleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers.m_pDevEstFrameXyz);
-			HandleCudaError(cudaGetLastError());
+			SingleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds);
 			break;
 		}
 
 		case 1:
 		{
-			MultipleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers.m_pDevEstFrameXyz);
-			HandleCudaError(cudaGetLastError());
+			MultipleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds);
 			break;
 		}
 	}
@@ -389,21 +407,18 @@ void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers,
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
 	
  	CCudaTimer TmrBlur;
-	BlurImageXyz(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevEstFrameBlurXyz);
-	HandleCudaError(cudaGetLastError());
+	BlurImageXyz(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstFrameBlurXyz);
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;
 	Estimate(&Scene, pDevScene, CudaFrameBuffers, N);
-	HandleCudaError(cudaGetLastError());
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
 
-	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers, N);
+//	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers, N);
 	ToneMap(&Scene, pDevScene, CudaFrameBuffers, N);
 
 	CCudaTimer TmrDenoise;
 	Denoise(&Scene, pDevScene, CudaFrameBuffers);
-	HandleCudaError(cudaGetLastError());
 	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
 
 	HandleCudaError(cudaFree(pDevScene));

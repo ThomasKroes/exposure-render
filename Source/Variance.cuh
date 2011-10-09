@@ -2,6 +2,7 @@
 
 #include "Geometry.h"
 #include "Variance.h"
+#include "CudaUtilities.h"
 
 __constant__ float SumVariance = 0;
 
@@ -14,5 +15,6 @@ void ComputeVariance(int Width, int Height, CColorXyz* pEstFrameXyz, CColorXyz* 
 	const dim3 KernelBlock(16, 8);
 	const dim3 KernelGrid((int)ceilf((float)Width / (float)KernelBlock.x), (int)ceilf((float)Height / (float)KernelBlock.y));
 
-	KrnlComputeVariance<<<KernelGrid, KernelBlock>>>(Width, Height, pEstFrameXyz, pAccEstXyz, N, Exposure, pPixels); 
+	KrnlComputeVariance<<<KernelGrid, KernelBlock>>>(Width, Height, pEstFrameXyz, pAccEstXyz, N, Exposure, pPixels);
+	HandleCudaError(cudaGetLastError());
 }

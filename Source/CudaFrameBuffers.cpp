@@ -10,7 +10,6 @@
 
 CCudaFrameBuffers::CCudaFrameBuffers(void) :
 	m_Resolution(),
-	m_pDevAccEstXyz(NULL),
 	m_pDevEstXyz(NULL),
 	m_pDevEstFrameXyz(NULL),
 	m_pDevEstFrameBlurXyz(NULL),
@@ -35,7 +34,6 @@ CCudaFrameBuffers::CCudaFrameBuffers(const CCudaFrameBuffers& Other)
 CCudaFrameBuffers& CCudaFrameBuffers::operator=(const CCudaFrameBuffers& Other)
 {
 	m_Resolution			= Other.m_Resolution;
-	m_pDevAccEstXyz			= Other.m_pDevAccEstXyz;
 	m_pDevEstXyz			= Other.m_pDevEstXyz;
 	m_pDevEstFrameXyz		= Other.m_pDevEstFrameXyz;
 	m_pDevEstFrameBlurXyz	= Other.m_pDevEstFrameBlurXyz;
@@ -56,7 +54,6 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 
 	long NoPixels				= Resolution.x * Resolution.y;
 	long NoRandomSeeds			= NoPixels * 2;
-	long SizeAccEstXyz			= NoPixels * sizeof(CColorXyz);
 	long SizeEstXyz				= NoPixels * sizeof(CColorXyz);
 	long SizeEstFrameXyz		= NoPixels * sizeof(CColorXyz);
 	long SizeEstFrameBlurXyz	= NoPixels * sizeof(CColorXyz);
@@ -65,19 +62,26 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 	long SizeRgbLdrDisp			= NoPixels * sizeof(CColorRgbLdr);
 	long SizeRandomSeeds		= NoRandomSeeds * sizeof(int);
 	long SizeNoEstimates		= NoPixels * sizeof(int);
-	long Total					= SizeAccEstXyz + SizeEstXyz + SizeEstFrameXyz + SizeEstFrameBlurXyz + SizeEstRgbaLdr + SizeRgbLdrDisp + SizeRandomSeeds + SizeNoEstimates;
+	long Total					= SizeEstXyz + SizeEstFrameXyz + SizeEstFrameBlurXyz + SizeEstRgbaLdr + SizeRgbLdrDisp + SizeRandomSeeds + SizeNoEstimates;
+
+	cudaChannelFormatDesc ChannelDesc;
 
 	HandleCudaError(cudaMalloc((void**)&m_pDevSeeds, SizeRandomSeeds));
-	HandleCudaError(cudaMalloc((void**)&m_pDevAccEstXyz, SizeAccEstXyz));
-	HandleCudaError(cudaMalloc((void**)&m_pDevEstXyz, SizeEstXyz));
-	HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameXyz, SizeEstFrameXyz));
+
+	// Running estimate
+	ChannelDesc = cudaCreateChannelDesc<float4>();//(32, 32, 32, 32, cudaChannelFormatKindFloat);
+	HandleCudaError(cudaMallocArray(&m_pDevEstXyz, &ChannelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
+
+	// Frame estimate
+	ChannelDesc = cudaCreateChannelDesc<float4>();//(32, 32, 32, 32, cudaChannelFormatKindFloat);
+	HandleCudaError(cudaMallocArray(&m_pDevEstFrameXyz, &ChannelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
+
 	HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeEstFrameBlurXyz));
 	HandleCudaError(cudaMalloc((void**)&m_pDevSpecularBloom, SizeSpecularBloom));
 	
-	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(8, 8, 8, 8, cudaChannelFormatKindUnsigned);
-
-	HandleCudaError(cudaMallocArray(&m_pDevEstRgbaLdr, &channelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
-//	HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbaLdr, SizeEstRgbaLdr));
+	// Estimate in RGBA
+	ChannelDesc = cudaCreateChannelDesc(8, 8, 8, 8, cudaChannelFormatKindUnsigned);
+	HandleCudaError(cudaMallocArray(&m_pDevEstRgbaLdr, &ChannelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
 
 	HandleCudaError(cudaMalloc((void**)&m_pDevRgbLdrDisp, SizeRgbLdrDisp));
 	HandleCudaError(cudaMalloc((void**)&m_pNoEstimates, SizeNoEstimates));
@@ -97,7 +101,6 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 	// Reset buffers to black
 	Reset();
 
-	gStatus.SetStatisticChanged("Frame Buffers", "Accumulated Estimate (XYZ color)", QString::number((float)SizeAccEstXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Estimate (XYZ color)", QString::number((float)SizeEstXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Blur Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameBlurXyz / MB, 'f', 2), "MB");
@@ -117,21 +120,15 @@ void CCudaFrameBuffers::Reset(void)
 {
 	const int NoPixels = m_Resolution.x * m_Resolution.y;
 
-	HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, NoPixels * sizeof(CColorXyz)));
-	HandleCudaError(cudaMemset(m_pDevEstXyz, 0, NoPixels * sizeof(CColorXyz)));
-	HandleCudaError(cudaMemset(m_pDevEstFrameXyz, 0, NoPixels * sizeof(CColorXyz)));
 	HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, NoPixels * sizeof(CColorXyz)));
 	HandleCudaError(cudaMemset(m_pDevSpecularBloom, 0, NoPixels * sizeof(CColorXyz)));
-	HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, NoPixels * sizeof(CColorXyz)));
-	HandleCudaError(cudaMemset(m_pDevAccEstXyz, 0, NoPixels * sizeof(CColorXyz)));
 	HandleCudaError(cudaMemset(m_pNoEstimates, 0, NoPixels * sizeof(int)));
 }
 
 void CCudaFrameBuffers::Free(void)
 {
-	HandleCudaError(cudaFree(m_pDevAccEstXyz));
-	HandleCudaError(cudaFree(m_pDevEstXyz));
-	HandleCudaError(cudaFree(m_pDevEstFrameXyz));
+	HandleCudaError(cudaFreeArray(m_pDevEstXyz));
+	HandleCudaError(cudaFreeArray(m_pDevEstFrameXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 	HandleCudaError(cudaFree(m_pDevSpecularBloom));
 	HandleCudaError(cudaFreeArray(m_pDevEstRgbaLdr));
@@ -139,7 +136,6 @@ void CCudaFrameBuffers::Free(void)
 	HandleCudaError(cudaFree(m_pDevSeeds));
 	HandleCudaError(cudaFree(m_pNoEstimates));
 
-	m_pDevAccEstXyz			= NULL;
 	m_pDevEstXyz			= NULL;
 	m_pDevEstFrameXyz		= NULL;
 	m_pDevEstFrameBlurXyz	= NULL;

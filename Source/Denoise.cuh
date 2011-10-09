@@ -2,6 +2,7 @@
 #include "Scene.h"
 
 #include "Utilities.cuh"
+#include "CudaUtilities.h"
 
 #include <cuda_runtime.h>
 #include <cutil.h>
@@ -42,14 +43,14 @@ KERNEL void KNN(CColorRgbLdr* pOut)
         float	fCount		= 0;
         float	SumWeights	= 0;
         float3	clr			= { 0, 0, 0 };
-        float4	clr00		= tex2D(gTexEstimateRgbLdr, x, y);
+        float4	clr00		= tex2D(gTexRunningEstimateRgba, x, y);
 //		float4	clr00		= tex2D(gTexEstimateRgbLdr, x, y);
 		
         for (float i = -gDenoiseWindowRadius; i <= gDenoiseWindowRadius; i++)
 		{
             for (float j = -gDenoiseWindowRadius; j <= gDenoiseWindowRadius; j++)
             {
-                const float4 clrIJ = tex2D(gTexEstimateRgbLdr, x + j, y + i);
+                const float4 clrIJ = tex2D(gTexRunningEstimateRgba, x + j, y + i);
                 const float distanceIJ = vecLen(clr00, clrIJ);
 
                 const float weightIJ = __expf(-(distanceIJ * gDenoiseNoise + (i * i + j * j) * gDenoiseInvWindowArea));
@@ -82,12 +83,12 @@ KERNEL void KNN(CColorRgbLdr* pOut)
     }
 	else
 	{/**/
-		float4 clr00 = tex2D(gTexEstimateRgbLdr, (float)X / gFilmWidth, (float)Y / gFilmHeight);
+		float4 clr00 = tex2D(gTexRunningEstimateRgba, X, Y);
 //		clr00 = EstimateRgbaLdr(X, 150);
 
 //		CColorRgbaLdr RGBA = pIn[ID];
 
-		pOut[ID].r = 255 * clr00.x;
+		pOut[ID].r = 255;// * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
 	}
@@ -99,4 +100,5 @@ void Denoise(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuff
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
 	KNN<<<KernelGrid, KernelBlock>>>(CudaFrameBuffers.m_pDevRgbLdrDisp);
+	HandleCudaError(cudaGetLastError());
 }

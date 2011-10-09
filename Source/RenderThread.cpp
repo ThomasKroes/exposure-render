@@ -246,7 +246,7 @@ void QRenderThread::run()
 				// Notify Inform others about the memory allocations
 //				gStatus.SetResize();
 
-				BindEstimateRgbLdr(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+				
 
 				Log("Render canvas resized to: " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()) + " x " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()) + " pixels", "application-resize");
 			}
@@ -280,6 +280,10 @@ void QRenderThread::run()
 			BindTransferFunctionSpecular(SceneCopy.m_TransferFunctions.m_Specular);
 			BindTransferFunctionRoughness(SceneCopy.m_TransferFunctions.m_Roughness);
 			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
+
+			BindRunningEstimateXyza(m_CudaFrameBuffers.m_pDevEstXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+			BindFrameEstimateXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+			BindRunningEstimateRgba(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
 //			BindEstimateRgbLdr(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 

@@ -3,12 +3,13 @@
 #include "Geometry.h"
 #include "Filter.h"
 #include "Scene.h"
+#include "CudaUtilities.h"
 
 #define KRNL_BLUR_BLOCK_W		32
 #define KRNL_BLUR_BLOCK_H		8
 #define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
 
-KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage)
+KERNEL void KrnlBlurXyzH(CColorXyz* pTempImage)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -28,7 +29,9 @@ KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage)
 	{
 		FW = gFilterWeights[(int)fabs((float)x - X)];
 
-		Sum		+= FW * pImage[(Y * gFilmWidth) + x];
+		float4 ColorXyza = tex2D(gTexFrameEstimateXyza, x, Y);
+
+		Sum		+= FW * CColorXyz(ColorXyza.x, ColorXyza.y, ColorXyza.z);
 		SumW	+= FW;
 	}
 
@@ -37,7 +40,7 @@ KERNEL void KrnlBlurXyzH(CColorXyz* pImage, CColorXyz* pTempImage)
 	pTempImage[PID] = Sum / SumW;
 }
 
-KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage)
+KERNEL void KrnlBlurXyzV(CColorXyz* pTempImage)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -63,14 +66,20 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pImage, CColorXyz* pTempImage)
 
 	__syncthreads();
 
-	pImage[PID]	= Sum / SumW;
+	Sum /= SumW;
+
+	float4 ColorXYZA = make_float4(Sum.c[0], Sum.c[1], Sum.c[2], 0.0f);
+	surf2Dwrite(ColorXYZA, gSurfFrameEstimateXyza, X * sizeof(float4), Y);
 }
 
-void BlurImageXyz(CScene* pScene, CScene* pDevScene, CColorXyz* pImage, CColorXyz* pTempImage)
+void BlurImageXyz(CScene* pScene, CScene* pDevScene, CColorXyz* pTempImage)
 {
 	const dim3 KernelBlock(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pImage, pTempImage); 
-	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pImage, pTempImage); 
+	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pTempImage);
+	HandleCudaError(cudaGetLastError());
+
+	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pTempImage);
+	HandleCudaError(cudaGetLastError());
 }

@@ -13,9 +13,8 @@ public:
 	void Free(void);
 
 	Vec2i				m_Resolution;
-	CColorXyz*			m_pDevAccEstXyz;
-	CColorXyz*			m_pDevEstXyz;
-	CColorXyz*			m_pDevEstFrameXyz;
+	cudaArray*			m_pDevEstXyz;
+	cudaArray*			m_pDevEstFrameXyz;
 	CColorXyz*			m_pDevEstFrameBlurXyz;
 	cudaArray*			m_pDevEstRgbaLdr;
 	CColorRgbLdr*		m_pDevRgbLdrDisp;

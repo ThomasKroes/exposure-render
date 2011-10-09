@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Transport.cuh"
+#include "CudaUtilities.h"
 
 #define KRNL_MS_BLOCK_W		32
 #define KRNL_MS_BLOCK_H		8
 #define KRNL_MS_BLOCK_SIZE	KRNL_MS_BLOCK_W * KRNL_MS_BLOCK_H
 
-KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
+KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds)
 {
 	const int X		= (blockIdx.x * blockDim.x) + threadIdx.x;
 	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -38,7 +39,8 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevE
 		{
 			if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 			{
-				pDevEstFrameXyz[PID] = Li;
+				float4 ColorXYZA = make_float4(Lv.c[0], Lv.c[1], Lv.c[2], 0.0f);
+				surf2Dwrite(ColorXYZA, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
 				return;
 			}
 		 
@@ -66,13 +68,15 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevE
 
 	__syncthreads();
 
-	pDevEstFrameXyz[PID] = Lv;
+	float4 ColorXYZA = make_float4(Lv.c[0], Lv.c[1], Lv.c[2], 0.0f);
+	surf2Dwrite(ColorXYZA, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
 }
 
-void MultipleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
+void MultipleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds)
 {
 	const dim3 KernelBlock(KRNL_MS_BLOCK_W, KRNL_MS_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
-	KrnlMultipleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds, pDevEstFrameXyz);
+	KrnlMultipleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds);
+	HandleCudaError(cudaGetLastError());
 }
