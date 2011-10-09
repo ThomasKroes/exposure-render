@@ -88,7 +88,7 @@ KERNEL void KNN(CColorRgbLdr* pOut)
 
 //		CColorRgbaLdr RGBA = pIn[ID];
 
-		pOut[ID].r = 255;// * clr00.x;
+		pOut[ID].r = 255 * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
 	}
