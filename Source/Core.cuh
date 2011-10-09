@@ -16,7 +16,7 @@ extern "C" void BindDensityBuffer(short* pBuffer, cudaExtent Extent);
 extern "C" void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent);
 extern "C" void UnbindDensityBuffer(void);
 extern "C" void UnbindGradientMagnitudeBuffer(void);
-extern "C" void BindEstimateRgbLdr(CColorRgbaLdr* pBuffer, int Width, int Height);
+extern "C" void BindEstimateRgbLdr(cudaArray* pBuffer, int Width, int Height);
 extern "C" void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity);
 extern "C" void BindTransferFunctionDiffuse(CTransferFunction& TransferFunctionDiffuse);
 extern "C" void BindTransferFunctionSpecular(CTransferFunction& TransferFunctionSpecular);

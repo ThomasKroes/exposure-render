@@ -41,7 +41,7 @@ DEV CColorRgbHdr GetEmission(CScene* pScene, const float& NormalizedIntensity)
 	return CColorRgbHdr(Emission.x, Emission.y, Emission.z);
 }
 
-__device__ inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
+DEV inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 {
 	Vec3f Gradient;
 

@@ -5,6 +5,7 @@ texture<short, 3, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, 3, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
 texture<float, 3, cudaReadModeElementType>			gTexExtinction;
 texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexEstimateRgbLdr;
+surface<void, 2>									gSurfEstimateRgbLdr;
 texture<float, 1, cudaReadModeElementType>			gTexOpacity;
 texture<float4, 1, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, 1, cudaReadModeElementType>			gTexSpecular;
@@ -126,13 +127,10 @@ void UnbindGradientMagnitudeBuffer(void)
 	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
 }
 
-void BindEstimateRgbLdr(CColorRgbaLdr* pBuffer, int Width, int Height)
+void BindEstimateRgbLdr(cudaArray* pBuffer, int Width, int Height)
 {
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<uchar4>();
-
-	gTexEstimateRgbLdr.filterMode = cudaFilterModeLinear;     
-
-	HandleCudaError(cudaBindTexture2D(0, gTexEstimateRgbLdr, (void*)pBuffer, ChannelDesc, Width, Height, Width * sizeof(uchar4)));
+	HandleCudaError(cudaBindSurfaceToArray(gSurfEstimateRgbLdr, pBuffer));
+	HandleCudaError(cudaBindTextureToArray(gTexEstimateRgbLdr, pBuffer));
 }
 
 void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity)
@@ -403,10 +401,10 @@ void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers,
 	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers, N);
 	ToneMap(&Scene, pDevScene, CudaFrameBuffers, N);
 
-//	CCudaTimer TmrDenoise;
-//	Denoise(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstRgbaLdr, CudaFrameBuffers.m_pDevRgbLdrDisp);
-//	HandleCudaError(cudaGetLastError());
-//	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
+	CCudaTimer TmrDenoise;
+	Denoise(&Scene, pDevScene, CudaFrameBuffers);
+	HandleCudaError(cudaGetLastError());
+	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
 
 	HandleCudaError(cudaFree(pDevScene));
 }

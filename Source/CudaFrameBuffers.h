@@ -17,7 +17,7 @@ public:
 	CColorXyz*			m_pDevEstXyz;
 	CColorXyz*			m_pDevEstFrameXyz;
 	CColorXyz*			m_pDevEstFrameBlurXyz;
-	CColorRgbaLdr*		m_pDevEstRgbaLdr;
+	cudaArray*			m_pDevEstRgbaLdr;
 	CColorRgbLdr*		m_pDevRgbLdrDisp;
 	CColorXyz*			m_pDevSpecularBloom;
 	int*				m_pDevSeeds;

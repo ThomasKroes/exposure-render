@@ -5,6 +5,9 @@
 #include "CudaFrameBuffers.h"
 #include "CudaUtilities.h"
 
+#include <cuda_runtime.h>
+#include <cutil.h>
+
 CCudaFrameBuffers::CCudaFrameBuffers(void) :
 	m_Resolution(),
 	m_pDevAccEstXyz(NULL),
@@ -70,7 +73,12 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 	HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameXyz, SizeEstFrameXyz));
 	HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeEstFrameBlurXyz));
 	HandleCudaError(cudaMalloc((void**)&m_pDevSpecularBloom, SizeSpecularBloom));
-	HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbaLdr, SizeEstRgbaLdr));
+	
+	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(8, 8, 8, 8, cudaChannelFormatKindUnsigned);
+
+	HandleCudaError(cudaMallocArray(&m_pDevEstRgbaLdr, &channelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
+//	HandleCudaError(cudaMalloc((void**)&m_pDevEstRgbaLdr, SizeEstRgbaLdr));
+
 	HandleCudaError(cudaMalloc((void**)&m_pDevRgbLdrDisp, SizeRgbLdrDisp));
 	HandleCudaError(cudaMalloc((void**)&m_pNoEstimates, SizeNoEstimates));
 
@@ -126,7 +134,7 @@ void CCudaFrameBuffers::Free(void)
 	HandleCudaError(cudaFree(m_pDevEstFrameXyz));
 	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
 	HandleCudaError(cudaFree(m_pDevSpecularBloom));
-	HandleCudaError(cudaFree(m_pDevEstRgbaLdr));
+	HandleCudaError(cudaFreeArray(m_pDevEstRgbaLdr));
 	HandleCudaError(cudaFree(m_pDevRgbLdrDisp));
 	HandleCudaError(cudaFree(m_pDevSeeds));
 	HandleCudaError(cudaFree(m_pNoEstimates));

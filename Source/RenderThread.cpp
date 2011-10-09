@@ -281,6 +281,8 @@ void QRenderThread::run()
 			BindTransferFunctionRoughness(SceneCopy.m_TransferFunctions.m_Roughness);
 			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
 
+//			BindEstimateRgbLdr(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+
 			// Execute the rendering kernels
   			Render(0, SceneCopy, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 			HandleCudaError(cudaGetLastError());

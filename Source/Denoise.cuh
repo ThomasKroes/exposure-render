@@ -1,6 +1,8 @@
 
 #include "Scene.h"
 
+#include "Utilities.cuh"
+
 #include <cuda_runtime.h>
 #include <cutil.h>
 
@@ -17,26 +19,32 @@ DEV float vecLen(float4 a, float4 b)
     return ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z));
 }
 
-KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
+KERNEL void KNN(CColorRgbLdr* pOut)
 {
-    const int ix = blockDim.x * blockIdx.x + threadIdx.x;
-    const int iy = blockDim.y * blockIdx.y + threadIdx.y;
+	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
+	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	const int PID	= Y * gFilmWidth + X;
 
-    const float x = (float)ix + 0.5f;
-    const float y = (float)iy + 0.5f;
+	if (X >= gFilmWidth || Y >= gFilmHeight)
+		return;
 
-	const int ID = iy * gFilmWidth + ix;
+    const float x = (float)X + 0.5f;
+    const float y = (float)Y + 0.5f;
 
-//	ID = min(ID, gFilmNoPixels - 1);
+	const int ID = Y * gFilmWidth + X;
+	
 
-	/*
-	if (gDenoiseEnabled && gDenoiseLerpC > 0.0f && ix < gFilmWidth && iy < gFilmHeight)
+//	ID = min(ID, gFilmNoPXels - 1);
+
+	
+	if (gDenoiseEnabled && gDenoiseLerpC > 0.0f && X < gFilmWidth && Y < gFilmHeight)
 	{
         float	fCount		= 0;
         float	SumWeights	= 0;
         float3	clr			= { 0, 0, 0 };
         float4	clr00		= tex2D(gTexEstimateRgbLdr, x, y);
-
+//		float4	clr00		= tex2D(gTexEstimateRgbLdr, x, y);
+		
         for (float i = -gDenoiseWindowRadius; i <= gDenoiseWindowRadius; i++)
 		{
             for (float j = -gDenoiseWindowRadius; j <= gDenoiseWindowRadius; j++)
@@ -73,19 +81,22 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 		pOut[ID].b = 255 * clr.z;
     }
 	else
-	{*/
-		float4 clr00 = tex2D(gTexEstimateRgbLdr, x, y);
+	{/**/
+		float4 clr00 = tex2D(gTexEstimateRgbLdr, (float)X / gFilmWidth, (float)Y / gFilmHeight);
+//		clr00 = EstimateRgbaLdr(X, 150);
+
+//		CColorRgbaLdr RGBA = pIn[ID];
 
 		pOut[ID].r = 255 * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
-//	}
+	}
 }
 
-void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbLdr* pOut)
+void Denoise(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers)
 {
 	const dim3 KernelBlock(KRNL_DENOISE_BLOCK_W, KRNL_DENOISE_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	KNN<<<KernelGrid, KernelBlock>>>(pDevScene, pOut);
+	KNN<<<KernelGrid, KernelBlock>>>(CudaFrameBuffers.m_pDevRgbLdrDisp);
 }
