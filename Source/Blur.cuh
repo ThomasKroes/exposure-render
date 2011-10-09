@@ -9,11 +9,10 @@
 #define KRNL_BLUR_BLOCK_H		8
 #define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
 
-KERNEL void KrnlBlurXyzH(CColorXyz* pTempImage)
+KERNEL void KrnlBlurXyzH(void)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
@@ -29,7 +28,7 @@ KERNEL void KrnlBlurXyzH(CColorXyz* pTempImage)
 	{
 		FW = gFilterWeights[(int)fabs((float)x - X)];
 
-		float4 ColorXyza = tex2D(gTexFrameEstimateXyza, x, Y);
+		const float4 ColorXyza = tex2D(gTexFrameEstimateXyza, x, Y);
 
 		Sum		+= FW * CColorXyz(ColorXyza.x, ColorXyza.y, ColorXyza.z);
 		SumW	+= FW;
@@ -37,14 +36,15 @@ KERNEL void KrnlBlurXyzH(CColorXyz* pTempImage)
 
 	__syncthreads();
 
-	pTempImage[PID] = Sum / SumW;
+	Sum /= SumW;
+
+	surf2Dwrite(make_float4(Sum.c[0], Sum.c[1], Sum.c[2], 0.0f), gSurfFrameBlurXyza, X * sizeof(float4), Y);
 }
 
-KERNEL void KrnlBlurXyzV(CColorXyz* pTempImage)
+KERNEL void KrnlBlurXyzV(void)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
@@ -60,7 +60,9 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pTempImage)
 	{
 		FW = gFilterWeights[(int)fabs((float)y - Y)];
 
-		Sum		+= FW * pTempImage[(y * gFilmWidth) + X];
+		const float4 ColorXyza = tex2D(gTexFrameBlurXyza, X, y);
+
+		Sum		+= FW * CColorXyz(ColorXyza.x, ColorXyza.y, ColorXyza.z);
 		SumW	+= FW;
 	}
 
@@ -72,14 +74,14 @@ KERNEL void KrnlBlurXyzV(CColorXyz* pTempImage)
 	surf2Dwrite(ColorXYZA, gSurfFrameEstimateXyza, X * sizeof(float4), Y);
 }
 
-void BlurImageXyz(CScene* pScene, CScene* pDevScene, CColorXyz* pTempImage)
+void BlurImageXyz(CScene* pScene, CScene* pDevScene)
 {
 	const dim3 KernelBlock(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pTempImage);
+	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>();
 	HandleCudaError(cudaGetLastError());
 
-	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pTempImage);
+	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>();
 	HandleCudaError(cudaGetLastError());
 }

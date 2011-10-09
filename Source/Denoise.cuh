@@ -24,7 +24,6 @@ KERNEL void KNN(CColorRgbLdr* pOut)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;

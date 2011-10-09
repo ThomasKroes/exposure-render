@@ -283,12 +283,15 @@ void QRenderThread::run()
 
 			BindRunningEstimateXyza(m_CudaFrameBuffers.m_pDevEstXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 			BindFrameEstimateXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+			BindFrameBlurXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+			BindFrameSpecularBloomXyza(m_CudaFrameBuffers.m_pFrameSpecularBloom, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+			BindRunningSpecularBloomXyza(m_CudaFrameBuffers.m_pRunningSpecularBloom, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 			BindRunningEstimateRgba(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
 //			BindEstimateRgbLdr(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
 			// Execute the rendering kernels
-  			Render(0, SceneCopy, m_CudaFrameBuffers, gScene.GetNoIterations(), RenderImage, BlurImage, PostProcessImage, DenoiseImage);
+  			Render(0, SceneCopy, m_CudaFrameBuffers, RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 			HandleCudaError(cudaGetLastError());
 		
 			gStatus.SetStatisticChanged("Timings", "Render Image", QString::number(RenderImage.m_FilteredDuration, 'f', 2), "ms.");

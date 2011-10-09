@@ -15,10 +15,10 @@ public:
 	Vec2i				m_Resolution;
 	cudaArray*			m_pDevEstXyz;
 	cudaArray*			m_pDevEstFrameXyz;
-	CColorXyz*			m_pDevEstFrameBlurXyz;
+	cudaArray*			m_pDevEstFrameBlurXyz;
 	cudaArray*			m_pDevEstRgbaLdr;
+	cudaArray*			m_pRunningSpecularBloom;
 	CColorRgbLdr*		m_pDevRgbLdrDisp;
-	CColorXyz*			m_pDevSpecularBloom;
 	int*				m_pDevSeeds;
 	int*				m_pNoEstimates;
 };

@@ -13,7 +13,7 @@ CCudaFrameBuffers::CCudaFrameBuffers(void) :
 	m_pDevEstXyz(NULL),
 	m_pDevEstFrameXyz(NULL),
 	m_pDevEstFrameBlurXyz(NULL),
-	m_pDevSpecularBloom(NULL),
+	m_pRunningSpecularBloom(NULL),
 	m_pDevEstRgbaLdr(NULL),
 	m_pDevRgbLdrDisp(NULL),
 	m_pDevSeeds(NULL),
@@ -33,15 +33,15 @@ CCudaFrameBuffers::CCudaFrameBuffers(const CCudaFrameBuffers& Other)
 
 CCudaFrameBuffers& CCudaFrameBuffers::operator=(const CCudaFrameBuffers& Other)
 {
-	m_Resolution			= Other.m_Resolution;
-	m_pDevEstXyz			= Other.m_pDevEstXyz;
-	m_pDevEstFrameXyz		= Other.m_pDevEstFrameXyz;
-	m_pDevEstFrameBlurXyz	= Other.m_pDevEstFrameBlurXyz;
-	m_pDevEstRgbaLdr		= Other.m_pDevEstRgbaLdr;
-	m_pDevSpecularBloom		= Other.m_pDevSpecularBloom;
-	m_pDevRgbLdrDisp		= Other.m_pDevRgbLdrDisp;
-	m_pDevSeeds				= Other.m_pDevSeeds;
-	m_pNoEstimates			= Other.m_pNoEstimates;
+	m_Resolution				= Other.m_Resolution;
+	m_pDevEstXyz				= Other.m_pDevEstXyz;
+	m_pDevEstFrameXyz			= Other.m_pDevEstFrameXyz;
+	m_pDevEstFrameBlurXyz		= Other.m_pDevEstFrameBlurXyz;
+	m_pDevEstRgbaLdr			= Other.m_pDevEstRgbaLdr;
+	m_pRunningSpecularBloom		= Other.m_pRunningSpecularBloom;
+	m_pDevRgbLdrDisp			= Other.m_pDevRgbLdrDisp;
+	m_pDevSeeds					= Other.m_pDevSeeds;
+	m_pNoEstimates				= Other.m_pNoEstimates;
 
 	return *this;
 }
@@ -73,11 +73,16 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 	HandleCudaError(cudaMallocArray(&m_pDevEstXyz, &ChannelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
 
 	// Frame estimate
-	ChannelDesc = cudaCreateChannelDesc<float4>();//(32, 32, 32, 32, cudaChannelFormatKindFloat);
+	ChannelDesc = cudaCreateChannelDesc<float4>();
 	HandleCudaError(cudaMallocArray(&m_pDevEstFrameXyz, &ChannelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
 
-	HandleCudaError(cudaMalloc((void**)&m_pDevEstFrameBlurXyz, SizeEstFrameBlurXyz));
-	HandleCudaError(cudaMalloc((void**)&m_pDevSpecularBloom, SizeSpecularBloom));
+	// Frame blur
+	ChannelDesc = cudaCreateChannelDesc<float4>();
+	HandleCudaError(cudaMallocArray(&m_pDevEstFrameBlurXyz, &ChannelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
+
+	// Running specular bloom
+	ChannelDesc = cudaCreateChannelDesc<float4>();
+	HandleCudaError(cudaMallocArray(&m_pRunningSpecularBloom, &ChannelDesc, m_Resolution.x, m_Resolution.y, cudaArraySurfaceLoadStore));
 	
 	// Estimate in RGBA
 	ChannelDesc = cudaCreateChannelDesc(8, 8, 8, 8, cudaChannelFormatKindUnsigned);
@@ -104,7 +109,7 @@ void CCudaFrameBuffers::Resize(const Vec2i& Resolution)
 	gStatus.SetStatisticChanged("Frame Buffers", "Estimate (XYZ color)", QString::number((float)SizeEstXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameXyz / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Blur Frame Estimate (XYZ color)", QString::number((float)SizeEstFrameBlurXyz / MB, 'f', 2), "MB");
-	gStatus.SetStatisticChanged("Frame Buffers", "Specular Bloom (XYZ color)", QString::number((float)SizeSpecularBloom / MB, 'f', 2), "MB");
+	gStatus.SetStatisticChanged("Frame Buffers", "Running Specular Bloom (XYZ color)", QString::number((float)SizeSpecularBloom / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Estimate (RGBA color)", QString::number((float)SizeEstRgbaLdr / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Estimate Screen (RGB color)", QString::number((float)SizeRgbLdrDisp / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("Frame Buffers", "Random Seeds", QString::number((float)SizeRandomSeeds / MB, 'f', 2), "MB");
@@ -120,8 +125,6 @@ void CCudaFrameBuffers::Reset(void)
 {
 	const int NoPixels = m_Resolution.x * m_Resolution.y;
 
-	HandleCudaError(cudaMemset(m_pDevEstFrameBlurXyz, 0, NoPixels * sizeof(CColorXyz)));
-	HandleCudaError(cudaMemset(m_pDevSpecularBloom, 0, NoPixels * sizeof(CColorXyz)));
 	HandleCudaError(cudaMemset(m_pNoEstimates, 0, NoPixels * sizeof(int)));
 }
 
@@ -129,8 +132,8 @@ void CCudaFrameBuffers::Free(void)
 {
 	HandleCudaError(cudaFreeArray(m_pDevEstXyz));
 	HandleCudaError(cudaFreeArray(m_pDevEstFrameXyz));
-	HandleCudaError(cudaFree(m_pDevEstFrameBlurXyz));
-	HandleCudaError(cudaFree(m_pDevSpecularBloom));
+	HandleCudaError(cudaFreeArray(m_pDevEstFrameBlurXyz));
+	HandleCudaError(cudaFreeArray(m_pRunningSpecularBloom));
 	HandleCudaError(cudaFreeArray(m_pDevEstRgbaLdr));
 	HandleCudaError(cudaFree(m_pDevRgbLdrDisp));
 	HandleCudaError(cudaFree(m_pDevSeeds));
@@ -139,7 +142,7 @@ void CCudaFrameBuffers::Free(void)
 	m_pDevEstXyz			= NULL;
 	m_pDevEstFrameXyz		= NULL;
 	m_pDevEstFrameBlurXyz	= NULL;
-	m_pDevSpecularBloom		= NULL;
+	m_pRunningSpecularBloom		= NULL;
 	m_pDevEstRgbaLdr		= NULL;
 	m_pDevRgbLdrDisp		= NULL;
 	m_pDevSeeds				= NULL;

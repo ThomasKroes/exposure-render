@@ -9,7 +9,7 @@
 #define KRNL_SP_BLOCK_H		8
 #define KRNL_SP_BLOCK_SIZE	KRNL_SP_BLOCK_W * KRNL_SP_BLOCK_H
 
-KERNEL void KrnlSpecularBloom(int* pSeeds, CColorXyz* pSpecularBloom, int N)
+KERNEL void KrnlSpecularBloom(int* pSeeds)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -24,9 +24,11 @@ KERNEL void KrnlSpecularBloom(int* pSeeds, CColorXyz* pSpecularBloom, int N)
 
 	float SumWeight = 0.0f;
 
-	for (int i = 0; i < 20; i++)
+	float Radius = 30.0f;
+
+	for (int i = 0; i < 5; i++)
 	{
-		Vec2f C = 100.0f * ConcentricSampleDisk(RNG.Get2());
+		Vec2f C = Radius * ConcentricSampleDisk(RNG.Get2());
 
 //		Vec2f UV(X + C.x, Y + C.y);
 		Vec2f UV((float)X + C.x, (float)Y + C.y);
@@ -34,25 +36,27 @@ KERNEL void KrnlSpecularBloom(int* pSeeds, CColorXyz* pSpecularBloom, int N)
 		if (UV.x < 0.0f || UV.x >= gFilmWidth || UV.y < 0.0f || UV.y >= gFilmHeight)
 			break;
 		
-		const int PIDB = floorf(UV.y) * gFilmWidth + UV.x;
+		const float4 Le = tex2D(gTexRunningEstimateXyza, UV.x, UV.y);
 
-//		Lb += expf(-4.0f * (C.Length() / 100.0f)) * tex2D(gTexRunningEstimateXyza, X, Y);//expf(-(C.Length() / 30.0f)) * 10.0f * 
+		Lb += expf(-5.0f * (C.Length() / Radius)) * CColorXyz(Le.x, Le.y, Le.z);
 		SumWeight++;
 	}
 
 	__syncthreads();
 
 	if (SumWeight > 0.0f)
-		pSpecularBloom[PID] += Lb / SumWeight;
+		Lb /= SumWeight;
 
-//	pEstXyz[PID] += pSpecularBloom[PID] / (float)__max(1.0f, N);
+	float4 ColorXyza = tex2D(gTexRunningSpecularBloomXyza, X, Y) + (make_float4(Lb.c[0], Lb.c[1], Lb.c[2], 0.0f) - tex2D(gTexRunningSpecularBloomXyza, X, Y)) / (float)__max(1.0f, gNoIterations);
+
+	surf2Dwrite(ColorXyza, gSurfRunningSpecularBloomXyza, X * sizeof(float4), Y);
 }
 
-void SpecularBloom(CScene& Scene, CScene* pDevScene, int* pSeeds, CCudaFrameBuffers& CudaFrameBuffers, int N)
+void SpecularBloom(CScene& Scene, CScene* pDevScene, int* pSeeds, CCudaFrameBuffers& CudaFrameBuffers)
 {
 	const dim3 KernelBlock(KRNL_SP_BLOCK_W, KRNL_SP_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)Scene.m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)Scene.m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	KrnlSpecularBloom<<<KernelGrid, KernelBlock>>>(pSeeds, CudaFrameBuffers.m_pDevSpecularBloom, N);
+	KrnlSpecularBloom<<<KernelGrid, KernelBlock>>>(pSeeds);
 	HandleCudaError(cudaGetLastError());
 }
