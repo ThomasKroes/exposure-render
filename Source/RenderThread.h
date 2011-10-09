@@ -43,14 +43,14 @@ public:
 
 	QString			GetFileName(void) const						{	return m_FileName;		}
 	void			SetFileName(const QString& FileName)		{	m_FileName = FileName;	}
-	CColorRgbaLdr*	GetRenderImage(void) const;
+	CColorRgbLdr*	GetRenderImage(void) const;
 	void			Close(void)									{	m_Abort = true;			}
 	void			PauseRendering(const bool& Pause)			{	m_Pause = Pause;		}
 	
 private:
 	QString				m_FileName;
 	CCudaFrameBuffers	m_CudaFrameBuffers;
-	CColorRgbaLdr*		m_pRenderImage;
+	CColorRgbLdr*		m_pRenderImage;
 	short*				m_pDensityBuffer;
 	short*				m_pGradientMagnitudeBuffer;
 

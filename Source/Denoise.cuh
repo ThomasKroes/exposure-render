@@ -29,6 +29,7 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 
 //	ID = min(ID, gFilmNoPixels - 1);
 
+	/*
 	if (gDenoiseEnabled && gDenoiseLerpC > 0.0f && ix < gFilmWidth && iy < gFilmHeight)
 	{
         float	fCount		= 0;
@@ -72,13 +73,13 @@ KERNEL void KNN(CScene* pScene, CColorRgbLdr* pOut)
 		pOut[ID].b = 255 * clr.z;
     }
 	else
-	{
+	{*/
 		float4 clr00 = tex2D(gTexEstimateRgbLdr, x, y);
 
 		pOut[ID].r = 255 * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
-	}
+//	}
 }
 
 void Denoise(CScene* pScene, CScene* pDevScene, CColorRgbaLdr* pIn, CColorRgbLdr* pOut)

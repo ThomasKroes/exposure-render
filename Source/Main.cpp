@@ -13,7 +13,7 @@ int main(int ArgumentCount, char* pArgv[])
 	Application.setStyle("plastique");
 	Application.setOrganizationName("TU Delft");
 	Application.setApplicationName("Exposure Render");
-
+	
 	// Application settings
 	QSettings Settings;
 
@@ -27,6 +27,8 @@ int main(int ArgumentCount, char* pArgv[])
 
 	// Show it
 	MainWindow.show();
+
+	MainWindow.setWindowIcon(GetIcon("grid"));
 
 	// Load default presets
 	gStatus.SetLoadPreset("Default");

@@ -524,6 +524,7 @@ SET(CudaSources
 	Variance.cuh
 	NearestIntersection.cuh
 	SpecularBloom.cuh
+	ToneMap.cuh
 	Core.cu
 	CudaFrameBuffers.h
 	CudaUtilities.h

@@ -8,9 +8,9 @@
 
 KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds, CColorXyz* pDevEstFrameXyz)
 {
-	const int X		= (blockIdx.x * blockDim.x) + threadIdx.x;
-	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
-	const int PID	= (Y * gFilmWidth) + X;
+	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
+	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	const int PID	= Y * gFilmWidth + X;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight || PID >= gFilmNoPixels)
 		return;

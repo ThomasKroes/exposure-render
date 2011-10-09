@@ -231,7 +231,7 @@ void QRenderThread::run()
 				free(m_pRenderImage);
 				m_pRenderImage = NULL;
 
-				m_pRenderImage = (CColorRgbaLdr*)malloc(SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
+				m_pRenderImage = (CColorRgbLdr*)malloc(SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
 
 				if (m_pRenderImage)
 					memset(m_pRenderImage, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
@@ -653,7 +653,7 @@ void QRenderThread::OnRenderPause(const bool& Pause)
 	m_Pause = Pause;
 }
 
-CColorRgbaLdr* QRenderThread::GetRenderImage(void) const
+CColorRgbLdr* QRenderThread::GetRenderImage(void) const
 {
 	return m_pRenderImage;
 }

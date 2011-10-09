@@ -411,23 +411,6 @@ public:
 		Update();
 	}
 
-	HOD void BiasDist(float& R) const
-	{
-		switch (m_Aperture.m_Bias)
-		{
-			case CAperture::BiasCenter:
-				R = sqrtf(sqrtf(R) * R);
-				break;
-
-			case CAperture::BiasEdge:
-				R = sqrtf((float)1.0f - R * R);
-				break;
-
-			default:
-				R = R;
-		}
-	}
-
 	HOD void GenerateRay(const Vec2f& Pixel, const Vec2f& ApertureRnd, Vec3f& RayO, Vec3f& RayD)
 	{
 		Vec2f ScreenPoint;

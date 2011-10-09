@@ -61,6 +61,7 @@ __constant__ float		gDenoiseLerpC;
 #include "Variance.cuh"
 #include "NearestIntersection.cuh"
 #include "SpecularBloom.cuh"
+#include "ToneMap.cuh"
 
 #include "CudaUtilities.h"
 
@@ -395,14 +396,17 @@ void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers,
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;
-	Estimate(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevAccEstXyz, CudaFrameBuffers.m_pDevEstXyz, CudaFrameBuffers.m_pDevEstRgbaLdr, N);
+	Estimate(&Scene, pDevScene, CudaFrameBuffers, N);
 	HandleCudaError(cudaGetLastError());
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
 
-	CCudaTimer TmrDenoise;
-	Denoise(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstRgbaLdr, CudaFrameBuffers.m_pDevRgbLdrDisp);
-	HandleCudaError(cudaGetLastError());
-	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
+	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers, N);
+	ToneMap(&Scene, pDevScene, CudaFrameBuffers, N);
+
+//	CCudaTimer TmrDenoise;
+//	Denoise(&Scene, pDevScene, CudaFrameBuffers.m_pDevEstRgbaLdr, CudaFrameBuffers.m_pDevRgbLdrDisp);
+//	HandleCudaError(cudaGetLastError());
+//	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
 
 	HandleCudaError(cudaFree(pDevScene));
 }

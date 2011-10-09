@@ -2,12 +2,13 @@
 
 #include "Geometry.h"
 #include "Variance.h"
+#include "CudaFrameBuffers.h"
 
 #define KRNL_ESTIMATE_BLOCK_W		32
 #define KRNL_ESTIMATE_BLOCK_H		8
 #define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
 
-KERNEL void KrnlEstimate(CScene* pScene, CColorXyz* pEstFrameXyz, CColorXyz* pAccEstXyz, CColorXyz* pEstXyz, CColorRgbaLdr* pPixels, float N)
+KERNEL void KrnlEstimate(CScene* pScene, CColorXyz* pEstFrameXyz, CColorXyz* pAccEstXyz, CColorXyz* pEstXyz, float N)
 {
 	const int X 	= (blockIdx.x * blockDim.x) + threadIdx.x;
 	const int Y		= (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -19,24 +20,12 @@ KERNEL void KrnlEstimate(CScene* pScene, CColorXyz* pEstFrameXyz, CColorXyz* pAc
 	pAccEstXyz[PID] += pEstFrameXyz[PID];
 
 	pEstXyz[PID] = pAccEstXyz[PID] / (float)__max(1.0f, N);
-	
-	CColorRgbHdr RgbHdr, RgbHdr2;
-	
-	RgbHdr.FromXYZ(pEstXyz[PID].c[0], pEstXyz[PID].c[1], pEstXyz[PID].c[2]);
-
-	RgbHdr.r = Clamp(1.0f - expf(-(RgbHdr.r * gInvExposure)), 0.0, 1.0f);
-	RgbHdr.g = Clamp(1.0f - expf(-(RgbHdr.g * gInvExposure)), 0.0, 1.0f);
-	RgbHdr.b = Clamp(1.0f - expf(-(RgbHdr.b * gInvExposure)), 0.0, 1.0f);
-
-	pPixels[PID].r = (unsigned char)Clamp((255.0f * powf(RgbHdr.r, gInvGamma)), 0.0f, 255.0f);
-	pPixels[PID].g = (unsigned char)Clamp((255.0f * powf(RgbHdr.g, gInvGamma)), 0.0f, 255.0f);
-	pPixels[PID].b = (unsigned char)Clamp((255.0f * powf(RgbHdr.b, gInvGamma)), 0.0f, 255.0f);
 }
 
-void Estimate(CScene* pScene, CScene* pDevScene, CColorXyz* pEstFrameXyz, CColorXyz* pAccEstXyz, CColorXyz* pEstXyz, CColorRgbaLdr* pPixels, float N)
+void Estimate(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers, float N)
 {
 	const dim3 KernelBlock(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.GetHeight() / (float)KernelBlock.y));
 
-	KrnlEstimate<<<KernelGrid, KernelBlock>>>(pDevScene, pEstFrameXyz, pAccEstXyz, pEstXyz, pPixels, N); 
+	KrnlEstimate<<<KernelGrid, KernelBlock>>>(pDevScene, CudaFrameBuffers.m_pDevEstFrameXyz, CudaFrameBuffers.m_pDevAccEstXyz, CudaFrameBuffers.m_pDevEstXyz, N); 
 }
