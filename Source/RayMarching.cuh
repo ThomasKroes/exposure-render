@@ -13,7 +13,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, CScene* pScene)
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	float S			= -log(RNG.Get1()) * gIntensityInvRange;
+	const float S	= -log(RNG.Get1()) * gIntensityInvRange;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
@@ -45,7 +45,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG, CScene* pScene)
 	MinT = max(MinT, R.m_MinT);
 	MaxT = min(MaxT, R.m_MaxT);
 
-	float S			= -log(RNG.Get1()) * gIntensityInvRange;
+	const float S	= -log(RNG.Get1()) * gIntensityInvRange;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 

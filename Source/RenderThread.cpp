@@ -265,6 +265,7 @@ void QRenderThread::run()
 
 			SceneCopy.m_DenoiseParams.SetWindowRadius(5.0f);
 			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.02f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
+			SceneCopy.m_DenoiseParams.m_Enabled = false;
 
 			SceneCopy.m_Camera.Update();
 
@@ -342,7 +343,7 @@ void QRenderThread::run()
 	Log("Device memory: " + QString::number(GetUsedCudaMemory() / MB, 'f', 2) + "/" + QString::number(GetTotalCudaMemory() / MB, 'f', 2) + " MB", "memory");
 
 	// Load default appearance, lighting and camera presets
-	gStatus.SetLoadPreset("Default");
+//	gStatus.SetLoadPreset("Default");
 
 	// Clear the histogram
 	gHistogram.Reset();

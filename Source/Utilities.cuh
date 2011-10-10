@@ -6,6 +6,11 @@
 #include <cutil.h>
 #include <cutil_math.h>
 
+DEV inline Vec3f ToVec3f(const float3& V)
+{
+	return Vec3f(V.x, V.y, V.z);
+}
+
 DEV float GetNormalizedIntensity(CScene* pScene, const Vec3f& P)
 {
 	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, P.x * gInvAaBbMax.x, P.y * gInvAaBbMax.y, P.z * gInvAaBbMax.z));
@@ -45,15 +50,11 @@ DEV inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
 {
 	Vec3f Gradient;
 
-	const float Delta = gGradientDelta;
+	Gradient.x = (GetNormalizedIntensity(pScene, P + ToVec3f(gGradientDeltaX)) - GetNormalizedIntensity(pScene, P - ToVec3f(gGradientDeltaX))) * gInvGradientDelta;
+	Gradient.y = (GetNormalizedIntensity(pScene, P + ToVec3f(gGradientDeltaY)) - GetNormalizedIntensity(pScene, P - ToVec3f(gGradientDeltaY))) * gInvGradientDelta;
+	Gradient.z = (GetNormalizedIntensity(pScene, P + ToVec3f(gGradientDeltaZ)) - GetNormalizedIntensity(pScene, P - ToVec3f(gGradientDeltaZ))) * gInvGradientDelta;
 
-	Gradient.x = (GetNormalizedIntensity(pScene, P + Vec3f(Delta, 0.0f, 0.0f)) - GetNormalizedIntensity(pScene, P - Vec3f(Delta, 0.0f, 0.0f))) * gInvGradientDelta;
-	Gradient.y = (GetNormalizedIntensity(pScene, P + Vec3f(0.0f, Delta, 0.0f)) - GetNormalizedIntensity(pScene, P - Vec3f(0.0f, Delta, 0.0f))) * gInvGradientDelta;
-	Gradient.z = (GetNormalizedIntensity(pScene, P + Vec3f(0.0f, 0.0f, Delta)) - GetNormalizedIntensity(pScene, P - Vec3f(0.0f, 0.0f, Delta))) * gInvGradientDelta;
-
-	Gradient.Normalize();
-
-	return Gradient;
+	return Normalize(Gradient);
 }
 
 DEV float GradientMagnitude(CScene* pScene, const Vec3f& P)
@@ -75,8 +76,7 @@ DEV bool NearestLight(CScene* pScene, CRay R, CColorXyz& LightColor, Vec3f& Pl, 
 		{
 			Pl		= R(T);
 			pLight	= &pScene->m_Lighting.m_Lights[i];
-
-			Hit = true;
+			Hit		= true;
 		}
 	}
 	

@@ -43,11 +43,14 @@ CD float	gStepSizeShadow;
 CD float	gDensityScale;
 CD float	gGradientDelta;
 CD float	gInvGradientDelta;
+CD float3	gGradientDeltaX;
+CD float3	gGradientDeltaY;
+CD float3	gGradientDeltaZ;
 CD int		gFilmWidth;
 CD int		gFilmHeight;
 CD int		gFilmNoPixels;
 CD int		gFilterWidth;
-CD float	gFilterWeights[3];
+CD float	gFilterWeights[10];
 CD float	gExposure;
 CD float	gInvExposure;
 CD float	gGamma;
@@ -59,7 +62,8 @@ CD float	gDenoiseNoise;
 CD float	gDenoiseWeightThreshold;
 CD float	gDenoiseLerpThreshold;
 CD float	gDenoiseLerpC;
-CD	float	gNoIterations;
+CD float	gNoIterations;
+CD float	gInvNoIterations;
 
 #define TF_NO_SAMPLES		256
 #define INV_TF_NO_SAMPLES	0.00390625f
@@ -352,10 +356,16 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gDensityScale", &DensityScale, sizeof(float)));
 	
 	const float GradientDelta		= pScene->m_GradientDelta;
-	const float InvGradientDelta	= 1.0f / GradientDelta;
-
+	const float InvGradientDelta	= 1.0f / (2.0f * GradientDelta);
+	const Vec3f GradientDeltaX(GradientDelta, 0.0f, 0.0f);
+	const Vec3f GradientDeltaY(0.0f, GradientDelta, 0.0f);
+	const Vec3f GradientDeltaZ(0.0f, 0.0f, GradientDelta);
+	
 	HandleCudaError(cudaMemcpyToSymbol("gGradientDelta", &GradientDelta, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gInvGradientDelta", &InvGradientDelta, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gGradientDeltaX", &GradientDeltaX, sizeof(Vec3f)));
+	HandleCudaError(cudaMemcpyToSymbol("gGradientDeltaY", &GradientDeltaY, sizeof(Vec3f)));
+	HandleCudaError(cudaMemcpyToSymbol("gGradientDeltaZ", &GradientDeltaZ, sizeof(Vec3f)));
 	
 	const int FilmWidth		= pScene->m_Camera.m_Film.GetWidth();
 	const int Filmheight	= pScene->m_Camera.m_Film.GetHeight();
@@ -365,13 +375,14 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gFilmHeight", &Filmheight, sizeof(int)));
 	HandleCudaError(cudaMemcpyToSymbol("gFilmNoPixels", &FilmNoPixels, sizeof(int)));
 
-	const int FilterWidth = 2;
+	const int FilterWidth = 9;
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
 
-	const float FilterWeights[3] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f };
+//	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	const float FilterWeights[10] = { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
-	HandleCudaError(cudaMemcpyToSymbol("gFilterWeights", &FilterWeights, 3 * sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gFilterWeights", &FilterWeights, 10 * sizeof(float)));
 
 	const float Gamma		= pScene->m_Camera.m_Film.m_Gamma;
 	const float InvGamma	= 1.0f / Gamma;
@@ -383,7 +394,7 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gGamma", &Gamma, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gInvGamma", &InvGamma, sizeof(float)));
 
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseEnabled", &pScene->m_DenoiseParams.m_Enabled, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoiseEnabled", &pScene->m_DenoiseParams.m_Enabled, sizeof(bool)));
 	HandleCudaError(cudaMemcpyToSymbol("gDenoiseWindowRadius", &pScene->m_DenoiseParams.m_WindowRadius, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gDenoiseInvWindowArea", &pScene->m_DenoiseParams.m_InvWindowArea, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gDenoiseNoise", &pScene->m_DenoiseParams.m_Noise, sizeof(float)));
@@ -391,9 +402,11 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gDenoiseLerpThreshold", &pScene->m_DenoiseParams.m_LerpThreshold, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gDenoiseLerpC", &pScene->m_DenoiseParams.m_LerpC, sizeof(float)));
 
-	const float NoIterations = pScene->GetNoIterations();
+	const float NoIterations	= pScene->GetNoIterations();
+	const float InvNoIterations = 1.0f / __max(1.0f, NoIterations);
 
 	HandleCudaError(cudaMemcpyToSymbol("gNoIterations", &NoIterations, sizeof(float)));
+	HandleCudaError(cudaMemcpyToSymbol("gInvNoIterations", &InvNoIterations, sizeof(float)));
 }
 
 void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)

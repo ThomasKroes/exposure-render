@@ -4,7 +4,7 @@
 #include "Variance.h"
 #include "CudaFrameBuffers.h"
 
-#define KRNL_ESTIMATE_BLOCK_W		32
+#define KRNL_ESTIMATE_BLOCK_W		16
 #define KRNL_ESTIMATE_BLOCK_H		8
 #define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
 
@@ -16,7 +16,7 @@ KERNEL void KrnlEstimate(void)
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	const float4 ColorXyza = gNoIterations == 0 ? make_float4(0.0f) : tex2D(gTexRunningEstimateXyza, X, Y) + ((tex2D(gTexFrameEstimateXyza, X, Y) - tex2D(gTexRunningEstimateXyza, X, Y)) / (float)__max(1.0f, gNoIterations));
+	const float4 ColorXyza = gNoIterations == 0 ? make_float4(0.0f) : tex2D(gTexRunningEstimateXyza, X, Y) + ((tex2D(gTexFrameEstimateXyza, X, Y) - tex2D(gTexRunningEstimateXyza, X, Y)) * gInvNoIterations);
 	
 	surf2Dwrite(ColorXyza, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
 }

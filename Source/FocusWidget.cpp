@@ -39,7 +39,7 @@ QFocusWidget::QFocusWidget(QWidget* pParent) :
 	m_GridLayout.addWidget(&m_FocalDistanceSlider, 1, 1);
 	
     m_FocalDistanceSpinner.setRange(0.0, 5.0);
-	m_FocalDistanceSpinner.setSuffix(" mm");
+	m_FocalDistanceSpinner.setSuffix(" m");
 	m_GridLayout.addWidget(&m_FocalDistanceSpinner, 1, 2);
 	
 	connect(&m_FocalDistanceSlider, SIGNAL(valueChanged(double)), &m_FocalDistanceSpinner, SLOT(setValue(double)));
