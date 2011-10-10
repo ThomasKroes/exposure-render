@@ -13,7 +13,7 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_DensityScaleSpinner(),
 	m_ShadingType()
 {
-	setTitle("Settings");
+//	setTitle("Settings");
 	
 	// Create grid layout
 	setLayout(&m_MainLayout);

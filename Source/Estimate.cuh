@@ -16,7 +16,7 @@ KERNEL void KrnlEstimate(void)
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	float4 ColorXyza = tex2D(gTexRunningEstimateXyza, X, Y) + (tex2D(gTexFrameEstimateXyza, X, Y) - tex2D(gTexRunningEstimateXyza, X, Y)) / (float)__max(1.0f, gNoIterations);
+	const float4 ColorXyza = gNoIterations == 0 ? make_float4(0.0f) : tex2D(gTexRunningEstimateXyza, X, Y) + ((tex2D(gTexFrameEstimateXyza, X, Y) - tex2D(gTexRunningEstimateXyza, X, Y)) / (float)__max(1.0f, gNoIterations));
 	
 	surf2Dwrite(ColorXyza, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
 }

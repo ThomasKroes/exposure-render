@@ -201,8 +201,8 @@ public:
 		{
 			m_Screen[0][0] = -Scale;
 			m_Screen[0][1] = Scale;
-			m_Screen[1][0] = -Scale / m_Resolution.GetAspectRatio();
-			m_Screen[1][1] = Scale / m_Resolution.GetAspectRatio();
+			m_Screen[1][0] = -Scale * m_Resolution.GetAspectRatio();
+			m_Screen[1][1] = Scale * m_Resolution.GetAspectRatio();
 		}
 		else
 		{

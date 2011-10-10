@@ -82,13 +82,13 @@ HO CDenoiseParams::CDenoiseParams(void)
 
 
 	m_Enabled			= true;
-	m_Noise				= 0.3f;//0.32f * 0.32f;// / (0.1f * 0.1f);
+	m_Noise				= 0.1f;//0.32f * 0.32f;// / (0.1f * 0.1f);
 	m_LerpC				= 0.01f;
 	m_WindowRadius		= 6.0f;
 	m_WindowArea		= (2.0f * m_WindowRadius + 1.0f) * (2.0f * m_WindowRadius + 1.0f);
 	m_InvWindowArea		= 1.0f / m_WindowArea;
 	m_WeightThreshold	= 0.1f;
-	m_LerpThreshold		= 0.1f;
+	m_LerpThreshold		= 0.0f;
 	/**/
 }
 

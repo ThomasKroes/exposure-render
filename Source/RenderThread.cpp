@@ -263,14 +263,9 @@ void QRenderThread::run()
 			// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 			gScene.m_DirtyFlags.ClearAllFlags();
 
-			// Increase the number of iterations performed so far
-			gScene.SetNoIterations(gScene.GetNoIterations() + 1);
+			SceneCopy.m_DenoiseParams.SetWindowRadius(5.0f);
+			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.02f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
 
-			// Adjust de-noising parameters
-			SceneCopy.m_DenoiseParams.SetWindowRadius(3.0f);
-			
-			SceneCopy.m_DenoiseParams.m_LerpC = 1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
-			
 			SceneCopy.m_Camera.Update();
 
 			BindConstants(&SceneCopy);
@@ -284,16 +279,13 @@ void QRenderThread::run()
 			BindRunningEstimateXyza(m_CudaFrameBuffers.m_pDevEstXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 			BindFrameEstimateXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 			BindFrameBlurXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-			BindFrameSpecularBloomXyza(m_CudaFrameBuffers.m_pFrameSpecularBloom, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 			BindRunningSpecularBloomXyza(m_CudaFrameBuffers.m_pRunningSpecularBloom, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 			BindRunningEstimateRgba(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
-//			BindEstimateRgbLdr(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-
-			// Execute the rendering kernels
   			Render(0, SceneCopy, m_CudaFrameBuffers, RenderImage, BlurImage, PostProcessImage, DenoiseImage);
-			HandleCudaError(cudaGetLastError());
 		
+			gScene.SetNoIterations(gScene.GetNoIterations() + 1);
+
 			gStatus.SetStatisticChanged("Timings", "Render Image", QString::number(RenderImage.m_FilteredDuration, 'f', 2), "ms.");
 			gStatus.SetStatisticChanged("Timings", "Blur Estimate", QString::number(BlurImage.m_FilteredDuration, 'f', 2), "ms.");
 			gStatus.SetStatisticChanged("Timings", "Post Process Estimate", QString::number(PostProcessImage.m_FilteredDuration, 'f', 2), "ms.");
@@ -552,7 +544,7 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		gScene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Roughness * 100);
 	}
 
-	gScene.m_DensityScale	= 100.0f * (expf(5.0f * TransferFunction.GetDensityScale()) / expf(5.0f));
+	gScene.m_DensityScale	= 5.0f * (expf(5.0f * TransferFunction.GetDensityScale()) / expf(5.0f));
 	gScene.m_ShadingType	= TransferFunction.GetShadingType();
 
 	gScene.m_DirtyFlags.SetFlag(TransferFunctionDirty);

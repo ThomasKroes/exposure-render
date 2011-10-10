@@ -45,7 +45,7 @@ public:
 		m_HalfHeight(0.5f * m_Height),
 		m_InvHalfHeight(1.0f / m_HalfHeight),
 		m_Distance(1.0f),
-		m_SkyRadius(10000.0f),
+		m_SkyRadius(100.0f),
 		m_P(1.0f, 1.0f, 1.0f),
 		m_Target(0.0f, 0.0f, 0.0f),
 		m_N(1.0f, 0.0f, 0.0f),
@@ -216,7 +216,7 @@ public:
 
 			Vec2f UV = Vec2f(SphericalPhi(R.m_D) * INV_TWO_PI_F, SphericalTheta(R.m_D) * INV_PI_F);
 
-			L	= Le(Vec2f(1.0f) - 2.0f * UV);
+			L	= 0.1f * Le(Vec2f(1.0f) - 2.0f * UV);
 
 			if (pPdf)
 				*pPdf = powf(m_SkyRadius, 2.0f) / m_Area;

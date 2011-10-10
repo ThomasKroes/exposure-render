@@ -33,18 +33,14 @@ KERNEL void KNN(CColorRgbLdr* pOut)
 
 	const int ID = Y * gFilmWidth + X;
 	
-
-//	ID = min(ID, gFilmNoPXels - 1);
-
+	const float4 clr00 = tex2D(gTexRunningEstimateRgba, x, y);
 	
-	if (gDenoiseEnabled && gDenoiseLerpC > 0.0f && X < gFilmWidth && Y < gFilmHeight)
+	if (gDenoiseEnabled && gDenoiseLerpC > 0.0f && gDenoiseLerpC < 1.0f)
 	{
-        float	fCount		= 0;
-        float	SumWeights	= 0;
-        float3	clr			= { 0, 0, 0 };
-        float4	clr00		= tex2D(gTexRunningEstimateRgba, x, y);
-//		float4	clr00		= tex2D(gTexEstimateRgbLdr, x, y);
-		
+        float			fCount		= 0;
+        float			SumWeights	= 0;
+        float3			clr			= { 0, 0, 0 };
+        		
         for (float i = -gDenoiseWindowRadius; i <= gDenoiseWindowRadius; i++)
 		{
             for (float j = -gDenoiseWindowRadius; j <= gDenoiseWindowRadius; j++)
@@ -81,12 +77,7 @@ KERNEL void KNN(CColorRgbLdr* pOut)
 		pOut[ID].b = 255 * clr.z;
     }
 	else
-	{/**/
-		float4 clr00 = tex2D(gTexRunningEstimateRgba, X, Y);
-//		clr00 = EstimateRgbaLdr(X, 150);
-
-//		CColorRgbaLdr RGBA = pIn[ID];
-
+	{
 		pOut[ID].r = 255 * clr00.x;
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;

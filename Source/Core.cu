@@ -140,6 +140,8 @@ void UnbindGradientMagnitudeBuffer(void)
 
 void BindRunningEstimateXyza(cudaArray* pCudaArray, int Width, int Height)
 {
+//	gTexRunningEstimateXyza.filterMode = cudaFilterModeLinear;
+
 	HandleCudaError(cudaBindSurfaceToArray(gSurfRunningEstimateXyza, pCudaArray));
 	HandleCudaError(cudaBindTextureToArray(gTexRunningEstimateXyza, pCudaArray));
 }
@@ -433,7 +435,8 @@ void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers,
 	Estimate(&Scene, pDevScene, CudaFrameBuffers);
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
 
-	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers);
+//	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers);
+
 	ToneMap(&Scene, pDevScene, CudaFrameBuffers);
 
 	CCudaTimer TmrDenoise;
