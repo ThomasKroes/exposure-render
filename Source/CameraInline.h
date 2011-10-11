@@ -421,8 +421,6 @@ public:
 		RayO	= m_From;
 		RayD	= Normalize(m_N + (-ScreenPoint.x * m_U) + (-ScreenPoint.y * m_V));
 
-		return;
-
 		if (m_Aperture.m_Size != 0.0f)
 		{
 			Vec2f LensUV = m_Aperture.m_Size * ConcentricSampleDisk(ApertureRnd);

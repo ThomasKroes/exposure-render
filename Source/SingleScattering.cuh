@@ -12,13 +12,14 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds)
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int PID	= Y * gFilmWidth + X;
+	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight || PID >= gFilmNoPixels)
 		return;
 	
 	CRNG RNG(&pSeeds[2 * PID], &pSeeds[2 * PID + 1]);
 
-	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
+	 CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	CRay Re;
 	

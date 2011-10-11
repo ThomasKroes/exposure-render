@@ -130,10 +130,8 @@ public:
 	// Samples the light
 	HOD CColorXyz SampleL(const Vec3f& P, CRay& Rl, float& Pdf, CLightingSample& LS)
 	{
-		// Exitant radiance
 		CColorXyz L = SPEC_BLACK;
 
-		// Determine position on light
 		if (m_T == 0)
 		{
 			Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
@@ -212,11 +210,11 @@ public:
 			if (T < R.m_MinT || T > R.m_MaxT)
 				return false;
 			
-			R.m_MaxT	= T;
+			R.m_MaxT = T;
 
 			Vec2f UV = Vec2f(SphericalPhi(R.m_D) * INV_TWO_PI_F, SphericalTheta(R.m_D) * INV_PI_F);
 
-			L	= 0.1f * Le(Vec2f(1.0f) - 2.0f * UV);
+			L	= Le(Vec2f(1.0f) - 2.0f * UV);
 
 			if (pPdf)
 				*pPdf = powf(m_SkyRadius, 2.0f) / m_Area;

@@ -7,7 +7,7 @@
 #include <cuda_runtime.h>
 #include <cutil.h>
 
-#define KRNL_DENOISE_BLOCK_W		32
+#define KRNL_DENOISE_BLOCK_W		16
 #define KRNL_DENOISE_BLOCK_H		8
 #define KRNL_DENOISE_BLOCK_SIZE	KRNL_DENOISE_BLOCK_W * KRNL_DENOISE_BLOCK_H
 
@@ -20,7 +20,7 @@ DEV float vecLen(float4 a, float4 b)
     return ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z));
 }
 
-KERNEL void KNN(CColorRgbLdr* pOut)
+KERNEL void KrnlDenoise(CColorRgbLdr* pOut)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -89,7 +89,7 @@ void Denoise(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuff
 	const dim3 KernelBlock(KRNL_DENOISE_BLOCK_W, KRNL_DENOISE_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	KNN<<<KernelGrid, KernelBlock>>>(CudaFrameBuffers.m_pDevRgbLdrDisp);
+	KrnlDenoise<<<KernelGrid, KernelBlock>>>(CudaFrameBuffers.m_pDevRgbLdrDisp);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Noise Reduction");
 }

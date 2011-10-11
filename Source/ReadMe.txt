@@ -5,16 +5,25 @@ Work flow tutorials (video's) will be put online as soon as possible.
 For a head start you can open one of the demo files, which come with appearance, lighting and camera presets.
 
 === Operating the camera ===
-- LMB to orbit the camera
-- MMB to pan the camera
-- RMB and mouse wheel zoom the camera
+- LMB to orbit
+- MMB to pan
+- RMB + mouse wheel to zoom
 - Shift + LMB to adjust the aperture size
 - Control + LMB to adjust the field of view
 - Alt + LMB to adjust the focal distance
 
+=== Navigating the render canvas ===
+- SPACE + MMB to pan
+- SPACE + RMB to zoom
+- SPACE + mouse wheel to zoom
+
+=== Editing the transfer function ===
+- Left click in empty areas to create a new node
+- RMB on a node to delete it
+
 === System Requirements ===
 - Microsoft Windows XP, Vista, or 7
-- NVIDIA CUDA-compatible GPU with compute capability 1.1 and at least 512 megabytes of DRAM. GeForce GTX2XX or higher is recommended
+- NVIDIA CUDA-compatible GPU with compute capability 2.0 and at least 512 megabytes of DRAM. GeForce GTX2XX is recommended
 - At least 1GB of system memory
 
 === Future Plans ===

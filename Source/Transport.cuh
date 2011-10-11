@@ -11,7 +11,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, const float& Density, CLig
 {
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, Density).ToXYZ(), GetSpecular(pScene, Density).ToXYZ(), 50.0f/*pScene->m_IOR*/, GetRoughness(pScene, Density));
+	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, Density).ToXYZ(), GetSpecular(pScene, Density).ToXYZ(), 2.0f/*pScene->m_IOR*/, GetRoughness(pScene, Density));
 	
 	// Light/shadow ray
 	CRay Rl; 

@@ -57,7 +57,6 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
  	connect(&m_AddLight, SIGNAL(clicked()), this, SLOT(OnAddLight()));
  	connect(&m_RemoveLight, SIGNAL(clicked()), this, SLOT(OnRemoveLight()));
 	connect(&m_RenameLight, SIGNAL(clicked()), this, SLOT(OnRenameLight()));
- 	connect(&m_LightList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(OnLightItemChanged(QListWidgetItem*)));
  	connect(&gLighting, SIGNAL(Changed()), this, SLOT(UpdateLightList()));
 
 	OnLightSelectionChanged();
@@ -76,31 +75,24 @@ void QLightsWidget::UpdateLightList(void)
 
 		// Add the item
 		m_LightList.addItem(pLightItem);
-
-// 		if (*gLighting.GetSelectedLight() == gLighting.m_Lights[i])
-// 		{
-// 			m_LightList.blockSignals(true);
-// 
-// 			const int Index = gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight());
-// 			m_LightList.setCurrentRow(Index, QItemSelectionModel::Select);
-// 			m_LightList.setFocus();
-// 
-// 			m_LightList.blockSignals(false);
-// 		}
-	}
-
-	QLight* pSelectedLight = gLighting.GetSelectedLight();
-
-	if (pSelectedLight != NULL)
-	{
-		m_LightList.blockSignals(true);
-//		m_LightList.setCurrentRow(gLighting.m_Lights.indexOf(*gLighting.GetSelectedLight()), QItemSelectionModel::Select);
-		m_LightList.blockSignals(false);
 	}
 
 	m_RemoveLight.setEnabled(m_LightList.currentRow() >= 0);
 	m_RenameLight.setEnabled(m_LightList.currentRow() >= 0);
 	m_CopyLight.setEnabled(m_LightList.currentRow() >= 0);
+
+	for (int i = 0; i < m_LightList.count(); i++)
+	{
+		if (((QLightItem*)m_LightList.item(i))->m_pLight == gLighting.GetSelectedLight())
+		{
+			m_LightList.blockSignals(true);
+
+			m_LightList.setCurrentRow(i, QItemSelectionModel::Select);
+			m_LightList.setFocus();
+
+			m_LightList.blockSignals(false);
+		}
+	}
 }
 
 void QLightsWidget::OnLightSelectionChanged(void)
@@ -117,15 +109,18 @@ void QLightsWidget::OnLightSelectionChanged(void)
 
 void QLightsWidget::OnLightSelectionChanged(QLight* pLight)
 {
-	UpdateLightList();
-}
+	for (int i = 0; i < m_LightList.count(); i++)
+	{
+		if (((QLightItem*)m_LightList.item(i))->m_pLight == pLight)
+		{
+			m_LightList.blockSignals(true);
 
-void QLightsWidget::OnLightItemChanged(QListWidgetItem* pWidgetItem)
-{
-	QLightItem* pLightItem = dynamic_cast<QLightItem*>(m_LightList.currentItem());
+			m_LightList.setCurrentRow(i, QItemSelectionModel::Select);
+			m_LightList.setFocus();
 
-	if (pLightItem)
-		pLightItem->m_pLight->SetName(pWidgetItem->text());
+			m_LightList.blockSignals(false);
+		}
+	}
 }
 
 void QLightsWidget::OnAddLight(void)

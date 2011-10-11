@@ -28,7 +28,6 @@ protected slots:
 	void UpdateLightList(void);
 	void OnLightSelectionChanged(void);
 	void OnLightSelectionChanged(QLight* pLight);
-	void OnLightItemChanged(QListWidgetItem* pWidgetItem);
 	void OnAddLight(void);
 	void OnRemoveLight(void);
 	void OnRenameLight(void);

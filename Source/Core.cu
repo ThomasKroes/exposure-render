@@ -65,8 +65,8 @@ CD float	gDenoiseLerpC;
 CD float	gNoIterations;
 CD float	gInvNoIterations;
 
-#define TF_NO_SAMPLES		256
-#define INV_TF_NO_SAMPLES	0.00390625f
+#define TF_NO_SAMPLES		128
+#define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -97,7 +97,7 @@ void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
 	HandleCudaError(cudaMemcpy3D(&CopyParams));
 
 	gTexDensity.normalized		= true;
-	gTexDensity.filterMode		= cudaFilterModePoint;      
+	gTexDensity.filterMode		= cudaFilterModeLinear;      
 	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
 	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
   	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
@@ -379,8 +379,8 @@ void BindConstants(CScene* pScene)
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
 
-//	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	const float FilterWeights[10] = { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+//	const float FilterWeights[10] = { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWeights", &FilterWeights, 10 * sizeof(float)));
 

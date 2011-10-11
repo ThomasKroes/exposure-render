@@ -205,11 +205,6 @@ void QRenderThread::run()
 			if (m_Pause)
 				continue;
 
-//			msleep(2);
-
-			
-
-			// Let others know we are starting with a new frame
 			gStatus.SetPreRenderFrame();
 
 			// CUDA time for profiling
@@ -243,11 +238,6 @@ void QRenderThread::run()
 				// Reset no. iterations
 				SceneCopy.SetNoIterations(0);
 
-				// Notify Inform others about the memory allocations
-//				gStatus.SetResize();
-
-				
-
 				Log("Render canvas resized to: " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()) + " x " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()) + " pixels", "application-resize");
 			}
 
@@ -263,9 +253,9 @@ void QRenderThread::run()
 			// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 			gScene.m_DirtyFlags.ClearAllFlags();
 
-			SceneCopy.m_DenoiseParams.SetWindowRadius(5.0f);
+			SceneCopy.m_DenoiseParams.SetWindowRadius(4.0f);
 			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.02f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
-			SceneCopy.m_DenoiseParams.m_Enabled = false;
+//			SceneCopy.m_DenoiseParams.m_Enabled = false;
 
 			SceneCopy.m_Camera.Update();
 
@@ -342,16 +332,12 @@ void QRenderThread::run()
 
 	Log("Device memory: " + QString::number(GetUsedCudaMemory() / MB, 'f', 2) + "/" + QString::number(GetTotalCudaMemory() / MB, 'f', 2) + " MB", "memory");
 
-	// Load default appearance, lighting and camera presets
-//	gStatus.SetLoadPreset("Default");
-
 	// Clear the histogram
 	gHistogram.Reset();
 }
 
 bool QRenderThread::Load(QString& FileName)
 {
-	
 	m_FileName = FileName;
 
 	// Create meta image reader
@@ -365,6 +351,8 @@ bool QRenderThread::Load(QString& FileName)
 		return false;
 	}
 
+	Log(QString("Loading " + QFileInfo(FileName).fileName()).toAscii());
+
 	// Exit if the reader can't read the file
 	if (!MetaImageReader->CanReadFile(m_FileName.toAscii()))
 	{
@@ -373,8 +361,6 @@ bool QRenderThread::Load(QString& FileName)
 	}
 
 	MetaImageReader->SetFileName(m_FileName.toAscii());
-
-	Log(QString("Loading " + QFileInfo(FileName).fileName()).toAscii());
 
 	MetaImageReader->Update();
 

@@ -50,18 +50,18 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 
 	m_MainLayout.addWidget(&m_GradientFactorSpinner, 4, 2);
 
-	m_MainLayout.addWidget(new QLabel("Index Of Refraction"), 5, 0);
+//	m_MainLayout.addWidget(new QLabel("Index Of Refraction"), 5, 0);
 
 	m_IndexOfRefractionSlider.setOrientation(Qt::Horizontal);
 	m_IndexOfRefractionSlider.setRange(0.001, 50.0);
 	m_IndexOfRefractionSlider.setValue(10.0);
 
-	m_MainLayout.addWidget(&m_IndexOfRefractionSlider, 5, 1);
+//	m_MainLayout.addWidget(&m_IndexOfRefractionSlider, 5, 1);
 
 	m_IndexOfRefractionSpinner.setRange(0.001, 50.0);
 	m_IndexOfRefractionSpinner.setDecimals(3);
 
-	m_MainLayout.addWidget(&m_IndexOfRefractionSpinner, 5, 2);
+//	m_MainLayout.addWidget(&m_IndexOfRefractionSpinner, 5, 2);
 
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSpinner, SIGNAL(valueChanged(double)), &m_DensityScaleSlider, SLOT(setValue(double)));
