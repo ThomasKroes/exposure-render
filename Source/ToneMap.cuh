@@ -35,5 +35,6 @@ void ToneMap(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuff
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.GetHeight() / (float)KernelBlock.y));
 
 	KrnlToneMap<<<KernelGrid, KernelBlock>>>(pDevScene);
-	HandleCudaError(cudaGetLastError());
+	cudaThreadSynchronize();
+	HandleCudaKernelError(cudaGetLastError(), "Tone Map");
 }

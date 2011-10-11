@@ -3,7 +3,7 @@
 #include "Transport.cuh"
 #include "CudaUtilities.h"
 
-#define KRNL_SS_BLOCK_W		32
+#define KRNL_SS_BLOCK_W		16
 #define KRNL_SS_BLOCK_H		8
 #define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
 
@@ -27,11 +27,13 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds)
  	pScene->m_Camera.GenerateRay(UV, RNG.Get2(), Re.m_O, Re.m_D);
 
 	Re.m_MinT = 0.0f; 
-	Re.m_MaxT = FLT_MAX;
+	Re.m_MaxT = 1500.0f;
 
 	Vec3f Pe, Pl;
 	
 	CLight* pLight = NULL;
+
+//	return;
 
 	if (SampleDistanceRM(Re, RNG, Pe, pScene))
 	{
@@ -81,8 +83,6 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds)
 			Lv = Li;
 	}
 	
-	__syncthreads();
-
 	float4 ColorXYZA = make_float4(Lv.c[0], Lv.c[1], Lv.c[2], 0.0f);
 	surf2Dwrite(ColorXYZA, gSurfFrameEstimateXyza, X * sizeof(float4), Y);
 }
@@ -93,5 +93,6 @@ void SingleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds)
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	KrnlSingleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds);
-	HandleCudaError(cudaGetLastError());
+	cudaThreadSynchronize();
+	HandleCudaKernelError(cudaGetLastError(), "Single Scattering");
 }

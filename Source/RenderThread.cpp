@@ -500,11 +500,9 @@ bool QRenderThread::Load(QString& FileName)
 	gStatus.SetStatisticChanged("Bounding Box", "Max", FormatVector(gScene.m_BoundingBox.m_MaxP, 2), "m");
 	gStatus.SetStatisticChanged("Volume", "Physical Size", FormatSize(PhysicalSize, 2), "mm");
 	gStatus.SetStatisticChanged("Volume", "Resolution", FormatSize(gScene.m_Resolution.GetResXYZ()), "Voxels");
-//	gStatus.SetStatisticChanged("Volume", "Extinction Resolution", FormatSize(Vec3i((int)gScene.m_ExtinctionSize.width, (int)gScene.m_ExtinctionSize.height, (int)gScene.m_ExtinctionSize.depth)), "Voxels");
 	gStatus.SetStatisticChanged("Volume", "Spacing", FormatSize(gScene.m_Spacing, 2), "mm");
 	gStatus.SetStatisticChanged("Volume", "No. Voxels", QString::number(gScene.m_Resolution.GetNoElements()), "Voxels");
 	gStatus.SetStatisticChanged("Volume", "Density Range", "[" + QString::number(gScene.m_IntensityRange.GetMin()) + ", " + QString::number(gScene.m_IntensityRange.GetMax()) + "]", "");
-	/**/
 	
 	return true;
 }

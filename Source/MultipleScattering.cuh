@@ -78,5 +78,6 @@ void MultipleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds)
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 	
 	KrnlMultipleScattering<<<KernelGrid, KernelBlock>>>(pDevScene, pSeeds);
-	HandleCudaError(cudaGetLastError());
+	cudaThreadSynchronize();
+	HandleCudaKernelError(cudaGetLastError(), "Multiple Scattering");
 }

@@ -90,5 +90,6 @@ void Denoise(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuff
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
 	KNN<<<KernelGrid, KernelBlock>>>(CudaFrameBuffers.m_pDevRgbLdrDisp);
-	HandleCudaError(cudaGetLastError());
+	cudaThreadSynchronize();
+	HandleCudaKernelError(cudaGetLastError(), "Noise Reduction");
 }

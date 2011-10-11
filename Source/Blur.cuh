@@ -155,8 +155,10 @@ void BlurImageXyz(CScene* pScene, CScene* pDevScene)
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
 	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>();
-	HandleCudaError(cudaGetLastError());
-
+	cudaThreadSynchronize();
+	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate H");
+	
 	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>();
-	HandleCudaError(cudaGetLastError());
+	cudaThreadSynchronize();
+	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate V");
 }

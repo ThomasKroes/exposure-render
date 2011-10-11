@@ -126,6 +126,8 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 
 DEV CColorXyz UniformSampleOneLight(CScene* pScene, const float& Density, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& Rnd, const bool& Brdf)
 {
+	return CColorXyz(0.0f);
+
 	// Determine no. lights
 	const int NumLights = pScene->m_Lighting.m_NoLights;
 

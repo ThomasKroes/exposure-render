@@ -150,12 +150,20 @@ bool InitializeCuda(void)
 	return cudaSetDevice(cutGetMaxGflopsDeviceId()) == cudaSuccess;
 }
 
-void HandleCudaError(const cudaError_t CudaError)
+void HandleCudaError(const cudaError_t CudaError, const char* pDescription /*= ""*/)
 {
 	if (CudaError == cudaSuccess)
 		return;
 
-	throw new QString("Encountered a critical CUDA error: " + QString(cudaGetErrorString(CudaError)));
+	throw new QString("Encountered a critical CUDA error: " + QString::fromAscii(pDescription) + QString(cudaGetErrorString(CudaError)));
+}
+
+void HandleCudaKernelError(const cudaError_t CudaError, const char* pName /*= ""*/)
+{
+	if (CudaError == cudaSuccess)
+		return;
+
+	throw new QString("The '" + QString::fromAscii(pName) + "' kernel caused the following CUDA runtime error: " + QString(cudaGetErrorString(CudaError)));
 }
 
 int GetTotalCudaMemory(void)

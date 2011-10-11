@@ -75,5 +75,6 @@ void SpecularBloom(CScene& Scene, CScene* pDevScene, int* pSeeds, CCudaFrameBuff
 	const dim3 KernelGrid((int)ceilf((float)Scene.m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)Scene.m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
 	KrnlSpecularBloom<<<KernelGrid, KernelBlock>>>(pSeeds);
-	HandleCudaError(cudaGetLastError());
+	cudaThreadSynchronize();
+	HandleCudaKernelError(cudaGetLastError(), "Specular Bloom");
 }

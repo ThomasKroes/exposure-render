@@ -97,7 +97,7 @@ void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
 	HandleCudaError(cudaMemcpy3D(&CopyParams));
 
 	gTexDensity.normalized		= true;
-	gTexDensity.filterMode		= cudaFilterModeLinear;      
+	gTexDensity.filterMode		= cudaFilterModePoint;      
 	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
 	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
   	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
@@ -375,7 +375,7 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gFilmHeight", &Filmheight, sizeof(int)));
 	HandleCudaError(cudaMemcpyToSymbol("gFilmNoPixels", &FilmNoPixels, sizeof(int)));
 
-	const int FilterWidth = 9;
+	const int FilterWidth = 2;
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
 
