@@ -2,8 +2,8 @@
 
 #include "Geometry.h"
 #include "RNG.h"
-#include "Light.h"
 #include "Flags.h"
+#include "MonteCarlo.h"
 
 class EXPOSURE_RENDER_DLL CCameraSample
 {

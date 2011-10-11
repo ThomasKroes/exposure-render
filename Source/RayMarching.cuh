@@ -2,6 +2,7 @@
 
 #include "Geometry.h"
 #include "Scene.h"
+#include "CudaUtilities.h"
 
 DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, CScene* pScene)
 {

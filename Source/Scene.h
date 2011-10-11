@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Light.h"
 #include "Flags.h"
-
 #include "CameraInline.h"
+#include "LightInline.h"
 
 class EXPOSURE_RENDER_DLL CDenoiseParams
 {

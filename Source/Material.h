@@ -1,7 +1,7 @@
 
 #include "Geometry.h"
 #include "MonteCarlo.h"
-#include "Light.h"
+#include "LightInline.h"
 
 class CLambertian
 {

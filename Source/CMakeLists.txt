@@ -54,13 +54,14 @@ SET(ExposureRenderSources
 	SettingsDockWidget.cpp
 
 	# Lighting
-	LightSettingsWidget.cpp 
+	LightWidget.cpp 
 	LightingDockWidget.cpp 
 	LightsWidget.cpp
 	LightingWidget.cpp
 	Lighting.cpp
+	Light.cpp
 	Background.cpp
-	BackgroundIlluminationWidget.cpp
+	BackgroundWidget.cpp
 
 	# Appearance
 	TransferFunction.cpp
@@ -107,7 +108,6 @@ SET(ExposureRenderSources
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
-	Light.cpp
 	MonteCarlo.cpp
 	RNG.cpp
 	Spectrum.cpp
@@ -141,13 +141,14 @@ SET(ExposureRenderHeaders
 	SettingsDockWidget.h
 
 	# Lighting
-	LightSettingsWidget.h
+	LightWidget.h
 	LightingDockWidget.h
 	LightsWidget.h
 	LightingWidget.h
 	Lighting.h
+	Light.h
 	Background.h
-	BackgroundIlluminationWidget.h
+	BackgroundWidget.h
 
 	# Appearance
 	TransferFunction.h
@@ -197,7 +198,7 @@ SET(ExposureRenderHeaders
 	Filter.h
 	Flags.h
 	Geometry.h
-	Light.h
+	LightInline.h
 	MonteCarlo.h
 	RNG.h
 	Spectrum.h
@@ -232,13 +233,14 @@ SET(ExposureRenderMocHeaders
 	AboutDialog.h
 
 	# Lighting
-	LightSettingsWidget.h
+	LightWidget.h
 	LightingDockWidget.h
 	LightsWidget.h
 	LightingWidget.h
 	Lighting.h
+	Light.h
 	Background.h
-	BackgroundIlluminationWidget.h
+	BackgroundWidget.h
 
 	# Appearance
 	TransferFunction.h
@@ -390,20 +392,22 @@ SOURCE_GROUP("Appearance" FILES ${AppearanceSources})
 
 # Lighting sources
 SET(LightingSources
-	LightSettingsWidget.h
+	LightWidget.h
 	LightingDockWidget.h
 	LightsWidget.h
 	LightingWidget.h
 	Lighting.h
+	Light.h
 	Background.h
-	BackgroundIlluminationWidget.h
-	LightSettingsWidget.cpp 
+	BackgroundWidget.h
+	LightWidget.cpp 
 	LightingDockWidget.cpp 
 	LightsWidget.cpp
 	LightingWidget.cpp
 	Lighting.cpp
+	Light.cpp
 	Background.cpp
-	BackgroundIlluminationWidget.cpp
+	BackgroundWidget.cpp
 )
 
 # Make the lighting group
@@ -469,7 +473,7 @@ SET(CoreSources
 	Filter.h
 	Flags.h
 	Geometry.h
-	Light.h
+	LightInline.h
 	MonteCarlo.h
 	Spectrum.h
 	InteractorStyleRealisticCamera.h
@@ -489,7 +493,6 @@ SET(CoreSources
 	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
-	Light.cpp
 	MonteCarlo.cpp
 	Spectrum.cpp
 	InteractorStyleRealisticCamera.cpp

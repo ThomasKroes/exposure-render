@@ -2,12 +2,12 @@
 
 class QLight;
 
-class QLightSettingsWidget : public QGroupBox
+class QLightWidget : public QGroupBox
 {
     Q_OBJECT
 
 public:
-    QLightSettingsWidget(QWidget* pParent = NULL);
+    QLightWidget(QWidget* pParent = NULL);
 
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 

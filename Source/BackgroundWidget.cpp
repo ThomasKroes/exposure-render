@@ -2,11 +2,11 @@
 // Precompiled headers
 #include "Stable.h"
 
-#include "BackgroundIlluminationWidget.h"
+#include "BackgroundWidget.h"
 #include "LightsWidget.h"
 #include "RenderThread.h"
 
-QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
+QBackgroundWidget::QBackgroundWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_MainLayout(),
 	m_GradientColorTopLabel(),
@@ -61,10 +61,10 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_IntensityLabel, 3, 0);
 
 	m_IntensitySlider.setOrientation(Qt::Horizontal);
-	m_IntensitySlider.setRange(0.0, 10000.0);
+	m_IntensitySlider.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_IntensitySlider, 3, 1, 1, 2);
 
-	m_IntensitySpinner.setRange(0.0, 10000.0);
+	m_IntensitySpinner.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_IntensitySpinner, 3, 3);
 
 	QObject::connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinner, SLOT(setValue(double)));
@@ -96,41 +96,41 @@ QBackgroundIlluminationWidget::QBackgroundIlluminationWidget(QWidget* pParent) :
 	OnBackgroundChanged();
 }
 
-void QBackgroundIlluminationWidget::OnBackgroundIlluminationChanged(bool Checked)
+void QBackgroundWidget::OnBackgroundIlluminationChanged(bool Checked)
 {
 	gLighting.Background().SetEnabled(Checked);
 }
 
-void QBackgroundIlluminationWidget::OnGradientColorTopChanged(const QColor& Color)
+void QBackgroundWidget::OnGradientColorTopChanged(const QColor& Color)
 {
 	gLighting.Background().SetTopColor(Color);
 }
 
-void QBackgroundIlluminationWidget::OnGradientColorMiddleChanged(const QColor& Color)
+void QBackgroundWidget::OnGradientColorMiddleChanged(const QColor& Color)
 {
 	gLighting.Background().SetMiddleColor(Color);
 }
 
-void QBackgroundIlluminationWidget::OnGradientColorBottomChanged(const QColor& Color)
+void QBackgroundWidget::OnGradientColorBottomChanged(const QColor& Color)
 {
 	gLighting.Background().SetBottomColor(Color);
 }
 
-void QBackgroundIlluminationWidget::OnIntensityChanged(double Intensity)
+void QBackgroundWidget::OnIntensityChanged(double Intensity)
 {
 	gLighting.Background().SetIntensity(Intensity);
 }
 
-void QBackgroundIlluminationWidget::OnUseTextureChanged(int UseTexture)
+void QBackgroundWidget::OnUseTextureChanged(int UseTexture)
 {
 	gLighting.Background().SetUseTexture(UseTexture);
 }
 
-void QBackgroundIlluminationWidget::OnLoadTexture(void)
+void QBackgroundWidget::OnLoadTexture(void)
 {
 }
 
-void QBackgroundIlluminationWidget::OnBackgroundChanged(void)
+void QBackgroundWidget::OnBackgroundChanged(void)
 {
 	setChecked(gLighting.Background().GetEnabled());
 

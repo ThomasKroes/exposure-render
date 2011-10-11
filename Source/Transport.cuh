@@ -5,13 +5,12 @@
 #include "Scene.h"
 
 #include "RayMarching.cuh"
-#include "Woodcock.cuh"
 
 DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& Rnd)
 {
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, Density).ToXYZ(), GetSpecular(pScene, Density).ToXYZ(), 2.0f/*pScene->m_IOR*/, GetRoughness(pScene, Density));
+	CBSDF Bsdf(N, Wo, GetDiffuse(pScene, Density).ToXYZ(), GetSpecular(pScene, Density).ToXYZ(), 1.5f/*pScene->m_IOR*/, GetRoughness(pScene, Density));
 	
 	// Light/shadow ray
 	CRay Rl; 

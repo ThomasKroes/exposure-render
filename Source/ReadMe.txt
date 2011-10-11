@@ -30,6 +30,7 @@ For a head start you can open one of the demo files, which come with appearance,
 - Performance optimizations
 - OpenCL support
 - HDRI textured lights
+- Specular Bloom
 - Clipping
 - Mesh based lights
 - More advanced 2D sampling schemes

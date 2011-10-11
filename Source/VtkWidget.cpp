@@ -5,7 +5,6 @@
 #include "VtkWidget.h"
 #include "MainWindow.h"
 
-// Key press callback
 void KeyPressCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* pCallData)
 {
  	vtkRenderWindowInteractor* pRenderWindowInteractor = static_cast<vtkRenderWindowInteractor*>(pCaller);
@@ -15,13 +14,10 @@ void KeyPressCallbackFunction(vtkObject* pCaller, long unsigned int EventId, voi
  	if (strcmp(pKeySymbol, "space") == 0)
  	{
 		pRenderWindowInteractor->SetInteractorStyle(gpMainWindow->m_VtkWidget.m_InteractorStyleImage);
- 
- 		// Change the cursor to a pointing, thus indicating the change in interaction mode
- 		gpMainWindow->setCursor(QCursor(Qt::CursorShape::PointingHandCursor));
+ 		gpMainWindow->setCursor(QCursor(Qt::PointingHandCursor));
  	}
 }
 
-// Key press callback
 void KeyReleaseCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* pCallData)
 {
  	vtkRenderWindowInteractor* pRenderWindowInteractor = static_cast<vtkRenderWindowInteractor*>(pCaller);
@@ -31,9 +27,7 @@ void KeyReleaseCallbackFunction(vtkObject* pCaller, long unsigned int EventId, v
  	if (strcmp(pKeySymbol, "space") == 0)
  	{
  		pRenderWindowInteractor->SetInteractorStyle(gpMainWindow->m_VtkWidget.m_InteractorStyleRealisticCamera);
- 
- 		// Change the cursor to a pointing, thus indicating the change in interaction mode
- 		gpMainWindow->setCursor(QCursor(Qt::CursorShape::ArrowCursor));
+ 		gpMainWindow->setCursor(QCursor(Qt::ArrowCursor));
  	}
 }
 

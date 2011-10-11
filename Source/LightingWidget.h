@@ -1,8 +1,8 @@
 #pragma once
 
 #include "LightsWidget.h"
-#include "LightSettingsWidget.h"
-#include "BackgroundIlluminationWidget.h"
+#include "LightWidget.h"
+#include "BackgroundWidget.h"
 #include "PresetsWidget.h"
 #include "Lighting.h"
 
@@ -18,9 +18,9 @@ public slots:
 	void OnSavePreset(const QString& Name);
 
 protected:
-	QGridLayout						m_MainLayout;
-	QLightsWidget					m_LightsWidget;
-	QLightSettingsWidget			m_LightSettingsWidget;
-	QBackgroundIlluminationWidget	m_BackgroundIlluminationWidget;
-	QPresetsWidget<QLighting>		m_PresetsWidget;
+	QGridLayout					m_MainLayout;
+	QLightsWidget				m_LightsWidget;
+	QLightWidget				m_LightSettingsWidget;
+	QBackgroundWidget			m_BackgroundIlluminationWidget;
+	QPresetsWidget<QLighting>	m_PresetsWidget;
 };

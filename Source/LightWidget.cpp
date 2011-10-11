@@ -2,11 +2,11 @@
 // Precompiled headers
 #include "Stable.h"
 
-#include "LightSettingsWidget.h"
+#include "LightWidget.h"
 #include "LightsWidget.h"
 #include "RenderThread.h"
 
-QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
+QLightWidget::QLightWidget(QWidget* pParent) :
 	QGroupBox(pParent),
 	m_MainLayout(),
 	m_ThetaLabel(),
@@ -151,10 +151,10 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
     m_IntensitySlider.setFocusPolicy(Qt::StrongFocus);
     m_IntensitySlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_IntensitySlider.setSingleStep(1);
-	m_IntensitySlider.setRange(0.0, 100000.0);
+	m_IntensitySlider.setRange(0.0, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySlider, 8, 1);
 	
-    m_IntensitySpinBox.setRange(0.0, 100000.0);
+    m_IntensitySpinBox.setRange(0.0, 1000.0);
 	m_MainLayout.addWidget(&m_IntensitySpinBox, 8, 2);
 	
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
@@ -165,7 +165,7 @@ QLightSettingsWidget::QLightSettingsWidget(QWidget* pParent) :
 	OnLightSelectionChanged(NULL);
 }
 
-void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
+void QLightWidget::OnLightSelectionChanged(QLight* pLight)
 {
 	QObject::disconnect(this, SLOT(OnLightThetaChanged(QLight*)));
 	QObject::disconnect(this, SLOT(OnLightPhiChanged(QLight*)));
@@ -200,7 +200,7 @@ void QLightSettingsWidget::OnLightSelectionChanged(QLight* pLight)
 	OnLightIntensityChanged(pLight);
 }
 
-void QLightSettingsWidget::OnThetaChanged(const double& Theta)
+void QLightWidget::OnThetaChanged(const double& Theta)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -208,7 +208,7 @@ void QLightSettingsWidget::OnThetaChanged(const double& Theta)
 	gLighting.GetSelectedLight()->SetTheta((float)Theta);
 }
 
-void QLightSettingsWidget::OnPhiChanged(const double& Phi)
+void QLightWidget::OnPhiChanged(const double& Phi)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -216,7 +216,7 @@ void QLightSettingsWidget::OnPhiChanged(const double& Phi)
 	gLighting.GetSelectedLight()->SetPhi((float)Phi);
 }
 
-void QLightSettingsWidget::OnDistanceChanged(const double& Distance)
+void QLightWidget::OnDistanceChanged(const double& Distance)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -224,7 +224,7 @@ void QLightSettingsWidget::OnDistanceChanged(const double& Distance)
 	gLighting.GetSelectedLight()->SetDistance((float)Distance);
 }
 
-void QLightSettingsWidget::OnWidthChanged(const double& Width)
+void QLightWidget::OnWidthChanged(const double& Width)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -232,7 +232,7 @@ void QLightSettingsWidget::OnWidthChanged(const double& Width)
 	gLighting.GetSelectedLight()->SetWidth(Width);
 }
 
-void QLightSettingsWidget::OnLockSizeChanged(int LockSize)
+void QLightWidget::OnLockSizeChanged(int LockSize)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -240,7 +240,7 @@ void QLightSettingsWidget::OnLockSizeChanged(int LockSize)
 	gLighting.GetSelectedLight()->SetLockSize((bool)LockSize);
 }
 
-void QLightSettingsWidget::OnHeightChanged(const double& Height)
+void QLightWidget::OnHeightChanged(const double& Height)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -248,7 +248,7 @@ void QLightSettingsWidget::OnHeightChanged(const double& Height)
 	gLighting.GetSelectedLight()->SetHeight(Height);
 }
 
-void QLightSettingsWidget::OnCurrentColorChanged(const QColor& Color)
+void QLightWidget::OnCurrentColorChanged(const QColor& Color)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -258,7 +258,7 @@ void QLightSettingsWidget::OnCurrentColorChanged(const QColor& Color)
 	m_ColorButton.SetColor(Color);
 }
 
-void QLightSettingsWidget::OnIntensityChanged(const double& Intensity)
+void QLightWidget::OnIntensityChanged(const double& Intensity)
 {
 	if (!gLighting.GetSelectedLight())
 		return;
@@ -266,7 +266,7 @@ void QLightSettingsWidget::OnIntensityChanged(const double& Intensity)
 	gLighting.GetSelectedLight()->SetIntensity((float)Intensity);
 }
 
-void QLightSettingsWidget::OnLightThetaChanged(QLight* pLight)
+void QLightWidget::OnLightThetaChanged(QLight* pLight)
 {
 	const bool Enable = pLight != NULL;
 
@@ -281,7 +281,7 @@ void QLightSettingsWidget::OnLightThetaChanged(QLight* pLight)
 	m_ThetaSpinBox.setEnabled(Enable);
 }
 
-void QLightSettingsWidget::OnLightPhiChanged(QLight* pLight)
+void QLightWidget::OnLightPhiChanged(QLight* pLight)
 {
 	const bool Enable = pLight != NULL;
 
@@ -296,7 +296,7 @@ void QLightSettingsWidget::OnLightPhiChanged(QLight* pLight)
 	m_PhiSpinBox.setEnabled(Enable);
 }
 
-void QLightSettingsWidget::OnLightDistanceChanged(QLight* pLight)
+void QLightWidget::OnLightDistanceChanged(QLight* pLight)
 {
 	const bool Enable = pLight != NULL;
 
@@ -311,7 +311,7 @@ void QLightSettingsWidget::OnLightDistanceChanged(QLight* pLight)
 	m_DistanceSpinner.setEnabled(Enable);
 }
 
-void QLightSettingsWidget::OnLightWidthChanged(QLight* pLight)
+void QLightWidget::OnLightWidthChanged(QLight* pLight)
 {
 	const bool Enable = pLight != NULL;
 
@@ -326,7 +326,7 @@ void QLightSettingsWidget::OnLightWidthChanged(QLight* pLight)
 	m_WidthSpinner.setEnabled(Enable);
 }
 
-void QLightSettingsWidget::OnLightLockSizeChanged(QLight* pLight)
+void QLightWidget::OnLightLockSizeChanged(QLight* pLight)
 {
 	bool Enable = true;
 
@@ -359,7 +359,7 @@ void QLightSettingsWidget::OnLightLockSizeChanged(QLight* pLight)
 	m_HeightSpinner.setEnabled(Enable);
 }
 
-void QLightSettingsWidget::OnLightHeightChanged(QLight* pLight)
+void QLightWidget::OnLightHeightChanged(QLight* pLight)
 {
 	bool Enable = pLight ? (pLight->GetLockSize() ? false : true) : false;
 
@@ -374,7 +374,7 @@ void QLightSettingsWidget::OnLightHeightChanged(QLight* pLight)
 	m_HeightSpinner.setEnabled(Enable);
 }
 
-void QLightSettingsWidget::OnLightColorChanged(QLight* pLight)
+void QLightWidget::OnLightColorChanged(QLight* pLight)
 {
 	bool Enable = pLight!= NULL;
 
@@ -387,7 +387,7 @@ void QLightSettingsWidget::OnLightColorChanged(QLight* pLight)
 	m_ColorButton.setEnabled(Enable);
 }
 
-void QLightSettingsWidget::OnLightIntensityChanged(QLight* pLight)
+void QLightWidget::OnLightIntensityChanged(QLight* pLight)
 {
 	const bool Enable = pLight!= NULL;
 

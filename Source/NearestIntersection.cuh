@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cuda_runtime.h>
-#include <cutil.h>
-
 #include "CudaUtilities.h"
 
 #define KRNL_NI_BLOCK_W		1

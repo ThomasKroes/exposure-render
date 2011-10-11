@@ -4,9 +4,6 @@
 #include "Utilities.cuh"
 #include "CudaUtilities.h"
 
-#include <cuda_runtime.h>
-#include <cutil.h>
-
 #define KRNL_DENOISE_BLOCK_W		16
 #define KRNL_DENOISE_BLOCK_H		8
 #define KRNL_DENOISE_BLOCK_SIZE	KRNL_DENOISE_BLOCK_W * KRNL_DENOISE_BLOCK_H

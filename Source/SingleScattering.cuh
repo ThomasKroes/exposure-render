@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Transport.cuh"
-#include "CudaUtilities.h"
 
 #define KRNL_SS_BLOCK_W		16
 #define KRNL_SS_BLOCK_H		8

@@ -557,7 +557,7 @@ void QRenderThread::OnUpdateCamera(void)
 {
 	QMutexLocker Locker(&gSceneMutex);
 
-	gScene.m_Camera.m_Film.m_Exposure = (1.001f - gCamera.GetFilm().GetExposure()) * 1000.0f;
+	gScene.m_Camera.m_Film.m_Exposure = 1.0f - gCamera.GetFilm().GetExposure();
 
 	if (gCamera.GetFilm().IsDirty())
 	{
