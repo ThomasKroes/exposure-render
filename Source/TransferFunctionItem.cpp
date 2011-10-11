@@ -212,8 +212,9 @@ void QTransferFunctionItem::UpdatePolygon(void)
 
 		if (i == 0)
 		{
-			CanvasPoint.setY(rect().height());
-			m_Polygon.append(CanvasPoint);
+			QPoint CanvasCopyPoint = CanvasPoint;
+			CanvasCopyPoint.setY(rect().height());
+			m_Polygon.append(CanvasCopyPoint);
 		}
 
 		m_Polygon.append(CanvasPoint);

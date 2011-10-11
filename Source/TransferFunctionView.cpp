@@ -123,7 +123,7 @@ void QTFView::mousePressEvent(QMouseEvent* pEvent)
 	if (!pNodeItem)
 	{
 		// Add a new node if the user clicked the left button
-		if (pEvent->button() == Qt::LeftButton && m_CanvasRectangle.contains(pEvent->pos() - QPoint(m_Margin.GetLeft(), m_Margin.GetRight())))
+		if (pEvent->button() == Qt::LeftButton && m_CanvasRectangle.contains(pEvent->pos()))
 		{
 			// Convert picked position to transfer function coordinates
 			QPointF TransferFunctionPoint((pEvent->posF().x() - m_Margin.GetLeft()) / m_CanvasRectangle.width(), (pEvent->posF().y() - m_Margin.GetTop()) / m_CanvasRectangle.height());

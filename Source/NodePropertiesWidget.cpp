@@ -190,6 +190,9 @@ void QNodePropertiesWidget::OnGlossinessChanged(const double& Glossiness)
 
 void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 {
+	m_IntensitySlider.blockSignals(true);
+	m_IntensitySpinBox.blockSignals(true);
+
 	bool Enable = false;
 
 	if (pNode)
@@ -208,6 +211,9 @@ void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 	m_IntensityLabel.setEnabled(Enable);
 	m_IntensitySlider.setEnabled(Enable);
 	m_IntensitySpinBox.setEnabled(Enable);
+
+	m_IntensitySlider.blockSignals(false);
+	m_IntensitySpinBox.blockSignals(false);
 }
 
 void QNodePropertiesWidget::OnNodeOpacityChanged(QNode* pNode)

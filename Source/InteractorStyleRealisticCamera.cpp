@@ -10,9 +10,9 @@ CFlags gMouseButtonFlags;
 
 vtkStandardNewMacro(vtkRealisticCameraStyle);
 
-float vtkRealisticCameraStyle::m_OrbitSpeed				= 600.0f;
-float vtkRealisticCameraStyle::m_PanSpeed				= 300.0f;
-float vtkRealisticCameraStyle::m_ZoomSpeed				= 500.0f;
+float vtkRealisticCameraStyle::m_OrbitSpeed				= 1.0f;
+float vtkRealisticCameraStyle::m_PanSpeed				= 1.0f;
+float vtkRealisticCameraStyle::m_ZoomSpeed				= 1000.0f;
 float vtkRealisticCameraStyle::m_ContinuousZoomSpeed	= 0.0000001f;
 float vtkRealisticCameraStyle::m_ApertureSpeed			= 0.001f;
 float vtkRealisticCameraStyle::m_FovSpeed				= 0.5f;
@@ -135,7 +135,7 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 			{
 				GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-				gScene.m_Camera.Orbit(0.6f * m_OrbitSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / gScene.m_Camera.m_Film.m_Resolution.GetResY()), -m_OrbitSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / gScene.m_Camera.m_Film.m_Resolution.GetResX()));
+				gScene.m_Camera.Orbit(0.6f * m_OrbitSpeed * (float)(m_NewPos[1] - m_OldPos[1]), -m_OrbitSpeed * (float)(m_NewPos[0] - m_OldPos[0]));
 
 				GetLastPos(m_OldPos[0], m_OldPos[1]);
 
@@ -150,7 +150,7 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 	{
 		GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-		gScene.m_Camera.Pan(m_PanSpeed * ((float)(m_NewPos[1] - m_OldPos[1]) / gScene.m_Camera.m_Film.m_Resolution.GetResY()), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0]) / gScene.m_Camera.m_Film.m_Resolution.GetResX()));
+		gScene.m_Camera.Pan(m_PanSpeed * (float)(m_NewPos[1] - m_OldPos[1]), -m_PanSpeed * ((float)(m_NewPos[0] - m_OldPos[0])));
 
 		GetLastPos(m_OldPos[0], m_OldPos[1]);
 
@@ -163,7 +163,7 @@ void vtkRealisticCameraStyle::OnMouseMove(void)
 	{
 		GetLastPos(m_NewPos[0], m_NewPos[1]);
 
-		gScene.m_Camera.Zoom(-0.000001f * m_ContinuousZoomSpeed * (float)(m_NewPos[1] - m_OldPos[1]));
+		gScene.m_Camera.Zoom(-(float)(m_NewPos[1] - m_OldPos[1]));
 
 		GetLastPos(m_OldPos[0], m_OldPos[1]);
 

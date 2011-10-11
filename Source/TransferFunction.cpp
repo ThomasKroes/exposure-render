@@ -174,7 +174,7 @@ void QTransferFunction::AddNode(const QNode& Node)
 		m_Nodes[i].m_ID = i;
 
 	// Update ranges
-//	UpdateNodeRanges();
+	UpdateNodeRanges();
 
 	// Notify us when the node changes
 	connect(&CacheNode, SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));

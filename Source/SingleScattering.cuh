@@ -33,8 +33,6 @@ KERNEL void KrnlSingleScattering(CScene* pScene, int* pSeeds)
 	
 	CLight* pLight = NULL;
 
-//	return;
-
 	if (SampleDistanceRM(Re, RNG, Pe, pScene))
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
