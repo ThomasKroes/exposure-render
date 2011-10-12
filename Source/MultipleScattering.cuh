@@ -35,7 +35,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds)
 
 	for (int i = 0; i < 2; i++)
 	{
-		if (SampleDistanceRM(Re, RNG, Pe, pScene))
+		if (SampleDistanceRM(Re, RNG, Pe))
 		{
 			if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 			{
@@ -44,11 +44,11 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds)
 				return;
 			}
 		 
-			const float D = GetNormalizedIntensity(pScene, Pe);
+			const float D = GetNormalizedIntensity(Pe);
 
-			Lv += Tr * GetEmission(pScene, D).ToXYZ();
+			Lv += Tr * GetEmission(D).ToXYZ();
 
-			Lv += Tr * 0.5f * UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(pScene, Pe), RNG, false);
+			Lv += Tr * 0.5f * UniformSampleOneLight(pScene, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
 		}
 		else
 		{

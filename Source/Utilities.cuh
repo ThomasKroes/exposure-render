@@ -11,53 +11,53 @@ DEV inline Vec3f ToVec3f(const float3& V)
 	return Vec3f(V.x, V.y, V.z);
 }
 
-DEV float GetNormalizedIntensity(CScene* pScene, const Vec3f& P)
+DEV float GetNormalizedIntensity(const Vec3f& P)
 {
 	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, P.x * gInvAaBbMax.x, P.y * gInvAaBbMax.y, P.z * gInvAaBbMax.z));
 
-	return (Intensity - gIntensityMin) * gIntensityInvRange;
+	return 0.3f;//(Intensity - gIntensityMin) * gIntensityInvRange;
 }
 
-DEV float GetOpacity(CScene* pScene, const float& NormalizedIntensity)
+DEV float GetOpacity(const float& NormalizedIntensity)
 {
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEV CColorRgbHdr GetDiffuse(CScene* pScene, const float& NormalizedIntensity)
+DEV CColorRgbHdr GetDiffuse(const float& NormalizedIntensity)
 {
 	float4 Diffuse = tex1D(gTexDiffuse, NormalizedIntensity);
 	return CColorRgbHdr(Diffuse.x, Diffuse.y, Diffuse.z);
 }
 
-DEV CColorRgbHdr GetSpecular(CScene* pScene, const float& NormalizedIntensity)
+DEV CColorRgbHdr GetSpecular(const float& NormalizedIntensity)
 {
 	float4 Specular = tex1D(gTexSpecular, NormalizedIntensity);
 	return CColorRgbHdr(Specular.x, Specular.y, Specular.z);
 }
 
-DEV float GetRoughness(CScene* pScene, const float& NormalizedIntensity)
+DEV float GetRoughness(const float& NormalizedIntensity)
 {
 	return tex1D(gTexRoughness, NormalizedIntensity);
 }
 
-DEV CColorRgbHdr GetEmission(CScene* pScene, const float& NormalizedIntensity)
+DEV CColorRgbHdr GetEmission(const float& NormalizedIntensity)
 {
 	float4 Emission = tex1D(gTexEmission, NormalizedIntensity);
 	return CColorRgbHdr(Emission.x, Emission.y, Emission.z);
 }
 
-DEV inline Vec3f NormalizedGradient(CScene* pScene, const Vec3f& P)
+DEV inline Vec3f NormalizedGradient(const Vec3f& P)
 {
 	Vec3f Gradient;
 
-	Gradient.x = (GetNormalizedIntensity(pScene, P + ToVec3f(gGradientDeltaX)) - GetNormalizedIntensity(pScene, P - ToVec3f(gGradientDeltaX))) * gInvGradientDelta;
-	Gradient.y = (GetNormalizedIntensity(pScene, P + ToVec3f(gGradientDeltaY)) - GetNormalizedIntensity(pScene, P - ToVec3f(gGradientDeltaY))) * gInvGradientDelta;
-	Gradient.z = (GetNormalizedIntensity(pScene, P + ToVec3f(gGradientDeltaZ)) - GetNormalizedIntensity(pScene, P - ToVec3f(gGradientDeltaZ))) * gInvGradientDelta;
+	Gradient.x = (GetNormalizedIntensity(P + ToVec3f(gGradientDeltaX)) - GetNormalizedIntensity(P - ToVec3f(gGradientDeltaX))) * gInvGradientDelta;
+	Gradient.y = (GetNormalizedIntensity(P + ToVec3f(gGradientDeltaY)) - GetNormalizedIntensity(P - ToVec3f(gGradientDeltaY))) * gInvGradientDelta;
+	Gradient.z = (GetNormalizedIntensity(P + ToVec3f(gGradientDeltaZ)) - GetNormalizedIntensity(P - ToVec3f(gGradientDeltaZ))) * gInvGradientDelta;
 
 	return Normalize(Gradient);
 }
 
-DEV float GradientMagnitude(CScene* pScene, const Vec3f& P)
+DEV float GradientMagnitude(const Vec3f& P)
 {
 	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gInvAaBbMax.x, P.y * gInvAaBbMax.y, P.z * gInvAaBbMax.z));
 }

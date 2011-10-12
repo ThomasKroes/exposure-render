@@ -4,7 +4,7 @@
 #include "Scene.h"
 #include "CudaUtilities.h"
 
-DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, CScene* pScene)
+DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -27,7 +27,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, CScene* pScene)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= gDensityScale * GetOpacity(pScene, GetNormalizedIntensity(pScene, Ps));
+		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps));
 
 		Sum		+= SigmaT * gStepSize;
 		MinT	+= gStepSize;
@@ -36,7 +36,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, CScene* pScene)
 	return true;
 }
 
-DEV inline bool FreePathRM(CRay& R, CRNG& RNG, CScene* pScene)
+DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -61,7 +61,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG, CScene* pScene)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= gDensityScale * GetOpacity(pScene, GetNormalizedIntensity(pScene, Ps));
+		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps));
 
 		Sum		+= SigmaT * gStepSizeShadow;
 		MinT	+= gStepSizeShadow;
@@ -88,7 +88,7 @@ DEV inline bool NearestIntersection(CRay R, CScene* pScene, float& T)
 	{
 		Ps = R.m_O + T * R.m_D;
 
-		if (GetOpacity(pScene, GetNormalizedIntensity(pScene, Ps)) > 0.0f)
+		if (GetOpacity(GetNormalizedIntensity(Ps)) > 0.0f)
 			return true;
 
 		T += gStepSize;
