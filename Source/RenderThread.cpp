@@ -105,7 +105,7 @@ void QFrameBuffer::Set(unsigned char* pPixels, const int& Width, const int& Heig
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
 	QThread(pParent),
 	m_FileName(FileName),
-	m_CudaFrameBuffers(),
+//	m_CudaFrameBuffers(),
 	m_pRenderImage(NULL),
 	m_pDensityBuffer(NULL),
 	m_pGradientMagnitudeBuffer(NULL),
@@ -130,7 +130,7 @@ QRenderThread::~QRenderThread(void)
 QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 {
 	m_FileName					= Other.m_FileName;
-	m_CudaFrameBuffers			= Other.m_CudaFrameBuffers;
+//	m_CudaFrameBuffers			= Other.m_CudaFrameBuffers;
 	m_pRenderImage				= Other.m_pRenderImage;
 	m_pDensityBuffer			= Other.m_pDensityBuffer;
 	m_pGradientMagnitudeBuffer	= Other.m_pGradientMagnitudeBuffer;
@@ -233,7 +233,9 @@ void QRenderThread::run()
 			
 				gStatus.SetStatisticChanged("Host Memory", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr) / MB, 'f', 2), "MB");
 
-				m_CudaFrameBuffers.Resize(Vec2i(SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight()));
+//				m_CudaFrameBuffers.Resize(Vec2i(SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight()));
+
+				BindRenderCanvasView(SceneCopy.m_Camera.m_Film.m_Resolution);
 
 				// Reset no. iterations
 				SceneCopy.SetNoIterations(0);
@@ -244,7 +246,7 @@ void QRenderThread::run()
 			// Restart the rendering when when the camera, lights and render params are dirty
 			if (SceneCopy.m_DirtyFlags.HasFlag(CameraDirty | LightsDirty | RenderParamsDirty | TransferFunctionDirty))
 			{
-				m_CudaFrameBuffers.Reset();
+				ResetRenderCanvasView();
 
 				// Reset no. iterations
 				gScene.SetNoIterations(0);
@@ -267,13 +269,13 @@ void QRenderThread::run()
 			BindTransferFunctionRoughness(SceneCopy.m_TransferFunctions.m_Roughness);
 			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
 
-			BindRunningEstimateXyza(m_CudaFrameBuffers.m_pDevEstXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-			BindFrameEstimateXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-			BindFrameBlurXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-			BindRunningSpecularBloomXyza(m_CudaFrameBuffers.m_pRunningSpecularBloom, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-			BindRunningEstimateRgba(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+//			BindRunningEstimateXyza(m_CudaFrameBuffers.m_pDevEstXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+//			BindFrameEstimateXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+//			BindFrameBlurXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+//			BindRunningSpecularBloomXyza(m_CudaFrameBuffers.m_pRunningSpecularBloom, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
+//			BindRunningEstimateRgba(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
 
-  			Render(0, SceneCopy, m_CudaFrameBuffers, RenderImage, BlurImage, PostProcessImage, DenoiseImage);
+  			Render(0, SceneCopy, RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 		
 			gScene.SetNoIterations(gScene.GetNoIterations() + 1);
 
@@ -287,7 +289,7 @@ void QRenderThread::run()
  			gStatus.SetStatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
  			gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(SceneCopy.GetNoIterations()), "Iterations");
 
-			HandleCudaError(cudaMemcpy(m_pRenderImage, m_CudaFrameBuffers.m_pDevRgbLdrDisp, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
+			HandleCudaError(cudaMemcpy(m_pRenderImage, GetDisplayEstimate(), 100000/*SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements()*/ * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 
 			gFrameBuffer.Set((unsigned char*)m_pRenderImage, SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight());
 

@@ -126,6 +126,11 @@ public:
 		return CColorXyz::FromRGB(r, g, b);
 	}
 
+	HOD CColorXyza ToXYZA(void)
+	{
+		return CColorXyza::FromRGB(r, g, b);
+	}
+
 	void PrintSelf(void)
 	{
 		printf("[%g, %g, %g]\n", r, g, b);

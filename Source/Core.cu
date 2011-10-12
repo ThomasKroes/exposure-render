@@ -1,26 +1,19 @@
 
 #include "Core.cuh"
 
-texture<short, 3, cudaReadModeNormalizedFloat>		gTexDensity;
-texture<short, 3, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
-texture<float, 3, cudaReadModeElementType>			gTexExtinction;
-texture<float, 1, cudaReadModeElementType>			gTexOpacity;
-texture<float4, 1, cudaReadModeElementType>			gTexDiffuse;
-texture<float4, 1, cudaReadModeElementType>			gTexSpecular;
-texture<float, 1, cudaReadModeElementType>			gTexRoughness;
-texture<float4, 1, cudaReadModeElementType>			gTexEmission;
-
-texture<float4, 2, cudaReadModeElementType>			gTexRunningEstimateXyza;
-texture<float4, 2, cudaReadModeElementType>			gTexFrameEstimateXyza;
-texture<float4, 2, cudaReadModeElementType>			gTexFrameBlurXyza;
-texture<float4, 2, cudaReadModeElementType>			gTexRunningSpecularBloomXyza;
-texture<uchar4, 2, cudaReadModeNormalizedFloat>		gTexRunningEstimateRgba;
-
-surface<void, 2>									gSurfRunningEstimateXyza;
-surface<void, 2>									gSurfFrameEstimateXyza;
-surface<void, 2>									gSurfFrameBlurXyza;
-surface<void, 2>									gSurfRunningSpecularBloomXyza;
-surface<void, 2>									gSurfRunningEstimateRgba;
+texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexDensity;
+texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
+texture<float, cudaTextureType3D, cudaReadModeElementType>			gTexExtinction;
+texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexOpacity;
+texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexDiffuse;
+texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexSpecular;
+texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexRoughness;
+texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexEmission;
+texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexRunningEstimateXyza;
+texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexFrameEstimateXyza;
+texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexFrameBlurXyza;
+texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexRunningSpecularBloomXyza;
+texture<uchar4, cudaTextureType2D, cudaReadModeNormalizedFloat>		gTexRunningEstimateRgba;
 
 cudaArray* gpDensityArray				= NULL;
 cudaArray* gpGradientMagnitudeArray		= NULL;
@@ -30,44 +23,45 @@ cudaArray* gpSpecularArray				= NULL;
 cudaArray* gpRoughnessArray				= NULL;
 cudaArray* gpEmissionArray				= NULL;
 
-CD float3	gAaBbMin;
-CD float3	gAaBbMax;
-CD float3	gInvAaBbMin;
-CD float3	gInvAaBbMax;
-CD float	gIntensityMin;
-CD float	gIntensityMax;
-CD float	gIntensityRange;
-CD float	gIntensityInvRange;
-CD float	gStepSize;
-CD float	gStepSizeShadow;
-CD float	gDensityScale;
-CD float	gGradientDelta;
-CD float	gInvGradientDelta;
-CD float3	gGradientDeltaX;
-CD float3	gGradientDeltaY;
-CD float3	gGradientDeltaZ;
-CD int		gFilmWidth;
-CD int		gFilmHeight;
-CD int		gFilmNoPixels;
-CD int		gFilterWidth;
-CD float	gFilterWeights[10];
-CD float	gExposure;
-CD float	gInvExposure;
-CD float	gGamma;
-CD float	gInvGamma;
-CD float	gDenoiseEnabled;
-CD float	gDenoiseWindowRadius;
-CD float	gDenoiseInvWindowArea;
-CD float	gDenoiseNoise;
-CD float	gDenoiseWeightThreshold;
-CD float	gDenoiseLerpThreshold;
-CD float	gDenoiseLerpC;
-CD float	gNoIterations;
-CD float	gInvNoIterations;
+CD float3		gAaBbMin;
+CD float3		gAaBbMax;
+CD float3		gInvAaBbMin;
+CD float3		gInvAaBbMax;
+CD float		gIntensityMin;
+CD float		gIntensityMax;
+CD float		gIntensityRange;
+CD float		gIntensityInvRange;
+CD float		gStepSize;
+CD float		gStepSizeShadow;
+CD float		gDensityScale;
+CD float		gGradientDelta;
+CD float		gInvGradientDelta;
+CD float3		gGradientDeltaX;
+CD float3		gGradientDeltaY;
+CD float3		gGradientDeltaZ;
+CD int			gFilmWidth;
+CD int			gFilmHeight;
+CD int			gFilmNoPixels;
+CD int			gFilterWidth;
+CD float		gFilterWeights[10];
+CD float		gExposure;
+CD float		gInvExposure;
+CD float		gGamma;
+CD float		gInvGamma;
+CD float		gDenoiseEnabled;
+CD float		gDenoiseWindowRadius;
+CD float		gDenoiseInvWindowArea;
+CD float		gDenoiseNoise;
+CD float		gDenoiseWeightThreshold;
+CD float		gDenoiseLerpThreshold;
+CD float		gDenoiseLerpC;
+CD float		gNoIterations;
+CD float		gInvNoIterations;
 
 #define TF_NO_SAMPLES		128
 #define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
 
+#include "View.cuh"
 #include "Blur.cuh"
 #include "Denoise.cuh"
 #include "Estimate.cuh"
@@ -79,7 +73,8 @@ CD float	gInvNoIterations;
 #include "SpecularBloom.cuh"
 #include "ToneMap.cuh"
 
-#include "CudaUtilities.h"
+CCudaView gRenderCanvasView;
+CCudaView gNavigatorView;
 
 void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
 {
@@ -142,36 +137,20 @@ void UnbindGradientMagnitudeBuffer(void)
 	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
 }
 
-void BindRunningEstimateXyza(cudaArray* pCudaArray, int Width, int Height)
+void BindRenderCanvasView(const CResolution2D& Resolution)
 {
-//	gTexRunningEstimateXyza.filterMode = cudaFilterModeLinear;
-
-	HandleCudaError(cudaBindSurfaceToArray(gSurfRunningEstimateXyza, pCudaArray));
-	HandleCudaError(cudaBindTextureToArray(gTexRunningEstimateXyza, pCudaArray));
+	gRenderCanvasView.Resize(Resolution);
+	gRenderCanvasView.BindTextures();
 }
 
-void BindFrameEstimateXyza(cudaArray* pCudaArray, int Width, int Height)
+void ResetRenderCanvasView(void)
 {
-	HandleCudaError(cudaBindSurfaceToArray(gSurfFrameEstimateXyza, pCudaArray));
-	HandleCudaError(cudaBindTextureToArray(gTexFrameEstimateXyza, pCudaArray));
+	gRenderCanvasView.Reset();
 }
 
-void BindFrameBlurXyza(cudaArray* pCudaArray, int Width, int Height)
+unsigned char* GetDisplayEstimate(void)
 {
-	HandleCudaError(cudaBindSurfaceToArray(gSurfFrameBlurXyza, pCudaArray));
-	HandleCudaError(cudaBindTextureToArray(gTexFrameBlurXyza, pCudaArray));
-}
-
-void BindRunningSpecularBloomXyza(cudaArray* pCudaArray, int Width, int Height)
-{
-	HandleCudaError(cudaBindSurfaceToArray(gSurfRunningSpecularBloomXyza, pCudaArray));
-	HandleCudaError(cudaBindTextureToArray(gTexRunningSpecularBloomXyza, pCudaArray));
-}
-
-void BindRunningEstimateRgba(cudaArray* pCudaArray, int Width, int Height)
-{
-	HandleCudaError(cudaBindSurfaceToArray(gSurfRunningEstimateRgba, pCudaArray));
-	HandleCudaError(cudaBindTextureToArray(gTexRunningEstimateRgba, pCudaArray));
+	return (unsigned char*)gRenderCanvasView.m_DisplayEstimateRgbLdr.m_pData;
 }
 
 void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity)
@@ -409,7 +388,7 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gInvNoIterations", &InvNoIterations, sizeof(float)));
 }
 
-void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
+void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
 {
 	CScene* pDevScene = NULL;
 
@@ -421,19 +400,25 @@ void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers,
 
 	HandleCudaError(cudaMemcpy(pDevScene, &Scene, sizeof(CScene), cudaMemcpyHostToDevice));
 
+	CCudaView* pDevView = NULL;
+
+	HandleCudaError(cudaMalloc(&pDevView, sizeof(CCudaView)));
+	HandleCudaError(cudaMemcpy(pDevView, &gRenderCanvasView, sizeof(CCudaView), cudaMemcpyHostToDevice));
+
+	
 	CCudaTimer TmrRender;
 	
 	switch (Type)
 	{
 		case 0:
 		{
-			SingleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds);
+			SingleScattering(&Scene, pDevScene, pDevView);
 			break;
 		}
 
 		case 1:
 		{
-			MultipleScattering(&Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds);
+//			MultipleScattering(&Scene, pDevScene);
 			break;
 		}
 	}
@@ -441,20 +426,22 @@ void Render(const int& Type, CScene& Scene, CCudaFrameBuffers& CudaFrameBuffers,
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
 	
  	CCudaTimer TmrBlur;
-	BlurImageXyz(&Scene, pDevScene);
+	BlurImageXyz(&Scene, pDevScene, pDevView);
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;
-	Estimate(&Scene, pDevScene, CudaFrameBuffers);
+	Estimate(&Scene, pDevScene, pDevView);
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
-
+	/*
 //	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers);
-
-	ToneMap(&Scene, pDevScene, CudaFrameBuffers);
+*/
+	ToneMap(&Scene, pDevScene, pDevView);
 
 	CCudaTimer TmrDenoise;
-	Denoise(&Scene, pDevScene, CudaFrameBuffers);
+	Denoise(&Scene, pDevScene, pDevView);
 	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
+	
 
 	HandleCudaError(cudaFree(pDevScene));
+	HandleCudaError(cudaFree(pDevView));
 }

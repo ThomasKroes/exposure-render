@@ -49,7 +49,7 @@ public:
 	
 private:
 	QString				m_FileName;
-	CCudaFrameBuffers	m_CudaFrameBuffers;
+//	CCudaFrameBuffers	m_CudaFrameBuffers;
 	CColorRgbLdr*		m_pRenderImage;
 	short*				m_pDensityBuffer;
 	short*				m_pGradientMagnitudeBuffer;

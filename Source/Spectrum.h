@@ -496,6 +496,221 @@ Spectrum FromXYZ(float x, float y, float z) {
 // static inline HOD SpectrumXYZ MakeSpectrum(const float& r, const float& g, const float& b)									{ SpectrumXYZ s; s.c[0] = r; s.c[1] = g; s.c[2] = b; return s;							}
 // static inline HOD SpectrumXYZ MakeSpectrum(const float& rgb)																{ SpectrumXYZ s; s.c[0] = rgb; s.c[1] = rgb; s.c[2] = rgb; return s;					}
 
+class EXPOSURE_RENDER_DLL CColorXyza
+{
+public:
+	enum EType
+	{
+		Reflectance,
+		Illuminant
+	};
+
+	// SampledSpectrum Public Methods
+	HOD CColorXyza(float v = 0.f)
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i) c[i] = v;
+	}
+
+	HOD CColorXyza(float x, float y, float z)
+	{
+		c[0] = x;
+		c[1] = y;
+		c[2] = z;
+	}
+
+	HOD CColorXyza &operator+=(const CColorXyza &s2)
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			c[i] += s2.c[i];
+		return *this;
+	}
+
+	HOD CColorXyza operator+(const CColorXyza &s2) const
+	{
+		CColorXyza ret = *this;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			ret.c[i] += s2.c[i];
+		return ret;
+	}
+
+	HOD CColorXyza operator-(const CColorXyza &s2) const
+	{
+		CColorXyza ret = *this;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			ret.c[i] -= s2.c[i];
+		return ret;
+	}
+
+	HOD CColorXyza operator/(const CColorXyza &s2) const
+	{
+		CColorXyza ret = *this;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			ret.c[i] /= s2.c[i];
+		return ret;
+	}
+
+	HOD CColorXyza operator*(const CColorXyza &sp) const
+	{
+		CColorXyza ret = *this;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			ret.c[i] *= sp.c[i];
+		return ret;
+	}
+
+	HOD CColorXyza &operator*=(const CColorXyza &sp)
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			c[i] *= sp.c[i];
+		return *this;
+	}
+
+	HOD CColorXyza operator*(float a) const
+	{
+		CColorXyza ret = *this;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			ret.c[i] *= a;
+		return ret;
+	}
+
+	HOD CColorXyza &operator*=(float a)
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			c[i] *= a;
+		return *this;
+	}
+
+	HOD friend inline CColorXyza operator*(float a, const CColorXyza &s)
+	{
+		return s * a;
+	}
+
+	HOD CColorXyza operator/(float a) const
+	{
+		CColorXyza ret = *this;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			ret.c[i] /= a;
+		return ret;
+	}
+
+	HOD CColorXyza &operator/=(float a)
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			c[i] /= a;
+		return *this;
+	}
+
+	HOD bool operator==(const CColorXyza &sp) const
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			if (c[i] != sp.c[i]) return false;
+		return true;
+	}
+
+	HOD bool operator!=(const CColorXyza &sp) const
+	{
+		return !(*this == sp);
+	}
+
+	HOD float operator[](int i) const
+	{
+		return c[i];
+	}
+
+	HOD float operator[](int i)
+	{
+		return c[i];
+	}
+
+	// ToDo: Add description
+	HOD CColorXyza& CColorXyza::operator=(const CColorXyza& Other)
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			c[i] = Other.c[i];
+
+		// By convention, always return *this
+		return *this;
+	}
+
+	HOD bool IsBlack() const
+	{
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			if (c[i] != 0.) return false;
+		return true;
+	}
+
+	HOD CColorXyza Clamp(float low = 0, float high = INF_MAX) const
+	{
+		CColorXyza ret;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; ++i)
+			ret.c[i] = clamp2(c[i], low, high);
+		return ret;
+	}
+
+	HOD float y() const
+	{
+		float v = 0.;
+		for (int i = 0; i < gNoSamplesSpectrumXYZ; i++)
+			v += YWeight[i] * c[i];
+		return v;
+	}
+
+	HOD void ToRGB(float rgb[3], float* pCIEX, float* pCIEY, float* pCIEZ) const
+	{
+		rgb[0] = c[0];
+		rgb[1] = c[1];
+		rgb[2] = c[2];
+
+		XYZToRGB(c, rgb);
+	}
+
+	// 	RGBSpectrum ToRGBSpectrum() const;
+
+	HOD static CColorXyza FromXYZ(float r, float g, float b)
+	{
+		CColorXyza L;
+
+		L.c[0] = r;
+		L.c[1] = g;
+		L.c[2] = b;
+
+		return L;
+	}
+
+	HOD static CColorXyza FromRGB(float r, float g, float b)
+	{
+		const float CoeffX[3] = { 0.4124f, 0.3576f, 0.1805f };
+		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
+		const float CoeffZ[3] = { 0.0193f, 0.1192f, 0.9505f };
+
+		float XYZ[3];
+
+		XYZ[0] =	CoeffX[0] * r +
+					CoeffX[1] * g +
+					CoeffX[2] * b;
+
+		XYZ[1] =	CoeffY[0] * r +
+					CoeffY[1] * g +
+					CoeffY[2] * b;
+
+		XYZ[2] =	CoeffZ[0] * r +
+					CoeffZ[1] * g +
+					CoeffZ[2] * b;
+
+		return CColorXyza::FromXYZ(XYZ[0], XYZ[1], XYZ[2]);
+	}
+
+	// 	static CSampledSpectrum FromXYZ(const float xyz[3], SpectrumType type = SPECTRUM_REFLECTANCE)
+	// 	{
+	// 		float rgb[3];
+	// 		XYZToRGB(xyz, rgb);
+	// 		return FromRGB(rgb, type);
+	// 	}
+
+	// 	CSampledSpectrum(const RGBSpectrum &r, SpectrumType type = SPECTRUM_REFLECTANCE);
+
+public:
+	float c[3];
+};
 
 // Colors
 #define CLR_RAD_BLACK										CColorXyz(0.0f)
@@ -516,3 +731,6 @@ Spectrum FromXYZ(float x, float y, float z) {
 #define SPEC_WHITE											CColorXyz(1.0f)
 #define SPEC_CYAN											CColorXyz(1.0f)
 #define SPEC_RED											CColorXyz(1.0f, 0.0f, 0.0f)
+
+
+#define	XYZA_BLACK			CColorXyza(0.0f)		

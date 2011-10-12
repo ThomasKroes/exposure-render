@@ -528,6 +528,7 @@ SET(CudaSources
 	NearestIntersection.cuh
 	SpecularBloom.cuh
 	ToneMap.cuh
+	View.cuh
 	Core.cu
 	CudaFrameBuffers.h
 	CudaUtilities.h

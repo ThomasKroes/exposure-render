@@ -17,10 +17,12 @@ DEV float vecLen(float4 a, float4 b)
     return ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z));
 }
 
-KERNEL void KrnlDenoise(CColorRgbLdr* pOut)
+KERNEL void KrnlDenoise(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	const int PID	= Y * gFilmWidth + X;
+	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
@@ -28,6 +30,7 @@ KERNEL void KrnlDenoise(CColorRgbLdr* pOut)
     const float x = (float)X + 0.5f;
     const float y = (float)Y + 0.5f;
 
+	/*
 	const int ID = Y * gFilmWidth + X;
 	
 	const float4 clr00 = tex2D(gTexRunningEstimateRgba, x, y);
@@ -79,14 +82,19 @@ KERNEL void KrnlDenoise(CColorRgbLdr* pOut)
 		pOut[ID].g = 255 * clr00.y;
 		pOut[ID].b = 255 * clr00.z;
 	}
+	*/
+
+	pView->m_DisplayEstimateRgbLdr.m_pData[PID].r = 255;// * pView->m_EstimateRgbaLdr.m_pData[PID].r;
+	pView->m_DisplayEstimateRgbLdr.m_pData[PID].g = pView->m_EstimateRgbaLdr.m_pData[PID].g;
+	pView->m_DisplayEstimateRgbLdr.m_pData[PID].b = 255 * pView->m_EstimateRgbaLdr.m_pData[PID].b;
 }
 
-void Denoise(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers)
+void Denoise(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)
 {
 	const dim3 KernelBlock(KRNL_DENOISE_BLOCK_W, KRNL_DENOISE_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	KrnlDenoise<<<KernelGrid, KernelBlock>>>(CudaFrameBuffers.m_pDevRgbLdrDisp);
+	KrnlDenoise<<<KernelGrid, KernelBlock>>>(pDevView);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Noise Reduction");
 }

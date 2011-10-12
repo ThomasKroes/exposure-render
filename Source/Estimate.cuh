@@ -8,25 +8,25 @@
 #define KRNL_ESTIMATE_BLOCK_H		8
 #define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
 
-KERNEL void KrnlEstimate(void)
+KERNEL void KrnlEstimate(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	const int PID	= Y * gFilmWidth + X;
+	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	const float4 ColorXyza = gNoIterations == 0 ? make_float4(0.0f) : tex2D(gTexRunningEstimateXyza, X, Y) + ((tex2D(gTexFrameEstimateXyza, X, Y) - tex2D(gTexRunningEstimateXyza, X, Y)) / gNoIterations);
-	
-	surf2Dwrite(ColorXyza, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
+	pView->m_EstimateXyza.m_pData[PID] = gNoIterations == 0 ? CColorXyza(0.0f) : pView->m_EstimateXyza.m_pData[Y * gFilmWidth + X] + (pView->m_EstimateFrameXyza.m_pData[Y * gFilmWidth + X] - pView->m_EstimateXyza.m_pData[Y * gFilmWidth + X] / gNoIterations);
 }
 
-void Estimate(CScene* pScene, CScene* pDevScene, CCudaFrameBuffers& CudaFrameBuffers)
+void Estimate(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)
 {
 	const dim3 KernelBlock(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.GetHeight() / (float)KernelBlock.y));
 
-	KrnlEstimate<<<KernelGrid, KernelBlock>>>();
+	KrnlEstimate<<<KernelGrid, KernelBlock>>>(pDevView);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Compute Estimate");
 }

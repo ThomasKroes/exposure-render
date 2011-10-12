@@ -40,7 +40,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds)
 			if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 			{
 				float4 ColorXYZA = make_float4(Lv.c[0], Lv.c[1], Lv.c[2], 0.0f);
-				surf2Dwrite(ColorXYZA, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
+//				surf2Dwrite(ColorXYZA, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
 				return;
 			}
 		 
@@ -69,7 +69,7 @@ KERNEL void KrnlMultipleScattering(CScene* pScene, int* pSeeds)
 	__syncthreads();
 
 	float4 ColorXYZA = make_float4(Lv.c[0], Lv.c[1], Lv.c[2], 0.0f);
-	surf2Dwrite(ColorXYZA, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
+//	surf2Dwrite(ColorXYZA, gSurfRunningEstimateXyza, X * sizeof(float4), Y);
 }
 
 void MultipleScattering(CScene* pScene, CScene* pDevScene, int* pSeeds)
