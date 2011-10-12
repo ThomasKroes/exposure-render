@@ -289,7 +289,7 @@ void QRenderThread::run()
  			gStatus.SetStatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
  			gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(SceneCopy.GetNoIterations()), "Iterations");
 
-			HandleCudaError(cudaMemcpy(m_pRenderImage, GetDisplayEstimate(), 100000/*SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements()*/ * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
+			HandleCudaError(cudaMemcpy(m_pRenderImage, GetDisplayEstimate(), SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
 
 			gFrameBuffer.Set((unsigned char*)m_pRenderImage, SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight());
 

@@ -15,7 +15,7 @@ DEV float GetNormalizedIntensity(const Vec3f& P)
 {
 	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, P.x * gInvAaBbMax.x, P.y * gInvAaBbMax.y, P.z * gInvAaBbMax.z));
 
-	return 0.3f;//(Intensity - gIntensityMin) * gIntensityInvRange;
+	return (Intensity - gIntensityMin) * gIntensityInvRange;
 }
 
 DEV float GetOpacity(const float& NormalizedIntensity)
@@ -97,4 +97,12 @@ DEV bool IntersectBox(CRay R, float* pNearT, float* pFarT)
 	*pFarT	= LargestMaxT;
 
 	return LargestMaxT > LargestMinT;
+}
+
+DEV CColorXyza CumulativeMovingAverage(const CColorXyza& A, const CColorXyza& Ax, const int& N)
+{
+	if (gNoIterations == 0)
+		return CColorXyza(0.0f);
+
+	 return A + ((Ax - A) / (float)N);
 }

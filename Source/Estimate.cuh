@@ -2,7 +2,6 @@
 
 #include "Geometry.h"
 #include "Variance.h"
-#include "CudaFrameBuffers.h"
 
 #define KRNL_ESTIMATE_BLOCK_W		16
 #define KRNL_ESTIMATE_BLOCK_H		8
@@ -18,7 +17,7 @@ KERNEL void KrnlEstimate(CCudaView* pView)
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	pView->m_EstimateXyza.m_pData[PID] = gNoIterations == 0 ? CColorXyza(0.0f) : pView->m_EstimateXyza.m_pData[Y * gFilmWidth + X] + (pView->m_EstimateFrameXyza.m_pData[Y * gFilmWidth + X] - pView->m_EstimateXyza.m_pData[Y * gFilmWidth + X] / gNoIterations);
+	pView->m_RunningEstimateXyza.m_pData[PID] = CumulativeMovingAverage(pView->m_RunningEstimateXyza.m_pData[PID], pView->m_FrameEstimateXyza.m_pData[PID], gNoIterations);
 }
 
 void Estimate(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Variance.h"
-#include "CudaFrameBuffers.h"
 
 class QFrameBuffer
 {

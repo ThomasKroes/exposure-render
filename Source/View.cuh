@@ -15,7 +15,7 @@ public:
 	{
 	}
 
-	~CCudaBuffer2D(void)
+	virtual ~CCudaBuffer2D(void)
 	{
 		Free();
 	}
@@ -40,7 +40,7 @@ public:
 
 		Free();
 
-		HandleCudaError(cudaMallocPitch(&m_pData, &m_Pitch, m_Resolution.GetResX(), m_Resolution.GetResY()), "Reset Cuda Buffer");
+		HandleCudaError(cudaMalloc(&m_pData, m_Resolution.GetNoElements() * sizeof(T)), "Reset Cuda Buffer");
 	}
 
 	void Reset(void)
@@ -64,9 +64,40 @@ public:
 	{
 	}
 
+	int GetNoElements(void) const
+	{
+		return m_Resolution.GetNoElements();
+	}
+
+	int GetSize(void) const
+	{
+		return GetNoElements() * sizeof(T);
+	}
+
 	CResolution2D	m_Resolution;
 	T*				m_pData;
 	size_t			m_Pitch;
+};
+
+class CCudaRandomBuffer2D : public CCudaBuffer2D<int>
+{
+public:
+	void Resize(const CResolution2D& Resolution)
+	{
+		CCudaBuffer2D::Resize(Resolution);
+
+		// Create random seeds
+		int* pSeeds = (int*)malloc(GetSize());
+
+		memset(pSeeds, 0, GetSize());
+
+		for (int i = 0; i < GetNoElements(); i++)
+			pSeeds[i] = rand();
+
+		HandleCudaError(cudaMemcpy(m_pData, pSeeds, GetSize(), cudaMemcpyHostToDevice));
+
+		free(pSeeds);
+	}
 };
 
 class CCudaView
@@ -74,8 +105,8 @@ class CCudaView
 public:
 	CCudaView(void) :
 		m_Resolution(0, 0),
-		m_EstimateXyza(),
-		m_EstimateFrameXyza(),
+		m_RunningEstimateXyza(),
+		m_FrameEstimateXyza(),
 		m_FrameBlurXyza(),
 		m_RunningSpecularBloom(),
 		m_EstimateRgbaLdr(),
@@ -99,8 +130,8 @@ public:
 	CCudaView& CCudaView::operator=(const CCudaView& Other)
 	{
 		m_Resolution				= Other.m_Resolution;
-		m_EstimateXyza				= Other.m_EstimateXyza;
-		m_EstimateFrameXyza			= Other.m_EstimateFrameXyza;
+		m_RunningEstimateXyza		= Other.m_RunningEstimateXyza;
+		m_FrameEstimateXyza			= Other.m_FrameEstimateXyza;
 		m_FrameBlurXyza				= Other.m_FrameBlurXyza;
 		m_RunningSpecularBloom		= Other.m_RunningSpecularBloom;
 		m_EstimateRgbaLdr			= Other.m_EstimateRgbaLdr;
@@ -116,8 +147,8 @@ public:
 	{
 		m_Resolution = Resolution;
 
-		m_EstimateXyza.Resize(m_Resolution);
-		m_EstimateFrameXyza.Resize(m_Resolution);
+		m_RunningEstimateXyza.Resize(m_Resolution);
+		m_FrameEstimateXyza.Resize(m_Resolution);
 		m_FrameBlurXyza.Resize(m_Resolution);
 		m_RunningSpecularBloom.Resize(m_Resolution);
 		m_EstimateRgbaLdr.Resize(m_Resolution);
@@ -129,21 +160,21 @@ public:
 
 	void Reset(void)
 	{
-		m_EstimateXyza.Reset();
-		m_EstimateFrameXyza.Reset();
+		m_RunningEstimateXyza.Reset();
+		m_FrameEstimateXyza.Reset();
 		m_FrameBlurXyza.Reset();
 		m_RunningSpecularBloom.Reset();
 		m_EstimateRgbaLdr.Reset();
 		m_DisplayEstimateRgbLdr.Reset();
-		m_RandomSeeds1.Reset();
-		m_RandomSeeds2.Reset();
+//		m_RandomSeeds1.Reset();
+//		m_RandomSeeds2.Reset();
 		m_NoEstimates.Reset();
 	}
 
 	void Free(void)
 	{
-		m_EstimateXyza.Free();
-		m_EstimateFrameXyza.Free();
+		m_RunningEstimateXyza.Free();
+		m_FrameEstimateXyza.Free();
 		m_FrameBlurXyza.Free();
 		m_RunningSpecularBloom.Free();
 		m_EstimateRgbaLdr.Free();
@@ -153,34 +184,14 @@ public:
 		m_NoEstimates.Free();
 	}
 
-	void BindTextures(void)
-	{
-		/*
-		size_t Offset;
-
-		cudaChannelFormatDesc ChannelDesc;
-		
-		ChannelDesc = cudaCreateChannelDesc<float4>();
-
-		HandleCudaError(cudaBindTexture2D(&Offset, gTexRunningEstimateXyza, (void*)m_EstimateXyza.m_pData, &ChannelDesc, m_Resolution.GetResX(), m_Resolution.GetResY(), m_EstimateXyza.m_Pitch), "Bind Estimate XYZA");
-		HandleCudaError(cudaBindTexture2D(&Offset, gTexFrameEstimateXyza, (void*)m_EstimateFrameXyza.m_pData, &ChannelDesc, m_Resolution.GetResX(), m_Resolution.GetResY(), m_EstimateFrameXyza.m_Pitch), "Bind Frame Estimate XYZA");
-		HandleCudaError(cudaBindTexture2D(&Offset, gTexFrameBlurXyza, (void*)m_FrameBlurXyza.m_pData, &ChannelDesc, m_Resolution.GetResX(), m_Resolution.GetResY(), m_FrameBlurXyza.m_Pitch), "Bind Frame Blur XYZA");
-		HandleCudaError(cudaBindTexture2D(&Offset, gTexRunningSpecularBloomXyza, (void*)m_RunningSpecularBloom.m_pData, &ChannelDesc, m_Resolution.GetResX(), m_Resolution.GetResY(), m_RunningSpecularBloom.m_Pitch), "Bind Running Specular Bloom");
-
-		ChannelDesc = cudaCreateChannelDesc<uchar4>();
-
-		HandleCudaError(cudaBindTexture2D(&Offset, gTexRunningEstimateRgba, (void*)m_EstimateRgbaLdr.m_pData, &ChannelDesc, m_Resolution.GetResX(), m_Resolution.GetResY(), m_EstimateRgbaLdr.m_Pitch), "Bind Estimate RGBA");
-		*/
-	}
-
 	CResolution2D					m_Resolution;
-	CCudaBuffer2D<CColorXyza>		m_EstimateXyza;
-	CCudaBuffer2D<CColorXyza>		m_EstimateFrameXyza;
+	CCudaBuffer2D<CColorXyza>		m_RunningEstimateXyza;
+	CCudaBuffer2D<CColorXyza>		m_FrameEstimateXyza;
 	CCudaBuffer2D<CColorXyza>		m_FrameBlurXyza;
 	CCudaBuffer2D<CColorXyza>		m_RunningSpecularBloom;
 	CCudaBuffer2D<CColorRgbaLdr>	m_EstimateRgbaLdr;
 	CCudaBuffer2D<CColorRgbLdr>		m_DisplayEstimateRgbLdr;
-	CCudaBuffer2D<int>				m_RandomSeeds1;
-	CCudaBuffer2D<int>				m_RandomSeeds2;
+	CCudaRandomBuffer2D				m_RandomSeeds1;
+	CCudaRandomBuffer2D				m_RandomSeeds2;
 	CCudaBuffer2D<int>				m_NoEstimates;
 };

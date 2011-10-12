@@ -2,7 +2,6 @@
 
 #include "Geometry.h"
 #include "Variance.h"
-#include "CudaFrameBuffers.h"
 
 #define KRNL_TM_BLOCK_W		32
 #define KRNL_TM_BLOCK_H		8
@@ -18,7 +17,7 @@ KERNEL void KrnlToneMap(CCudaView* pView)
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	const CColorXyza Color = pView->m_EstimateXyza.m_pData[Y * gFilmWidth + X];
+	const CColorXyza Color = pView->m_RunningEstimateXyza.m_pData[Y * gFilmWidth + X];
 
 	CColorRgbHdr RgbHdr;
 

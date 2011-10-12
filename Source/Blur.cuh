@@ -36,7 +36,7 @@ KERNEL void KrnlBlurXyzH(CCudaView* pView)
 	{
 		FW[TID] = gFilterWeights[(int)fabs((float)x - X)];
 
-		Sum			+= FW[TID] * pView->m_EstimateFrameXyza.m_pData[Y * gFilmWidth + x];
+		Sum			+= FW[TID] * pView->m_FrameEstimateXyza.m_pData[Y * gFilmWidth + x];
 		SumW[TID]	+= FW[TID];
 	}
 
@@ -82,9 +82,9 @@ KERNEL void KrnlBlurXyzV(CCudaView* pView)
 
 	const float4 ColorXYZA = make_float4(Sum.c[0], Sum.c[1], Sum.c[2], 0.0f);
 
-	pView->m_EstimateFrameXyza.m_pData[PID].c[0] = Sum.c[0];
-	pView->m_EstimateFrameXyza.m_pData[PID].c[1] = Sum.c[1];
-	pView->m_EstimateFrameXyza.m_pData[PID].c[2] = Sum.c[2];
+	pView->m_FrameEstimateXyza.m_pData[PID].c[0] = Sum.c[0];
+	pView->m_FrameEstimateXyza.m_pData[PID].c[1] = Sum.c[1];
+	pView->m_FrameEstimateXyza.m_pData[PID].c[2] = Sum.c[2];
 }
 
 void BlurImageXyz(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

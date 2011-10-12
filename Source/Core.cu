@@ -140,7 +140,6 @@ void UnbindGradientMagnitudeBuffer(void)
 void BindRenderCanvasView(const CResolution2D& Resolution)
 {
 	gRenderCanvasView.Resize(Resolution);
-	gRenderCanvasView.BindTextures();
 }
 
 void ResetRenderCanvasView(void)

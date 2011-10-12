@@ -123,7 +123,6 @@ SET(ExposureRenderSources
 	Status.cpp
 	Timing.cpp
 	Variance.cpp
-	CudaFrameBuffers.cpp
 
 	# Logging
 	Logger.cpp
@@ -215,7 +214,6 @@ SET(ExposureRenderHeaders
 	Status.h
 	Timing.h
 	Variance.h
-	CudaFrameBuffers.h
 	CameraInline.h
 
 	# Logging
@@ -530,14 +528,12 @@ SET(CudaSources
 	ToneMap.cuh
 	View.cuh
 	Core.cu
-	CudaFrameBuffers.h
 	CudaUtilities.h
-	CudaFrameBuffers.cpp
 	CudaUtilities.cpp
 )
 
 # Make the CUDA group
-SOURCE_GROUP("CUDA" FILES ${CudaSources})
+SOURCE_GROUP("Cuda" FILES ${CudaSources})
 
 # Logging sources
 SET(LoggingSources
