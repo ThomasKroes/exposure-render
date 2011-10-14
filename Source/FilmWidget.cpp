@@ -16,7 +16,7 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 	m_HeightSpinner(),
 	m_ExposureSlider(),
 	m_ExposureSpinner(),
-	m_LockSizeCheckBox()
+	m_NoiseReduction()
 {
 	setTitle("Film");
 	setStatusTip("Film properties");
@@ -86,11 +86,15 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
  	QObject::connect(&m_ExposureSlider, SIGNAL(valueChanged(double)), this, SLOT(SetExposure(double)));
  	QObject::connect(&m_ExposureSpinner, SIGNAL(valueChanged(double)), &m_ExposureSlider, SLOT(setValue(double)));
 
+	gStatus.SetStatisticChanged("Camera", "Film", "", "", "");
+
+	m_NoiseReduction.setText("Noise Reduction");
+	m_GridLayout.addWidget(&m_NoiseReduction, 4, 1);
+
+	QObject::connect(&m_NoiseReduction, SIGNAL(stateChanged(const int&)), this, SLOT(OnNoiseReduction(const int&)));
+
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-// 	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
-
-	gStatus.SetStatisticChanged("Camera", "Film", "", "", "");
 }
 
 void QFilmWidget::SetPresetType(const QString& PresetType)
@@ -188,4 +192,9 @@ void QFilmWidget::OnFilmChanged(const QFilm& Film)
 	// Exposure
 	m_ExposureSlider.setValue(Film.GetExposure(), true);
 	m_ExposureSpinner.setValue(Film.GetExposure(), true);
+}
+
+void QFilmWidget::OnNoiseReduction(const int& ReduceNoise)
+{
+	gCamera.GetFilm().SetNoiseReduction(m_NoiseReduction.checkState());
 }

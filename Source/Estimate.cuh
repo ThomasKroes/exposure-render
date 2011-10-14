@@ -2,7 +2,7 @@
 
 #include "Geometry.h"
 
-#define KRNL_ESTIMATE_BLOCK_W		16
+#define KRNL_ESTIMATE_BLOCK_W		8
 #define KRNL_ESTIMATE_BLOCK_H		8
 #define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
 
@@ -11,7 +11,6 @@ KERNEL void KrnlEstimate(CCudaView* pView)
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int PID	= Y * gFilmWidth + X;
-	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;

@@ -77,9 +77,9 @@ KERNEL void KrnlDenoise(CCudaView* pView)
     }
 	else
 	{
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].r = 255 * clr00.x;
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].g = 255 * clr00.y;
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].b = 255 * clr00.z;
+		pView->m_DisplayEstimateRgbLdr.m_pData[PID].r = pView->m_EstimateRgbaLdr.m_pData[PID].r;
+		pView->m_DisplayEstimateRgbLdr.m_pData[PID].g = pView->m_EstimateRgbaLdr.m_pData[PID].g;
+		pView->m_DisplayEstimateRgbLdr.m_pData[PID].b = pView->m_EstimateRgbaLdr.m_pData[PID].b;
 	}
 	
 	/*

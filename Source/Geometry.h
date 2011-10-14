@@ -1967,7 +1967,12 @@ class CColorRGBA : public CVec4<Vec4uc>
 };
 */
 
-inline HOD Vec3f FMinF(Vec3f a, Vec3f b)
+inline HOD Vec3f MinVec3f(Vec3f a, Vec3f b)
 {
 	return Vec3f(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z));
+}
+
+inline HOD Vec3f MaxVec3f(Vec3f a, Vec3f b)
+{
+	return Vec3f(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }

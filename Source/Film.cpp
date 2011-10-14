@@ -70,6 +70,18 @@ void QFilm::SetExposure(const float& Exposure)
 	emit Changed(*this);
 }
 
+bool QFilm::GetNoiseReduction(void) const
+{
+	return m_NoiseReduction;
+}
+
+void QFilm::SetNoiseReduction(const bool& NoiseReduction)
+{
+	m_NoiseReduction = NoiseReduction;
+
+	emit Changed(*this);
+}
+
 void QFilm::Reset(void)
 {
 	m_Width		= 640;

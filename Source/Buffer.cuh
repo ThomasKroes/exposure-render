@@ -75,7 +75,7 @@ public:
 	T*				m_pData;
 };
 
-class CCudaRandomBuffer2D : public CCudaBuffer2D<int>
+class CCudaRandomBuffer2D : public CCudaBuffer2D<unsigned int>
 {
 public:
 	void Resize(const CResolution2D& Resolution)
@@ -83,7 +83,7 @@ public:
 		CCudaBuffer2D::Resize(Resolution);
 
 		// Create random seeds
-		int* pSeeds = (int*)malloc(GetSize());
+		unsigned int* pSeeds = (unsigned int*)malloc(GetSize());
 
 		memset(pSeeds, 0, GetSize());
 

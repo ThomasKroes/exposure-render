@@ -81,7 +81,8 @@ public slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
 	void OnFilmChanged(const QFilm& Film);
-	
+	void OnNoiseReduction(const int& ReduceNoise);
+
 private:
 	QGridLayout				m_GridLayout;
 	QComboBox				m_PresetType;
@@ -91,5 +92,5 @@ private:
 	QSpinBox				m_HeightSpinner;
 	QDoubleSlider			m_ExposureSlider;
 	QDoubleSpinner			m_ExposureSpinner;
-	QCheckBox				m_LockSizeCheckBox;
+	QCheckBox				m_NoiseReduction;
 };

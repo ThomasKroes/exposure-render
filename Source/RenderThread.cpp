@@ -276,12 +276,6 @@ void QRenderThread::run()
 			BindTransferFunctionRoughness(SceneCopy.m_TransferFunctions.m_Roughness);
 			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
 
-//			BindRunningEstimateXyza(m_CudaFrameBuffers.m_pDevEstXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-//			BindFrameEstimateXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-//			BindFrameBlurXyza(m_CudaFrameBuffers.m_pDevEstFrameXyz, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-//			BindRunningSpecularBloomXyza(m_CudaFrameBuffers.m_pRunningSpecularBloom, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-//			BindRunningEstimateRgba(m_CudaFrameBuffers.m_pDevEstRgbaLdr, SceneCopy.m_Camera.m_Film.m_Resolution.GetResX(), SceneCopy.m_Camera.m_Film.m_Resolution.GetResY());
-
   			Render(0, SceneCopy, RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 		
 			gScene.SetNoIterations(gScene.GetNoIterations() + 1);
@@ -596,6 +590,8 @@ void QRenderThread::OnUpdateCamera(void)
 	// Focus
 	gScene.m_Camera.m_Focus.m_Type			= (CFocus::EType)gCamera.GetFocus().GetType();
 	gScene.m_Camera.m_Focus.m_FocalDistance = gCamera.GetFocus().GetFocalDistance();
+
+	gScene.m_DenoiseParams.m_Enabled = gCamera.GetFilm().GetNoiseReduction();
 
 	gScene.m_DirtyFlags.SetFlag(CameraDirty);
 }

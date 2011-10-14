@@ -2,7 +2,7 @@
 
 #include "Transport.cuh"
 
-#define KRNL_SS_BLOCK_W		16
+#define KRNL_SS_BLOCK_W		8
 #define KRNL_SS_BLOCK_H		8
 #define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
 
@@ -13,7 +13,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 	const int PID	= Y * gFilmWidth + X;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= gFilmWidth || Y >= gFilmHeight || PID >= gFilmNoPixels)
+	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 	
 	CRNG RNG(&pView->m_RandomSeeds1.m_pData[PID], &pView->m_RandomSeeds2.m_pData[PID]);
@@ -33,9 +33,9 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 	
 	CLight* pLight = NULL;
 
-	/*
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
+		
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
 			pView->m_FrameEstimateXyza.m_pData[PID].c[0] = Lv.c[0];
@@ -83,7 +83,6 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
 			Lv = Li;
 	}
-	*/
 
 	pView->m_FrameEstimateXyza.m_pData[PID].c[0] = Lv.c[0];
 	pView->m_FrameEstimateXyza.m_pData[PID].c[1] = Lv.c[1];
