@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Geometry.h"
 #include "Material.h"
-#include "Scene.h"
 
 #include "RayMarching.cuh"
 
@@ -10,7 +8,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, const float& Density, CLig
 {
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CBSDF Bsdf(N, Wo, GetDiffuse(Density).ToXYZ(), GetSpecular(Density).ToXYZ(), 1.5f/*pScene->m_IOR*/, GetRoughness(Density));
+	CBSDF Bsdf(N, Wo, GetDiffuse(Density).ToXYZ(), GetSpecular(Density).ToXYZ(), 5.5f/*pScene->m_IOR*/, GetRoughness(Density));
 	
 	// Light/shadow ray
 	CRay Rl; 

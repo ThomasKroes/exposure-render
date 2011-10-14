@@ -61,20 +61,20 @@ CD float		gInvNoIterations;
 #define TF_NO_SAMPLES		128
 #define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
 
+#include "Model.cuh"
 #include "View.cuh"
 #include "Blur.cuh"
 #include "Denoise.cuh"
 #include "Estimate.cuh"
 #include "Utilities.cuh"
 #include "SingleScattering.cuh"
-#include "MultipleScattering.cuh"
-#include "Variance.cuh"
 #include "NearestIntersection.cuh"
 #include "SpecularBloom.cuh"
 #include "ToneMap.cuh"
 
-CCudaView gRenderCanvasView;
-CCudaView gNavigatorView;
+CCudaModel	gModel;
+CCudaView	gRenderCanvasView;
+CCudaView	gNavigatorView;
 
 void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
 {
@@ -98,6 +98,14 @@ void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
   	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexDensity, gpDensityArray, ChannelDesc));
+	
+	return;
+
+	CResolution3D Resolution3D;
+
+	Resolution3D.SetResXYZ(Vec3i(Extent.width, Extent.height, Extent.depth));
+
+	gModel.m_GradientMagnitude.BindRawData(pBuffer, Resolution3D);/**/
 }
 
 void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent)
@@ -140,6 +148,10 @@ void UnbindGradientMagnitudeBuffer(void)
 void BindRenderCanvasView(const CResolution2D& Resolution)
 {
 	gRenderCanvasView.Resize(Resolution);
+
+	cudaChannelFormatDesc Des = cudaCreateChannelDesc<uchar4>();
+
+	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateRgba, gRenderCanvasView.m_EstimateRgbaLdr.m_pData, Des, gRenderCanvasView.m_Resolution.GetResX(), gRenderCanvasView.m_Resolution.GetResY(), gRenderCanvasView.m_Resolution.GetResX() * sizeof(uchar4)), "BindTexture");
 }
 
 void ResetRenderCanvasView(void)
@@ -353,11 +365,11 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gFilmHeight", &Filmheight, sizeof(int)));
 	HandleCudaError(cudaMemcpyToSymbol("gFilmNoPixels", &FilmNoPixels, sizeof(int)));
 
-	const int FilterWidth = 2;
+	const int FilterWidth = 3;
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
 
-	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 //	const float FilterWeights[10] = { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWeights", &FilterWeights, 10 * sizeof(float)));

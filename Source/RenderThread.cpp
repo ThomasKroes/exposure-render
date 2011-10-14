@@ -146,12 +146,14 @@ void QRenderThread::run()
 {
 	Log("Initializing CUDA...", "graphic-card");
 
- 	if (!InitializeCuda())
- 	{
-		Log("Unable to initialize CUDA, rendering cannot start", QLogger::Critical);
- 		QMessageBox::critical(gpMainWindow, "An error has occurred", "Unable to locate a CUDA capable device");
- 		return;
- 	}
+// 	if (!InitializeCuda())
+//	{
+//		Log("Unable to initialize CUDA, rendering cannot start", QLogger::Critical);
+ //		QMessageBox::critical(gpMainWindow, "An error has occurred", "Unable to locate a CUDA capable device");
+ //		return;
+ //	}
+
+	cudaSetDevice(0);
 
 	CScene SceneCopy;
 	
@@ -165,15 +167,20 @@ void QRenderThread::run()
 	gStatus.SetStatisticChanged("Memory", "CUDA Memory", "", "", "memory");
 	gStatus.SetStatisticChanged("Memory", "Host Memory", "", "", "memory");
 
+	cudaExtent Res;
+	Res.width = gScene.m_Resolution[0];
+	Res.height = gScene.m_Resolution[1];
+	Res.depth = gScene.m_Resolution[2];
+
 	// Bind density buffer to texture
 	Log("Copying density volume to device", "grid");
 	gStatus.SetStatisticChanged("CUDA Memory", "Density Buffer", QString::number(gScene.m_Resolution.GetNoElements() * sizeof(short) / MB, 'f', 2), "MB");
-	BindDensityBuffer((short*)m_pDensityBuffer, make_cudaExtent(gScene.m_Resolution[0], gScene.m_Resolution[1], gScene.m_Resolution[2]));
+	BindDensityBuffer((short*)m_pDensityBuffer, Res);
 
 	// Bind gradient magnitude buffer to texture
 	Log("Copying gradient magnitude to device", "grid");
 	gStatus.SetStatisticChanged("CUDA Memory", "Gradient Magnitude Buffer", QString::number(gScene.m_Resolution.GetNoElements() * sizeof(short) / MB, 'f', 2), "MB");
-	BindGradientMagnitudeBuffer((short*)m_pGradientMagnitudeBuffer, make_cudaExtent(gScene.m_Resolution[0], gScene.m_Resolution[1], gScene.m_Resolution[2]));
+	BindGradientMagnitudeBuffer((short*)m_pGradientMagnitudeBuffer, Res);
 
 	gStatus.SetStatisticChanged("Performance", "Timings", "");
 
@@ -256,7 +263,7 @@ void QRenderThread::run()
 			gScene.m_DirtyFlags.ClearAllFlags();
 
 			SceneCopy.m_DenoiseParams.SetWindowRadius(4.0f);
-			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.02f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
+			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.03f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
 //			SceneCopy.m_DenoiseParams.m_Enabled = false;
 
 			SceneCopy.m_Camera.Update();

@@ -2,11 +2,7 @@
 
 #include "Geometry.h"
 #include "Timing.h"
-#include "Variance.h"
 #include "Scene.h"
-
-#include <cuda_runtime.h>
-#include <cutil.h>
 
 class CScene;
 class CVariance;

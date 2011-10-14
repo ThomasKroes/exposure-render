@@ -63,7 +63,7 @@ KERNEL void KrnlSpecularBloom(CCudaView* pView)
 	if (SumWeight > 0.0f)
 		Lb /= SumWeight;
 
-	float4 ColorXyza = tex2D(gTexRunningSpecularBloomXyza, X, Y) + (make_float4(Lb.c[0], Lb.c[1], Lb.c[2], 0.0f) - tex2D(gTexRunningSpecularBloomXyza, X, Y)) / (float)__max(1.0f, gNoIterations);
+//	float4 ColorXyza = tex2D(gTexRunningSpecularBloomXyza, X, Y) + (make_float4(Lb.c[0], Lb.c[1], Lb.c[2], 0.0f) - tex2D(gTexRunningSpecularBloomXyza, X, Y)) / (float)__max(1.0f, gNoIterations);
 
 //	surf2Dwrite(ColorXyza, gSurfRunningSpecularBloomXyza, X * sizeof(float4), Y);
 }

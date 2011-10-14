@@ -33,6 +33,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 	
 	CLight* pLight = NULL;
 
+	/*
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
@@ -82,8 +83,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
 			Lv = Li;
 	}
-	
-	float4 ColorXYZA = make_float4(Lv.c[0], Lv.c[1], Lv.c[2], 0.0f);
+	*/
 
 	pView->m_FrameEstimateXyza.m_pData[PID].c[0] = Lv.c[0];
 	pView->m_FrameEstimateXyza.m_pData[PID].c[1] = Lv.c[1];

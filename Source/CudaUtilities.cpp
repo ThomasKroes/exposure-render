@@ -147,7 +147,7 @@ bool InitializeCuda(void)
 		gStatus.SetStatisticChanged("Texture", "Alignment", QString::number((float)DeviceProperties.textureAlignment / powf(1024.0f, 2.0f), 'f', 2), "MB");
 	}	
 	
-	return cudaSetDevice(cutGetMaxGflopsDeviceId()) == cudaSuccess;
+	return false;//cudaSetDevice(cutGetMaxGflopsDeviceId()) == cudaSuccess;
 }
 
 void HandleCudaError(const cudaError_t CudaError, const char* pDescription /*= ""*/)

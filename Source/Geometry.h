@@ -2,6 +2,9 @@
 
 #include "Spectrum.h"
 
+#include <algorithm>
+#include <math.h>
+
 class CColorRgbHdr;
 class CColorRgbLdr;
 class Vec2i;
@@ -1963,3 +1966,8 @@ class CColorRGBA : public CVec4<Vec4uc>
 	public:
 };
 */
+
+inline HOD Vec3f FMinF(Vec3f a, Vec3f b)
+{
+	return Vec3f(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z));
+}

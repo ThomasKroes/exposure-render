@@ -1,6 +1,7 @@
 #pragma once
 
-#include <cutil_inline.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
 
 class CCudaTimer
 {

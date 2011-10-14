@@ -1,10 +1,6 @@
 #pragma once
 
-#include "Scene.h"
-
 #include <cuda_runtime.h>
-#include <cutil.h>
-#include <cutil_math.h>
 
 DEV inline Vec3f ToVec3f(const float3& V)
 {
@@ -85,11 +81,11 @@ DEV bool NearestLight(CScene* pScene, CRay R, CColorXyz& LightColor, Vec3f& Pl, 
 
 DEV bool IntersectBox(CRay R, float* pNearT, float* pFarT)
 {
-	const float3 InvR		= make_float3(1.0f, 1.0f, 1.0f) / make_float3(R.m_D.x, R.m_D.y, R.m_D.z);
-	const float3 BottomT	= InvR * (gAaBbMin - make_float3(R.m_O.x, R.m_O.y, R.m_O.z));
-	const float3 TopT		= InvR * (gAaBbMax - make_float3(R.m_O.x, R.m_O.y, R.m_O.z));
-	const float3 MinT		= fminf(TopT, BottomT);
-	const float3 MaxT		= fmaxf(TopT, BottomT);
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
+	const Vec3f BottomT		= InvR * (Vec3f(gAaBbMin.x, gAaBbMin.y, gAaBbMin.z) - R.m_O);
+	const Vec3f TopT		= InvR * (Vec3f(gAaBbMax.x, gAaBbMax.y, gAaBbMax.z) - R.m_O);
+	const Vec3f MinT		= FMinF(TopT, BottomT);
+	const Vec3f MaxT		= FMinF(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
 	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
 

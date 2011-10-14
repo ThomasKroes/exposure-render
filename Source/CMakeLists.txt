@@ -7,7 +7,8 @@ SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 FIND_PACKAGE(CUDA)
 
-SET(CUDA_NVCC_FLAGS "-arch;sm_20")
+# SET(CUDA_NVCC_FLAGS "-arch;sm_13")
+# SET(CUDA_NVCC_FLAGS "--gpu-architecture=sm_13;${CUDA_NVCC_FLAGS}")
 
 IF(NOT VTK_BINARY_DIR)
 FIND_PACKAGE(VTK)
@@ -526,7 +527,9 @@ SET(CudaSources
 	NearestIntersection.cuh
 	SpecularBloom.cuh
 	ToneMap.cuh
+	Buffer.cuh
 	View.cuh
+	Model.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp
