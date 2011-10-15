@@ -13,6 +13,8 @@ public slots:
 	void OnTransferFunctionChanged(void);
 	void OnSetShadingType(int Index);
 	void OnSetGradientFactor(double GradientFactor);
+	void OnSetStepSizePrimaryRay(const double& StepSizePrimaryRay);
+	void OnSetStepSizeSecondaryRay(const double& StepSizeSecondaryRay);
 
 private:
 	QGridLayout		m_MainLayout;
@@ -21,4 +23,10 @@ private:
 	QComboBox		m_ShadingType;
 	QDoubleSlider	m_GradientFactorSlider;
 	QDoubleSpinner	m_GradientFactorSpinner;
+
+	QDoubleSlider	m_StepSizePrimaryRaySlider;
+	QDoubleSpinner	m_StepSizePrimaryRaySpinner;
+
+	QDoubleSlider	m_StepSizeSecondaryRaySlider;
+	QDoubleSpinner	m_StepSizeSecondaryRaySpinner;
 };

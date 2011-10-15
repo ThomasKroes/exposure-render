@@ -56,21 +56,16 @@ public:
 	Vec3f				m_Spacing;
 	Vec3f				m_Scale;
 	CBoundingBox		m_BoundingBox;
-	float				m_PhaseG;
 	CTransferFunctions	m_TransferFunctions;
-	int					m_MaxNoBounces;
 	CRange				m_IntensityRange;
 	CRange				m_GradientMagnitudeRange;
-	float				m_SigmaMax;
 	float				m_DensityScale;
 	CDenoiseParams		m_DenoiseParams;
 	float				m_Variance;
 	int					m_ShadingType;
-	bool				m_Spectral;
 	float				m_StepSizeFactor;
 	float				m_StepSizeFactorShadow;
 	float				m_GradientDelta;
-	float				m_IOR;
 	float				m_GradientFactor;
 	float				m_GradMagMean;
 

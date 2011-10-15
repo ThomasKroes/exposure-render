@@ -10,21 +10,16 @@ CScene::CScene(void) :
 	m_Spacing(),
 	m_Scale(),
 	m_BoundingBox(),
-	m_PhaseG(0.0f),
 	m_TransferFunctions(),
-	m_MaxNoBounces(1),
 	m_IntensityRange(),
 	m_GradientMagnitudeRange(),
-	m_SigmaMax(0.0f),
 	m_DensityScale(5000),
 	m_DenoiseParams(),
 	m_NoIterations(0),
 	m_ShadingType(2),
-	m_Spectral(false),
-	m_StepSizeFactor(1.5f),
-	m_StepSizeFactorShadow(3.0f),
+	m_StepSizeFactor(10.0f),
+	m_StepSizeFactorShadow(10.0f),
 	m_GradientDelta(1.0f),
-	m_IOR(2.5f),
 	m_GradientFactor(1.0f),
 	m_GradMagMean(1.0f)
 {
@@ -44,21 +39,16 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_Spacing					= Other.m_Spacing;
 	m_Scale						= Other.m_Scale;
 	m_BoundingBox				= Other.m_BoundingBox;
-	m_PhaseG					= Other.m_PhaseG;
 	m_TransferFunctions			= Other.m_TransferFunctions;
-	m_MaxNoBounces				= Other.m_MaxNoBounces;
 	m_IntensityRange			= Other.m_IntensityRange;
-	m_SigmaMax					= Other.m_SigmaMax;
 	m_DensityScale				= Other.m_DensityScale;
 	m_DenoiseParams				= Other.m_DenoiseParams;
 	m_NoIterations				= Other.m_NoIterations;
 	m_ShadingType				= Other.m_ShadingType;
-	m_Spectral					= Other.m_Spectral;
 	m_StepSizeFactor			= Other.m_StepSizeFactor;
 	m_StepSizeFactorShadow		= Other.m_StepSizeFactorShadow;
 	m_GradientDelta				= Other.m_GradientDelta;
 	m_GradientMagnitudeRange	= Other.m_GradientMagnitudeRange;
-	m_IOR						= Other.m_IOR;
 	m_GradientFactor			= Other.m_GradientFactor;
 	m_GradMagMean				= Other.m_GradMagMean;
 

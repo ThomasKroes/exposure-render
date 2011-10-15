@@ -2,7 +2,7 @@
 
 #include "Transport.cuh"
 
-#define KRNL_SS_BLOCK_W		8
+#define KRNL_SS_BLOCK_W		16
 #define KRNL_SS_BLOCK_H		8
 #define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
 
@@ -35,7 +35,6 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
-		
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
 			pView->m_FrameEstimateXyza.m_pData[PID].c[0] = Lv.c[0];
@@ -44,7 +43,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 
 			return;
 		}
-
+		
 		const float D = GetNormalizedIntensity(Pe);
 
 		Lv += GetEmission(D).ToXYZ();

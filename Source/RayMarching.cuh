@@ -6,31 +6,34 @@
 
 DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 {
-	float MinT = 0.0f, MaxT = 0.0f;
+	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (!IntersectBox(R, &MinT, &MaxT))
+	__shared__ float MinT[16 * 8];
+	__shared__ float MaxT[16 * 8];
+
+	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
 
-	MinT = max(MinT, R.m_MinT);
-	MaxT = min(MaxT, R.m_MaxT);
+	MinT[TID] = max(MinT[TID], R.m_MinT);
+	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
 	const float S	= -log(RNG.Get1()) * gIntensityInvRange;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT += RNG.Get1() * gStepSize;
+	MinT[TID] += RNG.Get1() * gStepSize;
 
 	while (Sum < S)
 	{
-		Ps = R.m_O + MinT * R.m_D;
+		Ps = R.m_O + MinT[TID] * R.m_D;
 
-		if (MinT > MaxT)
+		if (MinT[TID] > MaxT[TID])
 			return false;
 		
 		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps));
 
 		Sum		+= SigmaT * gStepSize;
-		MinT	+= gStepSize;
+		MinT[TID]	+= gStepSize;
 	}
 
 	return true;
