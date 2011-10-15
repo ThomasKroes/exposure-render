@@ -121,15 +121,12 @@ SET(ExposureRenderSources
 	Flags.cpp
 	Geometry.cpp
 	MonteCarlo.cpp
-	RNG.cpp
 	Spectrum.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
 	VtkWidget.cpp
 	Scene.cpp
 	Controls.cpp
-	Material.cpp
-	Sample.cpp
 	Utilities.cpp
 	CudaUtilities.cpp
 	Status.cpp
@@ -212,15 +209,12 @@ SET(ExposureRenderHeaders
 	Geometry.h
 	LightInline.h
 	MonteCarlo.h
-	RNG.h
 	Spectrum.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
 	VtkWidget.h
 	Scene.h
 	Controls.h
-	Material.h
-	Sample.h
 	LogWidget.h
 	Utilities.h
 	CudaUtilities.h
@@ -493,14 +487,11 @@ SET(CoreSources
 	VtkWidget.h
 	Scene.h
 	Controls.h
-	Material.h
-	Sample.h
 	Utilities.h
 	Status.h
 	Timing.h
 	Variance.h
 	CameraInline.h
-	RNG.h
 	VolumeMapper.h
 	Stable.cpp
 	Filter.cpp
@@ -513,13 +504,10 @@ SET(CoreSources
 	VtkWidget.cpp
 	Scene.cpp
 	Controls.cpp
-	Material.cpp
-	Sample.cpp
 	Utilities.cpp
 	Status.cpp
 	Timing.cpp
 	Variance.cpp
-	RNG.cpp
 	VolumeMapper.cpp
 )
 
@@ -547,6 +535,7 @@ SET(CudaSources
 	Model.cuh
 	Shader.cuh
 	Sample.cuh
+	Random.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp
