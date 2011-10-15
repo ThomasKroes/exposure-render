@@ -2,10 +2,6 @@
 
 #include "Transport.cuh"
 
-#define KRNL_SS_BLOCK_W		16
-#define KRNL_SS_BLOCK_H		8
-#define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
-
 KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 {
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;

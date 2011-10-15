@@ -4,12 +4,16 @@
 #include "Scene.h"
 #include "CudaUtilities.h"
 
+#define KRNL_SS_BLOCK_W		16
+#define KRNL_SS_BLOCK_H		8
+#define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
+
 DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
-	__shared__ float MinT[16 * 8];
-	__shared__ float MaxT[16 * 8];
+	__shared__ float MinT[KRNL_SS_BLOCK_SIZE];
+	__shared__ float MaxT[KRNL_SS_BLOCK_SIZE];
 
 	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
@@ -41,13 +45,16 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 
 DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 {
-	float MinT = 0.0f, MaxT = 0.0f;
+	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (!IntersectBox(R, &MinT, &MaxT))
+	__shared__ float MinT[KRNL_SS_BLOCK_SIZE];
+	__shared__ float MaxT[KRNL_SS_BLOCK_SIZE];
+
+	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
 
-	MinT = max(MinT, R.m_MinT);
-	MaxT = min(MaxT, R.m_MaxT);
+	MinT[TID] = max(MinT[TID], R.m_MinT);
+	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
 	const float S	= -log(RNG.Get1()) * gIntensityInvRange;
 	float Sum		= 0.0f;
@@ -55,19 +62,19 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 
 	Vec3f Ps; 
 
-	MinT += RNG.Get1() * gStepSizeShadow;
+	MinT[TID] += RNG.Get1() * gStepSizeShadow;
 
 	while (Sum < S)
 	{
-		Ps = R.m_O + MinT * R.m_D;
+		Ps = R.m_O + MinT[TID] * R.m_D;
 
-		if (MinT > MaxT)
+		if (MinT[TID] > MaxT[TID])
 			return false;
 		
 		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps));
 
-		Sum		+= SigmaT * gStepSizeShadow;
-		MinT	+= gStepSizeShadow;
+		Sum			+= SigmaT * gStepSizeShadow;
+		MinT[TID]	+= gStepSizeShadow;
 	}
 
 	return true;

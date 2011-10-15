@@ -139,6 +139,7 @@ QDoubleSlider::QDoubleSlider(QWidget* pParent /*= NULL*/) :
 	setSingleStep(1);
 
 	setOrientation(Qt::Horizontal);
+	setFocusPolicy(Qt::NoFocus);
 }
 
 void QDoubleSlider::setValue(int Value)

@@ -64,6 +64,7 @@ SET(ExposureRenderSources
 	StartupDialog.cpp
 	AboutDialog.cpp
 	SettingsDockWidget.cpp
+	HardwareInfoWidget.cpp
 
 	# Lighting
 	LightWidget.cpp 
@@ -146,6 +147,7 @@ SET(ExposureRenderHeaders
 	StartupDialog.h
 	AboutDialog.h
 	SettingsDockWidget.h
+	HardwareInfoWidget.h
 
 	# Lighting
 	LightWidget.h
@@ -231,6 +233,7 @@ SET(ExposureRenderMocHeaders
 	LoadSettingsDialog.h
 	StartupDialog.h
 	AboutDialog.h
+	HardwareInfoWidget.h
 
 	# Lighting
 	LightWidget.h
@@ -336,12 +339,14 @@ SET(MainSources
 	StartupDialog.h
 	AboutDialog.h
 	SettingsDockWidget.h
+	HardwareInfoWidget.h
 	MainWindow.cpp
 	Main.cpp
 	LoadSettingsDialog.cpp
 	StartupDialog.cpp
 	AboutDialog.cpp
 	SettingsDockWidget.cpp
+	HardwareInfoWidget.cpp
 )
 
 # Make the main group
@@ -555,7 +560,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Create executable
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources})
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources})
 
 
 

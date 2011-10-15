@@ -215,10 +215,7 @@ void QRenderThread::run()
 			// CUDA time for profiling
  			CCudaTimer TmrFps;
 
-			gSceneMutex.lock();
 			SceneCopy = gScene;
-			gSceneMutex.unlock();
-//			SceneCopy.m_Camera.Update();
 
 			gStatus.SetStatisticChanged("Camera", "Position", FormatVector(SceneCopy.m_Camera.m_From));
 			gStatus.SetStatisticChanged("Camera", "Target", FormatVector(SceneCopy.m_Camera.m_Target));

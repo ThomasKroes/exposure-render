@@ -1,5 +1,7 @@
 #pragma once
 
+#include "HardwareInfoWidget.h"
+
 class QStartupDialog : public QDialog
 {
 	Q_OBJECT
@@ -25,6 +27,7 @@ private:
 	QGroupBox			m_DemoFilesGroupBox;
 	QGridLayout			m_DemoFilesLayout;
 	QLabel				m_ResampleNote;
+	QHardwareWidget		m_HardwareWidget;
 	QGroupBox			m_ReadMeGroupBox;
 	QGridLayout			m_ReadMeLayout;
 	QTextEdit			m_ReadMe;

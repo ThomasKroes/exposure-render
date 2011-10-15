@@ -17,10 +17,10 @@ CScene::CScene(void) :
 	m_DenoiseParams(),
 	m_NoIterations(0),
 	m_ShadingType(2),
-	m_StepSizeFactor(10.0f),
-	m_StepSizeFactorShadow(10.0f),
-	m_GradientDelta(1.0f),
-	m_GradientFactor(1.0f),
+	m_StepSizeFactor(3.0f),
+	m_StepSizeFactorShadow(3.0f),
+	m_GradientDelta(4.0f),
+	m_GradientFactor(4.0f),
 	m_GradMagMean(1.0f)
 {
 }

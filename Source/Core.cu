@@ -365,11 +365,12 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gFilmHeight", &Filmheight, sizeof(int)));
 	HandleCudaError(cudaMemcpyToSymbol("gFilmNoPixels", &FilmNoPixels, sizeof(int)));
 
-	const int FilterWidth = 0;
+	const int FilterWidth = 2;
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
 
-	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	const float FilterWeights[10] = { 1.0f, 0.35f, 0.1f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+//	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 //	const float FilterWeights[10] = { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWeights", &FilterWeights, 10 * sizeof(float)));
