@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Geometry.h"
-#include "MonteCarlo.h"
 #include "Scene.h"
+
+#include "MonteCarlo.cuh"
 
 #define KRNL_SP_BLOCK_W		32
 #define KRNL_SP_BLOCK_H		8

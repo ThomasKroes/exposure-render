@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Geometry.h"
-#include "RNG.h"
 #include "Flags.h"
-#include "MonteCarlo.h"
+
+#include "MonteCarlo.cuh"
+#include "RNG.cuh"
 
 #define DEF_FOCUS_TYPE					CenterScreen
 #define DEF_FOCUS_SENSOR_POS_CANVAS		Vec2f(0.0f)

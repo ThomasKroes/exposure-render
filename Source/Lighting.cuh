@@ -1,7 +1,7 @@
 #pragma once
 
-#include "MonteCarlo.h"
-#include "Sample.h"
+#include "MonteCarlo.cuh"
+#include "Sample.cuh"
 
 #define MAX_NO_LIGHTS 32
 

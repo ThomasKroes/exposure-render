@@ -2,8 +2,8 @@
 
 #include "Geometry.h"
 #include "Flags.h"
-#include "CameraInline.h"
-#include "LightInline.h"
+#include "Camera.cuh"
+#include "Lighting.cuh"
 
 class EXPOSURE_RENDER_DLL CDenoiseParams
 {
@@ -64,7 +64,6 @@ public:
 	float				m_SigmaMax;
 	float				m_DensityScale;
 	CDenoiseParams		m_DenoiseParams;
-	cudaExtent			m_ExtinctionSize;
 	float				m_Variance;
 	int					m_ShadingType;
 	bool				m_Spectral;

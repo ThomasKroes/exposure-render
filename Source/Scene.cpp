@@ -19,7 +19,6 @@ CScene::CScene(void) :
 	m_DensityScale(5000),
 	m_DenoiseParams(),
 	m_NoIterations(0),
-	m_ExtinctionSize(),
 	m_ShadingType(2),
 	m_Spectral(false),
 	m_StepSizeFactor(1.5f),
@@ -53,7 +52,6 @@ HOD CScene& CScene::operator=(const CScene& Other)
 	m_DensityScale				= Other.m_DensityScale;
 	m_DenoiseParams				= Other.m_DenoiseParams;
 	m_NoIterations				= Other.m_NoIterations;
-	m_ExtinctionSize			= Other.m_ExtinctionSize;
 	m_ShadingType				= Other.m_ShadingType;
 	m_Spectral					= Other.m_Spectral;
 	m_StepSizeFactor			= Other.m_StepSizeFactor;

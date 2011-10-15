@@ -117,10 +117,8 @@ SET(ExposureRenderSources
 	
 	# Core
 	Stable.cpp
-	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
-	MonteCarlo.cpp
 	Spectrum.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
@@ -204,10 +202,8 @@ SET(ExposureRenderHeaders
 	Defines.h
 	Dll.h
 	Enumerations.h
-	Filter.h
 	Flags.h
 	Geometry.h
-	MonteCarlo.h
 	Spectrum.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
@@ -474,10 +470,8 @@ SET(CoreSources
 	Defines.h
 	Dll.h
 	Enumerations.h
-	Filter.h
 	Flags.h
 	Geometry.h
-	MonteCarlo.h
 	Spectrum.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
@@ -490,10 +484,8 @@ SET(CoreSources
 	Variance.h
 	VolumeMapper.h
 	Stable.cpp
-	Filter.cpp
 	Flags.cpp
 	Geometry.cpp
-	MonteCarlo.cpp
 	Spectrum.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
@@ -534,6 +526,7 @@ SET(CudaSources
 	RNG.cuh
 	Camera.cuh
 	Lighting.cuh
+	MonteCarlo.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

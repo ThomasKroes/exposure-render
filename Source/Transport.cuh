@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Material.h"
-
+#include "Shader.cuh"
 #include "RayMarching.cuh"
 
 DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& Rnd)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Filter.h"
 #include "Scene.h"
 #include "CudaUtilities.h"
 
