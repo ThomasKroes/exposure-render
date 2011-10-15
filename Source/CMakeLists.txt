@@ -207,7 +207,6 @@ SET(ExposureRenderHeaders
 	Filter.h
 	Flags.h
 	Geometry.h
-	LightInline.h
 	MonteCarlo.h
 	Spectrum.h
 	InteractorStyleRealisticCamera.h
@@ -221,7 +220,6 @@ SET(ExposureRenderHeaders
 	Status.h
 	Timing.h
 	Variance.h
-	CameraInline.h
 	VolumeMapper.h
 
 	# Logging
@@ -479,7 +477,6 @@ SET(CoreSources
 	Filter.h
 	Flags.h
 	Geometry.h
-	LightInline.h
 	MonteCarlo.h
 	Spectrum.h
 	InteractorStyleRealisticCamera.h
@@ -491,7 +488,6 @@ SET(CoreSources
 	Status.h
 	Timing.h
 	Variance.h
-	CameraInline.h
 	VolumeMapper.h
 	Stable.cpp
 	Filter.cpp
@@ -535,7 +531,9 @@ SET(CudaSources
 	Model.cuh
 	Shader.cuh
 	Sample.cuh
-	Random.cuh
+	RNG.cuh
+	Camera.cuh
+	Lighting.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

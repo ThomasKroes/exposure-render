@@ -5,33 +5,6 @@
 #include "Flags.h"
 #include "MonteCarlo.h"
 
-class EXPOSURE_RENDER_DLL CCameraSample
-{
-public:
-	Vec2f	m_ImageXY;
-	Vec2f	m_LensUV;
-
-	DEV CCameraSample(void)
-	{
-		m_ImageXY	= Vec2f(0.0f);
-		m_LensUV	= Vec2f(0.0f);
-	}
-
-	DEV CCameraSample& CCameraSample::operator=(const CCameraSample& Other)
-	{
-		m_ImageXY	= Other.m_ImageXY;
-		m_LensUV	= Other.m_LensUV;
-
-		return *this;
-	}
-
-	DEV void LargeStep(Vec2f& ImageUV, Vec2f& LensUV, const int& X, const int& Y, const int& KernelSize)
-	{
-		m_ImageXY	= Vec2f(X + ImageUV.x, Y + ImageUV.y);
-		m_LensUV	= LensUV;
-	}
-};
-
 #define DEF_FOCUS_TYPE					CenterScreen
 #define DEF_FOCUS_SENSOR_POS_CANVAS		Vec2f(0.0f)
 #define DEF_FOCUS_P						Vec3f(0.0f)
