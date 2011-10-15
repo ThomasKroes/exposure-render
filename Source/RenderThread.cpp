@@ -105,7 +105,6 @@ void QFrameBuffer::Set(unsigned char* pPixels, const int& Width, const int& Heig
 QRenderThread::QRenderThread(const QString& FileName, QObject* pParent /*= NULL*/) :
 	QThread(pParent),
 	m_FileName(FileName),
-//	m_CudaFrameBuffers(),
 	m_pRenderImage(NULL),
 	m_pDensityBuffer(NULL),
 	m_pGradientMagnitudeBuffer(NULL),
@@ -130,7 +129,6 @@ QRenderThread::~QRenderThread(void)
 QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 {
 	m_FileName					= Other.m_FileName;
-//	m_CudaFrameBuffers			= Other.m_CudaFrameBuffers;
 	m_pRenderImage				= Other.m_pRenderImage;
 	m_pDensityBuffer			= Other.m_pDensityBuffer;
 	m_pGradientMagnitudeBuffer	= Other.m_pGradientMagnitudeBuffer;
@@ -532,8 +530,9 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		gScene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Roughness * 100);
 	}
 
-	gScene.m_DensityScale	= 5.0f * (expf(5.0f * TransferFunction.GetDensityScale()) / expf(5.0f));
+	gScene.m_DensityScale	= TransferFunction.GetDensityScale();
 	gScene.m_ShadingType	= TransferFunction.GetShadingType();
+	gScene.m_GradientFactor	= TransferFunction.GetGradientFactor();
 
 	gScene.m_DirtyFlags.SetFlag(TransferFunctionDirty);
 

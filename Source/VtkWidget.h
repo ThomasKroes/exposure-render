@@ -27,6 +27,10 @@
 
 #include "RenderThread.h"
 
+#include "VolumeMapper.h"
+
+// http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
+
 class CVtkWidget : public QWidget
 {
     Q_OBJECT
@@ -61,4 +65,8 @@ public:
 	vtkSmartPointer<vtkCallbackCommand>			m_KeyPressCallback;
 	vtkSmartPointer<vtkCallbackCommand>			m_KeyReleaseCallback;
 	vtkSmartPointer<vtkRealisticCameraStyle>	m_InteractorStyleRealisticCamera;
+
+	// Experimental
+	vtkSmartPointer<vtkVolume>					m_Volume;
+//	vtkSmartPointer<vtkVolumeCudaMapper>		m_VolumeMapper;
 };

@@ -36,7 +36,9 @@ SET(QT_QMAKE_EXECUTABLE ${VTK_QT_QMAKE_EXECUTABLE} CACHE FILEPATH "")
 FIND_PACKAGE(Qt4 REQUIRED)
 
 # Enable the use of XML in Qt
+
 SET(QT_USE_QTXML TRUE)
+SET(QT_USE_QTOPENGL TRUE)
 
 INCLUDE(${QT_USE_FILE})
 
@@ -133,6 +135,7 @@ SET(ExposureRenderSources
 	Status.cpp
 	Timing.cpp
 	Variance.cpp
+	VolumeMapper.cpp
 
 	# Logging
 	Logger.cpp
@@ -225,6 +228,7 @@ SET(ExposureRenderHeaders
 	Timing.h
 	Variance.h
 	CameraInline.h
+	VolumeMapper.h
 
 	# Logging
 	Logger.h
@@ -497,6 +501,7 @@ SET(CoreSources
 	Variance.h
 	CameraInline.h
 	RNG.h
+	VolumeMapper.h
 	Stable.cpp
 	Filter.cpp
 	Flags.cpp
@@ -515,6 +520,7 @@ SET(CoreSources
 	Timing.cpp
 	Variance.cpp
 	RNG.cpp
+	VolumeMapper.cpp
 )
 
 # Make the core group
@@ -539,6 +545,8 @@ SET(CudaSources
 	Buffer.cuh
 	View.cuh
 	Model.cuh
+	Shader.cuh
+	Sample.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

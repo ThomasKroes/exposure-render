@@ -13,12 +13,8 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_DensityScaleSpinner(),
 	m_ShadingType()
 {
-//	setTitle("Settings");
-	
-	// Create grid layout
 	setLayout(&m_MainLayout);
 
-	// Density scale
 	m_MainLayout.addWidget(new QLabel("Density Scale"), 2, 0);
 
 	m_DensityScaleSlider.setOrientation(Qt::Horizontal);
@@ -50,46 +46,24 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 
 	m_MainLayout.addWidget(&m_GradientFactorSpinner, 4, 2);
 
-//	m_MainLayout.addWidget(new QLabel("Index Of Refraction"), 5, 0);
-
-	m_IndexOfRefractionSlider.setOrientation(Qt::Horizontal);
-	m_IndexOfRefractionSlider.setRange(0.001, 50.0);
-	m_IndexOfRefractionSlider.setValue(10.0);
-
-//	m_MainLayout.addWidget(&m_IndexOfRefractionSlider, 5, 1);
-
-	m_IndexOfRefractionSpinner.setRange(0.001, 50.0);
-	m_IndexOfRefractionSpinner.setDecimals(3);
-
-//	m_MainLayout.addWidget(&m_IndexOfRefractionSpinner, 5, 2);
-
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), &m_DensityScaleSpinner, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSpinner, SIGNAL(valueChanged(double)), &m_DensityScaleSlider, SLOT(setValue(double)));
 	QObject::connect(&m_DensityScaleSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetDensityScale(double)));
 
 	QObject::connect(&m_GradientFactorSlider, SIGNAL(valueChanged(double)), &m_GradientFactorSpinner, SLOT(setValue(double)));
 	QObject::connect(&m_GradientFactorSpinner, SIGNAL(valueChanged(double)), &m_GradientFactorSlider, SLOT(setValue(double)));
-	QObject::connect(&m_GradientFactorSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetMaxGradientMagnitude(double)));
-
-	QObject::connect(&m_IndexOfRefractionSlider, SIGNAL(valueChanged(double)), &m_IndexOfRefractionSpinner, SLOT(setValue(double)));
-	QObject::connect(&m_IndexOfRefractionSpinner, SIGNAL(valueChanged(double)), &m_IndexOfRefractionSlider, SLOT(setValue(double)));
-	QObject::connect(&m_IndexOfRefractionSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetIndexOfRefraction(double)));
+	QObject::connect(&m_GradientFactorSlider, SIGNAL(valueChanged(double)), this, SLOT(OnSetGradientFactor(double)));
 
 	QObject::connect(&m_ShadingType, SIGNAL(currentIndexChanged(int)), this, SLOT(OnSetShadingType(int)));
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	QObject::connect(&gTransferFunction, SIGNAL(Changed()), this, SLOT(OnTransferFunctionChanged()));
 }
 
 void QAppearanceSettingsWidget::OnRenderBegin(void)
 {
 	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale());
+	m_ShadingType.setCurrentIndex(gTransferFunction.GetShadingType());
 	m_GradientFactorSlider.setValue(gScene.m_GradientFactor);
-}
-
-void QAppearanceSettingsWidget::OnRenderEnd(void)
-{
-	m_DensityScaleSlider.setValue(1.0);
 }
 
 void QAppearanceSettingsWidget::OnSetDensityScale(double DensityScale)
@@ -97,25 +71,21 @@ void QAppearanceSettingsWidget::OnSetDensityScale(double DensityScale)
 	gTransferFunction.SetDensityScale(DensityScale);
 }
 
-void QAppearanceSettingsWidget::OnTransferFunctionChanged(void)
-{
-	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale(), true);
-	m_DensityScaleSpinner.setValue(gTransferFunction.GetDensityScale(), true);
-}
-
 void QAppearanceSettingsWidget::OnSetShadingType(int Index)
 {
 	gTransferFunction.SetShadingType(Index);
 }
 
-void QAppearanceSettingsWidget::OnSetMaxGradientMagnitude(double MaxGradMag)
+void QAppearanceSettingsWidget::OnSetGradientFactor(double GradientFactor)
 {
- 	gScene.m_GradientFactor = (float)MaxGradMag;
-	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
+	gTransferFunction.SetGradientFactor(GradientFactor);
 }
 
-void QAppearanceSettingsWidget::OnSetIndexOfRefraction(double IOR)
+void QAppearanceSettingsWidget::OnTransferFunctionChanged(void)
 {
-	gScene.m_IOR = IOR;
-	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
+	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale(), true);
+	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale(), true);
+	m_ShadingType.setCurrentIndex(gTransferFunction.GetShadingType());
+	m_GradientFactorSlider.setValue(gTransferFunction.GetGradientFactor(), true);
+	m_GradientFactorSpinner.setValue(gTransferFunction.GetGradientFactor(), true);
 }

@@ -38,8 +38,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, const float& Density, CLig
 		Ld += F * Li * (AbsDot(Wi, N) * WeightMIS / LightPdf);
 	}
 
-	return Ld;
-
+	/*
 	// Sample the BRDF with MIS
 	F = Bsdf.SampleF(Wo, Wi, BsdfPdf, LS.m_BsdfSample);
 	
@@ -62,6 +61,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, const float& Density, CLig
 			}
 		}
 	}
+	*/
 
 	return Ld;
 }
@@ -95,6 +95,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 		Ld += F * Li * WeightMIS / LightPdf;
 	}
 	
+	/*
 	PhasePdf = INV_4_PI_F;
 	
 	// Sample the phase function with MIS
@@ -119,6 +120,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 			}
 		}
 	}
+	*/
 
 	return Ld;
 }
@@ -143,13 +145,8 @@ DEV CColorXyz UniformSampleOneLight(CScene* pScene, const float& Density, const 
 	// Get the light
 	CLight& Light = pScene->m_Lighting.m_Lights[WhichLight];
 
-//	return SPEC_BLACK;
-
-	return (float)NumLights * EstimateDirectLightBrdf(pScene, Density, Light, LS, Wo, Pe, N, Rnd);
-//	return (float)NumLights * EstimateDirectLightPhase(pScene, Density, Light, LS, Wo, Pe, N, Rnd);
-
-//	if (Brdf)
-//		return (float)NumLights * EstimateDirectLightBrdf(pScene, Density, Light, LS, Wo, Pe, N, Rnd);
-//	else
-//		return (float)NumLights * EstimateDirectLightPhase(pScene, Density, Light, LS, Wo, Pe, N, Rnd);
+	if (Brdf)
+		return (float)NumLights * EstimateDirectLightBrdf(pScene, Density, Light, LS, Wo, Pe, N, Rnd);
+	else
+		return (float)NumLights * EstimateDirectLightPhase(pScene, Density, Light, LS, Wo, Pe, N, Rnd);
 }

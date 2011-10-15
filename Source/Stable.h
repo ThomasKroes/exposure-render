@@ -2,6 +2,7 @@
 
 #include <QtGui>
 #include <QtXml\qdom.h>
+#include <QGLWidget>
 
 #include "Utilities.h"
 #include "Logger.h"

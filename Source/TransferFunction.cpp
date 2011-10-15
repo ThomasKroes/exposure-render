@@ -17,7 +17,8 @@ QTransferFunction::QTransferFunction(QObject* pParent, const QString& Name) :
 	m_Nodes(),
 	m_pSelectedNode(NULL),
 	m_DensityScale(5.0f),
-	m_ShadingType(1)
+	m_ShadingType(1),
+	m_GradientFactor(0.0f)
 {
 }
 
@@ -39,8 +40,9 @@ QTransferFunction& QTransferFunction::operator = (const QTransferFunction& Other
 	for (int i = 0; i < m_Nodes.size(); i++)
 		connect(&m_Nodes[i], SIGNAL(NodeChanged(QNode*)), this, SLOT(OnNodeChanged(QNode*)));
 
-	m_DensityScale	= Other.m_DensityScale;
-	m_ShadingType	= Other.m_ShadingType;
+	m_DensityScale		= Other.m_DensityScale;
+	m_ShadingType		= Other.m_ShadingType;
+	m_GradientFactor	= Other.m_GradientFactor;
 
 	// Update node's range
 	UpdateNodeRanges();
@@ -292,6 +294,21 @@ void QTransferFunction::SetShadingType(const int& ShadingType)
 	emit Changed();
 }
 
+float QTransferFunction::GetGradientFactor(void) const
+{
+	return m_GradientFactor;
+}
+
+void QTransferFunction::SetGradientFactor(const float& GradientFactor)
+{
+	if (GradientFactor == m_GradientFactor)
+		return;
+
+	m_GradientFactor = GradientFactor;
+
+	emit Changed();
+}
+
 void QTransferFunction::ReadXML(QDomElement& Parent)
 {
 	QPresetXML::ReadXML(Parent);
@@ -313,14 +330,11 @@ void QTransferFunction::ReadXML(QDomElement& Parent)
 		AddNode(Node);
 	}
 
-	// Update node's range
 	UpdateNodeRanges();
 
-	// Density Scale
-	m_DensityScale = Parent.firstChildElement("DensityScale").attribute("Value").toFloat();
-
-	// Shading type
-	m_ShadingType = Parent.firstChildElement("ShadingType").attribute("Value").toInt();
+	m_DensityScale		= Parent.firstChildElement("DensityScale").attribute("Value").toFloat();
+	m_ShadingType		= Parent.firstChildElement("ShadingType").attribute("Value").toInt();
+	m_GradientFactor	= Parent.firstChildElement("GradientFactor").attribute("Value").toFloat();
 
 	blockSignals(false);
 
@@ -338,23 +352,24 @@ QDomElement QTransferFunction::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	Parent.appendChild(Preset);
 
-	// Nodes
 	QDomElement Nodes = DOM.createElement("Nodes");
 	Preset.appendChild(Nodes);
 
 	for (int i = 0; i < m_Nodes.size(); i++)
 		m_Nodes[i].WriteXML(DOM, Nodes);
 
-	// Density Scale
 	QDomElement DensityScale = DOM.createElement("DensityScale");
 	DensityScale.setAttribute("Value", GetDensityScale());
 	Preset.appendChild(DensityScale);
 
-	// Shading Type
 	QDomElement ShadingType = DOM.createElement("ShadingType");
 	ShadingType.setAttribute("Value", GetShadingType());
 	Preset.appendChild(ShadingType);
 
+	QDomElement GradientFactor = DOM.createElement("GradientFactor");
+	GradientFactor.setAttribute("Value", GetGradientFactor());
+	Preset.appendChild(GradientFactor);
+	
 	return Preset;
 }
 
@@ -368,5 +383,9 @@ QTransferFunction QTransferFunction::Default(void)
 	DefaultTransferFunction.AddNode(0.7f, 1.0f, Qt::gray, QColor(10, 10, 10), Qt::black, 1.0f);
 	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::gray, QColor(10, 10, 10), Qt::black, 1.0f);
 
+	DefaultTransferFunction.SetDensityScale(0.5f);
+	DefaultTransferFunction.SetShadingType(2);
+	DefaultTransferFunction.SetGradientFactor(10.0f);
+	
 	return DefaultTransferFunction;
 }

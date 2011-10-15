@@ -2,7 +2,6 @@
 
 class QAppearanceSettingsWidget : public QGroupBox
 {
-
 	Q_OBJECT
 
 public:
@@ -10,12 +9,10 @@ public:
 
 public slots:
 	void OnRenderBegin(void);
-	void OnRenderEnd(void);
 	void OnSetDensityScale(double DensityScale);
 	void OnTransferFunctionChanged(void);
 	void OnSetShadingType(int Index);
-	void OnSetMaxGradientMagnitude(double MaxGradMag);
-	void OnSetIndexOfRefraction(double IOR);
+	void OnSetGradientFactor(double GradientFactor);
 
 private:
 	QGridLayout		m_MainLayout;
@@ -24,6 +21,4 @@ private:
 	QComboBox		m_ShadingType;
 	QDoubleSlider	m_GradientFactorSlider;
 	QDoubleSpinner	m_GradientFactorSpinner;
-	QDoubleSlider	m_IndexOfRefractionSlider;
-	QDoubleSpinner	m_IndexOfRefractionSpinner;
 };

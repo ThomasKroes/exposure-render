@@ -5,6 +5,9 @@
 #include "VtkWidget.h"
 #include "MainWindow.h"
 
+#include <vtkMetaImageReader.h>
+#include <vtkVolumeProperty.h>
+
 void KeyPressCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* pCallData)
 {
  	vtkRenderWindowInteractor* pRenderWindowInteractor = static_cast<vtkRenderWindowInteractor*>(pCaller);
@@ -69,6 +72,7 @@ QVTKWidget* CVtkWidget::GetQtVtkWidget(void)
 
 void CVtkWidget::OnRenderBegin(void)
 {
+	
 	// Scale
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(500.0f);
 
@@ -93,8 +97,23 @@ void CVtkWidget::OnRenderBegin(void)
 	m_SceneRenderer->AddActor(m_ImageActor); 
 	
 	// Start the timer
-	m_RenderLoopTimer.start(1000.0f / 40.0f);
+	m_RenderLoopTimer.start(1000.0f / 25.0f);
+	/*
+
+	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
+
+	MetaImageReader->SetFileName("c:\\volumes\\manix_small.mhd");
+	MetaImageReader->Update();
+
+	m_VolumeMapper->SetInput(MetaImageReader->GetOutput());
+
+    m_Volume->SetMapper(m_VolumeMapper);
+    vtkVolumeProperty* prop = vtkVolumeProperty::New();
+    m_Volume->SetProperty(prop);
+    m_SceneRenderer->AddViewProp(m_Volume);*/
 }
+
+//http://agl.unm.edu/rpf/
 
 void CVtkWidget::OnRenderEnd(void)
 {

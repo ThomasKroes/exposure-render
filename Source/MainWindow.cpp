@@ -31,6 +31,7 @@ CMainWindow::CMainWindow() :
 
 	// Create VTK rendering window
 	setCentralWidget(&m_VtkWidget);
+//	setCentralWidget(new QRenderView(this));
 
 	CreateMenus();
 	CreateToolBars();
