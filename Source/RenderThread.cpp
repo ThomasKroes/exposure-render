@@ -33,6 +33,8 @@ QFrameBuffer gFrameBuffer;
 
 QMutex gSceneMutex;
 
+int gCurrentDeviceID = 0;
+
 QFrameBuffer::QFrameBuffer(void) :
 	m_pPixels(NULL),
 	m_Width(0),
@@ -142,16 +144,8 @@ QRenderThread& QRenderThread::operator=(const QRenderThread& Other)
 
 void QRenderThread::run()
 {
-	Log("Initializing CUDA...", "graphic-card");
-
-// 	if (!InitializeCuda())
-//	{
-//		Log("Unable to initialize CUDA, rendering cannot start", QLogger::Critical);
- //		QMessageBox::critical(gpMainWindow, "An error has occurred", "Unable to locate a CUDA capable device");
- //		return;
- //	}
-
-	cudaSetDevice(0);
+	if (!SetCudaDevice(gCurrentDeviceID))
+		return;
 
 	CScene SceneCopy;
 	
@@ -303,17 +297,14 @@ void QRenderThread::run()
 	{
 		Log(*pMessage + ", rendering will be aborted");
 
-		// Free render image buffer
 		free(m_pRenderImage);
 		m_pRenderImage = NULL;
 
-		// Let others know that we have stopped rendering
 		gStatus.SetRenderEnd();
 
 		return;
 	}
 
-	// Free render image buffer
 	free(m_pRenderImage);
 	m_pRenderImage = NULL;
 
@@ -324,6 +315,8 @@ void QRenderThread::run()
 	UnbindTransferFunctionSpecular();
 	UnbindTransferFunctionRoughness();
 	UnbindTransferFunctionEmission();
+	
+	FreeRenderCanvasView();
 
 	// Let others know that we have stopped rendering
 	gStatus.SetRenderEnd();
@@ -332,6 +325,8 @@ void QRenderThread::run()
 
 	// Clear the histogram
 	gHistogram.Reset();
+
+	ResetDevice();
 }
 
 bool QRenderThread::Load(QString& FileName)
@@ -649,7 +644,6 @@ void StartRenderThread(QString& FileName)
 {
 	// Create new render thread
  	gpRenderThread = new QRenderThread(FileName);
-  //	gpRenderThread->setStackSize(1500000000);
 
 	// Load the volume
  	if (!gpRenderThread->Load(FileName))

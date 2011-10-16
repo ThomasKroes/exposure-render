@@ -13,6 +13,7 @@ extern "C" void UnbindDensityBuffer(void);
 extern "C" void UnbindGradientMagnitudeBuffer(void);
 extern "C" void BindRenderCanvasView(const CResolution2D& Resolution);
 extern "C" void ResetRenderCanvasView(void);
+extern "C" void FreeRenderCanvasView(void);
 extern "C" unsigned char* GetDisplayEstimate(void);
 extern "C" void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity);
 extern "C" void BindTransferFunctionDiffuse(CTransferFunction& TransferFunctionDiffuse);

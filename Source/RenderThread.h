@@ -77,3 +77,4 @@ void StartRenderThread(QString& FileName);
 void KillRenderThread(void);
 
 extern QMutex gSceneMutex;
+extern int gCurrentDeviceID;

@@ -311,6 +311,8 @@ void CMainWindow::OnRenderEnd(void)
 
 void CMainWindow::ShowStartupDialog(void)
 {
+	Close();
+
 	QStartupDialog StartupDialog;
 
 	StartupDialog.setModal(true);

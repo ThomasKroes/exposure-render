@@ -159,6 +159,11 @@ void ResetRenderCanvasView(void)
 	gRenderCanvasView.Reset();
 }
 
+void FreeRenderCanvasView(void)
+{
+	gRenderCanvasView.Free();
+}
+
 unsigned char* GetDisplayEstimate(void)
 {
 	return (unsigned char*)gRenderCanvasView.m_DisplayEstimateRgbLdr.m_pData;

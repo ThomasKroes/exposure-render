@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HardwareInfoWidget.h"
+#include "HardwareWidget.h"
 
 class QStartupDialog : public QDialog
 {
