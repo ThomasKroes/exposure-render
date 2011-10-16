@@ -58,7 +58,7 @@ public:
 		m_HalfHeight(0.5f * m_Height),
 		m_InvHalfHeight(1.0f / m_HalfHeight),
 		m_Distance(1.0f),
-		m_SkyRadius(100000.0f),
+		m_SkyRadius(1000000.0f),
 		m_P(1.0f, 1.0f, 1.0f),
 		m_Target(0.0f, 0.0f, 0.0f),
 		m_N(1.0f, 0.0f, 0.0f),
@@ -158,7 +158,7 @@ public:
 			Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
 			Rl.m_D	= Normalize(P - Rl.m_O);
 			L		= Le(Vec2f(1.0f) - 2.0f * LS.m_LightSample.m_Pos);
-			Pdf		= DistanceSquared(P, Rl.m_O) / m_Area;
+			Pdf		= INV_4_PI_F;
 		}
 
 		Rl.m_MinT	= 0.0f;

@@ -108,20 +108,7 @@ void CVtkWidget::OnRenderBegin(void)
 	m_SceneRenderer->AddActor(m_ImageActor); 
 	
 	// Start the timer
-	m_RenderLoopTimer.start(1000.0f / 25.0f);
-	/*
-
-	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
-
-	MetaImageReader->SetFileName("c:\\volumes\\manix_small.mhd");
-	MetaImageReader->Update();
-
-	m_VolumeMapper->SetInput(MetaImageReader->GetOutput());
-
-    m_Volume->SetMapper(m_VolumeMapper);
-    vtkVolumeProperty* prop = vtkVolumeProperty::New();
-    m_Volume->SetProperty(prop);
-    m_SceneRenderer->AddViewProp(m_Volume);*/
+	m_RenderLoopTimer.start(1000.0f / 35.0f);
 }
 
 //http://agl.unm.edu/rpf/

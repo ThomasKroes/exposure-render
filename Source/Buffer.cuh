@@ -16,13 +16,14 @@
 #include "Geometry.h"
 #include "CudaUtilities.h"
 
-template<class T>
+template<class T, bool Pitched>
 class CCudaBuffer2D
 {
 public:
 	CCudaBuffer2D(void) :
 		m_Resolution(0, 0),
-		m_pData(NULL)
+		m_pData(NULL),
+		m_Pitch(0)
 	{
 	}
 
@@ -40,6 +41,7 @@ public:
 	{
 		m_Resolution	= Other.m_Resolution;
 		m_pData			= Other.m_pData;
+		m_Pitch			= Other.m_Pitch;
 
 		return *this;
 	}
@@ -50,52 +52,99 @@ public:
 
 		Free();
 
-		HandleCudaError(cudaMalloc(&m_pData, m_Resolution.GetNoElements() * sizeof(T)), "Reset Cuda Buffer");
+		if (Pitched)
+			HandleCudaError(cudaMallocPitch(&m_pData, &m_Pitch, GetWidth(), GetHeight()));
+		else
+			HandleCudaError(cudaMalloc(&m_pData, GetSize()));
 	}
 
 	void Reset(void)
 	{
-//		const int Size = m_Resolution.GetNoElements() * sizeof(T);
-//		HandleCudaError(cudaMemset(m_pData, 0, Size), "Reset Cuda Buffer");
+		HandleCudaError(cudaMemset(m_pData, 0, GetSize()));
 	}
 
 	void Free(void)
 	{
-		HandleCudaError(cudaFree(m_pData), "Free Cuda Buffer");
+		HandleCudaError(cudaFree(m_pData));
 		m_pData = NULL;
 	}
 
-	T Read(const int& X, const int& Y)
-	{
-		return m_pData[Y * m_Resolution.GetResX() + X];
-	}
-
-	void Write(const int& X, const int& Y)
-	{
-	}
-
-	int GetNoElements(void) const
+	HOD int GetNoElements(void) const
 	{
 		return m_Resolution.GetNoElements();
 	}
 
-	int GetSize(void) const
+	HOD int GetSize(void) const
 	{
-		return GetNoElements() * sizeof(T);
+		if (Pitched)
+			return m_Resolution.GetResY() * m_Pitch;
+		else
+			return GetNoElements() * sizeof(T);
 	}
 
+	HOD T Get(const int& X, const int& Y)
+	{
+		if (Pitched)
+			return m_pData[Y * (m_Pitch / sizeof(T)) + X];
+		else
+			return m_pData[Y * GetWidth() + X];
+	}
+
+	HOD T& GetRef(const int& X, const int& Y)
+	{
+		if (Pitched)
+			return m_pData[Y * m_Pitch / sizeof(T) + X];
+		else
+			return m_pData[Y * GetWidth() + X];
+	}
+
+	HOD T* GetPtr(const int& X, const int& Y)
+	{
+		if (Pitched)
+			return &m_pData[Y * m_Pitch / sizeof(T) + X];
+		else
+			return &m_pData[Y * GetWidth() + X];
+	}
+
+	HOD void Set(T& Value, const int& X, const int& Y)
+	{
+		if (Pitched)
+			m_pData[Y * m_Pitch + X] = Value;
+		else
+			m_pData[Y * GetWidth() + X] = Value;
+	}
+
+	HOD int GetWidth(void) const
+	{
+		return m_Resolution.GetResX();
+	}
+
+	HOD int GetHeight(void) const
+	{
+		return m_Resolution.GetResY();
+	}
+
+	HOD int GetPitch(void) const
+	{
+		if (Pitched)
+			return m_Pitch;
+		else
+			return GetWidth() * sizeof(T);
+	}
+
+protected:
 	CResolution2D	m_Resolution;
 	T*				m_pData;
+	size_t			m_Pitch;
 };
 
-class CCudaRandomBuffer2D : public CCudaBuffer2D<unsigned int>
+class CCudaRandomBuffer2D : public CCudaBuffer2D<unsigned int, false>
 {
 public:
 	void Resize(const CResolution2D& Resolution)
 	{
 		CCudaBuffer2D::Resize(Resolution);
 
-		// Create random seeds
 		unsigned int* pSeeds = (unsigned int*)malloc(GetSize());
 
 		memset(pSeeds, 0, GetSize());
@@ -107,82 +156,4 @@ public:
 
 		free(pSeeds);
 	}
-};
-
-template<class T>
-class CCudaBuffer3D
-{
-public:
-	CCudaBuffer3D(void) :
-		m_Resolution(),
-		m_pData(NULL)
-	{
-	}
-
-	virtual ~CCudaBuffer3D(void)
-	{
-		Free();
-	}
-
-	CCudaBuffer3D::CCudaBuffer3D(const CCudaBuffer3D& Other)
-	{
-		*this = Other;
-	}
-
-	CCudaBuffer3D& CCudaBuffer3D::operator=(const CCudaBuffer3D& Other)
-	{
-		m_Resolution	= Other.m_Resolution;
-		m_pData			= Other.m_pData;
-
-		return *this;
-	}
-
-	void Resize(const CResolution3D& Resolution)
-	{
-		m_Resolution = Resolution;
-
-		Free();
-
-		HandleCudaError(cudaMalloc(&m_pData, GetSize()), "Resize Cuda Buffer");
-	}
-
-	void BindRawData(T* pData, const CResolution3D& Resolution)
-	{
-		Resize(Resolution);
-
-		HandleCudaError(cudaMemcpy(m_pData, (void*)pData, GetSize(), cudaMemcpyHostToDevice), "Resize Cuda Buffer");
-	}
-
-	void Free(void)
-	{
-		if (m_pData == NULL)
-			return;
-
-		HandleCudaError(cudaFree(m_pData), "Free Cuda Buffer");
-		m_pData = NULL;
-	}
-
-	int GetNoElements(void) const
-	{
-		return m_Resolution.GetNoElements();
-	}
-
-	int GetSize(void) const
-	{
-		return GetNoElements() * sizeof(T);
-	}
-
-	/*
-	float Get(const int& x, const int& y, const int& z) const
-	{
-        x = Clamp(x, 0, nx - 1);
-        y = Clamp(y, 0, ny - 1);
-        z = Clamp(z, 0, nz - 1);
-
-        return density[z*nx*ny + y*nx + x];
-    }
-	*/
-
-	CResolution3D	m_Resolution;
-	T*				m_pData;
 };

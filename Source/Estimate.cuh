@@ -23,12 +23,11 @@ KERNEL void KrnlEstimate(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	pView->m_RunningEstimateXyza.m_pData[PID] = CumulativeMovingAverage(pView->m_RunningEstimateXyza.m_pData[PID], pView->m_FrameEstimateXyza.m_pData[PID], gNoIterations);
+	pView->m_RunningEstimateXyza.Set(CumulativeMovingAverage(pView->m_RunningEstimateXyza.Get(X, Y), pView->m_FrameEstimateXyza.Get(X, Y), gNoIterations), X, Y);
 }
 
 void Estimate(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

@@ -30,8 +30,7 @@ public:
 		m_EstimateRgbaLdr(),
 		m_DisplayEstimateRgbLdr(),
 		m_RandomSeeds1(),
-		m_RandomSeeds2(),
-		m_NoEstimates()
+		m_RandomSeeds2()
 	{
 	}
 
@@ -47,16 +46,15 @@ public:
 
 	CCudaView& CCudaView::operator=(const CCudaView& Other)
 	{
-		m_Resolution				= Other.m_Resolution;
-		m_RunningEstimateXyza		= Other.m_RunningEstimateXyza;
-		m_FrameEstimateXyza			= Other.m_FrameEstimateXyza;
-		m_FrameBlurXyza				= Other.m_FrameBlurXyza;
-		m_RunningSpecularBloom		= Other.m_RunningSpecularBloom;
-		m_EstimateRgbaLdr			= Other.m_EstimateRgbaLdr;
-		m_DisplayEstimateRgbLdr		= Other.m_DisplayEstimateRgbLdr;
-		m_RandomSeeds1				= Other.m_RandomSeeds1;
-		m_RandomSeeds2				= Other.m_RandomSeeds2;
-		m_NoEstimates				= Other.m_NoEstimates;
+		m_Resolution			= Other.m_Resolution;
+		m_RunningEstimateXyza	= Other.m_RunningEstimateXyza;
+		m_FrameEstimateXyza		= Other.m_FrameEstimateXyza;
+		m_FrameBlurXyza			= Other.m_FrameBlurXyza;
+		m_RunningSpecularBloom	= Other.m_RunningSpecularBloom;
+		m_EstimateRgbaLdr		= Other.m_EstimateRgbaLdr;
+		m_DisplayEstimateRgbLdr	= Other.m_DisplayEstimateRgbLdr;
+		m_RandomSeeds1			= Other.m_RandomSeeds1;
+		m_RandomSeeds2			= Other.m_RandomSeeds2;
 
 		return *this;
 	}
@@ -73,7 +71,6 @@ public:
 		m_DisplayEstimateRgbLdr.Resize(m_Resolution);
 		m_RandomSeeds1.Resize(m_Resolution);
 		m_RandomSeeds2.Resize(m_Resolution);
-		m_NoEstimates.Resize(m_Resolution);
 	}
 
 	void Reset(void)
@@ -86,7 +83,6 @@ public:
 		m_DisplayEstimateRgbLdr.Reset();
 //		m_RandomSeeds1.Reset();
 //		m_RandomSeeds2.Reset();
-		m_NoEstimates.Reset();
 	}
 
 	void Free(void)
@@ -99,17 +95,15 @@ public:
 		m_DisplayEstimateRgbLdr.Free();
 		m_RandomSeeds1.Free();
 		m_RandomSeeds2.Free();
-		m_NoEstimates.Free();
 	}
 
-	CResolution2D					m_Resolution;
-	CCudaBuffer2D<CColorXyza>		m_RunningEstimateXyza;
-	CCudaBuffer2D<CColorXyza>		m_FrameEstimateXyza;
-	CCudaBuffer2D<CColorXyza>		m_FrameBlurXyza;
-	CCudaBuffer2D<CColorXyza>		m_RunningSpecularBloom;
-	CCudaBuffer2D<CColorRgbaLdr>	m_EstimateRgbaLdr;
-	CCudaBuffer2D<CColorRgbLdr>		m_DisplayEstimateRgbLdr;
-	CCudaRandomBuffer2D				m_RandomSeeds1;
-	CCudaRandomBuffer2D				m_RandomSeeds2;
-	CCudaBuffer2D<int>				m_NoEstimates;
+	CResolution2D						m_Resolution;
+	CCudaBuffer2D<CColorXyza, true>		m_RunningEstimateXyza;
+	CCudaBuffer2D<CColorXyza, true>		m_FrameEstimateXyza;
+	CCudaBuffer2D<CColorXyza, true>		m_FrameBlurXyza;
+	CCudaBuffer2D<CColorXyza, true>		m_RunningSpecularBloom;
+	CCudaBuffer2D<CColorRgbaLdr, true>	m_EstimateRgbaLdr;
+	CCudaBuffer2D<CColorRgbLdr, false>	m_DisplayEstimateRgbLdr;
+	CCudaRandomBuffer2D					m_RandomSeeds1;
+	CCudaRandomBuffer2D					m_RandomSeeds2;
 };

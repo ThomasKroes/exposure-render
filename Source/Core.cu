@@ -110,14 +110,6 @@ void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
   	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexDensity, gpDensityArray, ChannelDesc));
-	
-	return;
-
-	CResolution3D Resolution3D;
-
-	Resolution3D.SetResXYZ(Vec3i(Extent.width, Extent.height, Extent.depth));
-
-	gModel.m_GradientMagnitude.BindRawData(pBuffer, Resolution3D);/**/
 }
 
 void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent)
@@ -163,7 +155,7 @@ void BindRenderCanvasView(const CResolution2D& Resolution)
 
 	cudaChannelFormatDesc Des = cudaCreateChannelDesc<uchar4>();
 
-	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateRgba, gRenderCanvasView.m_EstimateRgbaLdr.m_pData, Des, gRenderCanvasView.m_Resolution.GetResX(), gRenderCanvasView.m_Resolution.GetResY(), gRenderCanvasView.m_Resolution.GetResX() * sizeof(uchar4)), "BindTexture");
+	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateRgba, gRenderCanvasView.m_EstimateRgbaLdr.GetPtr(0, 0), Des, gRenderCanvasView.m_Resolution.GetResX(), gRenderCanvasView.m_Resolution.GetResY(), gRenderCanvasView.m_EstimateRgbaLdr.GetPitch()));
 }
 
 void ResetRenderCanvasView(void)
@@ -178,7 +170,7 @@ void FreeRenderCanvasView(void)
 
 unsigned char* GetDisplayEstimate(void)
 {
-	return (unsigned char*)gRenderCanvasView.m_DisplayEstimateRgbLdr.m_pData;
+	return (unsigned char*)gRenderCanvasView.m_DisplayEstimateRgbLdr.GetPtr(0, 0);
 }
 
 void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity)
@@ -382,13 +374,11 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gFilmHeight", &Filmheight, sizeof(int)));
 	HandleCudaError(cudaMemcpyToSymbol("gFilmNoPixels", &FilmNoPixels, sizeof(int)));
 
-	const int FilterWidth = 1;
+	const int FilterWidth = 2;
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
 
-	const float FilterWeights[10] = { 1.0f, 1.0f, 0.1f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-//	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-//	const float FilterWeights[10] = { 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWeights", &FilterWeights, 10 * sizeof(float)));
 
@@ -461,9 +451,7 @@ void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurI
 	CCudaTimer TmrPostProcess;
 	Estimate(&Scene, pDevScene, pDevView);
 	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
-	/*
-//	SpecularBloom(Scene, pDevScene, CudaFrameBuffers.m_pDevSeeds, CudaFrameBuffers);
-*/
+
 	ToneMap(&Scene, pDevScene, pDevView);
 
 	CCudaTimer TmrDenoise;

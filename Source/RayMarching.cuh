@@ -62,6 +62,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 
 	__shared__ float MinT[KRNL_SS_BLOCK_SIZE];
 	__shared__ float MaxT[KRNL_SS_BLOCK_SIZE];
+	__shared__ Vec3f Ps[KRNL_SS_BLOCK_SIZE];
 
 	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
@@ -73,18 +74,16 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	Vec3f Ps; 
-
 	MinT[TID] += RNG.Get1() * gStepSizeShadow;
 
 	while (Sum < S)
 	{
-		Ps = R.m_O + MinT[TID] * R.m_D;
+		Ps[TID] = R.m_O + MinT[TID] * R.m_D;
 
 		if (MinT[TID] > MaxT[TID])
 			return false;
 		
-		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps));
+		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps[TID]));
 
 		Sum			+= SigmaT * gStepSizeShadow;
 		MinT[TID]	+= gStepSizeShadow;

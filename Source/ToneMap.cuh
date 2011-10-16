@@ -24,12 +24,11 @@ KERNEL void KrnlToneMap(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	const CColorXyza Color = pView->m_RunningEstimateXyza.m_pData[PID];
+	const CColorXyza Color = pView->m_RunningEstimateXyza.Get(X, Y);
 
 	CColorRgbHdr RgbHdr;
 
@@ -39,9 +38,7 @@ KERNEL void KrnlToneMap(CCudaView* pView)
 	RgbHdr.g = Clamp(1.0f - expf(-(RgbHdr.g * gInvExposure)), 0.0, 1.0f);
 	RgbHdr.b = Clamp(1.0f - expf(-(RgbHdr.b * gInvExposure)), 0.0, 1.0f);
 
-	pView->m_EstimateRgbaLdr.m_pData[PID].r = RgbHdr.r * 255.0f;
-	pView->m_EstimateRgbaLdr.m_pData[PID].g = RgbHdr.g * 255.0f;
-	pView->m_EstimateRgbaLdr.m_pData[PID].b = RgbHdr.b * 255.0f;
+	pView->m_EstimateRgbaLdr.Set(CColorRgbaLdr(RgbHdr.r * 255.0f, RgbHdr.g * 255.0f, RgbHdr.b * 255.0f, 0), X, Y);
 }
 
 void ToneMap(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

@@ -25,12 +25,11 @@ KERNEL void KrnlSpecularBloom(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	CRNG RNG(&pView->m_RandomSeeds1.m_pData[PID], &pView->m_RandomSeeds2.m_pData[PID]);
+	CRNG RNG(pView->m_RandomSeeds1.GetPtr(X, Y), pView->m_RandomSeeds2.GetPtr(X, Y));
 
 	CColorXyz Lb = SPEC_BLACK;
 
@@ -43,8 +42,6 @@ KERNEL void KrnlSpecularBloom(CCudaView* pView)
 	const int Y0 = max((int)ceilf (Y - BloomFilterwWidth), 0);
 	const int Y1 = min((int)floorf(Y + BloomFilterwWidth), gFilmHeight - 1);
 
-	float WindowWidth = 50.0f;
-	float NumXY = 11.0f;
 	float DXY = BloomFilterwWidth / (2.0f * BloomFilterwWidth + 1.0f);
 
 	for (int x = X0; x < X1; x++)

@@ -19,13 +19,11 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 {
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
-	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 	
-	CRNG RNG(&pView->m_RandomSeeds1.m_pData[PID], &pView->m_RandomSeeds2.m_pData[PID]);
+	CRNG RNG(pView->m_RandomSeeds1.GetPtr(X, Y), pView->m_RandomSeeds2.GetPtr(X, Y));
 
 	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
@@ -46,10 +44,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
-			pView->m_FrameEstimateXyza.m_pData[PID].c[0] = Lv.c[0];
-			pView->m_FrameEstimateXyza.m_pData[PID].c[1] = Lv.c[1];
-			pView->m_FrameEstimateXyza.m_pData[PID].c[2] = Lv.c[2];
-
+			pView->m_FrameEstimateXyza.Set(CColorXyza(Lv.c[0], Lv.c[1], Lv.c[2]), X, Y);
 			return;
 		}
 		
@@ -92,9 +87,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 			Lv = Li;
 	}
 
-	pView->m_FrameEstimateXyza.m_pData[PID].c[0] = Lv.c[0];
-	pView->m_FrameEstimateXyza.m_pData[PID].c[1] = Lv.c[1];
-	pView->m_FrameEstimateXyza.m_pData[PID].c[2] = Lv.c[2];
+	pView->m_FrameEstimateXyza.Set(CColorXyza(Lv.c[0], Lv.c[1], Lv.c[2]), X, Y);
 }
 
 void SingleScattering(CScene* pScene, CScene* pDevScene, CCudaView* pView)

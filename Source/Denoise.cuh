@@ -33,8 +33,6 @@ KERNEL void KrnlDenoise(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-	const int PID	= Y * gFilmWidth + X;
-	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
@@ -42,8 +40,6 @@ KERNEL void KrnlDenoise(CCudaView* pView)
     const float x = (float)X + 0.5f;
     const float y = (float)Y + 0.5f;
 
-	const int ID = Y * gFilmWidth + X;
-	
 	const float4 clr00 = tex2D(gTexRunningEstimateRgba, x, y);
 	
 	if (gDenoiseEnabled && gDenoiseLerpC > 0.0f && gDenoiseLerpC < 1.0f)
@@ -83,15 +79,12 @@ KERNEL void KrnlDenoise(CCudaView* pView)
 		clr.y = lerpf(clr.y, clr00.y, LerpQ);
 		clr.z = lerpf(clr.z, clr00.z, LerpQ);
 
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].r = 255 * clr.x;
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].g = 255 * clr.y;
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].b = 255 * clr.z;
+		pView->m_DisplayEstimateRgbLdr.Set(CColorRgbLdr(255 * clr.x, 255 * clr.y, 255 * clr.z), X, Y);
     }
 	else
 	{
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].r = pView->m_EstimateRgbaLdr.m_pData[PID].r;
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].g = pView->m_EstimateRgbaLdr.m_pData[PID].g;
-		pView->m_DisplayEstimateRgbLdr.m_pData[PID].b = pView->m_EstimateRgbaLdr.m_pData[PID].b;
+		const CColorRgbaLdr RGBA = pView->m_EstimateRgbaLdr.Get(X, Y);
+		pView->m_DisplayEstimateRgbLdr.Set(CColorRgbLdr(RGBA.r, RGBA.g, RGBA.b), X, Y);
 	}
 	
 	/*
