@@ -110,8 +110,8 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 
 DEV CColorXyza CumulativeMovingAverage(const CColorXyza& A, const CColorXyza& Ax, const int& N)
 {
-	if (gNoIterations == 0)
-		return CColorXyza(0.0f);
+//	if (gNoIterations == 0)
+//		return CColorXyza(0.0f);
 
-	 return A + ((Ax - A) / (float)N);
+	 return A + ((Ax - A) / max((float)N, 1.0f));
 }

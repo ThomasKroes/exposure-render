@@ -87,7 +87,7 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 	CRay Rl; 
 
 	// Light probability
-	float LightPdf = 1.0f, PhasePdf = 1.0f;
+	float LightPdf = 1.0f, PhasePdf = INV_4_PI_F;
 	
 	// Incident light direction
 	Vec3f Wi, P, Pl;
@@ -106,32 +106,21 @@ DEV CColorXyz EstimateDirectLightPhase(CScene* pScene, const float& Density, CLi
 
 		Ld += F * Li * WeightMIS / LightPdf;
 	}
-	return Ld;
-	PhasePdf = INV_4_PI_F;
-	
-	// Sample the phase function with MIS
+
 	Wi = UniformSampleSphere(LS.m_BsdfSample.m_Dir);
 
 	if (!F.IsBlack())
 	{
-		float WeightMIS = 1.0f;
-
-		LightPdf = Light.Pdf(Pe, Wi);
-
-		if (LightPdf == 0.0f)
-			return Ld;
-
-		WeightMIS = PowerHeuristic(1.0f, PhasePdf, 1.0f, LightPdf);
-
 		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, pLight, &LightPdf)/* && pLight == &Light*/)
 		{
+			const float WeightMIS = PowerHeuristic(1.0f, PhasePdf, 1.0f, LightPdf);
+
 			if (!Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), Rnd)) 
 			{
 				Ld += F * Li * WeightMIS / PhasePdf;
 			}
 		}
 	}
-	/**/
 
 	return Ld;
 }

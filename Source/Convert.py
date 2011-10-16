@@ -43,7 +43,9 @@ for FileName in DirList:
             Resample.SetAxisMagnificationFactor(0, ResampleFactor)
             Resample.SetAxisMagnificationFactor(1, ResampleFactor)
             Resample.SetAxisMagnificationFactor(2, ResampleFactor)
-
+            Resample.SetInterpolationModeToCubic()
+            Resample.InterpolateOn()
+			
             Resample.Update()
 
             MetaImageWriter = vtkMetaImageWriter()

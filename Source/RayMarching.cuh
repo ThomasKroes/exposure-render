@@ -34,7 +34,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
-	const float S	= -log(RNG.Get1()) * gIntensityInvRange;
+	const float S	= -log(RNG.Get1()) / gDensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
@@ -49,7 +49,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 		
 		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps));
 
-		Sum		+= SigmaT * gStepSize;
+		Sum			+= SigmaT * gStepSize;
 		MinT[TID]	+= gStepSize;
 	}
 
@@ -69,7 +69,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
-	const float S	= -log(RNG.Get1()) * gIntensityInvRange;
+	const float S	= -log(RNG.Get1()) / gDensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
