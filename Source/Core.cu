@@ -468,7 +468,7 @@ void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurI
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
 	
  	CCudaTimer TmrBlur;
-	BlurImageXyz(&Scene, pDevScene, pDevView);
+//	BlurImageXyz(&Scene, pDevScene, pDevView);
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;

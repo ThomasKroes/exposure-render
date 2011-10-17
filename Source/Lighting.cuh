@@ -130,8 +130,10 @@ public:
 
 		if (m_T == 1)
 		{
-			m_Area		= 4.0f * PI_F * powf(m_SkyRadius, 2.0f);
-			m_AreaPdf	= 1.0f / m_Area;
+			m_P				= BoundingBox.GetCenter();
+			m_SkyRadius		= 1000.0f * (BoundingBox.GetMaxP() - BoundingBox.GetMinP()).Length();
+			m_Area			= 4.0f * PI_F * powf(m_SkyRadius, 2.0f);
+			m_AreaPdf		= 1.0f / m_Area;
 		}
 
 		// Compute orthogonal basis frame
@@ -150,15 +152,15 @@ public:
 			Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
 			Rl.m_D	= Normalize(P - Rl.m_O);
 			L		= Dot(Rl.m_D, m_N) > 0.0f ? Le(Vec2f(0.0f)) : SPEC_BLACK;
-			Pdf		= DistanceSquared(P, Rl.m_O) / (AbsDot(Rl.m_D, m_N) * m_Area);
+			Pdf		= AbsDot(Rl.m_D, m_N) > 0.0f ? DistanceSquared(P, Rl.m_O) / (AbsDot(Rl.m_D, m_N) * m_Area) : 0.0f;
 		}
 
 		if (m_T == 1)
 		{
-			Rl.m_O	= m_Target + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
+			Rl.m_O	= m_P + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
 			Rl.m_D	= Normalize(P - Rl.m_O);
 			L		= Le(Vec2f(1.0f) - 2.0f * LS.m_LightSample.m_Pos);
-			Pdf		= INV_4_PI_F;
+			Pdf		= powf(m_SkyRadius, 2.0f) / m_Area;
 		}
 
 		Rl.m_MinT	= 0.0f;
@@ -248,20 +250,16 @@ public:
 
 		if (m_T == 0)
 		{
-			// Hit distance
 			float T = 0.0f;
 			
-			// Intersect ray with light surface
 			if (!Intersect(Rl, T, L, NULL, &Pdf))
 				return 0.0f;
 
-			// Convert light sample weight to solid angle measure
 			return powf(T, 2.0f) / (AbsDot(m_N, -Wi) * m_Area);
 		}
 
 		if (m_T == 1)
 		{
-			// Convert light sample weight to solid angle measure
 			return powf(m_SkyRadius, 2.0f) / m_Area;
 		}
 

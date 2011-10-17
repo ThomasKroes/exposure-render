@@ -15,6 +15,7 @@
 
 #include "GridItem.h"
 #include "RenderThread.h"
+#include "Scene.h"
 
 QGridItem::QGridItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),

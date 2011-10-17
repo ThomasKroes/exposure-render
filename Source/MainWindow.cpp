@@ -18,6 +18,7 @@
 #include "VtkWidget.h"
 #include "StartupDialog.h"
 #include "AboutDialog.h"
+#include "Scene.h"
 
 // Main window singleton
 CMainWindow* gpMainWindow = NULL;

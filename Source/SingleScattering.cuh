@@ -34,7 +34,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
  	pScene->m_Camera.GenerateRay(UV, RNG.Get2(), Re.m_O, Re.m_D);
 
 	Re.m_MinT = 0.0f; 
-	Re.m_MaxT = 15000.0f;
+	Re.m_MaxT = 1500000.0f;
 
 	Vec3f Pe, Pl;
 	

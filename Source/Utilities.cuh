@@ -79,9 +79,11 @@ DEV bool NearestLight(CScene* pScene, CRay R, CColorXyz& LightColor, Vec3f& Pl, 
 
 	CRay RayCopy = R;
 
+	float Pdf = 0.0f;
+
 	for (int i = 0; i < pScene->m_Lighting.m_NoLights; i++)
 	{
-		if (pScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor, NULL, pPdf))
+		if (pScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor, NULL, &Pdf))
 		{
 			Pl		= R(T);
 			pLight	= &pScene->m_Lighting.m_Lights[i];
@@ -89,6 +91,9 @@ DEV bool NearestLight(CScene* pScene, CRay R, CColorXyz& LightColor, Vec3f& Pl, 
 		}
 	}
 	
+	if (pPdf)
+		*pPdf = Pdf;
+
 	return Hit;
 }
 

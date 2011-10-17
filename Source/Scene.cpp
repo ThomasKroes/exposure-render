@@ -13,6 +13,8 @@
 
 #include "Stable.h"
 
+#include "Scene.h"
+
 CScene::CScene(void) :
 	m_Camera(),
 	m_Lighting(),

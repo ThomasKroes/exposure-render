@@ -15,6 +15,7 @@
 
 #include "VtkWidget.h"
 #include "MainWindow.h"
+#include "Scene.h"
 
 #include <vtkMetaImageReader.h>
 #include <vtkVolumeProperty.h>

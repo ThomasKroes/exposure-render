@@ -17,6 +17,7 @@
 #include "TransferFunction.h"
 #include "NodeItem.h"
 #include "RenderThread.h"
+#include "Scene.h"
 
 QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QGroupBox(pParent),

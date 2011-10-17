@@ -16,6 +16,7 @@
 #include "CameraWidget.h"
 #include "MainWindow.h"
 #include "RenderThread.h"
+#include "Scene.h"
 
 QCameraWidget::QCameraWidget(QWidget* pParent) :
 	QWidget(pParent),
