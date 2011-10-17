@@ -233,91 +233,192 @@ public:
 
 };
 
-class CBSDF
+class CIsotropicPhase
 {
 public:
-	HOD CBSDF(const Vec3f& N, const Vec3f& W, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ior, const float& Exponent) :
-	  m_Lambertian(Kd),
-		  m_Microfacet(Ks, Ior, Exponent),
-		  m_Nn(N),
-		  m_Nu(Normalize(Cross(N, W))),
-		  m_Nv(Normalize(Cross(N, m_Nu)))
-	  {
-	  }
+	HOD CIsotropicPhase(const CColorXyz& Kd) :
+		m_Kd(Kd)
+	{
+	}
 
-	  HOD ~CBSDF(void)
-	  {
-	  }
+	HOD ~CIsotropicPhase(void)
+	{
+	}
 
-	  HOD Vec3f WorldToLocal(const Vec3f& W)
-	  {
-		  return Vec3f(Dot(W, m_Nu), Dot(W, m_Nv), Dot(W, m_Nn));
-	  }
+	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		return m_Kd * INV_PI_F;
+	}
 
-	  HOD Vec3f LocalToWorld(const Vec3f& W)
-	  {
-		  return Vec3f(	m_Nu.x * W.x + m_Nv.x * W.y + m_Nn.x * W.z,
-			  m_Nu.y * W.x + m_Nv.y * W.y + m_Nn.y * W.z,
-			  m_Nu.z * W.x + m_Nv.z * W.y + m_Nn.z * W.z);
-	  }
+	HOD void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	{
+		Wi	= UniformSampleSphere(U);
+		Pdf	= this->Pdf(Wo, Wi);
+	}
 
-	  HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
-	  {
-		  const Vec3f Wol = WorldToLocal(Wo);
-		  const Vec3f Wil = WorldToLocal(Wi);
+	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		return INV_4_PI_F;
+	}
 
-		  CColorXyz R;
+	CColorXyz	m_Kd;
+};
 
-		  R += m_Lambertian.F(Wol, Wil);
-		  R += m_Microfacet.F(Wol, Wil);
+class CBRDF
+{
+public:
+	HOD CBRDF(const Vec3f& N, const Vec3f& Wo, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ior, const float& Exponent) :
+		m_Lambertian(Kd),
+		m_Microfacet(Ks, Ior, Exponent),
+		m_Nn(N),
+		m_Nu(Normalize(Cross(N, Wo))),
+		m_Nv(Normalize(Cross(N, m_Nu)))
+	{
+	}
 
-		  return R;
-	  }
+	HOD ~CBRDF(void)
+	{
+	}
 
-	  HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBsdfSample& S)
-	  {
-		  const Vec3f Wol = WorldToLocal(Wo);
-		  Vec3f Wil;
+	HOD Vec3f WorldToLocal(const Vec3f& W)
+	{
+		return Vec3f(Dot(W, m_Nu), Dot(W, m_Nv), Dot(W, m_Nn));
+	}
 
-		  CColorXyz R;
+	HOD Vec3f LocalToWorld(const Vec3f& W)
+	{
+		return Vec3f(	m_Nu.x * W.x + m_Nv.x * W.y + m_Nn.x * W.z,
+						m_Nu.y * W.x + m_Nv.y * W.y + m_Nn.y * W.z,
+						m_Nu.z * W.x + m_Nv.z * W.y + m_Nn.z * W.z);
+	}
 
-		  if (S.m_Component <= 0.5f)
-		  {
-			  m_Lambertian.SampleF(Wol, Wil, Pdf, S.m_Dir);
-		  }
-		  else
-		  {
-			  m_Microfacet.SampleF(Wol, Wil, Pdf, S.m_Dir);
-		  }
+	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		const Vec3f Wol = WorldToLocal(Wo);
+		const Vec3f Wil = WorldToLocal(Wi);
 
-		  Pdf += m_Lambertian.Pdf(Wol, Wil);
-		  Pdf += m_Microfacet.Pdf(Wol, Wil);
+		CColorXyz R;
 
-		  R += m_Lambertian.F(Wol, Wil);
-		  R += m_Microfacet.F(Wol, Wil);
+		R += m_Lambertian.F(Wol, Wil);
+		R += m_Microfacet.F(Wol, Wil);
 
-		  Wi = LocalToWorld(Wil);
+		return R;
+	}
 
-		  return R;
-	  }
+	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
+	{
+		const Vec3f Wol = WorldToLocal(Wo);
+		Vec3f Wil;
 
-	  HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
-	  {
-		  const Vec3f Wol = WorldToLocal(Wo);
-		  const Vec3f Wil = WorldToLocal(Wi);
+		CColorXyz R;
 
-		  float Pdf = 0.0f;
+		if (S.m_Component <= 0.5f)
+		{
+			m_Lambertian.SampleF(Wol, Wil, Pdf, S.m_Dir);
+		}
+		else
+		{
+			m_Microfacet.SampleF(Wol, Wil, Pdf, S.m_Dir);
+		}
 
-		  Pdf += m_Lambertian.Pdf(Wol, Wil);
-		  Pdf += m_Microfacet.Pdf(Wol, Wil);
+		Pdf += m_Lambertian.Pdf(Wol, Wil);
+		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
-		  return Pdf;
-	  }
+		R += m_Lambertian.F(Wol, Wil);
+		R += m_Microfacet.F(Wol, Wil);
 
-	  Vec3f			m_Nn;
-	  Vec3f			m_Nu;
-	  Vec3f			m_Nv;
-	  CLambertian		m_Lambertian;
-	  CMicrofacet		m_Microfacet;
+		Wi = LocalToWorld(Wil);
 
+		return R;
+	}
+
+	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		const Vec3f Wol = WorldToLocal(Wo);
+		const Vec3f Wil = WorldToLocal(Wi);
+
+		float Pdf = 0.0f;
+
+		Pdf += m_Lambertian.Pdf(Wol, Wil);
+		Pdf += m_Microfacet.Pdf(Wol, Wil);
+
+		return Pdf;
+	}
+
+	Vec3f			m_Nn;
+	Vec3f			m_Nu;
+	Vec3f			m_Nv;
+	CLambertian		m_Lambertian;
+	CMicrofacet		m_Microfacet;
+};
+
+class CVolumeShader
+{
+public:
+	enum EType
+	{
+		Brdf,
+		Phase
+	};
+
+	HOD CVolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ior, const float& Exponent) :
+		m_Type(Type),
+		m_Brdf(N, Wo, Kd, Ks, Ior, Exponent),
+		m_IsotropicPhase(Kd)
+	{
+	}
+
+	HOD ~CVolumeShader(void)
+	{
+	}
+
+	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		switch (m_Type)
+		{
+			case Brdf:
+				return m_Brdf.F(Wo, Wi);
+
+			case Phase:
+				return m_IsotropicPhase.F(Wo, Wi);
+		}
+
+		return 1.0f;
+	}
+
+	HOD void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
+	{
+		switch (m_Type)
+		{
+			case Brdf:
+			{
+				m_Brdf.SampleF(Wo, Wi, Pdf, S);
+				break;
+			}
+
+			case Phase:
+			{
+				m_IsotropicPhase.SampleF(Wo, Wi, Pdf, S.m_Dir);
+				break;
+			}
+		}
+	}
+
+	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		switch (m_Type)
+		{
+			case Brdf:
+				return m_Brdf.Pdf(Wo, Wi);
+
+			case Phase:
+				return m_IsotropicPhase.Pdf(Wo, Wi);
+		}
+
+		return 1.0f;
+	}
+
+	EType				m_Type;
+	CBRDF				m_Brdf;
+	CIsotropicPhase		m_IsotropicPhase;
 };

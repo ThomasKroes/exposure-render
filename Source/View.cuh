@@ -26,7 +26,6 @@ public:
 		m_RunningEstimateXyza(),
 		m_FrameEstimateXyza(),
 		m_FrameBlurXyza(),
-		m_RunningSpecularBloom(),
 		m_EstimateRgbaLdr(),
 		m_DisplayEstimateRgbLdr(),
 		m_RandomSeeds1(),
@@ -50,7 +49,6 @@ public:
 		m_RunningEstimateXyza	= Other.m_RunningEstimateXyza;
 		m_FrameEstimateXyza		= Other.m_FrameEstimateXyza;
 		m_FrameBlurXyza			= Other.m_FrameBlurXyza;
-		m_RunningSpecularBloom	= Other.m_RunningSpecularBloom;
 		m_EstimateRgbaLdr		= Other.m_EstimateRgbaLdr;
 		m_DisplayEstimateRgbLdr	= Other.m_DisplayEstimateRgbLdr;
 		m_RandomSeeds1			= Other.m_RandomSeeds1;
@@ -69,7 +67,6 @@ public:
 		m_RunningEstimateXyza.Resize(m_Resolution);
 		m_FrameEstimateXyza.Resize(m_Resolution);
 		m_FrameBlurXyza.Resize(m_Resolution);
-		m_RunningSpecularBloom.Resize(m_Resolution);
 		m_EstimateRgbaLdr.Resize(m_Resolution);
 		m_DisplayEstimateRgbLdr.Resize(m_Resolution);
 		m_RandomSeeds1.Resize(m_Resolution);
@@ -79,9 +76,8 @@ public:
 	void Reset(void)
 	{
 //		m_RunningEstimateXyza.Reset();
-//		m_FrameEstimateXyza.Reset();
+		m_FrameEstimateXyza.Reset();
 //		m_FrameBlurXyza.Reset();
-//		m_RunningSpecularBloom.Reset();
 		m_EstimateRgbaLdr.Reset();
 		m_DisplayEstimateRgbLdr.Reset();
 //		m_RandomSeeds1.Reset();
@@ -93,7 +89,6 @@ public:
 		m_RunningEstimateXyza.Free();
 		m_FrameEstimateXyza.Free();
 		m_FrameBlurXyza.Free();
-		m_RunningSpecularBloom.Free();
 		m_EstimateRgbaLdr.Free();
 		m_DisplayEstimateRgbLdr.Free();
 		m_RandomSeeds1.Free();
@@ -116,7 +111,6 @@ public:
 	CCudaBuffer2D<CColorXyza, true>		m_RunningEstimateXyza;
 	CCudaBuffer2D<CColorXyza, true>		m_FrameEstimateXyza;
 	CCudaBuffer2D<CColorXyza, true>		m_FrameBlurXyza;
-	CCudaBuffer2D<CColorXyza, true>		m_RunningSpecularBloom;
 	CCudaBuffer2D<CColorRgbaLdr, true>	m_EstimateRgbaLdr;
 	CCudaBuffer2D<CColorRgbLdr, false>	m_DisplayEstimateRgbLdr;
 	CCudaRandomBuffer2D					m_RandomSeeds1;

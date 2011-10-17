@@ -243,7 +243,7 @@ QHardwareWidget::QHardwareWidget(QWidget* pParent) :
 	m_OptimalDevice.setToolTip("Optimal Device");
 	m_OptimalDevice.setStatusTip("Choose the most optimal device for rendering");
 	m_OptimalDevice.setFixedWidth(90);
-	m_OptimalDevice.setEnabled(m_Model.rowCount(QModelIndex()) > 1);
+	m_OptimalDevice.setVisible(m_Model.rowCount(QModelIndex()) > 1);
 
 	m_MainLayout.addWidget(&m_OptimalDevice);
 

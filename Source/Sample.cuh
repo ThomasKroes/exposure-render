@@ -44,25 +44,25 @@ public:
 	}
 };
 
-class CBsdfSample
+class CBrdfSample
 {
 public:
 	float	m_Component;
 	Vec2f	m_Dir;
 
-	HOD CBsdfSample(void)
+	HOD CBrdfSample(void)
 	{
 		m_Component = 0.0f;
 		m_Dir 		= Vec2f(0.0f);
 	}
 
-	HOD CBsdfSample(const float& Component, const Vec2f& Dir)
+	HOD CBrdfSample(const float& Component, const Vec2f& Dir)
 	{
 		m_Component = Component;
 		m_Dir 		= Dir;
 	}
 
-	HOD CBsdfSample& CBsdfSample::operator=(const CBsdfSample& Other)
+	HOD CBrdfSample& CBrdfSample::operator=(const CBrdfSample& Other)
 	{
 		m_Component = Other.m_Component;
 		m_Dir 		= Other.m_Dir;
@@ -80,7 +80,7 @@ public:
 class CLightingSample
 {
 public:
-	CBsdfSample		m_BsdfSample;
+	CBrdfSample		m_BsdfSample;
 	CLightSample 	m_LightSample;
 	float			m_LightNum;
 

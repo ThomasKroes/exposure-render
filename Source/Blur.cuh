@@ -48,14 +48,14 @@ KERNEL void KrnlBlurXyzH(CCudaView* pView)
 	{
 		FW[TID] = gFilterWeights[(int)fabs((float)x - X)];
 
-		Sum			+= tex2D(gTexFrameEstimateXyza, x, Y) * FW[TID];
+		Sum			+= tex2D(gTexFrameEstimateXyza, (float)x + 0.5f, Y + 0.5f) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
 		pView->m_FrameBlurXyza.Set(CColorXyza(Sum.x / SumW[TID], Sum.y / SumW[TID], Sum.z / SumW[TID]), X, Y);
 	else
-		pView->m_FrameBlurXyza.Set(CColorXyza(), X, Y);
+		pView->m_FrameBlurXyza.Set(CColorXyza(0.0f), X, Y);
 }
 
 KERNEL void KrnlBlurXyzV(CCudaView* pView)
@@ -84,14 +84,14 @@ KERNEL void KrnlBlurXyzV(CCudaView* pView)
 	{
 		FW[TID] = gFilterWeights[(int)fabs((float)y - Y)];
 
-		Sum			+= tex2D(gTexFrameBlurXyza, X, y) * FW[TID];
+		Sum			+= tex2D(gTexFrameBlurXyza, (float)X + 0.5f, (float)y + 0.5f) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
 		pView->m_FrameEstimateXyza.Set(CColorXyza(Sum.x / SumW[TID], Sum.y / SumW[TID], Sum.z / SumW[TID]), X, Y);
 	else
-		pView->m_FrameEstimateXyza.Set(CColorXyza(), X, Y);
+		pView->m_FrameEstimateXyza.Set(CColorXyza(0.0f), X, Y);
 }
 
 void BlurImageXyz(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

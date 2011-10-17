@@ -531,7 +531,7 @@ void QRenderThread::OnUpdateTransferFunction(void)
 
 		const float Roughness = 1.0f - expf(-Node.GetGlossiness());
 
-		gScene.m_TransferFunctions.m_Roughness.m_C[i]	= CColorRgbHdr(Roughness * 100);
+		gScene.m_TransferFunctions.m_Roughness.m_C[i] = CColorRgbHdr(Roughness * 1000.0f);
 	}
 
 	gScene.m_DensityScale	= TransferFunction.GetDensityScale();

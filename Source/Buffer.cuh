@@ -60,6 +60,8 @@ public:
 			HandleCudaError(cudaMallocPitch(&m_pData, &m_Pitch, GetWidth() * sizeof(T), GetHeight()));
 		else
 			HandleCudaError(cudaMalloc(&m_pData, GetSize()));
+
+		Reset();
 	}
 
 	void Reset(void)
