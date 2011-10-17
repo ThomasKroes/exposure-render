@@ -48,25 +48,38 @@ public:
 
 	void Resize(const CResolution2D& Resolution)
 	{
+		if (m_Resolution != Resolution)
+			Free();
+
 		m_Resolution = Resolution;
 
-		Free();
+		if (GetNoElements() <= 0)
+			return;
 
 		if (Pitched)
-			HandleCudaError(cudaMallocPitch(&m_pData, &m_Pitch, GetWidth(), GetHeight()));
+			HandleCudaError(cudaMallocPitch(&m_pData, &m_Pitch, GetWidth() * sizeof(T), GetHeight()));
 		else
 			HandleCudaError(cudaMalloc(&m_pData, GetSize()));
 	}
 
 	void Reset(void)
 	{
+		if (GetSize() <= 0)
+			return;
+
 		HandleCudaError(cudaMemset(m_pData, 0, GetSize()));
 	}
 
 	void Free(void)
 	{
-		HandleCudaError(cudaFree(m_pData));
-		m_pData = NULL;
+		if (m_pData)
+		{
+			HandleCudaError(cudaFree(m_pData));
+			m_pData = NULL;
+		}
+		
+		m_Pitch	= 0;
+		m_Resolution.Set(Vec2i(0, 0));
 	}
 
 	HOD int GetNoElements(void) const
@@ -82,34 +95,46 @@ public:
 			return GetNoElements() * sizeof(T);
 	}
 
-	HOD T Get(const int& X, const int& Y)
+	HOD T Get(const int& X = 0, const int& Y = 0)
 	{
+		if (X > GetWidth() || Y > GetHeight())
+			return T();
+
 		if (Pitched)
-			return m_pData[Y * (m_Pitch / sizeof(T)) + X];
+			return m_pData[Y * (GetPitch() / sizeof(T)) + X];
 		else
 			return m_pData[Y * GetWidth() + X];
 	}
 
-	HOD T& GetRef(const int& X, const int& Y)
+	HOD T& GetRef(const int& X = 0, const int& Y = 0)
 	{
+		if (X > GetWidth() || Y > GetHeight())
+			return T();
+
 		if (Pitched)
-			return m_pData[Y * m_Pitch / sizeof(T) + X];
+			return m_pData[Y * (GetPitch() / sizeof(T)) + X];
 		else
 			return m_pData[Y * GetWidth() + X];
 	}
 
-	HOD T* GetPtr(const int& X, const int& Y)
+	HOD T* GetPtr(const int& X = 0, const int& Y = 0)
 	{
+		if (X > GetWidth() || Y > GetHeight())
+			return NULL;
+
 		if (Pitched)
-			return &m_pData[Y * m_Pitch / sizeof(T) + X];
+			return &m_pData[Y * (GetPitch() / sizeof(T)) + X];
 		else
 			return &m_pData[Y * GetWidth() + X];
 	}
 
-	HOD void Set(T& Value, const int& X, const int& Y)
+	HOD void Set(T& Value, const int& X = 0, const int& Y = 0)
 	{
+		if (X > GetWidth() || Y > GetHeight())
+			return;
+
 		if (Pitched)
-			m_pData[Y * m_Pitch + X] = Value;
+			m_pData[Y * (GetPitch() / sizeof(T)) + X] = Value;
 		else
 			m_pData[Y * GetWidth() + X] = Value;
 	}

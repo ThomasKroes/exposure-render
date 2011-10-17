@@ -158,6 +158,8 @@ void QRenderThread::run()
 	if (!SetCudaDevice(gCurrentDeviceID))
 		return;
 
+	ResetDevice();
+
 	CScene SceneCopy;
 	
  	gScene.m_Camera.m_SceneBoundingBox = gScene.m_BoundingBox;
@@ -208,6 +210,8 @@ void QRenderThread::run()
 	// Keep track of frames/second
 	CTiming FPS, RenderImage, BlurImage, PostProcessImage, DenoiseImage;
 
+	ResetRenderCanvasView();
+
 	try
 	{
 		while (!m_Abort)
@@ -240,11 +244,6 @@ void QRenderThread::run()
 			
 				gStatus.SetStatisticChanged("Host Memory", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr) / MB, 'f', 2), "MB");
 
-//				m_CudaFrameBuffers.Resize(Vec2i(SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight()));
-
-				BindRenderCanvasView(SceneCopy.m_Camera.m_Film.m_Resolution);
-
-				// Reset no. iterations
 				SceneCopy.SetNoIterations(0);
 
 				Log("Render canvas resized to: " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResX()) + " x " + QString::number(SceneCopy.m_Camera.m_Film.m_Resolution.GetResY()) + " pixels", "application-resize");
@@ -263,7 +262,7 @@ void QRenderThread::run()
 			gScene.m_DirtyFlags.ClearAllFlags();
 
 			SceneCopy.m_DenoiseParams.SetWindowRadius(4.0f);
-			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.03f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
+			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.02f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
 //			SceneCopy.m_DenoiseParams.m_Enabled = false;
 
 			SceneCopy.m_Camera.Update();
@@ -275,6 +274,8 @@ void QRenderThread::run()
 			BindTransferFunctionSpecular(SceneCopy.m_TransferFunctions.m_Specular);
 			BindTransferFunctionRoughness(SceneCopy.m_TransferFunctions.m_Roughness);
 			BindTransferFunctionEmission(SceneCopy.m_TransferFunctions.m_Emission);
+
+			BindRenderCanvasView(SceneCopy.m_Camera.m_Film.m_Resolution);
 
   			Render(0, SceneCopy, RenderImage, BlurImage, PostProcessImage, DenoiseImage);
 		
@@ -306,7 +307,7 @@ void QRenderThread::run()
 	}
 	catch (QString* pMessage)
 	{
-		Log(*pMessage + ", rendering will be aborted");
+//		Log(*pMessage + ", rendering will be aborted");
 
 		free(m_pRenderImage);
 		m_pRenderImage = NULL;

@@ -722,7 +722,7 @@ public:
 	// 	CSampledSpectrum(const RGBSpectrum &r, SpectrumType type = SPECTRUM_REFLECTANCE);
 
 public:
-	float c[3];
+	float c[4];
 };
 
 // Colors

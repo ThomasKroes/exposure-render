@@ -1538,6 +1538,16 @@ public:
 		return m_XY[i];
 	}
 
+	HOD bool operator == (const CResolution2D& Other) const
+	{
+		return GetResX() == Other.GetResX() && GetResY() == Other.GetResY();
+	}
+
+	HOD bool operator != (const CResolution2D& Other) const
+	{
+		return GetResX() != Other.GetResX() || GetResY() != Other.GetResY();
+	}
+
 	// ToDo: Add description
 	HOD void Update(void)
 	{

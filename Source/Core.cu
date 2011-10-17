@@ -153,9 +153,32 @@ void BindRenderCanvasView(const CResolution2D& Resolution)
 {
 	gRenderCanvasView.Resize(Resolution);
 
-	cudaChannelFormatDesc Des = cudaCreateChannelDesc<uchar4>();
+	cudaChannelFormatDesc Channel;
+	
+	Channel = cudaCreateChannelDesc<uchar4>();
 
-	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateRgba, gRenderCanvasView.m_EstimateRgbaLdr.GetPtr(0, 0), Des, gRenderCanvasView.m_Resolution.GetResX(), gRenderCanvasView.m_Resolution.GetResY(), gRenderCanvasView.m_EstimateRgbaLdr.GetPitch()));
+	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateRgba, gRenderCanvasView.m_EstimateRgbaLdr.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_EstimateRgbaLdr.GetPitch()));
+
+	Channel = cudaCreateChannelDesc<float4>();
+
+	gTexRunningEstimateXyza.normalized		= false;
+	gTexRunningEstimateXyza.filterMode		= cudaFilterModeLinear;      
+	gTexRunningEstimateXyza.addressMode[0]	= cudaAddressModeClamp;  
+	gTexRunningEstimateXyza.addressMode[1]	= cudaAddressModeClamp;
+
+	gTexFrameBlurXyza.normalized			= false;
+	gTexFrameBlurXyza.filterMode			= cudaFilterModeLinear;      
+	gTexFrameBlurXyza.addressMode[0]		= cudaAddressModeClamp;  
+	gTexFrameBlurXyza.addressMode[1]		= cudaAddressModeClamp;
+  	
+	gTexFrameEstimateXyza.normalized		= false;
+	gTexFrameEstimateXyza.filterMode		= cudaFilterModeLinear;      
+	gTexFrameEstimateXyza.addressMode[0]	= cudaAddressModeClamp;  
+	gTexFrameEstimateXyza.addressMode[1]	= cudaAddressModeClamp;
+
+	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateXyza, gRenderCanvasView.m_RunningEstimateXyza.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_RunningEstimateXyza.GetPitch()));
+	HandleCudaError(cudaBindTexture2D(0, gTexFrameBlurXyza, gRenderCanvasView.m_FrameBlurXyza.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_FrameBlurXyza.GetPitch()));
+	HandleCudaError(cudaBindTexture2D(0, gTexFrameEstimateXyza, gRenderCanvasView.m_FrameEstimateXyza.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_FrameEstimateXyza.GetPitch()));
 }
 
 void ResetRenderCanvasView(void)

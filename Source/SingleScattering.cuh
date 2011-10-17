@@ -39,7 +39,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 	Vec3f Pe, Pl;
 	
 	CLight* pLight = NULL;
-
+	
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))

@@ -16,8 +16,9 @@
 #include "Geometry.h"
 #include "Scene.h"
 #include "CudaUtilities.h"
+#include "cutil_math.h"
 
-#define KRNL_BLUR_BLOCK_W		16
+#define KRNL_BLUR_BLOCK_W		8
 #define KRNL_BLUR_BLOCK_H		8
 #define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
 
@@ -33,7 +34,7 @@ KERNEL void KrnlBlurXyzH(CCudaView* pView)
 	const int X0 = max((int)ceilf(X - gFilterWidth), 0);
 	const int X1 = min((int)floorf(X + gFilterWidth), (int)gFilmWidth - 1);
 
-	CColorXyza Sum;
+	float4 Sum;
 
 	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
 	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
@@ -47,13 +48,14 @@ KERNEL void KrnlBlurXyzH(CCudaView* pView)
 	{
 		FW[TID] = gFilterWeights[(int)fabs((float)x - X)];
 
-		Sum			+= FW[TID] * pView->m_FrameEstimateXyza.Get(X, Y);
+		Sum			+= tex2D(gTexFrameEstimateXyza, x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
-	Sum /= SumW[TID];
-
-	pView->m_FrameBlurXyza.Set(CColorXyza(Sum.c[0], Sum.c[1], Sum.c[2]), X, Y);
+	if (SumW[TID] > 0.0f)
+		pView->m_FrameBlurXyza.Set(CColorXyza(Sum.x / SumW[TID], Sum.y / SumW[TID], Sum.z / SumW[TID]), X, Y);
+	else
+		pView->m_FrameBlurXyza.Set(CColorXyza(), X, Y);
 }
 
 KERNEL void KrnlBlurXyzV(CCudaView* pView)
@@ -68,7 +70,7 @@ KERNEL void KrnlBlurXyzV(CCudaView* pView)
 	const int Y0 = max((int)ceilf (Y - gFilterWidth), 0);
 	const int Y1 = min((int)floorf(Y + gFilterWidth), gFilmHeight - 1);
 
-	CColorXyza Sum;
+	float4 Sum;
 
 	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
 	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
@@ -82,15 +84,14 @@ KERNEL void KrnlBlurXyzV(CCudaView* pView)
 	{
 		FW[TID] = gFilterWeights[(int)fabs((float)y - Y)];
 
-		Sum			+= FW[TID] * pView->m_FrameBlurXyza.Get(X, Y);
+		Sum			+= tex2D(gTexFrameBlurXyza, X, y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
-	Sum /= SumW[TID];
-
-	const float4 ColorXYZA = make_float4(Sum.c[0], Sum.c[1], Sum.c[2], 0.0f);
-
-	pView->m_FrameEstimateXyza.Set(CColorXyza(Sum.c[0], Sum.c[1], Sum.c[2]), X, Y);
+	if (SumW[TID] > 0.0f)
+		pView->m_FrameEstimateXyza.Set(CColorXyza(Sum.x / SumW[TID], Sum.y / SumW[TID], Sum.z / SumW[TID]), X, Y);
+	else
+		pView->m_FrameEstimateXyza.Set(CColorXyza(), X, Y);
 }
 
 void BlurImageXyz(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

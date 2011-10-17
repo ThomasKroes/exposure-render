@@ -16,7 +16,7 @@
 #include "Utilities.cuh"
 #include "CudaUtilities.h"
 
-#define KRNL_DENOISE_BLOCK_W		16
+#define KRNL_DENOISE_BLOCK_W		8
 #define KRNL_DENOISE_BLOCK_H		8
 #define KRNL_DENOISE_BLOCK_SIZE	KRNL_DENOISE_BLOCK_W * KRNL_DENOISE_BLOCK_H
 
@@ -86,12 +86,6 @@ KERNEL void KrnlDenoise(CCudaView* pView)
 		const CColorRgbaLdr RGBA = pView->m_EstimateRgbaLdr.Get(X, Y);
 		pView->m_DisplayEstimateRgbLdr.Set(CColorRgbLdr(RGBA.r, RGBA.g, RGBA.b), X, Y);
 	}
-	
-	/*
-	pView->m_DisplayEstimateRgbLdr.m_pData[PID].r = pView->m_EstimateRgbaLdr.m_pData[PID].r;
-	pView->m_DisplayEstimateRgbLdr.m_pData[PID].g = pView->m_EstimateRgbaLdr.m_pData[PID].g;
-	pView->m_DisplayEstimateRgbLdr.m_pData[PID].b = pView->m_EstimateRgbaLdr.m_pData[PID].b;
-	*/
 }
 
 void Denoise(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

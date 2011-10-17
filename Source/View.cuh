@@ -61,6 +61,9 @@ public:
 
 	void Resize(const CResolution2D& Resolution)
 	{
+		if (m_Resolution == Resolution)
+			return;
+
 		m_Resolution = Resolution;
 
 		m_RunningEstimateXyza.Resize(m_Resolution);
@@ -75,10 +78,10 @@ public:
 
 	void Reset(void)
 	{
-		m_RunningEstimateXyza.Reset();
-		m_FrameEstimateXyza.Reset();
-		m_FrameBlurXyza.Reset();
-		m_RunningSpecularBloom.Reset();
+//		m_RunningEstimateXyza.Reset();
+//		m_FrameEstimateXyza.Reset();
+//		m_FrameBlurXyza.Reset();
+//		m_RunningSpecularBloom.Reset();
 		m_EstimateRgbaLdr.Reset();
 		m_DisplayEstimateRgbLdr.Reset();
 //		m_RandomSeeds1.Reset();
@@ -95,6 +98,18 @@ public:
 		m_DisplayEstimateRgbLdr.Free();
 		m_RandomSeeds1.Free();
 		m_RandomSeeds2.Free();
+
+		m_Resolution.Set(Vec2i(0, 0));
+	}
+
+	HOD int GetWidth(void) const
+	{
+		return m_Resolution.GetResX();
+	}
+
+	HOD int GetHeight(void) const
+	{
+		return m_Resolution.GetResY();
 	}
 
 	CResolution2D						m_Resolution;

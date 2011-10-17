@@ -38,7 +38,7 @@ DEV CColorXyz EstimateDirectLightBrdf(CScene* pScene, const float& Density, CLig
 
 	BsdfPdf	= Bsdf.Pdf(Wo, Wi);
 
-	if (!Li.IsBlack() && BsdfPdf > 0.0f && LightPdf > 0.0f)// && !FreePathRM(Rl, Rnd))
+	if (!Li.IsBlack() && BsdfPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, Rnd))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, BsdfPdf);
  
