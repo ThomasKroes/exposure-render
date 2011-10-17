@@ -11,28 +11,28 @@
 <Roughness Value="100"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.235606"/>
+<NormalizedIntensity Value="0.184586"/>
 <Opacity Value="0"/>
-<Diffuse G="0" R="24" B="0"/>
-<Specular G="17" R="26" B="13"/>
+<Diffuse G="0" R="45" B="0"/>
+<Specular G="40" R="63" B="31"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0"/>
+<Roughness Value="1"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.351154"/>
+<NormalizedIntensity Value="0.35413"/>
 <Opacity Value="0.0618557"/>
-<Diffuse G="0" R="170" B="0"/>
-<Specular G="36" R="39" B="18"/>
+<Diffuse G="0" R="67" B="0"/>
+<Specular G="14" R="16" B="7"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.038"/>
+<Roughness Value="1"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="0.485644"/>
 <Opacity Value="1"/>
-<Diffuse G="170" R="170" B="127"/>
-<Specular G="85" R="170" B="0"/>
+<Diffuse G="121" R="142" B="68"/>
+<Specular G="66" R="100" B="50"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="100"/>
+<Roughness Value="0"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="1"/>
@@ -43,7 +43,9 @@
 <Roughness Value="100"/>
 </Node>
 </Nodes>
-<DensityScale Value="1.158"/>
+<DensityScale Value="39.7266"/>
+<ShadingType Value="2"/>
+<GradientFactor Value="0"/>
 </Preset>
 <Preset Name="manix_smallddd">
 <Nodes>
@@ -81,6 +83,8 @@
 </Node>
 </Nodes>
 <DensityScale Value="0"/>
+<ShadingType Value="0"/>
+<GradientFactor Value="0"/>
 </Preset>
 <Preset Name="bonsai_small">
 <Nodes>
@@ -134,6 +138,8 @@
 </Node>
 </Nodes>
 <DensityScale Value="10"/>
+<ShadingType Value="0"/>
+<GradientFactor Value="0"/>
 </Preset>
 <Preset Name="engine_small">
 <Nodes>
@@ -146,7 +152,7 @@
 <Roughness Value="0"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.206112"/>
+<NormalizedIntensity Value="0.334088"/>
 <Opacity Value="0"/>
 <Diffuse G="45" R="45" B="45"/>
 <Specular G="14" R="40" B="170"/>
@@ -159,7 +165,7 @@
 <Diffuse G="56" R="56" B="56"/>
 <Specular G="235" R="255" B="187"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.059"/>
+<Roughness Value="1"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="1"/>
@@ -170,7 +176,9 @@
 <Roughness Value="0"/>
 </Node>
 </Nodes>
-<DensityScale Value="1"/>
+<DensityScale Value="49.3156"/>
+<ShadingType Value="0"/>
+<GradientFactor Value="100"/>
 </Preset>
 <Preset Name="backpack_small">
 <Nodes>
@@ -224,6 +232,8 @@
 </Node>
 </Nodes>
 <DensityScale Value="10"/>
+<ShadingType Value="0"/>
+<GradientFactor Value="0"/>
 </Preset>
 <Preset Name="artifix_small">
 <Nodes>
@@ -231,33 +241,41 @@
 <NormalizedIntensity Value="0"/>
 <Opacity Value="0"/>
 <Diffuse G="160" R="160" B="164"/>
-<Specular G="10" R="10" B="10"/>
+<Specular G="0" R="0" B="0"/>
 <Emission G="0" R="0" B="0"/>
 <Roughness Value="1"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.260568"/>
+<NormalizedIntensity Value="0.272722"/>
 <Opacity Value="0"/>
 <Diffuse G="0" R="127" B="0"/>
-<Specular G="19" R="19" B="19"/>
+<Specular G="62" R="93" B="46"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.104"/>
+<Roughness Value="1"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.434543"/>
-<Opacity Value="0.103093"/>
-<Diffuse G="244" R="255" B="196"/>
+<NormalizedIntensity Value="0.314286"/>
+<Opacity Value="0.168539"/>
+<Diffuse G="82" R="143" B="57"/>
+<Specular G="50" R="50" B="50"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.366877"/>
+<Opacity Value="0.321071"/>
+<Diffuse G="34" R="36" B="27"/>
 <Specular G="170" R="255" B="127"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0.022"/>
+<Roughness Value="1"/>
 </Node>
 <Node>
-<NormalizedIntensity Value="0.7"/>
+<NormalizedIntensity Value="0.393768"/>
 <Opacity Value="1"/>
-<Diffuse G="160" R="160" B="164"/>
+<Diffuse G="42" R="42" B="43"/>
 <Specular G="255" R="255" B="255"/>
 <Emission G="0" R="0" B="0"/>
-<Roughness Value="0"/>
+<Roughness Value="1"/>
 </Node>
 <Node>
 <NormalizedIntensity Value="1"/>
@@ -268,7 +286,9 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
-<DensityScale Value="3.802"/>
+<DensityScale Value="0.6745"/>
+<ShadingType Value="0"/>
+<GradientFactor Value="0"/>
 </Preset>
 <Preset Name="macoessix_small">
 <Nodes>
@@ -329,6 +349,165 @@
 <Roughness Value="1"/>
 </Node>
 </Nodes>
-<DensityScale Value="1"/>
+<DensityScale Value="100"/>
+<ShadingType Value="0"/>
+<GradientFactor Value="0"/>
+</Preset>
+<Preset Name="macoessix_noeska">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.405704"/>
+<Opacity Value="0"/>
+<Diffuse G="4" R="89" B="0"/>
+<Specular G="242" R="255" B="215"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.426616"/>
+<Opacity Value="0.0239234"/>
+<Diffuse G="0" R="109" B="0"/>
+<Specular G="14" R="22" B="0"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.426634"/>
+<Opacity Value="1"/>
+<Diffuse G="0" R="73" B="0"/>
+<Specular G="60" R="60" B="60"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.564982"/>
+<Opacity Value="1"/>
+<Diffuse G="86" R="108" B="83"/>
+<Specular G="42" R="63" B="31"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="145" R="170" B="120"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+</Nodes>
+<DensityScale Value="0.5484"/>
+<ShadingType Value="2"/>
+<GradientFactor Value="0"/>
+</Preset>
+<Preset Name="artifix_small_demo">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="0" R="0" B="0"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.272722"/>
+<Opacity Value="0"/>
+<Diffuse G="17" R="127" B="17"/>
+<Specular G="62" R="93" B="46"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.314286"/>
+<Opacity Value="0.168539"/>
+<Diffuse G="82" R="143" B="57"/>
+<Specular G="170" R="255" B="127"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.366877"/>
+<Opacity Value="0.321071"/>
+<Diffuse G="34" R="36" B="27"/>
+<Specular G="170" R="255" B="127"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.393768"/>
+<Opacity Value="1"/>
+<Diffuse G="42" R="42" B="43"/>
+<Specular G="216" R="255" B="97"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+</Nodes>
+<DensityScale Value="0.7418"/>
+<ShadingType Value="2"/>
+<GradientFactor Value="0"/>
+</Preset>
+<Preset Name="manix_small_demo">
+<Nodes>
+<Node>
+<NormalizedIntensity Value="0"/>
+<Opacity Value="0"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.184586"/>
+<Opacity Value="0"/>
+<Diffuse G="37" R="45" B="40"/>
+<Specular G="40" R="63" B="31"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.264334"/>
+<Opacity Value="0.0191591"/>
+<Diffuse G="0" R="51" B="0"/>
+<Specular G="26" R="39" B="19"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="0.485644"/>
+<Opacity Value="1"/>
+<Diffuse G="121" R="142" B="68"/>
+<Specular G="87" R="133" B="66"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="1"/>
+</Node>
+<Node>
+<NormalizedIntensity Value="1"/>
+<Opacity Value="1"/>
+<Diffuse G="160" R="160" B="164"/>
+<Specular G="10" R="10" B="10"/>
+<Emission G="0" R="0" B="0"/>
+<Roughness Value="100"/>
+</Node>
+</Nodes>
+<DensityScale Value="0.5735"/>
+<ShadingType Value="2"/>
+<GradientFactor Value="0"/>
 </Preset>
 </Presets>

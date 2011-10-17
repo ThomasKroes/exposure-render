@@ -529,9 +529,9 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		gScene.m_TransferFunctions.m_Specular.m_C[i]	= CColorRgbHdr(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
 		gScene.m_TransferFunctions.m_Emission.m_C[i]	= 500.0f * CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
 
-		const float Roughness = 1.0f - expf(-0.5f * Node.GetGlossiness());
+		const float Roughness = 1.0f - expf(-Node.GetGlossiness());
 
-		gScene.m_TransferFunctions.m_Roughness.m_C[i] = CColorRgbHdr(Roughness * 1000.0f);
+		gScene.m_TransferFunctions.m_Roughness.m_C[i] = CColorRgbHdr(Roughness * 250.0f);
 	}
 
 	gScene.m_DensityScale	= TransferFunction.GetDensityScale();

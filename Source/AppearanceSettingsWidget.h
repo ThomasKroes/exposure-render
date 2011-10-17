@@ -34,12 +34,11 @@ private:
 	QDoubleSlider	m_DensityScaleSlider;
 	QDoubleSpinner	m_DensityScaleSpinner;
 	QComboBox		m_ShadingType;
+	QLabel			m_GradientFactorLabel;
 	QDoubleSlider	m_GradientFactorSlider;
 	QDoubleSpinner	m_GradientFactorSpinner;
-
 	QDoubleSlider	m_StepSizePrimaryRaySlider;
 	QDoubleSpinner	m_StepSizePrimaryRaySpinner;
-
 	QDoubleSlider	m_StepSizeSecondaryRaySlider;
 	QDoubleSpinner	m_StepSizeSecondaryRaySpinner;
 };

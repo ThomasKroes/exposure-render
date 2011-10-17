@@ -24,6 +24,9 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_DensityScaleSlider(),
 	m_DensityScaleSpinner(),
 	m_ShadingType(),
+	m_GradientFactorLabel(),
+	m_GradientFactorSlider(),
+	m_GradientFactorSpinner(),
 	m_StepSizePrimaryRaySlider(),
 	m_StepSizePrimaryRaySpinner(),
 	m_StepSizeSecondaryRaySlider(),
@@ -49,7 +52,8 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	m_ShadingType.addItem("Hybrid", 2);
 	m_MainLayout.addWidget(&m_ShadingType, 3, 1, 1, 2);
 
-	m_MainLayout.addWidget(new QLabel("Gradient Factor"), 4, 0);
+	m_GradientFactorLabel.setText("Gradient Factor");
+	m_MainLayout.addWidget(&m_GradientFactorLabel, 4, 0);
 	
 	m_GradientFactorSlider.setRange(0.001, 100.0);
 	m_GradientFactorSlider.setValue(100.0);
@@ -125,6 +129,9 @@ void QAppearanceSettingsWidget::OnSetDensityScale(double DensityScale)
 void QAppearanceSettingsWidget::OnSetShadingType(int Index)
 {
 	gTransferFunction.SetShadingType(Index);
+	m_GradientFactorLabel.setEnabled(Index == 2);
+	m_GradientFactorSlider.setEnabled(Index == 2);
+	m_GradientFactorSpinner.setEnabled(Index == 2);
 }
 
 void QAppearanceSettingsWidget::OnSetGradientFactor(double GradientFactor)

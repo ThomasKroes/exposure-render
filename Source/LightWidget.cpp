@@ -162,10 +162,10 @@ QLightWidget::QLightWidget(QWidget* pParent) :
     m_IntensitySlider.setFocusPolicy(Qt::StrongFocus);
     m_IntensitySlider.setTickPosition(QDoubleSlider::NoTicks);
 	m_IntensitySlider.setSingleStep(1);
-	m_IntensitySlider.setRange(0.0, 1000.0);
+	m_IntensitySlider.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_IntensitySlider, 8, 1);
 	
-    m_IntensitySpinBox.setRange(0.0, 1000.0);
+    m_IntensitySpinBox.setRange(0.0, 100.0);
 	m_MainLayout.addWidget(&m_IntensitySpinBox, 8, 2);
 	
 	connect(&m_IntensitySlider, SIGNAL(valueChanged(double)), &m_IntensitySpinBox, SLOT(setValue(double)));
