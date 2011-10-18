@@ -49,7 +49,6 @@ public slots:
 
 private:
     void								CreateMenus(void);
-    void								CreateToolBars(void);
     void								CreateStatusBar(void);
     void								SetupDockingWidgets(void);
 	void								UpdateRecentFileActions(void);

@@ -246,7 +246,7 @@ QHardwareWidget::QHardwareWidget(QWidget* pParent) :
 	m_OptimalDevice.setVisible(m_Model.rowCount(QModelIndex()) > 1);
 
 	m_MainLayout.addWidget(&m_OptimalDevice);
-
+	
 	QObject::connect(&m_OptimalDevice, SIGNAL(clicked()), this, SLOT(OnOptimalDevice()));
 	QObject::connect(&m_Devices, SIGNAL(clicked(const QModelIndex&)), this, SLOT(OnSelection(const QModelIndex&)));
 

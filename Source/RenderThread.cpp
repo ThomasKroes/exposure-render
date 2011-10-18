@@ -188,7 +188,7 @@ void QRenderThread::run()
 	BindGradientMagnitudeBuffer((short*)m_pGradientMagnitudeBuffer, Res);
 
 	gStatus.SetStatisticChanged("Performance", "Timings", "");
-
+	gStatus.SetStatisticChanged("Camera", "", "");
 	gStatus.SetStatisticChanged("CUDA Memory", "Scene", QString::number(sizeof(CScene) / MB, 'f', 2), "MB");
 	gStatus.SetStatisticChanged("CUDA Memory", "Frame Buffers", "", "");
 
@@ -261,8 +261,8 @@ void QRenderThread::run()
 			// At this point, all dirty flags should have been taken care of, since the flags in the original scene are now cleared
 			gScene.m_DirtyFlags.ClearAllFlags();
 
-			SceneCopy.m_DenoiseParams.SetWindowRadius(4.0f);
-			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.02f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
+			SceneCopy.m_DenoiseParams.SetWindowRadius(3.0f);
+			SceneCopy.m_DenoiseParams.m_LerpC = 0.33f * (max((float)gScene.GetNoIterations(), 1.0f) * 0.035f);//1.0f - powf(1.0f / (float)gScene.GetNoIterations(), 15.0f);//1.0f - expf(-0.01f * (float)gScene.GetNoIterations());
 //			SceneCopy.m_DenoiseParams.m_Enabled = false;
 
 			SceneCopy.m_Camera.Update();

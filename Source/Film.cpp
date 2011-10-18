@@ -33,10 +33,11 @@ QFilm& QFilm::operator=(const QFilm& Other)
 {
 	QPresetXML::operator=(Other);
 
-	m_Width		= Other.m_Width;
-	m_Height	= Other.m_Height;
-	m_Exposure	= Other.m_Exposure;
-	m_Dirty		= Other.m_Dirty;
+	m_Width				= Other.m_Width;
+	m_Height			= Other.m_Height;
+	m_Exposure			= Other.m_Exposure;
+	m_NoiseReduction	= Other.m_NoiseReduction;
+	m_Dirty				= Other.m_Dirty;
 
 	emit Changed(*this);
 
@@ -50,8 +51,8 @@ int QFilm::GetWidth(void) const
 
 void QFilm::SetWidth(const int& Width)
 {
-	m_Width	= Width;
-	m_Dirty = true;
+	m_Width		= Width;
+	m_Dirty		= true;
 
 	emit Changed(*this);
 }
@@ -77,7 +78,6 @@ float QFilm::GetExposure(void) const
 void QFilm::SetExposure(const float& Exposure)
 {
 	m_Exposure = Exposure;
-
 	emit Changed(*this);
 }
 
@@ -89,17 +89,6 @@ bool QFilm::GetNoiseReduction(void) const
 void QFilm::SetNoiseReduction(const bool& NoiseReduction)
 {
 	m_NoiseReduction = NoiseReduction;
-
-	emit Changed(*this);
-}
-
-void QFilm::Reset(void)
-{
-	m_Width		= 640;
-	m_Height	= 480;
-	m_Exposure	= 500.0f;
-	m_Dirty		= true;
-
 	emit Changed(*this);
 }
 
@@ -108,32 +97,39 @@ bool QFilm::IsDirty(void) const
 	return m_Dirty;
 }
 
+void QFilm::UnDirty(void)
+{
+	m_Dirty = false;
+}
+
 void QFilm::ReadXML(QDomElement& Parent)
 {
-	m_Width		= Parent.firstChildElement("Width").attribute("Value").toFloat();
-	m_Height	= Parent.firstChildElement("Height").attribute("Value").toFloat();
+	SetWidth(Parent.firstChildElement("Width").attribute("Value").toFloat());
+	SetHeight(Parent.firstChildElement("Height").attribute("Value").toFloat());
+	SetExposure(Parent.firstChildElement("Exposure").attribute("Value").toFloat());
+//	SetNoiseReduction(Parent.firstChildElement("NoiseReduction").attribute("Value").toInt());
 }
 
 QDomElement QFilm::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 {
-	// Film
 	QDomElement Film = DOM.createElement("Film");
 	Parent.appendChild(Film);
 
-	// Width
 	QDomElement Width = DOM.createElement("Width");
 	Width.setAttribute("Value", m_Width);
 	Film.appendChild(Width);
 
-	// Height
 	QDomElement Height = DOM.createElement("Height");
 	Height.setAttribute("Value", m_Height);
 	Film.appendChild(Height);
 
-	return Film;
-}
+	QDomElement Exposure = DOM.createElement("Exposure");
+	Exposure.setAttribute("Value", m_Exposure);
+	Film.appendChild(Exposure);
 
-void QFilm::UnDirty(void)
-{
-	m_Dirty = false;
+//	QDomElement NoiseReduction = DOM.createElement("NoiseReduction");
+//	NoiseReduction.setAttribute("Value", m_NoiseReduction);
+//	Film.appendChild(NoiseReduction);
+
+	return Film;
 }

@@ -106,6 +106,8 @@ QFilmWidget::QFilmWidget(QWidget* pParent) :
 
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+
+	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), this, SLOT(OnFilmChanged(const QFilm&)));
 }
 
 void QFilmWidget::SetPresetType(const QString& PresetType)
@@ -174,16 +176,12 @@ void QFilmWidget::SetExposure(const double& Exposure)
 
 void QFilmWidget::OnRenderBegin(void)
 {
-	m_WidthSpinner.blockSignals(true);
-	m_WidthSpinner.setValue(gScene.m_Camera.m_Film.GetWidth());
-	m_WidthSpinner.blockSignals(false);
+//	m_WidthSpinner.setValue(gCamera.GetFilm().GetWidth());
+//	m_HeightSpinner.setValue(gCamera.GetFilm().GetHeight());
+//	m_ExposureSlider.setValue(gCamera.GetFilm().GetExposure());
+//	m_ExposureSpinner.setValue(gCamera.GetFilm().GetExposure());
 
-	m_HeightSpinner.blockSignals(true);
-	m_HeightSpinner.setValue(gScene.m_Camera.m_Film.GetHeight());
-	m_HeightSpinner.blockSignals(false);
-
-	m_ExposureSlider.setValue(gScene.m_Camera.m_Film.m_Exposure, true);
-	m_ExposureSpinner.setValue(gScene.m_Camera.m_Film.m_Exposure, true);
+	m_NoiseReduction.setChecked(gScene.m_DenoiseParams.m_Enabled);
 }
 
 void QFilmWidget::OnRenderEnd(void)

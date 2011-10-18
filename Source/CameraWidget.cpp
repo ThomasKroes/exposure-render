@@ -34,7 +34,7 @@ QCameraWidget::QCameraWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_FilmWidget);
 	m_MainLayout.addWidget(&m_ApertureWidget);
 	m_MainLayout.addWidget(&m_ProjectionWidget);
-	m_MainLayout.addWidget(&m_FocusWidget);
+//	m_MainLayout.addWidget(&m_FocusWidget);
 
 	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), &gCamera, SLOT(OnFilmChanged()));
 	QObject::connect(&gCamera.GetAperture(), SIGNAL(Changed(const QAperture&)), &gCamera, SLOT(OnApertureChanged()));

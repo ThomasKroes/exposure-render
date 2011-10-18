@@ -356,16 +356,16 @@ public:
 
 		if (PresetDestination.GetDirty())
 		{
-			int Result = QMessageBox::question(this, "Unsaved changes", "Save changes to " + PresetDestination.GetName() + "?", QMessageBox::Yes | QMessageBox::No);
+//			int Result = QMessageBox::question(this, "Unsaved changes", "Save changes to " + PresetDestination.GetName() + "?", QMessageBox::Yes | QMessageBox::No);
 				
-			if (Result == QMessageBox::Yes)
-			{
-				T Preset = PresetDestination;
-				Preset.SetName(Name);
+	//		if (Result == QMessageBox::Yes)
+		//	{
+//				T Preset = PresetDestination;
+//				Preset.SetName(Name);
 
 				// Save the preset
-				SavePreset(Preset, false);
-			}
+//				SavePreset(Preset, false);
+		//	}
 		}
 
 		// Copy the transfer function

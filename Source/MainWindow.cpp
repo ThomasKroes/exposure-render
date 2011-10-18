@@ -38,15 +38,11 @@ CMainWindow::CMainWindow() :
 	m_CameraDockWidget(),
 	m_SettingsDockWidget()
 {
-	// Set singleton pointer
 	gpMainWindow = this;
 
-	// Create VTK rendering window
 	setCentralWidget(&m_VtkWidget);
-//	setCentralWidget(new QRenderView(this));
 
 	CreateMenus();
-	CreateToolBars();
 	CreateStatusBar();
 	SetupDockingWidgets();
 
@@ -58,6 +54,8 @@ CMainWindow::CMainWindow() :
 
 	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+
+	DownloadVersionInfo();
 }
 
 CMainWindow::~CMainWindow(void)
@@ -67,7 +65,7 @@ CMainWindow::~CMainWindow(void)
 
 void CMainWindow::CreateMenus(void)
 {
-    m_pFileMenu = menuBar()->addMenu(tr("&File"));
+	m_pFileMenu = menuBar()->addMenu(tr("&File"));
 
 	m_pFileMenu->addAction(GetIcon("folder-open-document"), "Open", this, SLOT(Open()));
 
@@ -114,23 +112,6 @@ void CMainWindow::CreateMenus(void)
 	m_pHelpMenu->addAction(GetIcon("globe"), "Visit Website", this, SLOT(OnVisitWebsite()));
 
 	UpdateRecentFileActions();
-}
-
-void CMainWindow::CreateToolBars()
-{
-	/*
-    m_pFileToolBar		= addToolBar(tr("File"));
-
-	m_pFileToolBar->addAction(GetIcon("folder-open"), "Open", this, SLOT(OnOpen()));
-
-	m_pPlaybackToolBar	= addToolBar(tr("Playback"));
-	m_pPlaybackToolBar->setIconSize(QSize(16, 16));
-
-	m_pPlaybackToolBar->addAction(GetIcon("control"), "Play", this, SLOT(OnPlay()));
-	m_pPlaybackToolBar->addAction(GetIcon("control-pause"), "Pause", this, SLOT(OnPause()));
-	m_pPlaybackToolBar->addAction(GetIcon("control-stop-square"), "Stop", this, SLOT(OnStop()));
-	m_pPlaybackToolBar->addAction(GetIcon("control-stop-180"), "Restart", this, SLOT(OnRestart()));
-	*/
 }
 
 void CMainWindow::CreateStatusBar()
@@ -353,8 +334,52 @@ void CMainWindow::OnSaveImage(void)
 
 void CMainWindow::DownloadVersionInfo(void)
 {
-	QUrl Url("http://exposure-render.googlecode.com/hg/LatestVersion.xml");
+	const QUrl Url("http://exposure-render.googlecode.com/hg/LatestVersion.xml");
 
+	if (!Url.isValid())
+	{
+		Log("Unable to retrieve version info from web server", "globe");
+		return;
+	}
+	
+	QString LocalFileName = QFileInfo(Url.path()).fileName();
 
+	if (LocalFileName.isEmpty())
+	{
+		Log("Unable to retrieve version info from web server", "globe");
+		return;
+	}
 
+	QFile File;
+
+	File.setFileName(LocalFileName);
+
+	if (!File.open(QIODevice::WriteOnly))
+	{
+		Log("Unable to retrieve version info from web server", "globe");
+		return;
+	}
+	/*
+	QHttp Http;
+
+	Http.setHost(Url.host(), Url.port(80));
+	Http.get(Url.path(), &File);
+	Http.close();
+	*/
+/*
+	QNetworkAccessManager m_NetworkMngr;// = new QNetworkAccessManager(this);
+	
+	QNetworkReply *reply= m_NetworkMngr.get(QNetworkRequest(Url));
+QEventLoop loop;
+connect(reply, SIGNAL(finished()),&loop, SLOT(quit()));
+loop.exec();
+QUrl aUrl(url);
+QFileInfo fileInfo=aUrl.path();
+
+QFile file(aPathInClient+"\\"+fileInfo.fileName());
+file.open(QIODevice::WriteOnly);
+file.write(reply->readAll());
+
+delete reply;
+*/
 }

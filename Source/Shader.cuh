@@ -194,7 +194,7 @@ public:
 		  wh = Normalize(wh);
 		  float cosThetaH = Dot(wi, wh);
 
-		  CColorXyz F = m_Fresnel.Evaluate(cosThetaH);
+		  CColorXyz F = SPEC_WHITE;//m_Fresnel.Evaluate(cosThetaH);
 
 		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.f * cosThetaI * cosThetaO);
 	  }
@@ -250,10 +250,12 @@ public:
 		return m_Kd * INV_PI_F;
 	}
 
-	HOD void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		Wi	= UniformSampleSphere(U);
 		Pdf	= this->Pdf(Wo, Wi);
+
+		return F(Wo, Wi);
 	}
 
 	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
@@ -386,21 +388,15 @@ public:
 		return 1.0f;
 	}
 
-	HOD void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
+	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
 	{
 		switch (m_Type)
 		{
 			case Brdf:
-			{
-				m_Brdf.SampleF(Wo, Wi, Pdf, S);
-				break;
-			}
+				return m_Brdf.SampleF(Wo, Wi, Pdf, S);
 
 			case Phase:
-			{
-				m_IsotropicPhase.SampleF(Wo, Wi, Pdf, S.m_Dir);
-				break;
-			}
+				return m_IsotropicPhase.SampleF(Wo, Wi, Pdf, S.m_Dir);
 		}
 	}
 
