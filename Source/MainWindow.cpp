@@ -350,3 +350,11 @@ void CMainWindow::OnSaveImage(void)
 
 	gpRenderThread->PauseRendering(false);
 }
+
+void CMainWindow::DownloadVersionInfo(void)
+{
+	QUrl Url("http://exposure-render.googlecode.com/hg/LatestVersion.xml");
+
+
+
+}

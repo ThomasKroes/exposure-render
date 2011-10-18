@@ -42,6 +42,7 @@ public slots:
 	void ShowStartupDialog(void);
 	void OnVisitWebsite(void);
 	void OnSaveImage(void);
+	void DownloadVersionInfo(void);
 
 public slots:
 	void OnLoadDemo(const QString& FileName);
