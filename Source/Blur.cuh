@@ -18,11 +18,11 @@
 #include "CudaUtilities.h"
 #include "cutil_math.h"
 
-#define KRNL_BLUR_BLOCK_W		8
+#define KRNL_BLUR_BLOCK_W		16
 #define KRNL_BLUR_BLOCK_H		8
 #define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
 
-KERNEL void KrnlBlurXyzH(CCudaView* pView)
+KERNEL void KrnlBlurH(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -34,7 +34,7 @@ KERNEL void KrnlBlurXyzH(CCudaView* pView)
 	const int X0 = max((int)ceilf(X - gFilterWidth), 0);
 	const int X1 = min((int)floorf(X + gFilterWidth), (int)gFilmWidth - 1);
 
-	float4 Sum;
+	CColorXyza Sum;
 
 	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
 	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
@@ -48,17 +48,17 @@ KERNEL void KrnlBlurXyzH(CCudaView* pView)
 	{
 		FW[TID] = gFilterWeights[(int)fabs((float)x - X)];
 
-		Sum			+= tex2D(gTexFrameEstimateXyza, (float)x + 0.5f, Y + 0.5f) * FW[TID];
+		Sum			+= pView->m_FrameEstimateXyza.Get(x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
-		pView->m_FrameBlurXyza.Set(CColorXyza(Sum.x / SumW[TID], Sum.y / SumW[TID], Sum.z / SumW[TID]), X, Y);
+		pView->m_FrameBlurXyza.Set(CColorXyza(Sum / SumW[TID]), X, Y);
 	else
 		pView->m_FrameBlurXyza.Set(CColorXyza(0.0f), X, Y);
 }
 
-KERNEL void KrnlBlurXyzV(CCudaView* pView)
+KERNEL void KrnlBlurV(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -70,7 +70,7 @@ KERNEL void KrnlBlurXyzV(CCudaView* pView)
 	const int Y0 = max((int)ceilf (Y - gFilterWidth), 0);
 	const int Y1 = min((int)floorf(Y + gFilterWidth), gFilmHeight - 1);
 
-	float4 Sum;
+	CColorXyza Sum;
 
 	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
 	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
@@ -84,26 +84,26 @@ KERNEL void KrnlBlurXyzV(CCudaView* pView)
 	{
 		FW[TID] = gFilterWeights[(int)fabs((float)y - Y)];
 
-		Sum			+= tex2D(gTexFrameBlurXyza, (float)X + 0.5f, (float)y + 0.5f) * FW[TID];
+		Sum			+= pView->m_FrameBlurXyza.Get(X, y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
-		pView->m_FrameEstimateXyza.Set(CColorXyza(Sum.x / SumW[TID], Sum.y / SumW[TID], Sum.z / SumW[TID]), X, Y);
+		pView->m_FrameEstimateXyza.Set(CColorXyza(Sum / SumW[TID]), X, Y);
 	else
 		pView->m_FrameEstimateXyza.Set(CColorXyza(0.0f), X, Y);
 }
 
-void BlurImageXyz(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)
+void Blur(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)
 {
 	const dim3 KernelBlock(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
 	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
 
-	KrnlBlurXyzH<<<KernelGrid, KernelBlock>>>(pDevView);
+	KrnlBlurH<<<KernelGrid, KernelBlock>>>(pDevView);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate H");
 	
-	KrnlBlurXyzV<<<KernelGrid, KernelBlock>>>(pDevView);
+	KrnlBlurV<<<KernelGrid, KernelBlock>>>(pDevView);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate V");
 }

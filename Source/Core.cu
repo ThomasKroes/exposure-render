@@ -21,10 +21,6 @@ texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexSpecular;
 texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexRoughness;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexEmission;
-texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexRunningEstimateXyza;
-texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexFrameEstimateXyza;
-texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexFrameBlurXyza;
-texture<float4, cudaTextureType2D, cudaReadModeElementType>			gTexRunningSpecularBloomXyza;
 texture<uchar4, cudaTextureType2D, cudaReadModeNormalizedFloat>		gTexRunningEstimateRgba;
 
 cudaArray* gpDensityArray				= NULL;
@@ -158,27 +154,6 @@ void BindRenderCanvasView(const CResolution2D& Resolution)
 	Channel = cudaCreateChannelDesc<uchar4>();
 
 	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateRgba, gRenderCanvasView.m_EstimateRgbaLdr.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_EstimateRgbaLdr.GetPitch()));
-
-	Channel = cudaCreateChannelDesc<float4>();
-
-	gTexRunningEstimateXyza.normalized		= false;
-	gTexRunningEstimateXyza.filterMode		= cudaFilterModeLinear;      
-	gTexRunningEstimateXyza.addressMode[0]	= cudaAddressModeClamp;  
-	gTexRunningEstimateXyza.addressMode[1]	= cudaAddressModeClamp;
-
-	gTexFrameBlurXyza.normalized			= false;
-	gTexFrameBlurXyza.filterMode			= cudaFilterModeLinear;      
-	gTexFrameBlurXyza.addressMode[0]		= cudaAddressModeClamp;  
-	gTexFrameBlurXyza.addressMode[1]		= cudaAddressModeClamp;
-  	
-	gTexFrameEstimateXyza.normalized		= false;
-	gTexFrameEstimateXyza.filterMode		= cudaFilterModeLinear;      
-	gTexFrameEstimateXyza.addressMode[0]	= cudaAddressModeClamp;  
-	gTexFrameEstimateXyza.addressMode[1]	= cudaAddressModeClamp;
-
-	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateXyza, gRenderCanvasView.m_RunningEstimateXyza.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_RunningEstimateXyza.GetPitch()));
-	HandleCudaError(cudaBindTexture2D(0, gTexFrameBlurXyza, gRenderCanvasView.m_FrameBlurXyza.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_FrameBlurXyza.GetPitch()));
-	HandleCudaError(cudaBindTexture2D(0, gTexFrameEstimateXyza, gRenderCanvasView.m_FrameEstimateXyza.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_FrameEstimateXyza.GetPitch()));
 }
 
 void ResetRenderCanvasView(void)
@@ -468,7 +443,7 @@ void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurI
 	RenderImage.AddDuration(TmrRender.ElapsedTime());
 	
  	CCudaTimer TmrBlur;
-//	BlurImageXyz(&Scene, pDevScene, pDevView);
+	Blur(&Scene, pDevScene, pDevView);
 	BlurImage.AddDuration(TmrBlur.ElapsedTime());
 
 	CCudaTimer TmrPostProcess;

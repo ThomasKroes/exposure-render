@@ -23,9 +23,8 @@ For a head start you can open one of the demo files, which come with appearance,
 
 === System Requirements ===
 - Microsoft Windows XP, Vista, or 7
-- NVIDIA CUDA-compatible GPU with compute capability 2.0 and at least 512 megabytes of DRAM. GeForce GTX2XX is recommended
+- NVIDIA CUDA-compatible GPU with compute capability 1.0+ and at least 512 megabytes of DRAM. GeForce GTX2XX is recommended
 - At least 1GB of system memory
-- We currently do not support GTSXXX cards, we are working on this at the moment
 
 === Future Plans ===
 - Performance optimizations
@@ -36,3 +35,6 @@ For a head start you can open one of the demo files, which come with appearance,
 - Mesh based lights
 - More advanced 2D sampling schemes
 - Turntable animation rendering
+
+=== Known Limitations ===
+- Large volumes can cause Exposure Render to crash, we are working on this

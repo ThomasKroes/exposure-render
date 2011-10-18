@@ -181,11 +181,13 @@ void QFilmWidget::OnRenderBegin(void)
 	m_HeightSpinner.blockSignals(true);
 	m_HeightSpinner.setValue(gScene.m_Camera.m_Film.GetHeight());
 	m_HeightSpinner.blockSignals(false);
+
+	m_ExposureSlider.setValue(gScene.m_Camera.m_Film.m_Exposure, true);
+	m_ExposureSpinner.setValue(gScene.m_Camera.m_Film.m_Exposure, true);
 }
 
 void QFilmWidget::OnRenderEnd(void)
 {
-//	gCamera.GetFilm().Reset();
 }
 
 void QFilmWidget::OnFilmChanged(const QFilm& Film)

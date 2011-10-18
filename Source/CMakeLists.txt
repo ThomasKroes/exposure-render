@@ -68,6 +68,9 @@ INCLUDE_DIRECTORIES(
 # Set your files and resources here  
 SET(ExposureRenderSources 
 	
+	ReadMe.txt
+	Copyright.txt
+
 	# Main
 	MainWindow.cpp
 	Main.cpp 
