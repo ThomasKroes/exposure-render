@@ -332,6 +332,8 @@ void CMainWindow::OnSaveImage(void)
 	gpRenderThread->PauseRendering(false);
 }
 
+#include <QHttp>
+
 void CMainWindow::DownloadVersionInfo(void)
 {
 	const QUrl Url("http://exposure-render.googlecode.com/hg/LatestVersion.xml");
@@ -352,21 +354,21 @@ void CMainWindow::DownloadVersionInfo(void)
 
 	QFile File;
 
-	File.setFileName(LocalFileName);
+	File.setFileName("C:\\Test.xml");
 
 	if (!File.open(QIODevice::WriteOnly))
 	{
 		Log("Unable to retrieve version info from web server", "globe");
 		return;
 	}
-	/*
+	
 	QHttp Http;
 
 	Http.setHost(Url.host(), Url.port(80));
 	Http.get(Url.path(), &File);
 	Http.close();
-	*/
-/*
+	/**/
+	/*
 	QNetworkAccessManager m_NetworkMngr;// = new QNetworkAccessManager(this);
 	
 	QNetworkReply *reply= m_NetworkMngr.get(QNetworkRequest(Url));
