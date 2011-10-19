@@ -1,6 +1,14 @@
 <Versions>
 	<Version>
 		<ID>275</ID>
-		<File></File>
+		<FileUrl></FileUrl>
+		<Description></Description>
+		<Summary></Summary>
+	</Version>
+	<Version>
+		<ID>285</ID>
+		<FileUrl></FileUrl>
+		<Description></Description>
+		<Summary></Summary>
 	</Version>
 </Versions>
