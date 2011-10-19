@@ -22,7 +22,8 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_AddLight(),
 	m_RemoveLight(),
 	m_RenameLight(),
-	m_CopyLight()
+	m_CopyLight(),
+	m_pSelectedLight()
 {
 	// Title, status and tooltip
 	setTitle("Lights");
@@ -63,12 +64,12 @@ QLightsWidget::QLightsWidget(QWidget* pParent) :
 	m_RenameLight.setFixedHeight(24);
 	m_MainLayout.addWidget(&m_RenameLight, 1, 2);
 
- 	connect(&m_LightList, SIGNAL(itemSelectionChanged()), this, SLOT(OnLightSelectionChanged()));
+ 	connect(&m_LightList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(OnLightSelectionChanged()));
 	connect(&gLighting, SIGNAL(LightSelectionChanged(QLight*)), this, SLOT(OnLightSelectionChanged(QLight*)));
  	connect(&m_AddLight, SIGNAL(clicked()), this, SLOT(OnAddLight()));
  	connect(&m_RemoveLight, SIGNAL(clicked()), this, SLOT(OnRemoveLight()));
 	connect(&m_RenameLight, SIGNAL(clicked()), this, SLOT(OnRenameLight()));
- 	connect(&gLighting, SIGNAL(Changed()), this, SLOT(UpdateLightList()));
+	connect(&gLighting, SIGNAL(Changed()), this, SLOT(UpdateLightList()));
 
 	OnLightSelectionChanged();
 }
@@ -112,6 +113,7 @@ void QLightsWidget::OnLightSelectionChanged(void)
 		return;
 
 	gLighting.SetSelectedLight(m_LightList.currentRow());
+	m_pSelectedLight = &gLighting.GetLights()[m_LightList.currentRow()];
 
 	m_RemoveLight.setEnabled(m_LightList.currentRow() >= 0);
 	m_RenameLight.setEnabled(m_LightList.currentRow() >= 0);
@@ -120,6 +122,7 @@ void QLightsWidget::OnLightSelectionChanged(void)
 
 void QLightsWidget::OnLightSelectionChanged(QLight* pLight)
 {
+	
 	for (int i = 0; i < m_LightList.count(); i++)
 	{
 		if (((QLightItem*)m_LightList.item(i))->m_pLight == pLight)
@@ -132,10 +135,12 @@ void QLightsWidget::OnLightSelectionChanged(QLight* pLight)
 			m_LightList.blockSignals(false);
 		}
 	}
+	/**/
 }
 
 void QLightsWidget::OnAddLight(void)
 {
+	/*
 	QInputDialogEx InputDialog;
 
 	InputDialog.setTextValue("Light " + QString::number(gLighting.m_Lights.size() + 1));
@@ -147,12 +152,19 @@ void QLightsWidget::OnAddLight(void)
 
 	if (InputDialog.textValue().isEmpty())
 		return;
+	*/
 
 	QLight NewLight;
-	NewLight.SetName(InputDialog.textValue());
+	NewLight.SetName("Light " + QString::number(gLighting.m_Lights.size() + 1));
 
 	// Add the light
 	gLighting.AddLight(NewLight);
+
+	UpdateLightList();
+
+	m_LightList.setCurrentRow(m_LightList.count());
+
+	OnLightSelectionChanged();
 }
 
 void QLightsWidget::OnRemoveLight(void)
@@ -161,6 +173,8 @@ void QLightsWidget::OnRemoveLight(void)
 		return;
 
 	gLighting.RemoveLight(m_LightList.currentRow());
+	
+	m_LightList.setCurrentRow(0);
 }
 
 void QLightsWidget::OnRenameLight(void)

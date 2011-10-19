@@ -45,3 +45,4 @@ Note: The auto focus point is located in the center of the render canvas, future
 
 === Known Limitations ===
 - Large volumes can cause Exposure Render to crash, we are working on this
+- Some controls don't have linear response i.e. density scale, film exposure, we are working on this

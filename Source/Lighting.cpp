@@ -275,35 +275,13 @@ QLighting QLighting::Default(void)
 
 	DefaultLighting.SetName("Default");
 
-	QLight Key;
-	Key.SetTheta(180.0f);
-	Key.SetPhi(45.0f);
-	Key.SetName("Key");
-	Key.SetColor(QColor(255, 228, 165));
-	Key.SetWidth(0.7f);
-	Key.SetHeight(0.7f);
-	Key.SetIntensity(5000.0f);
-	Key.SetDistance(1.25f);
+	DefaultLighting.AddLight(QLight::Default());
 
-	DefaultLighting.AddLight(Key);
+	DefaultLighting.Background().SetTopColor(QColor(85, 170, 255));
+	DefaultLighting.Background().SetMiddleColor(QColor(255, 170, 127));
+	DefaultLighting.Background().SetBottomColor(QColor(63, 31, 0));
 
-	QLight Rim;
-	Rim.SetTheta(90.0f);
-	Rim.SetPhi(25.0f);
-	Rim.SetName("Rim");
-	Rim.SetColor(QColor(155, 155, 205));
-	Rim.SetWidth(1.7f);
-	Rim.SetHeight(1.7f);
-	Rim.SetIntensity(3000.0f);
-	Rim.SetDistance(2.25f);
-
-	DefaultLighting.AddLight(Rim);
-
-	DefaultLighting.Background().SetTopColor(QColor(185, 213, 255));
-	DefaultLighting.Background().SetMiddleColor(QColor(185, 213, 255));
-	DefaultLighting.Background().SetBottomColor(QColor(185, 213, 255));
-
-	DefaultLighting.Background().SetIntensity(300.0f);
+	DefaultLighting.Background().SetIntensity(2.0f);
 
 	return DefaultLighting;
 }

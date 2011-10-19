@@ -20,7 +20,7 @@ DEV CColorXyz EstimateDirectLight(CScene* pScene, const CVolumeShader::EType& Ty
 {
 	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density).ToXYZ(), GetSpecular(Density).ToXYZ(), 3.5f/*pScene->m_IOR*/, GetRoughness(Density));
+	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density).ToXYZ(), GetSpecular(Density).ToXYZ(), 2.5f/*pScene->m_IOR*/, GetRoughness(Density));
 	
 	CRay Rl; 
 
@@ -48,8 +48,8 @@ DEV CColorXyz EstimateDirectLight(CScene* pScene, const CVolumeShader::EType& Ty
 		if (Type == CVolumeShader::Phase)
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
-	
-	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);; 
+
+	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
 	{

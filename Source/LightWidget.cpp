@@ -96,7 +96,7 @@ QLightWidget::QLightWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_DistanceSlider, 2, 1);
 	
     m_DistanceSpinner.setRange(0.0, 10.0);
-	m_DistanceSpinner.setSuffix(" mm");
+	m_DistanceSpinner.setSuffix(" m");
 	m_MainLayout.addWidget(&m_DistanceSpinner, 2, 2);
 	
 	connect(&m_DistanceSlider, SIGNAL(valueChanged(double)), &m_DistanceSpinner, SLOT(setValue(double)));
@@ -113,7 +113,7 @@ QLightWidget::QLightWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_WidthSlider, 3, 1);
 	
 	m_WidthSpinner.setRange(0.01, 10.0);
-	m_WidthSpinner.setSuffix(" mm");
+	m_WidthSpinner.setSuffix(" m");
 	m_MainLayout.addWidget(&m_WidthSpinner, 3, 2);
 	
 	connect(&m_WidthSlider, SIGNAL(valueChanged(double)), &m_WidthSpinner, SLOT(setValue(double)));
@@ -130,7 +130,7 @@ QLightWidget::QLightWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_HeightSlider, 5, 1);
 	
 	m_HeightSpinner.setRange(0.01, 10.0);
-	m_HeightSpinner.setSuffix(" mm");
+	m_HeightSpinner.setSuffix(" m");
 	m_MainLayout.addWidget(&m_HeightSpinner, 5, 2);
 	
 	m_LockSizeCheckBox.setText("Lock Size");

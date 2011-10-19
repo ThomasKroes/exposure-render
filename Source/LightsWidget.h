@@ -53,6 +53,7 @@ protected:
 	QPushButton		m_RenameLight;
 	QPushButton		m_CopyLight;
 	QPushButton		m_Reset;
+	QLight*			m_pSelectedLight;
 
 	friend class QLightingWidget;
 };

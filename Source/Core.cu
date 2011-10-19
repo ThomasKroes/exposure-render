@@ -352,8 +352,8 @@ void BindConstants(CScene* pScene)
 
 	HandleCudaError(cudaMemcpyToSymbol("gDensityScale", &DensityScale, sizeof(float)));
 	
-	const float GradientDelta		= pScene->m_GradientDelta;
-	const float InvGradientDelta	= 1.0f / (2.0f * GradientDelta);
+	const float GradientDelta		= 1.0f * pScene->m_GradientDelta;
+	const float InvGradientDelta	= 1.0f / GradientDelta;
 	const Vec3f GradientDeltaX(GradientDelta, 0.0f, 0.0f);
 	const Vec3f GradientDeltaY(0.0f, GradientDelta, 0.0f);
 	const Vec3f GradientDeltaZ(0.0f, 0.0f, GradientDelta);

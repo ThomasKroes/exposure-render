@@ -234,3 +234,19 @@ QDomElement QLight::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	return Light;
 }
+
+QLight QLight::Default(void)
+{
+	QLight DefaultLight;
+
+	DefaultLight.SetTheta(180.0f);
+	DefaultLight.SetPhi(45.0f);
+	DefaultLight.SetName("Default");
+	DefaultLight.SetColor(QColor(255, 228, 165));
+	DefaultLight.SetWidth(0.7f);
+	DefaultLight.SetHeight(0.7f);
+	DefaultLight.SetIntensity(50.0f);
+	DefaultLight.SetDistance(3.25f);
+	
+	return DefaultLight;
+}

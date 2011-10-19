@@ -29,24 +29,26 @@ public:
 
 	bool operator == (const QLight& Other) const;
 
-	float		GetTheta(void) const;
-	void		SetTheta(const float& Theta);
-	float		GetPhi(void) const;
-	void		SetPhi(const float& Phi);
-	float		GetWidth(void) const;
-	void		SetWidth(const float& Width);
-	float		GetHeight(void) const;
-	void		SetHeight(const float& Height);
-	bool		GetLockSize(void) const;
-	void		SetLockSize(const bool& LockSize);
-	float		GetDistance(void) const;
-	void		SetDistance(const float& Distance);
-	QColor		GetColor(void) const;
-	void		SetColor(const QColor& Color);
-	float		GetIntensity(void) const;
-	void		SetIntensity(const float& Intensity);
-	void		ReadXML(QDomElement& Parent);
-	QDomElement	WriteXML(QDomDocument& DOM, QDomElement& Parent);
+	float			GetTheta(void) const;
+	void			SetTheta(const float& Theta);
+	float			GetPhi(void) const;
+	void			SetPhi(const float& Phi);
+	float			GetWidth(void) const;
+	void			SetWidth(const float& Width);
+	float			GetHeight(void) const;
+	void			SetHeight(const float& Height);
+	bool			GetLockSize(void) const;
+	void			SetLockSize(const bool& LockSize);
+	float			GetDistance(void) const;
+	void			SetDistance(const float& Distance);
+	QColor			GetColor(void) const;
+	void			SetColor(const QColor& Color);
+	float			GetIntensity(void) const;
+	void			SetIntensity(const float& Intensity);
+	void			ReadXML(QDomElement& Parent);
+	QDomElement		WriteXML(QDomDocument& DOM, QDomElement& Parent);
+
+	static QLight	Default(void);
 
 signals:
 	void LightPropertiesChanged(QLight*);
