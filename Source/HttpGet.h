@@ -13,59 +13,22 @@
 
 #pragma once
 
-#include "UpdateWidget.h"
-#include "HardwareWidget.h"
-
-class QStartupDialog : public QDialog
+class QHttpGet : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	QStartupDialog(QWidget* pParent = NULL);
-	virtual ~QStartupDialog(void);
+    QHttpGet(QObject* pParent = NULL);
 
-	virtual void accept();
-	virtual QSize sizeHint() const;
-
-public:
-	void LoadDemoFile(const QString& BaseName);
-
-private:
-	void LoadReadMe(const QString& FileName);
+    bool GetFile(const QUrl& Url, const QString& FilePath);
 
 signals:
-	void LoadDemo(const QString& FileName);
-
-private:
-	QGridLayout			m_MainLayout;
-	QGroupBox			m_DemoFilesGroupBox;
-	QGridLayout			m_DemoFilesLayout;
-	QLabel				m_ResampleNote;
-	QUpdateWidget		m_UpdateWidget;
-	QHardwareWidget		m_HardwareWidget;
-	QGroupBox			m_ReadMeGroupBox;
-	QGridLayout			m_ReadMeLayout;
-	QTextEdit			m_ReadMe;
-	QDialogButtonBox	m_DialogButtons;
-	QCheckBox			m_ShowNextTime;
-};
-
-class QDemoWidget : public QWidget
-{
-	Q_OBJECT
-
-public:
-	QDemoWidget(QStartupDialog* pStartupDialog, const QString& NameUI, const QString& BaseName, const QString& Description, const QString& Image, QWidget* pParent = NULL);
-	virtual ~QDemoWidget(void);
-
-private:
-	QStartupDialog*		m_pStartupDialog;
-	QGridLayout			m_MainLayout;
-	QPushButton			m_Demo;
-	QLabel				m_Name;
-	QLabel				m_Description;
-	QString				m_BaseName;
+    void done();
 
 private slots:
-	void OnLoadDemo(void);
+    void HttpDone(bool Error);
+
+private:
+    QHttp	m_Http;
+    QFile	m_File;
 };

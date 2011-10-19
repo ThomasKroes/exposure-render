@@ -11,61 +11,56 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "Stable.h"
 
-#include "UpdateWidget.h"
-#include "HardwareWidget.h"
+#include "HttpGet.h"
 
-class QStartupDialog : public QDialog
+QHttpGet::QHttpGet(QObject* pParent /*= NULL*/) :
+	QObject(pParent)
 {
-	Q_OBJECT
+    connect(&m_Http, SIGNAL(done(bool)), this, SLOT(HttpDone(bool)));
+}
 
-public:
-	QStartupDialog(QWidget* pParent = NULL);
-	virtual ~QStartupDialog(void);
-
-	virtual void accept();
-	virtual QSize sizeHint() const;
-
-public:
-	void LoadDemoFile(const QString& BaseName);
-
-private:
-	void LoadReadMe(const QString& FileName);
-
-signals:
-	void LoadDemo(const QString& FileName);
-
-private:
-	QGridLayout			m_MainLayout;
-	QGroupBox			m_DemoFilesGroupBox;
-	QGridLayout			m_DemoFilesLayout;
-	QLabel				m_ResampleNote;
-	QUpdateWidget		m_UpdateWidget;
-	QHardwareWidget		m_HardwareWidget;
-	QGroupBox			m_ReadMeGroupBox;
-	QGridLayout			m_ReadMeLayout;
-	QTextEdit			m_ReadMe;
-	QDialogButtonBox	m_DialogButtons;
-	QCheckBox			m_ShowNextTime;
-};
-
-class QDemoWidget : public QWidget
+bool QHttpGet::GetFile(const QUrl& Url, const QString& FilePath)
 {
-	Q_OBJECT
+    if (!Url.isValid())
+	{
+        Log("Error: Invalid URL", "globe");
+        return false;
+    }
 
-public:
-	QDemoWidget(QStartupDialog* pStartupDialog, const QString& NameUI, const QString& BaseName, const QString& Description, const QString& Image, QWidget* pParent = NULL);
-	virtual ~QDemoWidget(void);
+    if (Url.scheme() != "http")
+	{
+        Log("Error: URL must start with 'http:'", "globe");
+        return false;
+    }
 
-private:
-	QStartupDialog*		m_pStartupDialog;
-	QGridLayout			m_MainLayout;
-	QPushButton			m_Demo;
-	QLabel				m_Name;
-	QLabel				m_Description;
-	QString				m_BaseName;
+    if (Url.path().isEmpty())
+	{
+        Log("Error: URL has no path", "globe");
+        return false;
+    }
 
-private slots:
-	void OnLoadDemo(void);
-};
+    m_File.setFileName(FilePath);
+
+    if (!m_File.open(QIODevice::WriteOnly))
+	{
+        Log("Error: Cannot write m_File ", "globe");
+        return false;
+    }
+
+    m_Http.setHost(Url.host(), Url.port(80));
+    m_Http.get(Url.path(), &m_File);
+    m_Http.close();
+
+    return true;
+}
+
+void QHttpGet::HttpDone(bool Error)
+{
+    if (Error)
+		Log("Error: " + QString(m_Http.errorString()), QLogger::Critical);
+
+    m_File.close();
+    emit done();
+}

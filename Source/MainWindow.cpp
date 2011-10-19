@@ -20,6 +20,8 @@
 #include "AboutDialog.h"
 #include "Scene.h"
 
+QUrl gVersionInfoUrl("http://exposure-render.googlecode.com/hg/VersionInfo.xml");
+
 // Main window singleton
 CMainWindow* gpMainWindow = NULL;
 
@@ -52,10 +54,11 @@ CMainWindow::CMainWindow() :
 
 	setWindowFilePath(QString());
 
-	connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
-	connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
+	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&m_HttpGet, SIGNAL(done()), this, SLOT(VersionInfoDownloaded()));
 
-	DownloadVersionInfo();
+	CheckForUpdates();
 }
 
 CMainWindow::~CMainWindow(void)
@@ -332,56 +335,27 @@ void CMainWindow::OnSaveImage(void)
 	gpRenderThread->PauseRendering(false);
 }
 
-#include <QHttp>
-
-void CMainWindow::DownloadVersionInfo(void)
+void CMainWindow::CheckForUpdates(void)
 {
-	const QUrl Url("http://exposure-render.googlecode.com/hg/LatestVersion.xml");
+	const QString FilePath = QApplication::applicationDirPath() + "/" + QFileInfo(gVersionInfoUrl.path()).fileName();
 
-	if (!Url.isValid())
+	m_HttpGet.GetFile(gVersionInfoUrl, FilePath);
+}
+
+void CMainWindow::VersionInfoDownloaded(void)
+{
+	Log("Version info downloaded", "globe");
+
+	const QString FilePath = QApplication::applicationDirPath() + "/" + QFileInfo(gVersionInfoUrl.path()).fileName();
+
+	QFile XmlFile;
+
+	XmlFile.setFileName(FilePath);
+
+	// Open the XML file for reading
+	if (!XmlFile.open(QIODevice::ReadOnly))
 	{
-		Log("Unable to retrieve version info from web server", "globe");
+		Log(QString("Failed to open " + QFileInfo(FilePath).fileName() + " for reading: " + XmlFile.errorString()).toAscii(), QLogger::Critical);
 		return;
 	}
-	
-	QString LocalFileName = QFileInfo(Url.path()).fileName();
-
-	if (LocalFileName.isEmpty())
-	{
-		Log("Unable to retrieve version info from web server", "globe");
-		return;
-	}
-
-	QFile File;
-
-	File.setFileName("C:\\Test.xml");
-
-	if (!File.open(QIODevice::WriteOnly))
-	{
-		Log("Unable to retrieve version info from web server", "globe");
-		return;
-	}
-	
-	QHttp Http;
-
-	Http.setHost(Url.host(), Url.port(80));
-	Http.get(Url.path(), &File);
-	Http.close();
-	/**/
-	/*
-	QNetworkAccessManager m_NetworkMngr;// = new QNetworkAccessManager(this);
-	
-	QNetworkReply *reply= m_NetworkMngr.get(QNetworkRequest(Url));
-QEventLoop loop;
-connect(reply, SIGNAL(finished()),&loop, SLOT(quit()));
-loop.exec();
-QUrl aUrl(url);
-QFileInfo fileInfo=aUrl.path();
-
-QFile file(aPathInClient+"\\"+fileInfo.fileName());
-file.open(QIODevice::WriteOnly);
-file.write(reply->readAll());
-
-delete reply;
-*/
 }

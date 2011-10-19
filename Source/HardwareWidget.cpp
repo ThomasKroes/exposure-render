@@ -235,7 +235,7 @@ QHardwareWidget::QHardwareWidget(QWidget* pParent) :
 	m_Devices.verticalHeader()->setDefaultSectionSize(20);
 	m_Devices.setSelectionMode(QAbstractItemView::SingleSelection);
 	m_Devices.setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_Devices.setFixedHeight(90);
+	m_Devices.setFixedHeight(75);
 
 	m_Devices.setModel(&m_Model);
 

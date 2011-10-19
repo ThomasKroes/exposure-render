@@ -15,6 +15,7 @@
 
 #include <QtGui>
 #include <QtXml\qdom.h>
+#include <QHttp>
 
 #include "Utilities.h"
 #include "Logger.h"

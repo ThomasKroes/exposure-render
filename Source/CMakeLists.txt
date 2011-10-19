@@ -82,6 +82,8 @@ SET(ExposureRenderSources
 	AboutDialog.cpp
 	SettingsDockWidget.cpp
 	HardwareWidget.cpp
+	UpdateWidget.cpp
+	HttpGet.cpp
 
 	# Lighting
 	LightWidget.cpp 
@@ -165,6 +167,8 @@ SET(ExposureRenderHeaders
 	AboutDialog.h
 	SettingsDockWidget.h
 	HardwareWidget.h
+	UpdateWidget.h
+	HttpGet.h
 
 	# Lighting
 	LightWidget.h
@@ -251,6 +255,8 @@ SET(ExposureRenderMocHeaders
 	StartupDialog.h
 	AboutDialog.h
 	HardwareWidget.h
+	UpdateWidget.h
+	HttpGet.h
 
 	# Lighting
 	LightWidget.h
@@ -357,6 +363,8 @@ SET(MainSources
 	AboutDialog.h
 	SettingsDockWidget.h
 	HardwareWidget.h
+	HttpGet.h
+	UpdateWidget.h
 	MainWindow.cpp
 	Main.cpp
 	LoadSettingsDialog.cpp
@@ -364,6 +372,8 @@ SET(MainSources
 	AboutDialog.cpp
 	SettingsDockWidget.cpp
 	HardwareWidget.cpp
+	HttpGet.cpp
+	UpdateWidget.cpp
 )
 
 # Make the main group

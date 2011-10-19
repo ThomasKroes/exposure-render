@@ -21,6 +21,7 @@
 #include "SettingsDockWidget.h"
 #include "LogDockWidget.h"
 #include "VtkWidget.h"
+#include "HttpGet.h"
 
 class CMainWindow : public QMainWindow
 {
@@ -42,7 +43,8 @@ public slots:
 	void ShowStartupDialog(void);
 	void OnVisitWebsite(void);
 	void OnSaveImage(void);
-	void DownloadVersionInfo(void);
+	void CheckForUpdates(void);
+	void VersionInfoDownloaded(void);
 
 public slots:
 	void OnLoadDemo(const QString& FileName);
@@ -83,6 +85,8 @@ private:
 	};
 
     QAction*							m_pRecentFileActions[MaxRecentFiles];
+
+	QHttpGet m_HttpGet;
 };
 
 extern CMainWindow* gpMainWindow;

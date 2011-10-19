@@ -11,61 +11,18 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "Stable.h"
 
 #include "UpdateWidget.h"
-#include "HardwareWidget.h"
 
-class QStartupDialog : public QDialog
+QUpdateWidget::QUpdateWidget(QWidget* pParent) :
+	QGroupBox(pParent),
+	m_MainLayout()
 {
-	Q_OBJECT
+	setTitle("Hardware Selection");
+	setStatusTip("Hardware Selection");
+	setToolTip("Hardware Selection");
 
-public:
-	QStartupDialog(QWidget* pParent = NULL);
-	virtual ~QStartupDialog(void);
-
-	virtual void accept();
-	virtual QSize sizeHint() const;
-
-public:
-	void LoadDemoFile(const QString& BaseName);
-
-private:
-	void LoadReadMe(const QString& FileName);
-
-signals:
-	void LoadDemo(const QString& FileName);
-
-private:
-	QGridLayout			m_MainLayout;
-	QGroupBox			m_DemoFilesGroupBox;
-	QGridLayout			m_DemoFilesLayout;
-	QLabel				m_ResampleNote;
-	QUpdateWidget		m_UpdateWidget;
-	QHardwareWidget		m_HardwareWidget;
-	QGroupBox			m_ReadMeGroupBox;
-	QGridLayout			m_ReadMeLayout;
-	QTextEdit			m_ReadMe;
-	QDialogButtonBox	m_DialogButtons;
-	QCheckBox			m_ShowNextTime;
-};
-
-class QDemoWidget : public QWidget
-{
-	Q_OBJECT
-
-public:
-	QDemoWidget(QStartupDialog* pStartupDialog, const QString& NameUI, const QString& BaseName, const QString& Description, const QString& Image, QWidget* pParent = NULL);
-	virtual ~QDemoWidget(void);
-
-private:
-	QStartupDialog*		m_pStartupDialog;
-	QGridLayout			m_MainLayout;
-	QPushButton			m_Demo;
-	QLabel				m_Name;
-	QLabel				m_Description;
-	QString				m_BaseName;
-
-private slots:
-	void OnLoadDemo(void);
-};
+	m_MainLayout.setColumnMinimumWidth(0, 75);
+	setLayout(&m_MainLayout);
+}

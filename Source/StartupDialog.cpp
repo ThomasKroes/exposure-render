@@ -22,6 +22,7 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_DemoFilesGroupBox(),
 	m_DemoFilesLayout(),
 	m_ResampleNote(),
+	m_UpdateWidget(),
 	m_HardwareWidget(),
 	m_ReadMeGroupBox(),
 	m_ReadMeLayout(),
@@ -55,9 +56,12 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	
 	m_DemoFilesLayout.addWidget(&m_ResampleNote, 3, 0, 1, 2);
 
-	m_MainLayout.addWidget(&m_HardwareWidget, 1, 0, 1, 2);
+	
+//	m_MainLayout.addWidget(&m_UpdateWidget, 1, 0, 1, 2);
 
-	m_MainLayout.addWidget(&m_ReadMeGroupBox, 2, 0, 1, 2);
+	m_MainLayout.addWidget(&m_HardwareWidget, 2, 0, 1, 2);
+
+	m_MainLayout.addWidget(&m_ReadMeGroupBox, 3, 0, 1, 2);
 
 	m_ReadMeGroupBox.setLayout(&m_ReadMeLayout);
 	m_ReadMeGroupBox.setTitle("Special Notes");
@@ -80,9 +84,9 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	// Checked
 	m_ShowNextTime.setChecked(true);
 
-	m_MainLayout.addWidget(&m_ShowNextTime, 3, 0);
-	m_MainLayout.addWidget(&m_DialogButtons, 3, 1);
-
+	m_MainLayout.addWidget(&m_ShowNextTime, 4, 0);
+	m_MainLayout.addWidget(&m_DialogButtons, 4, 1);
+	
 	m_ReadMe.setReadOnly(true);
 
 	// Load the read me file
