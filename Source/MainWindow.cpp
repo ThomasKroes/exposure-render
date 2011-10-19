@@ -114,7 +114,7 @@ void CMainWindow::CreateMenus(void)
 	m_pHelpMenu->addSeparator();
 
 	m_pHelpMenu->addAction(GetIcon("globe"), "Visit Website", this, SLOT(OnVisitWebsite()));
-	m_pHelpMenu->addAction(GetIcon("globe"), "Check for updates", this, SLOT(OnCheckForUpdates()));
+//	m_pHelpMenu->addAction(GetIcon("globe"), "Check for updates", this, SLOT(OnCheckForUpdates()));
 
 	UpdateRecentFileActions();
 }

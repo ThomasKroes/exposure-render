@@ -622,9 +622,8 @@ SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_
 INSTALL_FILES(/bin FILES ${QtDlls})
 
 ### Example .mhd and .raw files ###
-FILE(GLOB ExamplesMhd "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.mhd")
-FILE(GLOB ExamplesRaw "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.raw")
-INSTALL_FILES(/bin/Examples FILES ${ExamplesMhd} ${ExamplesRaw})
+FILE(GLOB Examples "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.*")
+INSTALL_FILES(/bin/Examples FILES ${Examples})
 
 ### Preset files ###
 FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")
