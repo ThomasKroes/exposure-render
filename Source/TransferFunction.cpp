@@ -394,7 +394,7 @@ QTransferFunction QTransferFunction::Default(void)
 	DefaultTransferFunction.AddNode(0.7f, 1.0f, Qt::gray, QColor(10, 10, 10), Qt::black, 1.0f);
 	DefaultTransferFunction.AddNode(1.0f, 1.0f, Qt::gray, QColor(10, 10, 10), Qt::black, 1.0f);
 
-	DefaultTransferFunction.SetDensityScale(0.5f);
+	DefaultTransferFunction.SetDensityScale(100.0f);
 	DefaultTransferFunction.SetShadingType(2);
 	DefaultTransferFunction.SetGradientFactor(10.0f);
 	

@@ -10,7 +10,6 @@ For a head start you can open one of the demo files, which come with appearance,
 - RMB + mouse wheel to zoom
 - Shift + LMB to adjust the aperture size
 - Control + LMB to adjust the field of view
-- Alt + LMB to adjust the focal distance
 
 Note: The auto focus point is located in the center of the render canvas, future versions will include clickable focus points
 

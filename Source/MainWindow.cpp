@@ -21,7 +21,7 @@
 #include "Scene.h"
 
 QUrl	gVersionInfoUrl("http://exposure-render.googlecode.com/hg/VersionInfo.xml");
-int		gVersionID = 800;
+int		gVersionID = 303;
 
 // Main window singleton
 CMainWindow* gpMainWindow = NULL;
@@ -60,6 +60,8 @@ CMainWindow::CMainWindow() :
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	QObject::connect(&m_HttpGet, SIGNAL(done()), this, SLOT(VersionInfoDownloaded()));
+
+	OnCheckForUpdates();
 }
 
 CMainWindow::~CMainWindow(void)

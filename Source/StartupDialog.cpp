@@ -92,8 +92,6 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 
 	// Load the read me file
 	LoadReadMe(QApplication::applicationDirPath() + "/" + "Readme.rtf");
-
-	gpMainWindow->OnCheckForUpdates();
 };
 
 QStartupDialog::~QStartupDialog(void)
