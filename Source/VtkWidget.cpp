@@ -109,7 +109,7 @@ void CVtkWidget::OnRenderBegin(void)
 	m_SceneRenderer->AddActor(m_ImageActor); 
 	
 	// Start the timer
-	m_RenderLoopTimer.start(1000.0f / 35.0f);
+	m_RenderLoopTimer.start(1000.0f / 25.0f);
 }
 
 //http://agl.unm.edu/rpf/

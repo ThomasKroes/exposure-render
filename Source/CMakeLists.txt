@@ -611,48 +611,35 @@ endif(MSVC)
 
 ### VTK dependencies ###
 FILE(GLOB VtkDlls "${VTK_DIR}/bin/RelWithDebInfo/*.dll")
-INSTALL_FILES(/ FILES ${VtkDlls})
+INSTALL_FILES(/bin FILES ${VtkDlls})
 
 ### CUDA dependencies ###
 SET(CudaDlls ${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart32_40_17.dll)
-INSTALL_FILES(/ FILES ${CudaDlls})
+INSTALL_FILES(/bin FILES ${CudaDlls})
 
 ### QT dependencies ###
-SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll)
-INSTALL_FILES(/ FILES ${QtDlls})
-
-### Testing ###
-# MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED}/${CMAKE_BUILD_TYPE})
-# SET(CMAKE_INSTALL_PREFIX_CACHED ${CMAKE_INSTALL_PREFIX})
-# SET(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}")
-# MESSAGE(STATUS "CMAKE_INSTALL_PREFIX_CACHED: " ${CMAKE_INSTALL_PREFIX_CACHED})
-# MESSAGE(STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
-
-# INSTALL_FILES("${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt" FILES "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt")
-# CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Readme.txt COPYONLY)
-
-### Put back the original cached prefix string ###
-SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX_CACHED})
+SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll ${QT_BINARY_DIR}/QtNetwork4.dll)
+INSTALL_FILES(/bin FILES ${QtDlls})
 
 ### Example .mhd and .raw files ###
 FILE(GLOB ExamplesMhd "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.mhd")
 FILE(GLOB ExamplesRaw "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.raw")
-INSTALL_FILES(/Examples FILES ${ExamplesMhd} ${ExamplesRaw})
+INSTALL_FILES(/bin/Examples FILES ${ExamplesMhd} ${ExamplesRaw})
 
 ### Preset files ###
 FILE(GLOB Presets "${CMAKE_CURRENT_SOURCE_DIR}/Presets/*.xml")
-INSTALL_FILES(/ FILES ${Presets})
+INSTALL_FILES(/bin FILES ${Presets})
 
 ### Icon files ###
 FILE(GLOB Icons "${CMAKE_CURRENT_SOURCE_DIR}/Icons/*.png")
-INSTALL_FILES(/Icons FILES ${Icons})
+INSTALL_FILES(/bin/Icons FILES ${Icons})
 
 ### ReadMe and Copyright ###
-INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
-INSTALL_FILES(/ FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
+INSTALL_FILES(/bin FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
+INSTALL_FILES(/bin FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
 
 #### Install Exposure Render ###
-INSTALL_TARGETS(/ ExposureRender)
+INSTALL_TARGETS(/bin ExposureRender)
 
 # Requires re-distributables
 INCLUDE(InstallRequiredSystemLibraries)
@@ -666,7 +653,7 @@ SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt)
 SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt)
 SET(CPACK_PACKAGE_DEFAULT_LOCATION /)
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
-SET(CPACK_PACKAGE_VERSION_MINOR "0")
+SET(CPACK_PACKAGE_VERSION_MINOR "1")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 # Menu links
@@ -689,11 +676,9 @@ SET(CPACK_NSIS_HELP_LINK "http://graphics.tudelft.nl/")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http://code.google.com/p/exposure-render/")
 SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "ExposureRender")
 
-SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+SET(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
 
 # Shortcut in start menu
 SET(CPACK_PACKAGE_EXECUTABLES "ExposureRender;Exposure Render")
 
 INCLUDE(CPack)
-
-

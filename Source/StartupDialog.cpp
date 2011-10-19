@@ -53,7 +53,8 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 	m_ResampleNote.setText("In order to reduce the size of the installer we distribute resampled volumes (sampled at 50%). The original volumes, as well as other volumes can be downloaded from the <a href='http://code.google.com/p/exposure-render/downloads'>Exposure Render Website</a>");
 	m_ResampleNote.setWordWrap(true);
 	m_ResampleNote.setContentsMargins(10, 10, 10, 2);
-	
+	m_ResampleNote.setOpenExternalLinks(true);
+
 	m_DemoFilesLayout.addWidget(&m_ResampleNote, 3, 0, 1, 2);
 
 	
@@ -91,6 +92,8 @@ QStartupDialog::QStartupDialog(QWidget* pParent) :
 
 	// Load the read me file
 	LoadReadMe(QApplication::applicationDirPath() + "/" + "Readme.rtf");
+
+	gpMainWindow->OnCheckForUpdates();
 };
 
 QStartupDialog::~QStartupDialog(void)
@@ -152,9 +155,11 @@ QDemoWidget::QDemoWidget(QStartupDialog* pStartupDialog, const QString& NameUI, 
 
 	m_Name.setWordWrap(true);
 	m_Name.setText("<b>" + NameUI + "</b>");
+	m_Name.setOpenExternalLinks(true);
 
 	m_Description.setWordWrap(true);
 	m_Description.setText(Description);
+	m_Description.setOpenExternalLinks(true);
 
 	m_MainLayout.addWidget(&m_Demo, 0, 0, 2, 1, Qt::AlignTop);
 	m_MainLayout.addWidget(&m_Name, 0, 1, Qt::AlignTop);

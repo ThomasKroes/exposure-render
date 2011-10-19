@@ -59,6 +59,7 @@ QAboutDialog::QAboutDialog(QWidget* pParent /*= NULL*/) :
 	
 	pLabel->setWordWrap(true);
 	pLabel->setStyleSheet("ul {list-style-type: none; background-image: url(navi_bg.png); height: 80px; width: 663px; margin: auto; }");
+	pLabel->setOpenExternalLinks(true);
 
 	m_MainLayout.addWidget(pLabel, 0, 1);
 		

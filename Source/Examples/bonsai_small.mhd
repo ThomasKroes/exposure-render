@@ -1,0 +1,14 @@
+ObjectType = Image
+NDims = 3
+BinaryData = True
+BinaryDataByteOrderMSB = False
+CompressedData = True
+CompressedDataSize = 3220170
+TransformMatrix = 1 0 0 0 1 0 0 0 1
+Offset = 0 0 0
+CenterOfRotation = 0 0 0
+ElementSpacing = 1.172 1.172 2
+DimSize = 256 256 91
+AnatomicalOrientation = ???
+ElementType = MET_UCHAR
+ElementDataFile = bonsai_small.raw

@@ -1,12 +1,7 @@
 <Versions>
 	<Version>
-		<ID>275</ID>
-		<FileUrl></FileUrl>
-		<Description></Description>
-		<Summary></Summary>
-	</Version>
-	<Version>
 		<ID>285</ID>
+		<Name>sdfsdf</Name>
 		<FileUrl><![CDATA[http://code.google.com/p/exposure-render/downloads/detail?name=ExposureRender-1.0.0-win32.exe&can=2&q=#makechanges]]></FileUrl>
 		<Description></Description>
 		<Summary></Summary>

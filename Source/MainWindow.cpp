@@ -20,7 +20,8 @@
 #include "AboutDialog.h"
 #include "Scene.h"
 
-QUrl gVersionInfoUrl("http://exposure-render.googlecode.com/hg/VersionInfo.xml");
+QUrl	gVersionInfoUrl("http://exposure-render.googlecode.com/hg/VersionInfo.xml");
+int		gVersionID = 800;
 
 // Main window singleton
 CMainWindow* gpMainWindow = NULL;
@@ -54,11 +55,11 @@ CMainWindow::CMainWindow() :
 
 	setWindowFilePath(QString());
 
+	m_Update.setOpenExternalLinks(true);
+
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	QObject::connect(&m_HttpGet, SIGNAL(done()), this, SLOT(VersionInfoDownloaded()));
-
-	CheckForUpdates();
 }
 
 CMainWindow::~CMainWindow(void)
@@ -113,6 +114,7 @@ void CMainWindow::CreateMenus(void)
 	m_pHelpMenu->addSeparator();
 
 	m_pHelpMenu->addAction(GetIcon("globe"), "Visit Website", this, SLOT(OnVisitWebsite()));
+	m_pHelpMenu->addAction(GetIcon("globe"), "Check for updates", this, SLOT(OnCheckForUpdates()));
 
 	UpdateRecentFileActions();
 }
@@ -121,6 +123,8 @@ void CMainWindow::CreateStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
 	statusBar()->setSizeGripEnabled(true);
+	statusBar()->addPermanentWidget(&m_Update);
+	statusBar()->setStyleSheet("QStatusBar::item { border: 0px solid black };");
 }
 
 void CMainWindow::SetupDockingWidgets()
@@ -311,8 +315,6 @@ void CMainWindow::ShowStartupDialog(void)
 
 	QStartupDialog StartupDialog;
 
-	StartupDialog.setModal(true);
-
 	connect(&StartupDialog, SIGNAL(LoadDemo(const QString&)), gpMainWindow, SLOT(OnLoadDemo(const QString&)));
 
 	StartupDialog.exec();
@@ -335,7 +337,7 @@ void CMainWindow::OnSaveImage(void)
 	gpRenderThread->PauseRendering(false);
 }
 
-void CMainWindow::CheckForUpdates(void)
+void CMainWindow::OnCheckForUpdates(void)
 {
 	const QString FilePath = QApplication::applicationDirPath() + "/" + QFileInfo(gVersionInfoUrl.path()).fileName();
 
@@ -352,10 +354,50 @@ void CMainWindow::VersionInfoDownloaded(void)
 
 	XmlFile.setFileName(FilePath);
 
-	// Open the XML file for reading
 	if (!XmlFile.open(QIODevice::ReadOnly))
 	{
 		Log(QString("Failed to open " + QFileInfo(FilePath).fileName() + " for reading: " + XmlFile.errorString()).toAscii(), QLogger::Critical);
 		return;
+	}
+
+	QDomDocument DOM;
+
+	if (!DOM.setContent(&XmlFile))
+	{
+		Log("Failed to parse " + QFileInfo(FilePath).fileName() + "into a DOM tree.", QLogger::Critical);
+		XmlFile.close();
+		return;
+	}
+
+	QDomElement Root = DOM.documentElement();
+
+	QDomNodeList Versions = Root.elementsByTagName("Version");
+
+	bool FoundNewerVersion = false;
+
+	QString FileUrl, Name;
+
+	for (int i = 0; i < Versions.count(); i++)
+	{
+		QDomNode Version = Versions.item(i);
+
+		const int ID = Version.firstChildElement("ID").text().toInt();
+
+		if (ID > gVersionID)
+		{
+			FoundNewerVersion = true;
+			
+			FileUrl = Version.firstChildElement("FileUrl").text();
+			Name	= Version.firstChildElement("Name").text();
+		}
+	}
+
+	XmlFile.close();
+
+	if (FoundNewerVersion)
+	{
+		Log("Found a new version of Exposure Render", "globe");
+
+		m_Update.setText("There is a new version of Exposure Render available, click <a href='" + FileUrl + "'>here</a> to download it");
 	}
 }

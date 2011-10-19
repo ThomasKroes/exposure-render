@@ -41,6 +41,8 @@ int main(int ArgumentCount, char* pArgv[])
 
 	MainWindow.setWindowIcon(GetIcon("grid"));
 
+	
+
 	// Load default presets
 	gStatus.SetLoadPreset("Default");
 

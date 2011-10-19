@@ -43,7 +43,7 @@ public slots:
 	void ShowStartupDialog(void);
 	void OnVisitWebsite(void);
 	void OnSaveImage(void);
-	void CheckForUpdates(void);
+	void OnCheckForUpdates(void);
 	void VersionInfoDownloaded(void);
 
 public slots:
@@ -87,6 +87,8 @@ private:
     QAction*							m_pRecentFileActions[MaxRecentFiles];
 
 	QHttpGet m_HttpGet;
+
+	QLabel m_Update;
 };
 
 extern CMainWindow* gpMainWindow;

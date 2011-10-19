@@ -1,0 +1,14 @@
+ObjectType = Image
+NDims = 3
+BinaryData = True
+BinaryDataByteOrderMSB = False
+CompressedData = True
+CompressedDataSize = 14535641
+TransformMatrix = 1 0 0 0 1 0 0 0 1
+Offset = -135.707 -374.5 -294.707
+CenterOfRotation = 0 0 0
+ElementSpacing = 1.17188 2 1.17188
+DimSize = 256 174 256
+AnatomicalOrientation = ???
+ElementType = MET_SHORT
+ElementDataFile = artifix_small.raw
