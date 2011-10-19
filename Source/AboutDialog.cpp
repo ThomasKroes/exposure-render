@@ -41,8 +41,8 @@ QAboutDialog::QAboutDialog(QWidget* pParent /*= NULL*/) :
 	QString AboutString;
 
 	AboutString += "<b>About Exposure Render</b>";
-	AboutString += "<p>This application accompanies the paper on : <b>Raytraced Lighting in Direct Volume Rendering (DVR)</b></p>";
-	AboutString += "<p>Current version: " + Settings.value("version", "1.1.0").toString() + "</p>";
+	AboutString += "<p>This application accompanies the paper:<br><br><i>Interactive direct volume rendering with physically-based lighting, T. Kroes, F. H. Post, C. P. Botha (EuroGraphics2012 submission)</i></p>";
+	AboutString += "<p>Current version: 1.1.0</p>";
 	AboutString += "<p>Exposure Render uses the following libraries/toolkits:</p>";
 	AboutString += "<ul>";
 		AboutString += "<b><li>VTK</b>The <a href='http://www.vtk.org/'>Visualization Toolkit</a> (VTK) is an open-source, freely available software system for 3D computer graphics, image processing and visualization</li><br>";

@@ -13,20 +13,23 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(ExposureRender)
 
+### Export of symbols ###
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
+
 ### Set Build Type ###
 SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 FIND_PACKAGE(CUDA)
 
 # Supported streaming architectures
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=sm_11;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=compute_11;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=sm_12;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=compute_12;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=sm_13;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=compute_13;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=sm_11;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=compute_11;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=sm_12;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=compute_12;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=sm_13;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=compute_13;${CUDA_NVCC_FLAGS}")
 SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=sm_20;${CUDA_NVCC_FLAGS}")
 SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20;${CUDA_NVCC_FLAGS}")
 
@@ -56,8 +59,7 @@ FIND_PACKAGE(Qt4 REQUIRED)
 
 INCLUDE(${QT_USE_FILE})
 
-# Enable the export of symbols
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
+
 
 # Use the include path and library for Qt that is used by VTK.
 INCLUDE_DIRECTORIES(
@@ -617,9 +619,13 @@ INSTALL_FILES(/bin FILES ${VtkDlls})
 SET(CudaDlls ${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart32_40_17.dll)
 INSTALL_FILES(/bin FILES ${CudaDlls})
 
-### QT dependencies ###
-SET(QtDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll ${QT_BINARY_DIR}/QtNetwork4.dll)
-INSTALL_FILES(/bin FILES ${QtDlls})
+### QT core dlls ###
+SET(QtCoreDlls ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll ${QT_BINARY_DIR}/QtXml4.dll ${QT_BINARY_DIR}/QtSql4.dll ${QT_BINARY_DIR}/QtNetwork4.dll)
+INSTALL_FILES(/bin FILES ${QtCoreDlls})
+
+### Qt Image format dlls ###
+FILE(GLOB QtImageFormatDlls "${QT_BINARY_DIR}/../plugins/imageformats/*.dll")
+INSTALL_FILES(/bin FILES ${QtImageFormatDlls})
 
 ### Example .mhd and .raw files ###
 FILE(GLOB Examples "${CMAKE_CURRENT_SOURCE_DIR}/Examples/*.*")
@@ -654,6 +660,7 @@ SET(CPACK_PACKAGE_DEFAULT_LOCATION /)
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "1")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_ICON ${CMAKE_CURRENT_SOURCE_DIR}\\\\installer.bmp)
 
 # Menu links
 set(CPACK_NSIS_MENU_LINKS "http://graphics.tudelft.nl/" "TU Delft Graphics Website" "http://code.google.com/p/exposure-render/" "Exposure Render Website" "http://code.google.com/p/exposure-render/downloads" "Data sets" "http://code.google.com/p/exposure-render/wiki" "Wiki")
@@ -661,13 +668,12 @@ set(CPACK_NSIS_MENU_LINKS "http://graphics.tudelft.nl/" "TU Delft Graphics Websi
 # Icon in the add/remove control panel, this must be an .exe file 
 set(CPACK_NSIS_INSTALLED_ICON_NAME ${EXE_TARGET_NAME}.exe)
 
-# Install directory
+### Install directory ###
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Exposure Render")
 
-# SET(SIDEBAR_IMAGE ${CMAKE_SOURCE_DIR}/bonsai.bmp}
+# SET(SIDEBAR_IMAGE ${CMAKE_SOURCE_DIR}/install${LAST_PATH_DELIMITER}sidebar.bmp)
 # SET(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${SIDEBAR_IMAGE}\\\")
 
-# SET(CPACK_PACKAGE_ICON "c:\\WindowsMovieMaker.bmp")
 SET(CPACK_NSIS_PACKAGE_NAME "Exposure Render")
 SET(CPACK_NSIS_DISPLAY_NAME "Exposure Render")
 SET(CPACK_NSIS_CONTACT "t.kroes@tudelft.nl")
