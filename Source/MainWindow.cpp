@@ -334,7 +334,7 @@ void CMainWindow::OnSaveImage(void)
 
 	gpRenderThread->PauseRendering(true);
 
-	SaveImage((unsigned char*)gpRenderThread->GetRenderImage(), gScene.m_Camera.m_Film.m_Resolution.GetResX(), gScene.m_Camera.m_Film.m_Resolution.GetResY());
+	SaveImage((unsigned char*)gpRenderThread->m_pRenderImage, gScene.m_Camera.m_Film.m_Resolution.GetResX(), gScene.m_Camera.m_Film.m_Resolution.GetResY());
 
 	gpRenderThread->PauseRendering(false);
 }

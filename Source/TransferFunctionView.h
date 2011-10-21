@@ -17,6 +17,7 @@
 #include "GridItem.h"
 #include "HistogramItem.h"
 #include "TransferFunctionItem.h"
+#include "Utilities.h"
 
 class QTransferFunction;
 class QNodeItem;

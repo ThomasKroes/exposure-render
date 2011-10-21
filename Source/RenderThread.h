@@ -55,14 +55,12 @@ public:
 
 	QString			GetFileName(void) const						{	return m_FileName;		}
 	void			SetFileName(const QString& FileName)		{	m_FileName = FileName;	}
-	ColorRGBuc*		GetRenderImage(void) const;
 	void			Close(void)									{	m_Abort = true;			}
 	void			PauseRendering(const bool& Pause)			{	m_Pause = Pause;		}
 	
 private:
 	QString				m_FileName;
-//	CCudaFrameBuffers	m_CudaFrameBuffers;
-	CColorRgbLdr*		m_pRenderImage;
+	
 	short*				m_pDensityBuffer;
 	short*				m_pGradientMagnitudeBuffer;
 
@@ -71,7 +69,7 @@ public:
 	bool			m_Abort;
 	bool			m_Pause;
 	QMutex			m_Mutex;
-
+	ColorRGBuc*			m_pRenderImage;
 public:
 	QList<int>		m_SaveFrames;
 	QString			m_SaveBaseName;
