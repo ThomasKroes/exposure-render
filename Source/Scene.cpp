@@ -36,6 +36,9 @@ CScene::CScene(void) :
 	m_GradientFactor(4.0f),
 	m_GradMagMean(1.0f)
 {
+	Vec4<int> Color;
+
+	
 }
 
 CScene::CScene(const CScene& Other)

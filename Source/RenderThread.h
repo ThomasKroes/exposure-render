@@ -55,7 +55,7 @@ public:
 
 	QString			GetFileName(void) const						{	return m_FileName;		}
 	void			SetFileName(const QString& FileName)		{	m_FileName = FileName;	}
-	CColorRgbLdr*	GetRenderImage(void) const;
+	ColorRGBuc*		GetRenderImage(void) const;
 	void			Close(void)									{	m_Abort = true;			}
 	void			PauseRendering(const bool& Pause)			{	m_Pause = Pause;		}
 	

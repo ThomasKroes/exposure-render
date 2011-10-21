@@ -17,10 +17,10 @@
 #include <QtXml\qdom.h>
 #include <QHttp>
 
-#include "Utilities.h"
 #include "Logger.h"
 #include "Status.h"
 #include "Controls.h"
+#include "Geometry.h"
 #include "CudaUtilities.h"
 
 inline void ReadVectorElement(QDomElement& Parent, const QString& Name, float& X, float& Y, float& Z)

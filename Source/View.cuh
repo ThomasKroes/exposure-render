@@ -111,8 +111,8 @@ public:
 	CCudaBuffer2D<CColorXyza, true>		m_RunningEstimateXyza;
 	CCudaBuffer2D<CColorXyza, true>		m_FrameEstimateXyza;
 	CCudaBuffer2D<CColorXyza, true>		m_FrameBlurXyza;
-	CCudaBuffer2D<CColorRgbaLdr, true>	m_EstimateRgbaLdr;
-	CCudaBuffer2D<CColorRgbLdr, false>	m_DisplayEstimateRgbLdr;
+	CCudaBuffer2D<ColorRGBAuc, true>	m_EstimateRgbaLdr;
+	CCudaBuffer2D<ColorRGBuc, false>	m_DisplayEstimateRgbLdr;
 	CCudaRandomBuffer2D					m_RandomSeeds1;
 	CCudaRandomBuffer2D					m_RandomSeeds2;
 };

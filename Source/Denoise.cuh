@@ -79,12 +79,12 @@ KERNEL void KrnlDenoise(CCudaView* pView)
 		clr.y = lerpf(clr.y, clr00.y, LerpQ);
 		clr.z = lerpf(clr.z, clr00.z, LerpQ);
 
-		pView->m_DisplayEstimateRgbLdr.Set(CColorRgbLdr(255 * clr.x, 255 * clr.y, 255 * clr.z), X, Y);
+		pView->m_DisplayEstimateRgbLdr.Set(ColorRGBuc(255 * clr.x, 255 * clr.y, 255 * clr.z), X, Y);
     }
 	else
 	{
-		const CColorRgbaLdr RGBA = pView->m_EstimateRgbaLdr.Get(X, Y);
-		pView->m_DisplayEstimateRgbLdr.Set(CColorRgbLdr(RGBA.r, RGBA.g, RGBA.b), X, Y);
+		const ColorRGBAuc RGBA = pView->m_EstimateRgbaLdr.Get(X, Y);
+		pView->m_DisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
 	}
 }
 

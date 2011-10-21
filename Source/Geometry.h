@@ -1919,28 +1919,366 @@ inline float RandomFloat(void)
 	return (float)rand() / RAND_MAX;
 }
 
-template <class T>
-class CVec2
+typedef unsigned char uChar;
+
+template <class T, int Size>
+class EXPOSURE_RENDER_DLL Vec
 {
 public:
+	HOD Vec(void)
+	{
+		for (int i = 0; i < Size; i++)
+			m_D[i] = T();
+	}
 
-	T	m_D[3];
+	HOD Vec(const Vec<T, Size>& D)
+	{
+		for (int i = 0; i < Size; i++)
+			m_D[i] = D[i];
+	}
+
+	HOD Vec(const T& Other)
+	{
+		*this = Other;
+	}
+
+	HOD T& operator = (const T& Other)
+	{
+		for (int i = 0; i < Size; i++)
+			m_D[i] = Other[i];
+
+		return *this;
+	}
+
+	HOD T operator[](const int& i) const
+	{
+		return m_D[i];
+	}
+
+	HOD T& operator[](const int& i)
+	{
+		return (&m_D)[i];
+	}
+
+	HOD Vec<T, Size> operator * (const float& f) const
+	{
+		Vec<T, Size> Result;
+
+		for (int i = 0; i < Size; i++)
+			Result[i] = m_D[i] * f;
+
+		return Result;
+	}
+
+	HOD Vec<T, Size>& operator *= (const float& f)
+	{
+		for (int i = 0; i < Size; i++)
+			m_D[i] *= f;
+
+		return *this;
+	}
+
+	HOD Vec<T, Size> operator / (const float& f) const
+	{
+		const float Inv = 1.0f / f;
+
+		Vec<T, Size> Result;
+
+		for (int i = 0; i < Size; i++)
+			Result[i] = m_D[i] * Inv;
+
+		return Result;
+	}
+
+	HOD Vec<T, Size>& operator /= (float f)
+	{
+		const float Inv = 1.0f / f;
+
+		for (int i = 0; i < Size; i++)
+			m_D[i] *= Inv;
+
+		return *this;
+	}
+
+	HOD bool operator < (const T& V) const
+	{
+		for (int i = 0; i < Size; i++)
+		{
+			if (m_D[i] > V[i])
+				return false;
+		}
+
+		return true;
+	}
+
+	HOD bool operator > (const T& V) const
+	{
+		for (int i = 0; i < Size; i++)
+		{
+			if (m_D[i] < V[i])
+				return false;
+		}
+
+		return true;
+	}
+
+	HOD bool operator == (const T& V) const
+	{
+		for (int i = 0; i < Size; i++)
+		{
+			if (m_D[i] != V[i])
+				return false;
+		}
+
+		return true;
+	}
+
+	HOD int Max(void)
+	{
+		T Max;
+
+		for (int i = 1; i < Size; i++)
+		{
+			if (m_D[i] > m_D[i - 1])
+				Max = m_D[i];
+		}
+	}
+
+	HOD int Min(void)
+	{
+		T Min;
+
+		for (int i = 1; i < Size; i++)
+		{
+			if (m_D[i] < m_D[i - 1])
+				Min = m_D[i];
+		}
+	}
+
+protected:
+	T	m_D[Size];
 };
 
 template <class T>
-class CVec3
+class EXPOSURE_RENDER_DLL Vec2 : public Vec<T, 2>
 {
 public:
-
-	T	m_D[3];
+	HOD Vec2(const T& V1, const T& V2)
+	{
+		m_D[0] = V1;
+		m_D[1] = V2;
+	}
 };
 
 template <class T>
-class CVec4
+class EXPOSURE_RENDER_DLL Vec3 : public Vec<T, 3>
 {
 public:
+	HOD Vec3(const T& V1, const T& V2, const T& V3)
+	{
+		m_D[0] = V1;
+		m_D[1] = V2;
+		m_D[2] = V3;
+	}
 
-	T	m_D[3];
+};
+
+template <class T>
+class EXPOSURE_RENDER_DLL Vec4 : public Vec<T, 4>
+{
+public:
+	HOD Vec4(void)
+	{
+	}
+
+	HOD Vec4(const T& V1, const T& V2, const T& V3, const T& V4)
+	{
+		m_D[0] = V1;
+		m_D[1] = V2;
+		m_D[2] = V3;
+		m_D[3] = V4;
+	}
+};
+
+template <class T, int Size>
+class EXPOSURE_RENDER_DLL ColorRGB : public Vec<T, Size>
+{
+public:
+	HOD ColorRGB(void)
+	{
+	}
+
+	HOD ColorRGB(const T& R, const T& G, const T& B)
+	{
+		Set(R, G, B);
+	}
+
+	HOD void Set(const T& R, const T& G, const T& B)
+	{
+		SetR(R);
+		SetG(G);
+		SetB(B);
+	}
+
+	HOD T GetR(void) const
+	{
+		return m_D[0];
+	}
+
+	HOD void SetR(const T& R)
+	{
+		m_D[0] = R;
+	}
+
+	HOD T GetG(void) const
+	{
+		return m_D[1];
+	}
+
+	HOD void SetG(const T& G)
+	{
+		m_D[1] = G;
+	}
+
+	HOD T GetB(void) const
+	{
+		return m_D[2];
+	}
+
+	HOD void SetB(const T& B)
+	{
+		m_D[2] = B;
+	}
+
+	HOD void SetBlack(void)
+	{
+		Set(T(), T(), T());
+	}
+};
+
+template <class T>
+class EXPOSURE_RENDER_DLL ColorRGBA : public ColorRGB<T, 4>
+{
+public:
+	HOD void Set(const T& R, const T& G, const T& B, const T& A)
+	{
+		SetR(R);
+		SetG(G);
+		SetB(B);
+		SetA(A);
+	}
+
+	HOD T GetA(void) const
+	{
+		return m_D[3];
+	}
+
+	HOD void SetA(const T& A)
+	{
+		m_D[3] = A;
+	}
+};
+
+class EXPOSURE_RENDER_DLL ColorRGBuc : public ColorRGB<unsigned char, 3>
+{
+public:
+	HOD ColorRGBuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0)
+	{
+		Set(R, G, B);
+	}
+
+	HOD void FromRGBf(const float& R, const float& G, const float& B)
+	{
+		SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
+		SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
+		SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
+	}
+
+	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
+	{
+		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
+		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
+		const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
+
+		float R, G, B;
+
+		R =	rWeight[0] * X + rWeight[1] * Y + rWeight[2] * Z; 
+		G =	gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z;
+		B =	bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z;
+
+		clamp2(R, 0.0f, 1.0f);
+		clamp2(G, 0.0f, 1.0f);
+		clamp2(B, 0.0f, 1.0f);
+
+		SetR((unsigned char)(R * 255.0f));
+		SetG((unsigned char)(G * 255.0f));
+		SetB((unsigned char)(B * 255.0f));
+	}
+
+	HOD void SetBlack(void)
+	{
+		Set(0, 0, 0);
+	}
+
+	HOD void SetWhite(void)
+	{
+		Set(255, 255, 255);
+	}
+};
+
+class EXPOSURE_RENDER_DLL ColorRGBAuc : public ColorRGBA<unsigned char>
+{
+public:
+	HOD ColorRGBAuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0, const unsigned char& A = 0)
+	{
+		Set(R, G, B, A);
+	}
+
+	HOD ColorRGBAuc(const ColorRGBuc& RGB)
+	{
+		SetR(RGB.GetR());
+		SetG(RGB.GetG());
+		SetB(RGB.GetB());
+	}
+
+	HOD void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
+	{
+		SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
+		SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
+		SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
+		SetA(clamp2(A, 0.0f, 1.0f) * 255.0f);
+	}
+
+	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
+	{
+		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
+		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
+		const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
+
+		float R, G, B;
+
+		R =	rWeight[0] * X + rWeight[1] * Y + rWeight[2] * Z;
+		G =	gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z;
+		B =	bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z;
+
+		clamp2(R, 0.0f, 1.0f);
+		clamp2(G, 0.0f, 1.0f);
+		clamp2(B, 0.0f, 1.0f);
+
+		SetR((unsigned char)(R * 255.0f));
+		SetG((unsigned char)(G * 255.0f));
+		SetB((unsigned char)(B * 255.0f));
+	}
+
+	HOD void SetBlack(void)
+	{
+		Set(0, 0, 0, 0);
+	}
+
+	HOD void SetWhite(void)
+	{
+		Set(255, 255, 255, 0);
+	}
 };
 
 /*
