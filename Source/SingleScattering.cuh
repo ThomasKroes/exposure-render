@@ -25,7 +25,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 	
 	CRNG RNG(pView->m_RandomSeeds1.GetPtr(X, Y), pView->m_RandomSeeds2.GetPtr(X, Y));
 
-	CColorXyz Lv = SPEC_BLACK, Li = SPEC_BLACK;
+	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	CRay Re;
 	
@@ -44,13 +44,13 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
-			pView->m_FrameEstimateXyza.Set(CColorXyza(Lv.c[0], Lv.c[1], Lv.c[2]), X, Y);
+			pView->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
 			return;
 		}
 		
 		const float D = GetNormalizedIntensity(Pe);
 
-		Lv += GetEmission(D).ToXYZ();
+		Lv += GetEmission(D);
 
 		switch (pScene->m_ShadingType)
 		{
@@ -69,13 +69,12 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 			case 2:
 			{
 				const float GradMag = GradientMagnitude(Pe) * gIntensityInvRange;
-
 				const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
 
 				if (RNG.Get1() < PdfBrdf)
   					Lv += UniformSampleOneLight(pScene, CVolumeShader::Brdf, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, true);
 				else
- 					Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
+					Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
 
 				break;
 			}
@@ -87,7 +86,7 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 			Lv = Li;
 	}
 
-	pView->m_FrameEstimateXyza.Set(CColorXyza(Lv.c[0], Lv.c[1], Lv.c[2]), X, Y);
+	pView->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
 }
 
 void SingleScattering(CScene* pScene, CScene* pDevScene, CCudaView* pView)

@@ -611,10 +611,14 @@ void QRenderThread::OnUpdateLighting(void)
 
 		BackgroundLight.m_T	= 1;
 
-		BackgroundLight.m_ColorTop		= gLighting.Background().GetIntensity() * CColorRgbHdr(gLighting.Background().GetTopColor().redF(), gLighting.Background().GetTopColor().greenF(), gLighting.Background().GetTopColor().blueF());
-		BackgroundLight.m_ColorMiddle	= gLighting.Background().GetIntensity() * CColorRgbHdr(gLighting.Background().GetMiddleColor().redF(), gLighting.Background().GetMiddleColor().greenF(), gLighting.Background().GetMiddleColor().blueF());
-		BackgroundLight.m_ColorBottom	= gLighting.Background().GetIntensity() * CColorRgbHdr(gLighting.Background().GetBottomColor().redF(), gLighting.Background().GetBottomColor().greenF(), gLighting.Background().GetBottomColor().blueF());
+		BackgroundLight.m_ColorTop.FromRGB(gLighting.Background().GetTopColor().redF(), gLighting.Background().GetTopColor().greenF(), gLighting.Background().GetTopColor().blueF());
+		BackgroundLight.m_ColorMiddle.FromRGB(gLighting.Background().GetMiddleColor().redF(), gLighting.Background().GetMiddleColor().greenF(), gLighting.Background().GetMiddleColor().blueF());
+		BackgroundLight.m_ColorBottom.FromRGB(gLighting.Background().GetBottomColor().redF(), gLighting.Background().GetBottomColor().greenF(), gLighting.Background().GetBottomColor().blueF());
 		
+		BackgroundLight.m_ColorTop		*= gLighting.Background().GetIntensity();
+		BackgroundLight.m_ColorMiddle	*= gLighting.Background().GetIntensity();
+		BackgroundLight.m_ColorBottom	*= gLighting.Background().GetIntensity();
+
 		BackgroundLight.Update(gScene.m_BoundingBox);
 
 		gScene.m_Lighting.AddLight(BackgroundLight);
@@ -632,7 +636,9 @@ void QRenderThread::OnUpdateLighting(void)
 		AreaLight.m_Width		= Light.GetWidth();
 		AreaLight.m_Height		= Light.GetHeight();
 		AreaLight.m_Distance	= Light.GetDistance();
-		AreaLight.m_Color		= Light.GetIntensity() * CColorRgbHdr(Light.GetColor().redF(), Light.GetColor().greenF(), Light.GetColor().blueF());
+		
+		AreaLight.m_Color.FromRGB(Light.GetColor().redF(), Light.GetColor().greenF(), Light.GetColor().blueF());
+		AreaLight.m_Color		*= Light.GetIntensity();
 
 		AreaLight.Update(gScene.m_BoundingBox);
 

@@ -34,7 +34,7 @@ KERNEL void KrnlBlurH(CCudaView* pView)
 	const int X0 = max((int)ceilf(X - gFilterWidth), 0);
 	const int X1 = min((int)floorf(X + gFilterWidth), (int)gFilmWidth - 1);
 
-	CColorXyza Sum;
+	ColorXYZAf Sum;
 
 	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
 	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
@@ -53,9 +53,9 @@ KERNEL void KrnlBlurH(CCudaView* pView)
 	}
 
 	if (SumW[TID] > 0.0f)
-		pView->m_FrameBlurXyza.Set(CColorXyza(Sum / SumW[TID]), X, Y);
+		pView->m_FrameBlurXyza.Set(Sum / SumW[TID], X, Y);
 	else
-		pView->m_FrameBlurXyza.Set(CColorXyza(0.0f), X, Y);
+		pView->m_FrameBlurXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
 KERNEL void KrnlBlurV(CCudaView* pView)
@@ -70,7 +70,7 @@ KERNEL void KrnlBlurV(CCudaView* pView)
 	const int Y0 = max((int)ceilf (Y - gFilterWidth), 0);
 	const int Y1 = min((int)floorf(Y + gFilterWidth), gFilmHeight - 1);
 
-	CColorXyza Sum;
+	ColorXYZAf Sum;
 
 	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
 	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
@@ -89,9 +89,9 @@ KERNEL void KrnlBlurV(CCudaView* pView)
 	}
 
 	if (SumW[TID] > 0.0f)
-		pView->m_FrameEstimateXyza.Set(CColorXyza(Sum / SumW[TID]), X, Y);
+		pView->m_FrameEstimateXyza.Set(Sum / SumW[TID], X, Y);
 	else
-		pView->m_FrameEstimateXyza.Set(CColorXyza(0.0f), X, Y);
+		pView->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
 void Blur(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)

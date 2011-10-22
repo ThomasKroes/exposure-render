@@ -21,7 +21,7 @@
 class CLambertian
 {
 public:
-	HOD CLambertian(const CColorXyz& Kd)
+	HOD CLambertian(const ColorXYZf& Kd)
 	{
 		m_Kd = Kd;
 	}
@@ -30,12 +30,12 @@ public:
 	{
 	}
 
-	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	HOD ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return m_Kd * INV_PI_F;
 	}
 
-	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		Wi = CosineWeightedHemisphere(U);
 
@@ -52,13 +52,13 @@ public:
 		return SameHemisphere(Wo, Wi) ? AbsCosTheta(Wi) * INV_PI_F : 0.0f;
 	}
 
-	CColorXyz	m_Kd;
+	ColorXYZf	m_Kd;
 };
 
-HOD inline CColorXyz FrDiel(float cosi, float cost, const CColorXyz &etai, const CColorXyz &etat)
+HOD inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, const ColorXYZf &etat)
 {
-	CColorXyz Rparl = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-	CColorXyz Rperp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+	ColorXYZf Rparl = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+	ColorXYZf Rperp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
 	return (Rparl*Rparl + Rperp*Rperp) / 2.f;
 }
 
@@ -75,7 +75,7 @@ public:
 	  {
 	  }
 
-	  HOD CColorXyz Evaluate(float cosi)
+	  HOD ColorXYZf Evaluate(float cosi)
 	  {
 		  // Compute Fresnel reflectance for dielectric
 		  cosi = Clamp(cosi, -1.0f, 1.0f);
@@ -167,7 +167,7 @@ public:
 class CMicrofacet
 {
 public:
-	HOD CMicrofacet(const CColorXyz& Reflectance, const float& Ior, const float& Exponent) :
+	HOD CMicrofacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
 	  m_R(Reflectance),
 		  m_Fresnel(Ior, 1.0f),
 		  m_Blinn(Exponent)
@@ -178,7 +178,7 @@ public:
 	  {
 	  }
 
-	  HOD CColorXyz F(const Vec3f& wo, const Vec3f& wi)
+	  HOD ColorXYZf F(const Vec3f& wo, const Vec3f& wi)
 	  {
 		  float cosThetaO = AbsCosTheta(wo);
 		  float cosThetaI = AbsCosTheta(wi);
@@ -194,12 +194,12 @@ public:
 		  wh = Normalize(wh);
 		  float cosThetaH = Dot(wi, wh);
 
-		  CColorXyz F = SPEC_WHITE;//m_Fresnel.Evaluate(cosThetaH);
+		  ColorXYZf F = SPEC_WHITE;//m_Fresnel.Evaluate(cosThetaH);
 
 		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.f * cosThetaI * cosThetaO);
 	  }
 
-	  HOD CColorXyz SampleF(const Vec3f& wo, Vec3f& wi, float& Pdf, const Vec2f& U)
+	  HOD ColorXYZf SampleF(const Vec3f& wo, Vec3f& wi, float& Pdf, const Vec2f& U)
 	  {
 		  m_Blinn.SampleF(wo, wi, Pdf, U);
 
@@ -227,7 +227,7 @@ public:
 		  return min(1.f, min((2.f * NdotWh * NdotWo / WOdotWh), (2.f * NdotWh * NdotWi / WOdotWh)));
 	  }
 
-	  CColorXyz		m_R;
+	  ColorXYZf		m_R;
 	  CFresnel		m_Fresnel;
 	  CBlinn		m_Blinn;
 
@@ -236,7 +236,7 @@ public:
 class CIsotropicPhase
 {
 public:
-	HOD CIsotropicPhase(const CColorXyz& Kd) :
+	HOD CIsotropicPhase(const ColorXYZf& Kd) :
 		m_Kd(Kd)
 	{
 	}
@@ -245,12 +245,12 @@ public:
 	{
 	}
 
-	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	HOD ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return m_Kd * INV_PI_F;
 	}
 
-	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		Wi	= UniformSampleSphere(U);
 		Pdf	= this->Pdf(Wo, Wi);
@@ -263,13 +263,13 @@ public:
 		return INV_4_PI_F;
 	}
 
-	CColorXyz	m_Kd;
+	ColorXYZf	m_Kd;
 };
 
 class CBRDF
 {
 public:
-	HOD CBRDF(const Vec3f& N, const Vec3f& Wo, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ior, const float& Exponent) :
+	HOD CBRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		m_Lambertian(Kd),
 		m_Microfacet(Ks, Ior, Exponent),
 		m_Nn(N),
@@ -294,12 +294,12 @@ public:
 						m_Nu.z * W.x + m_Nv.z * W.y + m_Nn.z * W.z);
 	}
 
-	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	HOD ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		const Vec3f Wil = WorldToLocal(Wi);
 
-		CColorXyz R;
+		ColorXYZf R;
 
 		R += m_Lambertian.F(Wol, Wil);
 		R += m_Microfacet.F(Wol, Wil);
@@ -307,12 +307,12 @@ public:
 		return R;
 	}
 
-	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
+	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		Vec3f Wil;
 
-		CColorXyz R;
+		ColorXYZf R;
 
 		if (S.m_Component <= 0.5f)
 		{
@@ -363,7 +363,7 @@ public:
 		Phase
 	};
 
-	HOD CVolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const CColorXyz& Kd, const CColorXyz& Ks, const float& Ior, const float& Exponent) :
+	HOD CVolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		m_Type(Type),
 		m_Brdf(N, Wo, Kd, Ks, Ior, Exponent),
 		m_IsotropicPhase(Kd)
@@ -374,7 +374,7 @@ public:
 	{
 	}
 
-	HOD CColorXyz F(const Vec3f& Wo, const Vec3f& Wi)
+	HOD ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		switch (m_Type)
 		{
@@ -388,7 +388,7 @@ public:
 		return 1.0f;
 	}
 
-	HOD CColorXyz SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
+	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
 	{
 		switch (m_Type)
 		{

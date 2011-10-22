@@ -32,16 +32,16 @@ DEV float GetOpacity(const float& NormalizedIntensity)
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEV CColorRgbHdr GetDiffuse(const float& NormalizedIntensity)
+DEV ColorXYZf GetDiffuse(const float& NormalizedIntensity)
 {
 	float4 Diffuse = tex1D(gTexDiffuse, NormalizedIntensity);
-	return CColorRgbHdr(Diffuse.x, Diffuse.y, Diffuse.z);
+	return ColorXYZf(Diffuse.x, Diffuse.y, Diffuse.z);
 }
 
-DEV CColorRgbHdr GetSpecular(const float& NormalizedIntensity)
+DEV ColorXYZf GetSpecular(const float& NormalizedIntensity)
 {
 	float4 Specular = tex1D(gTexSpecular, NormalizedIntensity);
-	return CColorRgbHdr(Specular.x, Specular.y, Specular.z);
+	return ColorXYZf(Specular.x, Specular.y, Specular.z);
 }
 
 DEV float GetRoughness(const float& NormalizedIntensity)
@@ -49,10 +49,10 @@ DEV float GetRoughness(const float& NormalizedIntensity)
 	return tex1D(gTexRoughness, NormalizedIntensity);
 }
 
-DEV CColorRgbHdr GetEmission(const float& NormalizedIntensity)
+DEV ColorXYZf GetEmission(const float& NormalizedIntensity)
 {
 	float4 Emission = tex1D(gTexEmission, NormalizedIntensity);
-	return CColorRgbHdr(Emission.x, Emission.y, Emission.z);
+	return ColorXYZf(Emission.x, Emission.y, Emission.z);
 }
 
 DEV inline Vec3f NormalizedGradient(const Vec3f& P)
@@ -71,7 +71,7 @@ DEV float GradientMagnitude(const Vec3f& P)
 	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gInvAaBbMax.x, P.y * gInvAaBbMax.y, P.z * gInvAaBbMax.z));
 }
 
-DEV bool NearestLight(CScene* pScene, CRay R, CColorXyz& LightColor, Vec3f& Pl, CLight*& pLight, float* pPdf = NULL)
+DEV bool NearestLight(CScene* pScene, CRay R, ColorXYZf& LightColor, Vec3f& Pl, CLight*& pLight, float* pPdf = NULL)
 {
 	bool Hit = false;
 	
@@ -113,7 +113,7 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 	return LargestMaxT > LargestMinT;
 }
 
-DEV CColorXyza CumulativeMovingAverage(const CColorXyza& A, const CColorXyza& Ax, const int& N)
+DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
 {
 //	if (gNoIterations == 0)
 //		return CColorXyza(0.0f);

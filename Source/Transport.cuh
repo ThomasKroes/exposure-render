@@ -16,11 +16,11 @@
 #include "Shader.cuh"
 #include "RayMarching.cuh"
 
-DEV CColorXyz EstimateDirectLight(CScene* pScene, const CVolumeShader::EType& Type, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
+DEV ColorXYZf EstimateDirectLight(CScene* pScene, const CVolumeShader::EType& Type, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
 {
-	CColorXyz Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
+	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density).ToXYZ(), GetSpecular(Density).ToXYZ(), 2.5f/*pScene->m_IOR*/, GetRoughness(Density));
+	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density), GetSpecular(Density), 2.5f, GetRoughness(Density));
 	
 	CRay Rl; 
 
@@ -69,11 +69,11 @@ DEV CColorXyz EstimateDirectLight(CScene* pScene, const CVolumeShader::EType& Ty
 			}
 		}
 	}
-
+	
 	return Ld;
 }
 
-DEV CColorXyz UniformSampleOneLight(CScene* pScene, const CVolumeShader::EType& Type, const float& Density, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG, const bool& Brdf)
+DEV ColorXYZf UniformSampleOneLight(CScene* pScene, const CVolumeShader::EType& Type, const float& Density, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG, const bool& Brdf)
 {
 	const int NumLights = pScene->m_Lighting.m_NoLights;
 
@@ -87,6 +87,6 @@ DEV CColorXyz UniformSampleOneLight(CScene* pScene, const CVolumeShader::EType& 
 	const int WhichLight = (int)floorf(LS.m_LightNum * (float)NumLights);
 
 	CLight& Light = pScene->m_Lighting.m_Lights[WhichLight];
-
+	
 	return (float)NumLights * EstimateDirectLight(pScene, Type, Density, Light, LS, Wo, Pe, N, RNG);
 }

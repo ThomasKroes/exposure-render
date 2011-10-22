@@ -21,30 +21,30 @@
 class EXPOSURE_RENDER_DLL CLight
 {
 public:
-	float			m_Theta;
-	float			m_Phi;
-	float			m_Width;
-	float			m_InvWidth;
-	float			m_HalfWidth;
-	float			m_InvHalfWidth;
-	float			m_Height;
-	float			m_InvHeight;
-	float			m_HalfHeight;
-	float			m_InvHalfHeight;
-	float			m_Distance;
-	float			m_SkyRadius;
-	Vec3f			m_P;
-	Vec3f			m_Target;	
-	Vec3f			m_N;					
-	Vec3f			m_U;					
-	Vec3f			m_V;					
-	float			m_Area;					
-	float			m_AreaPdf;
-	CColorRgbHdr	m_Color;
-	CColorRgbHdr	m_ColorTop;
-	CColorRgbHdr	m_ColorMiddle;
-	CColorRgbHdr	m_ColorBottom;
-	int				m_T;
+	float		m_Theta;
+	float		m_Phi;
+	float		m_Width;
+	float		m_InvWidth;
+	float		m_HalfWidth;
+	float		m_InvHalfWidth;
+	float		m_Height;
+	float		m_InvHeight;
+	float		m_HalfHeight;
+	float		m_InvHalfHeight;
+	float		m_Distance;
+	float		m_SkyRadius;
+	Vec3f		m_P;
+	Vec3f		m_Target;	
+	Vec3f		m_N;					
+	Vec3f		m_U;					
+	Vec3f		m_V;					
+	float		m_Area;					
+	float		m_AreaPdf;
+	ColorXYZf	m_Color;
+	ColorXYZf	m_ColorTop;
+	ColorXYZf	m_ColorMiddle;
+	ColorXYZf	m_ColorBottom;
+	int			m_T;
 
 	CLight(void) :
 		m_Theta(0.0f),
@@ -143,9 +143,9 @@ public:
 	}
 
 	// Samples the light
-	HOD CColorXyz SampleL(const Vec3f& P, CRay& Rl, float& Pdf, CLightingSample& LS)
+	HOD ColorXYZf SampleL(const Vec3f& P, CRay& Rl, float& Pdf, CLightingSample& LS)
 	{
-		CColorXyz L = SPEC_BLACK;
+		ColorXYZf L = SPEC_BLACK;
 
 		if (m_T == 0)
 		{
@@ -170,7 +170,7 @@ public:
 	}
 
 	// Intersect ray with light
-	HOD bool Intersect(CRay& R, float& T, CColorXyz& L, Vec2f* pUV = NULL, float* pPdf = NULL)
+	HOD bool Intersect(CRay& R, float& T, ColorXYZf& L, Vec2f* pUV = NULL, float* pPdf = NULL)
 	{
 		if (m_T == 0)
 		{
@@ -207,7 +207,7 @@ public:
 				*pUV = UV;
 
  			if (DotN < 0.0f)
-				L = m_Color.ToXYZ() / m_Area;
+				L = m_Color / m_Area;
  			else
  				L = SPEC_BLACK;
 
@@ -242,7 +242,7 @@ public:
 
 	HOD float Pdf(const Vec3f& P, const Vec3f& Wi)
 	{
-		CColorXyz L;
+		ColorXYZf L;
 		Vec2f UV;
 		float Pdf = 1.0f;
 
@@ -266,17 +266,17 @@ public:
 		return 0.0f;
 	}
 
-	HOD CColorXyz Le(const Vec2f& UV)
+	HOD ColorXYZf Le(const Vec2f& UV)
 	{
 		if (m_T == 0)
-			return CColorXyz::FromRGB(m_Color.r, m_Color.g, m_Color.b) / m_Area;
+			return m_Color / m_Area;
 
 		if (m_T == 1)
 		{
 			if (UV.y > 0.0f)
-				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorTop).ToXYZ();
+				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorTop);
 			else
-				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorBottom).ToXYZ();
+				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorBottom);
 		}
 
 		return SPEC_BLACK;

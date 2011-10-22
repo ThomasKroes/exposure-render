@@ -208,9 +208,15 @@ void BindTransferFunctionDiffuse(CTransferFunction& TransferFunctionDiffuse)
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
 	{
-		Diffuse[i].x = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES).r;
-		Diffuse[i].y = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES).g;
-		Diffuse[i].z = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES).b;
+		ColorXYZAf Color;
+		
+		CColorRgbHdr ColorRgbHdr = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES);
+		
+		Color.FromRGB(ColorRgbHdr.r, ColorRgbHdr.g, ColorRgbHdr.b);
+
+		Diffuse[i].x = Color.GetX();
+		Diffuse[i].y = Color.GetY();
+		Diffuse[i].z = Color.GetZ();
 	}
 
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float4>();
@@ -239,9 +245,15 @@ void BindTransferFunctionSpecular(CTransferFunction& TransferFunctionSpecular)
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
 	{
-		Specular[i].x = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES).r;
-		Specular[i].y = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES).g;
-		Specular[i].z = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES).b;
+		ColorXYZAf Color;
+		
+		CColorRgbHdr ColorRgbHdr = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES);
+		
+		Color.FromRGB(ColorRgbHdr.r, ColorRgbHdr.g, ColorRgbHdr.b);
+
+		Specular[i].x = Color.GetX();
+		Specular[i].y = Color.GetY();
+		Specular[i].z = Color.GetZ();
 	}
 
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float4>();
@@ -297,9 +309,15 @@ void BindTransferFunctionEmission(CTransferFunction& TransferFunctionEmission)
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
 	{
-		Emission[i].x = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES).r;
-		Emission[i].y = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES).g;
-		Emission[i].z = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES).b;
+		ColorXYZAf Color;
+		
+		CColorRgbHdr ColorRgbHdr = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES);
+		
+		Color.FromRGB(ColorRgbHdr.r, ColorRgbHdr.g, ColorRgbHdr.b);
+
+		Emission[i].x = Color.GetX();
+		Emission[i].y = Color.GetY();
+		Emission[i].z = Color.GetZ();
 	}
 
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float4>();
@@ -455,7 +473,6 @@ void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurI
 	CCudaTimer TmrDenoise;
 	Denoise(&Scene, pDevScene, pDevView);
 	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
-	
 
 	HandleCudaError(cudaFree(pDevScene));
 	HandleCudaError(cudaFree(pDevView));

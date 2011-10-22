@@ -28,11 +28,11 @@ KERNEL void KrnlToneMap(CCudaView* pView)
 	if (X >= gFilmWidth || Y >= gFilmHeight)
 		return;
 
-	const CColorXyza Color = pView->m_RunningEstimateXyza.Get(X, Y);
+	const ColorXYZAf Color = pView->m_RunningEstimateXyza.Get(X, Y);
 
 	CColorRgbHdr RgbHdr;
 
-	RgbHdr.FromXYZ(Color.c[0], Color.c[1], Color.c[2]);
+	RgbHdr.FromXYZ(Color.GetX(), Color.GetY(), Color.GetZ());
 
 	RgbHdr.r = Clamp(1.0f - expf(-(RgbHdr.r * gInvExposure)), 0.0, 1.0f);
 	RgbHdr.g = Clamp(1.0f - expf(-(RgbHdr.g * gInvExposure)), 0.0, 1.0f);

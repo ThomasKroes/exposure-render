@@ -26,7 +26,6 @@ class Vec3i;
 class Vec3f;
 class Vec4i;
 class Vec4f;
-class CColorXyz;
 
 class EXPOSURE_RENDER_DLL CColorRgbHdr
 {
@@ -60,8 +59,6 @@ public:
 
 		return *this;
 	}
-
-	HOD CColorRgbHdr& operator = (const CColorXyz& S);	
 
 	HOD CColorRgbHdr& operator += (CColorRgbHdr &p)		
 	{
@@ -135,16 +132,6 @@ public:
 		b =	bWeight[0] * x +
 			bWeight[1] * y +
 			bWeight[2] * z;
-	}
-
-	HOD CColorXyz ToXYZ(void)
-	{
-		return CColorXyz::FromRGB(r, g, b);
-	}
-
-	HOD CColorXyza ToXYZA(void)
-	{
-		return CColorXyza::FromRGB(r, g, b);
 	}
 
 	void PrintSelf(void)
@@ -1671,15 +1658,6 @@ private:
 	bool	m_Dirty;
 };
 
-HOD inline CColorRgbHdr& CColorRgbHdr::operator = (const CColorXyz& S)			
-{
-	r = S.c[0];
-	g = S.c[1];
-	b = S.c[2];
-
-	return *this;
-}
-
 HOD inline float Dot(const Vec3f& a, const Vec3f& b)			
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;			
@@ -1820,99 +1798,7 @@ HOD inline CColorRgbHdr Lerp(float T, const CColorRgbHdr& C1, const CColorRgbHdr
 	return CColorRgbHdr(OneMinusT * C1.r + T * C2.r, OneMinusT * C1.g + T * C2.g, OneMinusT * C1.b + T * C2.b);
 }
 
-HOD inline CColorXyz Lerp(float T, const CColorXyz& C1, const CColorXyz& C2)
-{
-	const float OneMinusT = 1.0f - T;
-	return CColorXyz(OneMinusT * C1.c[0] + T * C2[0], OneMinusT * C1.c[0] + T * C2[0], OneMinusT * C1.c[0] + T * C2[0]);
-}
 
-// ToDo: Add description
-class EXPOSURE_RENDER_DLL CTransferFunction
-{
-public:
-	float			m_P[MAX_NO_TF_POINTS];		/*!< Node positions */
-	CColorRgbHdr	m_C[MAX_NO_TF_POINTS];		/*!< Node colors in HDR RGB */
-	int				m_NoNodes;					/*!< No. nodes */
-
-	// ToDo: Add description
-	HO CTransferFunction(void)
-	{
-		for (int i = 0; i < MAX_NO_TF_POINTS; i++)
-		{
-			m_P[i]	= 0.0f;
-			m_C[i]	= SPEC_BLACK;
-		}
-
-		m_NoNodes = 0;
-	}
-
-	// ToDo: Add description
-	HO ~CTransferFunction(void)
-	{
-	}
-
-	// ToDo: Add description
-	HOD CTransferFunction& operator=(const CTransferFunction& Other)
-	{
-		for (int i = 0; i < MAX_NO_TF_POINTS; i++)
-		{
-			m_P[i]	= Other.m_P[i];
-			m_C[i]	= Other.m_C[i];
-		}
-
-		m_NoNodes = Other.m_NoNodes;
-
-		return *this;
-	}
-
-	// ToDo: Add description
-	HOD CColorRgbHdr F(const float& P)
-	{
-		for (int i = 0; i < m_NoNodes - 1; i++)
-		{
-			if (P >= m_P[i] && P < m_P[i + 1])
-			{
-				const float T = (float)(P - m_P[i]) / (m_P[i + 1] - m_P[i]);
-				return Lerp(T, m_C[i], m_C[i + 1]);
-			}
-		}
-
-		return CColorRgbHdr(0.0f);
-	}
-};
-
-// ToDo: Add description
-class EXPOSURE_RENDER_DLL CTransferFunctions
-{
-public:
-	CTransferFunction	m_Opacity;
-	CTransferFunction	m_Diffuse;
-	CTransferFunction	m_Specular;
-	CTransferFunction	m_Emission;
-	CTransferFunction	m_Roughness;
-
-	// ToDo: Add description
-	HO CTransferFunctions(void)
-	{
-	}
-
-	// ToDo: Add description
-	HO ~CTransferFunctions(void)
-	{
-	}
-
-	// ToDo: Add description
-	HOD CTransferFunctions& operator=(const CTransferFunctions& Other)
-	{
-		m_Opacity		= Other.m_Opacity;
-		m_Diffuse		= Other.m_Diffuse;
-		m_Specular		= Other.m_Specular;
-		m_Emission		= Other.m_Emission;
-		m_Roughness		= Other.m_Roughness;
-
-		return *this;
-	}
-};
 
 inline float RandomFloat(void)
 {
@@ -2063,6 +1949,12 @@ template <class T>
 class EXPOSURE_RENDER_DLL Vec2 : public Vec<T, 2>
 {
 public:
+	HOD Vec2(void)
+	{
+		m_D[0] = T();
+		m_D[1] = T();
+	}
+
 	HOD Vec2(const T& V1, const T& V2)
 	{
 		m_D[0] = V1;
@@ -2074,13 +1966,19 @@ template <class T>
 class EXPOSURE_RENDER_DLL Vec3 : public Vec<T, 3>
 {
 public:
+	HOD Vec3(void)
+	{
+		m_D[0] = T();
+		m_D[1] = T();
+		m_D[2] = T();
+	}
+
 	HOD Vec3(const T& V1, const T& V2, const T& V3)
 	{
 		m_D[0] = V1;
 		m_D[1] = V2;
 		m_D[2] = V3;
 	}
-
 };
 
 template <class T>
@@ -2089,6 +1987,10 @@ class EXPOSURE_RENDER_DLL Vec4 : public Vec<T, 4>
 public:
 	HOD Vec4(void)
 	{
+		m_D[0] = T();
+		m_D[1] = T();
+		m_D[2] = T();
+		m_D[3] = T();
 	}
 
 	HOD Vec4(const T& V1, const T& V2, const T& V3, const T& V4)
@@ -2281,6 +2183,504 @@ public:
 	}
 };
 
+class EXPOSURE_RENDER_DLL ColorXYZf : public Vec3<float>
+{
+public:
+	HOD ColorXYZf(float V = 0.0f)
+	{
+		Set(V, V, V);
+	}
+
+	HOD ColorXYZf(const float& X, const float& Y, const float& Z)
+	{
+		Set(X, Y, Z);
+	}
+
+	HOD void Set(const float& X, const float& Y, const float& Z)
+	{
+		SetX(X);
+		SetY(Y);
+		SetZ(Z);
+	}
+
+	HOD float GetX(void) const
+	{
+		return m_D[0];
+	}
+
+	HOD void SetX(const float& X)
+	{
+		m_D[0] = X;
+	}
+
+	HOD float GetY(void) const
+	{
+		return m_D[1];
+	}
+
+	HOD void SetY(const float& Y)
+	{
+		m_D[1] = Y;
+	}
+
+	HOD float GetZ(void) const
+	{
+		return m_D[2];
+	}
+
+	HOD void SetZ(const float& Z)
+	{
+		m_D[2] = Z;
+	}
+
+	HOD ColorXYZf& operator += (const ColorXYZf& XYZ)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] += XYZ[i];
+
+		return *this;
+	}
+
+	HOD ColorXYZf operator + (const ColorXYZf& XYZ) const
+	{
+		ColorXYZf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] += XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZf operator - (const ColorXYZf& XYZ) const
+	{
+		ColorXYZf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] -= XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZf operator / (const ColorXYZf& XYZ) const
+	{
+		ColorXYZf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] /= XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZf operator * (const ColorXYZf& XYZ) const
+	{
+		ColorXYZf Result = *this;
+
+		for (int i = 0; i < 3; i++)
+			Result.m_D[i] *= XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZf& operator *= (const ColorXYZf& XYZ)
+	{
+		for (int i = 0; i < 3; i++)
+			m_D[i] *= XYZ[i];
+
+		return *this;
+	}
+
+	HOD ColorXYZf operator * (const float& F) const
+	{
+		ColorXYZf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] *= F;
+
+		return Result;
+	}
+
+	HOD ColorXYZf& operator *= (const float& F)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] *= F;
+
+		return *this;
+	}
+
+	HOD ColorXYZf operator / (const float& F) const
+	{
+		ColorXYZf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] /= F;
+
+		return Result;
+	}
+
+	HOD ColorXYZf& operator /= (float a)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] /= a;
+
+		return *this;
+	}
+
+	HOD bool operator == (const ColorXYZf& XYZ) const
+	{
+		for (int i = 0; i < 3; ++i)
+			if (m_D[i] != XYZ[i])
+				return false;
+
+		return true;
+	}
+
+	HOD bool operator != (const ColorXYZf& XYZ) const
+	{
+		return !(*this == XYZ);
+	}
+
+	HOD float& operator[](int i)
+	{
+		return m_D[i];
+	}
+
+	HOD float operator[](int i) const
+	{
+		return m_D[i];
+	}
+
+	HOD ColorXYZf& ColorXYZf::operator = (const ColorXYZf& Other)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] = Other[i];
+
+		return *this;
+	}
+
+	HOD bool IsBlack() const
+	{
+		for (int i = 0; i < 3; ++i)
+			if (m_D[i] != 0.0f)
+				return false;
+
+		return true;
+	}
+
+	HOD ColorXYZf Clamp(const float& L = 0.0f, const float& H = 1.0f) const
+	{
+		ColorXYZf Result;
+
+		for (int i = 0; i < 3; ++i)
+			Result[i] = clamp2(m_D[i], L, H);
+
+		return Result;
+	}
+
+	HOD float Y() const
+	{
+		float v = 0.0f;
+
+		for (int i = 0; i < 3; i++)
+			v += YWeight[i] * m_D[i];
+
+		return v;
+	}
+
+	HOD void FromRGB(const float& R, const float& G, const float& B)
+	{
+		const float CoeffX[3] = { 0.4124f, 0.3576f, 0.1805f };
+		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
+		const float CoeffZ[3] = { 0.0193f, 0.1192f, 0.9505f };
+
+		m_D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
+		m_D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
+		m_D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
+	}
+};
+
+HOD inline ColorXYZf operator * (const float& F, const ColorXYZf& XYZ)
+{
+	return XYZ * F;
+}
+
+HOD inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& C2)
+{
+	const float OneMinusT = 1.0f - T;
+	return ColorXYZf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ());
+}
+
+class EXPOSURE_RENDER_DLL ColorXYZAf : public Vec4<float>
+{
+public:
+	HOD ColorXYZAf(const float& V = 0.0f)
+	{
+		Set(V, V, V, V);
+	}
+
+	HOD ColorXYZAf(const ColorXYZf& XYZ)
+	{
+		Set(XYZ.GetX(), XYZ.GetY(), XYZ.GetZ());
+	}
+
+	HOD ColorXYZAf(const float& X, const float& Y, const float& Z)
+	{
+		Set(X, Y, Z);
+	}
+
+	HOD ColorXYZAf(const float& X, const float& Y, const float& Z, const float& A)
+	{
+		Set(X, Y, Z, A);
+	}
+	
+	HOD void Set(const float& X, const float& Y, const float& Z)
+	{
+		SetX(X);
+		SetY(Y);
+		SetZ(Z);
+	}
+
+	HOD void Set(const float& X, const float& Y, const float& Z, const float& A)
+	{
+		SetX(X);
+		SetY(Y);
+		SetZ(Z);
+		SetA(A);
+	}
+
+	HOD float GetX(void) const
+	{
+		return m_D[0];
+	}
+
+	HOD void SetX(const float& X)
+	{
+		m_D[0] = X;
+	}
+
+	HOD float GetY(void) const
+	{
+		return m_D[1];
+	}
+
+	HOD void SetY(const float& Y)
+	{
+		m_D[1] = Y;
+	}
+
+	HOD float GetZ(void) const
+	{
+		return m_D[2];
+	}
+
+	HOD void SetZ(const float& Z)
+	{
+		m_D[2] = Z;
+	}
+
+	HOD float GetA(void) const
+	{
+		return m_D[3];
+	}
+
+	HOD void SetA(const float& A)
+	{
+		m_D[3] = A;
+	}
+
+	HOD ColorXYZAf& operator += (const ColorXYZAf& XYZ)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] += XYZ[i];
+
+		return *this;
+	}
+
+	HOD ColorXYZAf operator + (const ColorXYZAf& XYZ) const
+	{
+		ColorXYZAf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] += XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZAf operator - (const ColorXYZAf& XYZ) const
+	{
+		ColorXYZAf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] -= XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZAf operator / (const ColorXYZAf& XYZ) const
+	{
+		ColorXYZAf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] /= XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZAf operator * (const ColorXYZAf& XYZ) const
+	{
+		ColorXYZAf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] *= XYZ[i];
+
+		return Result;
+	}
+
+	HOD ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] *= XYZ[i];
+
+		return *this;
+	}
+
+	HOD ColorXYZAf operator * (const float& F) const
+	{
+		ColorXYZAf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] *= F;
+
+		return Result;
+	}
+
+	HOD ColorXYZAf& operator *= (const float& F)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] *= F;
+
+		return *this;
+	}
+
+	HOD ColorXYZAf operator / (const float& F) const
+	{
+		ColorXYZAf Result = *this;
+
+		for (int i = 0; i < 3; ++i)
+			Result.m_D[i] /= F;
+
+		return Result;
+	}
+
+	HOD ColorXYZAf& operator/=(float a)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] /= a;
+
+		return *this;
+	}
+
+	HOD bool operator == (const ColorXYZAf& XYZ) const
+	{
+		for (int i = 0; i < 3; ++i)
+			if (m_D[i] != XYZ[i])
+				return false;
+
+		return true;
+	}
+
+	HOD bool operator != (const ColorXYZAf& XYZ) const
+	{
+		return !(*this == XYZ);
+	}
+
+	HOD float& operator[](int i)
+	{
+		return m_D[i];
+	}
+
+	HOD float operator[](int i) const
+	{
+		return m_D[i];
+	}
+
+	HOD ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
+	{
+		for (int i = 0; i < 3; ++i)
+			m_D[i] = Other[i];
+
+		return *this;
+	}
+
+	HOD bool IsBlack() const
+	{
+		for (int i = 0; i < 3; ++i)
+			if (m_D[i] != 0.0f)
+				return false;
+
+		return true;
+	}
+
+	HOD ColorXYZAf Clamp(const float& L = 0.0f, const float& H = 1.0f) const
+	{
+		ColorXYZAf Result;
+
+		for (int i = 0; i < 3; ++i)
+			Result[i] = clamp2(m_D[i], L, H);
+
+		return Result;
+	}
+
+	HOD float Y() const
+	{
+		float v = 0.0f;
+
+		for (int i = 0; i < 3; i++)
+			v += YWeight[i] * m_D[i];
+
+		return v;
+	}
+
+	HOD void FromRGB(const float& R, const float& G, const float& B)
+	{
+		const float CoeffX[3] = { 0.4124f, 0.3576f, 0.1805f };
+		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
+		const float CoeffZ[3] = { 0.0193f, 0.1192f, 0.9505f };
+
+		m_D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
+		m_D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
+		m_D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
+	}
+};
+
+HOD inline ColorXYZAf operator * (const float& F, const ColorXYZAf& XYZA)
+{
+	return XYZA * F;
+}
+
+HOD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZAf& C2)
+{
+	const float OneMinusT = 1.0f - T;
+	return ColorXYZAf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ(), OneMinusT * C1.GetA() + T * C2.GetA());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 typedef Vec2c CVec2<char>;
 typedef Vec2uc CVec2<unsigned char>;
@@ -2337,3 +2737,135 @@ inline HOD Vec3f MaxVec3f(Vec3f a, Vec3f b)
 {
 	return Vec3f(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class EXPOSURE_RENDER_DLL CTransferFunction
+{
+public:
+	float			m_P[MAX_NO_TF_POINTS];		/*!< Node positions */
+	CColorRgbHdr	m_C[MAX_NO_TF_POINTS];		/*!< Node colors in HDR RGB */
+	int				m_NoNodes;					/*!< No. nodes */
+
+	// ToDo: Add description
+	HO CTransferFunction(void)
+	{
+		for (int i = 0; i < MAX_NO_TF_POINTS; i++)
+		{
+			m_P[i]	= 0.0f;
+//			m_C[i]	= SPEC_BLACK;
+		}
+
+		m_NoNodes = 0;
+	}
+
+	// ToDo: Add description
+	HO ~CTransferFunction(void)
+	{
+	}
+
+	// ToDo: Add description
+	HOD CTransferFunction& operator=(const CTransferFunction& Other)
+	{
+		for (int i = 0; i < MAX_NO_TF_POINTS; i++)
+		{
+			m_P[i]	= Other.m_P[i];
+			m_C[i]	= Other.m_C[i];
+		}
+
+		m_NoNodes = Other.m_NoNodes;
+
+		return *this;
+	}
+
+	// ToDo: Add description
+	HOD CColorRgbHdr F(const float& P)
+	{
+		for (int i = 0; i < m_NoNodes - 1; i++)
+		{
+			if (P >= m_P[i] && P < m_P[i + 1])
+			{
+				const float T = (float)(P - m_P[i]) / (m_P[i + 1] - m_P[i]);
+				return Lerp(T, m_C[i], m_C[i + 1]);
+			}
+		}
+
+		return CColorRgbHdr(0.0f);
+	}
+};
+
+// ToDo: Add description
+class EXPOSURE_RENDER_DLL CTransferFunctions
+{
+public:
+	CTransferFunction	m_Opacity;
+	CTransferFunction	m_Diffuse;
+	CTransferFunction	m_Specular;
+	CTransferFunction	m_Emission;
+	CTransferFunction	m_Roughness;
+
+	// ToDo: Add description
+	HO CTransferFunctions(void)
+	{
+	}
+
+	// ToDo: Add description
+	HO ~CTransferFunctions(void)
+	{
+	}
+
+	// ToDo: Add description
+	HOD CTransferFunctions& operator=(const CTransferFunctions& Other)
+	{
+		m_Opacity		= Other.m_Opacity;
+		m_Diffuse		= Other.m_Diffuse;
+		m_Specular		= Other.m_Specular;
+		m_Emission		= Other.m_Emission;
+		m_Roughness		= Other.m_Roughness;
+
+		return *this;
+	}
+};
+
+#define CLR_RAD_BLACK										ColorXYZf(0.0f)
+#define CLR_RAD_WHITE										ColorXYZf(1.0f)
+#define CLR_RAD_RED											ColorXYZf(1.0f, 0.0f, 0.0)
+#define CLR_RAD_GREEN										ColorXYZf(0.0f, 1.0f, 0.0)
+#define CLR_RAD_BLUE										ColorXYZf(1.0f)
+#define SPEC_BLACK											ColorXYZf(0.0f)
+#define SPEC_GRAY_10										ColorXYZf(1.0f)
+#define SPEC_GRAY_20										ColorXYZf(1.0f)
+#define SPEC_GRAY_30										ColorXYZf(1.0f)
+#define SPEC_GRAY_40										ColorXYZf(1.0f)
+#define SPEC_GRAY_50										ColorXYZf(0.5f)
+#define SPEC_GRAY_60										ColorXYZf(1.0f)
+#define SPEC_GRAY_70										ColorXYZf(1.0f)
+#define SPEC_GRAY_80										ColorXYZf(1.0f)
+#define SPEC_GRAY_90										ColorXYZf(1.0f)
+#define SPEC_WHITE											ColorXYZf(1.0f)
+#define SPEC_CYAN											ColorXYZf(1.0f)
+#define SPEC_RED											ColorXYZf(1.0f, 0.0f, 0.0f)
