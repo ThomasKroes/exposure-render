@@ -27,366 +27,6 @@ class Vec3f;
 class Vec4i;
 class Vec4f;
 
-class EXPOSURE_RENDER_DLL CColorRgbHdr
-{
-public:
-	HOD CColorRgbHdr(void)
-	{
-		r = 0.0f;
-		g = 0.0f;
-		b = 0.0f;
-	}
-
-	HOD CColorRgbHdr(const float& r, const float& g, const float& b)
-	{
-		this->r = r;
-		this->g = g;
-		this->b = b;
-	}
-
-	HOD CColorRgbHdr(const float& rgb)
-	{
-		r = rgb;
-		g = rgb;
-		b = rgb;
-	}
-
-	HOD CColorRgbHdr& operator = (const CColorRgbHdr& p)			
-	{
-		r = p.r;
-		g = p.g;
-		b = p.b;
-
-		return *this;
-	}
-
-	HOD CColorRgbHdr& operator += (CColorRgbHdr &p)		
-	{
-		r += p.r;
-		g += p.g;
-		b += p.b;	
-
-		return *this;
-	}
-
-	HOD CColorRgbHdr operator * (float f) const
-	{
-		return CColorRgbHdr(r * f, g * f, b * f);
-	}
-
-	HOD CColorRgbHdr& operator *= (float f)
-	{
-		for (int i = 0; i < 3; i++)
-			(&r)[i] *= f;
-
-		return *this;
-	}
-
-	HOD CColorRgbHdr operator / (float f) const
-	{
-		float inv = 1.0f / f;
-		return CColorRgbHdr(r * inv, g * inv, b * inv);
-	}
-
-	HOD CColorRgbHdr& operator /= (float f)
-	{
-		float inv = 1.f / f;
-		r *= inv; g *= inv; b *= inv;
-		return *this;
-	}
-
-	HOD float operator[](int i) const
-	{
-		return (&r)[i];
-	}
-
-	HOD float operator[](int i)
-	{
-		return (&r)[i];
-	}
-
-	HOD bool Black(void)
-	{
-		return r == 0.0f && g == 0.0f && b == 0.0f;
-	}
-
-	HOD CColorRgbHdr Pow(float e)
-	{
-		return CColorRgbHdr(powf(r, e), powf(g, e), powf(b, e));
-	}
-
-	HOD void FromXYZ(float x, float y, float z)
-	{
-		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
-		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
-		const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
-
-		r =	rWeight[0] * x +
-			rWeight[1] * y +
-			rWeight[2] * z;
-
-		g =	gWeight[0] * x +
-			gWeight[1] * y +
-			gWeight[2] * z;
-
-		b =	bWeight[0] * x +
-			bWeight[1] * y +
-			bWeight[2] * z;
-	}
-
-	void PrintSelf(void)
-	{
-		printf("[%g, %g, %g]\n", r, g, b);
-	}
-
-	float	r;
-	float	g;
-	float	b;
-};
-
-class EXPOSURE_RENDER_DLL CColorRgbLdr
-{
-public:
-	HOD CColorRgbLdr(void)
-	{
-		r = 0;
-		g = 0;
-		b = 0;
-	}
-
-	HOD CColorRgbLdr(unsigned char R, unsigned char G, unsigned char B)
-	{
-		r = R;
-		g = G;
-		b = B;
-	}
-
-	HOD CColorRgbLdr& operator = (const CColorRgbLdr& Other)			
-	{
-		r = Other.r;
-		g = Other.g;
-		b = Other.b;
-
-		return *this;
-	}
-
-	HOD CColorRgbLdr operator * (float f) const
-	{
-		return CColorRgbLdr((unsigned char)(r * f), (unsigned char)(g * f), (unsigned char)(b * f));
-	}
-
-	HOD CColorRgbLdr& operator *= (float f)
-	{
-		for (int i = 0; i < 3; i++)
-			(&r)[i] *= f;
-
-		return *this;
-	}
-
-	HOD CColorRgbLdr operator / (float f) const
-	{
-		float inv = 1.0f / f;
-		return CColorRgbLdr((unsigned char)(r * inv), (unsigned char)(g * inv), (unsigned char)(b * inv));
-	}
-
-	HOD CColorRgbLdr& operator /= (float f)
-	{
-		float inv = 1.0f / f;
-		r = (unsigned char)((float)r * inv); g = (unsigned char)((float)g * inv); b = (unsigned char)((float)b * inv);
-		return *this;
-	}
-
-	HOD float operator[](int i) const
-	{
-		return (&r)[i];
-	}
-
-	HOD float operator[](int i)
-	{
-		return (&r)[i];
-	}
-
-	HOD CColorRgbLdr& operator += (CColorRgbLdr& p)		
-	{
-		r += p.r;
-		g += p.g;
-		b += p.b;	
-
-		return *this;
-	}
-
-	HOD CColorRgbLdr Pow(float e)
-	{
-		return CColorRgbLdr((unsigned char)powf(r, e), (unsigned char)powf(g, e), (unsigned char)powf(b, e));
-	}
-
-	HOD void FromXYZ(float x, float y, float z)
-	{
-		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
-		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
-		const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
-
-		float R, G, B;
-
-		R =	rWeight[0] * x +
-			rWeight[1] * y +
-			rWeight[2] * z;
-
-		G =	gWeight[0] * x +
-			gWeight[1] * y +
-			gWeight[2] * z;
-
-		B =	bWeight[0] * x +
-			bWeight[1] * y +
-			bWeight[2] * z;
-
-		clamp2(R, 0.0f, 1.0f);
-		clamp2(G, 0.0f, 1.0f);
-		clamp2(B, 0.0f, 1.0f);
-
-		r = (unsigned char)(R * 255.0f);
-		g = (unsigned char)(G * 255.0f);
-		b = (unsigned char)(B * 255.0f);
-	}
-
-	void PrintSelf(void)
-	{
-		printf("[%d, %d, %d]\n", r, g, b);
-	}
-
-public:
-	unsigned char	r;
-	unsigned char	g;
-	unsigned char	b;
-};
-
-class EXPOSURE_RENDER_DLL CColorRgbaLdr
-{
-public:
-	HOD CColorRgbaLdr(void)
-	{
-		r = 0;
-		g = 0;
-		b = 0;
-		a = 0;
-	}
-
-	HOD CColorRgbaLdr(unsigned char R, unsigned char G, unsigned char B, unsigned char A)
-	{
-		r = R;
-		g = G;
-		b = B;
-		a = A;
-	}
-
-	HOD CColorRgbaLdr& operator = (const CColorRgbaLdr& Other)			
-	{
-		r = Other.r;
-		g = Other.g;
-		b = Other.b;
-		a = Other.a;
-
-		return *this;
-	}
-
-	HOD CColorRgbaLdr operator * (float f) const
-	{
-		return CColorRgbaLdr((unsigned char)(r * f), (unsigned char)(g * f), (unsigned char)(b * f), (unsigned char)(a * f));
-	}
-
-	HOD CColorRgbaLdr& operator *= (float f)
-	{
-		for (int i = 0; i < 4; i++)
-			(&r)[i] *= f;
-
-		return *this;
-	}
-
-	HOD CColorRgbaLdr operator / (float f) const
-	{
-		float inv = 1.0f / f;
-		return CColorRgbaLdr((unsigned char)(r * inv), (unsigned char)(g * inv), (unsigned char)(b * inv), (unsigned char)(a * inv));
-	}
-
-	HOD CColorRgbaLdr& operator /= (float f)
-	{
-		float inv = 1.0f / f;
-		
-		r = (unsigned char)((float)r * inv);
-		g = (unsigned char)((float)g * inv);
-		b = (unsigned char)((float)b * inv);
-		a = (unsigned char)((float)a * inv);
-		
-		return *this;
-	}
-
-	HOD float operator[](int i) const
-	{
-		return (&r)[i];
-	}
-
-	HOD float operator[](int i)
-	{
-		return (&r)[i];
-	}
-
-	HOD CColorRgbaLdr& operator += (CColorRgbaLdr& p)		
-	{
-		r += p.r;
-		g += p.g;
-		b += p.b;	
-		a += p.a;
-
-		return *this;
-	}
-
-	HOD CColorRgbaLdr Pow(float e)
-	{
-		return CColorRgbaLdr((unsigned char)powf(r, e), (unsigned char)powf(g, e), (unsigned char)powf(b, e), (unsigned char)powf(a, e));
-	}
-
-	HOD void FromXYZ(float x, float y, float z)
-	{
-		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
-		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
-		const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
-
-		float R, G, B;
-
-		R =	rWeight[0] * x +
-			rWeight[1] * y +
-			rWeight[2] * z;
-
-		G =	gWeight[0] * x +
-			gWeight[1] * y +
-			gWeight[2] * z;
-
-		B =	bWeight[0] * x +
-			bWeight[1] * y +
-			bWeight[2] * z;
-
-		clamp2(R, 0.0f, 1.0f);
-		clamp2(G, 0.0f, 1.0f);
-		clamp2(B, 0.0f, 1.0f);
-
-		r = (unsigned char)(R * 255.0f);
-		g = (unsigned char)(G * 255.0f);
-		b = (unsigned char)(B * 255.0f);
-		a = 255;
-	}
-
-	void PrintSelf(void)
-	{
-		printf("[%d, %d, %d, %d]\n", r, g, b, a);
-	}
-
-public:
-	unsigned char	r;
-	unsigned char	g;
-	unsigned char	b;
-	unsigned char	a;
-};
-
 class EXPOSURE_RENDER_DLL Vec2f
 {
 public:
@@ -690,11 +330,11 @@ public:
 		z = 0.0f;
 	}
 
-	HOD Vec3f(const CColorRgbHdr& p)
+	HOD Vec3f(const Vec3f& p)
 	{
-		x = p.r;
-		y = p.g;
-		z = p.b;
+		x = p.x;
+		y = p.y;
+		z = p.z;
 	}
 
 	HOD Vec3f(const float& x, const float& y, const float& z)
@@ -1001,11 +641,6 @@ HOD inline Vec3f Normalize(const Vec3f& v)
 	return v / v.Length();
 }
 
-static HOD CColorRgbHdr operator * (const CColorRgbHdr& v, const float& f) 			{ return CColorRgbHdr(f * v.r, f * v.g, f * v.b); 					};
-static HOD CColorRgbHdr operator * (const float& f, const CColorRgbHdr& v) 			{ return CColorRgbHdr(f * v.r, f * v.g, f * v.b); 					};
-static HOD CColorRgbHdr operator * (const CColorRgbHdr& p1, const CColorRgbHdr& p2) 	{ return CColorRgbHdr(p1.r * p2.r, p1.g * p2.g, p1.b * p2.b); 		};
-static HOD CColorRgbHdr operator + (const CColorRgbHdr& a, const CColorRgbHdr& b)		{ return CColorRgbHdr(a.r + b.r, a.g + b.g, a.b + b.b);				};
-static HOD CColorRgbLdr operator + (const CColorRgbLdr& a, const CColorRgbLdr& b)		{ return CColorRgbLdr(a.r + b.r, a.g + b.g, a.b + b.b);				};
 // Vec2f
 static inline HOD Vec2f operator * (const Vec2f& v, const float& f) 	{ return Vec2f(f * v.x, f * v.y);					};
 static inline HOD Vec2f operator * (const float& f, const Vec2f& v) 	{ return Vec2f(f * v.x, f * v.y);					};
@@ -1018,7 +653,6 @@ static inline HOD Vec3f operator * (const float& f, const Vec3f& v) 		{ return V
 static inline HOD Vec3f operator * (const Vec3f& v1, const Vec3f& v2) 		{ return Vec3f(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);			};
 static inline HOD Vec3f operator / (const Vec3f& v1, const Vec3f& v2) 		{ return Vec3f(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);			};
 
-static inline HOD CColorRgbHdr operator * (const Vec3f& v1, const CColorRgbHdr& p)	{ return CColorRgbHdr(v1.x * p.r, v1.y * p.g, v1.z * p.b);				};
 
 static inline HOD Vec2f operator * (Vec2f& V2f, Vec2i& V2i)	{ return Vec2f(V2f.x * V2i.x, V2f.y * V2i.y);				};
 
@@ -1791,14 +1425,6 @@ HOD inline void CoordinateSystem(const Vec3f& v1, Vec3f* v2, Vec3f *v3)
 	}
 	*v3 = Cross(v1, *v2);
 }
-
-HOD inline CColorRgbHdr Lerp(float T, const CColorRgbHdr& C1, const CColorRgbHdr& C2)
-{
-	const float OneMinusT = 1.0f - T;
-	return CColorRgbHdr(OneMinusT * C1.r + T * C2.r, OneMinusT * C1.g + T * C2.g, OneMinusT * C1.b + T * C2.b);
-}
-
-
 
 inline float RandomFloat(void)
 {
@@ -2663,70 +2289,161 @@ HOD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZA
 	return ColorXYZAf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ(), OneMinusT * C1.GetA() + T * C2.GetA());
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-typedef Vec2c CVec2<char>;
-typedef Vec2uc CVec2<unsigned char>;
-typedef Vec2s CVec2<short>;
-typedef Vec2us CVec2<unsigned short>;
-typedef Vec2ui CVec2<int>;
-typedef Vec2ui CVec2<unsigned int>;
-typedef Vec2l CVec2<long>;
-typedef Vec2ul CVec2<unsigned long>;
-typedef Vec2f CVec2<float>;
-typedef Vec2uf CVec2<unsigned float>;
-typedef Vec2d CVec2<double>;
-typedef Vec2ud CVec2<unsigned double>;
-
-typedef Vec3c CVec3<char>;
-typedef Vec3uc CVec3<unsigned char>;
-typedef Vec3s CVec3<short>;
-typedef Vec3us CVec3<unsigned short>;
-typedef Vec3ui CVec3<int>;
-typedef Vec3ui CVec3<unsigned int>;
-typedef Vec3l CVec3<long>;
-typedef Vec3ul CVec3<unsigned long>;
-typedef Vec3f CVec3<float>;
-typedef Vec3uf CVec3<unsigned float>;
-typedef Vec3d CVec3<double>;
-typedef Vec3ud CVec3<unsigned double>;
-
-typedef Vec4c CVec4<char>;
-typedef Vec4uc CVec4<unsigned char>;
-typedef Vec4s CVec4<short>;
-typedef Vec4us CVec4<unsigned short>;
-typedef Vec4ui CVec4<int>;
-typedef Vec4ui CVec4<unsigned int>;
-typedef Vec4l CVec4<long>;
-typedef Vec4ul CVec4<unsigned long>;
-typedef Vec4f CVec4<float>;
-typedef Vec4uf CVec4<unsigned float>;
-typedef Vec4d CVec4<double>;
-typedef Vec4ud CVec4<unsigned double>;
-
-template <class T>
-class CColorRGBA : public CVec4<Vec4uc>
+class EXPOSURE_RENDER_DLL ColorRGBf : public Vec3<float>
 {
-	public:
+public:
+	HOD ColorRGBf(void)
+	{
+	}
+
+	HOD ColorRGBf(const float& R, const float& G, const float& B)
+	{
+		Set(R, G, B);
+	}
+
+	HOD ColorRGBf(const float& RGB)
+	{
+		Set(RGB, RGB, RGB);
+	}
+
+	HOD void Set(const float& R, const float& G, const float& B)
+	{
+		SetR(R);
+		SetG(G);
+		SetB(B);
+	}
+
+	HOD float GetR(void) const
+	{
+		return m_D[0];
+	}
+
+	HOD void SetR(const float& R)
+	{
+		m_D[0] = R;
+	}
+
+	HOD float GetG(void) const
+	{
+		return m_D[1];
+	}
+
+	HOD void SetG(const float& G)
+	{
+		m_D[1] = G;
+	}
+
+	HOD float GetB(void) const
+	{
+		return m_D[2];
+	}
+
+	HOD void SetB(const float& B)
+	{
+		m_D[2] = B;
+	}
+
+	HOD void SetBlack(void)
+	{
+		Set(0.0f, 0.0f, 0.0f);
+	}
+
+	HOD void SetWhite(void)
+	{
+		Set(1.0f, 1.0f, 1.0f);
+	}
+
+	HOD ColorRGBf& operator = (const ColorRGBf& Other)			
+	{
+		for (int i = 0; i < 3; i++)
+			m_D[i] = Other[i];
+
+		return *this;
+	}
+
+	HOD ColorRGBf& operator += (ColorRGBf& Other)		
+	{
+		for (int i = 0; i < 3; i++)
+			m_D[i] += Other[i];
+
+		return *this;
+	}
+
+	HOD ColorRGBf operator * (const float& F) const
+	{
+		return ColorRGBf(m_D[0] * F, m_D[1] * F, m_D[2] * F);
+	}
+
+	HOD ColorRGBf& operator *= (const float& F)
+	{
+		for (int i = 0; i < 3; i++)
+			m_D[i] *= F;
+
+		return *this;
+	}
+
+	HOD ColorRGBf operator / (const float& F) const
+	{
+		const float Inv = 1.0f / F;
+		return ColorRGBf(m_D[0] * Inv, m_D[1] * Inv, m_D[2] * Inv);
+	}
+
+	HOD ColorRGBf& operator /= (const float& F)
+	{
+		const float Inv = 1.0f / F;
+		
+		for (int i = 0; i < 3; i++)
+			m_D[i] *= Inv;
+
+		return *this;
+	}
+
+	HOD float operator[](int i) const
+	{
+		return m_D[i];
+	}
+
+	HOD float operator[](int i)
+	{
+		return m_D[i];
+	}
+
+	HOD bool Black(void)
+	{
+		for (int i = 0; i < 3; i++)
+			if (m_D[i] != 0.0f)
+				return false;
+
+		return true;
+	}
+
+	HOD ColorRGBf Pow(const float& E)
+	{
+		return ColorRGBf(powf(m_D[0], E), powf(m_D[1], E), powf(m_D[1], E));
+	}
+
+	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
+	{
+		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
+		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
+		const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
+
+		Set(rWeight[0] * X + rWeight[1] * Y + rWeight[2] * Z, gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z, bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z);
+	}
+
+	HOD void ToneMap(const float& InvExposure)
+	{
+		m_D[0] = Clamp(1.0f - expf(-(m_D[0] * InvExposure)), 0.0f, 1.0f);
+		m_D[1] = Clamp(1.0f - expf(-(m_D[1] * InvExposure)), 0.0f, 1.0f);
+		m_D[2] = Clamp(1.0f - expf(-(m_D[2] * InvExposure)), 0.0f, 1.0f);
+	}
 };
-*/
+
+HOD inline ColorRGBf Lerp(const float& T, const ColorRGBf& C1, const ColorRGBf& C2)
+{
+	const float OneMinusT = 1.0f - T;
+	return ColorRGBf(OneMinusT * C1.GetR() + T * C2.GetR(), OneMinusT * C1.GetG() + T * C2.GetG(), OneMinusT * C1.GetB() + T * C2.GetB());
+}
 
 inline HOD Vec3f MinVec3f(Vec3f a, Vec3f b)
 {
@@ -2738,37 +2455,11 @@ inline HOD Vec3f MaxVec3f(Vec3f a, Vec3f b)
 	return Vec3f(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class EXPOSURE_RENDER_DLL CTransferFunction
 {
 public:
 	float			m_P[MAX_NO_TF_POINTS];		/*!< Node positions */
-	CColorRgbHdr	m_C[MAX_NO_TF_POINTS];		/*!< Node colors in HDR RGB */
+	ColorRGBf		m_C[MAX_NO_TF_POINTS];		/*!< Node colors in HDR RGB */
 	int				m_NoNodes;					/*!< No. nodes */
 
 	// ToDo: Add description
@@ -2803,7 +2494,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD CColorRgbHdr F(const float& P)
+	HOD ColorRGBf F(const float& P)
 	{
 		for (int i = 0; i < m_NoNodes - 1; i++)
 		{
@@ -2814,7 +2505,7 @@ public:
 			}
 		}
 
-		return CColorRgbHdr(0.0f);
+		return ColorRGBf(0.0f);
 	}
 };
 

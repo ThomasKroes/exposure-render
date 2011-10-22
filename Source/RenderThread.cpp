@@ -240,9 +240,9 @@ void QRenderThread::run()
 				m_pRenderImage = (ColorRGBuc*)malloc(SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(ColorRGBuc));
 
 				if (m_pRenderImage)
-					memset(m_pRenderImage, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr));
+					memset(m_pRenderImage, 0, SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(ColorRGBuc));
 			
-				gStatus.SetStatisticChanged("Host Memory", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr) / MB, 'f', 2), "MB");
+				gStatus.SetStatisticChanged("Host Memory", "LDR Frame Buffer", QString::number(3 * SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(ColorRGBuc) / MB, 'f', 2), "MB");
 
 				SceneCopy.SetNoIterations(0);
 
@@ -291,7 +291,7 @@ void QRenderThread::run()
  			gStatus.SetStatisticChanged("Performance", "FPS", QString::number(FPS.m_FilteredDuration, 'f', 2), "Frames/Sec.");
  			gStatus.SetStatisticChanged("Performance", "No. Iterations", QString::number(SceneCopy.GetNoIterations()), "Iterations");
 
-			HandleCudaError(cudaMemcpy(m_pRenderImage, GetDisplayEstimate(), SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(CColorRgbLdr), cudaMemcpyDeviceToHost));
+			HandleCudaError(cudaMemcpy(m_pRenderImage, GetDisplayEstimate(), SceneCopy.m_Camera.m_Film.m_Resolution.GetNoElements() * sizeof(ColorRGBuc), cudaMemcpyDeviceToHost));
 
 			gFrameBuffer.Set((unsigned char*)m_pRenderImage, SceneCopy.m_Camera.m_Film.GetWidth(), SceneCopy.m_Camera.m_Film.GetHeight());
 
@@ -524,14 +524,14 @@ void QRenderThread::OnUpdateTransferFunction(void)
 		gScene.m_TransferFunctions.m_Roughness.m_P[i]	= Intensity;
 
 		// Colors
-		gScene.m_TransferFunctions.m_Opacity.m_C[i]		= CColorRgbHdr(Node.GetOpacity());
-		gScene.m_TransferFunctions.m_Diffuse.m_C[i]		= CColorRgbHdr(Node.GetDiffuse().redF(), Node.GetDiffuse().greenF(), Node.GetDiffuse().blueF());
-		gScene.m_TransferFunctions.m_Specular.m_C[i]	= CColorRgbHdr(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
-		gScene.m_TransferFunctions.m_Emission.m_C[i]	= 500.0f * CColorRgbHdr(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF());
+		gScene.m_TransferFunctions.m_Opacity.m_C[i]		= ColorRGBf(Node.GetOpacity());
+		gScene.m_TransferFunctions.m_Diffuse.m_C[i]		= ColorRGBf(Node.GetDiffuse().redF(), Node.GetDiffuse().greenF(), Node.GetDiffuse().blueF());
+		gScene.m_TransferFunctions.m_Specular.m_C[i]	= ColorRGBf(Node.GetSpecular().redF(), Node.GetSpecular().greenF(), Node.GetSpecular().blueF());
+		gScene.m_TransferFunctions.m_Emission.m_C[i]	= ColorRGBf(Node.GetEmission().redF(), Node.GetEmission().greenF(), Node.GetEmission().blueF()) * 500.0f;
 
 		const float Roughness = 1.0f - expf(-Node.GetGlossiness());
 
-		gScene.m_TransferFunctions.m_Roughness.m_C[i] = CColorRgbHdr(Roughness * 250.0f);
+		gScene.m_TransferFunctions.m_Roughness.m_C[i] = ColorRGBf(Roughness * 250.0f);
 	}
 
 	gScene.m_DensityScale	= TransferFunction.GetDensityScale();

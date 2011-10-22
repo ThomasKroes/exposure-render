@@ -180,7 +180,7 @@ void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity)
 	float Opacity[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
-		Opacity[i] = TransferFunctionOpacity.F((float)i * INV_TF_NO_SAMPLES).r;
+		Opacity[i] = TransferFunctionOpacity.F((float)i * INV_TF_NO_SAMPLES)[1];
 	
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
 
@@ -210,9 +210,9 @@ void BindTransferFunctionDiffuse(CTransferFunction& TransferFunctionDiffuse)
 	{
 		ColorXYZAf Color;
 		
-		CColorRgbHdr ColorRgbHdr = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES);
+		ColorRGBf ColorRgbHdr = TransferFunctionDiffuse.F((float)i * INV_TF_NO_SAMPLES);
 		
-		Color.FromRGB(ColorRgbHdr.r, ColorRgbHdr.g, ColorRgbHdr.b);
+		Color.FromRGB(ColorRgbHdr[0], ColorRgbHdr[1], ColorRgbHdr[2]);
 
 		Diffuse[i].x = Color.GetX();
 		Diffuse[i].y = Color.GetY();
@@ -247,9 +247,9 @@ void BindTransferFunctionSpecular(CTransferFunction& TransferFunctionSpecular)
 	{
 		ColorXYZAf Color;
 		
-		CColorRgbHdr ColorRgbHdr = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES);
+		ColorRGBf ColorRgbHdr = TransferFunctionSpecular.F((float)i * INV_TF_NO_SAMPLES);
 		
-		Color.FromRGB(ColorRgbHdr.r, ColorRgbHdr.g, ColorRgbHdr.b);
+		Color.FromRGB(ColorRgbHdr[0], ColorRgbHdr[1], ColorRgbHdr[2]);
 
 		Specular[i].x = Color.GetX();
 		Specular[i].y = Color.GetY();
@@ -281,7 +281,7 @@ void BindTransferFunctionRoughness(CTransferFunction& TransferFunctionRoughness)
 	float Roughness[TF_NO_SAMPLES];
 
 	for (int i = 0; i < TF_NO_SAMPLES; i++)
-		Roughness[i] = TransferFunctionRoughness.F((float)i * INV_TF_NO_SAMPLES).r;
+		Roughness[i] = TransferFunctionRoughness.F((float)i * INV_TF_NO_SAMPLES)[0];
 	
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
 
@@ -311,9 +311,9 @@ void BindTransferFunctionEmission(CTransferFunction& TransferFunctionEmission)
 	{
 		ColorXYZAf Color;
 		
-		CColorRgbHdr ColorRgbHdr = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES);
+		ColorRGBf ColorRgbHdr = TransferFunctionEmission.F((float)i * INV_TF_NO_SAMPLES);
 		
-		Color.FromRGB(ColorRgbHdr.r, ColorRgbHdr.g, ColorRgbHdr.b);
+		Color.FromRGB(ColorRgbHdr[0], ColorRgbHdr[1], ColorRgbHdr[2]);
 
 		Emission[i].x = Color.GetX();
 		Emission[i].y = Color.GetY();
