@@ -141,7 +141,6 @@ SET(ExposureRenderSources
 	Stable.cpp
 	Flags.cpp
 	Geometry.cpp
-	Spectrum.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
 	VtkWidget.cpp
@@ -229,7 +228,6 @@ SET(ExposureRenderHeaders
 	Enumerations.h
 	Flags.h
 	Geometry.h
-	Spectrum.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
 	VtkWidget.h
@@ -506,7 +504,6 @@ SET(CoreSources
 	Enumerations.h
 	Flags.h
 	Geometry.h
-	Spectrum.h
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
 	VtkWidget.h
@@ -520,7 +517,6 @@ SET(CoreSources
 	Stable.cpp
 	Flags.cpp
 	Geometry.cpp
-	Spectrum.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
 	VtkWidget.cpp

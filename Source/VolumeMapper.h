@@ -34,16 +34,19 @@
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
 
-/*
+
 class EXPOSURE_RENDER_DLL vtkVolumeCudaMapper : public vtkVolumeMapper
 {
 public:
-    vtkTypeRevisionMacro(vtkVolumeCudaMapper,vtkVolumeMapper);
-    static vtkVolumeCudaMapper *New();
-
+//  vtkTypeRevisionMacro(vtkVolumeCudaMapper,vtkVolumeMapper);
+//	vtkTypeMacro(vtkVolumeCudaMapper,vtkVolumeMapper);
+//    static vtkVolumeCudaMapper *New();
+vtkVolumeCudaMapper operator=(const vtkVolumeCudaMapper&);
+    vtkVolumeCudaMapper(const vtkVolumeCudaMapper&);
     virtual void SetInput( vtkImageData * );
+	virtual void SetInput( vtkDataSet * );
     virtual void Render(vtkRenderer *, vtkVolume *);
-
+	virtual int FillInputPortInformation(int, vtkInformation*);
     // Should be in Property??
     void SetThreshold(unsigned int min, unsigned int max);
     void SetThreshold(double* range) { SetThreshold((unsigned int)range[0], (unsigned int)range[1]); }
@@ -57,7 +60,7 @@ public:
 
    void PrintSelf(ostream& os, vtkIndent indent);
 
-protected:
+
     vtkVolumeCudaMapper();
     virtual ~vtkVolumeCudaMapper();
 
@@ -66,8 +69,7 @@ protected:
 //    vtkCudaRendererInformationHandler* RendererInfoHandler;
 //    vtkCudaVolumeInformationHandler* VolumeInfoHandler;
 
-private:
-    vtkVolumeCudaMapper operator=(const vtkVolumeCudaMapper&);
-    vtkVolumeCudaMapper(const vtkVolumeCudaMapper&);
+
+    
 };
-*/
+/**/

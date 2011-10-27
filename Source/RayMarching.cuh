@@ -64,7 +64,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 	__shared__ float MaxT[KRNL_SS_BLOCK_SIZE];
 	__shared__ Vec3f Ps[KRNL_SS_BLOCK_SIZE];
 
-	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
+	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]) || !gShadows)
 		return false;
 
 	MinT[TID] = max(MinT[TID], R.m_MinT);

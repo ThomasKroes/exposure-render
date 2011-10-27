@@ -20,38 +20,6 @@
 #define KRNL_TM_BLOCK_H		8
 #define KRNL_TM_BLOCK_SIZE	KRNL_TM_BLOCK_W * KRNL_TM_BLOCK_H
 
-/*
-HOD void FromXYZ(float x, float y, float z)
-{
-	const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
-	const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
-	const float bWeight[3] = { 0.055648f, -0.204043f,  1.057311f };
-
-	float R, G, B;
-
-	R =	rWeight[0] * x +
-		rWeight[1] * y +
-		rWeight[2] * z;
-
-	G =	gWeight[0] * x +
-		gWeight[1] * y +
-		gWeight[2] * z;
-
-	B =	bWeight[0] * x +
-		bWeight[1] * y +
-		bWeight[2] * z;
-
-	clamp2(R, 0.0f, 1.0f);
-	clamp2(G, 0.0f, 1.0f);
-	clamp2(B, 0.0f, 1.0f);
-
-	r = (unsigned char)(R * 255.0f);
-	g = (unsigned char)(G * 255.0f);
-	b = (unsigned char)(B * 255.0f);
-	a = 255;
-}
-*/
-
 KERNEL void KrnlToneMap(CCudaView* pView)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;

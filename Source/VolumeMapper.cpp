@@ -15,14 +15,17 @@
 
 #include <vtkMetaImageReader.h>
 #include <vtkVolumeProperty.h>
+//#include <vtkRayCastImageDisplayHelper.h>
+//#include <vtkVolumeRayCastMapper.h>
 #include <vtkObjectFactory.h>
 
 #include "VolumeMapper.h"
 
-/*
-vtkCxxRevisionMacro(vtkVolumeCudaMapper, "$Revision: 1.8 $");
-vtkStandardNewMacro(vtkVolumeCudaMapper);
 
+//vtkCxxRevisionMacro(vtkVolumeCudaMapper, "$Revision: 1.8 $");
+//vtkStandardNewMacro(vtkVolumeCudaMapper);
+
+/*
 vtkVolumeCudaMapper::vtkVolumeCudaMapper()
 {
 //    this->VolumeInfoHandler = vtkCudaVolumeInformationHandler::New();
@@ -34,8 +37,14 @@ vtkVolumeCudaMapper::~vtkVolumeCudaMapper()
 //    this->VolumeInfoHandler->Delete();
 //    this->RendererInfoHandler->Delete();
 }
-
+*/
 void vtkVolumeCudaMapper::SetInput(vtkImageData * input)
+{
+//    this->Superclass::SetInput(input);
+//    this->VolumeInfoHandler->SetInputData(input);
+}
+
+void vtkVolumeCudaMapper::SetInput(vtkDataSet *)
 {
 //    this->Superclass::SetInput(input);
 //    this->VolumeInfoHandler->SetInputData(input);
@@ -79,17 +88,17 @@ void vtkVolumeCudaMapper::Render(vtkRenderer *renderer, vtkVolume *volume)
     log->StartTimer();
 
     // Renderer Information Setter.
-    this->RendererInfoHandler->SetRenderer(renderer);
+//    this->RendererInfoHandler->SetRenderer(renderer);
 
-    this->VolumeInfoHandler->SetInputData(this->GetInput());
-    this->VolumeInfoHandler->SetVolume(volume);
-    this->VolumeInfoHandler->Update();
+//    this->VolumeInfoHandler->SetInputData(this->GetInput());
+ //   this->VolumeInfoHandler->SetVolume(volume);
+//    this->VolumeInfoHandler->Update();
 
-    this->RendererInfoHandler->Bind();
+ //   this->RendererInfoHandler->Bind();
 
-    CUDArenderAlgo_doRender(
-        this->RendererInfoHandler->GetRendererInfo(),
-        this->VolumeInfoHandler->GetVolumeInfo());         
+ //   CUDArenderAlgo_doRender(
+ //       this->RendererInfoHandler->GetRendererInfo(),
+  //      this->VolumeInfoHandler->GetVolumeInfo());         
 
 
     // Get the resulted image.
@@ -120,7 +129,7 @@ void vtkVolumeCudaMapper::Render(vtkRenderer *renderer, vtkVolume *volume)
     double coordinatesD[4];
     renderer->GetWorldPoint(coordinatesD);
 
-
+	/*
     glPushAttrib(GL_BLEND);
     glEnable(GL_BLEND);
     glPushAttrib(GL_LIGHTING);
@@ -139,6 +148,8 @@ void vtkVolumeCudaMapper::Render(vtkRenderer *renderer, vtkVolume *volume)
     glEnd();
     glPopAttrib();
     glPopAttrib();
+	*/
+
 //    this->RendererInfoHandler->Unbind();
 
     log->Delete();
@@ -147,6 +158,11 @@ void vtkVolumeCudaMapper::Render(vtkRenderer *renderer, vtkVolume *volume)
 
 void vtkVolumeCudaMapper::PrintSelf(ostream& os, vtkIndent indent)
 {
-    vtkVolumeMapper::PrintSelf(os, indent);
+ //   vtkVolumeMapper::PrintSelf(os, indent);
 }
-*/
+
+int vtkVolumeCudaMapper::FillInputPortInformation(int port, vtkInformation* info)
+{
+	return 0;
+}
+/**/

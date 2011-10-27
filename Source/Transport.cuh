@@ -80,6 +80,8 @@ DEV ColorXYZf UniformSampleOneLight(CScene* pScene, const CVolumeShader::EType& 
  	if (NumLights == 0)
  		return SPEC_BLACK;
 
+	ColorXYZf Li;
+
 	CLightingSample LS;
 
 	LS.LargeStep(RNG);
@@ -88,5 +90,5 @@ DEV ColorXYZf UniformSampleOneLight(CScene* pScene, const CVolumeShader::EType& 
 
 	CLight& Light = pScene->m_Lighting.m_Lights[WhichLight];
 	
-	return (float)NumLights * EstimateDirectLight(pScene, Type, Density, Light, LS, Wo, Pe, N, RNG);
+	return NumLights * EstimateDirectLight(pScene, Type, Density, Light, LS, Wo, Pe, N, RNG);
 }

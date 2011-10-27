@@ -65,6 +65,7 @@ CD float		gDenoiseLerpThreshold;
 CD float		gDenoiseLerpC;
 CD float		gNoIterations;
 CD float		gInvNoIterations;
+CD bool			gShadows;
 
 #define TF_NO_SAMPLES		128
 #define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
@@ -421,6 +422,10 @@ void BindConstants(CScene* pScene)
 
 	HandleCudaError(cudaMemcpyToSymbol("gNoIterations", &NoIterations, sizeof(float)));
 	HandleCudaError(cudaMemcpyToSymbol("gInvNoIterations", &InvNoIterations, sizeof(float)));
+
+	const bool Shadows = pScene->GetNoIterations() > 0;
+
+	HandleCudaError(cudaMemcpyToSymbol("gShadows", &Shadows, sizeof(bool)));
 }
 
 void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
