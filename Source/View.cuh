@@ -29,7 +29,8 @@ public:
 		m_EstimateRgbaLdr(),
 		m_DisplayEstimateRgbLdr(),
 		m_RandomSeeds1(),
-		m_RandomSeeds2()
+		m_RandomSeeds2(),
+		m_ZBuffer()
 	{
 	}
 
@@ -53,6 +54,7 @@ public:
 		m_DisplayEstimateRgbLdr	= Other.m_DisplayEstimateRgbLdr;
 		m_RandomSeeds1			= Other.m_RandomSeeds1;
 		m_RandomSeeds2			= Other.m_RandomSeeds2;
+		m_ZBuffer						= Other.m_ZBuffer;
 
 		return *this;
 	}
@@ -71,6 +73,7 @@ public:
 		m_DisplayEstimateRgbLdr.Resize(m_Resolution);
 		m_RandomSeeds1.Resize(m_Resolution);
 		m_RandomSeeds2.Resize(m_Resolution);
+		m_ZBuffer.Resize(m_Resolution);
 	}
 
 	void Reset(void)
@@ -93,6 +96,7 @@ public:
 		m_DisplayEstimateRgbLdr.Free();
 		m_RandomSeeds1.Free();
 		m_RandomSeeds2.Free();
+		m_ZBuffer.Free();
 
 		m_Resolution.Set(Vec2i(0, 0));
 	}
@@ -115,4 +119,5 @@ public:
 	CCudaBuffer2D<ColorRGBuc, false>	m_DisplayEstimateRgbLdr;
 	CCudaRandomBuffer2D					m_RandomSeeds1;
 	CCudaRandomBuffer2D					m_RandomSeeds2;
+	CCudaBuffer2D<float, true>			m_ZBuffer;
 };

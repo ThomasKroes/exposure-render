@@ -137,6 +137,10 @@ SET(ExposureRenderSources
 	StatisticsDockWidget.cpp
 	StatisticsWidget.cpp
 	
+	# Slicing
+	SlicingDockWidget.cpp
+	SlicingWidget.cpp
+
 	# Core
 	Stable.cpp
 	Flags.cpp
@@ -221,6 +225,10 @@ SET(ExposureRenderHeaders
 	StatisticsDockWidget.h
 	StatisticsWidget.h
 	
+	# Slicing
+	SlicingDockWidget.h
+	SlicingWidget.h
+
 	# Core
 	Stable.h
 	Defines.h
@@ -300,6 +308,10 @@ SET(ExposureRenderMocHeaders
 	StatisticsDockWidget.h
 	StatisticsWidget.h
 	
+	# Slicing
+	SlicingDockWidget.h
+	SlicingWidget.h
+
 	# Core
 	RenderThread.h
 	VtkWidget.h
@@ -495,7 +507,18 @@ SET(StatisticsSources
 
 # Make the statistics group
 SOURCE_GROUP("Statistics" FILES ${StatisticsSources})
-	
+
+# Slicing sources
+SET(SlicingSources
+	SlicingDockWidget.h
+	SlicingWidget.h
+	SlicingDockWidget.cpp
+	SlicingWidget.cpp
+)
+
+# Make the statistics group
+SOURCE_GROUP("Slicing" FILES ${SlicingSources})
+
 # Core sources
 SET(CoreSources
 	Stable.h
@@ -585,7 +608,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Create executable
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources})
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources} ${SlicingSources})
 
 
 

@@ -30,7 +30,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 
 	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
-
+	 
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
@@ -44,10 +44,10 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 	{
 		Ps = R.m_O + MinT[TID] * R.m_D;
 
-		if (MinT[TID] > MaxT[TID])
+		if (MinT[TID] >= MaxT[TID])
 			return false;
 		
-		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps));
+		SigmaT	= gDensityScale * GetOpacity(Ps);
 
 		Sum			+= SigmaT * gStepSize;
 		MinT[TID]	+= gStepSize;
@@ -83,7 +83,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 		if (MinT[TID] > MaxT[TID])
 			return false;
 		
-		SigmaT	= gDensityScale * GetOpacity(GetNormalizedIntensity(Ps[TID]));
+		SigmaT	= gDensityScale * GetOpacity(Ps[TID]);
 
 		Sum			+= SigmaT * gStepSizeShadow;
 		MinT[TID]	+= gStepSizeShadow;
@@ -92,7 +92,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 	return true;
 }
 
-DEV inline bool NearestIntersection(CRay R, CScene* pScene, float& T)
+DEV inline bool NearestIntersection(CRay R, CRNG& RNG, CScene* pScene, float& T)
 {
 	float MinT = 0.0f, MaxT = 0.0f;
 
@@ -104,7 +104,7 @@ DEV inline bool NearestIntersection(CRay R, CScene* pScene, float& T)
 
 	Vec3f Ps; 
 
-	T = MinT;
+	T = MinT + RNG.Get1() * gStepSize;
 
 	while (T < MaxT)
 	{

@@ -32,6 +32,11 @@ DEV float GetOpacity(const float& NormalizedIntensity)
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
+DEV float GetOpacity(const Vec3f& P)
+{
+	return P.x > 0.4f && P.y > 0.2f && P.z > 0.2f? GetOpacity(GetNormalizedIntensity(P)) : 0.0f;
+}
+
 DEV ColorXYZf GetDiffuse(const float& NormalizedIntensity)
 {
 	float4 Diffuse = tex1D(gTexDiffuse, NormalizedIntensity);

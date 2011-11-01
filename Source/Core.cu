@@ -371,7 +371,7 @@ void BindConstants(CScene* pScene)
 
 	HandleCudaError(cudaMemcpyToSymbol("gDensityScale", &DensityScale, sizeof(float)));
 	
-	const float GradientDelta		= 1.0f * pScene->m_GradientDelta;
+	const float GradientDelta		= pScene->m_GradientDelta;
 	const float InvGradientDelta	= 1.0f / GradientDelta;
 	const Vec3f GradientDeltaX(GradientDelta, 0.0f, 0.0f);
 	const Vec3f GradientDeltaY(0.0f, GradientDelta, 0.0f);
@@ -391,7 +391,7 @@ void BindConstants(CScene* pScene)
 	HandleCudaError(cudaMemcpyToSymbol("gFilmHeight", &Filmheight, sizeof(int)));
 	HandleCudaError(cudaMemcpyToSymbol("gFilmNoPixels", &FilmNoPixels, sizeof(int)));
 
-	const int FilterWidth = 1;
+	const int FilterWidth = 2;
 
 	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
 
@@ -445,6 +445,8 @@ void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurI
 	HandleCudaError(cudaMalloc(&pDevView, sizeof(CCudaView)));
 	HandleCudaError(cudaMemcpy(pDevView, &gRenderCanvasView, sizeof(CCudaView), cudaMemcpyHostToDevice));
 
+//	if (Scene.GetNoIterations() == 1)
+//		CreateZBuffer(&Scene, pDevScene, pDevView);
 	
 	CCudaTimer TmrRender;
 	

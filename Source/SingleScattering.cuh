@@ -33,17 +33,16 @@ KERNEL void KrnlSingleScattering(CScene* pScene, CCudaView* pView)
 
  	pScene->m_Camera.GenerateRay(UV, RNG.Get2(), Re.m_O, Re.m_D);
 
-	const float Radius = 150.0f;
-
-	const float p = Radius * sin((Y / (float)gFilmHeight) * PI_F);
-
-	Re.m_MinT = 0.0f; 
+	Re.m_MinT = 0.0f;//pView->m_ZBuffer.Get(X, Y)-0.01f; 
 	Re.m_MaxT = INF_MAX;
 
 	Vec3f Pe, Pl;
 	
 	CLight* pLight = NULL;
 	
+	if (Re.m_MinT == INF_MAX)
+		return;
+
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))

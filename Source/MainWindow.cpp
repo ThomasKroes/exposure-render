@@ -39,7 +39,8 @@ CMainWindow::CMainWindow() :
 	m_AppearanceDockWidget(),
 	m_StatisticsDockWidget(),
 	m_CameraDockWidget(),
-	m_SettingsDockWidget()
+	m_SettingsDockWidget(),
+	m_SlicingDockWidget()
 {
 	gpMainWindow = this;
 
@@ -131,45 +132,37 @@ void CMainWindow::CreateStatusBar()
 
 void CMainWindow::SetupDockingWidgets()
 {
-	// Lighting dock widget
 	m_LightingDockWidget.setEnabled(false);
     m_LightingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_LightingDockWidget);
     m_pViewMenu->addAction(m_LightingDockWidget.toggleViewAction());
 
-	// Appearance dock widget
 	m_AppearanceDockWidget.setEnabled(false);
 	m_AppearanceDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::LeftDockWidgetArea, &m_AppearanceDockWidget);
     m_pViewMenu->addAction(m_AppearanceDockWidget.toggleViewAction());
 
-	// Camera dock widget
 	m_CameraDockWidget.setEnabled(false);
 	m_CameraDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_CameraDockWidget);
     m_pViewMenu->addAction(m_CameraDockWidget.toggleViewAction());
 
-	// Log dock widget
 	m_LogDockWidget.setEnabled(false);
 	m_LogDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::RightDockWidgetArea, &m_LogDockWidget);
 	m_pViewMenu->addAction(m_LogDockWidget.toggleViewAction());
 
-	// Statistics dock widget
 	m_StatisticsDockWidget.setEnabled(false);
 	m_StatisticsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, &m_StatisticsDockWidget);
     m_pViewMenu->addAction(m_StatisticsDockWidget.toggleViewAction());
 
-	// Settings dock widget
-// 	m_SettingsDockWidget.setEnabled(false);
-// 	m_SettingsDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
-//  addDockWidget(Qt::LeftDockWidgetArea, &m_SettingsDockWidget);
-//  m_pViewMenu->addAction(m_SettingsDockWidget.toggleViewAction());
-
+	m_SlicingDockWidget.setEnabled(false);
+	m_SlicingDockWidget.setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::RightDockWidgetArea, &m_SlicingDockWidget);
+    m_pViewMenu->addAction(m_SlicingDockWidget.toggleViewAction());
+	
 	tabifyDockWidget(&m_AppearanceDockWidget, &m_LightingDockWidget);
-//	tabifyDockWidget(&m_LightingDockWidget, &m_CameraDockWidget);
-//	tabifyDockWidget(&m_CameraDockWidget, &m_SettingsDockWidget);
 
 	m_AppearanceDockWidget.raise();
 }
@@ -291,6 +284,7 @@ void CMainWindow::OnRenderBegin(void)
 	m_CameraDockWidget.setEnabled(true);
 	m_SettingsDockWidget.setEnabled(true);
 	m_LogDockWidget.setEnabled(true);
+	m_SlicingDockWidget.setEnabled(true);
 }
 
 void CMainWindow::OnRenderEnd(void)
@@ -309,6 +303,7 @@ void CMainWindow::OnRenderEnd(void)
 	m_CameraDockWidget.setEnabled(false);
 	m_SettingsDockWidget.setEnabled(false);
 	m_LogDockWidget.setEnabled(false);
+	m_SlicingDockWidget.setEnabled(false);
 }
 
 void CMainWindow::ShowStartupDialog(void)
