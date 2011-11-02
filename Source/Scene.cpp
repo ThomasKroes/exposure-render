@@ -38,7 +38,9 @@ CScene::CScene(void) :
 {
 	Vec4<int> Color;
 
-	
+	m_Slicing.m_Slices[0].m_P = Vec3f(0.5f, 0.5f, 0.5f);
+	m_Slicing.m_Slices[0].m_N = Vec3f(0.5f, 0.5f, 0.5f);
+	m_Slicing.m_NoSlices = 1;
 }
 
 CScene::CScene(const CScene& Other)

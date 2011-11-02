@@ -13,17 +13,20 @@
 
 #pragma once
 
-class QSlicingWidget : public QGroupBox
+class QSlice : public QObject
 {
     Q_OBJECT
 
 public:
-    QSlicingWidget(QWidget* pParent = NULL);
+    QSlice(QObject* pParent = NULL);
 
 	virtual QSize sizeHint() const { return QSize(10, 10); }
 
 public slots:
 
-protected:
-	QGridLayout			m_MainLayout;
+private:
+	Vec3f	m_P;
+	Vec3f	m_N;
+	CRange	m_IntensityRange;
+	bool	m_Reversed;
 };

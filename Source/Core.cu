@@ -13,6 +13,8 @@
 
 #include "Core.cuh"
 
+#include "Slice.cuh"
+
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
 texture<float, cudaTextureType3D, cudaReadModeElementType>			gTexExtinction;
@@ -66,6 +68,7 @@ CD float		gDenoiseLerpC;
 CD float		gNoIterations;
 CD float		gInvNoIterations;
 CD bool			gShadows;
+CD CSlicing		gSlicing;
 
 #define TF_NO_SAMPLES		128
 #define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
@@ -426,6 +429,9 @@ void BindConstants(CScene* pScene)
 	const bool Shadows = pScene->GetNoIterations() > 0;
 
 	HandleCudaError(cudaMemcpyToSymbol("gShadows", &Shadows, sizeof(bool)));
+
+	HandleCudaError(cudaMemcpyToSymbol("gSlicing", &pScene->m_Slicing, sizeof(CSlicing)));
+	
 }
 
 void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)

@@ -555,6 +555,8 @@ public:
 class EXPOSURE_RENDER_DLL Vec3f
 {
 public:
+#if defined __CUDACC__
+
 	HOD Vec3f(void)
 	{
 		x = 0.0f;
@@ -582,7 +584,7 @@ public:
 		this->y = xyz;
 		this->z = xyz;
 	}
-
+#endif
 	HOD float operator[](int i) const
 	{
 		return (&x)[i];

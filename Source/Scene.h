@@ -17,6 +17,7 @@
 #include "Flags.h"
 #include "Camera.cuh"
 #include "Lighting.cuh"
+#include "Slice.cuh"
 
 class EXPOSURE_RENDER_DLL CDenoiseParams
 {
@@ -81,6 +82,7 @@ public:
 	float				m_GradientDelta;
 	float				m_GradientFactor;
 	float				m_GradMagMean;
+	CSlicing			m_Slicing;
 
 	HOD int GetNoIterations(void) const					{ return m_NoIterations;			}
 	HOD void SetNoIterations(const int& NoIterations)	{ m_NoIterations = NoIterations;	}

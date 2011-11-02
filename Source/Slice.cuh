@@ -13,17 +13,36 @@
 
 #pragma once
 
-class QSlicingWidget : public QGroupBox
+#include "Geometry.h"
+
+#define MAX_NO_SLICES	10
+
+struct EXPOSURE_RENDER_DLL CSlice
 {
-    Q_OBJECT
+	bool Contains(const Vec3f& P)
+	{
+		return Dot(P - m_P, m_N) > 0.0f;
+	}
 
-public:
-    QSlicingWidget(QWidget* pParent = NULL);
+	Vec3f	m_P;
+	Vec3f	m_N;
+//	CRange	m_IntensityRange;
+	bool	m_Reversed;
+};
 
-	virtual QSize sizeHint() const { return QSize(10, 10); }
+struct EXPOSURE_RENDER_DLL CSlicing
+{
+	HOD bool Contains(const Vec3f& P)
+	{
+		for (int i = 0; i < MAX_NO_SLICES; i++)
+		{
+			if (m_Slices[i].Contains(P))
+				return true;
+		}
 
-public slots:
+		return false;
+	}
 
-protected:
-	QGridLayout			m_MainLayout;
+	CSlice	m_Slices[MAX_NO_SLICES];
+	int		m_NoSlices;
 };

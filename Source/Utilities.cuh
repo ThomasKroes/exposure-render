@@ -34,7 +34,10 @@ DEV float GetOpacity(const float& NormalizedIntensity)
 
 DEV float GetOpacity(const Vec3f& P)
 {
-	return P.x > 0.4f && P.y > 0.2f && P.z > 0.2f? GetOpacity(GetNormalizedIntensity(P)) : 0.0f;
+	if (!gSlicing.Contains(P))
+		return 0.0f;
+	else
+		return GetOpacity(GetNormalizedIntensity(P));
 }
 
 DEV ColorXYZf GetDiffuse(const float& NormalizedIntensity)

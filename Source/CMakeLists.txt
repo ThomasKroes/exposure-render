@@ -140,6 +140,7 @@ SET(ExposureRenderSources
 	# Slicing
 	SlicingDockWidget.cpp
 	SlicingWidget.cpp
+	Slice.cpp
 
 	# Core
 	Stable.cpp
@@ -228,6 +229,7 @@ SET(ExposureRenderHeaders
 	# Slicing
 	SlicingDockWidget.h
 	SlicingWidget.h
+	Slice.h
 
 	# Core
 	Stable.h
@@ -311,6 +313,7 @@ SET(ExposureRenderMocHeaders
 	# Slicing
 	SlicingDockWidget.h
 	SlicingWidget.h
+	Slice.h
 
 	# Core
 	RenderThread.h
@@ -512,8 +515,10 @@ SOURCE_GROUP("Statistics" FILES ${StatisticsSources})
 SET(SlicingSources
 	SlicingDockWidget.h
 	SlicingWidget.h
+	Slice.h
 	SlicingDockWidget.cpp
 	SlicingWidget.cpp
+	Slice.cpp
 )
 
 # Make the statistics group
@@ -580,6 +585,7 @@ SET(CudaSources
 	Camera.cuh
 	Lighting.cuh
 	MonteCarlo.cuh
+	Slice.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp
