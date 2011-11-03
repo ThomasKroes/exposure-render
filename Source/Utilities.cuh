@@ -34,7 +34,7 @@ DEV float GetOpacity(const float& NormalizedIntensity)
 
 DEV float GetOpacity(const Vec3f& P)
 {
-	if (!gSlicing.Contains(P))
+	if (!gpSlicing->Contains(P))
 		return 0.0f;
 	else
 		return GetOpacity(GetNormalizedIntensity(P));

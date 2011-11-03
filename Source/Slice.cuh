@@ -26,7 +26,8 @@ struct EXPOSURE_RENDER_DLL CSlice
 
 	Vec3f	m_P;
 	Vec3f	m_N;
-//	CRange	m_IntensityRange;
+	float	m_IntensityRangeMin;
+	float	m_IntensityRangeMax;
 	bool	m_Reversed;
 };
 
@@ -34,6 +35,8 @@ struct EXPOSURE_RENDER_DLL CSlicing
 {
 	HOD bool Contains(const Vec3f& P)
 	{
+		return m_Slices[0].Contains(P);
+
 		for (int i = 0; i < MAX_NO_SLICES; i++)
 		{
 			if (m_Slices[i].Contains(P))

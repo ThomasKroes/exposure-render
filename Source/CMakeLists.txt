@@ -155,7 +155,6 @@ SET(ExposureRenderSources
 	CudaUtilities.cpp
 	Status.cpp
 	Timing.cpp
-	Variance.cpp
 	VolumeMapper.cpp
 
 	# Logging
@@ -248,7 +247,6 @@ SET(ExposureRenderHeaders
 	CudaUtilities.h
 	Status.h
 	Timing.h
-	Variance.h
 	VolumeMapper.h
 
 	# Logging
@@ -540,7 +538,6 @@ SET(CoreSources
 	Utilities.h
 	Status.h
 	Timing.h
-	Variance.h
 	VolumeMapper.h
 	Stable.cpp
 	Flags.cpp
@@ -553,7 +550,6 @@ SET(CoreSources
 	Utilities.cpp
 	Status.cpp
 	Timing.cpp
-	Variance.cpp
 	VolumeMapper.cpp
 )
 

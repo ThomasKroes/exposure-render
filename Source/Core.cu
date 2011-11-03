@@ -68,7 +68,8 @@ CD float		gDenoiseLerpC;
 CD float		gNoIterations;
 CD float		gInvNoIterations;
 CD bool			gShadows;
-CD CSlicing		gSlicing;
+
+CD CSlicing*	gpSlicing;
 
 #define TF_NO_SAMPLES		128
 #define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
@@ -429,9 +430,6 @@ void BindConstants(CScene* pScene)
 	const bool Shadows = pScene->GetNoIterations() > 0;
 
 	HandleCudaError(cudaMemcpyToSymbol("gShadows", &Shadows, sizeof(bool)));
-
-	HandleCudaError(cudaMemcpyToSymbol("gSlicing", &pScene->m_Slicing, sizeof(CSlicing)));
-	
 }
 
 void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
@@ -450,7 +448,10 @@ void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurI
 
 	HandleCudaError(cudaMalloc(&pDevView, sizeof(CCudaView)));
 	HandleCudaError(cudaMemcpy(pDevView, &gRenderCanvasView, sizeof(CCudaView), cudaMemcpyHostToDevice));
-
+	
+	HandleCudaError(cudaMalloc(&gpSlicing, sizeof(CSlicing)));
+	HandleCudaError(cudaMemcpy(gpSlicing, &Scene.m_Slicing, sizeof(CSlicing), cudaMemcpyHostToDevice));
+	
 //	if (Scene.GetNoIterations() == 1)
 //		CreateZBuffer(&Scene, pDevScene, pDevView);
 	
@@ -489,4 +490,5 @@ void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurI
 
 	HandleCudaError(cudaFree(pDevScene));
 	HandleCudaError(cudaFree(pDevView));
+	HandleCudaError(cudaFree(gpSlicing));
 }
