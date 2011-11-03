@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "Variance.h"
-
 class QFrameBuffer
 {
 public:
