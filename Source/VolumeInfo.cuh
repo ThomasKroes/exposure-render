@@ -17,12 +17,12 @@
 
 struct EXPOSURE_RENDER_DLL VolumeInfo
 {
-	Vec3f	m_Extent;
-	Vec3f	m_InvExtent;
-	Vec3f	m_MinAABB;
-	Vec3f	m_MaxAABB;
-	Vec3f	m_InvMinAABB;
-	Vec3f	m_InvMaxAABB;
+	float3	m_Extent;
+	float3	m_InvExtent;
+	float3	m_MinAABB;
+	float3	m_MaxAABB;
+	float3	m_InvMinAABB;
+	float3	m_InvMaxAABB;
 	float	m_IntensityMin;
 	float	m_IntensityMax;
 	float	m_IntensityRange;
@@ -32,9 +32,9 @@ struct EXPOSURE_RENDER_DLL VolumeInfo
 	float	m_DensityScale;
 	float	m_GradientDelta;
 	float	m_InvGradientDelta;
-	Vec3f	m_GradientDeltaX;
-	Vec3f	m_GradientDeltaY;
-	Vec3f	m_GradientDeltaZ;
-	Vec3f	m_Spacing;
-	Vec3f	m_InvSpacing;
+	float3	m_GradientDeltaX;
+	float3	m_GradientDeltaY;
+	float3	m_GradientDeltaZ;
+	float3	m_Spacing;
+	float3	m_InvSpacing;
 };

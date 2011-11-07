@@ -36,6 +36,8 @@ cudaArray* gpSpecularArray				= NULL;
 cudaArray* gpRoughnessArray				= NULL;
 cudaArray* gpEmissionArray				= NULL;
 
+CD VolumeInfo	gVolumeInfo;
+
 #define TF_NO_SAMPLES		128
 #define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
 
@@ -276,28 +278,30 @@ void UnbindTransferFunctionEmission(void)
 
 void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
-	VolumeInfo*		pDevVolumeInfo	= NULL;
+	HandleCudaError(cudaMemcpyToSymbol("gVolumeInfo", pVolumeInfo, sizeof(VolumeInfo)));
+
+//	VolumeInfo*		pDevVolumeInfo	= NULL;
 	RenderInfo*		pDevRenderInfo	= NULL;
 	FrameBuffer*	pDevFrameBuffer	= NULL;
 
-	HandleCudaError(cudaMalloc(&pDevVolumeInfo, sizeof(VolumeInfo)));
+//	HandleCudaError(cudaMalloc(&pDevVolumeInfo, sizeof(VolumeInfo)));
 	HandleCudaError(cudaMalloc(&pDevRenderInfo, sizeof(RenderInfo)));
 	HandleCudaError(cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer)));
 
-	HandleCudaError(cudaMemcpy(pDevVolumeInfo, pVolumeInfo, sizeof(VolumeInfo), cudaMemcpyHostToDevice));
+//	HandleCudaError(cudaMemcpy(pDevVolumeInfo, pVolumeInfo, sizeof(VolumeInfo), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaMemcpy(pDevRenderInfo, pRenderInfo, sizeof(RenderInfo), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaMemcpy(pDevFrameBuffer, pFrameBuffer, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 
 	const dim3 BlockDim(8, 8);
 	const dim3 GridDim((int)ceilf((float)pRenderInfo->m_FilmWidth / (float)BlockDim.x), (int)ceilf((float)pRenderInfo->m_FilmHeight / (float)BlockDim.y));
 
-	SingleScattering(BlockDim, GridDim, pDevVolumeInfo, pDevRenderInfo, pDevFrameBuffer);
+	SingleScattering(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
 //	Blur(BlockDim, GridDim, pDevRenderInfo);
 //	Estimate(BlockDim, GridDim, pDevRenderInfo);
 //	ToneMap(BlockDim, GridDim, pDevRenderInfo);
 //	Denoise(BlockDim, GridDim, pDevRenderInfo);
 
-	HandleCudaError(cudaFree(pDevVolumeInfo));
+//	HandleCudaError(cudaFree(pDevVolumeInfo));
 	HandleCudaError(cudaFree(pDevRenderInfo));
 	HandleCudaError(cudaFree(pDevFrameBuffer));
 }

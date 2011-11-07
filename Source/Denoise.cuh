@@ -14,6 +14,10 @@
 #include "Utilities.cuh"
 #include "CudaUtilities.h"
 
+#define KRNL_DENOISE_BLOCK_W		16
+#define KRNL_DENOISE_BLOCK_H		8
+#define KRNL_DENOISE_BLOCK_SIZE		KRNL_DENOISE_BLOCK_W * KRNL_DENOISE_BLOCK_H
+
 DEV float lerpf(float a, float b, float c){
 	return a + (b - a) * c;
 }
@@ -84,8 +88,11 @@ KERNEL void KrnlDenoise(RenderInfo* pRenderInfo)
 	*/
 }
 
-void Denoise(dim3 BlockDim, dim3 GridDim, RenderInfo* pDevRenderInfo)
+void Denoise(RenderInfo* pDevRenderInfo, int Width, int Height)
 {
+	const dim3 BlockDim(KRNL_DENOISE_BLOCK_W, KRNL_DENOISE_BLOCK_H);
+	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+
 	KrnlDenoise<<<GridDim, BlockDim>>>(pDevRenderInfo);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Noise Reduction");

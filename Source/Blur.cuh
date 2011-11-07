@@ -17,6 +17,10 @@
 #include "CudaUtilities.h"
 #include "cutil_math.h"
 
+#define KRNL_BLUR_BLOCK_W		16
+#define KRNL_BLUR_BLOCK_H		8
+#define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
+
 KERNEL void KrnlBlurH(RenderInfo* pRenderInfo)
 {
 	/*
@@ -93,8 +97,11 @@ KERNEL void KrnlBlurV(RenderInfo* pRenderInfo)
 	*/
 }
 
-void Blur(dim3 BlockDim, dim3 GridDim, RenderInfo* pDevRenderInfo)
+void Blur(RenderInfo* pDevRenderInfo, int Width, int Height)
 {
+	const dim3 BlockDim(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
+	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+
 	KrnlBlurH<<<GridDim, BlockDim>>>(pDevRenderInfo);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate H");

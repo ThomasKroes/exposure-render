@@ -35,6 +35,9 @@ vtkCudaVolumeInfo::~vtkCudaVolumeInfo()
 
 void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 {
+	if (m_pIntensity != NULL)
+		return;
+
     if (pInputData == NULL)
     {
 //        this->CudaInputBuffer.Free();
@@ -104,9 +107,9 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_InvMinAABB.y	= 0.0f;
 		m_VolumeInfo.m_InvMinAABB.z	= 0.0f;
 
-		m_VolumeInfo.m_MaxAABB.x	= 1.0f;//PhysicalSize.x / PhysicalSize.Max();
-		m_VolumeInfo.m_MaxAABB.y	= 1.0f;//PhysicalSize.y / PhysicalSize.Max();
-		m_VolumeInfo.m_MaxAABB.z	= 1.0f;//PhysicalSize.z / PhysicalSize.Max();
+		m_VolumeInfo.m_MaxAABB.x	= PhysicalSize.x / PhysicalSize.Max();
+		m_VolumeInfo.m_MaxAABB.y	= PhysicalSize.y / PhysicalSize.Max();
+		m_VolumeInfo.m_MaxAABB.z	= PhysicalSize.z / PhysicalSize.Max();
 
 		m_VolumeInfo.m_InvMaxAABB.x	= 1.0f / m_VolumeInfo.m_MaxAABB.x;
 		m_VolumeInfo.m_InvMaxAABB.y	= 1.0f / m_VolumeInfo.m_MaxAABB.y;
@@ -117,8 +120,8 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_GradientDelta	= m_VolumeInfo.m_Spacing.x;
 		m_VolumeInfo.m_InvGradientDelta	= 1.0f / m_VolumeInfo.m_GradientDelta;
 		
-		m_VolumeInfo.m_StepSize			= m_VolumeInfo.m_Spacing.x;
-		m_VolumeInfo.m_StepSizeShadow	= m_VolumeInfo.m_Spacing.x;
+		m_VolumeInfo.m_StepSize			= 0.1f;
+		m_VolumeInfo.m_StepSizeShadow	= 0.1f;
 
 		m_VolumeInfo.m_GradientDeltaX.x = m_VolumeInfo.m_GradientDelta;
 		m_VolumeInfo.m_GradientDeltaX.y = 0.0f;
@@ -136,7 +139,7 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 		BindGradientMagnitudeBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
     }
 
-    this->Modified();
+//    this->Modified();
 }
 
 void vtkCudaVolumeInfo::Update()

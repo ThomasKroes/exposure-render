@@ -67,5 +67,6 @@ protected:
 
 	CHostBuffer2D<ColorRGBAuc>	m_Host;
 //	CCudaView	m_CudaView;
+	unsigned int TextureID;
 };
 /**/

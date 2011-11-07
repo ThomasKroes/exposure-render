@@ -16,6 +16,10 @@
 #include "Geometry.h"
 #include "Variance.h"
 
+#define KRNL_TONE_MAP_BLOCK_W		16
+#define KRNL_TONE_MAP_BLOCK_H		8
+#define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
+
 KERNEL void KrnlToneMap(RenderInfo* pRenderInfo)
 {
 	/*
@@ -43,8 +47,11 @@ KERNEL void KrnlToneMap(RenderInfo* pRenderInfo)
 	*/
 }
 
-void ToneMap(dim3 BlockDim, dim3 GridDim, RenderInfo* pDevRenderInfo)
+void ToneMap(RenderInfo* pDevRenderInfo, int Width, int Height)
 {
+	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
+	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+
 	KrnlToneMap<<<GridDim, BlockDim>>>(pDevRenderInfo);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Tone Map");

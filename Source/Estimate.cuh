@@ -15,6 +15,10 @@
 
 #include "Geometry.h"
 
+#define KRNL_ESTIMATE_BLOCK_W		16
+#define KRNL_ESTIMATE_BLOCK_H		8
+#define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
+
 KERNEL void KrnlEstimate(RenderInfo* pRenderInfo)
 {
 	/*
@@ -28,8 +32,11 @@ KERNEL void KrnlEstimate(RenderInfo* pRenderInfo)
 	*/
 }
 
-void Estimate(dim3 BlockDim, dim3 GridDim, RenderInfo* pDevRenderInfo)
+void Estimate(RenderInfo* pDevRenderInfo, int Width, int Height)
 {
+	const dim3 BlockDim(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
+	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+
 	KrnlEstimate<<<GridDim, BlockDim>>>(pDevRenderInfo);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Compute Estimate");

@@ -20,24 +20,24 @@ DEV inline Vec3f ToVec3f(const float3& V)
 	return Vec3f(V.x, V.y, V.z);
 }
 
-DEV float GetNormalizedIntensity(const Vec3f& P, VolumeInfo& VI)
+DEV float GetNormalizedIntensity(const Vec3f& P)
 {
-	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, P.x * VI.m_InvMaxAABB.x, P.y * VI.m_InvMaxAABB.y, P.z * VI.m_InvMaxAABB.z));
+	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, P.x * gVolumeInfo.m_InvMaxAABB.x, P.y * gVolumeInfo.m_InvMaxAABB.y, P.z * gVolumeInfo.m_InvMaxAABB.z));
 
-	return (Intensity - VI.m_IntensityMin) * VI.m_IntensityInvRange;
+	return (Intensity - gVolumeInfo.m_IntensityMin) * gVolumeInfo.m_IntensityInvRange;
 }
 
 DEV float GetOpacity(const float& NormalizedIntensity)
 {
-	return tex1D(gTexOpacity, NormalizedIntensity);
+	return NormalizedIntensity > 0.1f ? 0.001f : 0.0f;//tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEV float GetOpacity(const Vec3f& P, VolumeInfo& VI)
+DEV float GetOpacity(const Vec3f& P)
 {
 //	if (!gSlicing.Contains(P))
 //		return 0.0f;
 //	else
-		return GetOpacity(GetNormalizedIntensity(P, VI));
+		return GetOpacity(GetNormalizedIntensity(P));
 }
 
 DEV ColorXYZf GetDiffuse(const float& NormalizedIntensity)
@@ -67,23 +67,23 @@ DEV inline Vec3f NormalizedGradient(const Vec3f& P, VolumeInfo& VI)
 {
 	Vec3f Gradient;
 
-	Gradient.x = (GetNormalizedIntensity(P + VI.m_GradientDeltaX, VI) - GetNormalizedIntensity(P - VI.m_GradientDeltaX, VI)) * VI.m_InvGradientDelta;
-	Gradient.y = (GetNormalizedIntensity(P + VI.m_GradientDeltaY, VI) - GetNormalizedIntensity(P - VI.m_GradientDeltaY, VI)) * VI.m_InvGradientDelta;
-	Gradient.z = (GetNormalizedIntensity(P + VI.m_GradientDeltaZ, VI) - GetNormalizedIntensity(P - VI.m_GradientDeltaZ, VI)) * VI.m_InvGradientDelta;
+	Gradient.x = (GetNormalizedIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaX)) - GetNormalizedIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaX))) * gVolumeInfo.m_InvGradientDelta;
+	Gradient.y = (GetNormalizedIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaY)) - GetNormalizedIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaY))) * gVolumeInfo.m_InvGradientDelta;
+	Gradient.z = (GetNormalizedIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaZ)) - GetNormalizedIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaZ))) * gVolumeInfo.m_InvGradientDelta;
 
 	return Normalize(Gradient);
 }
 
-DEV float GradientMagnitude(const Vec3f& P, VolumeInfo& VI)
+DEV float GradientMagnitude(const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * VI.m_InvMaxAABB.x, P.y * VI.m_InvMaxAABB.y, P.z * VI.m_InvMaxAABB.z));
+	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolumeInfo.m_InvMaxAABB.x, P.y * gVolumeInfo.m_InvMaxAABB.y, P.z * gVolumeInfo.m_InvMaxAABB.z));
 }
 
-DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT, VolumeInfo& VI)
+DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * (VI.m_MinAABB - R.m_O);
-	const Vec3f TopT		= InvR * (VI.m_MaxAABB - R.m_O);
+	const Vec3f BottomT		= InvR * (Vec3f(gVolumeInfo.m_MinAABB.x, gVolumeInfo.m_MinAABB.y, gVolumeInfo.m_MinAABB.z) - R.m_O);
+	const Vec3f TopT		= InvR * (Vec3f(gVolumeInfo.m_MaxAABB.x, gVolumeInfo.m_MaxAABB.y, gVolumeInfo.m_MaxAABB.z) - R.m_O);
 	const Vec3f MinT		= MinVec3f(TopT, BottomT);
 	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));

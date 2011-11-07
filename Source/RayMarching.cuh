@@ -16,21 +16,20 @@
 #include "Geometry.h"
 #include "CudaUtilities.h"
 
-#define KRNL_SS_BLOCK_W		16
-#define KRNL_SS_BLOCK_H		8
-#define KRNL_SS_BLOCK_SIZE	KRNL_SS_BLOCK_W * KRNL_SS_BLOCK_H
+#define KRNL_SINGLE_SCATTERING_BLOCK_W		16
+#define KRNL_SINGLE_SCATTERING_BLOCK_H		8
+#define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
 
 DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 {
-	/*
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
-	__shared__ float MinT[KRNL_SS_BLOCK_SIZE];
-	__shared__ float MaxT[KRNL_SS_BLOCK_SIZE];
+	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
+	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
 	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
-	 
+
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
@@ -52,21 +51,19 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 		Sum			+= SigmaT * gVolumeInfo.m_StepSize;
 		MinT[TID]	+= gVolumeInfo.m_StepSize;
 	}
-	*/
 
 	return true;
 }
 
 DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 {
-	/*
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
-	__shared__ float MinT[KRNL_SS_BLOCK_SIZE];
-	__shared__ float MaxT[KRNL_SS_BLOCK_SIZE];
-	__shared__ Vec3f Ps[KRNL_SS_BLOCK_SIZE];
+	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
+	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
+	__shared__ Vec3f Ps[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]) || !gRenderInfo.m_Shadows)
+	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
 
 	MinT[TID] = max(MinT[TID], R.m_MinT);
@@ -90,7 +87,6 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 		Sum			+= SigmaT * gVolumeInfo.m_StepSizeShadow;
 		MinT[TID]	+= gVolumeInfo.m_StepSizeShadow;
 	}
-	*/
 
 	return true;
 }

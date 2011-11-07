@@ -62,7 +62,7 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
   widget->SetOutlineColor( 0.9300, 0.5700, 0.1300 );
 
   vtkCylinderSource *cylinder = vtkCylinderSource::New();
-  cylinder->SetResolution(80);
+  cylinder->SetResolution(800);
 
   vtkCubeSource* pBox = vtkCubeSource::New();
 
@@ -75,7 +75,7 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
   // library. It may also do color mapping, if scalars or other attributes
   // are defined.
   vtkPolyDataMapper *cylinderMapper = vtkPolyDataMapper::New();
-  cylinderMapper->SetInputConnection(pBox->GetOutputPort());
+  cylinderMapper->SetInputConnection(cylinder->GetOutputPort());
 
   // The actor is a grouping mechanism: besides the geometry (mapper), it
   // also has a property, transformation matrix, and/or texture map.
@@ -88,23 +88,14 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 //  cylinderActor->RotateY(-45.0);
  m_SceneRenderer->AddActor(cylinderActor);
 
-   vtkAxesActor* act2 = vtkAxesActor::New();
-
- // widget->SetOrientationMarker( act2 );
-  widget->SetInteractor( m_QtVtkWidget.GetRenderWindow()->GetInteractor() );
-  widget->SetViewport( 0.0, 0.0, 0.2, 0.2 );
-  widget->SetEnabled( 1 );
-   widget->InteractiveOn();
- widget->SetCurrentRenderer(m_SceneRenderer);
-//  renderer->AddActor(superquadricActor);
 
  
- m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.1f);
+ m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.0f);
 
 
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
-	MetaImageReader->SetFileName("C:\\Volumes\\engine_small.mhd");
+	MetaImageReader->SetFileName("C://Volumes//engine_small.mhd");
 
 	MetaImageReader->Update();
 

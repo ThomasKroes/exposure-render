@@ -33,6 +33,10 @@ vtkVolumeCudaMapper::vtkVolumeCudaMapper()
 	m_CudaRenderInfo	= vtkCudaRenderInfo::New();
 
 	SetCudaDevice(0);
+
+	
+
+	glGenTextures(1, &TextureID);
 }  
 
 vtkVolumeCudaMapper::~vtkVolumeCudaMapper()
@@ -48,25 +52,25 @@ void vtkVolumeCudaMapper::SetInput(vtkImageData* input)
 
 void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 {
+	
+
     int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
 
 	/**/
 	m_CudaRenderInfo->SetRenderer(pRenderer);
-
+	
 	m_CudaVolumeInfo->SetInputData(this->GetInput());
-	m_CudaVolumeInfo->SetVolume(pVolume);
+//	m_CudaVolumeInfo->SetVolume(pVolume);
 	m_CudaVolumeInfo->Update();
-
+//	return;
 //	m_CudaRenderInfo->Bind();
-
+	
 	m_Host.Resize(CResolution2D(pWindowSize[0], pWindowSize[1]));
 
 	RenderEstimate(m_CudaVolumeInfo->GetVolumeInfo(), m_CudaRenderInfo->GetRenderInfo(), &m_CudaRenderInfo->m_FrameBuffer);
 
 	cudaMemcpy(m_Host.GetPtr(), m_CudaRenderInfo->m_FrameBuffer.m_EstimateRgbaLdr.GetPtr(), m_Host.GetSize(), cudaMemcpyDeviceToHost);
-	unsigned int TextureID;
-
-	glGenTextures(1, &TextureID);
+	
     glBindTexture(GL_TEXTURE_2D, TextureID);
 	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -77,12 +81,12 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 //	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pWindowSize[0], pWindowSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
  //   glBindTexture(GL_TEXTURE_2D, 0);
 //	lPushAttrib(GL_ENABLE_BIT);
-    glEnable(GL_TEXTURE_2D);
+    
 	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pWindowSize[0], pWindowSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
 	glBindTexture(GL_TEXTURE_2D, TextureID);
-
-	glColor3f(1.0f, 0.0f, 0.0f);
+	glEnable(GL_TEXTURE_2D);
+//	glColor3f(1.0f, 0.0f, 0.0f);
 
     pRenderer->SetDisplayPoint(0,0,0.5);
     pRenderer->DisplayToWorld();

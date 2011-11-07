@@ -15,24 +15,18 @@
 
 #include "Transport.cuh"
 
-KERNEL void KrnlSingleScattering(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
+KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
-
-	
-//	else
-//		Col = ColorRGBAuc(0, 255, 0, 120);
 
 	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
 		return;
 	
 	CRNG RNG(pFrameBuffer->m_RandomSeeds1.GetPtr(X, Y), pFrameBuffer->m_RandomSeeds2.GetPtr(X, Y));
 
-	ColorRGBAuc Col = ColorRGBAuc(RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f);//255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, 150.0f);
+	ColorRGBAuc Col;// = ColorRGBAuc(RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f);//255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, 150.0f);
 
-	
-	
 	Vec2f ScreenPoint;
 
 	ScreenPoint.x = pRenderInfo->m_Camera.m_Screen[0][0] + (pRenderInfo->m_Camera.m_InvScreen.x * (float)X);
@@ -55,42 +49,26 @@ KERNEL void KrnlSingleScattering(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInf
 		Re.m_D = Normalize((Re.m_D * 1.0f) - LI);
 	}
 
-
-
-
-
-
 	float Near = 0.0f, Far = 150000.0f;
 
-	if (IntersectBox(Re, &Near, &Far, *pVolumeInfo))
-		Col = ColorRGBAuc(RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f);
-	else
-		Col = ColorRGBAuc(0, 255, 0, 120);
-	/*	*/
+	/*
 	pFrameBuffer->m_EstimateRgbaLdr.Set(Col, X, Y);
-
-
-/*
-	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
-
-	CRay Re;
 	
-	const Vec2f UV = Vec2f(X, Y) + RNG.Get2();
-
- 	pScene->m_Camera.GenerateRay(UV, RNG.Get2(), Re.m_O, Re.m_D);
-
-	Re.m_MinT = 0.0f;//pView->m_ZBuffer.Get(X, Y)-0.01f; 
-	Re.m_MaxT = INF_MAX;
+	return;
+	*/
+	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	Vec3f Pe, Pl;
 	
 	CLight* pLight = NULL;
-	
-	if (Re.m_MinT == INF_MAX)
-		return;
 
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
+		Col = ColorRGBAuc(255, 255, 255, 120);
+
+//		Lv = ColorXYZf(1.0f);
+
+		/*
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
 		{
 			pView->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
@@ -128,20 +106,29 @@ KERNEL void KrnlSingleScattering(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInf
 				break;
 			}
 		}
+		*/
 	}
 	else
 	{
+		/*
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
 			Lv = Li;
+		*/
+
+		Col = ColorRGBAuc(0, 0, 0, 120);
 	}
 
-	pView->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
-	*/
+	pFrameBuffer->m_EstimateRgbaLdr.Set(Col, X, Y);
+
+	pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
 }
 
-void SingleScattering(dim3 BlockDim, dim3 GridDim, VolumeInfo* pDevVolumeInfo, RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer)
+void SingleScattering(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
 {
-	KrnlSingleScattering<<<GridDim, BlockDim>>>(pDevVolumeInfo, pDevRenderInfo, pFrameBuffer);
+	const dim3 BlockDim(KRNL_SINGLE_SCATTERING_BLOCK_W, KRNL_SINGLE_SCATTERING_BLOCK_H);
+	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+
+	KrnlSingleScattering<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Single Scattering");
 }
