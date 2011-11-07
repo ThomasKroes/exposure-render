@@ -6,7 +6,7 @@
 
 	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-	- Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 	
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
@@ -15,7 +15,6 @@
 
 #include "VtkWidget.h"
 #include "MainWindow.h"
-#include "Scene.h"
 
 #include <vtkMetaImageReader.h>
 #include <vtkVolumeProperty.h>
@@ -74,7 +73,7 @@ CVtkWidget::CVtkWidget(QWidget* pParent) :
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 	QObject::connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 
-	SetupRenderView();
+///	SetupRenderView();
 }
 
 QVTKWidget* CVtkWidget::GetQtVtkWidget(void)
@@ -84,17 +83,17 @@ QVTKWidget* CVtkWidget::GetQtVtkWidget(void)
 
 void CVtkWidget::OnRenderBegin(void)
 {
-	
+	/*
 	// Scale
 	m_SceneRenderer->GetActiveCamera()->SetParallelScale(500.0f);
 
 	m_ImageImport->SetDataSpacing(1, 1, 1);
-	m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResY(), 0);
+//	m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResY(), 0);
 
 	m_pPixels = (unsigned char*)malloc(4 * 2048 * 2048 * sizeof(unsigned char));
 
 	m_ImageImport->SetImportVoidPointer((void*)m_pPixels, 1);
-	m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, gScene.m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
+//	m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, gScene.m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
 	m_ImageImport->SetDataExtentToWholeExtent();
 	m_ImageImport->SetDataScalarTypeToUnsignedChar();
 	m_ImageImport->SetNumberOfScalarComponents(3);
@@ -110,14 +109,17 @@ void CVtkWidget::OnRenderBegin(void)
 	
 	// Start the timer
 	m_RenderLoopTimer.start(1000.0f / 25.0f);
+	*/
 }
 
 //http://agl.unm.edu/rpf/
 
 void CVtkWidget::OnRenderEnd(void)
 {
+	/*
 	m_ImageActor->VisibilityOff();
 	m_RenderWindow->Render();
+	*/
 }
 
 void CVtkWidget::SetupRenderView(void)
@@ -160,6 +162,7 @@ void CVtkWidget::SetupRenderView(void)
 
 void CVtkWidget::OnRenderLoopTimer(void)
 {
+	/*
 	if (!gpRenderThread)
 		return;
 
@@ -182,4 +185,5 @@ void CVtkWidget::OnRenderLoopTimer(void)
 	m_ImageActor->SetInput(m_ImageImport->GetOutput());
 
 	m_RenderWindow->GetInteractor()->Render();
+	*/
 }

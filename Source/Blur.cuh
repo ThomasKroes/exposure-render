@@ -6,7 +6,7 @@
 
 	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-	- Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 	
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
@@ -14,30 +14,26 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Scene.h"
 #include "CudaUtilities.h"
 #include "cutil_math.h"
 
-#define KRNL_BLUR_BLOCK_W		16
-#define KRNL_BLUR_BLOCK_H		8
-#define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
-
-KERNEL void KrnlBlurH(CCudaView* pView)
+KERNEL void KrnlBlurH(RenderInfo* pRenderInfo)
 {
+	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= gFilmWidth || Y >= gFilmHeight)
+	if (X >= gRenderInfo.m_FilmWidth || Y >= gRenderInfo.m_FilmHeight)
 		return;
 
-	const int X0 = max((int)ceilf(X - gFilterWidth), 0);
-	const int X1 = min((int)floorf(X + gFilterWidth), (int)gFilmWidth - 1);
+	const int X0 = max((int)ceilf(X - gRenderInfo.m_FilterWidth), 0);
+	const int X1 = min((int)floorf(X + gRenderInfo.m_FilterWidth), (int)gRenderInfo.m_FilmWidth - 1);
 
 	ColorXYZAf Sum;
 
-	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
-	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
+	__shared__ float FW[KRNL_BLOCK_SIZE];
+	__shared__ float SumW[KRNL_BLOCK_SIZE];
 
 	__syncthreads();
 
@@ -46,7 +42,7 @@ KERNEL void KrnlBlurH(CCudaView* pView)
 
 	for (int x = X0; x <= X1; x++)
 	{
-		FW[TID] = gFilterWeights[(int)fabs((float)x - X)];
+		FW[TID] = gRenderInfo.m_FilterWeights[(int)fabs((float)x - X)];
 
 		Sum			+= pView->m_FrameEstimateXyza.Get(x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
@@ -56,24 +52,26 @@ KERNEL void KrnlBlurH(CCudaView* pView)
 		pView->m_FrameBlurXyza.Set(Sum / SumW[TID], X, Y);
 	else
 		pView->m_FrameBlurXyza.Set(ColorXYZAf(0.0f), X, Y);
+	*/
 }
 
-KERNEL void KrnlBlurV(CCudaView* pView)
+KERNEL void KrnlBlurV(RenderInfo* pRenderInfo)
 {
+	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= gFilmWidth || Y >= gFilmHeight)
+	if (X >= gRenderInfo.m_FilmWidth || Y >= gRenderInfo.m_FilmHeight)
 		return;
 
-	const int Y0 = max((int)ceilf (Y - gFilterWidth), 0);
-	const int Y1 = min((int)floorf(Y + gFilterWidth), gFilmHeight - 1);
+	const int Y0 = max((int)ceilf (Y - gRenderInfo.m_FilterWidth), 0);
+	const int Y1 = min((int)floorf(Y + gRenderInfo.m_FilterWidth), gRenderInfo.m_FilmHeight - 1);
 
 	ColorXYZAf Sum;
 
-	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
-	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
+	__shared__ float FW[KRNL_BLOCK_SIZE];
+	__shared__ float SumW[KRNL_BLOCK_SIZE];
 
 	__syncthreads();
 
@@ -82,7 +80,7 @@ KERNEL void KrnlBlurV(CCudaView* pView)
 
 	for (int y = Y0; y <= Y1; y++)
 	{
-		FW[TID] = gFilterWeights[(int)fabs((float)y - Y)];
+		FW[TID] = gRenderInfo.m_FilterWeights[(int)fabs((float)y - Y)];
 
 		Sum			+= pView->m_FrameBlurXyza.Get(X, y) * FW[TID];
 		SumW[TID]	+= FW[TID];
@@ -92,18 +90,16 @@ KERNEL void KrnlBlurV(CCudaView* pView)
 		pView->m_FrameEstimateXyza.Set(Sum / SumW[TID], X, Y);
 	else
 		pView->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
+	*/
 }
 
-void Blur(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)
+void Blur(dim3 BlockDim, dim3 GridDim, RenderInfo* pDevRenderInfo)
 {
-	const dim3 KernelBlock(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
-	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResX() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.m_Resolution.GetResY() / (float)KernelBlock.y));
-
-	KrnlBlurH<<<KernelGrid, KernelBlock>>>(pDevView);
+	KrnlBlurH<<<GridDim, BlockDim>>>(pDevRenderInfo);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate H");
 	
-	KrnlBlurV<<<KernelGrid, KernelBlock>>>(pDevView);
+	KrnlBlurV<<<GridDim, BlockDim>>>(pDevRenderInfo);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate V");
 }

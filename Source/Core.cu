@@ -6,7 +6,7 @@
 
 	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-	- Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 	
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
@@ -14,6 +14,9 @@
 #include "Core.cuh"
 
 #include "Slice.cuh"
+
+#include "VolumeInfo.cuh"
+#include "RenderInfo.cuh"
 
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
@@ -33,49 +36,9 @@ cudaArray* gpSpecularArray				= NULL;
 cudaArray* gpRoughnessArray				= NULL;
 cudaArray* gpEmissionArray				= NULL;
 
-CD float3		gAaBbMin;
-CD float3		gAaBbMax;
-CD float3		gInvAaBbMin;
-CD float3		gInvAaBbMax;
-CD float		gIntensityMin;
-CD float		gIntensityMax;
-CD float		gIntensityRange;
-CD float		gIntensityInvRange;
-CD float		gStepSize;
-CD float		gStepSizeShadow;
-CD float		gDensityScale;
-CD float		gGradientDelta;
-CD float		gInvGradientDelta;
-CD float3		gGradientDeltaX;
-CD float3		gGradientDeltaY;
-CD float3		gGradientDeltaZ;
-CD int			gFilmWidth;
-CD int			gFilmHeight;
-CD int			gFilmNoPixels;
-CD int			gFilterWidth;
-CD float		gFilterWeights[10];
-CD float		gExposure;
-CD float		gInvExposure;
-CD float		gGamma;
-CD float		gInvGamma;
-CD float		gDenoiseEnabled;
-CD float		gDenoiseWindowRadius;
-CD float		gDenoiseInvWindowArea;
-CD float		gDenoiseNoise;
-CD float		gDenoiseWeightThreshold;
-CD float		gDenoiseLerpThreshold;
-CD float		gDenoiseLerpC;
-CD float		gNoIterations;
-CD float		gInvNoIterations;
-CD bool			gShadows;
-
-CD CSlicing*	gpSlicing;
-
 #define TF_NO_SAMPLES		128
 #define INV_TF_NO_SAMPLES	1.0f / (float)TF_NO_SAMPLES
 
-#include "Model.cuh"
-#include "View.cuh"
 #include "Blur.cuh"
 #include "Denoise.cuh"
 #include "Estimate.cuh"
@@ -85,11 +48,7 @@ CD CSlicing*	gpSlicing;
 #include "SpecularBloom.cuh"
 #include "ToneMap.cuh"
 
-CCudaModel	gModel;
-CCudaView	gRenderCanvasView;
-CCudaView	gNavigatorView;
-
-void BindDensityBuffer(short* pBuffer, cudaExtent Extent)
+void BindIntensityBuffer(short* pBuffer, cudaExtent Extent)
 {
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
 
@@ -148,32 +107,6 @@ void UnbindGradientMagnitudeBuffer(void)
 	HandleCudaError(cudaFreeArray(gpGradientMagnitudeArray));
 	gpGradientMagnitudeArray = NULL;
 	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
-}
-
-void BindRenderCanvasView(const CResolution2D& Resolution)
-{
-	gRenderCanvasView.Resize(Resolution);
-
-	cudaChannelFormatDesc Channel;
-	
-	Channel = cudaCreateChannelDesc<uchar4>();
-
-	HandleCudaError(cudaBindTexture2D(0, gTexRunningEstimateRgba, gRenderCanvasView.m_EstimateRgbaLdr.GetPtr(), Channel, gRenderCanvasView.GetWidth(), gRenderCanvasView.GetHeight(), gRenderCanvasView.m_EstimateRgbaLdr.GetPitch()));
-}
-
-void ResetRenderCanvasView(void)
-{
-	gRenderCanvasView.Reset();
-}
-
-void FreeRenderCanvasView(void)
-{
-	gRenderCanvasView.Free();
-}
-
-unsigned char* GetDisplayEstimate(void)
-{
-	return (unsigned char*)gRenderCanvasView.m_DisplayEstimateRgbLdr.GetPtr(0, 0);
 }
 
 void BindTransferFunctionOpacity(CTransferFunction& TransferFunctionOpacity)
@@ -341,154 +274,30 @@ void UnbindTransferFunctionEmission(void)
 	HandleCudaError(cudaUnbindTexture(gTexEmission));
 }
 
-void BindConstants(CScene* pScene)
+void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
-	const float3 AaBbMin = make_float3(pScene->m_BoundingBox.GetMinP().x, pScene->m_BoundingBox.GetMinP().y, pScene->m_BoundingBox.GetMinP().z);
-	const float3 AaBbMax = make_float3(pScene->m_BoundingBox.GetMaxP().x, pScene->m_BoundingBox.GetMaxP().y, pScene->m_BoundingBox.GetMaxP().z);
+	VolumeInfo*		pDevVolumeInfo	= NULL;
+	RenderInfo*		pDevRenderInfo	= NULL;
+	FrameBuffer*	pDevFrameBuffer	= NULL;
 
-	HandleCudaError(cudaMemcpyToSymbol("gAaBbMin", &AaBbMin, sizeof(float3)));
-	HandleCudaError(cudaMemcpyToSymbol("gAaBbMax", &AaBbMax, sizeof(float3)));
+	HandleCudaError(cudaMalloc(&pDevVolumeInfo, sizeof(VolumeInfo)));
+	HandleCudaError(cudaMalloc(&pDevRenderInfo, sizeof(RenderInfo)));
+	HandleCudaError(cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer)));
 
-	const float3 InvAaBbMin = make_float3(pScene->m_BoundingBox.GetInvMinP().x, pScene->m_BoundingBox.GetInvMinP().y, pScene->m_BoundingBox.GetInvMinP().z);
-	const float3 InvAaBbMax = make_float3(pScene->m_BoundingBox.GetInvMaxP().x, pScene->m_BoundingBox.GetInvMaxP().y, pScene->m_BoundingBox.GetInvMaxP().z);
+	HandleCudaError(cudaMemcpy(pDevVolumeInfo, pVolumeInfo, sizeof(VolumeInfo), cudaMemcpyHostToDevice));
+	HandleCudaError(cudaMemcpy(pDevRenderInfo, pRenderInfo, sizeof(RenderInfo), cudaMemcpyHostToDevice));
+	HandleCudaError(cudaMemcpy(pDevFrameBuffer, pFrameBuffer, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 
-	HandleCudaError(cudaMemcpyToSymbol("gInvAaBbMin", &InvAaBbMin, sizeof(float3)));
-	HandleCudaError(cudaMemcpyToSymbol("gInvAaBbMax", &InvAaBbMax, sizeof(float3)));
+	const dim3 BlockDim(8, 8);
+	const dim3 GridDim((int)ceilf((float)pRenderInfo->m_FilmWidth / (float)BlockDim.x), (int)ceilf((float)pRenderInfo->m_FilmHeight / (float)BlockDim.y));
 
-	const float IntensityMin		= pScene->m_IntensityRange.GetMin();
-	const float IntensityMax		= pScene->m_IntensityRange.GetMax();
-	const float IntensityRange		= pScene->m_IntensityRange.GetRange();
-	const float IntensityInvRange	= 1.0f / IntensityRange;
+	SingleScattering(BlockDim, GridDim, pDevVolumeInfo, pDevRenderInfo, pDevFrameBuffer);
+//	Blur(BlockDim, GridDim, pDevRenderInfo);
+//	Estimate(BlockDim, GridDim, pDevRenderInfo);
+//	ToneMap(BlockDim, GridDim, pDevRenderInfo);
+//	Denoise(BlockDim, GridDim, pDevRenderInfo);
 
-	HandleCudaError(cudaMemcpyToSymbol("gIntensityMin", &IntensityMin, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gIntensityMax", &IntensityMax, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gIntensityRange", &IntensityRange, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gIntensityInvRange", &IntensityInvRange, sizeof(float)));
-
-	const float StepSize		= pScene->m_StepSizeFactor * pScene->m_GradientDelta;
-	const float StepSizeShadow	= pScene->m_StepSizeFactorShadow * pScene->m_GradientDelta;
-
-	HandleCudaError(cudaMemcpyToSymbol("gStepSize", &StepSize, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gStepSizeShadow", &StepSizeShadow, sizeof(float)));
-
-	const float DensityScale = pScene->m_DensityScale;
-
-	HandleCudaError(cudaMemcpyToSymbol("gDensityScale", &DensityScale, sizeof(float)));
-	
-	const float GradientDelta		= pScene->m_GradientDelta;
-	const float InvGradientDelta	= 1.0f / GradientDelta;
-	const Vec3f GradientDeltaX(GradientDelta, 0.0f, 0.0f);
-	const Vec3f GradientDeltaY(0.0f, GradientDelta, 0.0f);
-	const Vec3f GradientDeltaZ(0.0f, 0.0f, GradientDelta);
-	
-	HandleCudaError(cudaMemcpyToSymbol("gGradientDelta", &GradientDelta, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gInvGradientDelta", &InvGradientDelta, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gGradientDeltaX", &GradientDeltaX, sizeof(Vec3f)));
-	HandleCudaError(cudaMemcpyToSymbol("gGradientDeltaY", &GradientDeltaY, sizeof(Vec3f)));
-	HandleCudaError(cudaMemcpyToSymbol("gGradientDeltaZ", &GradientDeltaZ, sizeof(Vec3f)));
-	
-	const int FilmWidth		= pScene->m_Camera.m_Film.GetWidth();
-	const int Filmheight	= pScene->m_Camera.m_Film.GetHeight();
-	const int FilmNoPixels	= pScene->m_Camera.m_Film.m_Resolution.GetNoElements();
-
-	HandleCudaError(cudaMemcpyToSymbol("gFilmWidth", &FilmWidth, sizeof(int)));
-	HandleCudaError(cudaMemcpyToSymbol("gFilmHeight", &Filmheight, sizeof(int)));
-	HandleCudaError(cudaMemcpyToSymbol("gFilmNoPixels", &FilmNoPixels, sizeof(int)));
-
-	const int FilterWidth = 2;
-
-	HandleCudaError(cudaMemcpyToSymbol("gFilterWidth", &FilterWidth, sizeof(int)));
-
-	const float FilterWeights[10] = { 0.11411459588254977f, 0.08176668094332218f, 0.03008028089187349f, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-
-	HandleCudaError(cudaMemcpyToSymbol("gFilterWeights", &FilterWeights, 10 * sizeof(float)));
-
-	const float Gamma		= pScene->m_Camera.m_Film.m_Gamma;
-	const float InvGamma	= 1.0f / Gamma;
-	const float Exposure	= pScene->m_Camera.m_Film.m_Exposure;
-	const float InvExposure	= 1.0f / Exposure;
-
-	HandleCudaError(cudaMemcpyToSymbol("gExposure", &Exposure, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gInvExposure", &InvExposure, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gGamma", &Gamma, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gInvGamma", &InvGamma, sizeof(float)));
-
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseEnabled", &pScene->m_DenoiseParams.m_Enabled, sizeof(bool)));
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseWindowRadius", &pScene->m_DenoiseParams.m_WindowRadius, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseInvWindowArea", &pScene->m_DenoiseParams.m_InvWindowArea, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseNoise", &pScene->m_DenoiseParams.m_Noise, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseWeightThreshold", &pScene->m_DenoiseParams.m_WeightThreshold, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseLerpThreshold", &pScene->m_DenoiseParams.m_LerpThreshold, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gDenoiseLerpC", &pScene->m_DenoiseParams.m_LerpC, sizeof(float)));
-
-	const float NoIterations	= pScene->GetNoIterations();
-	const float InvNoIterations = 1.0f / __max(1.0f, NoIterations);
-
-	HandleCudaError(cudaMemcpyToSymbol("gNoIterations", &NoIterations, sizeof(float)));
-	HandleCudaError(cudaMemcpyToSymbol("gInvNoIterations", &InvNoIterations, sizeof(float)));
-
-	const bool Shadows = pScene->GetNoIterations() > 0;
-
-	HandleCudaError(cudaMemcpyToSymbol("gShadows", &Shadows, sizeof(bool)));
-}
-
-void Render(const int& Type, CScene& Scene, CTiming& RenderImage, CTiming& BlurImage, CTiming& PostProcessImage, CTiming& DenoiseImage)
-{
-	CScene* pDevScene = NULL;
-
-	HandleCudaError(cudaMalloc(&pDevScene, sizeof(CScene)));
-	HandleCudaError(cudaMemcpy(pDevScene, &Scene, sizeof(CScene), cudaMemcpyHostToDevice));
-
-	if (Scene.m_Camera.m_Focus.m_Type == 0)
-		Scene.m_Camera.m_Focus.m_FocalDistance = NearestIntersection(pDevScene);
-
-	HandleCudaError(cudaMemcpy(pDevScene, &Scene, sizeof(CScene), cudaMemcpyHostToDevice));
-
-	CCudaView* pDevView = NULL;
-
-	HandleCudaError(cudaMalloc(&pDevView, sizeof(CCudaView)));
-	HandleCudaError(cudaMemcpy(pDevView, &gRenderCanvasView, sizeof(CCudaView), cudaMemcpyHostToDevice));
-	
-	HandleCudaError(cudaMalloc(&gpSlicing, sizeof(CSlicing)));
-	HandleCudaError(cudaMemcpy(gpSlicing, &Scene.m_Slicing, sizeof(CSlicing), cudaMemcpyHostToDevice));
-	
-//	if (Scene.GetNoIterations() == 1)
-//		CreateZBuffer(&Scene, pDevScene, pDevView);
-	
-	CCudaTimer TmrRender;
-	
-	switch (Type)
-	{
-		case 0:
-		{
-			SingleScattering(&Scene, pDevScene, pDevView);
-			break;
-		}
-
-		case 1:
-		{
-//			MultipleScattering(&Scene, pDevScene);
-			break;
-		}
-	}
-
-	RenderImage.AddDuration(TmrRender.ElapsedTime());
-	
- 	CCudaTimer TmrBlur;
-	Blur(&Scene, pDevScene, pDevView);
-	BlurImage.AddDuration(TmrBlur.ElapsedTime());
-
-	CCudaTimer TmrPostProcess;
-	Estimate(&Scene, pDevScene, pDevView);
-	PostProcessImage.AddDuration(TmrPostProcess.ElapsedTime());
-
-	ToneMap(&Scene, pDevScene, pDevView);
-
-	CCudaTimer TmrDenoise;
-	Denoise(&Scene, pDevScene, pDevView);
-	DenoiseImage.AddDuration(TmrDenoise.ElapsedTime());
-
-	HandleCudaError(cudaFree(pDevScene));
-	HandleCudaError(cudaFree(pDevView));
-	HandleCudaError(cudaFree(gpSlicing));
+	HandleCudaError(cudaFree(pDevVolumeInfo));
+	HandleCudaError(cudaFree(pDevRenderInfo));
+	HandleCudaError(cudaFree(pDevFrameBuffer));
 }

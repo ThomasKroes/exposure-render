@@ -6,7 +6,7 @@
 
 	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-	- Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 	
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
@@ -15,11 +15,13 @@
 
 #include "Shader.cuh"
 #include "RayMarching.cuh"
+#include "Lighting.cuh"
 
-DEV ColorXYZf EstimateDirectLight(CScene* pScene, const CVolumeShader::EType& Type, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
+DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
+	/*
 	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density), GetSpecular(Density), 2.5f, GetRoughness(Density));
 	
 	CRay Rl; 
@@ -69,12 +71,14 @@ DEV ColorXYZf EstimateDirectLight(CScene* pScene, const CVolumeShader::EType& Ty
 			}
 		}
 	}
-	
+	*/
+
 	return Ld;
 }
 
-DEV ColorXYZf UniformSampleOneLight(CScene* pScene, const CVolumeShader::EType& Type, const float& Density, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG, const bool& Brdf)
+DEV ColorXYZf UniformSampleOneLight(const CVolumeShader::EType& Type, const float& Density, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG, const bool& Brdf)
 {
+	/*
 	const int NumLights = pScene->m_Lighting.m_NoLights;
 
  	if (NumLights == 0)
@@ -91,4 +95,7 @@ DEV ColorXYZf UniformSampleOneLight(CScene* pScene, const CVolumeShader::EType& 
 	CLight& Light = pScene->m_Lighting.m_Lights[WhichLight];
 	
 	return NumLights * EstimateDirectLight(pScene, Type, Density, Light, LS, Wo, Pe, N, RNG);
+	*/
+
+	return ColorXYZf(0.0f);
 }

@@ -6,7 +6,7 @@
 
 	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-	- Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 	
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
@@ -14,18 +14,15 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Variance.cuh"
+#include "Variance.h"
 
-#define KRNL_TM_BLOCK_W		8
-#define KRNL_TM_BLOCK_H		8
-#define KRNL_TM_BLOCK_SIZE	KRNL_TM_BLOCK_W * KRNL_TM_BLOCK_H
-
-KERNEL void KrnlToneMap(CCudaView* pView)
+KERNEL void KrnlToneMap(RenderInfo* pRenderInfo)
 {
+	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gFilmWidth || Y >= gFilmHeight)
+	if (X >= gRenderInfo.m_FilmWidth || Y >= gRenderInfo.m_FilmHeight)
 		return;
 
 	const ColorXYZAf Color = pView->m_RunningEstimateXyza.Get(X, Y);
@@ -34,23 +31,21 @@ KERNEL void KrnlToneMap(CCudaView* pView)
 
 	RgbHdr.FromXYZ(Color.GetX(), Color.GetY(), Color.GetZ());
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gInvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gInvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gInvExposure)), 0.0, 1.0f));
+	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gRenderInfo.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gRenderInfo.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gRenderInfo.m_InvExposure)), 0.0, 1.0f));
 
 	ColorRGBAuc RGBA;
 
 	RGBA.FromRGBAf(RgbHdr[0], RgbHdr[1], RgbHdr[2], 0.0f);
 
 	pView->m_EstimateRgbaLdr.Set(RGBA, X, Y);
+	*/
 }
 
-void ToneMap(CScene* pScene, CScene* pDevScene, CCudaView* pDevView)
+void ToneMap(dim3 BlockDim, dim3 GridDim, RenderInfo* pDevRenderInfo)
 {
-	const dim3 KernelBlock(KRNL_TM_BLOCK_W, KRNL_TM_BLOCK_H);
-	const dim3 KernelGrid((int)ceilf((float)pScene->m_Camera.m_Film.GetWidth() / (float)KernelBlock.x), (int)ceilf((float)pScene->m_Camera.m_Film.GetHeight() / (float)KernelBlock.y));
-
-	KrnlToneMap<<<KernelGrid, KernelBlock>>>(pDevView);
+	KrnlToneMap<<<GridDim, BlockDim>>>(pDevRenderInfo);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Tone Map");
 }

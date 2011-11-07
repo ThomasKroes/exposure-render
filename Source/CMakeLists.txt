@@ -5,7 +5,7 @@
 #
 #	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 #	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-#	- Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+#	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 #	
 #	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
@@ -149,13 +149,25 @@ SET(ExposureRenderSources
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
 	VtkWidget.cpp
-	Scene.cpp
 	Controls.cpp
 	Utilities.cpp
 	CudaUtilities.cpp
 	Status.cpp
 	Timing.cpp
-	VolumeMapper.cpp
+	Variance.cpp
+	RenderOutputDialog.cpp
+
+	# Vtk
+	VtkCudaVolumeMapper.cpp
+	VtkCudaLight.cpp
+	VtkCudaAreaLight.cpp
+	VtkCudaBackgroundLight.cpp
+	VtkCudaTransferFunction.cpp
+	VtkCudaSlicePlane.cpp
+	VtkCudaVolumeProperty.cpp
+	VtkCudaVolumeInfo.cpp
+	VtkCudaRenderInfo.cpp
+	vtkCudaMemoryTexture.cpp
 
 	# Logging
 	Logger.cpp
@@ -240,14 +252,26 @@ SET(ExposureRenderHeaders
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
 	VtkWidget.h
-	Scene.h
 	Controls.h
 	LogWidget.h
 	Utilities.h
 	CudaUtilities.h
 	Status.h
 	Timing.h
-	VolumeMapper.h
+	Variance.h
+	RenderOutputDialog.h
+
+	# Vtk
+	VtkCudaVolumeMapper.h
+	VtkCudaLight.h
+	VtkCudaAreaLight.h
+	VtkCudaBackgroundLight.h
+	VtkCudaTransferFunction.h
+	VtkCudaSlicePlane.h
+	VtkCudaVolumeProperty.h
+	VtkCudaVolumeInfo.h
+	VtkCudaRenderInfo.h
+	vtkCudaMemoryTexture.h
 
 	# Logging
 	Logger.h
@@ -314,10 +338,10 @@ SET(ExposureRenderMocHeaders
 	Slice.h
 
 	# Core
-	RenderThread.h
 	VtkWidget.h
 	Controls.h
 	Status.h
+	RenderOutputDialog.h
 
 	# Logging
 	Logger.h
@@ -533,28 +557,55 @@ SET(CoreSources
 	InteractorStyleRealisticCamera.h
 	RenderThread.h
 	VtkWidget.h
-	Scene.h
 	Controls.h
 	Utilities.h
 	Status.h
 	Timing.h
-	VolumeMapper.h
+	Variance.h
+	RenderOutputDialog.h
 	Stable.cpp
 	Flags.cpp
 	Geometry.cpp
 	InteractorStyleRealisticCamera.cpp
 	RenderThread.cpp
 	VtkWidget.cpp
-	Scene.cpp
 	Controls.cpp
 	Utilities.cpp
 	Status.cpp
 	Timing.cpp
-	VolumeMapper.cpp
+	Variance.cpp
+	RenderOutputDialog.cpp
 )
 
 # Make the core group
 SOURCE_GROUP("Core" FILES ${CoreSources})
+
+# Vtk sources
+SET(VtkSources
+	VtkCudaVolumeMapper.h
+	VtkCudaLight.h
+	VtkCudaAreaLight.h
+	VtkCudaBackgroundLight.h
+	VtkCudaTransferFunction.h
+	VtkCudaSlicePlane.h
+	VtkCudaVolumeProperty.h
+	VtkCudaVolumeInfo.h
+	VtkCudaRenderInfo.h
+	vtkCudaMemoryTexture.h
+	VtkCudaVolumeMapper.cpp
+	VtkCudaLight.cpp
+	VtkCudaAreaLight.cpp
+	VtkCudaBackgroundLight.cpp
+	VtkCudaTransferFunction.cpp
+	VtkCudaSlicePlane.cpp
+	VtkCudaVolumeProperty.cpp
+	VtkCudaVolumeInfo.cpp
+	VtkCudaRenderInfo.cpp
+	vtkCudaMemoryTexture.cpp
+)
+
+# Make the core group
+SOURCE_GROUP("Vtk" FILES ${VtkSources})
 
 # CUDA sources
 SET(CudaSources
@@ -572,9 +623,6 @@ SET(CudaSources
 	NearestIntersection.cuh
 	SpecularBloom.cuh
 	ToneMap.cuh
-	Buffer.cuh
-	View.cuh
-	Model.cuh
 	Shader.cuh
 	Sample.cuh
 	RNG.cuh
@@ -582,6 +630,9 @@ SET(CudaSources
 	Lighting.cuh
 	MonteCarlo.cuh
 	Slice.cuh
+	VolumeInfo.cuh
+	RenderInfo.cuh
+	Buffer.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp
@@ -610,7 +661,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Create executable
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources} ${SlicingSources})
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${VtkSources} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources} ${SlicingSources})
 
 
 
@@ -621,7 +672,7 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkGraphics
   vtkIO
   vtkCommon
-
+  vtkVolumeRendering
   vtkViews
 )
 

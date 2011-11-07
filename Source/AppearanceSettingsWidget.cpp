@@ -6,7 +6,7 @@
 
 	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-	- Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 	
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
@@ -16,7 +16,6 @@
 #include "AppearanceSettingsWidget.h"
 #include "TransferFunction.h"
 #include "RenderThread.h"
-#include "Scene.h"
 
 QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -111,6 +110,7 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 
 void QAppearanceSettingsWidget::OnRenderBegin(void)
 {
+	/*
 	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale());
 	m_ShadingType.setCurrentIndex(gTransferFunction.GetShadingType());
 	m_GradientFactorSlider.setValue(gScene.m_GradientFactor);
@@ -119,6 +119,7 @@ void QAppearanceSettingsWidget::OnRenderBegin(void)
 	m_StepSizePrimaryRaySpinner.setValue(gScene.m_StepSizeFactor, true);
 	m_StepSizeSecondaryRaySlider.setValue(gScene.m_StepSizeFactorShadow, true);
 	m_StepSizeSecondaryRaySpinner.setValue(gScene.m_StepSizeFactorShadow, true);
+	*/
 }
 
 void QAppearanceSettingsWidget::OnSetDensityScale(double DensityScale)
@@ -141,14 +142,14 @@ void QAppearanceSettingsWidget::OnSetGradientFactor(double GradientFactor)
 
 void QAppearanceSettingsWidget::OnSetStepSizePrimaryRay(const double& StepSizePrimaryRay)
 {
-	gScene.m_StepSizeFactor = (float)StepSizePrimaryRay;
-	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
+//	gScene.m_StepSizeFactor = (float)StepSizePrimaryRay;
+//	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 void QAppearanceSettingsWidget::OnSetStepSizeSecondaryRay(const double& StepSizeSecondaryRay)
 {
-	gScene.m_StepSizeFactorShadow = (float)StepSizeSecondaryRay;
-	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
+//	gScene.m_StepSizeFactorShadow = (float)StepSizeSecondaryRay;
+//	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
 }
 
 void QAppearanceSettingsWidget::OnTransferFunctionChanged(void)
