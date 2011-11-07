@@ -25,14 +25,13 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	
 	CRNG RNG(pFrameBuffer->m_RandomSeeds1.GetPtr(X, Y), pFrameBuffer->m_RandomSeeds2.GetPtr(X, Y));
 
-	ColorRGBAuc Col;// = ColorRGBAuc(RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f);//255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, 150.0f);
+	ColorRGBAuc Col;
 
 	Vec2f ScreenPoint;
 
 	ScreenPoint.x = pRenderInfo->m_Camera.m_Screen[0][0] + (pRenderInfo->m_Camera.m_InvScreen.x * (float)X);
 	ScreenPoint.y = pRenderInfo->m_Camera.m_Screen[1][0] + (pRenderInfo->m_Camera.m_InvScreen.y * (float)Y);
-
-
+	
 	CRay Re;
 
 	Re.m_O		= pRenderInfo->m_Camera.m_Pos;
@@ -51,16 +50,13 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 	float Near = 0.0f, Far = 150000.0f;
 
-	/*
-	pFrameBuffer->m_EstimateRgbaLdr.Set(Col, X, Y);
-	
-	return;
-	*/
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	Vec3f Pe, Pl;
 	
 	CLight* pLight = NULL;
+
+	SampleDistanceRM(Re, RNG, Pe);
 
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{

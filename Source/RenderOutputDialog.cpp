@@ -66,31 +66,31 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 
   vtkCubeSource* pBox = vtkCubeSource::New();
 
-  pBox->SetXLength(1.0);
-  pBox->SetYLength(1.0);
-  pBox->SetZLength(1.0);
-  pBox->SetCenter(0.5, 0.5, 0.5);
+  pBox->SetXLength(0.1);
+  pBox->SetYLength(0.1);
+  pBox->SetZLength(0.1);
+  pBox->SetCenter(0.05, 0.05, 0.05);
 
   // The mapper is responsible for pushing the geometry into the graphics
   // library. It may also do color mapping, if scalars or other attributes
   // are defined.
   vtkPolyDataMapper *cylinderMapper = vtkPolyDataMapper::New();
-  cylinderMapper->SetInputConnection(cylinder->GetOutputPort());
+  cylinderMapper->SetInputConnection(pBox->GetOutputPort());
 
   // The actor is a grouping mechanism: besides the geometry (mapper), it
   // also has a property, transformation matrix, and/or texture map.
   // Here we set its color and rotate it -22.5 degrees.
   vtkActor *cylinderActor = vtkActor::New();
   cylinderActor->SetMapper(cylinderMapper);
-  cylinderActor->GetProperty()->SetColor(1.0000, 0.3882, 0.2784);
-  cylinderActor->GetProperty()->SetOpacity(0.5);
+  cylinderActor->GetProperty()->SetColor(1.0, 1.0, 1.0);
+  cylinderActor->GetProperty()->SetOpacity(0.9);
 //  cylinderActor->RotateX(30.0);
 //  cylinderActor->RotateY(-45.0);
  m_SceneRenderer->AddActor(cylinderActor);
 
 
  
- m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.0f);
+ m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.0025f);
 
 
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
