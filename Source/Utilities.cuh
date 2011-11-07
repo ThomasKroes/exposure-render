@@ -67,9 +67,9 @@ DEV inline Vec3f NormalizedGradient(const Vec3f& P, VolumeInfo& VI)
 {
 	Vec3f Gradient;
 
-	Gradient.x = (GetNormalizedIntensity(P + ToVec3f(VI.m_GradientDeltaX), VI) - GetNormalizedIntensity(P - ToVec3f(VI.m_GradientDeltaX), VI)) * VI.m_InvGradientDelta;
-	Gradient.y = (GetNormalizedIntensity(P + ToVec3f(VI.m_GradientDeltaY), VI) - GetNormalizedIntensity(P - ToVec3f(VI.m_GradientDeltaY), VI)) * VI.m_InvGradientDelta;
-	Gradient.z = (GetNormalizedIntensity(P + ToVec3f(VI.m_GradientDeltaZ), VI) - GetNormalizedIntensity(P - ToVec3f(VI.m_GradientDeltaZ), VI)) * VI.m_InvGradientDelta;
+	Gradient.x = (GetNormalizedIntensity(P + VI.m_GradientDeltaX, VI) - GetNormalizedIntensity(P - VI.m_GradientDeltaX, VI)) * VI.m_InvGradientDelta;
+	Gradient.y = (GetNormalizedIntensity(P + VI.m_GradientDeltaY, VI) - GetNormalizedIntensity(P - VI.m_GradientDeltaY, VI)) * VI.m_InvGradientDelta;
+	Gradient.z = (GetNormalizedIntensity(P + VI.m_GradientDeltaZ, VI) - GetNormalizedIntensity(P - VI.m_GradientDeltaZ, VI)) * VI.m_InvGradientDelta;
 
 	return Normalize(Gradient);
 }
@@ -82,8 +82,8 @@ DEV float GradientMagnitude(const Vec3f& P, VolumeInfo& VI)
 DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT, VolumeInfo& VI)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * (Vec3f(VI.m_MinAABB.x, VI.m_MinAABB.y, VI.m_MinAABB.z) - R.m_O);
-	const Vec3f TopT		= InvR * (Vec3f(VI.m_MaxAABB.x, VI.m_MaxAABB.y, VI.m_MaxAABB.z) - R.m_O);
+	const Vec3f BottomT		= InvR * (VI.m_MinAABB - R.m_O);
+	const Vec3f TopT		= InvR * (VI.m_MaxAABB - R.m_O);
 	const Vec3f MinT		= MinVec3f(TopT, BottomT);
 	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));

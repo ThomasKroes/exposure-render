@@ -11,52 +11,54 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Stable.h"
+#pragma once
 
-#include "MainWindow.h"
+#include "Geometry.h"
 
-int main(int ArgumentCount, char* pArgv[])
+#include "Buffer.cuh"
+
+struct EXPOSURE_RENDER_DLL Denoise
 {
-	// Create the application
-    QApplication Application(ArgumentCount, pArgv);
+	float	m_Enabled;
+	float	m_WindowRadius;
+	float	m_WindowArea;
+	float	m_InvWindowArea;
+	float	m_Noise;
+	float	m_WeightThreshold;
+	float	m_LerpThreshold;
+	float	m_LerpC;
+};
 
-	// Adjust style
-	Application.setStyle("plastique");
-	Application.setOrganizationName("TU Delft");
-	Application.setApplicationName("Exposure Render");
-	
-	// Application settings
-	QSettings Settings;
+struct EXPOSURE_RENDER_DLL Camera
+{
+	Vec3f		m_Pos;
+	Vec3f		m_Target;
+	Vec3f		m_Up;
+	Vec3f		m_N;
+	Vec3f		m_U;
+	Vec3f		m_V;
+	float		m_FocalDistance;
+	float		m_ApertureSize;
+	float3		m_ClipNear;
+	float3		m_ClipFar;
+	float		m_Screen[2][2];
+	float2		m_InvScreen;
+};
 
-	Settings.setValue("version", "1.0.0");
-
-	// Main window
-	CMainWindow MainWindow;
-
-	// Show the main window
-	gpMainWindow = &MainWindow;
-
-	// Show it
-	MainWindow.show();
-
-	MainWindow.setWindowIcon(GetIcon("logo"));
-
-	
-
-	// Load default presets
-	gStatus.SetLoadPreset("Default");
-
-//	Log("Device memory: " + QString::number(GetUsedCudaMemory() / MB, 'f', 2) + "/" + QString::number(GetTotalCudaMemory() / MB, 'f', 2) + " MB", "memory");
-
-	// Override the application setting to enforce the display of the startup dialog
-	Settings.setValue("startup/dialog/show", QVariant(true));
-
-	// Show startup dialog
-	if (Settings.value("startup/dialog/show").toBool() == true)
-		MainWindow.ShowStartupDialog();
-
-	// Execute the application
-	int Result = Application.exec();
-
-	return Result;
-}
+struct EXPOSURE_RENDER_DLL RenderInfo
+{
+	int			m_FilmWidth;
+	int			m_FilmHeight;
+	int			m_FilmNoPixels;
+	int			m_FilterWidth;
+	float		m_FilterWeights[10];
+	float		m_Exposure;
+	float		m_InvExposure;
+	float		m_Gamma;
+	float		m_InvGamma;
+	float		m_NoIterations;
+	float		m_InvNoIterations;
+	bool		m_Shadows;
+	Denoise		m_Denoise;
+	Camera		m_Camera;
+};

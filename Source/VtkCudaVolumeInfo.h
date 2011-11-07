@@ -11,52 +11,39 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Stable.h"
+#pragma once
 
-#include "MainWindow.h"
+#include "Geometry.h"
 
-int main(int ArgumentCount, char* pArgv[])
+#include <vtkObject.h>
+#include <vtkImageData.h>
+#include <vtkVolume.h>
+
+#include "VolumeInfo.cuh"
+
+class EXPOSURE_RENDER_DLL vtkCudaVolumeInfo : public vtkObject
 {
-	// Create the application
-    QApplication Application(ArgumentCount, pArgv);
+public:
+	vtkTypeRevisionMacro(vtkCudaVolumeInfo, vtkObject);
+	static vtkCudaVolumeInfo *New();
 
-	// Adjust style
-	Application.setStyle("plastique");
-	Application.setOrganizationName("TU Delft");
-	Application.setApplicationName("Exposure Render");
-	
-	// Application settings
-	QSettings Settings;
+	void SetInputData(vtkImageData* pInputData);
 
-	Settings.setValue("version", "1.0.0");
+	vtkGetMacro(Volume, vtkVolume*);
+    vtkSetMacro(Volume, vtkVolume*);
 
-	// Main window
-	CMainWindow MainWindow;
+	VolumeInfo* GetVolumeInfo(void) { return &m_VolumeInfo; }
 
-	// Show the main window
-	gpMainWindow = &MainWindow;
+	virtual void Update();
 
-	// Show it
-	MainWindow.show();
+protected:
+	vtkCudaVolumeInfo();
+	virtual ~vtkCudaVolumeInfo();
 
-	MainWindow.setWindowIcon(GetIcon("logo"));
+private:
+	VolumeInfo		m_VolumeInfo;
+	vtkImageData*   m_pIntensity;
+	vtkImageData*   m_pGradientMagnitude;
+	vtkVolume*      Volume;
 
-	
-
-	// Load default presets
-	gStatus.SetLoadPreset("Default");
-
-//	Log("Device memory: " + QString::number(GetUsedCudaMemory() / MB, 'f', 2) + "/" + QString::number(GetTotalCudaMemory() / MB, 'f', 2) + " MB", "memory");
-
-	// Override the application setting to enforce the display of the startup dialog
-	Settings.setValue("startup/dialog/show", QVariant(true));
-
-	// Show startup dialog
-	if (Settings.value("startup/dialog/show").toBool() == true)
-		MainWindow.ShowStartupDialog();
-
-	// Execute the application
-	int Result = Application.exec();
-
-	return Result;
-}
+};

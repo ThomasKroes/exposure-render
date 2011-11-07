@@ -351,10 +351,10 @@ public:
 	}
 
 	CResolution2D						m_Resolution;
-	CCudaBuffer2D<ColorXYZAf, true>		m_RunningEstimateXyza;
-	CCudaBuffer2D<ColorXYZAf, true>		m_FrameEstimateXyza;
-	CCudaBuffer2D<ColorXYZAf, true>		m_FrameBlurXyza;
-	CCudaBuffer2D<ColorRGBAuc, true>	m_EstimateRgbaLdr;
+	CCudaBuffer2D<ColorXYZAf, false>	m_RunningEstimateXyza;
+	CCudaBuffer2D<ColorXYZAf, false>	m_FrameEstimateXyza;
+	CCudaBuffer2D<ColorXYZAf, false>	m_FrameBlurXyza;
+	CCudaBuffer2D<ColorRGBAuc, false>	m_EstimateRgbaLdr;
 	CCudaBuffer2D<ColorRGBuc, false>	m_DisplayEstimateRgbLdr;
 	CCudaRandomBuffer2D					m_RandomSeeds1;
 	CCudaRandomBuffer2D					m_RandomSeeds2;

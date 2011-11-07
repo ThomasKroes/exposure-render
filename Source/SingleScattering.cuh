@@ -17,9 +17,12 @@
 
 KERNEL void KrnlSingleScattering(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
-	
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+
+	
+//	else
+//		Col = ColorRGBAuc(0, 255, 0, 120);
 
 	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
 		return;
@@ -29,26 +32,41 @@ KERNEL void KrnlSingleScattering(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInf
 	ColorRGBAuc Col = ColorRGBAuc(RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f);//255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, 150.0f);
 
 	
-
+	
 	Vec2f ScreenPoint;
 
 	ScreenPoint.x = pRenderInfo->m_Camera.m_Screen[0][0] + (pRenderInfo->m_Camera.m_InvScreen.x * (float)X);
 	ScreenPoint.y = pRenderInfo->m_Camera.m_Screen[1][0] + (pRenderInfo->m_Camera.m_InvScreen.y * (float)Y);
 
+
 	CRay Re;
 
-	Re.m_O	= pRenderInfo->m_Camera.m_Pos;
-	Re.m_D	= Normalize(pRenderInfo->m_Camera.m_N + (-ScreenPoint.x * pRenderInfo->m_Camera.m_U) + (-ScreenPoint.y * pRenderInfo->m_Camera.m_V));
+	Re.m_O		= pRenderInfo->m_Camera.m_Pos;
+	Re.m_D		= Normalize(pRenderInfo->m_Camera.m_N + (-ScreenPoint.x * pRenderInfo->m_Camera.m_U) + (-ScreenPoint.y * pRenderInfo->m_Camera.m_V));
 	Re.m_MinT	= 0.0f;
-	Re.m_MaxT	= 10000.0f;
+	Re.m_MaxT	= 100000000.0f;
+
+	if (pRenderInfo->m_Camera.m_ApertureSize != 0.0f)
+	{
+		Vec2f LensUV = pRenderInfo->m_Camera.m_ApertureSize * ConcentricSampleDisk(RNG.Get2());
+
+		Vec3f LI = pRenderInfo->m_Camera.m_U * LensUV.x + pRenderInfo->m_Camera.m_V * LensUV.y;
+		Re.m_O += LI;
+		Re.m_D = Normalize((Re.m_D * 1.0f) - LI);
+	}
+
+
+
+
+
 
 	float Near = 0.0f, Far = 150000.0f;
 
 	if (IntersectBox(Re, &Near, &Far, *pVolumeInfo))
-		Col = ColorRGBAuc(255, 0, 0, 120);
+		Col = ColorRGBAuc(RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f, RNG.Get1() * 255.0f);
 	else
 		Col = ColorRGBAuc(0, 255, 0, 120);
-
+	/*	*/
 	pFrameBuffer->m_EstimateRgbaLdr.Set(Col, X, Y);
 
 

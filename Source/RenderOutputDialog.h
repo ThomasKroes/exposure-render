@@ -11,52 +11,37 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Stable.h"
+#pragma once
 
-#include "MainWindow.h"
+#include <QVTKWidget.h>
 
-int main(int ArgumentCount, char* pArgv[])
+#include <vtkSmartPointer.h>
+#include <vtkVolume.h>
+#include <vtkRenderer.h>
+
+#include "VtkCudaVolumeMapper.h"
+
+class QRenderOutputDialog : public QDialog
 {
-	// Create the application
-    QApplication Application(ArgumentCount, pArgv);
+	Q_OBJECT
 
-	// Adjust style
-	Application.setStyle("plastique");
-	Application.setOrganizationName("TU Delft");
-	Application.setApplicationName("Exposure Render");
-	
-	// Application settings
-	QSettings Settings;
+public:
+	QRenderOutputDialog(QWidget* pParent = NULL);
+	virtual ~QRenderOutputDialog(void);
 
-	Settings.setValue("version", "1.0.0");
+	virtual void accept();
+	virtual QSize sizeHint() const;
 
-	// Main window
-	CMainWindow MainWindow;
+public:
 
-	// Show the main window
-	gpMainWindow = &MainWindow;
+private:
 
-	// Show it
-	MainWindow.show();
+signals:
 
-	MainWindow.setWindowIcon(GetIcon("logo"));
-
-	
-
-	// Load default presets
-	gStatus.SetLoadPreset("Default");
-
-//	Log("Device memory: " + QString::number(GetUsedCudaMemory() / MB, 'f', 2) + "/" + QString::number(GetTotalCudaMemory() / MB, 'f', 2) + " MB", "memory");
-
-	// Override the application setting to enforce the display of the startup dialog
-	Settings.setValue("startup/dialog/show", QVariant(true));
-
-	// Show startup dialog
-	if (Settings.value("startup/dialog/show").toBool() == true)
-		MainWindow.ShowStartupDialog();
-
-	// Execute the application
-	int Result = Application.exec();
-
-	return Result;
-}
+private:
+	QGridLayout								m_MainLayout;
+	QVTKWidget								m_QtVtkWidget;
+	vtkSmartPointer<vtkVolume>				m_Volume;
+	vtkSmartPointer<vtkVolumeCudaMapper>	m_VolumeMapper;
+	vtkSmartPointer<vtkRenderer>			m_SceneRenderer;
+};
