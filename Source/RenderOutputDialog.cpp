@@ -23,6 +23,37 @@
 #include <vtkProperty.h>
 #include <vtkAxesActor.h>
 #include <vtkCubeSource.h>
+#include <vtkVolumeProperty.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkObject.h>
+
+class vtkTimerCallback : public vtkCommand
+{
+  public:
+    static vtkTimerCallback *New()
+    {
+      vtkTimerCallback *cb = new vtkTimerCallback;
+      cb->TimerCount = 0;
+      return cb;
+    }
+ 
+    void Execute(vtkObject *caller, unsigned long vtkNotUsed(eventId), 
+                       void *vtkNotUsed(callData))
+  {
+//    std::cout << "timer callback" << std::endl;
+ 
+    vtkRenderWindowInteractor *iren = 
+      static_cast<vtkRenderWindowInteractor*>(caller);
+ 
+	iren->Render();
+ 
+  }
+ 
+  private:
+    int TimerCount;
+ 
+};
 
 QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 	QDialog(pParent),
@@ -53,7 +84,8 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 
 	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_SceneRenderer);
 
-
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.001);
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, vtkTimerCallback::New());
 
 
 	// Set up the widget
@@ -90,20 +122,29 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 
 
  
- m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.0025f);
+ m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.03f);
 
 
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
-	MetaImageReader->SetFileName("C://Volumes//engine_small.mhd");
+	MetaImageReader->SetFileName("C://Volumes//mecanix_small.mhd");
 
 	MetaImageReader->Update();
 
 	m_VolumeMapper->SetInput(MetaImageReader->GetOutput());
 
     m_Volume->SetMapper(m_VolumeMapper);
-//    vtkVolumeProperty* prop = vtkVolumeProperty::New();
-//    m_Volume->SetProperty(prop);
+    vtkVolumeProperty* prop = vtkVolumeProperty::New();
+
+	vtkPiecewiseFunction* pwf = vtkPiecewiseFunction::New();
+
+	pwf->AddPoint(0,0);
+	pwf->AddPoint(0,0);
+	pwf->AddPoint(2055,1.0);
+
+	prop->SetScalarOpacity(pwf);
+
+    m_Volume->SetProperty(prop);
     
 
 	m_SceneRenderer->AddViewProp(m_Volume);

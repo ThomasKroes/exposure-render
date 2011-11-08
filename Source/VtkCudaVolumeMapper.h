@@ -33,11 +33,14 @@
 #include <vtkImageData.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkPointData.h>
+#include <vtkVolume.h>
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
 
 #include "VtkCudaVolumeInfo.h"
 #include "VtkCudaRenderInfo.h"
+
+class vtkVolumeProperty;
 
 class EXPOSURE_RENDER_DLL vtkVolumeCudaMapper : public vtkVolumeMapper
 {
@@ -64,6 +67,8 @@ protected:
 
 	vtkVolumeCudaMapper();
     virtual ~vtkVolumeCudaMapper();
+
+	void UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty);
 
 	CHostBuffer2D<ColorRGBAuc>	m_Host;
 //	CCudaView	m_CudaView;

@@ -16,6 +16,9 @@
 #include <vtkMetaImageReader.h>
 #include <vtkVolumeProperty.h>
 #include <vtkObjectFactory.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkColorTransferFunction.h>
+
 #include <vtkgl.h>
 
 #include "VtkCudaVolumeMapper.h"
@@ -26,6 +29,8 @@
 
 //vtkCxxRevisionMacro(vtkVolumeCudaMapper, "$Revision: 1.8 $");
 vtkStandardNewMacro(vtkVolumeCudaMapper);
+
+
 
 vtkVolumeCudaMapper::vtkVolumeCudaMapper()
 {
@@ -53,6 +58,8 @@ void vtkVolumeCudaMapper::SetInput(vtkImageData* input)
 void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 {
 	
+	if (pVolume)
+		UploadVolumeProperty(pVolume->GetProperty());
 
     int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
 
@@ -66,6 +73,8 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 //	m_CudaRenderInfo->Bind();
 	
 	m_Host.Resize(CResolution2D(pWindowSize[0], pWindowSize[1]));
+
+	m_CudaRenderInfo->GetRenderInfo()->m_NoIterations += 1;
 
 	RenderEstimate(m_CudaVolumeInfo->GetVolumeInfo(), m_CudaRenderInfo->GetRenderInfo(), &m_CudaRenderInfo->m_FrameBuffer);
 
@@ -86,7 +95,7 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pWindowSize[0], pWindowSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 	glEnable(GL_TEXTURE_2D);
-//	glColor3f(1.0f, 0.0f, 0.0f);
+	glColor3f(1.0f, 1.0f, 1.0f);
 
     pRenderer->SetDisplayPoint(0,0,0.5);
     pRenderer->DisplayToWorld();
@@ -127,12 +136,8 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
     glPopAttrib();
     glPopAttrib();
     
-//	m_CudaRenderInfo->Unbind();
-
 //	Modified();
 
-//	Render(pRenderer, pVolume);
-	
 	return;
 }
 
@@ -144,4 +149,35 @@ void vtkVolumeCudaMapper::PrintSelf(ostream& os, vtkIndent indent)
 int vtkVolumeCudaMapper::FillInputPortInformation(int port, vtkInformation* info)
 {
 	return 0;
+}
+
+void vtkVolumeCudaMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
+{
+	if (pVolumeProperty == NULL)
+	{
+		vtkErrorMacro("Volume property cannot be null");
+		return;
+	}
+
+	int N = 128;
+
+	float* pOpacity		= new float[N];
+	float* pDiffuse		= new float[N * 3];
+	float* pSpecular	= new float[N * 3];
+	float* pRoughness	= new float[N];
+	float* pEmission	= new float[N * 3];
+	
+	double* pRange = GetDataSetInput()->GetScalarRange();
+
+	pVolumeProperty->GetScalarOpacity()->GetTable(pRange[0], pRange[1], N, pOpacity);
+	pVolumeProperty->GetRGBTransferFunction()->GetTable(pRange[0], pRange[1], N, pDiffuse);
+	pVolumeProperty->GetRGBTransferFunction()->GetTable(pRange[0], pRange[1], N, pSpecular);
+
+	BindTransferFunctions1D(pOpacity, pDiffuse, pSpecular, pRoughness, pEmission, N);
+
+	delete pOpacity;
+	delete pDiffuse;
+	delete pSpecular;
+	delete pRoughness;
+	delete pEmission;
 }

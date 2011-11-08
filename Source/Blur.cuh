@@ -21,23 +21,22 @@
 #define KRNL_BLUR_BLOCK_H		8
 #define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
 
-KERNEL void KrnlBlurH(RenderInfo* pRenderInfo)
+KERNEL void KrnlBlurEstimateH(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
-	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= gRenderInfo.m_FilmWidth || Y >= gRenderInfo.m_FilmHeight)
+	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
 		return;
 
-	const int X0 = max((int)ceilf(X - gRenderInfo.m_FilterWidth), 0);
-	const int X1 = min((int)floorf(X + gRenderInfo.m_FilterWidth), (int)gRenderInfo.m_FilmWidth - 1);
+	const int X0 = max((int)ceilf(X - pRenderInfo->m_FilterWidth), 0);
+	const int X1 = min((int)floorf(X + pRenderInfo->m_FilterWidth), (int)pRenderInfo->m_FilmWidth - 1);
 
 	ColorXYZAf Sum;
 
-	__shared__ float FW[KRNL_BLOCK_SIZE];
-	__shared__ float SumW[KRNL_BLOCK_SIZE];
+	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
+	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
 
 	__syncthreads();
 
@@ -46,36 +45,34 @@ KERNEL void KrnlBlurH(RenderInfo* pRenderInfo)
 
 	for (int x = X0; x <= X1; x++)
 	{
-		FW[TID] = gRenderInfo.m_FilterWeights[(int)fabs((float)x - X)];
+		FW[TID] = pRenderInfo->m_FilterWeights[(int)fabs((float)x - X)];
 
-		Sum			+= pView->m_FrameEstimateXyza.Get(x, Y) * FW[TID];
+		Sum			+= pFrameBuffer->m_FrameEstimateXyza.Get(x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
-		pView->m_FrameBlurXyza.Set(Sum / SumW[TID], X, Y);
+		pFrameBuffer->m_FrameBlurXyza.Set(Sum / SumW[TID], X, Y);
 	else
-		pView->m_FrameBlurXyza.Set(ColorXYZAf(0.0f), X, Y);
-	*/
+		pFrameBuffer->m_FrameBlurXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
-KERNEL void KrnlBlurV(RenderInfo* pRenderInfo)
+KERNEL void KrnlBlurEstimateV(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
-	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= gRenderInfo.m_FilmWidth || Y >= gRenderInfo.m_FilmHeight)
+	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
 		return;
 
-	const int Y0 = max((int)ceilf (Y - gRenderInfo.m_FilterWidth), 0);
-	const int Y1 = min((int)floorf(Y + gRenderInfo.m_FilterWidth), gRenderInfo.m_FilmHeight - 1);
+	const int Y0 = max((int)ceilf (Y - pRenderInfo->m_FilterWidth), 0);
+	const int Y1 = min((int)floorf(Y + pRenderInfo->m_FilterWidth), pRenderInfo->m_FilmHeight - 1);
 
 	ColorXYZAf Sum;
 
-	__shared__ float FW[KRNL_BLOCK_SIZE];
-	__shared__ float SumW[KRNL_BLOCK_SIZE];
+	__shared__ float FW[KRNL_BLUR_BLOCK_SIZE];
+	__shared__ float SumW[KRNL_BLUR_BLOCK_SIZE];
 
 	__syncthreads();
 
@@ -84,29 +81,28 @@ KERNEL void KrnlBlurV(RenderInfo* pRenderInfo)
 
 	for (int y = Y0; y <= Y1; y++)
 	{
-		FW[TID] = gRenderInfo.m_FilterWeights[(int)fabs((float)y - Y)];
+		FW[TID] = pRenderInfo->m_FilterWeights[(int)fabs((float)y - Y)];
 
-		Sum			+= pView->m_FrameBlurXyza.Get(X, y) * FW[TID];
+		Sum			+= pFrameBuffer->m_FrameBlurXyza.Get(X, y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
-		pView->m_FrameEstimateXyza.Set(Sum / SumW[TID], X, Y);
+		pFrameBuffer->m_FrameEstimateXyza.Set(Sum / SumW[TID], X, Y);
 	else
-		pView->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
-	*/
+		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
-void Blur(RenderInfo* pDevRenderInfo, int Width, int Height)
+void BlurEstimate(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlBlurH<<<GridDim, BlockDim>>>(pDevRenderInfo);
+	KrnlBlurEstimateH<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate H");
 	
-	KrnlBlurV<<<GridDim, BlockDim>>>(pDevRenderInfo);
+	KrnlBlurEstimateV<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate V");
 }

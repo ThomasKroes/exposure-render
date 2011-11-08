@@ -168,6 +168,7 @@ SET(ExposureRenderSources
 	VtkCudaVolumeInfo.cpp
 	VtkCudaRenderInfo.cpp
 	vtkCudaMemoryTexture.cpp
+	VtkErVolumeProperty.cpp
 
 	# Logging
 	Logger.cpp
@@ -272,6 +273,7 @@ SET(ExposureRenderHeaders
 	VtkCudaVolumeInfo.h
 	VtkCudaRenderInfo.h
 	vtkCudaMemoryTexture.h
+	VtkErVolumeProperty.h
 
 	# Logging
 	Logger.h
@@ -592,6 +594,7 @@ SET(VtkSources
 	VtkCudaVolumeInfo.h
 	VtkCudaRenderInfo.h
 	vtkCudaMemoryTexture.h
+	VtkErVolumeProperty.h
 	VtkCudaVolumeMapper.cpp
 	VtkCudaLight.cpp
 	VtkCudaAreaLight.cpp
@@ -602,6 +605,7 @@ SET(VtkSources
 	VtkCudaVolumeInfo.cpp
 	VtkCudaRenderInfo.cpp
 	vtkCudaMemoryTexture.cpp
+	VtkErVolumeProperty.cpp
 )
 
 # Make the core group

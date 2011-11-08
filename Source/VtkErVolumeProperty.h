@@ -13,45 +13,27 @@
 
 #pragma once
 
-#include "Geometry.h"
+#include "Dll.h"
 
 #include <vtkObject.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkCamera.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkVolumeProperty.h>
 
-#include "vtkCudaMemoryTexture.h"
-#include "RenderInfo.cuh"
-#include "Buffer.cuh"
-
-class EXPOSURE_RENDER_DLL vtkCudaRenderInfo : public vtkObject
+class EXPOSURE_RENDER_DLL vtkErVolumeProperty : public vtkVolumeProperty
 {
-	vtkTypeRevisionMacro(vtkCudaRenderInfo, vtkObject);
-
-public:
-	static vtkCudaRenderInfo *New();
-
-	void SetRenderer(vtkRenderer* pRenderer);
-
-	vtkGetMacro(Renderer, vtkRenderer*);
-
-	RenderInfo* GetRenderInfo(void) { return &RendererInfo; }
-
-	virtual void Update();
-
-	void Bind();
-	void Unbind();
-	void Reset();
+	vtkTypeRevisionMacro(vtkErVolumeProperty, vtkVolumeProperty);
+	static vtkErVolumeProperty *New();
 
 protected:
-	vtkCudaRenderInfo();
-	virtual ~vtkCudaRenderInfo();
+	vtkErVolumeProperty();
+	virtual ~vtkErVolumeProperty();
 
-private:
-	RenderInfo				RendererInfo;
-	vtkRenderer*			Renderer;
-	vtkCudaMemoryTexture*   MemoryTexture;
-
-public:
-	FrameBuffer				m_FrameBuffer;
+	/*
+	vtkSmartPointer<vtkPiecewiseFunction>	Opacity;
+	vtkSmartPointer<vtkPiecewiseFunction>	Diffuse[3];
+	vtkSmartPointer<vtkPiecewiseFunction>	Specular[3];
+	vtkSmartPointer<vtkPiecewiseFunction>	Emission[3];
+	vtkSmartPointer<vtkPiecewiseFunction>	Glossiness;
+	vtkSmartPointer<vtkPiecewiseFunction>	IOR;
+	*/
 };

@@ -56,13 +56,14 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	
 	CLight* pLight = NULL;
 
-	SampleDistanceRM(Re, RNG, Pe);
+//	SampleDistanceRM(Re, RNG, Pe);
 
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
 		Col = ColorRGBAuc(255, 255, 255, 120);
 
-//		Lv = ColorXYZf(1.0f);
+		Lv = ColorXYZf(10000.0f);
+		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(10000.0f), X, Y);
 
 		/*
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
@@ -110,13 +111,15 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
 			Lv = Li;
 		*/
-
+		Lv = ColorXYZf(0.0f);
 		Col = ColorRGBAuc(0, 0, 0, 120);
+
+		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
 	}
 
-	pFrameBuffer->m_EstimateRgbaLdr.Set(Col, X, Y);
+//	pFrameBuffer->m_EstimateRgbaLdr.Set(Col, X, Y);
 
-	pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
+//	pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(15000, 150, 15000), X, Y);
 }
 
 void SingleScattering(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)

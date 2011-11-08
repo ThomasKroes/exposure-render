@@ -19,25 +19,23 @@
 #define KRNL_ESTIMATE_BLOCK_H		8
 #define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
 
-KERNEL void KrnlEstimate(RenderInfo* pRenderInfo)
+KERNEL void KrnlComputeEstimate(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
-	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= pDevRenderInfo->m_FilmWidth || Y >= pDevRenderInfo->m_FilmHeight)
+	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
 		return;
 
-	pView->m_RunningEstimateXyza.Set(CumulativeMovingAverage(pView->m_RunningEstimateXyza.Get(X, Y), pView->m_FrameEstimateXyza.Get(X, Y), gRenderInfo.m_NoIterations), X, Y);
-	*/
+	pFrameBuffer->m_RunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->m_RunningEstimateXyza.Get(X, Y), pFrameBuffer->m_FrameEstimateXyza.Get(X, Y), pRenderInfo->m_NoIterations), X, Y);
 }
 
-void Estimate(RenderInfo* pDevRenderInfo, int Width, int Height)
+void ComputeEstimate(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlEstimate<<<GridDim, BlockDim>>>(pDevRenderInfo);
+	KrnlComputeEstimate<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Compute Estimate");
 }

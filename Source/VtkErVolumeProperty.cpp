@@ -11,47 +11,34 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include "Stable.h"
 
-#include "Geometry.h"
+// TYPE
+#include "vtkErVolumeProperty.h"
+#include "vtkObjectFactory.h"
+#include "vtkVolumeProperty.h"
 
-#include <vtkObject.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkCamera.h>
+vtkCxxRevisionMacro(vtkErVolumeProperty, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkErVolumeProperty);
 
-#include "vtkCudaMemoryTexture.h"
-#include "RenderInfo.cuh"
-#include "Buffer.cuh"
-
-class EXPOSURE_RENDER_DLL vtkCudaRenderInfo : public vtkObject
+vtkErVolumeProperty::vtkErVolumeProperty()
 {
-	vtkTypeRevisionMacro(vtkCudaRenderInfo, vtkObject);
+	/*
+	Opacity		= NULL;
+	Diffuse[0]	= NULL;
+	Diffuse[1]	= NULL;
+	Diffuse[2]	= NULL;
+	Specular[0]	= NULL;
+	Specular[1]	= NULL;
+	Specular[2]	= NULL;
+	Emission[0]	= NULL;
+	Emission[1]	= NULL;
+	Emission[2]	= NULL;
+	Glossiness	= NULL;
+	IOR			= NULL;
+	*/
+}
 
-public:
-	static vtkCudaRenderInfo *New();
-
-	void SetRenderer(vtkRenderer* pRenderer);
-
-	vtkGetMacro(Renderer, vtkRenderer*);
-
-	RenderInfo* GetRenderInfo(void) { return &RendererInfo; }
-
-	virtual void Update();
-
-	void Bind();
-	void Unbind();
-	void Reset();
-
-protected:
-	vtkCudaRenderInfo();
-	virtual ~vtkCudaRenderInfo();
-
-private:
-	RenderInfo				RendererInfo;
-	vtkRenderer*			Renderer;
-	vtkCudaMemoryTexture*   MemoryTexture;
-
-public:
-	FrameBuffer				m_FrameBuffer;
-};
+vtkErVolumeProperty::~vtkErVolumeProperty()
+{
+}

@@ -27,8 +27,14 @@ DEV float vecLen(float4 a, float4 b)
     return ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z));
 }
 
-KERNEL void KrnlDenoise(RenderInfo* pRenderInfo)
+KERNEL void KrnlDenoise(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
+	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
+	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+
+//	const ColorRGBuc RGBA = pFrameBuffer->m_EstimateRgbLdr.Get(X, Y);
+//	pFrameBuffer->m_DisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
+
 	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -88,12 +94,12 @@ KERNEL void KrnlDenoise(RenderInfo* pRenderInfo)
 	*/
 }
 
-void Denoise(RenderInfo* pDevRenderInfo, int Width, int Height)
+void Denoise(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_DENOISE_BLOCK_W, KRNL_DENOISE_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlDenoise<<<GridDim, BlockDim>>>(pDevRenderInfo);
+	KrnlDenoise<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Noise Reduction");
 }

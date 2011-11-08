@@ -19,8 +19,52 @@
 #include <vtkObjectFactory.h>
 #include <vtkTransform.h>
 #include <vtkPerspectiveTransform.h>
+#include <vtkCommand.h>
+#include <vtkLight.h>
 
 #include "Core.cuh"
+
+class vtkErCameraCallbackCommand : public vtkCommand
+{
+public:
+  static vtkErCameraCallbackCommand *New()
+    { return new vtkErCameraCallbackCommand; };
+  vtkCamera *Self;
+
+  vtkCudaRenderInfo*	m_pCudaRenderInfo;
+
+  void Execute(vtkObject *, unsigned long, void *)
+    {
+		m_pCudaRenderInfo->Reset();
+
+    }
+protected:
+  vtkErCameraCallbackCommand() { this->Self = NULL; };
+  ~vtkErCameraCallbackCommand() {};
+};
+
+class vtkRendererObserver : public vtkCommand
+{
+public:
+  static vtkRendererObserver* New (void) { return new vtkRendererObserver; }
+
+  void Execute (vtkObject* aCaller, unsigned long aEID, void* aCallData)
+    {
+      vtkRenderer* renderer = static_cast<vtkRenderer*>(aCaller);
+//	  renderer->Up();
+//	  renderer->();
+//	  Log("asd");
+    }
+
+protected:
+  vtkRendererObserver (void){}
+
+  char          Buffer[256];
+
+private:
+  vtkRendererObserver (const vtkRendererObserver&);
+  void operator= (const vtkRendererObserver&);
+};
 
 vtkCxxRevisionMacro(vtkCudaRenderInfo, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkCudaRenderInfo);
@@ -39,7 +83,20 @@ vtkCudaRenderInfo::~vtkCudaRenderInfo()
 
 void vtkCudaRenderInfo::SetRenderer(vtkRenderer* pRenderer)
 {
+	if (Renderer == NULL)
+	{
+		vtkRendererObserver* renObserver = vtkRendererObserver::New();
+
+		pRenderer->AddObserver(vtkCommand::EndEvent, renObserver);
+
+		vtkErCameraCallbackCommand* pCallBack = vtkErCameraCallbackCommand::New();
+		pCallBack->m_pCudaRenderInfo = this;
+
+		pRenderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, pCallBack);
+	}
+	
 	Renderer = pRenderer;
+
 	Update();
 }
 
@@ -125,17 +182,18 @@ void vtkCudaRenderInfo::Update()
 
 		RendererInfo.m_Camera.m_ApertureSize = (float)pCamera->GetFocalDisk();
 
-		RendererInfo.m_FilterWidth = 2;
+		RendererInfo.m_FilterWidth = 3;
 
-		RendererInfo.m_FilterWeights[0] = 0.11411459588254977f;
-		RendererInfo.m_FilterWeights[1] = 0.08176668094332218f;
-		RendererInfo.m_FilterWeights[2] = 0.03008028089187349f;
-		RendererInfo.m_FilterWeights[3] = 0.01f;
+		RendererInfo.m_FilterWeights[0] = 1.11411459588254977f;
+		RendererInfo.m_FilterWeights[1] = 1.08176668094332218f;
+		RendererInfo.m_FilterWeights[2] = 1.03008028089187349f;
+		RendererInfo.m_FilterWeights[3] = 1.01f;
 
 		RendererInfo.m_Gamma		= 2.2;
 		RendererInfo.m_InvGamma		= 1.0f / RendererInfo.m_Gamma;
-		RendererInfo.m_Exposure		= 50.0f;
+		RendererInfo.m_Exposure		= 50000.0f;
 		RendererInfo.m_InvExposure	= 1.0f / RendererInfo.m_Exposure;
+//		RendererInfo.m_NoIterations = 1.0f;
 
 		RendererInfo.m_Denoise.m_Enabled			= false;
 		RendererInfo.m_Denoise.m_Noise				= 0.05f;
@@ -148,4 +206,9 @@ void vtkCudaRenderInfo::Update()
 
 		RendererInfo.m_Shadows = true;
     }
+}
+
+void vtkCudaRenderInfo::Reset()
+{
+	RendererInfo.m_NoIterations = 0;
 }

@@ -16,43 +16,41 @@
 #include "Geometry.h"
 #include "Variance.h"
 
-#define KRNL_TONE_MAP_BLOCK_W		16
+#define KRNL_TONE_MAP_BLOCK_W		16 
 #define KRNL_TONE_MAP_BLOCK_H		8
 #define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
 
-KERNEL void KrnlToneMap(RenderInfo* pRenderInfo)
+KERNEL void KrnlToneMap(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 {
-	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gRenderInfo.m_FilmWidth || Y >= gRenderInfo.m_FilmHeight)
+	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
 		return;
 
-	const ColorXYZAf Color = pView->m_RunningEstimateXyza.Get(X, Y);
+	const ColorXYZAf Color = pFrameBuffer->m_RunningEstimateXyza.Get(X, Y);
 
 	ColorRGBf RgbHdr;
 
 	RgbHdr.FromXYZ(Color.GetX(), Color.GetY(), Color.GetZ());
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gRenderInfo.m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gRenderInfo.m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gRenderInfo.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * pRenderInfo->m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * pRenderInfo->m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * pRenderInfo->m_InvExposure)), 0.0, 1.0f));
 
 	ColorRGBAuc RGBA;
 
-	RGBA.FromRGBAf(RgbHdr[0], RgbHdr[1], RgbHdr[2], 0.0f);
+	RGBA.FromRGBAf(RgbHdr[0], RgbHdr[1], RgbHdr[2], 1.0f);
 
-	pView->m_EstimateRgbaLdr.Set(RGBA, X, Y);
-	*/
+	pFrameBuffer->m_EstimateRgbaLdr.Set(RGBA, X, Y);
 }
 
-void ToneMap(RenderInfo* pDevRenderInfo, int Width, int Height)
+void ToneMap(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlToneMap<<<GridDim, BlockDim>>>(pDevRenderInfo);
+	KrnlToneMap<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Tone Map");
 }

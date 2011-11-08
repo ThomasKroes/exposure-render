@@ -19,6 +19,9 @@
 #include <vtkImageCast.h>
 #include <vtkSmartPointer.h>
 #include <vtkImageGradientMagnitude.h>
+#include <vtkVolumeProperty.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkColorTransferFunction.h>
 
 #include "Core.cuh"
 
@@ -120,8 +123,8 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_GradientDelta	= m_VolumeInfo.m_Spacing.x;
 		m_VolumeInfo.m_InvGradientDelta	= 1.0f / m_VolumeInfo.m_GradientDelta;
 		
-		m_VolumeInfo.m_StepSize			= 0.1f;
-		m_VolumeInfo.m_StepSizeShadow	= 0.1f;
+		m_VolumeInfo.m_StepSize			= 0.01f;
+		m_VolumeInfo.m_StepSizeShadow	= 0.01f;
 
 		m_VolumeInfo.m_GradientDeltaX.x = m_VolumeInfo.m_GradientDelta;
 		m_VolumeInfo.m_GradientDeltaX.y = 0.0f;
@@ -137,6 +140,8 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 
 		BindIntensityBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
 		BindGradientMagnitudeBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
+
+		
     }
 
 //    this->Modified();
