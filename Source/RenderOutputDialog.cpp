@@ -27,6 +27,7 @@
 #include <vtkPiecewiseFunction.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkObject.h>
+#include <vtkLight.h>
 
 class vtkTimerCallback : public vtkCommand
 {
@@ -122,12 +123,12 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 
 
  
- m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.03f);
+	m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.00000001f);
 
 
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
-	MetaImageReader->SetFileName("C://Volumes//mecanix_small.mhd");
+	MetaImageReader->SetFileName("C://Volumes//bonsai.mhd");
 
 	MetaImageReader->Update();
 
@@ -138,16 +139,32 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 
 	vtkPiecewiseFunction* pwf = vtkPiecewiseFunction::New();
 
-	pwf->AddPoint(0,0);
-	pwf->AddPoint(0,0);
-	pwf->AddPoint(2055,1.0);
+	pwf->AddPoint(0,0.0, 0.5, 0);
+	pwf->AddPoint(15,0.0, 0.5, 0);
+	pwf->AddPoint(16, 1.0, 0.5, 0);
+	pwf->AddPoint(255, 1.0, 0.5, 0);
 
 	prop->SetScalarOpacity(pwf);
 
     m_Volume->SetProperty(prop);
     
+	vtkLight* pLight = vtkLight::New();
+	pLight->SetPosition(2.0, 2.0, 2.0);
+	pLight->SetDiffuseColor(150, 150, 150);
+
+	vtkLight* pLight2 = vtkLight::New();
+	pLight2->SetPosition(2.0, 2.0, 0.0);
+	pLight2->SetDiffuseColor(50, 10, 85);
+
+	vtkLight* pLight3 = vtkLight::New();
+	pLight3->SetPosition(0.9, 1.0, 0.3);
+	pLight3->SetDiffuseColor(10, 150, 15);
 
 	m_SceneRenderer->AddViewProp(m_Volume);
+
+	m_SceneRenderer->AddLight(pLight);
+//	m_SceneRenderer->AddLight(pLight2);
+//	m_SceneRenderer->AddLight(pLight3);
 };
 
 QRenderOutputDialog::~QRenderOutputDialog(void)
@@ -156,7 +173,7 @@ QRenderOutputDialog::~QRenderOutputDialog(void)
 
 QSize QRenderOutputDialog::sizeHint() const
 {
-	return QSize(600, 300);
+	return QSize(1024, 768);
 }
 
 void QRenderOutputDialog::accept()

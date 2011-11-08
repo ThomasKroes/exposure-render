@@ -21,6 +21,7 @@
 #include <vtkPerspectiveTransform.h>
 #include <vtkCommand.h>
 #include <vtkLight.h>
+#include <vtkLightCollection.h>
 
 #include "Core.cuh"
 
@@ -182,16 +183,16 @@ void vtkCudaRenderInfo::Update()
 
 		RendererInfo.m_Camera.m_ApertureSize = (float)pCamera->GetFocalDisk();
 
-		RendererInfo.m_FilterWidth = 3;
+		RendererInfo.m_FilterWidth = 1;
 
-		RendererInfo.m_FilterWeights[0] = 1.11411459588254977f;
-		RendererInfo.m_FilterWeights[1] = 1.08176668094332218f;
-		RendererInfo.m_FilterWeights[2] = 1.03008028089187349f;
+		RendererInfo.m_FilterWeights[0] = 1.0f;
+		RendererInfo.m_FilterWeights[1] = 0.5f;
+		RendererInfo.m_FilterWeights[2] = 0.1f;
 		RendererInfo.m_FilterWeights[3] = 1.01f;
 
 		RendererInfo.m_Gamma		= 2.2;
 		RendererInfo.m_InvGamma		= 1.0f / RendererInfo.m_Gamma;
-		RendererInfo.m_Exposure		= 50000.0f;
+		RendererInfo.m_Exposure		= 10.0f;
 		RendererInfo.m_InvExposure	= 1.0f / RendererInfo.m_Exposure;
 //		RendererInfo.m_NoIterations = 1.0f;
 
@@ -205,6 +206,35 @@ void vtkCudaRenderInfo::Update()
 		RendererInfo.m_Denoise.m_LerpThreshold		= 0.0f;
 
 		RendererInfo.m_Shadows = true;
+
+		vtkLightCollection* pLights = Renderer->GetLights();
+
+		m_Lighting.m_NoLights = 0;//pLights->GetNumberOfItems();
+
+		 
+ 
+		pLights->InitTraversal();
+		vtkLight* pLight = pLights->GetNextItem();
+
+		int count = 0;
+
+		while (pLight != 0)
+		{
+			double angle = pLight->GetConeAngle();
+			
+			m_Lighting.m_P[count].x = pLight->GetPosition()[0];
+			m_Lighting.m_P[count].y = pLight->GetPosition()[1];
+			m_Lighting.m_P[count].z = pLight->GetPosition()[2];
+
+			m_Lighting.m_Color[count].x = pLight->GetDiffuseColor()[0];
+			m_Lighting.m_Color[count].y = pLight->GetDiffuseColor()[1];
+			m_Lighting.m_Color[count].z = pLight->GetDiffuseColor()[2];
+		
+			pLight = pLights->GetNextItem();
+
+			count++;
+		}
+
     }
 }
 

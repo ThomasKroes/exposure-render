@@ -21,17 +21,26 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	/*
-	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density), GetSpecular(Density), 2.5f, GetRoughness(Density));
-	
+//	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density), GetSpecular(Density), 2.5f, GetRoughness(Density));
+	CVolumeShader Shader(Type, N, Wo, ColorXYZf(1.0f), ColorXYZf(1.0f), 2.5f, 1.0f);
+
 	CRay Rl; 
 
 	float LightPdf = 1.0f, ShaderPdf = 1.0f;
 	
-	Vec3f Wi, P, Pl;
+	const int LID = floorf(RNG.Get1() * (gLighting.m_NoLights + 1));
 
- 	Li = Light.SampleL(Pe, Rl, LightPdf, LS);
+	Vec3f Wi, Pl = LID < gLighting.m_NoLights ? ToVec3f(gLighting.m_P[LID]) : 15.0f * UniformSampleSphere(RNG.Get2());
+
+ 	Li = LID < gLighting.m_NoLights ? ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z) : ColorXYZf(1500.0f);//Light.SampleL(Pe, Rl, LightPdf, LS);
 	
+	Rl.m_O		= Pe;
+	Rl.m_D		= Normalize(Pe - Pl);
+	Rl.m_MinT	= 0.0f;
+	Rl.m_MaxT	= (Pe - Pl).Length();
+
+	LightPdf = Rl.m_MaxT;
+
 	CLight* pLight = NULL;
 
 	Wi = -Rl.m_D; 
@@ -51,6 +60,7 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
 
+	/*
 	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
@@ -97,5 +107,11 @@ DEV ColorXYZf UniformSampleOneLight(const CVolumeShader::EType& Type, const floa
 	return NumLights * EstimateDirectLight(pScene, Type, Density, Light, LS, Wo, Pe, N, RNG);
 	*/
 
-	return ColorXYZf(0.0f);
+	CLight* Light;
+
+	CLightingSample LS;
+
+	LS.LargeStep(RNG);
+
+	return EstimateDirectLight(Type, Density, *Light, LS, Wo, Pe, N, RNG);
 }

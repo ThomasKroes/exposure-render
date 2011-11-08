@@ -123,7 +123,7 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_GradientDelta	= m_VolumeInfo.m_Spacing.x;
 		m_VolumeInfo.m_InvGradientDelta	= 1.0f / m_VolumeInfo.m_GradientDelta;
 		
-		m_VolumeInfo.m_StepSize			= 0.01f;
+		m_VolumeInfo.m_StepSize			= 0.010f;
 		m_VolumeInfo.m_StepSizeShadow	= 0.01f;
 
 		m_VolumeInfo.m_GradientDeltaX.x = m_VolumeInfo.m_GradientDelta;

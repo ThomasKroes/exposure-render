@@ -20,6 +20,7 @@ class CVariance;
 
 struct VolumeInfo;
 struct RenderInfo;
+struct Lighting;
 class FrameBuffer;
 
 extern "C" void BindIntensityBuffer(short* pBuffer, cudaExtent Extent);
@@ -28,4 +29,4 @@ extern "C" void UnbindDensityBuffer(void);
 extern "C" void UnbindGradientMagnitudeBuffer(void);
 extern "C" void BindTransferFunctions1D(float* pOpacity, float* pDiffuse, float* pSpecular, float* pRoughness, float* pEmission, int N);
 extern "C" void UnbindTransferFunctions1D(void);
-extern "C" void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer);
+extern "C" void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, Lighting* pLighting, FrameBuffer* pFrameBuffer);

@@ -17,6 +17,7 @@
 
 #include "VolumeInfo.cuh"
 #include "RenderInfo.cuh"
+#include "Lighting.cuh"
 
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
@@ -40,6 +41,7 @@ cudaArray* gpRoughnessArray				= NULL;
 cudaArray* gpEmissionArray				= NULL;
 
 CD VolumeInfo	gVolumeInfo;
+CD Lighting		gLighting;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -211,10 +213,12 @@ void UnbindTransferFunctions1D(void)
 	HandleCudaError(cudaUnbindTexture(gTexEmission));
 }
 
-void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
+void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, Lighting* pLighting, FrameBuffer* pFrameBuffer)
 {
 	HandleCudaError(cudaMemcpyToSymbol("gVolumeInfo", pVolumeInfo, sizeof(VolumeInfo)));
+	HandleCudaError(cudaMemcpyToSymbol("gLighting", pLighting, sizeof(Lighting)));
 
+	
 	RenderInfo*		pDevRenderInfo	= NULL;
 	FrameBuffer*	pDevFrameBuffer	= NULL;
 
@@ -228,7 +232,7 @@ void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, FrameBuffe
 	const dim3 GridDim((int)ceilf((float)pRenderInfo->m_FilmWidth / (float)BlockDim.x), (int)ceilf((float)pRenderInfo->m_FilmHeight / (float)BlockDim.y));
 
 	SingleScattering(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
-//	BlurEstimate(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
+	BlurEstimate(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
 	ComputeEstimate(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
 	ToneMap(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
 //	Denoise(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);

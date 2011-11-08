@@ -76,7 +76,7 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 
 	m_CudaRenderInfo->GetRenderInfo()->m_NoIterations += 1;
 
-	RenderEstimate(m_CudaVolumeInfo->GetVolumeInfo(), m_CudaRenderInfo->GetRenderInfo(), &m_CudaRenderInfo->m_FrameBuffer);
+	RenderEstimate(m_CudaVolumeInfo->GetVolumeInfo(), m_CudaRenderInfo->GetRenderInfo(), &m_CudaRenderInfo->m_Lighting, &m_CudaRenderInfo->m_FrameBuffer);
 
 	cudaMemcpy(m_Host.GetPtr(), m_CudaRenderInfo->m_FrameBuffer.m_EstimateRgbaLdr.GetPtr(), m_Host.GetSize(), cudaMemcpyDeviceToHost);
 	

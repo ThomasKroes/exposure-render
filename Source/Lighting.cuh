@@ -34,7 +34,7 @@ public:
 	float		m_Distance;
 	float		m_SkyRadius;
 	Vec3f		m_P;
-	Vec3f		m_Target;	
+	Vec3f		m_Target;
 	Vec3f		m_N;					
 	Vec3f		m_U;					
 	Vec3f		m_V;					
@@ -323,7 +323,7 @@ public:
 	int			m_NoLights;
 };
 
-DEV bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, CLight*& pLight, float* pPdf = NULL)
+DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, CLight*& pLight, float* pPdf = NULL)
 {
 	bool Hit = false;
 	
@@ -350,3 +350,14 @@ DEV bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, CLight*& pLight,
 
 	return Hit;
 }
+
+#define MAX_LIGHTS 10
+
+struct EXPOSURE_RENDER_DLL Lighting
+{
+	int		m_NoLights;
+	float3	m_P[MAX_LIGHTS];
+	float3	m_N[MAX_LIGHTS];
+	float3	m_Size[MAX_LIGHTS];
+	float3	m_Color[MAX_LIGHTS];
+};

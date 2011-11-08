@@ -23,6 +23,7 @@
 #include "vtkCudaMemoryTexture.h"
 #include "RenderInfo.cuh"
 #include "Buffer.cuh"
+#include "Lighting.cuh"
 
 class EXPOSURE_RENDER_DLL vtkCudaRenderInfo : public vtkObject
 {
@@ -47,8 +48,9 @@ protected:
 	vtkCudaRenderInfo();
 	virtual ~vtkCudaRenderInfo();
 
-private:
+public:
 	RenderInfo				RendererInfo;
+	Lighting				m_Lighting;
 	vtkRenderer*			Renderer;
 	vtkCudaMemoryTexture*   MemoryTexture;
 
