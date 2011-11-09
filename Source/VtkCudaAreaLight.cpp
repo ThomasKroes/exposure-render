@@ -17,13 +17,12 @@
 #include "vtkCudaAreaLight.h"
 #include "vtkObjectFactory.h"
 
-vtkCxxRevisionMacro(vtkCudaAreaLight, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkCudaAreaLight);
+vtkStandardNewMacro(vtkErAreaLight);
 
-vtkCudaAreaLight::vtkCudaAreaLight()
+vtkErAreaLight::vtkErAreaLight()
 {
 }
 
-vtkCudaAreaLight::~vtkCudaAreaLight()
+vtkErAreaLight::~vtkErAreaLight()
 {
 }

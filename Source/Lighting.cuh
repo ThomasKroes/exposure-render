@@ -356,6 +356,7 @@ DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, CLight*& 
 struct EXPOSURE_RENDER_DLL Lighting
 {
 	int		m_NoLights;
+	short	m_Type[MAX_LIGHTS];
 	float3	m_P[MAX_LIGHTS];
 	float3	m_N[MAX_LIGHTS];
 	float3	m_Size[MAX_LIGHTS];

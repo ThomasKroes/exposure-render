@@ -15,11 +15,11 @@
 
 #include "Geometry.h"
 
-#include "vtkObject.h"
+#include "vtkLight.h"
 
-class EXPOSURE_RENDER_DLL vtkCudaLight : public vtkObject
+class EXPOSURE_RENDER_DLL vtkCudaLight : public vtkLight
 {
-	vtkTypeRevisionMacro(vtkCudaLight, vtkObject);
+	vtkTypeRevisionMacro(vtkCudaLight, vtkLight);
 	static vtkCudaLight *New();
 
 protected:

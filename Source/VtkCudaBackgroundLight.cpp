@@ -14,17 +14,16 @@
 #include "Stable.h"
 
 // TYPE
-#include "VtkCudaBackgroundLight.h"
+#include "vtkCudaBackgroundLight.h"
 
 #include "vtkObjectFactory.h"
 
-vtkCxxRevisionMacro(vtkCudaBackgroundLight, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkCudaBackgroundLight);
+vtkStandardNewMacro(vtkErBackgroundLight);
 
-vtkCudaBackgroundLight::vtkCudaBackgroundLight()
+vtkErBackgroundLight::vtkErBackgroundLight()
 {
 }
 
-vtkCudaBackgroundLight::~vtkCudaBackgroundLight()
+vtkErBackgroundLight::~vtkErBackgroundLight()
 {
 }

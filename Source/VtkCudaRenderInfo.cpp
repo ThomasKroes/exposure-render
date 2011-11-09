@@ -183,7 +183,7 @@ void vtkCudaRenderInfo::Update()
 
 		RendererInfo.m_Camera.m_ApertureSize = (float)pCamera->GetFocalDisk();
 
-		RendererInfo.m_FilterWidth = 1;
+		RendererInfo.m_FilterWidth = 2;
 
 		RendererInfo.m_FilterWeights[0] = 1.0f;
 		RendererInfo.m_FilterWeights[1] = 0.5f;
@@ -209,7 +209,7 @@ void vtkCudaRenderInfo::Update()
 
 		vtkLightCollection* pLights = Renderer->GetLights();
 
-		m_Lighting.m_NoLights = 0;//pLights->GetNumberOfItems();
+		m_Lighting.m_NoLights = pLights->GetNumberOfItems();
 
 		 
  
@@ -220,16 +220,33 @@ void vtkCudaRenderInfo::Update()
 
 		while (pLight != 0)
 		{
-			double angle = pLight->GetConeAngle();
-			
-			m_Lighting.m_P[count].x = pLight->GetPosition()[0];
-			m_Lighting.m_P[count].y = pLight->GetPosition()[1];
-			m_Lighting.m_P[count].z = pLight->GetPosition()[2];
+			if (pLight->IsTypeOf("vtkLight"))
+			{
+				m_Lighting.m_Type[count] = 0;
 
-			m_Lighting.m_Color[count].x = pLight->GetDiffuseColor()[0];
-			m_Lighting.m_Color[count].y = pLight->GetDiffuseColor()[1];
-			m_Lighting.m_Color[count].z = pLight->GetDiffuseColor()[2];
-		
+				m_Lighting.m_P[count].x = pLight->GetPosition()[0];
+				m_Lighting.m_P[count].y = pLight->GetPosition()[1];
+				m_Lighting.m_P[count].z = pLight->GetPosition()[2];
+			}
+
+			if (pLight->IsTypeOf("vtkErAreaLight"))
+			{
+				m_Lighting.m_Type[count] = 1;
+			}
+
+			if (pLight->IsTypeOf("vtkErBackgroundLight"))
+			{
+				m_Lighting.m_Type[count] = 2;
+			}
+
+			ColorXYZf Color;
+
+			Color.FromRGB(pLight->GetDiffuseColor()[0], pLight->GetDiffuseColor()[1], pLight->GetDiffuseColor()[2]);
+
+			m_Lighting.m_Color[count].x = Color[0];
+			m_Lighting.m_Color[count].y = Color[1];
+			m_Lighting.m_Color[count].z = Color[2];
+
 			pLight = pLights->GetNextItem();
 
 			count++;

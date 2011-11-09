@@ -17,6 +17,38 @@
 #include "RayMarching.cuh"
 #include "Lighting.cuh"
 
+DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
+{
+	const int LID = floorf(RNG.Get1() * gLighting.m_NoLights);
+
+	switch (gLighting.m_Type[LID])
+	{
+		case 0:
+		{
+			Pl	= ToVec3f(gLighting.m_P[LID]);
+			Pdf	= (Pe - Pl).Length();
+
+			return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
+		}
+		
+		case 1:
+		{
+			Pl	= ToVec3f(gLighting.m_P[LID]);
+			Pdf	= (Pe - Pl).Length();
+
+			return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
+		}
+
+		case 2:
+		{
+			Pl	= 150.0f * UniformSampleSphere(RNG.Get2());
+			Pdf	= (Pe - Pl).Length();
+
+			return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
+		}
+	}
+}
+
 DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
@@ -27,19 +59,15 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 	CRay Rl; 
 
 	float LightPdf = 1.0f, ShaderPdf = 1.0f;
-	
-	const int LID = floorf(RNG.Get1() * (gLighting.m_NoLights + 1));
 
-	Vec3f Wi, Pl = LID < gLighting.m_NoLights ? ToVec3f(gLighting.m_P[LID]) : 15.0f * UniformSampleSphere(RNG.Get2());
+	Vec3f Wi, Pl;
 
- 	Li = LID < gLighting.m_NoLights ? ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z) : ColorXYZf(1500.0f);//Light.SampleL(Pe, Rl, LightPdf, LS);
+ 	Li = SampleLight(RNG, Pe, Pl, LightPdf);
 	
 	Rl.m_O		= Pe;
 	Rl.m_D		= Normalize(Pe - Pl);
 	Rl.m_MinT	= 0.0f;
 	Rl.m_MaxT	= (Pe - Pl).Length();
-
-	LightPdf = Rl.m_MaxT;
 
 	CLight* pLight = NULL;
 
@@ -47,17 +75,18 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 
 	F = Shader.F(Wo, Wi); 
 
-	ShaderPdf = Shader.Pdf(Wo, Wi);
+	ShaderPdf = INV_4_PI_F;//.Pdf(Wo, Wi);
 
 	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
 		
-		if (Type == CVolumeShader::Brdf)
-			Ld += F * Li * AbsDot(Wi, N) * WeightMIS / LightPdf;
+//		if (Type == CVolumeShader::Brdf)
+//			Ld += F * Li * AbsDot(Wi, N) * WeightMIS / LightPdf;
 
-		if (Type == CVolumeShader::Phase)
-			Ld += F * Li * WeightMIS / LightPdf;
+//		if (Type == CVolumeShader::Phase)
+//			Ld += F * Li * WeightMIS / LightPdf;
+		Ld += F * Li / LightPdf;
 	}
 
 	/*

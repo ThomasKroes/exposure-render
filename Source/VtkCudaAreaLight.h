@@ -15,12 +15,18 @@
 
 #include "VtkCudaLight.h"
 
-class EXPOSURE_RENDER_DLL vtkCudaAreaLight : public vtkCudaLight
+class EXPOSURE_RENDER_DLL vtkErAreaLight : public vtkCudaLight
 {
-	vtkTypeRevisionMacro(vtkCudaAreaLight, vtkCudaLight);
-	static vtkCudaAreaLight *New();
+	vtkTypeMacro(vtkErAreaLight, vtkCudaLight);
+	static vtkErAreaLight *New();
+
+	vtkSetVector3Macro(Size, double);
+	vtkGetVectorMacro(Size, double, 3);
+	void SetSize(float* pSize) { this->SetSize(pSize[0], pSize[1], pSize[2]); };
 
 protected:
-	vtkCudaAreaLight();
-	virtual ~vtkCudaAreaLight();
+	vtkErAreaLight();
+	virtual ~vtkErAreaLight();
+
+	double Size[3];
 };

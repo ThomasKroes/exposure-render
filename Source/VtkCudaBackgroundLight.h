@@ -15,12 +15,12 @@
 
 #include "VtkCudaLight.h"
 
-class EXPOSURE_RENDER_DLL vtkCudaBackgroundLight : public vtkCudaLight
+class EXPOSURE_RENDER_DLL vtkErBackgroundLight : public vtkCudaLight
 {
-	vtkTypeRevisionMacro(vtkCudaBackgroundLight, vtkCudaLight);
-	static vtkCudaBackgroundLight *New();
+	vtkTypeMacro(vtkErBackgroundLight, vtkCudaLight);
+	static vtkErBackgroundLight *New();
 
 protected:
-	vtkCudaBackgroundLight();
-	virtual ~vtkCudaBackgroundLight();
+	vtkErBackgroundLight();
+	virtual ~vtkErBackgroundLight();
 };

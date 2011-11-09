@@ -29,6 +29,8 @@
 #include <vtkObject.h>
 #include <vtkLight.h>
 
+#include "vtkCudaBackgroundLight.h"
+
 class vtkTimerCallback : public vtkCommand
 {
   public:
@@ -140,9 +142,9 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 	vtkPiecewiseFunction* pwf = vtkPiecewiseFunction::New();
 
 	pwf->AddPoint(0,0.0, 0.5, 0);
-	pwf->AddPoint(15,0.0, 0.5, 0);
-	pwf->AddPoint(16, 1.0, 0.5, 0);
-	pwf->AddPoint(255, 1.0, 0.5, 0);
+	pwf->AddPoint(30,0.0, 0.5, 0);
+	pwf->AddPoint(31, 1.0, 0.5, 0);
+	pwf->AddPoint(1024, 1.0, 0.5, 0);
 
 	prop->SetScalarOpacity(pwf);
 
@@ -162,9 +164,16 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 
 	m_SceneRenderer->AddViewProp(m_Volume);
 
-	m_SceneRenderer->AddLight(pLight);
+	m_SceneRenderer->RemoveAllLights();
+//	m_SceneRenderer->AddLight(pLight);
 //	m_SceneRenderer->AddLight(pLight2);
 //	m_SceneRenderer->AddLight(pLight3);
+
+	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
+
+	pErBackgroundLight->SetDiffuseColor(5020000, 500, 1000);
+
+	m_SceneRenderer->AddLight(pErBackgroundLight);
 };
 
 QRenderOutputDialog::~QRenderOutputDialog(void)
