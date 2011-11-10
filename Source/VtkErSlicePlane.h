@@ -15,14 +15,14 @@
 
 #include "Dll.h"
 
-#include "vtkObject.h"
+#include <vtkObject.h>
 
-class EXPOSURE_RENDER_DLL vtkCudaSlicePlane : public vtkObject
+class EXPOSURE_RENDER_DLL vtkErSlicePlane : public vtkObject
 {
-	vtkTypeRevisionMacro(vtkCudaSlicePlane, vtkObject);
-	static vtkCudaSlicePlane *New();
+	vtkTypeRevisionMacro(vtkErSlicePlane, vtkObject);
+	static vtkErSlicePlane *New();
 
 protected:
-	vtkCudaSlicePlane();
-	virtual ~vtkCudaSlicePlane();
+	vtkErSlicePlane();
+	virtual ~vtkErSlicePlane();
 };

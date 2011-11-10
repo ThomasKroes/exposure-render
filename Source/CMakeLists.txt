@@ -158,17 +158,14 @@ SET(ExposureRenderSources
 	RenderOutputDialog.cpp
 
 	# Vtk
-	VtkCudaVolumeMapper.cpp
-	VtkCudaLight.cpp
-	VtkCudaAreaLight.cpp
-	VtkCudaBackgroundLight.cpp
-	VtkCudaTransferFunction.cpp
-	VtkCudaSlicePlane.cpp
-	VtkCudaVolumeProperty.cpp
-	VtkCudaVolumeInfo.cpp
-	VtkCudaRenderInfo.cpp
-	vtkCudaMemoryTexture.cpp
-	VtkErVolumeProperty.cpp
+	vtkErVolumeMapper.cpp
+	vtkErLight.cpp
+	vtkErAreaLight.cpp
+	vtkErBackgroundLight.cpp
+	vtkErSlicePlane.cpp
+	vtkErVolumeProperty.cpp
+	vtkErVolumeInfo.cpp
+	vtkErRenderInfo.cpp
 
 	# Logging
 	Logger.cpp
@@ -263,17 +260,14 @@ SET(ExposureRenderHeaders
 	RenderOutputDialog.h
 
 	# Vtk
-	VtkCudaVolumeMapper.h
-	VtkCudaLight.h
-	VtkCudaAreaLight.h
-	VtkCudaBackgroundLight.h
-	VtkCudaTransferFunction.h
-	VtkCudaSlicePlane.h
-	VtkCudaVolumeProperty.h
-	VtkCudaVolumeInfo.h
-	VtkCudaRenderInfo.h
-	vtkCudaMemoryTexture.h
-	VtkErVolumeProperty.h
+	vtkErVolumeMapper.h
+	vtkErLight.h
+	vtkErAreaLight.h
+	vtkErBackgroundLight.h
+	vtkErSlicePlane.h
+	vtkErVolumeProperty.h
+	vtkErVolumeInfo.h
+	vtkErRenderInfo.h
 
 	# Logging
 	Logger.h
@@ -584,28 +578,22 @@ SOURCE_GROUP("Core" FILES ${CoreSources})
 
 # Vtk sources
 SET(VtkSources
-	VtkCudaVolumeMapper.h
-	VtkCudaLight.h
-	VtkCudaAreaLight.h
-	VtkCudaBackgroundLight.h
-	VtkCudaTransferFunction.h
-	VtkCudaSlicePlane.h
-	VtkCudaVolumeProperty.h
-	VtkCudaVolumeInfo.h
-	VtkCudaRenderInfo.h
-	vtkCudaMemoryTexture.h
-	VtkErVolumeProperty.h
-	VtkCudaVolumeMapper.cpp
-	VtkCudaLight.cpp
-	VtkCudaAreaLight.cpp
-	VtkCudaBackgroundLight.cpp
-	VtkCudaTransferFunction.cpp
-	VtkCudaSlicePlane.cpp
-	VtkCudaVolumeProperty.cpp
-	VtkCudaVolumeInfo.cpp
-	VtkCudaRenderInfo.cpp
-	vtkCudaMemoryTexture.cpp
-	VtkErVolumeProperty.cpp
+	vtkErVolumeMapper.h
+	vtkErLight.h
+	vtkErAreaLight.h
+	vtkErBackgroundLight.h
+	vtkErSlicePlane.h
+	vtkErVolumeProperty.h
+	vtkErVolumeInfo.h
+	vtkErRenderInfo.h
+	vtkErVolumeMapper.cpp
+	vtkErLight.cpp
+	vtkErAreaLight.cpp
+	vtkErBackgroundLight.cpp
+	vtkErSlicePlane.cpp
+	vtkErVolumeProperty.cpp
+	vtkErVolumeInfo.cpp
+	vtkErRenderInfo.cpp
 )
 
 # Make the core group

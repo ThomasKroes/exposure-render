@@ -13,18 +13,17 @@
 
 #include "Stable.h"
 
-// TYPE
-#include "vtkCudaLight.h"
-#include "vtkObjectFactory.h"
+#include <vtkObjectFactory.h>
 
-vtkCxxRevisionMacro(vtkCudaLight, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkCudaLight);
+#include "vtkErLight.h"
 
+vtkCxxRevisionMacro(vtkErLight, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkErLight);
 
-vtkCudaLight::vtkCudaLight()
+vtkErLight::vtkErLight()
 {
 }
 
-vtkCudaLight::~vtkCudaLight()
+vtkErLight::~vtkErLight()
 {
 }

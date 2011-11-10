@@ -13,30 +13,15 @@
 
 #include "Stable.h"
 
-// TYPE
 #include "vtkErVolumeProperty.h"
-#include "vtkObjectFactory.h"
-#include "vtkVolumeProperty.h"
+
+#include <vtkObjectFactory.h>
 
 vtkCxxRevisionMacro(vtkErVolumeProperty, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkErVolumeProperty);
 
 vtkErVolumeProperty::vtkErVolumeProperty()
 {
-	/*
-	Opacity		= NULL;
-	Diffuse[0]	= NULL;
-	Diffuse[1]	= NULL;
-	Diffuse[2]	= NULL;
-	Specular[0]	= NULL;
-	Specular[1]	= NULL;
-	Specular[2]	= NULL;
-	Emission[0]	= NULL;
-	Emission[1]	= NULL;
-	Emission[2]	= NULL;
-	Glossiness	= NULL;
-	IOR			= NULL;
-	*/
 }
 
 vtkErVolumeProperty::~vtkErVolumeProperty()

@@ -13,8 +13,9 @@
 
 #include "Stable.h"
 
-// TYPE
-#include "vtkCudaRenderInfo.h"
+#include "vtkErRenderInfo.h"
+#include "vtkErAreaLight.h"
+#include "vtkErBackgroundLight.h"
 
 #include <vtkObjectFactory.h>
 #include <vtkTransform.h>
@@ -32,7 +33,7 @@ public:
     { return new vtkErCameraCallbackCommand; };
   vtkCamera *Self;
 
-  vtkCudaRenderInfo*	m_pCudaRenderInfo;
+  vtkErRenderInfo*	m_pCudaRenderInfo;
 
   void Execute(vtkObject *, unsigned long, void *)
     {
@@ -67,22 +68,20 @@ private:
   void operator= (const vtkRendererObserver&);
 };
 
-vtkCxxRevisionMacro(vtkCudaRenderInfo, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkCudaRenderInfo);
+vtkCxxRevisionMacro(vtkErRenderInfo, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkErRenderInfo);
 
-vtkCudaRenderInfo::vtkCudaRenderInfo()
+vtkErRenderInfo::vtkErRenderInfo()
 {
 	Renderer = NULL;
-    MemoryTexture = vtkCudaMemoryTexture::New();
 }
 
-vtkCudaRenderInfo::~vtkCudaRenderInfo()
+vtkErRenderInfo::~vtkErRenderInfo()
 {
 	Renderer = NULL;
-    MemoryTexture->Delete();
 }
 
-void vtkCudaRenderInfo::SetRenderer(vtkRenderer* pRenderer)
+void vtkErRenderInfo::SetRenderer(vtkRenderer* pRenderer)
 {
 	if (Renderer == NULL)
 	{
@@ -101,20 +100,7 @@ void vtkCudaRenderInfo::SetRenderer(vtkRenderer* pRenderer)
 	Update();
 }
 
-void vtkCudaRenderInfo::Bind()
-{
-	MemoryTexture->BindTexture();
-	MemoryTexture->BindBuffer();
-//	RendererInfo.OutputImage = (uchar4*)this->MemoryTexture->GetRenderDestination();
-}
-
-void vtkCudaRenderInfo::Unbind()
-{
-	MemoryTexture->UnbindBuffer();
-	MemoryTexture->UnbindTexture();
-}
-
-void vtkCudaRenderInfo::Update()
+void vtkErRenderInfo::Update()
 {
     if (this->Renderer != NULL)
     {
@@ -122,7 +108,6 @@ void vtkCudaRenderInfo::Update()
 
         int* pRenderSize = pRenderWindow->GetSize();
 
-		MemoryTexture->SetSize(pRenderSize[0], pRenderSize[1]);
 		m_FrameBuffer.Resize(CResolution2D(pRenderSize[0], pRenderSize[1]));
 
 		if (pRenderSize[0] != this->RendererInfo.m_FilmWidth || pRenderSize[1] != this->RendererInfo.m_FilmHeight)
@@ -220,6 +205,9 @@ void vtkCudaRenderInfo::Update()
 
 		while (pLight != 0)
 		{
+			vtkErAreaLight* pAreaLight = dynamic_cast<vtkErAreaLight*>(pLight);
+			vtkErBackgroundLight* pBackgroundLight = dynamic_cast<vtkErBackgroundLight*>(pLight);
+
 			if (pLight->IsTypeOf("vtkLight"))
 			{
 				m_Lighting.m_Type[count] = 0;
@@ -229,12 +217,12 @@ void vtkCudaRenderInfo::Update()
 				m_Lighting.m_P[count].z = pLight->GetPosition()[2];
 			}
 
-			if (pLight->IsTypeOf("vtkErAreaLight"))
+			if (pAreaLight)
 			{
 				m_Lighting.m_Type[count] = 1;
 			}
 
-			if (pLight->IsTypeOf("vtkErBackgroundLight"))
+			if (pBackgroundLight)
 			{
 				m_Lighting.m_Type[count] = 2;
 			}
@@ -255,7 +243,7 @@ void vtkCudaRenderInfo::Update()
     }
 }
 
-void vtkCudaRenderInfo::Reset()
+void vtkErRenderInfo::Reset()
 {
 	RendererInfo.m_NoIterations = 0;
 }

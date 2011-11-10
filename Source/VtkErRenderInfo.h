@@ -20,17 +20,16 @@
 #include <vtkRenderWindow.h>
 #include <vtkCamera.h>
 
-#include "vtkCudaMemoryTexture.h"
 #include "RenderInfo.cuh"
 #include "Buffer.cuh"
 #include "Lighting.cuh"
 
-class EXPOSURE_RENDER_DLL vtkCudaRenderInfo : public vtkObject
+class EXPOSURE_RENDER_DLL vtkErRenderInfo : public vtkObject
 {
-	vtkTypeRevisionMacro(vtkCudaRenderInfo, vtkObject);
+	vtkTypeRevisionMacro(vtkErRenderInfo, vtkObject);
 
 public:
-	static vtkCudaRenderInfo *New();
+	static vtkErRenderInfo *New();
 
 	void SetRenderer(vtkRenderer* pRenderer);
 
@@ -40,19 +39,16 @@ public:
 
 	virtual void Update();
 
-	void Bind();
-	void Unbind();
 	void Reset();
 
 protected:
-	vtkCudaRenderInfo();
-	virtual ~vtkCudaRenderInfo();
+	vtkErRenderInfo();
+	virtual ~vtkErRenderInfo();
 
 public:
 	RenderInfo				RendererInfo;
 	Lighting				m_Lighting;
 	vtkRenderer*			Renderer;
-	vtkCudaMemoryTexture*   MemoryTexture;
 
 public:
 	FrameBuffer				m_FrameBuffer;

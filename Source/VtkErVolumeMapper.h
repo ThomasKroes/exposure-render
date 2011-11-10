@@ -37,8 +37,8 @@
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
 
-#include "VtkCudaVolumeInfo.h"
-#include "VtkCudaRenderInfo.h"
+#include "VtkErVolumeInfo.h"
+#include "VtkErRenderInfo.h"
 
 class vtkVolumeProperty;
 
@@ -62,8 +62,8 @@ vtkVolumeCudaMapper operator=(const vtkVolumeCudaMapper&);
     void UpdateOutputResolution(unsigned int width, unsigned int height, bool TypeChanged = false);
 
 protected:
-	vtkSmartPointer<vtkCudaVolumeInfo>	m_CudaVolumeInfo;
-	vtkSmartPointer<vtkCudaRenderInfo>	m_CudaRenderInfo;
+	vtkSmartPointer<vtkErVolumeInfo>	m_CudaVolumeInfo;
+	vtkSmartPointer<vtkErRenderInfo>	m_CudaRenderInfo;
 
 	vtkVolumeCudaMapper();
     virtual ~vtkVolumeCudaMapper();

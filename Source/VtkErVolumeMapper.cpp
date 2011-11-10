@@ -21,7 +21,7 @@
 
 #include <vtkgl.h>
 
-#include "VtkCudaVolumeMapper.h"
+#include "VtkErVolumeMapper.h"
 
 #include "Core.cuh"
 
@@ -34,8 +34,8 @@ vtkStandardNewMacro(vtkVolumeCudaMapper);
 
 vtkVolumeCudaMapper::vtkVolumeCudaMapper()
 {
-	m_CudaVolumeInfo	= vtkCudaVolumeInfo::New();
-	m_CudaRenderInfo	= vtkCudaRenderInfo::New();
+	m_CudaVolumeInfo	= vtkErVolumeInfo::New();
+	m_CudaRenderInfo	= vtkErRenderInfo::New();
 
 	SetCudaDevice(0);
 

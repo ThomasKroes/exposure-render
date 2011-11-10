@@ -13,8 +13,6 @@
 
 #include "Stable.h"
 
-#include "vtkCudaVolumeInfo.h"
-
 #include <vtkObjectFactory.h>
 #include <vtkImageCast.h>
 #include <vtkSmartPointer.h>
@@ -23,20 +21,22 @@
 #include <vtkPiecewiseFunction.h>
 #include <vtkColorTransferFunction.h>
 
+#include "vtkErVolumeInfo.h"
+
 #include "Core.cuh"
 
-vtkCxxRevisionMacro(vtkCudaVolumeInfo, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkCudaVolumeInfo);
+vtkCxxRevisionMacro(vtkErVolumeInfo, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkErVolumeInfo);
 
-vtkCudaVolumeInfo::vtkCudaVolumeInfo()
+vtkErVolumeInfo::vtkErVolumeInfo()
 {
 }
 
-vtkCudaVolumeInfo::~vtkCudaVolumeInfo()
+vtkErVolumeInfo::~vtkErVolumeInfo()
 {
 }
 
-void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
+void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 {
 	if (m_pIntensity != NULL)
 		return;
@@ -124,7 +124,7 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_InvGradientDelta	= 1.0f / m_VolumeInfo.m_GradientDelta;
 		
 		m_VolumeInfo.m_StepSize			= 3.0f * (m_VolumeInfo.m_MaxAABB.x / m_VolumeInfo.m_Extent.x);
-		m_VolumeInfo.m_StepSizeShadow	= m_VolumeInfo.m_StepSize * 1.0f;
+		m_VolumeInfo.m_StepSizeShadow	= m_VolumeInfo.m_StepSize * 2.0f;
 
 		m_VolumeInfo.m_GradientDeltaX.x = m_VolumeInfo.m_GradientDelta;
 		m_VolumeInfo.m_GradientDeltaX.y = 0.0f;
@@ -147,7 +147,7 @@ void vtkCudaVolumeInfo::SetInputData(vtkImageData* pInputData)
 //    this->Modified();
 }
 
-void vtkCudaVolumeInfo::Update()
+void vtkErVolumeInfo::Update()
 {
     if (Volume != NULL && m_pIntensity != NULL)
     {

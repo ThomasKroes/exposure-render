@@ -13,10 +13,9 @@
 
 #include "Stable.h"
 
-// TYPE
-#include "vtkCudaBackgroundLight.h"
+#include <vtkObjectFactory.h>
 
-#include "vtkObjectFactory.h"
+#include "vtkErBackgroundLight.h"
 
 vtkStandardNewMacro(vtkErBackgroundLight);
 

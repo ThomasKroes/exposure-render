@@ -21,11 +21,11 @@
 
 #include "VolumeInfo.cuh"
 
-class EXPOSURE_RENDER_DLL vtkCudaVolumeInfo : public vtkObject
+class EXPOSURE_RENDER_DLL vtkErVolumeInfo : public vtkObject
 {
 public:
-	vtkTypeRevisionMacro(vtkCudaVolumeInfo, vtkObject);
-	static vtkCudaVolumeInfo *New();
+	vtkTypeRevisionMacro(vtkErVolumeInfo, vtkObject);
+	static vtkErVolumeInfo *New();
 
 	void SetInputData(vtkImageData* pInputData);
 
@@ -37,13 +37,12 @@ public:
 	virtual void Update();
 
 protected:
-	vtkCudaVolumeInfo();
-	virtual ~vtkCudaVolumeInfo();
+	vtkErVolumeInfo();
+	virtual ~vtkErVolumeInfo();
 
 private:
 	VolumeInfo		m_VolumeInfo;
 	vtkImageData*   m_pIntensity;
 	vtkImageData*   m_pGradientMagnitude;
 	vtkVolume*      Volume;
-
 };

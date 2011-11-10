@@ -13,9 +13,9 @@
 
 #include "Stable.h"
 
-// TYPE
-#include "vtkCudaAreaLight.h"
-#include "vtkObjectFactory.h"
+#include <vtkObjectFactory.h>
+
+#include "vtkErAreaLight.h"
 
 vtkStandardNewMacro(vtkErAreaLight);
 

@@ -13,17 +13,17 @@
 
 #include "Stable.h"
 
-// TYPE
-#include "vtkCudaSlicePlane.h"
-#include "vtkObjectFactory.h"
+#include <vtkObjectFactory.h>
 
-vtkCxxRevisionMacro(vtkCudaSlicePlane, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkCudaSlicePlane);
+#include "vtkErSlicePlane.h"
 
-vtkCudaSlicePlane::vtkCudaSlicePlane()
+vtkCxxRevisionMacro(vtkErSlicePlane, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkErSlicePlane);
+
+vtkErSlicePlane::vtkErSlicePlane()
 {
 }
 
-vtkCudaSlicePlane::~vtkCudaSlicePlane()
+vtkErSlicePlane::~vtkErSlicePlane()
 {
 }

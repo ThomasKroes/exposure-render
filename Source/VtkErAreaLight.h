@@ -13,11 +13,11 @@
 
 #pragma once
 
-#include "VtkCudaLight.h"
+#include "VtkErLight.h"
 
-class EXPOSURE_RENDER_DLL vtkErAreaLight : public vtkCudaLight
+class EXPOSURE_RENDER_DLL vtkErAreaLight : public vtkErLight
 {
-	vtkTypeMacro(vtkErAreaLight, vtkCudaLight);
+	vtkTypeMacro(vtkErAreaLight, vtkErLight);
 	static vtkErAreaLight *New();
 
 	vtkSetVector3Macro(Size, double);

@@ -27,13 +27,4 @@ class EXPOSURE_RENDER_DLL vtkErVolumeProperty : public vtkVolumeProperty
 protected:
 	vtkErVolumeProperty();
 	virtual ~vtkErVolumeProperty();
-
-	/*
-	vtkSmartPointer<vtkPiecewiseFunction>	Opacity;
-	vtkSmartPointer<vtkPiecewiseFunction>	Diffuse[3];
-	vtkSmartPointer<vtkPiecewiseFunction>	Specular[3];
-	vtkSmartPointer<vtkPiecewiseFunction>	Emission[3];
-	vtkSmartPointer<vtkPiecewiseFunction>	Glossiness;
-	vtkSmartPointer<vtkPiecewiseFunction>	IOR;
-	*/
 };

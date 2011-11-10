@@ -19,7 +19,7 @@
 #include <vtkVolume.h>
 #include <vtkRenderer.h>
 
-#include "VtkCudaVolumeMapper.h"
+#include "VtkErVolumeMapper.h"
 
 class QRenderOutputDialog : public QDialog
 {

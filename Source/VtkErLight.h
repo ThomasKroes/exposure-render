@@ -17,12 +17,12 @@
 
 #include "vtkLight.h"
 
-class EXPOSURE_RENDER_DLL vtkCudaLight : public vtkLight
+class EXPOSURE_RENDER_DLL vtkErLight : public vtkLight
 {
-	vtkTypeRevisionMacro(vtkCudaLight, vtkLight);
-	static vtkCudaLight *New();
+	vtkTypeRevisionMacro(vtkErLight, vtkLight);
+	static vtkErLight *New();
 
 protected:
-	vtkCudaLight();
-	virtual ~vtkCudaLight();
+	vtkErLight();
+	virtual ~vtkErLight();
 };

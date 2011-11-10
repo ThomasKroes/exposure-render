@@ -29,7 +29,8 @@
 #include <vtkObject.h>
 #include <vtkLight.h>
 
-#include "vtkCudaBackgroundLight.h"
+#include "vtkErAreaLight.h"
+#include "vtkErBackgroundLight.h"
 
 class vtkTimerCallback : public vtkCommand
 {
@@ -78,26 +79,15 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 
 	// Create and configure scene renderer
 	m_SceneRenderer = vtkRenderer::New();
-	m_SceneRenderer->SetBackground(0.25, 0.25, 0.25);
-	m_SceneRenderer->SetBackground2(0.25, 0.25, 0.25);
-	m_SceneRenderer->SetGradientBackground(true);
+	m_SceneRenderer->SetBackground(0, 0, 0);
 	m_SceneRenderer->GetActiveCamera()->SetPosition(0.0, 0.0, 10.0);
 	m_SceneRenderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
-//	m_SceneRenderer->GetActiveCamera()->ParallelProjectionOn();
 
 	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_SceneRenderer);
 
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.001);
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, vtkTimerCallback::New());
 
-
-	// Set up the widget
-  vtkSmartPointer<vtkOrientationMarkerWidget> widget =
-    vtkSmartPointer<vtkOrientationMarkerWidget>::New();
-  widget->SetOutlineColor( 0.9300, 0.5700, 0.1300 );
-
-  vtkCylinderSource *cylinder = vtkCylinderSource::New();
-  cylinder->SetResolution(800);
 
   vtkCubeSource* pBox = vtkCubeSource::New();
 
@@ -121,16 +111,16 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
   cylinderActor->GetProperty()->SetOpacity(0.9);
 //  cylinderActor->RotateX(30.0);
 //  cylinderActor->RotateY(-45.0);
- m_SceneRenderer->AddActor(cylinderActor);
+// m_SceneRenderer->AddActor(cylinderActor);
 
 
  
-	m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.00000001f);
+	m_SceneRenderer->GetActiveCamera()->SetFocalDisk(0.001f);
 
 
 	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
-	MetaImageReader->SetFileName("C://Volumes//bonsai.mhd");
+	MetaImageReader->SetFileName("C://Volumes//manix_small.mhd");
 
 	MetaImageReader->Update();
 
@@ -142,8 +132,8 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 	vtkPiecewiseFunction* pwf = vtkPiecewiseFunction::New();
 
 	pwf->AddPoint(0,0.0, 0.5, 0);
-	pwf->AddPoint(30,0.0, 0.5, 0);
-	pwf->AddPoint(31, 1.0, 0.5, 0);
+	pwf->AddPoint(400,0.0, 0.5, 0);
+	pwf->AddPoint(401, 1.0, 0.5, 0);
 	pwf->AddPoint(1024, 1.0, 0.5, 0);
 
 	prop->SetScalarOpacity(pwf);
@@ -165,13 +155,13 @@ QRenderOutputDialog::QRenderOutputDialog(QWidget* pParent) :
 	m_SceneRenderer->AddViewProp(m_Volume);
 
 	m_SceneRenderer->RemoveAllLights();
-//	m_SceneRenderer->AddLight(pLight);
+	m_SceneRenderer->AddLight(pLight);
 //	m_SceneRenderer->AddLight(pLight2);
 //	m_SceneRenderer->AddLight(pLight3);
 
 	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
 
-	pErBackgroundLight->SetDiffuseColor(5020000, 500, 1000);
+	pErBackgroundLight->SetDiffuseColor(10000, 10000, 10000);
 
 	m_SceneRenderer->AddLight(pErBackgroundLight);
 };
