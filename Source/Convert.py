@@ -35,7 +35,7 @@ for FileName in DirList:
 
             Resample = vtkImageResample()
 
-            ResampleFactor = 0.5
+            ResampleFactor = 0.75
 
             print("Resampling image at " + str(100.0 * ResampleFactor) + "% of original volume")
         
@@ -50,8 +50,8 @@ for FileName in DirList:
 
             MetaImageWriter = vtkMetaImageWriter()
 
-            MetaImageWriter.SetFileName(Path + "\\" + BaseName + "_small.mhd")
-            MetaImageWriter.SetRAWFileName(Path + "\\" + BaseName + "_small.raw")
+            MetaImageWriter.SetFileName(Path + "\\" + BaseName  + "_small.mhd")
+            MetaImageWriter.SetRAWFileName(Path + "\\" + BaseName  + "_small.raw")
         
             MetaImageWriter.SetInput(Resample.GetOutput())
 

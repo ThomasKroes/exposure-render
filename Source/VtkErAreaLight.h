@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <vtkLightActor.h>
+
 #include "VtkErLight.h"
 
 class EXPOSURE_RENDER_DLL vtkErAreaLight : public vtkErLight

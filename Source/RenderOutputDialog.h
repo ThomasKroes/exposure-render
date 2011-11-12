@@ -13,13 +13,7 @@
 
 #pragma once
 
-#include <QVTKWidget.h>
-
-#include <vtkSmartPointer.h>
-#include <vtkVolume.h>
-#include <vtkRenderer.h>
-
-#include "VtkErVolumeMapper.h"
+#include "VtkWidget.h"
 
 class QRenderOutputDialog : public QDialog
 {
@@ -33,15 +27,7 @@ public:
 	virtual QSize sizeHint() const;
 
 public:
+	void SetRenderWidget(CVtkRenderWidget* pRenderWidget);
 
-private:
-
-signals:
-
-private:
-	QGridLayout								m_MainLayout;
-	QVTKWidget								m_QtVtkWidget;
-	vtkSmartPointer<vtkVolume>				m_Volume;
-	vtkSmartPointer<vtkVolumeCudaMapper>	m_VolumeMapper;
-	vtkSmartPointer<vtkRenderer>			m_SceneRenderer;
+	QGridLayout					m_MainLayout;
 };

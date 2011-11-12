@@ -16,6 +16,7 @@
 #include "Dll.h"
 
 #include <vtkObject.h>
+#include <vtkSmartPointer.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkVolumeProperty.h>
 
@@ -24,7 +25,31 @@ class EXPOSURE_RENDER_DLL vtkErVolumeProperty : public vtkVolumeProperty
 	vtkTypeRevisionMacro(vtkErVolumeProperty, vtkVolumeProperty);
 	static vtkErVolumeProperty *New();
 
+public:
+	void SetOpacity(vtkPiecewiseFunction* pPiecewiseFunction);
+	vtkPiecewiseFunction* GetOpacity(void);
+
+	void SetDiffuse(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
+	vtkPiecewiseFunction* GetDiffuse(int Index);
+
+	void SetSpecular(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
+	vtkPiecewiseFunction* GetSpecular(int Index);
+
+	void SetRoughness(vtkPiecewiseFunction* pPiecewiseFunction);
+	vtkPiecewiseFunction* GetRoughness(void);
+
+	void SetEmission(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
+	vtkPiecewiseFunction* GetEmission(int Index);
+
+	void Default(double Min, double Max);
+
 protected:
 	vtkErVolumeProperty();
 	virtual ~vtkErVolumeProperty();
+
+	vtkSmartPointer<vtkPiecewiseFunction>	Opacity;
+	vtkSmartPointer<vtkPiecewiseFunction>	Diffuse[3];
+	vtkSmartPointer<vtkPiecewiseFunction>	Specular[3];
+	vtkSmartPointer<vtkPiecewiseFunction>	Roughness;
+	vtkSmartPointer<vtkPiecewiseFunction>	Emission[3];
 };

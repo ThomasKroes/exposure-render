@@ -663,6 +663,7 @@ TARGET_LINK_LIBRARIES(ExposureRender
   vtkRendering
   vtkGraphics
   vtkIO
+  vtkWidgets
   vtkCommon
   vtkVolumeRendering
   vtkViews

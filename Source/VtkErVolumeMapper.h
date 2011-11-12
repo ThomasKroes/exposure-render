@@ -42,14 +42,14 @@
 
 class vtkVolumeProperty;
 
-class EXPOSURE_RENDER_DLL vtkVolumeCudaMapper : public vtkVolumeMapper
+class EXPOSURE_RENDER_DLL vtkErVolumeMapper : public vtkVolumeMapper
 {
 public:
-//  vtkTypeRevisionMacro(vtkVolumeCudaMapper,vtkVolumeMapper);
-	vtkTypeMacro(vtkVolumeCudaMapper,vtkVolumeMapper);
-    static vtkVolumeCudaMapper *New();
-vtkVolumeCudaMapper operator=(const vtkVolumeCudaMapper&);
-    vtkVolumeCudaMapper(const vtkVolumeCudaMapper&);
+//  vtkTypeRevisionMacro(vtkErVolumeMapper,vtkVolumeMapper);
+	vtkTypeMacro(vtkErVolumeMapper,vtkVolumeMapper);
+    static vtkErVolumeMapper *New();
+vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
+    vtkErVolumeMapper(const vtkErVolumeMapper&);
     virtual void SetInput( vtkImageData * );
 //	virtual void SetInput( vtkDataSet * );
     virtual void Render(vtkRenderer *, vtkVolume *);
@@ -65,8 +65,8 @@ protected:
 	vtkSmartPointer<vtkErVolumeInfo>	m_CudaVolumeInfo;
 	vtkSmartPointer<vtkErRenderInfo>	m_CudaRenderInfo;
 
-	vtkVolumeCudaMapper();
-    virtual ~vtkVolumeCudaMapper();
+	vtkErVolumeMapper();
+    virtual ~vtkErVolumeMapper();
 
 	void UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty);
 

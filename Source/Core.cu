@@ -113,7 +113,7 @@ void UnbindGradientMagnitudeBuffer(void)
 	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
 }
 
-void BindTransferFunctions1D(float* pOpacity, float* pDiffuse, float* pSpecular, float* pRoughness, float* pEmission, int N)
+void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Roughness[128], float Emission[3][128], int N)
 {
 	// Opacity
 	gTexOpacity.normalized		= true;
@@ -123,7 +123,7 @@ void BindTransferFunctions1D(float* pOpacity, float* pDiffuse, float* pSpecular,
 	if (gpOpacityArray == NULL)
 		HandleCudaError(cudaMallocArray(&gpOpacityArray, &gFloatChannelDesc, N, 1));
 
-	HandleCudaError(cudaMemcpyToArray(gpOpacityArray, 0, 0, pOpacity, N * sizeof(float), cudaMemcpyHostToDevice));
+	HandleCudaError(cudaMemcpyToArray(gpOpacityArray, 0, 0, Opacity, N * sizeof(float), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaBindTextureToArray(gTexOpacity, gpOpacityArray, gFloatChannelDesc));
 
 	// Diffuse
@@ -137,7 +137,7 @@ void BindTransferFunctions1D(float* pOpacity, float* pDiffuse, float* pSpecular,
 	ColorXYZAf* pDiffuseXYZA = new ColorXYZAf[N];
 
 	for (int i = 0; i < N; i++)
-		pDiffuseXYZA[i].FromRGB(pDiffuse[i * 3], pDiffuse[i * 3 + 1], pDiffuse[i * 3 + 2]);
+		pDiffuseXYZA[i].FromRGB(Diffuse[0][i], Diffuse[1][i], Diffuse[2][i]);
 
 	HandleCudaError(cudaMemcpyToArray(gpDiffuseArray, 0, 0, pDiffuseXYZA, N * sizeof(float4), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaBindTextureToArray(gTexDiffuse, gpDiffuseArray, gFloat4ChannelDesc));
@@ -155,7 +155,7 @@ void BindTransferFunctions1D(float* pOpacity, float* pDiffuse, float* pSpecular,
 	ColorXYZAf* pSpecularXYZA = new ColorXYZAf[N];
 
 	for (int i = 0; i < N; i++)
-		pSpecularXYZA[i].FromRGB(pSpecular[i * 3], pSpecular[i * 3 + 1], pSpecular[i * 3 + 2]);
+		pSpecularXYZA[i].FromRGB(Specular[0][i], Specular[1][i], Specular[2][i]);
 
 	HandleCudaError(cudaMemcpyToArray(gpSpecularArray, 0, 0, pSpecularXYZA, N * sizeof(float4), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaBindTextureToArray(gTexSpecular, gpSpecularArray, gFloat4ChannelDesc));
@@ -170,7 +170,7 @@ void BindTransferFunctions1D(float* pOpacity, float* pDiffuse, float* pSpecular,
 	if (gpRoughnessArray == NULL)
 		HandleCudaError(cudaMallocArray(&gpRoughnessArray, &gFloatChannelDesc, N, 1));
 
-	HandleCudaError(cudaMemcpyToArray(gpRoughnessArray, 0, 0, pRoughness, N * sizeof(float),  cudaMemcpyHostToDevice));
+	HandleCudaError(cudaMemcpyToArray(gpRoughnessArray, 0, 0, Roughness, N * sizeof(float),  cudaMemcpyHostToDevice));
 	HandleCudaError(cudaBindTextureToArray(gTexRoughness, gpRoughnessArray, gFloatChannelDesc));
 
 	// Emission
@@ -184,7 +184,7 @@ void BindTransferFunctions1D(float* pOpacity, float* pDiffuse, float* pSpecular,
 	ColorXYZAf* pEmissionXYZA = new ColorXYZAf[N];
 
 	for (int i = 0; i < N; i++)
-		pEmissionXYZA[i].FromRGB(pEmission[i * 3], pEmission[i * 3 + 1], pEmission[i * 3 + 2]);
+		pEmissionXYZA[i].FromRGB(Emission[0][i], Emission[1][i], Emission[2][i]);
 
 	HandleCudaError(cudaMemcpyToArray(gpEmissionArray, 0, 0, pEmissionXYZA, N * sizeof(float4),  cudaMemcpyHostToDevice));
 	HandleCudaError(cudaBindTextureToArray(gTexEmission, gpEmissionArray, gFloat4ChannelDesc));

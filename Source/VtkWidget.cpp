@@ -17,173 +17,233 @@
 #include "MainWindow.h"
 
 #include <vtkMetaImageReader.h>
-#include <vtkVolumeProperty.h>
+#include <vtkCubeSource.h>
+#include <vtkActor.h>
+#include <vtkProperty.h>
+#include <vtkLight.h>
+#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkLightActor.h>
+#include <vtkPlaneWidget.h>
+#include <vtkPointWidget.h>
+#include <vtkAxesTransformWidget.h>
+#include <vtkAxesTransformRepresentation.h>
+#include <vtkCameraWidget.h>
 
-void KeyPressCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* pCallData)
+#include "vtkErBackgroundLight.h"
+
+//http://agl.unm.edu/rpf/
+
+void TimerCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* pCallData)
 {
  	vtkRenderWindowInteractor* pRenderWindowInteractor = static_cast<vtkRenderWindowInteractor*>(pCaller);
  
- 	char* pKeySymbol = pRenderWindowInteractor->GetKeySym();
- 
- 	if (strcmp(pKeySymbol, "space") == 0)
- 	{
-		pRenderWindowInteractor->SetInteractorStyle(gpMainWindow->m_VtkWidget.m_InteractorStyleImage);
- 		gpMainWindow->setCursor(QCursor(Qt::PointingHandCursor));
- 	}
+	if (pRenderWindowInteractor)
+		pRenderWindowInteractor->Render();
+
+	CVtkRenderWidget* pRenderWidget = (CVtkRenderWidget*)pClientData;
+//	pRenderWidget->
+//	pRenderWidget->repaint(true);
 }
 
-void KeyReleaseCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* pClientData, void* pCallData)
-{
- 	vtkRenderWindowInteractor* pRenderWindowInteractor = static_cast<vtkRenderWindowInteractor*>(pCaller);
- 
- 	char* pKeySymbol = pRenderWindowInteractor->GetKeySym();
- 
- 	if (strcmp(pKeySymbol, "space") == 0)
- 	{
- 		pRenderWindowInteractor->SetInteractorStyle(gpMainWindow->m_VtkWidget.m_InteractorStyleRealisticCamera);
- 		gpMainWindow->setCursor(QCursor(Qt::ArrowCursor));
- 	}
-}
+CVtkRenderWidget* gpActiveRenderWidget = NULL;
 
-CVtkWidget::CVtkWidget(QWidget* pParent) :
-	QWidget(pParent),
+CVtkRenderWidget::CVtkRenderWidget(QWidget* pParent) :
+	QDialog(pParent),
 	m_MainLayout(),
 	m_QtVtkWidget(),
-	m_pPixels(NULL),
-	m_ImageActor(),
-	m_ImageImport(),
-	m_InteractorStyleImage(),
-	m_SceneRenderer(),
-	m_RenderWindow(),
-	m_RenderWindowInteractor(),
-	m_KeyPressCallback(),
-	m_KeyReleaseCallback(),
-	m_InteractorStyleRealisticCamera()
+	m_Volume(),
+	m_VolumeProperty(),
+	m_VolumeMapper(),
+	m_Renderer(),
+	m_TimerCallback()
 {
 	setLayout(&m_MainLayout);
-
-	QMenu* pMenu = new QMenu();
-	pMenu->addAction("asd", this, SLOT(OnRenderBegin()));
-
-	m_MainLayout.addWidget(pMenu);
 	
-	m_MainLayout.addWidget(&m_QtVtkWidget, 0, 0, 1, 2);
+	m_MainLayout.addWidget(&m_QtVtkWidget);
+	m_MainLayout.addWidget(new QPushButton("Hello World!"));
 
+	m_QtVtkWidget.
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
-	QObject::connect(&m_RenderLoopTimer, SIGNAL(timeout()), this, SLOT(OnRenderLoopTimer()));
 
-///	SetupRenderView();
+	SetupVtk();
 }
 
-QVTKWidget* CVtkWidget::GetQtVtkWidget(void)
+QVTKWidget* CVtkRenderWidget::GetQtVtkWidget(void)
 {
 	return &m_QtVtkWidget;
 }
 
-void CVtkWidget::OnRenderBegin(void)
+void CVtkRenderWidget::OnRenderBegin(void)
 {
-	/*
-	// Scale
-	m_SceneRenderer->GetActiveCamera()->SetParallelScale(500.0f);
+}
 
-	m_ImageImport->SetDataSpacing(1, 1, 1);
-//	m_ImageImport->SetDataOrigin(-0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResX(), -0.5f * (float)gScene.m_Camera.m_Film.m_Resolution.GetResY(), 0);
+void CVtkRenderWidget::OnRenderEnd(void)
+{
+}
 
-	m_pPixels = (unsigned char*)malloc(4 * 2048 * 2048 * sizeof(unsigned char));
+void CVtkRenderWidget::SetActive(void)
+{
+	gpActiveRenderWidget = this;
+}
 
-	m_ImageImport->SetImportVoidPointer((void*)m_pPixels, 1);
-//	m_ImageImport->SetWholeExtent(0, gScene.m_Camera.m_Film.m_Resolution.GetResX() - 1, 0, gScene.m_Camera.m_Film.m_Resolution.GetResY() - 1, 0, 0);
-	m_ImageImport->SetDataExtentToWholeExtent();
-	m_ImageImport->SetDataScalarTypeToUnsignedChar();
-	m_ImageImport->SetNumberOfScalarComponents(3);
-	m_ImageImport->Update();
+void CVtkRenderWidget::LoadVolume(const QString& FilePath)
+{
+	vtkSmartPointer<vtkMetaImageReader> MetaImageReader = vtkMetaImageReader::New();
 
-	m_ImageActor->SetInterpolate(1);
-	m_ImageActor->SetInput(m_ImageImport->GetOutput());
-	m_ImageActor->SetScale(1, -1, -1);
-	m_ImageActor->VisibilityOn();
+	MetaImageReader->SetFileName(FilePath.toAscii());
 
-	// Add the image actor
-	m_SceneRenderer->AddActor(m_ImageActor); 
+	MetaImageReader->Update();
+
+	m_VolumeMapper->SetInput(MetaImageReader->GetOutput());
+
+    m_Volume->SetMapper(m_VolumeMapper);
+
+	vtkPiecewiseFunction* pwf = vtkPiecewiseFunction::New();
+
+	pwf->AddPoint(0,0.0, 0.5, 0);
+	pwf->AddPoint(10,0.0, 0.5, 0);
+	pwf->AddPoint(11, 1.0, 0.5, 0);
+	pwf->AddPoint(1024, 1.0, 0.5, 0);
+
+	m_VolumeProperty->SetOpacity(pwf);
+
+    m_Volume->SetProperty(m_VolumeProperty);
+
+//	m_Renderer->RemoveAllLights();
+
+//	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
+
+//	pErBackgroundLight->SetDiffuseColor(10000, 10000, 10000);
+
+//	m_SceneRenderer->AddLight(pErBackgroundLight);
+
+	vtkCubeSource* pBox = vtkCubeSource::New();
+
+  pBox->SetXLength(0.1);
+  pBox->SetYLength(0.1);
+  pBox->SetZLength(0.1);
+  pBox->SetCenter(0.05, 0.05, 0.05);
+
+  // The mapper is responsible for pushing the geometry into the graphics
+  // library. It may also do color mapping, if scalars or other attributes
+  // are defined.
+  vtkPolyDataMapper *cylinderMapper = vtkPolyDataMapper::New();
+  cylinderMapper->SetInputConnection(pBox->GetOutputPort());
+
+  // The actor is a grouping mechanism: besides the geometry (mapper), it
+  // also has a property, transformation matrix, and/or texture map.
+  // Here we set its color and rotate it -22.5 degrees.
+  vtkActor *cylinderActor = vtkActor::New();
+  cylinderActor->SetMapper(cylinderMapper);
+  cylinderActor->GetProperty()->SetColor(1.0, 1.0, 1.0);
+  cylinderActor->GetProperty()->SetOpacity(0.9);
+//  cylinderActor->RotateX(30.0);
+//  cylinderActor->RotateY(-45.0);
 	
-	// Start the timer
-	m_RenderLoopTimer.start(1000.0f / 25.0f);
-	*/
+//	m_Renderer->AddActor(cylinderActor);
+	m_Renderer->AddViewProp(m_Volume);
+
+	vtkLight* pLight = vtkLight::New();
+	pLight->SetPosition(2.0, 2.0, 2.0);
+	pLight->SetDiffuseColor(150, 50, 10);
+
+	vtkLight* pLight2 = vtkLight::New();
+	pLight2->SetPosition(2.0, 2.0, 0.0);
+	pLight2->SetDiffuseColor(50, 10, 85);
+
+	vtkLight* pLight3 = vtkLight::New();
+	pLight3->SetPosition(0.9, 1.0, 0.3);
+	pLight3->SetDiffuseColor(10, 150, 15);
+
+	m_Renderer->AddViewProp(m_Volume);
+
+	m_Renderer->RemoveAllLights();
+	m_Renderer->AddLight(pLight);
+//	m_SceneRenderer->AddLight(pLight2);
+//	m_SceneRenderer->AddLight(pLight3);
+
+	// lighting the box.
+  vtkLight* l1 = vtkLight::New();
+  l1->SetPosition(-4.0,4.0,-1.0);
+  l1->SetFocalPoint(0,0,0);
+  l1->SetColor(1.0,1.0,1.0);
+  l1->SetPositional(1);
+  m_Renderer->AddLight(l1);
+  l1->SetSwitch(1);
+
+	vtkLightActor *la = vtkLightActor::New();
+    la->SetLight(l1);
+//    m_Renderer->AddViewProp(la);
+
+
+//	vtkPointWidget* planeWidget = vtkPointWidget::New();
+//  planeWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
+
+
+//  planeWidget->On();
+
+  vtkCameraWidget* affineWidget = vtkCameraWidget::New();
+  affineWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
+  affineWidget->CreateDefaultRepresentation();
+  
+  vtkAxesTransformRepresentation* pRep = vtkAxesTransformRepresentation::New();
+
+//  pRep->SetLabelFormat("%-#6.3g mm");
+
+//  affineWidget->SetRepresentation(pRep);
+
+//  affineWidget->SetEnabled(1);
+  affineWidget->On();
+
+	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
+
+	pErBackgroundLight->SetDiffuseColor(5000, 5000, 10000);
+
+	m_Renderer->AddLight(pErBackgroundLight);
+
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.001);
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);
+
+	m_Renderer->GetActiveCamera()->SetPosition(10, 10, 10);
+	m_Renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
+	m_Renderer->GetActiveCamera()->SetFocalDisk(0.0);
+	m_Renderer->GetActiveCamera()->SetClippingRange(0, 1000000);
+
+	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
 }
 
-//http://agl.unm.edu/rpf/
-
-void CVtkWidget::OnRenderEnd(void)
+void CVtkRenderWidget::SetupVtk(void)
 {
-	/*
-	m_ImageActor->VisibilityOff();
-	m_RenderWindow->Render();
-	*/
+	m_Volume			= vtkVolume::New();
+	m_VolumeProperty	= vtkErVolumeProperty::New();
+	m_VolumeMapper		= vtkErVolumeMapper::New();
+	m_Renderer			= vtkRenderer::New();
+	m_TimerCallback		= vtkCallbackCommand::New();
+
+	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_Renderer);
+	m_TimerCallback->SetCallback(TimerCallbackFunction);
+	m_TimerCallback->SetClientData((void*)this);
+
+	m_Renderer->SetBackground(0, 0, 0);
+	m_Renderer->GetActiveCamera()->SetPosition(0.0, 0.0, 10.0);
+	m_Renderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
+
+	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
 }
 
-void CVtkWidget::SetupRenderView(void)
+
+QRenderView::QRenderView(QWidget* pParent /*= NULL*/) :
+	QGraphicsView(pParent),
+	m_GraphicsScene(),
+	m_RenderWidget()
 {
-	// Create and configure scene renderer
-	m_SceneRenderer = vtkRenderer::New();
-	m_SceneRenderer->SetBackground(0.25, 0.25, 0.25);
-	m_SceneRenderer->SetBackground2(0.25, 0.25, 0.25);
-	m_SceneRenderer->SetGradientBackground(true);
-	m_SceneRenderer->GetActiveCamera()->SetPosition(0.0, 0.0, 1.0);
-	m_SceneRenderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
-	m_SceneRenderer->GetActiveCamera()->ParallelProjectionOn();
+	setScene(&m_GraphicsScene);
 
-	// Get render window and configure
-	m_RenderWindow = GetQtVtkWidget()->GetRenderWindow();
-	m_RenderWindow->AddRenderer(m_SceneRenderer);
+	m_GraphicsScene.setBackgroundBrush(QBrush(Qt::black));
 
-	// Key press callback
-	m_KeyPressCallback = vtkCallbackCommand::New();
-	m_KeyPressCallback->SetCallback(KeyPressCallbackFunction);
+	m_GraphicsScene.addWidget(&m_RenderWidget, Qt::Dialog);
 
-	// Key press callback
-	m_KeyReleaseCallback = vtkCallbackCommand::New();
-	m_KeyReleaseCallback->SetCallback(KeyReleaseCallbackFunction);
-
-	// Create interactor style for camera navigation
-	m_InteractorStyleRealisticCamera = vtkSmartPointer<vtkRealisticCameraStyle>::New();
-	m_InteractorStyleImage = vtkInteractorStyleImage::New();
-
-	// Add observers
-	m_RenderWindow->GetInteractor()->SetInteractorStyle(m_InteractorStyleRealisticCamera);
-//	m_RenderWindow->GetInteractor()->SetInteractorStyle(m_InteractorStyleImage);
-
-	m_RenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyPressEvent, m_KeyPressCallback);
-	m_RenderWindow->GetInteractor()->AddObserver(vtkCommand::KeyReleaseEvent, m_KeyReleaseCallback);
-
-	m_ImageImport = vtkImageImport::New();
-	m_ImageActor = vtkImageActor::New();
-}
-
-void CVtkWidget::OnRenderLoopTimer(void)
-{
-	/*
-	if (!gpRenderThread)
-		return;
-
-	QMutexLocker(&gpRenderThread->m_Mutex);
-
-	m_FrameBuffer = gFrameBuffer;
-
-	if (m_FrameBuffer.GetPixels() == NULL)
-		return;
-
-	m_ImageImport->SetImportVoidPointer(NULL);
-	m_ImageImport->SetImportVoidPointer(m_FrameBuffer.GetPixels());
-
-	m_ImageImport->SetDataOrigin(-0.5f * (float)m_FrameBuffer.GetWidth(), -0.5f * (float)m_FrameBuffer.GetHeight(), 0);
-	m_ImageImport->SetWholeExtent(0, m_FrameBuffer.GetWidth() - 1, 0, m_FrameBuffer.GetHeight() - 1, 0, 0);
-	m_ImageImport->UpdateWholeExtent();
-	m_ImageImport->SetDataExtentToWholeExtent();
-	m_ImageImport->Update();
-	
-	m_ImageActor->SetInput(m_ImageImport->GetOutput());
-
-	m_RenderWindow->GetInteractor()->Render();
-	*/
+	m_RenderWidget.setFocus();
 }

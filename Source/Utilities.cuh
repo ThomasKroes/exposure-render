@@ -30,7 +30,7 @@ DEV float GetNormalizedIntensity(const Vec3f& P)
 DEV float GetOpacity(const float& NormalizedIntensity)
 {
 	return tex1D(gTexOpacity, NormalizedIntensity);
-	return NormalizedIntensity > 0.1f ? 0.2f : 0.0f;//tex1D(gTexOpacity, NormalizedIntensity);
+//	return NormalizedIntensity > 0.1f ? 0.2f : 0.0f;//tex1D(gTexOpacity, NormalizedIntensity);
 }
 
 DEV float GetOpacity(const Vec3f& P)

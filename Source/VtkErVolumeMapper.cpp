@@ -22,17 +22,16 @@
 #include <vtkgl.h>
 
 #include "VtkErVolumeMapper.h"
+#include "VtkErVolumeProperty.h"
 
 #include "Core.cuh"
 
 #include "Geometry.h"
 
-//vtkCxxRevisionMacro(vtkVolumeCudaMapper, "$Revision: 1.8 $");
-vtkStandardNewMacro(vtkVolumeCudaMapper);
+//vtkCxxRevisionMacro(vtkErVolumeMapper, "$Revision: 1.8 $");
+vtkStandardNewMacro(vtkErVolumeMapper);
 
-
-
-vtkVolumeCudaMapper::vtkVolumeCudaMapper()
+vtkErVolumeMapper::vtkErVolumeMapper()
 {
 	m_CudaVolumeInfo	= vtkErVolumeInfo::New();
 	m_CudaRenderInfo	= vtkErRenderInfo::New();
@@ -44,26 +43,26 @@ vtkVolumeCudaMapper::vtkVolumeCudaMapper()
 	glGenTextures(1, &TextureID);
 }  
 
-vtkVolumeCudaMapper::~vtkVolumeCudaMapper()
+vtkErVolumeMapper::~vtkErVolumeMapper()
 {
 }
 
-void vtkVolumeCudaMapper::SetInput(vtkImageData* input)
+void vtkErVolumeMapper::SetInput(vtkImageData* input)
 {
 	this->Superclass::SetInput(input);
 
 
 }
 
-void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
+void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 {
-	
+	/**/
 	if (pVolume)
 		UploadVolumeProperty(pVolume->GetProperty());
 
     int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
 
-	/**/
+	
 	m_CudaRenderInfo->SetRenderer(pRenderer);
 	
 	m_CudaVolumeInfo->SetInputData(this->GetInput());
@@ -86,7 +85,7 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	/**/
+
 //	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pWindowSize[0], pWindowSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
  //   glBindTexture(GL_TEXTURE_2D, 0);
 //	lPushAttrib(GL_ENABLE_BIT);
@@ -97,22 +96,24 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-    pRenderer->SetDisplayPoint(0,0,0.5);
+	double d = 0.5;
+
+    pRenderer->SetDisplayPoint(0,0,d);
     pRenderer->DisplayToWorld();
     double coordinatesA[4];
     pRenderer->GetWorldPoint(coordinatesA);
 
-    pRenderer->SetDisplayPoint(pWindowSize[0],0,0.5);
+    pRenderer->SetDisplayPoint(pWindowSize[0],0,d);
     pRenderer->DisplayToWorld();
     double coordinatesB[4];
     pRenderer->GetWorldPoint(coordinatesB);
 
-    pRenderer->SetDisplayPoint(pWindowSize[0],pWindowSize[1],0.5);
+    pRenderer->SetDisplayPoint(pWindowSize[0],pWindowSize[1],d);
     pRenderer->DisplayToWorld();
     double coordinatesC[4];
     pRenderer->GetWorldPoint(coordinatesC);
 
-    pRenderer->SetDisplayPoint(0,pWindowSize[1],0.5);
+    pRenderer->SetDisplayPoint(0,pWindowSize[1],d);
     pRenderer->DisplayToWorld();
     double coordinatesD[4];
     pRenderer->GetWorldPoint(coordinatesD);
@@ -135,49 +136,57 @@ void vtkVolumeCudaMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
     glEnd();
     glPopAttrib();
     glPopAttrib();
-    
-//	Modified();
 
 	return;
 }
 
-void vtkVolumeCudaMapper::PrintSelf(ostream& os, vtkIndent indent)
+void vtkErVolumeMapper::PrintSelf(ostream& os, vtkIndent indent)
 {
 	vtkVolumeMapper::PrintSelf(os, indent);
 }
 
-int vtkVolumeCudaMapper::FillInputPortInformation(int port, vtkInformation* info)
+int vtkErVolumeMapper::FillInputPortInformation(int port, vtkInformation* info)
 {
 	return 0;
 }
 
-void vtkVolumeCudaMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
+void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 {
 	if (pVolumeProperty == NULL)
 	{
-		vtkErrorMacro("Volume property cannot be null");
+		vtkErrorMacro("Volume property is NULL!");
 		return;
+	}
+
+	vtkErVolumeProperty* pErVolumeProperty = dynamic_cast<vtkErVolumeProperty*>(pVolumeProperty);
+
+	double* pRange = GetDataSetInput()->GetScalarRange();
+
+	if (pErVolumeProperty == NULL)
+	{
+		vtkErrorMacro("Incompatible volume property, use vtkErVolumeProperty!");
+		pErVolumeProperty->Default(pRange[0], pRange[1]);
 	}
 
 	int N = 128;
 
-	float* pOpacity		= new float[N];
-	float* pDiffuse		= new float[N * 3];
-	float* pSpecular	= new float[N * 3];
-	float* pRoughness	= new float[N];
-	float* pEmission	= new float[N * 3];
-	
-	double* pRange = GetDataSetInput()->GetScalarRange();
+	float	Opacity[128];
+	float	Diffuse[3][128];
+	float	Specular[3][128];
+	float	Roughness[128];
+	float	Emission[3][128];
 
-	pVolumeProperty->GetScalarOpacity()->GetTable(pRange[0], pRange[1], N, pOpacity);
-	pVolumeProperty->GetRGBTransferFunction()->GetTable(pRange[0], pRange[1], N, pDiffuse);
-	pVolumeProperty->GetRGBTransferFunction()->GetTable(pRange[0], pRange[1], N, pSpecular);
+	pErVolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
+	pErVolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
+	pErVolumeProperty->GetDiffuse(1)->GetTable(pRange[0], pRange[1], N, Diffuse[1]);
+	pErVolumeProperty->GetDiffuse(2)->GetTable(pRange[0], pRange[1], N, Diffuse[2]);
+	pErVolumeProperty->GetSpecular(0)->GetTable(pRange[0], pRange[1], N, Specular[0]);
+	pErVolumeProperty->GetSpecular(1)->GetTable(pRange[0], pRange[1], N, Specular[1]);
+	pErVolumeProperty->GetSpecular(2)->GetTable(pRange[0], pRange[1], N, Specular[2]);
+	pErVolumeProperty->GetRoughness()->GetTable(pRange[0], pRange[1], N, Roughness);
+	pErVolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
+	pErVolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
+	pErVolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
 
-	BindTransferFunctions1D(pOpacity, pDiffuse, pSpecular, pRoughness, pEmission, N);
-
-	delete pOpacity;
-	delete pDiffuse;
-	delete pSpecular;
-	delete pRoughness;
-	delete pEmission;
+	BindTransferFunctions1D(Opacity, Diffuse, Specular, Roughness, Emission, N);
 }

@@ -35,51 +35,54 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkPointData.h>
 
-// Interactor
-#include "InteractorStyleRealisticCamera.h"
-
-#include "RenderThread.h"
-
 #include "VtkErVolumeMapper.h"
+#include "VtkErVolumeProperty.h"
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
 
-class CVtkWidget : public QWidget
+class CVtkRenderWidget : public QDialog
 {
     Q_OBJECT
 
 public:
-    CVtkWidget(QWidget* pParent = NULL);
+    CVtkRenderWidget(QWidget* pParent = NULL);
 	
 	QVTKWidget*		GetQtVtkWidget(void);
-
-//	QFrameBuffer	m_FrameBuffer;
 
 public slots:
 	void OnRenderBegin(void);
 	void OnRenderEnd(void);
-	void OnRenderLoopTimer(void);
+	void SetActive(void);
+	void LoadVolume(const QString& FilePath);
+
+	vtkVolume* GetVolume(void) { return m_Volume.GetPointer(); };
+	vtkErVolumeProperty* GetVolumeProperty(void) { return m_VolumeProperty.GetPointer(); };
+	vtkErVolumeMapper* GetVolumeMapper(void) {return m_VolumeMapper.GetPointer(); };
+	vtkRenderer* GetRenderer(void) {return m_Renderer.GetPointer(); };
 
 private:
-	void SetupRenderView(void);
-	
-	QGridLayout									m_MainLayout;
-	QVTKWidget									m_QtVtkWidget;
-	unsigned char*								m_pPixels;
-	QTimer										m_RenderLoopTimer;
+	QGridLayout								m_MainLayout;
+	QVTKWidget								m_QtVtkWidget;
+
+	void SetupVtk(void);
 
 public:
-	vtkSmartPointer<vtkImageActor>				m_ImageActor;
-	vtkSmartPointer<vtkImageImport>				m_ImageImport;
-	vtkSmartPointer<vtkInteractorStyleImage>	m_InteractorStyleImage;
-	vtkSmartPointer<vtkRenderer>				m_SceneRenderer;
-	vtkSmartPointer<vtkRenderWindow>			m_RenderWindow;
-	vtkSmartPointer<vtkRenderWindowInteractor>	m_RenderWindowInteractor;
-	vtkSmartPointer<vtkCallbackCommand>			m_KeyPressCallback;
-	vtkSmartPointer<vtkCallbackCommand>			m_KeyReleaseCallback;
-	vtkSmartPointer<vtkRealisticCameraStyle>	m_InteractorStyleRealisticCamera;
+	vtkSmartPointer<vtkVolume>				m_Volume;
+	vtkSmartPointer<vtkErVolumeProperty>	m_VolumeProperty;
+	vtkSmartPointer<vtkErVolumeMapper>		m_VolumeMapper;
+	vtkSmartPointer<vtkRenderer>			m_Renderer;
+	vtkSmartPointer<vtkCallbackCommand>		m_TimerCallback;
+};
 
-	// Experimental
-	vtkSmartPointer<vtkVolume>					m_Volume;
-//	vtkSmartPointer<vtkVolumeCudaMapper>		m_VolumeMapper;
+extern CVtkRenderWidget* gpActiveRenderWidget;
+
+class QRenderView : public QGraphicsView
+{
+    Q_OBJECT
+
+public:
+    QRenderView(QWidget* pParent = NULL);
+
+	QGraphicsScene		m_GraphicsScene;
+	CVtkRenderWidget	m_RenderWidget;
 };

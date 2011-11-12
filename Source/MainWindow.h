@@ -66,7 +66,6 @@ public:
     QMenu*								m_pFileMenu;
     QMenu*								m_pViewMenu;
     QMenu*								m_pHelpMenu;
-	CVtkWidget							m_VtkWidget;
 
 private:
 	// Toolbars
@@ -94,6 +93,8 @@ private:
 	QHttpGet m_HttpGet;
 
 	QLabel m_Update;
+
+	CVtkRenderWidget		m_RenderView;
 };
 
 extern CMainWindow* gpMainWindow;

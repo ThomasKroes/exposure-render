@@ -28,7 +28,11 @@
 vtkCxxRevisionMacro(vtkErVolumeInfo, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkErVolumeInfo);
 
-vtkErVolumeInfo::vtkErVolumeInfo()
+vtkErVolumeInfo::vtkErVolumeInfo() :
+	m_VolumeInfo(),
+	m_pIntensity(NULL),
+	m_pGradientMagnitude(NULL),
+	Volume(NULL)
 {
 }
 
@@ -143,43 +147,8 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 
 		
     }
-
-//    this->Modified();
 }
 
 void vtkErVolumeInfo::Update()
 {
-    if (Volume != NULL && m_pIntensity != NULL)
-    {
-		/*
-        this->UpdateVolumeProperties(this->Volume->GetProperty());
-        int* dims = this->InputData->GetDimensions();
-
-        this->VolumeInfo.SourceData = this->CudaInputBuffer.GetMemPointer();
-        this->VolumeInfo.InputDataType = this->InputData->GetScalarType();
-
-        this->VolumeInfo.VoxelSize[0] = 1;
-        this->VolumeInfo.VoxelSize[1] = 1;
-        this->VolumeInfo.VoxelSize[2] = 1;
-
-        this->VolumeInfo.VolumeTransformation[0] = 0.0f;
-        this->VolumeInfo.VolumeTransformation[1] = 0.0f;
-        this->VolumeInfo.VolumeTransformation[2] = 0.0f;
-        
-        this->VolumeInfo.VolumeSize[0] = dims[0];
-        this->VolumeInfo.VolumeSize[1] = dims[1];
-        this->VolumeInfo.VolumeSize[2] = dims[2];
-        
-        this->VolumeInfo.SteppingSize = 1.0;// nothing yet!!
-
-        int* extent = InputData->GetExtent();
-        this->VolumeInfo.MinMaxValue[0] = this->VolumeInfo.MinValueX = (float)extent[0];
-        this->VolumeInfo.MinMaxValue[1] = this->VolumeInfo.MaxValueX = (float)extent[1];
-        this->VolumeInfo.MinMaxValue[2] = this->VolumeInfo.MinValueY = (float)extent[2];
-        this->VolumeInfo.MinMaxValue[3] = this->VolumeInfo.MaxValueY = (float)extent[3];
-        this->VolumeInfo.MinMaxValue[4] = this->VolumeInfo.MinValueZ = (float)extent[4];
-        this->VolumeInfo.MinMaxValue[5] = this->VolumeInfo.MaxValueZ = (float)extent[5];
-		*/
-
-    }
 }

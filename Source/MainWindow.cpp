@@ -32,7 +32,6 @@ CMainWindow::CMainWindow() :
     m_pHelpMenu(NULL),
     m_pFileToolBar(NULL),
 	m_pPlaybackToolBar(),
-	m_VtkWidget(),
 	m_LogDockWidget(),
 	m_LightingDockWidget(),
 	m_AppearanceDockWidget(),
@@ -44,7 +43,11 @@ CMainWindow::CMainWindow() :
 {
 	gpMainWindow = this;
 
-//	setCentralWidget(&m_VtkWidget);
+	setCentralWidget(&m_RenderView);
+
+//	m_RenderView.m_RenderWidget.SetActive();
+	m_RenderView.SetActive();
+//	m_RenderOutputDialog.m_VtkRenderWidget.SetSource(&m_RenderWidget);
 
 	CreateMenus();
 	CreateStatusBar();
@@ -247,8 +250,7 @@ void CMainWindow::Open(QString FilePath)
 	// Make string suitable for VTK
 	FilePath.replace("/", "\\\\");
 
-// 	if (!FilePath.isEmpty())
-// 		StartRenderThread(FilePath);
+	gpActiveRenderWidget->LoadVolume(FilePath);
 
 	gStatus.SetRenderBegin();
 }
@@ -290,7 +292,7 @@ void CMainWindow::OnRenderBegin(void)
 	m_LogDockWidget.setEnabled(true);
 	m_SlicingDockWidget.setEnabled(true);
 
-	m_RenderOutputDialog.show();
+//	m_RenderOutputDialog.show();
 }
 
 void CMainWindow::OnRenderEnd(void)
@@ -311,8 +313,8 @@ void CMainWindow::OnRenderEnd(void)
 	m_LogDockWidget.setEnabled(false);
 	m_SlicingDockWidget.setEnabled(false);
 
-	m_RenderOutputDialog.hide();
-	m_RenderOutputDialog.close();
+//	m_RenderOutputDialog.hide();
+//	m_RenderOutputDialog.close();
 }
 
 void CMainWindow::ShowStartupDialog(void)
