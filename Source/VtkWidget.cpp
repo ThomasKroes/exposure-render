@@ -28,6 +28,7 @@
 #include <vtkAxesTransformWidget.h>
 #include <vtkAxesTransformRepresentation.h>
 #include <vtkLineWidget.h>
+#include <vtkSphereSource.h>
 
 #include "vtkErBackgroundLight.h"
 #include "vtkErAreaLightWidget.h"
@@ -93,7 +94,7 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 	MetaImageReader->Update();
 
 	m_VolumeMapper->SetInput(MetaImageReader->GetOutput());
-
+	
     m_Volume->SetMapper(m_VolumeMapper);
 
     m_Volume->SetProperty(m_VolumeProperty);
@@ -106,12 +107,11 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
 //	m_SceneRenderer->AddLight(pErBackgroundLight);
 
-	vtkCubeSource* pBox = vtkCubeSource::New();
+	vtkSphereSource* pBox = vtkSphereSource::New();
 
-  pBox->SetXLength(0.1);
-  pBox->SetYLength(0.1);
-  pBox->SetZLength(0.1);
-  pBox->SetCenter(0.05, 0.05, 0.05);
+  pBox->SetRadius(0.1);
+  
+  pBox->Update();
 
   // The mapper is responsible for pushing the geometry into the graphics
   // library. It may also do color mapping, if scalars or other attributes
@@ -124,30 +124,21 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
   // Here we set its color and rotate it -22.5 degrees.
   vtkActor *cylinderActor = vtkActor::New();
   cylinderActor->SetMapper(cylinderMapper);
-  cylinderActor->GetProperty()->SetColor(1.0, 1.0, 1.0);
-  cylinderActor->GetProperty()->SetOpacity(0.9);
+//  cylinderActor->GetProperty()->SetColor(1.0, 1.0, 1.0);
+//  cylinderActor->GetProperty()->SetOpacity(1.0);
 //  cylinderActor->RotateX(30.0);
 //  cylinderActor->RotateY(-45.0);
 	
-//	m_Renderer->AddActor(cylinderActor);
-	m_Renderer->AddViewProp(m_Volume);
+  m_Renderer->AddViewProp(m_Volume);
+	m_Renderer->AddActor(cylinderActor);
+	
 
 	vtkLight* pLight = vtkLight::New();
 	pLight->SetPosition(2.0, 2.0, 2.0);
-	pLight->SetDiffuseColor(150, 50, 10);
+	pLight->SetDiffuseColor(1, 1, 1);
 
-	vtkLight* pLight2 = vtkLight::New();
-	pLight2->SetPosition(2.0, 2.0, 0.0);
-	pLight2->SetDiffuseColor(50, 10, 85);
-
-	vtkLight* pLight3 = vtkLight::New();
-	pLight3->SetPosition(0.9, 1.0, 0.3);
-	pLight3->SetDiffuseColor(10, 150, 15);
-
-	m_Renderer->AddViewProp(m_Volume);
-
-	m_Renderer->RemoveAllLights();
-	m_Renderer->AddLight(pLight);
+//	m_Renderer->RemoveAllLights();
+//	m_Renderer->AddLight(pLight);
 //	m_SceneRenderer->AddLight(pLight2);
 //	m_SceneRenderer->AddLight(pLight3);
 
@@ -166,13 +157,14 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
 	
 //	m_Renderer->SetActiveCamera(m_Camera.GetPointer());
-	m_Renderer->ResetCamera();
+//	m_Renderer->ResetCamera();
 
 	vtkErAreaLightWidget* vtkLineWidget = vtkErAreaLightWidget::New();
   vtkLineWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
-
+  
 
   vtkLineWidget->On();
+//  vtkLineWidget->SetCurrentRenderer(m_OverlayRenderer);
 
   vtkAxesTransformRepresentation* pRep = vtkAxesTransformRepresentation::New();
 
@@ -180,7 +172,7 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
 	pErBackgroundLight->SetDiffuseColor(5000, 5000, 10000);
 
-	m_Renderer->AddLight(pErBackgroundLight);
+//	m_Renderer->AddLight(pErBackgroundLight);
 
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.001);
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);
@@ -188,7 +180,7 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 	m_Renderer->GetActiveCamera()->SetPosition(10, 10, 10);
 	m_Renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
 	m_Renderer->GetActiveCamera()->SetFocalDisk(0.0);
-	m_Renderer->GetActiveCamera()->SetClippingRange(0, 1000000);
+	m_Renderer->GetActiveCamera()->SetClippingRange(1, 10);
 
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
@@ -204,16 +196,31 @@ void CVtkRenderWidget::SetupVtk(void)
 	m_TimerCallback		= vtkCallbackCommand::New();
 	m_Camera			= vtkErCamera::New();
 
-	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_Renderer);
+//	m_Renderer->SetInteractive(1);
+//	m_OverlayRenderer->SetInteractive(1);
+
+//	m_Renderer->SetLayer(1);
+//	m_OverlayRenderer->SetLayer(0);
+
+//	m_QtVtkWidget.GetRenderWindow()->SetNumberOfLayers(2);
 //	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_OverlayRenderer);
+	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_Renderer);
 	
+	
+	
+//	m_QtVtkWidget.GetRenderWindow()->SetPolygonSmoothing(1);
+
 	m_TimerCallback->SetCallback(TimerCallbackFunction);
 	m_TimerCallback->SetClientData((void*)this);
 
-	m_Renderer->SetBackground(0, 0, 0);
+	m_QtVtkWidget.GetRenderWindow()->SetAlphaBitPlanes(true);
+//	m_QtVtkWidget.GetRenderWindow()->SetMultiSamples(0);
+
+//	m_Renderer->SetBackground(0, 0, 0);
 //	m_Renderer->GetActiveCamera()->SetPosition(0.0, 0.0, 10.0);
 //	m_Renderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
-
+//	m_Renderer->SetUseDepthPeeling(true);
+//	m_Renderer->SetMaximumNumberOfPeels(4);
 //	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
 }
 

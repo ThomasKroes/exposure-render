@@ -26,6 +26,8 @@ class vtkPolyData;
 class vtkProperty;
 class vtkErArrowSource;
 
+// http://www.cmake.org/Wiki/VTKWidgets
+
 class EXPOSURE_RENDER_DLL vtkErPointWidget : public vtk3DWidget
 {
 public:

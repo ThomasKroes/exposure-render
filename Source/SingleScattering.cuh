@@ -58,6 +58,8 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 //	SampleDistanceRM(Re, RNG, Pe);
 
+	float Alpha = pFrameBuffer->m_FrameEstimateXyza.Get(X, Y).GetA();
+
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
 		/*
@@ -103,6 +105,8 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 			}
 		}
 		*/
+
+		Alpha = 1.0f;
 	}
 	else
 	{
@@ -111,9 +115,12 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 			Lv = Li;
 		*/
 		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
+//		Alpha = 0.0f;
 	}
 
-	pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
+	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), Alpha);
+
+	pFrameBuffer->m_FrameEstimateXyza.Set(L, X, Y);
 }
 
 void SingleScattering(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)

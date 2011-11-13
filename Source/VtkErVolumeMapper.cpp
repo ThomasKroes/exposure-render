@@ -94,9 +94,9 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pWindowSize[0], pWindowSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 	glEnable(GL_TEXTURE_2D);
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-	double d = 10.5;
+//	glColor3f(1.0f, 1.0f, 1.0f);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	double d = 0.5;
 
     pRenderer->SetDisplayPoint(0,0,d);
     pRenderer->DisplayToWorld();
@@ -120,7 +120,13 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	
 	
     glPushAttrib(GL_BLEND);
-    glEnable(GL_BLEND);
+//	glEnable(GL_DEPTH_TEST);
+   glEnable(GL_BLEND);
+//	glBlendFunc(GL_SRC_COLOR,GL_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+// glEnable(GL_BLEND);
+//glDisable(GL_COLOR_MATERIAL);
+
     glPushAttrib(GL_LIGHTING);
     glDisable(GL_LIGHTING);
 
@@ -136,6 +142,8 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
     glEnd();
     glPopAttrib();
     glPopAttrib();
+
+	glDisable(GL_BLEND);
 
 	return;
 }
