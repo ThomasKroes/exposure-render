@@ -302,7 +302,7 @@ public:
 		ColorXYZf R;
 
 		R += m_Lambertian.F(Wol, Wil);
-		R += m_Microfacet.F(Wol, Wil);
+//		R += m_Microfacet.F(Wol, Wil);
 
 		return R;
 	}
@@ -342,7 +342,7 @@ public:
 		float Pdf = 0.0f;
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
-		Pdf += m_Microfacet.Pdf(Wol, Wil);
+//		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
 		return Pdf;
 	}

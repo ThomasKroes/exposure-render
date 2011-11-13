@@ -96,7 +96,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	double d = 0.5;
+	double d = 10.5;
 
     pRenderer->SetDisplayPoint(0,0,d);
     pRenderer->DisplayToWorld();

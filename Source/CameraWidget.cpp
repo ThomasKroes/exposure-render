@@ -16,6 +16,7 @@
 #include "CameraWidget.h"
 #include "MainWindow.h"
 #include "RenderThread.h"
+#include "VtkWidget.h"
 
 QCameraWidget::QCameraWidget(QWidget* pParent) :
 	QWidget(pParent),
@@ -33,7 +34,7 @@ QCameraWidget::QCameraWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_FilmWidget);
 	m_MainLayout.addWidget(&m_ApertureWidget);
 	m_MainLayout.addWidget(&m_ProjectionWidget);
-//	m_MainLayout.addWidget(&m_FocusWidget);
+	m_MainLayout.addWidget(&m_FocusWidget);
 
 	QObject::connect(&gCamera.GetFilm(), SIGNAL(Changed(const QFilm&)), &gCamera, SLOT(OnFilmChanged()));
 	QObject::connect(&gCamera.GetAperture(), SIGNAL(Changed(const QAperture&)), &gCamera, SLOT(OnApertureChanged()));
@@ -42,6 +43,7 @@ QCameraWidget::QCameraWidget(QWidget* pParent) :
 	QObject::connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
 	QObject::connect(&gStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
+	QObject::connect(&gCamera, SIGNAL(Changed()), this, SLOT(OnCameraChanged()));
 }
 
 void QCameraWidget::OnLoadPreset(const QString& Name)
@@ -69,4 +71,13 @@ void QCameraWidget::OnSavePreset(const QString& Name)
 QSize QCameraWidget::sizeHint() const
 {
 	return QSize(20, 20);
+}
+
+void QCameraWidget::OnCameraChanged(void)
+{
+	if (!gpActiveRenderWidget)
+		return;
+
+	gpActiveRenderWidget->GetCamera()->SetFocalDisk(gCamera.GetAperture().GetSize());
+	gpActiveRenderWidget->GetCamera()->SetFocalDistance(gCamera.GetFocus().GetFocalDistance());
 }

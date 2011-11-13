@@ -14,7 +14,6 @@
 #include "Stable.h"
 
 #include "AppearanceDockWidget.h"
-
 #include "VtkWidget.h"
 
 QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
@@ -80,16 +79,19 @@ void QAppearanceWidget::OnTransferFunctionChanged(void)
 		const double Intensity = pScalarRange[0] + gTransferFunction.GetNode(i).GetIntensity() * (pScalarRange[1] - pScalarRange[0]);
 
 		Opacity->AddPoint(Intensity, gTransferFunction.GetNode(i).GetOpacity());
-		DiffuseR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().red());
-		DiffuseG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().green());
-		DiffuseR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().blue());
-		SpecularR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().red());
-		SpecularG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().green());
-		SpecularR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().blue());
-		Glossiness->AddPoint(Intensity, gTransferFunction.GetNode(i).GetGlossiness());
-		EmissionR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetEmission().red());
-		EmissionG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetEmission().green());
-		EmissionR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetEmission().blue());
+		DiffuseR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().redF());
+		DiffuseG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().greenF());
+		DiffuseR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().blueF());
+		SpecularR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().redF());
+		SpecularG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().greenF());
+		SpecularR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().blueF());
+
+		const float Gloss = 1.0f - expf(-gTransferFunction.GetNode(i).GetGlossiness());
+
+		Glossiness->AddPoint(Intensity, Gloss * 250.0);
+		EmissionR->AddPoint(Intensity, 100.0f * gTransferFunction.GetNode(i).GetEmission().redF());
+		EmissionG->AddPoint(Intensity, 100.0f * gTransferFunction.GetNode(i).GetEmission().greenF());
+		EmissionR->AddPoint(Intensity, 100.0f * gTransferFunction.GetNode(i).GetEmission().blueF());
 	}
 		
 	gpActiveRenderWidget->GetVolumeProperty()->SetOpacity(Opacity);

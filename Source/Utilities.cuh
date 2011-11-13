@@ -64,7 +64,7 @@ DEV ColorXYZf GetEmission(const float& NormalizedIntensity)
 	return ColorXYZf(Emission.x, Emission.y, Emission.z);
 }
 
-DEV inline Vec3f NormalizedGradient(const Vec3f& P, VolumeInfo& VI)
+DEV inline Vec3f NormalizedGradient(const Vec3f& P)
 {
 	Vec3f Gradient;
 

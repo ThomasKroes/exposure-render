@@ -49,12 +49,11 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 	}
 }
 
-DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float& Density, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
+DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float& Intensity, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-//	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density), GetSpecular(Density), 2.5f, GetGlossiness(Density));
-	CVolumeShader Shader(Type, N, Wo, ColorXYZf(1.0f), ColorXYZf(1.0f), 2.5f, 1.0f);
+	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Intensity), GetSpecular(Intensity), 2.5f, GetGlossiness(Intensity));
 
 	CRay Rl; 
 
@@ -75,18 +74,18 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 
 	F = Shader.F(Wo, Wi); 
 
-	ShaderPdf = INV_4_PI_F;//.Pdf(Wo, Wi);
+//	ShaderPdf = Shader.Pdf(Wo, Wi);
 
 	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
 		
-//		if (Type == CVolumeShader::Brdf)
+		if (Type == CVolumeShader::Brdf)
 //			Ld += F * Li * AbsDot(Wi, N) * WeightMIS / LightPdf;
 
-//		if (Type == CVolumeShader::Phase)
-//			Ld += F * Li * WeightMIS / LightPdf;
-		Ld += F * Li / LightPdf;
+		if (Type == CVolumeShader::Phase)
+			Ld += F * Li * WeightMIS / LightPdf;
+//		Ld += F * Li / LightPdf;
 	}
 
 	/*
@@ -115,7 +114,7 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 	return Ld;
 }
 
-DEV ColorXYZf UniformSampleOneLight(const CVolumeShader::EType& Type, const float& Density, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG, const bool& Brdf)
+DEV ColorXYZf UniformSampleOneLight(const CVolumeShader::EType& Type, const float& Intensity, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
 {
 	/*
 	const int NumLights = pScene->m_Lighting.m_NoLights;
@@ -142,5 +141,5 @@ DEV ColorXYZf UniformSampleOneLight(const CVolumeShader::EType& Type, const floa
 
 	LS.LargeStep(RNG);
 
-	return EstimateDirectLight(Type, Density, *Light, LS, Wo, Pe, N, RNG);
+	return EstimateDirectLight(Type, Intensity, *Light, LS, Wo, Pe, N, RNG);
 }

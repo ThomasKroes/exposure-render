@@ -32,6 +32,7 @@ public:
 public slots:
 	void OnLoadPreset(const QString& Name);
 	void OnSavePreset(const QString& Name);
+	void OnCameraChanged(void);
 
 private:
 	QGridLayout					m_MainLayout;

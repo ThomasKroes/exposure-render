@@ -16,6 +16,7 @@
 #include "vtkErRenderInfo.h"
 #include "vtkErAreaLight.h"
 #include "vtkErBackgroundLight.h"
+#include "vtkErCamera.h"
 
 #include <vtkObjectFactory.h>
 #include <vtkTransform.h>
@@ -116,7 +117,8 @@ void vtkErRenderInfo::Update()
             RendererInfo.m_FilmHeight	= pRenderSize[1];
 			RendererInfo.m_FilmNoPixels	= RendererInfo.m_FilmWidth * RendererInfo.m_FilmHeight;
         }
-        vtkCamera* pCamera = this->Renderer->GetActiveCamera();
+        
+		vtkCamera* pCamera = this->Renderer->GetActiveCamera();
 
 		RendererInfo.m_Camera.m_Pos.x		= pCamera->GetPosition()[0];
         RendererInfo.m_Camera.m_Pos.y		= pCamera->GetPosition()[1];
@@ -133,6 +135,17 @@ void vtkErRenderInfo::Update()
 		RendererInfo.m_Camera.m_N			= Normalize(RendererInfo.m_Camera.m_Target - RendererInfo.m_Camera.m_Pos);
 		RendererInfo.m_Camera.m_U			= -Normalize(Cross(RendererInfo.m_Camera.m_Up, RendererInfo.m_Camera.m_N));
 		RendererInfo.m_Camera.m_V			= -Normalize(Cross(RendererInfo.m_Camera.m_N, RendererInfo.m_Camera.m_U));
+
+		vtkErCamera* pErCamera = dynamic_cast<vtkErCamera*>(pCamera);
+
+		if (pErCamera)
+		{
+			RendererInfo.m_Camera.m_FocalDistance = pErCamera->GetFocalDistance();
+		}
+		else
+		{
+			RendererInfo.m_Camera.m_FocalDistance = vtkErCamera::DefaultFocalDistance();
+		}
 
         double ClippingRange[2];
 

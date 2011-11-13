@@ -260,6 +260,8 @@ void vtkErVolumeProperty::Default(double Min, double Max)
 	SetStepSizeFactorPrimary(vtkErVolumeProperty::DefaultStepSizeFactorPrimary());
 	SetStepSizeFactorSecondary(vtkErVolumeProperty::DefaultStepSizeFactorSecondary());
 	SetGradientDeltaFactor(vtkErVolumeProperty::DefaultGradientDeltaFactor());
+	SetGradientFactor(vtkErVolumeProperty::DefaultGradientFactor());
+	SetShadingType(vtkErVolumeProperty::DefaultShadingType());
 }
 
 double vtkErVolumeProperty::DefaultDensityScale(void)

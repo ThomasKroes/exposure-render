@@ -123,24 +123,8 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_InvMaxAABB.y	= 1.0f / m_VolumeInfo.m_MaxAABB.y;
 		m_VolumeInfo.m_InvMaxAABB.z	= 1.0f / m_VolumeInfo.m_MaxAABB.z;
 
-		
-
-		m_VolumeInfo.m_GradientDeltaX.x = m_VolumeInfo.m_GradientDelta;
-		m_VolumeInfo.m_GradientDeltaX.y = 0.0f;
-		m_VolumeInfo.m_GradientDeltaX.z = 0.0f;
-
-		m_VolumeInfo.m_GradientDeltaY.x = 0.0f;
-		m_VolumeInfo.m_GradientDeltaY.y = m_VolumeInfo.m_GradientDelta;
-		m_VolumeInfo.m_GradientDeltaY.z = 0.0f;
-
-		m_VolumeInfo.m_GradientDeltaZ.x = 0.0f;
-		m_VolumeInfo.m_GradientDeltaZ.y = 0.0f;
-		m_VolumeInfo.m_GradientDeltaZ.z = m_VolumeInfo.m_GradientDelta;
-
 		BindIntensityBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
 		BindGradientMagnitudeBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
-
-		
     }
 }
 
@@ -168,4 +152,16 @@ void vtkErVolumeInfo::Update()
 		m_VolumeInfo.m_GradientFactor	= vtkErVolumeProperty::DefaultGradientFactor();
 		m_VolumeInfo.m_ShadingType		= vtkErVolumeProperty::DefaultShadingType();
 	}
+
+	m_VolumeInfo.m_GradientDeltaX.x = m_VolumeInfo.m_GradientDelta;
+	m_VolumeInfo.m_GradientDeltaX.y = 0.0f;
+	m_VolumeInfo.m_GradientDeltaX.z = 0.0f;
+
+	m_VolumeInfo.m_GradientDeltaY.x = 0.0f;
+	m_VolumeInfo.m_GradientDeltaY.y = m_VolumeInfo.m_GradientDelta;
+	m_VolumeInfo.m_GradientDeltaY.z = 0.0f;
+
+	m_VolumeInfo.m_GradientDeltaZ.x = 0.0f;
+	m_VolumeInfo.m_GradientDeltaZ.y = 0.0f;
+	m_VolumeInfo.m_GradientDeltaZ.z = m_VolumeInfo.m_GradientDelta;
 }

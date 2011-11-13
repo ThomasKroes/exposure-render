@@ -166,6 +166,10 @@ SET(ExposureRenderSources
 	vtkErVolumeProperty.cpp
 	vtkErVolumeInfo.cpp
 	vtkErRenderInfo.cpp
+	VtkErCamera.cpp
+	VtkErAreaLightWidget.cpp
+	vtkErPointWidget.cpp
+	vtkErArrowSource.cpp
 
 	# Logging
 	Logger.cpp
@@ -268,6 +272,10 @@ SET(ExposureRenderHeaders
 	vtkErVolumeProperty.h
 	vtkErVolumeInfo.h
 	vtkErRenderInfo.h
+	VtkErCamera.h
+	VtkErAreaLightWidget.h
+	vtkErPointWidget.h
+	vtkErArrowSource.h
 
 	# Logging
 	Logger.h
@@ -586,6 +594,10 @@ SET(VtkSources
 	vtkErVolumeProperty.h
 	vtkErVolumeInfo.h
 	vtkErRenderInfo.h
+	VtkErCamera.h
+	VtkErAreaLightWidget.h
+	vtkErPointWidget.h
+	vtkErArrowSource.h
 	vtkErVolumeMapper.cpp
 	vtkErLight.cpp
 	vtkErAreaLight.cpp
@@ -594,6 +606,10 @@ SET(VtkSources
 	vtkErVolumeProperty.cpp
 	vtkErVolumeInfo.cpp
 	vtkErRenderInfo.cpp
+	VtkErCamera.cpp
+	VtkErAreaLightWidget.cpp
+	vtkErPointWidget.cpp
+	vtkErArrowSource.cpp
 )
 
 # Make the core group

@@ -38,6 +38,7 @@
 
 #include "VtkErVolumeMapper.h"
 #include "VtkErVolumeProperty.h"
+#include "VtkErCamera.h"
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
 
@@ -58,8 +59,9 @@ public slots:
 
 	vtkVolume* GetVolume(void) { return m_Volume.GetPointer(); };
 	vtkErVolumeProperty* GetVolumeProperty(void) { return m_VolumeProperty.GetPointer(); };
-	vtkErVolumeMapper* GetVolumeMapper(void) {return m_VolumeMapper.GetPointer(); };
-	vtkRenderer* GetRenderer(void) {return m_Renderer.GetPointer(); };
+	vtkErVolumeMapper* GetVolumeMapper(void) { return m_VolumeMapper.GetPointer(); };
+	vtkRenderer* GetRenderer(void) { return m_Renderer.GetPointer(); };
+	vtkErCamera* GetCamera(void) { return m_Camera.GetPointer(); }
 
 private:
 	QGridLayout								m_MainLayout;
@@ -72,7 +74,9 @@ public:
 	vtkSmartPointer<vtkErVolumeProperty>	m_VolumeProperty;
 	vtkSmartPointer<vtkErVolumeMapper>		m_VolumeMapper;
 	vtkSmartPointer<vtkRenderer>			m_Renderer;
+	vtkSmartPointer<vtkRenderer>			m_OverlayRenderer;
 	vtkSmartPointer<vtkCallbackCommand>		m_TimerCallback;
+	vtkSmartPointer<vtkErCamera>			m_Camera;
 };
 
 extern CVtkRenderWidget* gpActiveRenderWidget;

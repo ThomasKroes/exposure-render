@@ -27,9 +27,10 @@
 #include <vtkPointWidget.h>
 #include <vtkAxesTransformWidget.h>
 #include <vtkAxesTransformRepresentation.h>
-#include <vtkCameraWidget.h>
+#include <vtkLineWidget.h>
 
 #include "vtkErBackgroundLight.h"
+#include "vtkErAreaLightWidget.h"
 
 //http://agl.unm.edu/rpf/
 
@@ -39,10 +40,6 @@ void TimerCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* 
  
 	if (pRenderWindowInteractor)
 		pRenderWindowInteractor->Render();
-
-	CVtkRenderWidget* pRenderWidget = (CVtkRenderWidget*)pClientData;
-//	pRenderWidget->
-//	pRenderWidget->repaint(true);
 }
 
 CVtkRenderWidget* gpActiveRenderWidget = NULL;
@@ -55,6 +52,7 @@ CVtkRenderWidget::CVtkRenderWidget(QWidget* pParent) :
 	m_VolumeProperty(),
 	m_VolumeMapper(),
 	m_Renderer(),
+	m_OverlayRenderer(),
 	m_TimerCallback()
 {
 	setLayout(&m_MainLayout);
@@ -62,7 +60,6 @@ CVtkRenderWidget::CVtkRenderWidget(QWidget* pParent) :
 	m_MainLayout.addWidget(&m_QtVtkWidget);
 	m_MainLayout.addWidget(new QPushButton("Hello World!"));
 
-	m_QtVtkWidget.
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
 
@@ -98,15 +95,6 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 	m_VolumeMapper->SetInput(MetaImageReader->GetOutput());
 
     m_Volume->SetMapper(m_VolumeMapper);
-
-	vtkPiecewiseFunction* pwf = vtkPiecewiseFunction::New();
-
-	pwf->AddPoint(0,0.0, 0.5, 0);
-	pwf->AddPoint(10,0.0, 0.5, 0);
-	pwf->AddPoint(11, 1.0, 0.5, 0);
-	pwf->AddPoint(1024, 1.0, 0.5, 0);
-
-	m_VolumeProperty->SetOpacity(pwf);
 
     m_Volume->SetProperty(m_VolumeProperty);
 
@@ -176,25 +164,17 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
     la->SetLight(l1);
 //    m_Renderer->AddViewProp(la);
 
+	
+//	m_Renderer->SetActiveCamera(m_Camera.GetPointer());
+	m_Renderer->ResetCamera();
 
-//	vtkPointWidget* planeWidget = vtkPointWidget::New();
-//  planeWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
+	vtkErAreaLightWidget* vtkLineWidget = vtkErAreaLightWidget::New();
+  vtkLineWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
 
 
-//  planeWidget->On();
+  vtkLineWidget->On();
 
-  vtkCameraWidget* affineWidget = vtkCameraWidget::New();
-  affineWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
-  affineWidget->CreateDefaultRepresentation();
-  
   vtkAxesTransformRepresentation* pRep = vtkAxesTransformRepresentation::New();
-
-//  pRep->SetLabelFormat("%-#6.3g mm");
-
-//  affineWidget->SetRepresentation(pRep);
-
-//  affineWidget->SetEnabled(1);
-  affineWidget->On();
 
 	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
 
@@ -220,17 +200,21 @@ void CVtkRenderWidget::SetupVtk(void)
 	m_VolumeProperty	= vtkErVolumeProperty::New();
 	m_VolumeMapper		= vtkErVolumeMapper::New();
 	m_Renderer			= vtkRenderer::New();
+	m_OverlayRenderer	= vtkRenderer::New();
 	m_TimerCallback		= vtkCallbackCommand::New();
+	m_Camera			= vtkErCamera::New();
 
 	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_Renderer);
+//	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_OverlayRenderer);
+	
 	m_TimerCallback->SetCallback(TimerCallbackFunction);
 	m_TimerCallback->SetClientData((void*)this);
 
 	m_Renderer->SetBackground(0, 0, 0);
-	m_Renderer->GetActiveCamera()->SetPosition(0.0, 0.0, 10.0);
-	m_Renderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
+//	m_Renderer->GetActiveCamera()->SetPosition(0.0, 0.0, 10.0);
+//	m_Renderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
 
-	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
+//	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
 }
 
 
