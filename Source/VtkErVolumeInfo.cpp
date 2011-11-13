@@ -22,6 +22,7 @@
 #include <vtkColorTransferFunction.h>
 
 #include "vtkErVolumeInfo.h"
+#include "vtkErVolumeProperty.h"
 
 #include "Core.cuh"
 
@@ -122,13 +123,7 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_InvMaxAABB.y	= 1.0f / m_VolumeInfo.m_MaxAABB.y;
 		m_VolumeInfo.m_InvMaxAABB.z	= 1.0f / m_VolumeInfo.m_MaxAABB.z;
 
-		m_VolumeInfo.m_DensityScale		= 50000.0f;
-
-		m_VolumeInfo.m_GradientDelta	= m_VolumeInfo.m_Spacing.x;
-		m_VolumeInfo.m_InvGradientDelta	= 1.0f / m_VolumeInfo.m_GradientDelta;
 		
-		m_VolumeInfo.m_StepSize			= 3.0f * (m_VolumeInfo.m_MaxAABB.x / m_VolumeInfo.m_Extent.x);
-		m_VolumeInfo.m_StepSizeShadow	= m_VolumeInfo.m_StepSize * 2.0f;
 
 		m_VolumeInfo.m_GradientDeltaX.x = m_VolumeInfo.m_GradientDelta;
 		m_VolumeInfo.m_GradientDeltaX.y = 0.0f;
@@ -151,4 +146,26 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 
 void vtkErVolumeInfo::Update()
 {
+	vtkErVolumeProperty* pErVolumeProperty = dynamic_cast<vtkErVolumeProperty*>(GetVolume()->GetProperty());
+
+	if (pErVolumeProperty)
+	{
+		m_VolumeInfo.m_DensityScale		= pErVolumeProperty->GetDensityScale();
+		m_VolumeInfo.m_StepSize			= pErVolumeProperty->GetStepSizeFactorPrimary() * (m_VolumeInfo.m_MaxAABB.x / m_VolumeInfo.m_Extent.x);
+		m_VolumeInfo.m_StepSizeShadow	= m_VolumeInfo.m_StepSize * pErVolumeProperty->GetStepSizeFactorSecondary();
+		m_VolumeInfo.m_GradientDelta	= pErVolumeProperty->GetGradientDeltaFactor() * m_VolumeInfo.m_Spacing.x;
+		m_VolumeInfo.m_InvGradientDelta	= 1.0f / m_VolumeInfo.m_GradientDelta;
+		m_VolumeInfo.m_GradientFactor	= pErVolumeProperty->GetGradientFactor();
+		m_VolumeInfo.m_ShadingType		= pErVolumeProperty->GetShadingType();
+	}
+	else
+	{
+		m_VolumeInfo.m_DensityScale		= vtkErVolumeProperty::DefaultDensityScale();
+		m_VolumeInfo.m_StepSize			= vtkErVolumeProperty::DefaultStepSizeFactorPrimary() * (m_VolumeInfo.m_MaxAABB.x / m_VolumeInfo.m_Extent.x);
+		m_VolumeInfo.m_StepSizeShadow	= vtkErVolumeProperty::DefaultStepSizeFactorSecondary() * m_VolumeInfo.m_StepSize;
+		m_VolumeInfo.m_GradientDelta	= vtkErVolumeProperty::DefaultGradientDeltaFactor() * m_VolumeInfo.m_Spacing.x;
+		m_VolumeInfo.m_InvGradientDelta	= 1.0f / m_VolumeInfo.m_GradientDelta;
+		m_VolumeInfo.m_GradientFactor	= vtkErVolumeProperty::DefaultGradientFactor();
+		m_VolumeInfo.m_ShadingType		= vtkErVolumeProperty::DefaultShadingType();
+	}
 }

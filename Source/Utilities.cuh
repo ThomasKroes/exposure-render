@@ -53,9 +53,9 @@ DEV ColorXYZf GetSpecular(const float& NormalizedIntensity)
 	return ColorXYZf(Specular.x, Specular.y, Specular.z);
 }
 
-DEV float GetRoughness(const float& NormalizedIntensity)
+DEV float GetGlossiness(const float& NormalizedIntensity)
 {
-	return tex1D(gTexRoughness, NormalizedIntensity);
+	return tex1D(gTexGlossiness, NormalizedIntensity);
 }
 
 DEV ColorXYZf GetEmission(const float& NormalizedIntensity)

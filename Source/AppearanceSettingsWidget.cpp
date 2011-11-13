@@ -16,6 +16,7 @@
 #include "AppearanceSettingsWidget.h"
 #include "TransferFunction.h"
 #include "RenderThread.h"
+#include "VtkWidget.h"
 
 QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),
@@ -110,16 +111,16 @@ QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :
 
 void QAppearanceSettingsWidget::OnRenderBegin(void)
 {
-	/*
-	m_DensityScaleSlider.setValue(gTransferFunction.GetDensityScale());
-	m_ShadingType.setCurrentIndex(gTransferFunction.GetShadingType());
-	m_GradientFactorSlider.setValue(gScene.m_GradientFactor);
+	if (!gpActiveRenderWidget)
+		return;
 
-	m_StepSizePrimaryRaySlider.setValue(gScene.m_StepSizeFactor, true);
-	m_StepSizePrimaryRaySpinner.setValue(gScene.m_StepSizeFactor, true);
-	m_StepSizeSecondaryRaySlider.setValue(gScene.m_StepSizeFactorShadow, true);
-	m_StepSizeSecondaryRaySpinner.setValue(gScene.m_StepSizeFactorShadow, true);
-	*/
+	m_DensityScaleSlider.setValue(gpActiveRenderWidget->GetVolumeProperty()->GetDensityScale());
+	m_ShadingType.setCurrentIndex(gpActiveRenderWidget->GetVolumeProperty()->GetShadingType());
+	m_GradientFactorSlider.setValue(gpActiveRenderWidget->GetVolumeProperty()->GetGradientFactor());
+	m_StepSizePrimaryRaySlider.setValue(gpActiveRenderWidget->GetVolumeProperty()->GetStepSizeFactorPrimary(), true);
+	m_StepSizePrimaryRaySpinner.setValue(gpActiveRenderWidget->GetVolumeProperty()->GetStepSizeFactorPrimary(), true);
+	m_StepSizeSecondaryRaySlider.setValue(gpActiveRenderWidget->GetVolumeProperty()->GetStepSizeFactorSecondary(), true);
+	m_StepSizeSecondaryRaySpinner.setValue(gpActiveRenderWidget->GetVolumeProperty()->GetStepSizeFactorSecondary(), true);
 }
 
 void QAppearanceSettingsWidget::OnSetDensityScale(double DensityScale)
@@ -130,6 +131,7 @@ void QAppearanceSettingsWidget::OnSetDensityScale(double DensityScale)
 void QAppearanceSettingsWidget::OnSetShadingType(int Index)
 {
 	gTransferFunction.SetShadingType(Index);
+
 	m_GradientFactorLabel.setEnabled(Index == 2);
 	m_GradientFactorSlider.setEnabled(Index == 2);
 	m_GradientFactorSpinner.setEnabled(Index == 2);
@@ -140,16 +142,20 @@ void QAppearanceSettingsWidget::OnSetGradientFactor(double GradientFactor)
 	gTransferFunction.SetGradientFactor(GradientFactor);
 }
 
-void QAppearanceSettingsWidget::OnSetStepSizePrimaryRay(const double& StepSizePrimaryRay)
+void QAppearanceSettingsWidget::OnSetStepSizePrimaryRay(const double& StepSizeFactorPrimary)
 {
-//	gScene.m_StepSizeFactor = (float)StepSizePrimaryRay;
-//	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
+	if (!gpActiveRenderWidget)
+		return;
+
+	gpActiveRenderWidget->GetVolumeProperty()->SetStepSizeFactorPrimary(StepSizeFactorPrimary);
 }
 
-void QAppearanceSettingsWidget::OnSetStepSizeSecondaryRay(const double& StepSizeSecondaryRay)
+void QAppearanceSettingsWidget::OnSetStepSizeSecondaryRay(const double& StepSizeFactorSecondary)
 {
-//	gScene.m_StepSizeFactorShadow = (float)StepSizeSecondaryRay;
-//	gScene.m_DirtyFlags.SetFlag(RenderParamsDirty);
+	if (!gpActiveRenderWidget)
+		return;
+
+	gpActiveRenderWidget->GetVolumeProperty()->SetStepSizeFactorSecondary(StepSizeFactorSecondary);
 }
 
 void QAppearanceSettingsWidget::OnTransferFunctionChanged(void)

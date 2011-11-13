@@ -53,7 +53,7 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-//	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density), GetSpecular(Density), 2.5f, GetRoughness(Density));
+//	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Density), GetSpecular(Density), 2.5f, GetGlossiness(Density));
 	CVolumeShader Shader(Type, N, Wo, ColorXYZf(1.0f), ColorXYZf(1.0f), 2.5f, 1.0f);
 
 	CRay Rl; 

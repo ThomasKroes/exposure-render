@@ -15,6 +15,8 @@
 
 #include "AppearanceDockWidget.h"
 
+#include "VtkWidget.h"
+
 QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 	QWidget(pParent),
 	m_MainLayout(),
@@ -37,6 +39,7 @@ QAppearanceWidget::QAppearanceWidget(QWidget* pParent) :
 	QObject::connect(&m_PresetsWidget, SIGNAL(LoadPreset(const QString&)), this, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&gStatus, SIGNAL(LoadPreset(const QString&)), &m_PresetsWidget, SLOT(OnLoadPreset(const QString&)));
 	QObject::connect(&m_PresetsWidget, SIGNAL(SavePreset(const QString&)), this, SLOT(OnSavePreset(const QString&)));
+	QObject::connect(&gTransferFunction, SIGNAL(Changed()), this, SLOT(OnTransferFunctionChanged()));
 }
 
 void QAppearanceWidget::OnLoadPreset(const QString& Name)
@@ -51,6 +54,59 @@ void QAppearanceWidget::OnSavePreset(const QString& Name)
 
 	// Save the preset
 	m_PresetsWidget.SavePreset(Preset);
+}
+
+void QAppearanceWidget::OnTransferFunctionChanged(void)
+{
+	if (!gpActiveRenderWidget || !gpActiveRenderWidget->GetVolumeMapper()->GetInput())
+		return;
+
+	vtkSmartPointer<vtkPiecewiseFunction> Opacity		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> DiffuseR		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> DiffuseG		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> DiffuseB		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> SpecularR		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> SpecularG		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> SpecularB		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> Glossiness	= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> EmissionR		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> EmissionG		= vtkPiecewiseFunction::New();
+	vtkSmartPointer<vtkPiecewiseFunction> EmissionB		= vtkPiecewiseFunction::New();
+
+	double* pScalarRange = gpActiveRenderWidget->GetVolumeMapper()->GetInput()->GetScalarRange();
+
+	for (int i = 0; i < gTransferFunction.GetNodes().size(); i++)
+	{
+		const double Intensity = pScalarRange[0] + gTransferFunction.GetNode(i).GetIntensity() * (pScalarRange[1] - pScalarRange[0]);
+
+		Opacity->AddPoint(Intensity, gTransferFunction.GetNode(i).GetOpacity());
+		DiffuseR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().red());
+		DiffuseG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().green());
+		DiffuseR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetDiffuse().blue());
+		SpecularR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().red());
+		SpecularG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().green());
+		SpecularR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetSpecular().blue());
+		Glossiness->AddPoint(Intensity, gTransferFunction.GetNode(i).GetGlossiness());
+		EmissionR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetEmission().red());
+		EmissionG->AddPoint(Intensity, gTransferFunction.GetNode(i).GetEmission().green());
+		EmissionR->AddPoint(Intensity, gTransferFunction.GetNode(i).GetEmission().blue());
+	}
+		
+	gpActiveRenderWidget->GetVolumeProperty()->SetOpacity(Opacity);
+	gpActiveRenderWidget->GetVolumeProperty()->SetDiffuse(0, DiffuseR);
+	gpActiveRenderWidget->GetVolumeProperty()->SetDiffuse(1, DiffuseG);
+	gpActiveRenderWidget->GetVolumeProperty()->SetDiffuse(2, DiffuseB);
+	gpActiveRenderWidget->GetVolumeProperty()->SetSpecular(0, SpecularR);
+	gpActiveRenderWidget->GetVolumeProperty()->SetSpecular(1, SpecularG);
+	gpActiveRenderWidget->GetVolumeProperty()->SetSpecular(2, SpecularB);
+	gpActiveRenderWidget->GetVolumeProperty()->SetGlossiness(Glossiness);
+	gpActiveRenderWidget->GetVolumeProperty()->SetEmission(0, EmissionR);
+	gpActiveRenderWidget->GetVolumeProperty()->SetEmission(1, EmissionG);
+	gpActiveRenderWidget->GetVolumeProperty()->SetEmission(2, EmissionB);
+
+	gpActiveRenderWidget->GetVolumeProperty()->SetDensityScale(gTransferFunction.GetDensityScale());
+	gpActiveRenderWidget->GetVolumeProperty()->SetGradientFactor(gTransferFunction.GetGradientFactor());
+	gpActiveRenderWidget->GetVolumeProperty()->SetShadingType(gTransferFunction.GetShadingType());
 }
 
 QAppearanceDockWidget::QAppearanceDockWidget(QWidget *parent) :

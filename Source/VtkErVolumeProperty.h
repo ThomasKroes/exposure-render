@@ -35,13 +35,41 @@ public:
 	void SetSpecular(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
 	vtkPiecewiseFunction* GetSpecular(int Index);
 
-	void SetRoughness(vtkPiecewiseFunction* pPiecewiseFunction);
-	vtkPiecewiseFunction* GetRoughness(void);
+	void SetGlossiness(vtkPiecewiseFunction* pPiecewiseFunction);
+	vtkPiecewiseFunction* GetGlossiness(void);
 
 	void SetEmission(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
 	vtkPiecewiseFunction* GetEmission(int Index);
 
+	vtkGetMacro(Dirty, bool);
+	vtkSetMacro(Dirty, bool);
+	
+	vtkGetMacro(DensityScale, double);
+	void SetDensityScale(double DensityScale);
+	
+	vtkGetMacro(StepSizeFactorPrimary, double);
+	void SetStepSizeFactorPrimary(double StepSizeFactorPrimary);
+	
+	vtkGetMacro(StepSizeFactorSecondary, double);
+	void SetStepSizeFactorSecondary(double StepSizeFactorSecondary);
+
+	vtkGetMacro(GradientDeltaFactor, double);
+	void SetGradientDeltaFactor(double GradientDeltaFactor);
+	
+	vtkGetMacro(GradientFactor, double);
+	void SetGradientFactor(double GradientFactor);
+
+	vtkGetMacro(ShadingType, int);
+	void SetShadingType(int ShadingType);
+
 	void Default(double Min, double Max);
+
+	static double DefaultDensityScale(void);
+	static double DefaultStepSizeFactorPrimary(void);
+	static double DefaultStepSizeFactorSecondary(void);
+	static double DefaultGradientDeltaFactor(void);
+	static double DefaultGradientFactor(void);
+	static int DefaultShadingType(void);
 
 protected:
 	vtkErVolumeProperty();
@@ -50,6 +78,13 @@ protected:
 	vtkSmartPointer<vtkPiecewiseFunction>	Opacity;
 	vtkSmartPointer<vtkPiecewiseFunction>	Diffuse[3];
 	vtkSmartPointer<vtkPiecewiseFunction>	Specular[3];
-	vtkSmartPointer<vtkPiecewiseFunction>	Roughness;
+	vtkSmartPointer<vtkPiecewiseFunction>	Glossiness;
 	vtkSmartPointer<vtkPiecewiseFunction>	Emission[3];
+	bool									Dirty;
+	double									DensityScale;
+	double									StepSizeFactorPrimary;
+	double									StepSizeFactorSecondary;
+	double									GradientDeltaFactor;
+	double									GradientFactor;
+	int										ShadingType;
 };

@@ -64,7 +64,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 
 	
 	m_CudaRenderInfo->SetRenderer(pRenderer);
-	
+	m_CudaVolumeInfo->SetVolume(pVolume);
 	m_CudaVolumeInfo->SetInputData(this->GetInput());
 //	m_CudaVolumeInfo->SetVolume(pVolume);
 	m_CudaVolumeInfo->Update();
@@ -162,31 +162,54 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 
 	double* pRange = GetDataSetInput()->GetScalarRange();
 
-	if (pErVolumeProperty == NULL)
-	{
-		vtkErrorMacro("Incompatible volume property, use vtkErVolumeProperty!");
-		pErVolumeProperty->Default(pRange[0], pRange[1]);
-	}
-
 	int N = 128;
 
 	float	Opacity[128];
 	float	Diffuse[3][128];
 	float	Specular[3][128];
-	float	Roughness[128];
+	float	Glossiness[128];
 	float	Emission[3][128];
 
-	pErVolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
-	pErVolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
-	pErVolumeProperty->GetDiffuse(1)->GetTable(pRange[0], pRange[1], N, Diffuse[1]);
-	pErVolumeProperty->GetDiffuse(2)->GetTable(pRange[0], pRange[1], N, Diffuse[2]);
-	pErVolumeProperty->GetSpecular(0)->GetTable(pRange[0], pRange[1], N, Specular[0]);
-	pErVolumeProperty->GetSpecular(1)->GetTable(pRange[0], pRange[1], N, Specular[1]);
-	pErVolumeProperty->GetSpecular(2)->GetTable(pRange[0], pRange[1], N, Specular[2]);
-	pErVolumeProperty->GetRoughness()->GetTable(pRange[0], pRange[1], N, Roughness);
-	pErVolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
-	pErVolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
-	pErVolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
+	if (pErVolumeProperty == NULL)
+	{
+		vtkErrorMacro("Incompatible volume property, use vtkErVolumeProperty!");
+		
+		vtkSmartPointer<vtkErVolumeProperty> ErVolumeProperty = vtkErVolumeProperty::New();
 
-	BindTransferFunctions1D(Opacity, Diffuse, Specular, Roughness, Emission, N);
+		ErVolumeProperty->Default(pRange[0], pRange[1]);
+
+		ErVolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
+		ErVolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
+		ErVolumeProperty->GetDiffuse(1)->GetTable(pRange[0], pRange[1], N, Diffuse[1]);
+		ErVolumeProperty->GetDiffuse(2)->GetTable(pRange[0], pRange[1], N, Diffuse[2]);
+		ErVolumeProperty->GetSpecular(0)->GetTable(pRange[0], pRange[1], N, Specular[0]);
+		ErVolumeProperty->GetSpecular(1)->GetTable(pRange[0], pRange[1], N, Specular[1]);
+		ErVolumeProperty->GetSpecular(2)->GetTable(pRange[0], pRange[1], N, Specular[2]);
+		ErVolumeProperty->GetGlossiness()->GetTable(pRange[0], pRange[1], N, Glossiness);
+		ErVolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
+		ErVolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
+		ErVolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
+	}
+	else
+	{
+		if (pErVolumeProperty->GetDirty())
+		{
+			m_CudaRenderInfo->Reset();
+			pErVolumeProperty->SetDirty(false);
+		}
+
+		pErVolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
+		pErVolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
+		pErVolumeProperty->GetDiffuse(1)->GetTable(pRange[0], pRange[1], N, Diffuse[1]);
+		pErVolumeProperty->GetDiffuse(2)->GetTable(pRange[0], pRange[1], N, Diffuse[2]);
+		pErVolumeProperty->GetSpecular(0)->GetTable(pRange[0], pRange[1], N, Specular[0]);
+		pErVolumeProperty->GetSpecular(1)->GetTable(pRange[0], pRange[1], N, Specular[1]);
+		pErVolumeProperty->GetSpecular(2)->GetTable(pRange[0], pRange[1], N, Specular[2]);
+		pErVolumeProperty->GetGlossiness()->GetTable(pRange[0], pRange[1], N, Glossiness);
+		pErVolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
+		pErVolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
+		pErVolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
+	}
+
+	BindTransferFunctions1D(Opacity, Diffuse, Specular, Glossiness, Emission, N);
 }

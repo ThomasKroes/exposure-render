@@ -25,7 +25,7 @@ texture<float, cudaTextureType3D, cudaReadModeElementType>			gTexExtinction;
 texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexOpacity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexSpecular;
-texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexRoughness;
+texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexGlossiness;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexEmission;
 texture<uchar4, cudaTextureType2D, cudaReadModeNormalizedFloat>		gTexRunningEstimateRgba;
 
@@ -37,7 +37,7 @@ cudaArray* gpGradientMagnitudeArray		= NULL;
 cudaArray* gpOpacityArray				= NULL;
 cudaArray* gpDiffuseArray				= NULL;
 cudaArray* gpSpecularArray				= NULL;
-cudaArray* gpRoughnessArray				= NULL;
+cudaArray* gpGlossinessArray				= NULL;
 cudaArray* gpEmissionArray				= NULL;
 
 CD VolumeInfo	gVolumeInfo;
@@ -113,7 +113,7 @@ void UnbindGradientMagnitudeBuffer(void)
 	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
 }
 
-void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Roughness[128], float Emission[3][128], int N)
+void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Glossiness[128], float Emission[3][128], int N)
 {
 	// Opacity
 	gTexOpacity.normalized		= true;
@@ -162,16 +162,16 @@ void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Sp
 
 	delete[] pSpecularXYZA;
 
-	// Roughness
-	gTexRoughness.normalized		= true;
-	gTexRoughness.filterMode		= cudaFilterModeLinear;
-	gTexRoughness.addressMode[0]	= cudaAddressModeClamp;
+	// Glossiness
+	gTexGlossiness.normalized		= true;
+	gTexGlossiness.filterMode		= cudaFilterModeLinear;
+	gTexGlossiness.addressMode[0]	= cudaAddressModeClamp;
 
-	if (gpRoughnessArray == NULL)
-		HandleCudaError(cudaMallocArray(&gpRoughnessArray, &gFloatChannelDesc, N, 1));
+	if (gpGlossinessArray == NULL)
+		HandleCudaError(cudaMallocArray(&gpGlossinessArray, &gFloatChannelDesc, N, 1));
 
-	HandleCudaError(cudaMemcpyToArray(gpRoughnessArray, 0, 0, Roughness, N * sizeof(float),  cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexRoughness, gpRoughnessArray, gFloatChannelDesc));
+	HandleCudaError(cudaMemcpyToArray(gpGlossinessArray, 0, 0, Glossiness, N * sizeof(float),  cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexGlossiness, gpGlossinessArray, gFloatChannelDesc));
 
 	// Emission
 	gTexEmission.normalized		= true;
@@ -197,19 +197,19 @@ void UnbindTransferFunctions1D(void)
 	HandleCudaError(cudaFreeArray(gpOpacityArray));
 	HandleCudaError(cudaFreeArray(gpDiffuseArray));
 	HandleCudaError(cudaFreeArray(gpSpecularArray));
-	HandleCudaError(cudaFreeArray(gpRoughnessArray));
+	HandleCudaError(cudaFreeArray(gpGlossinessArray));
 	HandleCudaError(cudaFreeArray(gpEmissionArray));
 
 	gpOpacityArray		= NULL;
 	gpDiffuseArray		= NULL;
 	gpSpecularArray		= NULL;
-	gpRoughnessArray	= NULL;
+	gpGlossinessArray	= NULL;
 	gpEmissionArray		= NULL;
 
 	HandleCudaError(cudaUnbindTexture(gTexOpacity));
 	HandleCudaError(cudaUnbindTexture(gTexDiffuse));
 	HandleCudaError(cudaUnbindTexture(gTexSpecular));
-	HandleCudaError(cudaUnbindTexture(gTexRoughness));
+	HandleCudaError(cudaUnbindTexture(gTexGlossiness));
 	HandleCudaError(cudaUnbindTexture(gTexEmission));
 }
 

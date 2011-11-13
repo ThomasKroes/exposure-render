@@ -29,10 +29,12 @@ vtkErVolumeProperty::vtkErVolumeProperty()
 	this->Specular[0]	= vtkPiecewiseFunction::New();
 	this->Specular[1]	= vtkPiecewiseFunction::New();
 	this->Specular[2]	= vtkPiecewiseFunction::New();
-	this->Roughness		= vtkPiecewiseFunction::New();
+	this->Glossiness	= vtkPiecewiseFunction::New();
 	this->Emission[0]	= vtkPiecewiseFunction::New();
 	this->Emission[1]	= vtkPiecewiseFunction::New();
 	this->Emission[2]	= vtkPiecewiseFunction::New();
+
+	Default(0, 1024);
 }
 
 vtkErVolumeProperty::~vtkErVolumeProperty()
@@ -51,6 +53,7 @@ void vtkErVolumeProperty::SetOpacity(vtkPiecewiseFunction* pPiecewiseFunction)
 	{
 		this->Opacity = pPiecewiseFunction;
 		this->Modified();
+		this->SetDirty(true);
 	}
 }
 
@@ -77,6 +80,7 @@ void vtkErVolumeProperty::SetDiffuse(int Index, vtkPiecewiseFunction* pPiecewise
 	{
 		this->Diffuse[Index] = pPiecewiseFunction;
 		this->Modified();
+		this->SetDirty(true);
 	}
 }
 
@@ -109,6 +113,7 @@ void vtkErVolumeProperty::SetSpecular(int Index, vtkPiecewiseFunction* pPiecewis
 	{
 		this->Specular[Index] = pPiecewiseFunction;
 		this->Modified();
+		this->SetDirty(true);
 	}
 }
 
@@ -123,24 +128,25 @@ vtkPiecewiseFunction* vtkErVolumeProperty::GetSpecular(int Index)
 	return Specular[Index];
 }
 
-void vtkErVolumeProperty::SetRoughness(vtkPiecewiseFunction* pPiecewiseFunction)
+void vtkErVolumeProperty::SetGlossiness(vtkPiecewiseFunction* pPiecewiseFunction)
 {
 	if (!pPiecewiseFunction)
 	{
-		vtkErrorMacro("Roughness piecewise function is NULL!")
+		vtkErrorMacro("Glossiness piecewise function is NULL!")
 		return;
 	}
 
-	if (this->Roughness != pPiecewiseFunction)
+	if (this->Glossiness != pPiecewiseFunction)
 	{
-		this->Roughness = pPiecewiseFunction;
+		this->Glossiness = pPiecewiseFunction;
 		this->Modified();
+		this->SetDirty(true);
 	}
 }
 
-vtkPiecewiseFunction* vtkErVolumeProperty::GetRoughness(void)
+vtkPiecewiseFunction* vtkErVolumeProperty::GetGlossiness(void)
 {
-	return Roughness.GetPointer();
+	return Glossiness.GetPointer();
 }
 
 void vtkErVolumeProperty::SetEmission(int Index, vtkPiecewiseFunction* pPiecewiseFunction)
@@ -161,6 +167,7 @@ void vtkErVolumeProperty::SetEmission(int Index, vtkPiecewiseFunction* pPiecewis
 	{
 		this->Emission[Index] = pPiecewiseFunction;
 		this->Modified();
+		this->SetDirty(true);
 	}
 }
 
@@ -175,6 +182,42 @@ vtkPiecewiseFunction* vtkErVolumeProperty::GetEmission(int Index)
 	return Emission[Index];
 }
 
+void vtkErVolumeProperty::SetDensityScale(double DensityScale)
+{
+	this->DensityScale = DensityScale;
+	this->SetDirty(true);
+}
+
+void vtkErVolumeProperty::SetStepSizeFactorPrimary(double StepSizeFactorPrimary)
+{
+	this->StepSizeFactorPrimary = StepSizeFactorPrimary;
+	this->SetDirty(true);
+}
+
+void vtkErVolumeProperty::SetStepSizeFactorSecondary(double StepSizeFactorSecondary)
+{
+	this->StepSizeFactorSecondary = StepSizeFactorSecondary;
+	this->SetDirty(true);
+}
+
+void vtkErVolumeProperty::SetGradientDeltaFactor(double GradientDeltaFactor)
+{
+	this->GradientDeltaFactor = GradientDeltaFactor;
+	this->SetDirty(true);
+}
+
+void vtkErVolumeProperty::SetGradientFactor(double GradientFactor)
+{
+	this->GradientFactor = GradientFactor;
+	this->SetDirty(true);
+}
+
+void vtkErVolumeProperty::SetShadingType(int ShadingType)
+{
+	this->ShadingType = ShadingType;
+	this->SetDirty(true);
+}
+
 void vtkErVolumeProperty::Default(double Min, double Max)
 {
 	this->Opacity->RemoveAllPoints();
@@ -184,7 +227,7 @@ void vtkErVolumeProperty::Default(double Min, double Max)
 	this->Specular[0]->RemoveAllPoints();
 	this->Specular[1]->RemoveAllPoints();
 	this->Specular[2]->RemoveAllPoints();
-	this->Roughness->RemoveAllPoints();
+	this->Glossiness->RemoveAllPoints();
 	this->Emission[0]->RemoveAllPoints();
 	this->Emission[1]->RemoveAllPoints();
 	this->Emission[2]->RemoveAllPoints();
@@ -204,12 +247,47 @@ void vtkErVolumeProperty::Default(double Min, double Max)
 		Specular[0]->AddPoint(Max, 0.5, 0.5, 0);
 	}
 
-	Roughness->AddPoint(Min, 1, 0.5, 0);
-	Roughness->AddPoint(Max, 1, 0.5, 0);
+	Glossiness->AddPoint(Min, 1, 0.5, 0);
+	Glossiness->AddPoint(Max, 1, 0.5, 0);
 
 	for (int i = 0; i < 3; i++)
 	{
 		Emission[0]->AddPoint(Min, 0.5, 0.5, 0);
 		Emission[0]->AddPoint(Max, 0.5, 0.5, 0);
 	}
+
+	SetDensityScale(vtkErVolumeProperty::DefaultDensityScale());
+	SetStepSizeFactorPrimary(vtkErVolumeProperty::DefaultStepSizeFactorPrimary());
+	SetStepSizeFactorSecondary(vtkErVolumeProperty::DefaultStepSizeFactorSecondary());
+	SetGradientDeltaFactor(vtkErVolumeProperty::DefaultGradientDeltaFactor());
+}
+
+double vtkErVolumeProperty::DefaultDensityScale(void)
+{
+	return 50.0;
+}
+
+double vtkErVolumeProperty::DefaultStepSizeFactorPrimary(void)
+{
+	return 2.0;
+}
+
+double vtkErVolumeProperty::DefaultStepSizeFactorSecondary(void)
+{
+	return 3.0;
+}
+
+double vtkErVolumeProperty::DefaultGradientDeltaFactor(void)
+{
+	return 1.0;
+}
+
+double vtkErVolumeProperty::DefaultGradientFactor(void)
+{
+	return 1.0;
+}
+
+int vtkErVolumeProperty::DefaultShadingType(void)
+{
+	return 2;
 }

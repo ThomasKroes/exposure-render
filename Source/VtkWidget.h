@@ -34,6 +34,7 @@
 #include <vtkImageData.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkPointData.h>
+#include <vtkPiecewiseFunction.h>
 
 #include "VtkErVolumeMapper.h"
 #include "VtkErVolumeProperty.h"

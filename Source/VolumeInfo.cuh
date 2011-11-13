@@ -37,4 +37,6 @@ struct EXPOSURE_RENDER_DLL VolumeInfo
 	float3	m_GradientDeltaZ;
 	float3	m_Spacing;
 	float3	m_InvSpacing;
+	float	m_GradientFactor;
+	int		m_ShadingType;
 };
