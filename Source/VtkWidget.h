@@ -35,10 +35,12 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkPointData.h>
 #include <vtkPiecewiseFunction.h>
+#include <vtkVolume.h>
 
 #include "VtkErVolumeMapper.h"
 #include "VtkErVolumeProperty.h"
 #include "VtkErCamera.h"
+#include "VtkErVolume.h"
 
 #include <vtkVolume.h>
 
@@ -84,7 +86,7 @@ private:
 	void SetupVtk(void);
 
 public:
-	vtkSmartPointer<vtkVolume>				m_Volume;
+	vtkSmartPointer<vtkErVolume>			m_Volume;
 	vtkSmartPointer<vtkErVolumeProperty>	m_VolumeProperty;
 	vtkSmartPointer<vtkErVolumeMapper>		m_VolumeMapper;
 	vtkSmartPointer<vtkRenderer>			m_Renderer;

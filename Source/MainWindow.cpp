@@ -45,8 +45,8 @@ CMainWindow::CMainWindow() :
 
 	setCentralWidget(&m_RenderView);
 
-//	m_RenderView.m_RenderWidget.SetActive();
-	m_RenderView.SetActive();
+	m_RenderView.m_RenderWidget.SetActive();
+//	m_RenderView.SetActive();
 //	m_RenderOutputDialog.m_VtkRenderWidget.SetSource(&m_RenderWidget);
 
 	CreateMenus();

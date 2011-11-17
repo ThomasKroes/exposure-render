@@ -53,6 +53,7 @@ vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
     virtual void SetInput( vtkImageData * );
 //	virtual void SetInput( vtkDataSet * );
     virtual void Render(vtkRenderer *, vtkVolume *);
+	virtual void Render2(vtkRenderer *, vtkVolume *);
 	virtual int FillInputPortInformation(int, vtkInformation*);
 
    vtkImageData* GetOutput() { return NULL;  }

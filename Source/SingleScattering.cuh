@@ -107,6 +107,7 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 		*/
 
 		Alpha = 1.0f;
+		pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(255);
 	}
 	else
 	{
@@ -116,6 +117,7 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 		*/
 		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
 //		Alpha = 0.0f;
+//		pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(255);
 	}
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), Alpha);

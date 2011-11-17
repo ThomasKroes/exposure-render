@@ -100,3 +100,8 @@ DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax
 {
 	 return A + ((Ax - A) / max((float)N, 1.0f));
 }
+
+DEV ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
+{
+	 return A + ((Ax - A) / max((float)N, 1.0f));
+}

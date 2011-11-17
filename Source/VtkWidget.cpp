@@ -30,6 +30,10 @@
 #include <vtkLineWidget.h>
 #include <vtkSphereSource.h>
 #include <vtkAxesActor.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <QVTKGraphicsItem.h>
+#include <vtkInteractorStyleImage.h>
 
 #include "vtkErBackgroundLight.h"
 #include "vtkErAreaLightWidget.h"
@@ -42,6 +46,8 @@ void TimerCallbackFunction(vtkObject* pCaller, long unsigned int EventId, void* 
  
 	if (pRenderWindowInteractor)
 		pRenderWindowInteractor->Render();
+
+	
 }
 
 CVtkRenderWidget* gpActiveRenderWidget = NULL;
@@ -201,8 +207,8 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
 	m_Renderer->AddLight(pErBackgroundLight);
 
-	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.001);
-	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);
+//	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.1);
+//	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);
 
 	m_Renderer->GetActiveCamera()->SetPosition(10, 10, 10);
 	m_Renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
@@ -211,11 +217,16 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
+
+	
+	vtkSmartPointer<vtkInteractorStyleImage> style1 = vtkSmartPointer<vtkInteractorStyleImage>::New();
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style1);
+
 }
 
 void CVtkRenderWidget::SetupVtk(void)
 {
-	m_Volume			= vtkVolume::New();
+	m_Volume			= vtkErVolume::New();
 	m_VolumeProperty	= vtkErVolumeProperty::New();
 	m_VolumeMapper		= vtkErVolumeMapper::New();
 	m_Renderer			= vtkRenderer::New();
@@ -233,7 +244,9 @@ void CVtkRenderWidget::SetupVtk(void)
 //	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_OverlayRenderer);
 	m_QtVtkWidget.GetRenderWindow()->AddRenderer(m_Renderer);
 	
+//	m_QtVtkWidget.setGraphicsEffect(new QGraphicsDropShadowEffect());
 	
+	m_Renderer->SetBackground(0.1, 0.1, 0.1);
 	
 //	m_QtVtkWidget.GetRenderWindow()->SetPolygonSmoothing(1);
 
@@ -248,7 +261,7 @@ void CVtkRenderWidget::SetupVtk(void)
 //	m_Renderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
 //	m_Renderer->SetUseDepthPeeling(true);
 //	m_Renderer->SetMaximumNumberOfPeels(4);
-//	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
+	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
 }
 
 void CVtkRenderWidget::OnViewFront(void)
@@ -287,10 +300,18 @@ QRenderView::QRenderView(QWidget* pParent /*= NULL*/) :
 	m_RenderWidget()
 {
 	setScene(&m_GraphicsScene);
+	setWindowTitle("Render Canvas");
 
 	m_GraphicsScene.setBackgroundBrush(QBrush(Qt::black));
 
 	m_GraphicsScene.addWidget(&m_RenderWidget, Qt::Dialog);
 
-	m_RenderWidget.setFocus();
+//	m_RenderWidget.setParent(this);
+//	m_RenderWidget.setFocus();
+
+//	m_GraphicsScene.addItem(new QVTKGraphicsItem(new QGLContext(QGLFormat())));
+//	setViewport(&m_RenderWidget);
+//    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+//	setInteractive(true);
+//	renderHints() = 0;
 }

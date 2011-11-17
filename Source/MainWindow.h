@@ -94,7 +94,8 @@ private:
 
 	QLabel m_Update;
 
-	CVtkRenderWidget		m_RenderView;
+//	CVtkRenderWidget		m_RenderView;
+	QRenderView			m_RenderView;
 };
 
 extern CMainWindow* gpMainWindow;
