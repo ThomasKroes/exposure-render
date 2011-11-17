@@ -14,6 +14,9 @@
 #include "Stable.h"
 
 #include <vtkObjectFactory.h>
+#include <vtkRenderer.h>
+#include <vtkBoundingBox.h>
+#include <vtkMath.h>
 
 #include "vtkErCamera.h"
 
@@ -40,8 +43,158 @@ void vtkErCamera::Default(void)
 
 void vtkErCamera::SetViewFront(void)
 {
-	SetFocalPoint();
-	SetPosition();
+	if (!Renderer)
+	{
+		vtkErrorMacro("Unable to set front view, VTK Renderer is NULL!");
+		return;
+	}
+
+	double* pBounds = Renderer->ComputeVisiblePropBounds();
+
+	vtkBoundingBox AABB(pBounds);
+
+	double Center[3];
+
+	AABB.GetCenter(Center);
+
+	SetFocalPoint(Center[0], Center[1], Center[2]);
+
+	const double Distance = (0.5 * AABB.GetMaxLength()) / tan(vtkMath::RadiansFromDegrees(0.5 * GetViewAngle()));
+	
+	SetPosition(Center[0], Center[1], Center[2] + Distance);
+	SetViewUp(0, 1, 0);
+
+	this->Modified();
+}
+
+void vtkErCamera::SetViewBack(void)
+{
+	if (!Renderer)
+	{
+		vtkErrorMacro("Unable to set front view, VTK Renderer is NULL!");
+		return;
+	}
+
+	double* pBounds = Renderer->ComputeVisiblePropBounds();
+
+	vtkBoundingBox AABB(pBounds);
+
+	double Center[3];
+
+	AABB.GetCenter(Center);
+
+	SetFocalPoint(Center[0], Center[1], Center[2]);
+
+	const double Distance = (0.5 * AABB.GetMaxLength()) / tan(vtkMath::RadiansFromDegrees(0.5 * GetViewAngle()));
+	
+	SetPosition(Center[0], Center[1], Center[2] - Distance);
+	SetViewUp(0, 1, 0);
+
+	this->Modified();
+}
+
+void vtkErCamera::SetViewLeft(void)
+{
+	if (!Renderer)
+	{
+		vtkErrorMacro("Unable to set front view, VTK Renderer is NULL!");
+		return;
+	}
+
+	double* pBounds = Renderer->ComputeVisiblePropBounds();
+
+	vtkBoundingBox AABB(pBounds);
+
+	double Center[3];
+
+	AABB.GetCenter(Center);
+
+	SetFocalPoint(Center[0], Center[1], Center[2]);
+
+	const double Distance = (0.5 * AABB.GetMaxLength()) / tan(vtkMath::RadiansFromDegrees(0.5 * GetViewAngle()));
+	
+	SetPosition(Center[0] - Distance, Center[1], Center[2]);
+	SetViewUp(0, 1, 0);
+
+	this->Modified();
+}
+
+void vtkErCamera::SetViewRight(void)
+{
+	if (!Renderer)
+	{
+		vtkErrorMacro("Unable to set front view, VTK Renderer is NULL!");
+		return;
+	}
+
+	double* pBounds = Renderer->ComputeVisiblePropBounds();
+
+	vtkBoundingBox AABB(pBounds);
+
+	double Center[3];
+
+	AABB.GetCenter(Center);
+
+	SetFocalPoint(Center[0], Center[1], Center[2]);
+
+	const double Distance = (0.5 * AABB.GetMaxLength()) / tan(vtkMath::RadiansFromDegrees(0.5 * GetViewAngle()));
+	
+	SetPosition(Center[0] + Distance, Center[1], Center[2]);
+	SetViewUp(0, 1, 0);
+
+	this->Modified();
+}
+
+void vtkErCamera::SetViewTop(void)
+{
+	if (!Renderer)
+	{
+		vtkErrorMacro("Unable to set front view, VTK Renderer is NULL!");
+		return;
+	}
+
+	double* pBounds = Renderer->ComputeVisiblePropBounds();
+
+	vtkBoundingBox AABB(pBounds);
+
+	double Center[3];
+
+	AABB.GetCenter(Center);
+
+	SetFocalPoint(Center[0], Center[1], Center[2]);
+
+	const double Distance = (0.5 * AABB.GetMaxLength()) / tan(vtkMath::RadiansFromDegrees(0.5 * GetViewAngle()));
+	
+	SetPosition(Center[0], Center[1] + Distance, Center[2]);
+	SetViewUp(0, 0, -1);
+
+	this->Modified();
+}
+
+void vtkErCamera::SetViewBottom(void)
+{
+	if (!Renderer)
+	{
+		vtkErrorMacro("Unable to set front view, VTK Renderer is NULL!");
+		return;
+	}
+
+	double* pBounds = Renderer->ComputeVisiblePropBounds();
+
+	vtkBoundingBox AABB(pBounds);
+
+	double Center[3] = { 0.5 * (AABB.GetMaxPoint()[0] - AABB.GetMinPoint()[0]), 0.5 * (AABB.GetMaxPoint()[1] - AABB.GetMinPoint()[1]), 0.5 * (AABB.GetMaxPoint()[2] - AABB.GetMinPoint()[2]) };
+
+	AABB.GetCenter(Center);
+
+	SetFocalPoint(Center[0], Center[1], Center[2]);
+
+	const double Distance = (0.5 * AABB.GetMaxLength()) / tan(vtkMath::RadiansFromDegrees(0.5 * GetViewAngle()));
+	
+	SetPosition(Center[0], Center[1] - Distance, Center[2]);
+	SetViewUp(0, 0, -1);
+
+	this->Modified();
 }
 
 double vtkErCamera::DefaultFocalDisk(void)

@@ -29,6 +29,7 @@
 //#include <vtkAxesTransformRepresentation.h>
 #include <vtkLineWidget.h>
 #include <vtkSphereSource.h>
+#include <vtkAxesActor.h>
 
 #include "vtkErBackgroundLight.h"
 #include "vtkErAreaLightWidget.h"
@@ -48,6 +49,7 @@ CVtkRenderWidget* gpActiveRenderWidget = NULL;
 CVtkRenderWidget::CVtkRenderWidget(QWidget* pParent) :
 	QDialog(pParent),
 	m_MainLayout(),
+	m_ViewFront(),
 	m_QtVtkWidget(),
 	m_Volume(),
 	m_VolumeProperty(),
@@ -59,10 +61,29 @@ CVtkRenderWidget::CVtkRenderWidget(QWidget* pParent) :
 	setLayout(&m_MainLayout);
 	
 	m_MainLayout.addWidget(&m_QtVtkWidget);
-	m_MainLayout.addWidget(new QPushButton("Hello World!"));
+
+	m_ViewFront.setText("Front");
+	m_ViewBack.setText("Back");
+	m_ViewLeft.setText("Left");
+	m_ViewRight.setText("Right");
+	m_ViewTop.setText("Top");
+	m_ViewBottom.setText("Bottom");
+
+	m_MainLayout.addWidget(&m_ViewFront);
+	m_MainLayout.addWidget(&m_ViewBack);
+	m_MainLayout.addWidget(&m_ViewLeft);
+	m_MainLayout.addWidget(&m_ViewRight);
+	m_MainLayout.addWidget(&m_ViewTop);
+	m_MainLayout.addWidget(&m_ViewBottom);
 
 	QObject::connect(&gStatus, SIGNAL(RenderBegin()), this, SLOT(OnRenderBegin()));
 	QObject::connect(&gStatus, SIGNAL(RenderEnd()), this, SLOT(OnRenderEnd()));
+	QObject::connect(&m_ViewFront, SIGNAL(clicked()), this, SLOT(OnViewFront()));
+	QObject::connect(&m_ViewBack, SIGNAL(clicked()), this, SLOT(OnViewBack()));
+	QObject::connect(&m_ViewLeft, SIGNAL(clicked()), this, SLOT(OnViewLeft()));
+	QObject::connect(&m_ViewRight, SIGNAL(clicked()), this, SLOT(OnViewRight()));
+	QObject::connect(&m_ViewTop, SIGNAL(clicked()), this, SLOT(OnViewTop()));
+	QObject::connect(&m_ViewBottom, SIGNAL(clicked()), this, SLOT(OnViewBottom()));
 
 	SetupVtk();
 }
@@ -109,6 +130,8 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
 	vtkSphereSource* pBox = vtkSphereSource::New();
 
+	m_Camera->SetRenderer(m_Renderer);
+
   pBox->SetRadius(0.1);
   
   pBox->Update();
@@ -132,6 +155,10 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
   m_Renderer->AddViewProp(m_Volume);
 //	m_Renderer->AddActor(cylinderActor);
 	
+
+  vtkAxesActor* pAcot = vtkAxesActor::New();
+  pAcot->SetCylinderRadius(5);
+  m_Renderer->AddActor(pAcot);
 
 	vtkLight* pLight = vtkLight::New();
 	pLight->SetPosition(2.0, 2.0, 2.0);
@@ -213,7 +240,7 @@ void CVtkRenderWidget::SetupVtk(void)
 	m_TimerCallback->SetCallback(TimerCallbackFunction);
 	m_TimerCallback->SetClientData((void*)this);
 
-	m_QtVtkWidget.GetRenderWindow()->SetAlphaBitPlanes(true);
+//	m_QtVtkWidget.GetRenderWindow()->SetAlphaBitPlanes(true);
 //	m_QtVtkWidget.GetRenderWindow()->SetMultiSamples(0);
 
 //	m_Renderer->SetBackground(0, 0, 0);
@@ -224,6 +251,35 @@ void CVtkRenderWidget::SetupVtk(void)
 //	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
 }
 
+void CVtkRenderWidget::OnViewFront(void)
+{
+	m_Camera->SetViewFront();
+}
+
+void CVtkRenderWidget::OnViewBack(void)
+{
+	m_Camera->SetViewBack();
+}
+
+void CVtkRenderWidget::OnViewLeft(void)
+{
+	m_Camera->SetViewLeft();
+}
+
+void CVtkRenderWidget::OnViewRight(void)
+{
+	m_Camera->SetViewRight();
+}
+
+void CVtkRenderWidget::OnViewTop(void)
+{
+	m_Camera->SetViewTop();
+}
+
+void CVtkRenderWidget::OnViewBottom(void)
+{
+	m_Camera->SetViewBottom();
+}
 
 QRenderView::QRenderView(QWidget* pParent /*= NULL*/) :
 	QGraphicsView(pParent),

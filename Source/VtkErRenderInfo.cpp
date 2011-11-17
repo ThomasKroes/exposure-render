@@ -120,13 +120,13 @@ void vtkErRenderInfo::Update()
         
 		vtkCamera* pCamera = this->Renderer->GetActiveCamera();
 
-		RendererInfo.m_Camera.m_Pos.x		= pCamera->GetPosition()[0];
-        RendererInfo.m_Camera.m_Pos.y		= pCamera->GetPosition()[1];
-        RendererInfo.m_Camera.m_Pos.z		= pCamera->GetPosition()[2];
+		RendererInfo.m_Camera.m_Pos.x		= 0.001f * pCamera->GetPosition()[0];
+        RendererInfo.m_Camera.m_Pos.y		= 0.001f * pCamera->GetPosition()[1];
+        RendererInfo.m_Camera.m_Pos.z		= 0.001f * pCamera->GetPosition()[2];
 		
-		RendererInfo.m_Camera.m_Target.x	= pCamera->GetFocalPoint()[0];
-        RendererInfo.m_Camera.m_Target.y	= pCamera->GetFocalPoint()[1];
-        RendererInfo.m_Camera.m_Target.z	= pCamera->GetFocalPoint()[2];
+		RendererInfo.m_Camera.m_Target.x	= 0.001f * pCamera->GetFocalPoint()[0];
+        RendererInfo.m_Camera.m_Target.y	= 0.001f * pCamera->GetFocalPoint()[1];
+        RendererInfo.m_Camera.m_Target.z	= 0.001f * pCamera->GetFocalPoint()[2];
 
         RendererInfo.m_Camera.m_Up.x		= pCamera->GetViewUp()[0];
         RendererInfo.m_Camera.m_Up.y		= pCamera->GetViewUp()[1];

@@ -40,6 +40,8 @@
 #include "VtkErVolumeProperty.h"
 #include "VtkErCamera.h"
 
+#include <vtkVolume.h>
+
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
 
 class CVtkRenderWidget : public QDialog
@@ -56,6 +58,12 @@ public slots:
 	void OnRenderEnd(void);
 	void SetActive(void);
 	void LoadVolume(const QString& FilePath);
+	void OnViewFront(void);
+	void OnViewBack(void);
+	void OnViewLeft(void);
+	void OnViewRight(void);
+	void OnViewTop(void);
+	void OnViewBottom(void);
 
 	vtkVolume* GetVolume(void) { return m_Volume.GetPointer(); };
 	vtkErVolumeProperty* GetVolumeProperty(void) { return m_VolumeProperty.GetPointer(); };
@@ -65,6 +73,12 @@ public slots:
 
 private:
 	QGridLayout								m_MainLayout;
+	QPushButton								m_ViewFront;
+	QPushButton								m_ViewBack;
+	QPushButton								m_ViewLeft;
+	QPushButton								m_ViewRight;
+	QPushButton								m_ViewTop;
+	QPushButton								m_ViewBottom;
 	QVTKWidget								m_QtVtkWidget;
 
 	void SetupVtk(void);
