@@ -74,14 +74,14 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 
 	F = Shader.F(Wo, Wi); 
 
-//	ShaderPdf = Shader.Pdf(Wo, Wi);
+	ShaderPdf = Shader.Pdf(Wo, Wi);
 
 	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
 		
 		if (Type == CVolumeShader::Brdf)
-//			Ld += F * Li * AbsDot(Wi, N) * WeightMIS / LightPdf;
+			Ld += F * Li * AbsDot(Wi, N) * WeightMIS / LightPdf;
 
 		if (Type == CVolumeShader::Phase)
 			Ld += F * Li * WeightMIS / LightPdf;

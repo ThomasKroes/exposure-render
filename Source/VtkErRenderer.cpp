@@ -15,61 +15,15 @@
 
 #include <vtkObjectFactory.h>
 
-#include "vtkErCamera.h"
+#include "vtkErRenderer.h"
 
-vtkCxxRevisionMacro(vtkErCamera, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkErCamera);
+vtkCxxRevisionMacro(vtkErRenderer, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkErRenderer);
 
-vtkErCamera::vtkErCamera()
-{
-	Default();
-}
-
-vtkErCamera::~vtkErCamera()
+vtkErRenderer::vtkErRenderer()
 {
 }
 
-void vtkErCamera::Default(void)
+vtkErRenderer::~vtkErRenderer()
 {
-	SetFocalDisk(vtkErCamera::DefaultFocalDisk());
-	SetFocalDistance(vtkErCamera::DefaultFocalDistance());
-	SetNoApertureBlades(vtkErCamera::DefaultNoApertureBlades());
-	SetApertureBias(vtkErCamera::DefaultApertureBias());
-	SetExposure(vtkErCamera::DefaultExposure());
-}
-
-void vtkErCamera::SetViewFront(void)
-{
-	SetFocalPoint();
-	SetPosition();
-}
-
-double vtkErCamera::DefaultFocalDisk(void)
-{
-	return 0.001;
-}
-
-double vtkErCamera::DefaultFocalDistance(void)
-{
-	return 1.0;
-}
-
-double vtkErCamera::DefaultNoApertureBlades(void)
-{
-	return 6;
-}
-
-double vtkErCamera::DefaultBladesAngle(void)
-{
-	return 0.0;
-}
-
-double vtkErCamera::DefaultApertureBias(void)
-{
-	return 0.5;
-}
-
-double vtkErCamera::DefaultExposure(void)
-{
-	return 50.0;
 }

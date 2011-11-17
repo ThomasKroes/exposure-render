@@ -221,36 +221,41 @@ void vtkErRenderInfo::Update()
 			vtkErAreaLight* pAreaLight = dynamic_cast<vtkErAreaLight*>(pLight);
 			vtkErBackgroundLight* pBackgroundLight = dynamic_cast<vtkErBackgroundLight*>(pLight);
 
-			if (pLight->IsTypeOf("vtkLight"))
+			if (pAreaLight && pAreaLight->GetEnabled())
 			{
-				m_Lighting.m_Type[count] = 0;
+				m_Lighting.m_Type[count] = 1;
 
 				m_Lighting.m_P[count].x = pLight->GetPosition()[0];
 				m_Lighting.m_P[count].y = pLight->GetPosition()[1];
 				m_Lighting.m_P[count].z = pLight->GetPosition()[2];
+
+				ColorXYZf Color;
+
+				Color.FromRGB(pLight->GetDiffuseColor()[0], pLight->GetDiffuseColor()[1], pLight->GetDiffuseColor()[2]);
+
+				m_Lighting.m_Color[count].x = Color[0];
+				m_Lighting.m_Color[count].y = Color[1];
+				m_Lighting.m_Color[count].z = Color[2];
+
+				count++;
 			}
 
-			if (pAreaLight)
-			{
-				m_Lighting.m_Type[count] = 1;
-			}
-
-			if (pBackgroundLight)
+			if (pBackgroundLight && pBackgroundLight->GetEnabled())
 			{
 				m_Lighting.m_Type[count] = 2;
+
+				ColorXYZf Color;
+
+				Color.FromRGB(pLight->GetDiffuseColor()[0], pLight->GetDiffuseColor()[1], pLight->GetDiffuseColor()[2]);
+
+				m_Lighting.m_Color[count].x = Color[0];
+				m_Lighting.m_Color[count].y = Color[1];
+				m_Lighting.m_Color[count].z = Color[2];
+
+				count++;
 			}
 
-			ColorXYZf Color;
-
-			Color.FromRGB(pLight->GetDiffuseColor()[0], pLight->GetDiffuseColor()[1], pLight->GetDiffuseColor()[2]);
-
-			m_Lighting.m_Color[count].x = Color[0];
-			m_Lighting.m_Color[count].y = Color[1];
-			m_Lighting.m_Color[count].z = Color[2];
-
 			pLight = pLights->GetNextItem();
-
-			count++;
 		}
 
     }

@@ -22,6 +22,7 @@ vtkStandardNewMacro(vtkErLight);
 
 vtkErLight::vtkErLight()
 {
+	SetEnabled(true);
 }
 
 vtkErLight::~vtkErLight()

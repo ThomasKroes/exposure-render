@@ -15,9 +15,9 @@
 
 #include "Geometry.h"
 
-#include <vtkCamera.h>
+#include <vtkOpenGLCamera.h>
 
-class EXPOSURE_RENDER_DLL vtkErCamera : public vtkCamera
+class EXPOSURE_RENDER_DLL vtkErCamera : public vtkOpenGLCamera
 {
 	vtkTypeRevisionMacro(vtkErCamera, vtkCamera);
 	static vtkErCamera *New();
@@ -25,14 +25,36 @@ class EXPOSURE_RENDER_DLL vtkErCamera : public vtkCamera
 	vtkGetMacro(FocalDistance, double);
 	vtkSetMacro(FocalDistance, double);
 
+	vtkGetMacro(NoApertureBlades, int);
+	vtkSetMacro(NoApertureBlades, int);
+
+	vtkGetMacro(BladesAngle, double);
+	vtkSetMacro(BladesAngle, double);
+
+	vtkGetMacro(ApertureBias, double);
+	vtkSetMacro(ApertureBias, double);
+
+	vtkGetMacro(Exposure, double);
+	vtkSetMacro(Exposure, double);
+
 	void Default(void);
+
+	void SetViewFront(void);
 
 	static double DefaultFocalDisk(void);
 	static double DefaultFocalDistance(void);
+	static double DefaultNoApertureBlades(void);
+	static double DefaultBladesAngle(void);
+	static double DefaultApertureBias(void);
+	static double DefaultExposure(void);
 
 protected:
 	vtkErCamera();
 	virtual ~vtkErCamera();
 
-	double	FocalDistance;
+	double		FocalDistance;
+	int			NoApertureBlades;
+	int			BladesAngle;
+	double		ApertureBias;
+	double		Exposure;
 };

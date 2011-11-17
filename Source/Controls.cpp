@@ -236,3 +236,35 @@ QSize QInputDialogEx::sizeHint() const
 {
 	return QSize(350, 60);
 }
+
+/*
+QColorCombo::QColorCombo(QWidget* pParent ) :
+	QComboBox(pParent)
+{
+    setStyleSheet("QPushButton {text-align:center;color:blue;text-decoration:underline;font-family:arial; background-color:#d4d0c8; }");
+    setEditable(true);
+    setFrame(false);
+    resize(300,size().height());
+
+	setView(
+}
+
+void QColorCombo::showPopup ()
+{
+   QColorCombo::showPopup();
+   bt_->setVisible(true);
+   //move button to right-down corner
+   QRect qRect(view()->geometry());
+   int iXpos=qRect.width()-bt_->width();
+   int iYpos=qRect.height()-bt_->height();
+   bt_->move(iXpos,iYpos);
+
+   QDateEdit
+
+}
+void myToolBar::hidePopup ()
+{
+   QComboBox::hidePopup ();
+    bt_->setVisible(false);
+}
+*/

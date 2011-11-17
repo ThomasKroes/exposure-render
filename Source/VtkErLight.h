@@ -15,14 +15,19 @@
 
 #include "Geometry.h"
 
-#include "vtkLight.h"
+#include <vtkLight.h>
 
 class EXPOSURE_RENDER_DLL vtkErLight : public vtkLight
 {
 	vtkTypeRevisionMacro(vtkErLight, vtkLight);
 	static vtkErLight *New();
 
+	vtkGetMacro(Enabled, bool);
+	vtkSetMacro(Enabled, bool);
+
 protected:
 	vtkErLight();
 	virtual ~vtkErLight();
+
+	bool	Enabled;
 };

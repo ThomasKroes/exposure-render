@@ -74,7 +74,7 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 		Lv += GetEmission(Intensity);
 
-		Lv += UniformSampleOneLight(CVolumeShader::Brdf, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
+		Lv += UniformSampleOneLight(CVolumeShader::Phase, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
 
 		/*
 		switch (pScene->m_ShadingType)

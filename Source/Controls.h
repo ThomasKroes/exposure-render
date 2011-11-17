@@ -114,3 +114,18 @@ public:
 
 	virtual QSize sizeHint() const;
 };
+
+/*
+class QColorCombo : public QComboBox
+{
+public:
+    QColorCombo(QWidget* pParent = NULL);
+    void showPopup();
+    void hidePopup();
+
+private:
+    QPushButton*		bt_;
+    myQListWidget*		te_;
+
+}
+*/

@@ -25,8 +25,8 @@
 #include <vtkLightActor.h>
 #include <vtkPlaneWidget.h>
 #include <vtkPointWidget.h>
-#include <vtkAxesTransformWidget.h>
-#include <vtkAxesTransformRepresentation.h>
+//#include <vtkAxesTransformWidget.h>
+//#include <vtkAxesTransformRepresentation.h>
 #include <vtkLineWidget.h>
 #include <vtkSphereSource.h>
 
@@ -130,7 +130,7 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 //  cylinderActor->RotateY(-45.0);
 	
   m_Renderer->AddViewProp(m_Volume);
-	m_Renderer->AddActor(cylinderActor);
+//	m_Renderer->AddActor(cylinderActor);
 	
 
 	vtkLight* pLight = vtkLight::New();
@@ -143,10 +143,10 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 //	m_SceneRenderer->AddLight(pLight3);
 
 	// lighting the box.
-  vtkLight* l1 = vtkLight::New();
+  vtkErAreaLight* l1 = vtkErAreaLight::New();
   l1->SetPosition(-4.0,4.0,-1.0);
   l1->SetFocalPoint(0,0,0);
-  l1->SetColor(1.0,1.0,1.0);
+  l1->SetColor(10000.0,100.0,100.0);
   l1->SetPositional(1);
   m_Renderer->AddLight(l1);
   l1->SetSwitch(1);
@@ -156,23 +156,23 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 //    m_Renderer->AddViewProp(la);
 
 	
-//	m_Renderer->SetActiveCamera(m_Camera.GetPointer());
-//	m_Renderer->ResetCamera();
+	m_Renderer->SetActiveCamera(m_Camera);
+	m_Renderer->ResetCamera();
 
 	vtkErAreaLightWidget* vtkLineWidget = vtkErAreaLightWidget::New();
   vtkLineWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
   
 
-  vtkLineWidget->On();
+//  vtkLineWidget->On();
 //  vtkLineWidget->SetCurrentRenderer(m_OverlayRenderer);
 
-  vtkAxesTransformRepresentation* pRep = vtkAxesTransformRepresentation::New();
+//  vtkAxesTransformRepresentation* pRep = vtkAxesTransformRepresentation::New();
 
 	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
 
 	pErBackgroundLight->SetDiffuseColor(5000, 5000, 10000);
 
-//	m_Renderer->AddLight(pErBackgroundLight);
+	m_Renderer->AddLight(pErBackgroundLight);
 
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.001);
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);

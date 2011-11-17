@@ -11,65 +11,18 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Stable.h"
+#pragma once
 
-#include <vtkObjectFactory.h>
+#include <vtkRenderer.h>
 
-#include "vtkErCamera.h"
-
-vtkCxxRevisionMacro(vtkErCamera, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkErCamera);
-
-vtkErCamera::vtkErCamera()
+class EXPOSURE_RENDER_DLL vtkErRenderer : public vtkRenderer
 {
-	Default();
-}
+	vtkTypeRevisionMacro(vtkErRenderer, vtkRenderer);
+	static vtkErRenderer *New();
 
-vtkErCamera::~vtkErCamera()
-{
-}
+	void SetViewFront(void);
 
-void vtkErCamera::Default(void)
-{
-	SetFocalDisk(vtkErCamera::DefaultFocalDisk());
-	SetFocalDistance(vtkErCamera::DefaultFocalDistance());
-	SetNoApertureBlades(vtkErCamera::DefaultNoApertureBlades());
-	SetApertureBias(vtkErCamera::DefaultApertureBias());
-	SetExposure(vtkErCamera::DefaultExposure());
-}
-
-void vtkErCamera::SetViewFront(void)
-{
-	SetFocalPoint();
-	SetPosition();
-}
-
-double vtkErCamera::DefaultFocalDisk(void)
-{
-	return 0.001;
-}
-
-double vtkErCamera::DefaultFocalDistance(void)
-{
-	return 1.0;
-}
-
-double vtkErCamera::DefaultNoApertureBlades(void)
-{
-	return 6;
-}
-
-double vtkErCamera::DefaultBladesAngle(void)
-{
-	return 0.0;
-}
-
-double vtkErCamera::DefaultApertureBias(void)
-{
-	return 0.5;
-}
-
-double vtkErCamera::DefaultExposure(void)
-{
-	return 50.0;
-}
+protected:
+	vtkErRenderer();
+	virtual ~vtkErRenderer();
+};
