@@ -34,6 +34,7 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkPointData.h>
 #include <vtkVolume.h>
+#include <vtkMultiThreader.h>
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
 
@@ -53,7 +54,6 @@ vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
     virtual void SetInput( vtkImageData * );
 //	virtual void SetInput( vtkDataSet * );
     virtual void Render(vtkRenderer *, vtkVolume *);
-	virtual void Render2(vtkRenderer *, vtkVolume *);
 	virtual int FillInputPortInformation(int, vtkInformation*);
 
    vtkImageData* GetOutput() { return NULL;  }
@@ -62,9 +62,17 @@ vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
 
     void UpdateOutputResolution(unsigned int width, unsigned int height, bool TypeChanged = false);
 
-protected:
+	vtkGetMacro(UseCustomRenderSize, bool);
+	vtkSetMacro(UseCustomRenderSize, bool);
+
+	vtkGetVector2Macro(CustomRenderSize, int);
+	vtkSetVector2Macro(CustomRenderSize, int);
+
+//	void DoIt(void* pData);
+
 	vtkSmartPointer<vtkErVolumeInfo>	m_CudaVolumeInfo;
 	vtkSmartPointer<vtkErRenderInfo>	m_CudaRenderInfo;
+	vtkSmartPointer<vtkMultiThreader>	MultiThreader;
 
 	vtkErVolumeMapper();
     virtual ~vtkErVolumeMapper();
@@ -74,5 +82,8 @@ protected:
 	CHostBuffer2D<ColorRGBAuc>	m_Host;
 //	CCudaView	m_CudaView;
 	unsigned int TextureID;
+
+	bool	UseCustomRenderSize;
+	int		CustomRenderSize[2];
 };
 /**/

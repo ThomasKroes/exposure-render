@@ -101,23 +101,21 @@ void vtkErRenderInfo::SetRenderer(vtkRenderer* pRenderer)
 	Update();
 }
 
+void vtkErRenderInfo::Resize(int Width, int Height)
+{
+	m_FrameBuffer.Resize(CResolution2D(Width, Height));
+
+	RendererInfo.m_FilmWidth	= Width;
+    RendererInfo.m_FilmHeight	= Height;
+	RendererInfo.m_FilmNoPixels	= RendererInfo.m_FilmWidth * RendererInfo.m_FilmHeight;
+}
+
 void vtkErRenderInfo::Update()
 {
     if (this->Renderer != NULL)
     {
         vtkRenderWindow* pRenderWindow = Renderer->GetRenderWindow();
 
-        int* pRenderSize = pRenderWindow->GetSize();
-
-		m_FrameBuffer.Resize(CResolution2D(pRenderSize[0], pRenderSize[1]));
-
-		if (pRenderSize[0] != this->RendererInfo.m_FilmWidth || pRenderSize[1] != this->RendererInfo.m_FilmHeight)
-        {
-            RendererInfo.m_FilmWidth	= pRenderSize[0];
-            RendererInfo.m_FilmHeight	= pRenderSize[1];
-			RendererInfo.m_FilmNoPixels	= RendererInfo.m_FilmWidth * RendererInfo.m_FilmHeight;
-        }
-        
 		vtkCamera* pCamera = this->Renderer->GetActiveCamera();
 
 		RendererInfo.m_Camera.m_Pos.x		= 0.001f * pCamera->GetPosition()[0];
@@ -181,7 +179,7 @@ void vtkErRenderInfo::Update()
 
 		RendererInfo.m_Camera.m_ApertureSize = (float)pCamera->GetFocalDisk();
 
-		RendererInfo.m_FilterWidth = 2;
+		RendererInfo.m_FilterWidth = 1;
 
 		RendererInfo.m_FilterWeights[0] = 1.0f;
 		RendererInfo.m_FilterWeights[1] = 0.5f;

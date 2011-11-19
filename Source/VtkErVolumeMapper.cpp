@@ -18,6 +18,7 @@
 #include <vtkObjectFactory.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkColorTransferFunction.h>
+#include <vtkMultiThreader.h>
 
 #include <vtkgl.h>
 
@@ -33,6 +34,21 @@
 //vtkCxxRevisionMacro(vtkErVolumeMapper, "$Revision: 1.8 $");
 vtkStandardNewMacro(vtkErVolumeMapper);
 
+/*
+// this function runs in an alternate thread to asyncronously generate matrices
+static void *vtkTrackerSimulatorRecordThread(vtkMultiThreader::ThreadInfo* pData)
+{
+	vtkErVolumeMapper* pVolumeMapper = (vtkErVolumeMapper*)(pData->UserData);
+
+	if (!pVolumeMapper)
+		return NULL;
+
+//	RenderEstimate(pVolumeMapper->m_CudaVolumeInfo->GetVolumeInfo(), pVolumeMapper->m_CudaRenderInfo->GetRenderInfo(), &pVolumeMapper->m_CudaRenderInfo->m_Lighting, &pVolumeMapper->m_CudaRenderInfo->m_FrameBuffer);
+
+	return NULL;
+}
+*/
+
 vtkErVolumeMapper::vtkErVolumeMapper()
 {
 	m_CudaVolumeInfo	= vtkErVolumeInfo::New();
@@ -40,9 +56,15 @@ vtkErVolumeMapper::vtkErVolumeMapper()
 
 	SetCudaDevice(0);
 
-	
+	SetUseCustomRenderSize(false);
+	SetCustomRenderSize(34, 34);
 
 	glGenTextures(1, &TextureID);
+
+	MultiThreader = vtkMultiThreader::New();
+
+//	MultiThreader->SpawnThread((vtkThreadFunctionType)vtkTrackerSimulatorRecordThread, this);
+
 }  
 
 vtkErVolumeMapper::~vtkErVolumeMapper()
@@ -58,24 +80,36 @@ void vtkErVolumeMapper::SetInput(vtkImageData* input)
 
 void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 {
-	return;
-
-	/**/
-	if (pVolume)
-		UploadVolumeProperty(pVolume->GetProperty());
-
-    int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
-
+	if (!pVolume)
+		return;
 	
+	UploadVolumeProperty(pVolume->GetProperty());
+
+	int RenderSize[2];
+
+	if (this->UseCustomRenderSize)
+	{
+		RenderSize[0] = this->CustomRenderSize[0];
+		RenderSize[1] = this->CustomRenderSize[1];
+	}
+	else
+	{
+		int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
+
+		RenderSize[0] = pWindowSize[0];
+		RenderSize[1] = pWindowSize[1];
+	}
+    
+	
+	m_CudaRenderInfo->Resize(RenderSize[0], RenderSize[1]);
 	m_CudaRenderInfo->SetRenderer(pRenderer);
+	m_CudaRenderInfo->Update();
 	m_CudaVolumeInfo->SetVolume(pVolume);
 	m_CudaVolumeInfo->SetInputData(this->GetInput());
-//	m_CudaVolumeInfo->SetVolume(pVolume);
+	m_CudaVolumeInfo->SetVolume(pVolume);
 	m_CudaVolumeInfo->Update();
-//	return;
-//	m_CudaRenderInfo->Bind();
 	
-	m_Host.Resize(CResolution2D(pWindowSize[0], pWindowSize[1]));
+	m_Host.Resize(CResolution2D(RenderSize[0], RenderSize[1]));
 
 	m_CudaRenderInfo->GetRenderInfo()->m_NoIterations += 1;
 
@@ -84,120 +118,18 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	cudaMemcpy(m_Host.GetPtr(), m_CudaRenderInfo->m_FrameBuffer.m_EstimateRgbaLdr.GetPtr(), m_Host.GetSize(), cudaMemcpyDeviceToHost);
 	
 	glEnable(GL_TEXTURE_2D);
-//	glEnable(GL_BLEND);
 
     glBindTexture(GL_TEXTURE_2D, TextureID);
-//	glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
-	
-//	glDepthMask(GL_FALSE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pWindowSize[0], pWindowSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
-	glBindTexture(GL_TEXTURE_2D, TextureID);
-
-//	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	double d = 0.5;
-	
-    pRenderer->SetDisplayPoint(0,0,d);
-    pRenderer->DisplayToWorld();
-    double coordinatesA[4];
-    pRenderer->GetWorldPoint(coordinatesA);
-
-    pRenderer->SetDisplayPoint(pWindowSize[0],0,d);
-    pRenderer->DisplayToWorld();
-    double coordinatesB[4];
-    pRenderer->GetWorldPoint(coordinatesB);
-
-    pRenderer->SetDisplayPoint(pWindowSize[0],pWindowSize[1],d);
-    pRenderer->DisplayToWorld();
-    double coordinatesC[4];
-    pRenderer->GetWorldPoint(coordinatesC);
-
-    pRenderer->SetDisplayPoint(0,pWindowSize[1],d);
-    pRenderer->DisplayToWorld();
-    double coordinatesD[4];
-    pRenderer->GetWorldPoint(coordinatesD);
-	
-	
-    glPushAttrib(GL_BLEND);
-//	glEnable(GL_DEPTH_TEST);
-   
-//	glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//	glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-// glEnable(GL_BLEND);
-//glDisable(GL_COLOR_MATERIAL);
-
-   glPushAttrib(GL_LIGHTING);
-   glDisable(GL_LIGHTING);
-
-    glBegin(GL_QUADS);
-		glTexCoord2i(1,1);
-		glVertex4dv(coordinatesA);
-		glTexCoord2i(0,1);
-		glVertex4dv(coordinatesB);
-		glTexCoord2i(0,0);
-		glVertex4dv(coordinatesC);
-		glTexCoord2i(1,0);
-		glVertex4dv(coordinatesD);
-    glEnd();
-
-    glPopAttrib();
-   glPopAttrib();
-
-//	glDisable(GL_BLEND);
-//	glDisable(GL_TEXTURE_2D);
-	return;
-}
-
-void vtkErVolumeMapper::Render2(vtkRenderer* pRenderer, vtkVolume* pVolume)
-{
-	
-
-	/**/
-	if (pVolume)
-		UploadVolumeProperty(pVolume->GetProperty());
-
-    int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
-
-	
-	m_CudaRenderInfo->SetRenderer(pRenderer);
-	m_CudaVolumeInfo->SetVolume(pVolume);
-	m_CudaVolumeInfo->SetInputData(this->GetInput());
-//	m_CudaVolumeInfo->SetVolume(pVolume);
-	m_CudaVolumeInfo->Update();
-//	return;
-//	m_CudaRenderInfo->Bind();
-	
-	m_Host.Resize(CResolution2D(pWindowSize[0], pWindowSize[1]));
-
-	m_CudaRenderInfo->GetRenderInfo()->m_NoIterations += 1;
-
-	RenderEstimate(m_CudaVolumeInfo->GetVolumeInfo(), m_CudaRenderInfo->GetRenderInfo(), &m_CudaRenderInfo->m_Lighting, &m_CudaRenderInfo->m_FrameBuffer);
-
-	cudaMemcpy(m_Host.GetPtr(), m_CudaRenderInfo->m_FrameBuffer.m_EstimateRgbaLdr.GetPtr(), m_Host.GetSize(), cudaMemcpyDeviceToHost);
-	
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-
-    glBindTexture(GL_TEXTURE_2D, TextureID);
-	glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
-	
-//	glDepthMask(GL_FALSE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pWindowSize[0], pWindowSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, RenderSize[0], RenderSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	
 	double d = 0.5;
 	
     pRenderer->SetDisplayPoint(0,0,d);
@@ -205,35 +137,25 @@ void vtkErVolumeMapper::Render2(vtkRenderer* pRenderer, vtkVolume* pVolume)
     double coordinatesA[4];
     pRenderer->GetWorldPoint(coordinatesA);
 
-    pRenderer->SetDisplayPoint(pWindowSize[0],0,d);
+    pRenderer->SetDisplayPoint(RenderSize[0],0,d);
     pRenderer->DisplayToWorld();
     double coordinatesB[4];
     pRenderer->GetWorldPoint(coordinatesB);
 
-    pRenderer->SetDisplayPoint(pWindowSize[0],pWindowSize[1],d);
+    pRenderer->SetDisplayPoint(RenderSize[0], RenderSize[1],d);
     pRenderer->DisplayToWorld();
     double coordinatesC[4];
     pRenderer->GetWorldPoint(coordinatesC);
 
-    pRenderer->SetDisplayPoint(0,pWindowSize[1],d);
+    pRenderer->SetDisplayPoint(0,RenderSize[1],d);
     pRenderer->DisplayToWorld();
     double coordinatesD[4];
     pRenderer->GetWorldPoint(coordinatesD);
 	
-	
-    glPushAttrib(GL_BLEND);
-//	glEnable(GL_DEPTH_TEST);
-   
-//	glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//	glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-// glEnable(GL_BLEND);
-//glDisable(GL_COLOR_MATERIAL);
+	glPushAttrib(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
 
-   glPushAttrib(GL_LIGHTING);
-   glDisable(GL_LIGHTING);
-
-    glBegin(GL_QUADS);
+	glBegin(GL_QUADS);
 		glTexCoord2i(1,1);
 		glVertex4dv(coordinatesA);
 		glTexCoord2i(0,1);
@@ -242,14 +164,9 @@ void vtkErVolumeMapper::Render2(vtkRenderer* pRenderer, vtkVolume* pVolume)
 		glVertex4dv(coordinatesC);
 		glTexCoord2i(1,0);
 		glVertex4dv(coordinatesD);
-    glEnd();
+	glEnd();
 
-    glPopAttrib();
-   glPopAttrib();
-
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	return;
+	glPopAttrib();
 }
 
 void vtkErVolumeMapper::PrintSelf(ostream& os, vtkIndent indent)

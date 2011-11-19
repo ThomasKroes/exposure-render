@@ -22,16 +22,16 @@ SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
 FIND_PACKAGE(CUDA)
 
 # Supported streaming architectures
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=sm_11;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=compute_11;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=sm_12;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=compute_12;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=sm_13;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=compute_13;${CUDA_NVCC_FLAGS}")
-SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=sm_20;${CUDA_NVCC_FLAGS}")
-SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=sm_20;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20;${CUDA_NVCC_FLAGS}")
 
 IF(NOT VTK_BINARY_DIR)
 FIND_PACKAGE(VTK)
@@ -171,6 +171,7 @@ SET(ExposureRenderSources
 	vtkErPointWidget.cpp
 	vtkErArrowSource.cpp
 	VtkErVolume.cpp
+	VtkErRenderCanvas.cpp
 
 	# Logging
 	Logger.cpp
@@ -278,6 +279,7 @@ SET(ExposureRenderHeaders
 	vtkErPointWidget.h
 	vtkErArrowSource.h
 	VtkErVolume.h
+	VtkErRenderCanvas.cpp
 
 	# Logging
 	Logger.h
@@ -601,6 +603,7 @@ SET(VtkSources
 	vtkErPointWidget.h
 	vtkErArrowSource.h
 	VtkErVolume.h
+	VtkErRenderCanvas.h
 	vtkErVolumeMapper.cpp
 	vtkErLight.cpp
 	vtkErAreaLight.cpp
@@ -614,6 +617,7 @@ SET(VtkSources
 	vtkErPointWidget.cpp
 	vtkErArrowSource.cpp
 	VtkErVolume.cpp
+	VtkErRenderCanvas.cpp
 )
 
 # Make the core group

@@ -14,53 +14,28 @@
 #include "Stable.h"
 
 #include <vtkObjectFactory.h>
-#include <vtkAbstractVolumeMapper.h>
-#include <vtkRenderer.h>
 
-#include "vtkErVolume.h"
-#include "VtkErVolumeMapper.h"
+#include "vtkErRenderCanvas.h"
+#include "vtkErVolumeMapper.h"
 
-vtkCxxRevisionMacro(vtkErVolume, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkErVolume);
+vtkCxxRevisionMacro(vtkErRenderCanvas, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkErRenderCanvas);
 
-vtkErVolume::vtkErVolume()
+vtkErRenderCanvas::vtkErRenderCanvas()
 {
 }
 
-vtkErVolume::~vtkErVolume()
+vtkErRenderCanvas::~vtkErRenderCanvas()
 {
 }
 
-int vtkErVolume::RenderTranslucentPolygonalGeometry( vtkViewport * vp)
+void vtkErRenderCanvas::Render(vtkRenderer* pRenderer)
 {
-	this->Update();
+	if (!VolumeMapper)
+	{
+		vtkErrorMacro("This rendering canvas is not associated with an exposure render volume mapper, use SetVolumeMapper()!");
+		return;
+	}
 
-  if ( !this->Mapper )
-    {
-    vtkErrorMacro( << "You must specify a mapper!\n" );
-    return 0;
-    }
 
-  // If we don't have any input return silently
-  if ( !this->Mapper->GetDataObjectInput() )
-    {
-    return 0;
-    }
-  
-  // Force the creation of a property
-  if( !this->Property )
-    {
-    this->GetProperty();
-    }
-
-  if( !this->Property )
-    {
-    vtkErrorMacro( << "Error generating a property!\n" );
-    return 0;
-    }
-
-//	((vtkErVolumeMapper*)this->Mapper)->Render2( static_cast<vtkRenderer *>(vp), this );
-  this->EstimatedRenderTime += this->Mapper->GetTimeToDraw();
-
-  return 1;
 }

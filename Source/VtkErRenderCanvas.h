@@ -11,56 +11,27 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Stable.h"
+#pragma once
 
-#include <vtkObjectFactory.h>
-#include <vtkAbstractVolumeMapper.h>
-#include <vtkRenderer.h>
+#include "Geometry.h"
 
-#include "vtkErVolume.h"
-#include "VtkErVolumeMapper.h"
+#include <vtkImageActor.h>
 
-vtkCxxRevisionMacro(vtkErVolume, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkErVolume);
+class vtkVolumeMapper;
 
-vtkErVolume::vtkErVolume()
+class EXPOSURE_RENDER_DLL vtkErRenderCanvas : public vtkImageActor
 {
-}
+	vtkTypeRevisionMacro(vtkErRenderCanvas, vtkImageActor);
+	static vtkErRenderCanvas *New();
 
-vtkErVolume::~vtkErVolume()
-{
-}
+	vtkGetMacro(VolumeMapper, vtkVolumeMapper*);
+	vtkSetMacro(VolumeMapper, vtkVolumeMapper*);
 
-int vtkErVolume::RenderTranslucentPolygonalGeometry( vtkViewport * vp)
-{
-	this->Update();
+	virtual void Render(vtkRenderer* pRenderer);
 
-  if ( !this->Mapper )
-    {
-    vtkErrorMacro( << "You must specify a mapper!\n" );
-    return 0;
-    }
+protected:
+	vtkErRenderCanvas();
+	virtual ~vtkErRenderCanvas();
 
-  // If we don't have any input return silently
-  if ( !this->Mapper->GetDataObjectInput() )
-    {
-    return 0;
-    }
-  
-  // Force the creation of a property
-  if( !this->Property )
-    {
-    this->GetProperty();
-    }
-
-  if( !this->Property )
-    {
-    vtkErrorMacro( << "Error generating a property!\n" );
-    return 0;
-    }
-
-//	((vtkErVolumeMapper*)this->Mapper)->Render2( static_cast<vtkRenderer *>(vp), this );
-  this->EstimatedRenderTime += this->Mapper->GetTimeToDraw();
-
-  return 1;
-}
+	vtkVolumeMapper*	VolumeMapper;
+};

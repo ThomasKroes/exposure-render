@@ -31,9 +31,8 @@
 #include <vtkSphereSource.h>
 #include <vtkAxesActor.h>
 #include <vtkRenderWindowInteractor.h>
-#include <vtkGenericOpenGLRenderWindow.h>
-#include <QVTKGraphicsItem.h>
 #include <vtkInteractorStyleImage.h>
+#include <vtkImageActor.h>
 
 #include "vtkErBackgroundLight.h"
 #include "vtkErAreaLightWidget.h"
@@ -68,7 +67,8 @@ CVtkRenderWidget::CVtkRenderWidget(QWidget* pParent) :
 	
 	m_MainLayout.addWidget(&m_QtVtkWidget);
 
-	m_ViewFront.setText("Front");
+	m_MainLayout.setContentsMargins(1, 1, 1, 1);
+ 	m_ViewFront.setText("Front");
 	m_ViewBack.setText("Back");
 	m_ViewLeft.setText("Left");
 	m_ViewRight.setText("Right");
@@ -126,89 +126,32 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
     m_Volume->SetProperty(m_VolumeProperty);
 
-//	m_Renderer->RemoveAllLights();
-
-//	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
-
-//	pErBackgroundLight->SetDiffuseColor(10000, 10000, 10000);
-
-//	m_SceneRenderer->AddLight(pErBackgroundLight);
-
-	vtkSphereSource* pBox = vtkSphereSource::New();
-
+	// Camera
 	m_Camera->SetRenderer(m_Renderer);
-
-  pBox->SetRadius(0.1);
-  
-  pBox->Update();
-
-  // The mapper is responsible for pushing the geometry into the graphics
-  // library. It may also do color mapping, if scalars or other attributes
-  // are defined.
-  vtkPolyDataMapper *cylinderMapper = vtkPolyDataMapper::New();
-  cylinderMapper->SetInputConnection(pBox->GetOutputPort());
-
-  // The actor is a grouping mechanism: besides the geometry (mapper), it
-  // also has a property, transformation matrix, and/or texture map.
-  // Here we set its color and rotate it -22.5 degrees.
-  vtkActor *cylinderActor = vtkActor::New();
-  cylinderActor->SetMapper(cylinderMapper);
-//  cylinderActor->GetProperty()->SetColor(1.0, 1.0, 1.0);
-//  cylinderActor->GetProperty()->SetOpacity(1.0);
-//  cylinderActor->RotateX(30.0);
-//  cylinderActor->RotateY(-45.0);
-	
-  m_Renderer->AddViewProp(m_Volume);
-//	m_Renderer->AddActor(cylinderActor);
-	
-
-  vtkAxesActor* pAcot = vtkAxesActor::New();
-  pAcot->SetCylinderRadius(5);
-  m_Renderer->AddActor(pAcot);
-
-	vtkLight* pLight = vtkLight::New();
-	pLight->SetPosition(2.0, 2.0, 2.0);
-	pLight->SetDiffuseColor(1, 1, 1);
-
-//	m_Renderer->RemoveAllLights();
-//	m_Renderer->AddLight(pLight);
-//	m_SceneRenderer->AddLight(pLight2);
-//	m_SceneRenderer->AddLight(pLight3);
-
-	// lighting the box.
-  vtkErAreaLight* l1 = vtkErAreaLight::New();
-  l1->SetPosition(-4.0,4.0,-1.0);
-  l1->SetFocalPoint(0,0,0);
-  l1->SetColor(10000.0,100.0,100.0);
-  l1->SetPositional(1);
-  m_Renderer->AddLight(l1);
-  l1->SetSwitch(1);
-
-	vtkLightActor *la = vtkLightActor::New();
-    la->SetLight(l1);
-//    m_Renderer->AddViewProp(la);
-
-	
 	m_Renderer->SetActiveCamera(m_Camera);
 	m_Renderer->ResetCamera();
 
-	vtkErAreaLightWidget* vtkLineWidget = vtkErAreaLightWidget::New();
-  vtkLineWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
-  
+	m_Renderer->AddViewProp(m_Volume);
+	m_Renderer->AddActor(m_RenderCanvas);
 
-//  vtkLineWidget->On();
-//  vtkLineWidget->SetCurrentRenderer(m_OverlayRenderer);
+	vtkErAreaLight* l1 = vtkErAreaLight::New();
+	l1->SetPosition(-4.0,4.0,-1.0);
+	l1->SetFocalPoint(0,0,0);
+	l1->SetColor(10000.0,100.0,100.0);
+	l1->SetPositional(1);
+	m_Renderer->AddLight(l1);
+	l1->SetSwitch(1);
 
-//  vtkAxesTransformRepresentation* pRep = vtkAxesTransformRepresentation::New();
-
+	vtkLightActor *la = vtkLightActor::New();
+    la->SetLight(l1);
+	
+	// Environment light
 	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
-
 	pErBackgroundLight->SetDiffuseColor(5000, 5000, 10000);
-
 	m_Renderer->AddLight(pErBackgroundLight);
 
-//	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.1);
-//	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.1);
+	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);
 
 	m_Renderer->GetActiveCamera()->SetPosition(10, 10, 10);
 	m_Renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
@@ -217,22 +160,21 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
-
 	
-	vtkSmartPointer<vtkInteractorStyleImage> style1 = vtkSmartPointer<vtkInteractorStyleImage>::New();
-	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style1);
-
+//	vtkSmartPointer<vtkInteractorStyleImage> style1 = vtkSmartPointer<vtkInteractorStyleImage>::New();
+//	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style1);
 }
 
 void CVtkRenderWidget::SetupVtk(void)
 {
-	m_Volume			= vtkErVolume::New();
+	m_Volume			= vtkVolume::New();
 	m_VolumeProperty	= vtkErVolumeProperty::New();
 	m_VolumeMapper		= vtkErVolumeMapper::New();
 	m_Renderer			= vtkRenderer::New();
 	m_OverlayRenderer	= vtkRenderer::New();
 	m_TimerCallback		= vtkCallbackCommand::New();
 	m_Camera			= vtkErCamera::New();
+	m_RenderCanvas		= vtkErRenderCanvas::New();
 
 //	m_Renderer->SetInteractive(1);
 //	m_OverlayRenderer->SetInteractive(1);
@@ -261,7 +203,7 @@ void CVtkRenderWidget::SetupVtk(void)
 //	m_Renderer->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
 //	m_Renderer->SetUseDepthPeeling(true);
 //	m_Renderer->SetMaximumNumberOfPeels(4);
-	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
+//	m_QtVtkWidget.setAutomaticImageCacheEnabled(false);
 }
 
 void CVtkRenderWidget::OnViewFront(void)
