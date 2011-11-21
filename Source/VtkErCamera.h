@@ -60,10 +60,12 @@ protected:
 	vtkErCamera();
 	virtual ~vtkErCamera();
 
+	//BTX
 	vtkRenderer*	Renderer;
 	double			FocalDistance;
 	int				NoApertureBlades;
 	int				BladesAngle;
 	double			ApertureBias;
 	double			Exposure;
+	//ETX
 };

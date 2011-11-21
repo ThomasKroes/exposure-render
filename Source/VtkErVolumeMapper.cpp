@@ -50,7 +50,7 @@ vtkErVolumeMapper::vtkErVolumeMapper()
 //	SetUseCustomRenderSize(false);
 //	SetCustomRenderSize(34, 34);
 
-	glGenTextures(1, &TextureID);
+//	glGenTextures(1, &TextureID);
 
 //	MultiThreader = vtkMultiThreader::New();
 
@@ -74,6 +74,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	if (!pVolume)
 		return;
 	
+	/*
 	UploadVolumeProperty(pVolume->GetProperty());
 
 	int RenderSize[2];
@@ -148,6 +149,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glEnd();
 
 	glPopAttrib();
+	*/
 }
 
 void vtkErVolumeMapper::PrintSelf(ostream& os, vtkIndent indent)

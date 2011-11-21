@@ -68,6 +68,7 @@ protected:
 	vtkErArrowSource();
 	~vtkErArrowSource() {};
 
+	//BTX
 	int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
 	double	Offset;
@@ -78,6 +79,7 @@ protected:
 	double	ShaftRadius;
 	int		ShaftResolution;
 	bool	Invert;
+	//ETX
 
 private:
   vtkErArrowSource(const vtkErArrowSource&); // Not implemented.

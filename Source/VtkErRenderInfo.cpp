@@ -255,6 +255,7 @@ void vtkErRenderInfo::Update()
 		pActors->InitTraversal();
 		vtkActor* pActor = pActors->GetNextItem();
 
+		/*
 		while (pActor != 0)
 		{
 			vtkPlaneSource* pPlaneSource = dynamic_cast<vtkPlaneSource*>(pActor);
@@ -264,6 +265,7 @@ void vtkErRenderInfo::Update()
 				m_Lighting.m_Type[count] = 1;
 			}
 		}
+		*/
     }
 }
 

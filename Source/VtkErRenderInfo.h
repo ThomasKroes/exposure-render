@@ -30,7 +30,9 @@ public:
 
 	vtkGetMacro(Renderer, vtkRenderer*);
 
+	//BTX
 	RenderInfo* GetRenderInfo(void) { return &RendererInfo; }
+	//ETX
 
 	virtual void Update();
 
@@ -41,10 +43,13 @@ protected:
 	virtual ~vtkErRenderInfo();
 
 public:
+	//BTX
 	RenderInfo				RendererInfo;
 	Lighting				m_Lighting;
 	vtkRenderer*			Renderer;
-
+	//ETX
 public:
+	//BTX
 	FrameBuffer				m_FrameBuffer;
+	//ETX
 };

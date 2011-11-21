@@ -11,9 +11,15 @@
 
 cmake_minimum_required(VERSION 2.8)
 
+# Exposure Render core project
 PROJECT(ExposureRenderCore)
 
+INCLUDE (CMakeOptions.cmake)
+
 FIND_PACKAGE(CUDA)
+FIND_PACKAGE(PYTHONLIBS)
+
+MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR" ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Supported streaming architectures
 SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
@@ -26,6 +32,7 @@ SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=compute_13;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=sm_20;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20;${CUDA_NVCC_FLAGS}")
+
 
 # Add CUDA includes
 INCLUDE_DIRECTORIES(
@@ -90,34 +97,37 @@ SET(ErVtkSources
 	vtkErLight.h
 	vtkErAreaLight.h
 	vtkErBackgroundLight.h
-	vtkErSlicePlane.h
 	vtkErVolumeProperty.h
 	vtkErVolumeInfo.h
 	vtkErRenderInfo.h
 	VtkErCamera.h
-	VtkErAreaLightWidget.h
-	vtkErPointWidget.h
-	vtkErArrowSource.h
-	VtkErVolume.h
-	VtkErRenderCanvas.h
 	vtkErVolumeMapper.cpp
 	vtkErLight.cpp
 	vtkErAreaLight.cpp
 	vtkErBackgroundLight.cpp
-	vtkErSlicePlane.cpp
 	vtkErVolumeProperty.cpp
 	vtkErVolumeInfo.cpp
 	vtkErRenderInfo.cpp
 	VtkErCamera.cpp
-	VtkErAreaLightWidget.cpp
-	vtkErPointWidget.cpp
-	vtkErArrowSource.cpp
-	VtkErVolume.cpp
-	VtkErRenderCanvas.cpp
 )
 
 # Make the "Vtk" source group
 SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
+
+# Make Python wrappings
+VTK_WRAP_PYTHON3(ExposureRenderCore ErCorePython_SRCS "${ErVtkSources}")
+
+IF (VTK_WRAP_PYTHON)
+	INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
+	VTK_WRAP_PYTHON3(ExposureRenderCore ExposureRenderCore_SRCS "${ErVtkSources}")
+	ADD_LIBRARY(ExposureRenderCorePythonD ${ExposureRenderCore_SRCS})
+#	ADD_LIBRARY(ExposureRenderCorePython MODULE vtkmyImagingPythonInit.cxx)
+	TARGET_LINK_LIBRARIES(ExposureRenderCorePythonD)
+#	TARGET_LINK_LIBRARIES(ExposureRenderCorePython vtkmyImagingPythonD)
+ENDIF (VTK_WRAP_PYTHON)
+
+
+
 
 # Make the library
 CUDA_ADD_LIBRARY(ExposureRenderCore ${ErCoreSources} ${ErCudaSources} ${ErVtkSources})
@@ -161,7 +171,7 @@ ENDIF(NOT VTK_DIR)
 INCLUDE(${VTK_USE_FILE})
 ENDIF(NOT VTK_BINARY_DIR)
 
-MESSAGE(STATUS "vv" ${CMAKE_INSTALL_PREFIX})
+
 
 # use what QVTK built with
 SET(QT_MOC_EXECUTABLE ${VTK_QT_MOC_EXECUTABLE} CACHE FILEPATH "")

@@ -152,6 +152,7 @@ public:
   vtkGetMacro(HotSpotSize,double);
   
 protected:
+
   vtkErPointWidget();
   ~vtkErPointWidget();
 
@@ -167,7 +168,7 @@ protected:
     Translating,
     Outside
   };
-//ETX
+
     
   // Handles the events
   static void ProcessEvents(vtkObject* object, 
@@ -226,7 +227,7 @@ protected:
 	vtkSmartPointer<vtkPolyDataMapper>	ZAxisMapper;
 	vtkSmartPointer<vtkErArrowSource>	ZAxisHandleGeometry;
 	vtkSmartPointer<vtkProperty>		ZAxisProperty;
-
+	//ETX
 private:
   vtkErPointWidget(const vtkErPointWidget&);  //Not implemented
   void operator=(const vtkErPointWidget&);  //Not implemented

@@ -273,7 +273,7 @@ void QHardwareWidget::OnCudaDeviceChanged(void)
 
 	if (m_Model.GetDevice(m_Devices.currentIndex().row(), CudaDevice))
 	{
-		gCurrentDeviceID = CudaDevice.m_ID;
-		Log("Cuda device changed to " + CudaDevice.m_Name, "graphic-card");
+//		gCurrentDeviceID = CudaDevice.m_ID;
+//		Log("Cuda device changed to " + CudaDevice.m_Name, "graphic-card");
 	}
 }

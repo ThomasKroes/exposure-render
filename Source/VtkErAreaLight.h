@@ -28,5 +28,7 @@ protected:
 	vtkErAreaLight();
 	virtual ~vtkErAreaLight();
 
+	//BTX
 	double Size[3];
+	//ETX
 };

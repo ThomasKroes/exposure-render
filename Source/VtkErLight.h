@@ -27,5 +27,7 @@ protected:
 	vtkErLight();
 	virtual ~vtkErLight();
 
+	//BTX
 	bool	Enabled;
+	//ETX
 };

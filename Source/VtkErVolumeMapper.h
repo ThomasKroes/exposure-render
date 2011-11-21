@@ -13,16 +13,15 @@
 
 #pragma once
 
-// http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
+
 
 #include "VtkErVolumeInfo.h"
 #include "VtkErRenderInfo.h"
 
-class vtkVolumeProperty;
-
-class EXPOSURE_RENDER_DLL vtkErVolumeMapper : public vtkVolumeMapper
+class vtkErVolumeMapper : public vtkVolumeMapper
 {
 public:
+	
 //  vtkTypeRevisionMacro(vtkErVolumeMapper,vtkVolumeMapper);
 	vtkTypeMacro(vtkErVolumeMapper,vtkVolumeMapper);
     static vtkErVolumeMapper *New();
@@ -46,7 +45,7 @@ vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
 	vtkSetVector2Macro(CustomRenderSize, int);
 
 //	void DoIt(void* pData);
-
+	//BTX
 	vtkSmartPointer<vtkErVolumeInfo>	m_CudaVolumeInfo;
 	vtkSmartPointer<vtkErRenderInfo>	m_CudaRenderInfo;
 	vtkSmartPointer<vtkMultiThreader>	MultiThreader;
@@ -62,5 +61,7 @@ vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
 
 	bool	UseCustomRenderSize;
 	int		CustomRenderSize[2];
+	//eTX
 };
-/**/
+
+// http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/

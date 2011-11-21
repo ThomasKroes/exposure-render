@@ -24,11 +24,14 @@ public:
 	static vtkErVolumeInfo *New();
 
 	void SetInputData(vtkImageData* pInputData);
-
+	
+	//BTX
 	vtkGetMacro(Volume, vtkVolume*);
     vtkSetMacro(Volume, vtkVolume*);
 
+	
 	VolumeInfo* GetVolumeInfo(void) { return &m_VolumeInfo; }
+	//ETX
 
 	virtual void Update();
 
@@ -37,8 +40,10 @@ protected:
 	virtual ~vtkErVolumeInfo();
 
 private:
+	//BTX
 	VolumeInfo		m_VolumeInfo;
 	vtkImageData*   m_pIntensity;
 	vtkImageData*   m_pGradientMagnitude;
 	vtkVolume*      Volume;
+	//ETX
 };

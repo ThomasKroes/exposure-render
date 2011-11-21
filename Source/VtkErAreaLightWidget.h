@@ -54,6 +54,7 @@ public:
 	void GetTarget(double xyz[3]) { this->AreaLight->GetFocalPoint(xyz); }
 
 protected:
+	//BTX
 	vtkErAreaLightWidget();
 	virtual ~vtkErAreaLightWidget();
 
@@ -125,4 +126,5 @@ protected:
 	double LastPosition[3];
 
 	void HighlightLine(int Highlight);
+	//ETX
 };
