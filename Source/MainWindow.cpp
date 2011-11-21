@@ -45,8 +45,8 @@ CMainWindow::CMainWindow() :
 
 	setCentralWidget(&m_RenderView);
 
-	m_RenderView.m_RenderWidget.SetActive();
-//	m_RenderView.SetActive();
+//	m_RenderView.m_RenderWidget.SetActive();
+	m_RenderView.SetActive();
 //	m_RenderOutputDialog.m_VtkRenderWidget.SetSource(&m_RenderWidget);
 
 	CreateMenus();
@@ -229,7 +229,7 @@ QString CMainWindow::StrippedName(const QString& FullFileName)
 void CMainWindow::Open()
 {
 	// Create open file dialog
-    QString FileName = GetOpenFileName("Open volume", "Meta Image Volume Files (*.mhd)", "grid");
+    QString FileName = GetOpenFileName2("Open volume", "Meta Image Volume Files (*.mhd)", "grid");
 
 	// Exit empty
 	if (FileName.isEmpty())

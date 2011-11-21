@@ -40,7 +40,6 @@ public:
 	virtual void Update();
 
 	void Reset();
-	void Resize(int Width, int Height);
 
 protected:
 	vtkErRenderInfo();

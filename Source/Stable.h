@@ -45,6 +45,6 @@ inline QIcon GetIcon(const QString& Name)
 	return QIcon(QApplication::applicationDirPath() + "/Icons/" + Name + ".png");
 }
 
-QString GetOpenFileName(const QString& Caption, const QString& Filter, const QString& Icon);
+QString GetOpenFileName2(const QString& Caption, const QString& Filter, const QString& Icon);
 QString GetSaveFileName(const QString& Caption, const QString& Filter, const QString& Icon);
 void SaveImage(const unsigned char* pImageBuffer, const int& Width, const int& Height, QString FilePath = "");

@@ -14,7 +14,7 @@
 #include "Stable.h"
 
 #include "VtkWidget.h"
-#include "MainWindow.h"
+
 
 #include <vtkMetaImageReader.h>
 #include <vtkCubeSource.h>
@@ -132,12 +132,14 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 	m_Renderer->ResetCamera();
 
 	m_Renderer->AddViewProp(m_Volume);
-	m_Renderer->AddActor(m_RenderCanvas);
+//	m_Renderer->AddActor(m_RenderCanvas);
+
+	m_RenderCanvas->SetVolumeMapper(m_VolumeMapper);
 
 	vtkErAreaLight* l1 = vtkErAreaLight::New();
 	l1->SetPosition(-4.0,4.0,-1.0);
 	l1->SetFocalPoint(0,0,0);
-	l1->SetColor(10000.0,100.0,100.0);
+	l1->SetColor(100.0,100.0,100.0);
 	l1->SetPositional(1);
 	m_Renderer->AddLight(l1);
 	l1->SetSwitch(1);
@@ -150,16 +152,21 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 	pErBackgroundLight->SetDiffuseColor(5000, 5000, 10000);
 	m_Renderer->AddLight(pErBackgroundLight);
 
+	vtkPlaneWidget* planeWidget = vtkPlaneWidget::New();
+	planeWidget->SetInteractor(m_QtVtkWidget.GetRenderWindow()->GetInteractor());
+	planeWidget->On();
+
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(0.1);
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, m_TimerCallback);
 
 	m_Renderer->GetActiveCamera()->SetPosition(10, 10, 10);
 	m_Renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
 	m_Renderer->GetActiveCamera()->SetFocalDisk(0.0);
-	m_Renderer->GetActiveCamera()->SetClippingRange(1, 10);
-
+	m_Renderer->GetActiveCamera()->SetClippingRange(0, 100000000);
+	
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
+	
 	
 //	vtkSmartPointer<vtkInteractorStyleImage> style1 = vtkSmartPointer<vtkInteractorStyleImage>::New();
 //	m_QtVtkWidget.GetRenderWindow()->GetInteractor()->SetInteractorStyle(style1);

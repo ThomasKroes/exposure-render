@@ -27,7 +27,10 @@ class EXPOSURE_RENDER_DLL vtkErRenderCanvas : public vtkImageActor
 	vtkGetMacro(VolumeMapper, vtkVolumeMapper*);
 	vtkSetMacro(VolumeMapper, vtkVolumeMapper*);
 
+	virtual int RenderOpaqueGeometry(vtkViewport *viewport);
+	virtual int RenderTranslucentPolygonalGeometry( vtkViewport *);
 	virtual void Render(vtkRenderer* pRenderer);
+	virtual int HasTranslucentPolygonalGeometry() { return 0; }
 
 protected:
 	vtkErRenderCanvas();

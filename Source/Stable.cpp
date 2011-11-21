@@ -13,7 +13,7 @@
 
 #include "Stable.h"
 
-QString GetOpenFileName(const QString& Caption, const QString& Filter, const QString& Icon)
+QString GetOpenFileName2(const QString& Caption, const QString& Filter, const QString& Icon)
 {
 	QFileDialog FileDialog;
 

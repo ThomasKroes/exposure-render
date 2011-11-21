@@ -56,12 +56,12 @@ vtkErVolumeMapper::vtkErVolumeMapper()
 
 	SetCudaDevice(0);
 
-	SetUseCustomRenderSize(false);
-	SetCustomRenderSize(34, 34);
+//	SetUseCustomRenderSize(false);
+//	SetCustomRenderSize(34, 34);
 
 	glGenTextures(1, &TextureID);
 
-	MultiThreader = vtkMultiThreader::New();
+//	MultiThreader = vtkMultiThreader::New();
 
 //	MultiThreader->SpawnThread((vtkThreadFunctionType)vtkTrackerSimulatorRecordThread, this);
 
@@ -87,21 +87,11 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 
 	int RenderSize[2];
 
-	if (this->UseCustomRenderSize)
-	{
-		RenderSize[0] = this->CustomRenderSize[0];
-		RenderSize[1] = this->CustomRenderSize[1];
-	}
-	else
-	{
-		int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
+	int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
 
-		RenderSize[0] = pWindowSize[0];
-		RenderSize[1] = pWindowSize[1];
-	}
-    
+	RenderSize[0] = pWindowSize[0];
+	RenderSize[1] = pWindowSize[1];
 	
-	m_CudaRenderInfo->Resize(RenderSize[0], RenderSize[1]);
 	m_CudaRenderInfo->SetRenderer(pRenderer);
 	m_CudaRenderInfo->Update();
 	m_CudaVolumeInfo->SetVolume(pVolume);
@@ -128,7 +118,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, RenderSize[0], RenderSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+//	glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 	
 	double d = 0.5;
 	
@@ -201,7 +191,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 
 	if (pErVolumeProperty == NULL)
 	{
-		vtkErrorMacro("Incompatible volume property, use vtkErVolumeProperty!");
+		vtkErrorMacro("Incompatible volume property (reverting to default property), use vtkErVolumeProperty!");
 		
 		vtkSmartPointer<vtkErVolumeProperty> ErVolumeProperty = vtkErVolumeProperty::New();
 

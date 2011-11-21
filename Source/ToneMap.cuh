@@ -42,11 +42,10 @@ KERNEL void KrnlToneMap(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 
 	RGBA.FromRGBAf(RgbHdr[0], RgbHdr[1], RgbHdr[2], Color.GetA());
 
-//	RGBA.SetA(Color.GetA() == 0.0f ? 255 : 0);
-
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetR(RGBA.GetR());
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetG(RGBA.GetG());
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetB(RGBA.GetB());
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(100);
 }
 
 void ToneMap(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)

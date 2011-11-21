@@ -109,3 +109,115 @@ public:
 	QGraphicsScene		m_GraphicsScene;
 	CVtkRenderWidget	m_RenderWidget;
 };
+
+#include <QVTKGraphicsItem.h>
+#include <QGraphicsView>
+#include <QResizeEvent>
+#include "QVTKWidget2.h"
+#include "vtkGenericOpenGLRenderWindow.h"
+#include "vtkRenderer.h"
+#include "vtkTextActor3D.h"
+#include <vtkGraphLayoutView.h>
+
+class QTestGraphicsItem : public QVTKGraphicsItem
+{
+public:
+  QTestGraphicsItem(QGLContext* ctx, QGraphicsItem* p=0)
+  : QVTKGraphicsItem(ctx, p)
+{//
+	GraphLayoutView = vtkGraphLayoutView::New();
+//  GraphLayoutView.TakeReference(vtkGraphLayoutView::New());
+  
+  
+GraphLayoutView->SetInteractor(this->GetInteractor());
+GraphLayoutView->SetRenderWindow(this->GetRenderWindow());
+  GraphLayoutView->ResetCamera();
+
+}
+
+  ~QTestGraphicsItem(){};
+
+protected:
+  vtkSmartPointer<vtkGraphLayoutView> GraphLayoutView;
+};
+
+class OpenGLScene : public QGraphicsScene
+{
+  Q_OBJECT
+  public:
+	  OpenGLScene(QGLContext* ctx, QObject* p=0)  : QGraphicsScene(p), mContext(ctx)
+	  {
+		  this->addItem(new QTestGraphicsItem(ctx, NULL));
+	  };
+	  ~OpenGLScene(){};
+
+  Q_SIGNALS:
+    void enterState1();
+    void enterState2();
+    void enterState3();
+    void enterState4();
+
+  protected:
+    QGLContext* mContext;
+    QStateMachine machine;
+    QGraphicsWidget* mGraphLayoutView;
+    QGraphicsWidget* mTreeRingView;
+    QGraphicsWidget* mWebView;
+    int CurrentState;
+
+    void mousePressEvent(QGraphicsSceneMouseEvent* e){};
+
+};
+
+class GraphicsView : public QGraphicsView
+{
+  public:
+    GraphicsView()
+    {
+      mCtx = new QGLContext(QGLFormat());
+      mWidget = new QVTKWidget2(mCtx);
+      this->setViewport(mWidget);
+//      this->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+      this->setScene(new OpenGLScene(mCtx, this));
+      vtkSmartPointer<vtkRenderer> ren = vtkSmartPointer<vtkRenderer>::New();
+      ren->SetBackground(0,0,0);
+      ren->SetBackground2(1,1,1);
+      ren->SetGradientBackground(1);
+      vtkSmartPointer<vtkTextActor3D> textActor = vtkSmartPointer<vtkTextActor3D>::New();
+      textActor->SetInput("Qt & VTK!!");
+      ren->AddViewProp(textActor);
+      ren->ResetCamera();
+      mWidget->GetRenderWindow()->AddRenderer(ren);
+      mWidget->GetRenderWindow()->SetSwapBuffers(0);  // don't let VTK swap buffers on us
+      mWidget->setAutoBufferSwap(true);
+    }
+    ~GraphicsView()
+    {
+    }
+
+  protected:
+
+    void drawBackground(QPainter* p, const QRectF& vtkNotUsed(r))
+      {
+#if QT_VERSION >= 0x040600
+      p->beginNativePainting();
+#endif
+      mWidget->GetRenderWindow()->PushState();
+      mWidget->GetRenderWindow()->Render();
+      mWidget->GetRenderWindow()->PopState();
+#if QT_VERSION >= 0x040600
+      p->endNativePainting();
+#endif
+      }
+
+    void resizeEvent(QResizeEvent *event)
+      {
+        // give the same size to the scene that his widget has
+        if (scene())
+            scene()->setSceneRect(QRect(QPoint(0, 0), event->size()));
+        QGraphicsView::resizeEvent(event);
+        mWidget->GetRenderWindow()->SetSize(event->size().width(), event->size().height());
+      }
+    QGLContext* mCtx;
+    QVTKWidget2* mWidget;
+};

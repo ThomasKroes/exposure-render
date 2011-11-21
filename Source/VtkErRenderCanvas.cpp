@@ -14,6 +14,7 @@
 #include "Stable.h"
 
 #include <vtkObjectFactory.h>
+#include <vtkgl.h>
 
 #include "vtkErRenderCanvas.h"
 #include "vtkErVolumeMapper.h"
@@ -23,19 +24,51 @@ vtkStandardNewMacro(vtkErRenderCanvas);
 
 vtkErRenderCanvas::vtkErRenderCanvas()
 {
+	this->VolumeMapper = NULL;
 }
 
 vtkErRenderCanvas::~vtkErRenderCanvas()
 {
 }
 
+int vtkErRenderCanvas::RenderOpaqueGeometry(vtkViewport* viewport)
+{
+	this->Render(vtkRenderer::SafeDownCast(viewport));
+	return 1;
+}
+
+int vtkErRenderCanvas::RenderTranslucentPolygonalGeometry(vtkViewport* viewport)
+{
+	this->Render(vtkRenderer::SafeDownCast(viewport));
+	return 1;
+
+}
 void vtkErRenderCanvas::Render(vtkRenderer* pRenderer)
 {
 	if (!VolumeMapper)
 	{
-		vtkErrorMacro("This rendering canvas is not associated with an exposure render volume mapper, use SetVolumeMapper()!");
+		vtkErrorMacro("This rendering canvas is not associated with an exposure render volume mapper, use vtkErRenderCanvas::SetVolumeMapper()!");
 		return;
 	}
 
+	// if the display extent has not been set, then compute one
+	this->ComputedDisplayExtent[0] = 0.0;
+	this->ComputedDisplayExtent[1] = 300.0;
+	this->ComputedDisplayExtent[2] = 0.0;
+	this->ComputedDisplayExtent[3] = 300.0;
+	this->ComputedDisplayExtent[4] = 0.0;
+	this->ComputedDisplayExtent[5] = 0.0;
 
+	/*
+	glBegin(GL_QUADS);
+		glTexCoord2i(1,1);
+		glVertex3d(0, 0, 0);
+		glTexCoord2i(0,1);
+		glVertex3d(0, 300, 0);
+		glTexCoord2i(0,0);
+		glVertex3d(300, 300, 0);
+		glTexCoord2i(1,0);
+		glVertex3d(coordinatesD);
+	glEnd();
+	*/
 }

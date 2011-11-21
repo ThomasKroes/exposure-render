@@ -24,6 +24,9 @@
 #include <vtkCommand.h>
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
+#include <vtkActorCollection.h>
+#include <vtkPlaneSource.h>
+#include <vtkRenderWindowInteractor.h>
 
 #include "Core.cuh"
 
@@ -101,20 +104,19 @@ void vtkErRenderInfo::SetRenderer(vtkRenderer* pRenderer)
 	Update();
 }
 
-void vtkErRenderInfo::Resize(int Width, int Height)
-{
-	m_FrameBuffer.Resize(CResolution2D(Width, Height));
-
-	RendererInfo.m_FilmWidth	= Width;
-    RendererInfo.m_FilmHeight	= Height;
-	RendererInfo.m_FilmNoPixels	= RendererInfo.m_FilmWidth * RendererInfo.m_FilmHeight;
-}
-
 void vtkErRenderInfo::Update()
 {
     if (this->Renderer != NULL)
     {
         vtkRenderWindow* pRenderWindow = Renderer->GetRenderWindow();
+
+		int* pRenderSize = pRenderWindow->GetSize();
+
+		m_FrameBuffer.Resize(CResolution2D(pRenderSize[0], pRenderSize[1]));
+
+		RendererInfo.m_FilmWidth	= pRenderSize[0];
+		RendererInfo.m_FilmHeight	= pRenderSize[1];
+		RendererInfo.m_FilmNoPixels	= RendererInfo.m_FilmWidth * RendererInfo.m_FilmHeight;
 
 		vtkCamera* pCamera = this->Renderer->GetActiveCamera();
 
@@ -179,7 +181,7 @@ void vtkErRenderInfo::Update()
 
 		RendererInfo.m_Camera.m_ApertureSize = (float)pCamera->GetFocalDisk();
 
-		RendererInfo.m_FilterWidth = 1;
+		RendererInfo.m_FilterWidth = 2;
 
 		RendererInfo.m_FilterWeights[0] = 1.0f;
 		RendererInfo.m_FilterWeights[1] = 0.5f;
@@ -256,10 +258,30 @@ void vtkErRenderInfo::Update()
 			pLight = pLights->GetNextItem();
 		}
 
+//		Renderer->GetRenderWindow()->GetInteractor()->get
+
+		vtkActorCollection* pActors = Renderer->GetActors();
+
+		pActors->InitTraversal();
+		vtkActor* pActor = pActors->GetNextItem();
+
+		while (pActor != 0)
+		{
+			vtkPlaneSource* pPlaneSource = dynamic_cast<vtkPlaneSource*>(pActor);
+
+			if (pPlaneSource)
+			{
+				m_Lighting.m_Type[count] = 1;
+			}
+		}
     }
 }
 
 void vtkErRenderInfo::Reset()
 {
 	RendererInfo.m_NoIterations = 0;
+	m_FrameBuffer.m_DisplayEstimateRgbLdr.Reset();
+	m_FrameBuffer.m_EstimateRgbaLdr.Reset();
+	m_FrameBuffer.m_FrameBlurXyza.Reset();
+	m_FrameBuffer.m_FrameEstimateXyza.Reset();
 }

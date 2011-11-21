@@ -14,6 +14,7 @@
 #pragma once
 
 #include "Preset.h"
+#include "Stable.h"
 
 class QPresetsWidgetBase : public QGroupBox
 {
@@ -178,7 +179,7 @@ public:
 		if (ChoosePath)
 		{
 			// Create open file dialog
-			XmlFile.setFileName(GetOpenFileName("Load " + m_UserInterfaceName + " presets from file", "XML Preset Files (*.xml)", "star"));
+			XmlFile.setFileName(GetOpenFileName2("Load " + m_UserInterfaceName + " presets from file", "XML Preset Files (*.xml)", "star"));
 		}
 		else
 		{
