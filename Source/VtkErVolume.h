@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include <vtkVolume.h>
-
 class EXPOSURE_RENDER_DLL vtkErVolume : public vtkVolume
 {
 	vtkTypeRevisionMacro(vtkErVolume, vtkVolume);

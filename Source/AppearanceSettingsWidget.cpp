@@ -15,7 +15,6 @@
 
 #include "AppearanceSettingsWidget.h"
 #include "TransferFunction.h"
-#include "RenderThread.h"
 #include "VtkWidget.h"
 
 QAppearanceSettingsWidget::QAppearanceSettingsWidget(QWidget* pParent) :

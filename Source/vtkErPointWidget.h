@@ -13,10 +13,6 @@
 
 #pragma once
 
-#include <vtk3DWidget.h>
-#include <vtkCursor3D.h>
-#include <vtkSmartPointer.h>
-
 #include "Dll.h"
 
 class vtkActor;

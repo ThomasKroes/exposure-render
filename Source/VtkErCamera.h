@@ -15,8 +15,6 @@
 
 #include "Geometry.h"
 
-#include <vtkOpenGLCamera.h>
-
 class vtkRenderer;
 
 class EXPOSURE_RENDER_DLL vtkErCamera : public vtkOpenGLCamera

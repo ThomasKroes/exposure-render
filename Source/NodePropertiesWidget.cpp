@@ -16,7 +16,6 @@
 #include "NodePropertiesWidget.h"
 #include "TransferFunction.h"
 #include "NodeItem.h"
-#include "RenderThread.h"
 
 QNodePropertiesWidget::QNodePropertiesWidget(QWidget* pParent) :
 	QGroupBox(pParent),

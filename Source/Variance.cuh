@@ -14,7 +14,6 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Variance.h"
 #include "CudaUtilities.h"
 
 __constant__ float SumVariance = 0;

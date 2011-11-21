@@ -14,7 +14,6 @@
 #include "Stable.h"
 
 #include "LogWidget.h"
-#include "RenderThread.h"
 
 QTimeTableWidgetItem::QTimeTableWidgetItem(void) :
 	QTableWidgetItem(QTime::currentTime().toString("hh:mm:ss"))

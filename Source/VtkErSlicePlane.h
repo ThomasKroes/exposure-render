@@ -15,8 +15,6 @@
 
 #include "Dll.h"
 
-#include <vtkObject.h>
-
 class EXPOSURE_RENDER_DLL vtkErSlicePlane : public vtkObject
 {
 	vtkTypeRevisionMacro(vtkErSlicePlane, vtkObject);

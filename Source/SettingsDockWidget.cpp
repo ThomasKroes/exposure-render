@@ -14,7 +14,6 @@
 #include "Stable.h"
 
 #include "SettingsDockWidget.h"
-#include "RenderThread.h"
 
 CTracerSettingsWidget::CTracerSettingsWidget(QWidget* pParent) :
 	QGroupBox(pParent),

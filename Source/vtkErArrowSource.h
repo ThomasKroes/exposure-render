@@ -15,8 +15,6 @@
 
 #include "Dll.h"
 
-#include <vtkPolyDataAlgorithm.h>
-
 class EXPOSURE_RENDER_DLL vtkErArrowSource : public vtkPolyDataAlgorithm
 {
 public:

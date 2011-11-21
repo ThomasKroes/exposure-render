@@ -16,7 +16,6 @@
 #include "TransferFunction.h"
 #include "TransferFunctionView.h"
 #include "NodeItem.h"
-#include "RenderThread.h"
 
 QTFView::QTFView(QWidget* pParent /*= NULL*/) :
 	QGraphicsView(pParent),

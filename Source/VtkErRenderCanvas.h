@@ -15,8 +15,6 @@
 
 #include "Geometry.h"
 
-#include <vtkImageActor.h>
-
 class vtkVolumeMapper;
 
 class EXPOSURE_RENDER_DLL vtkErRenderCanvas : public vtkImageActor

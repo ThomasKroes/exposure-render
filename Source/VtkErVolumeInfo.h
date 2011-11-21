@@ -15,10 +15,6 @@
 
 #include "Geometry.h"
 
-#include <vtkObject.h>
-#include <vtkImageData.h>
-#include <vtkVolume.h>
-
 #include "VolumeInfo.cuh"
 
 class EXPOSURE_RENDER_DLL vtkErVolumeInfo : public vtkObject

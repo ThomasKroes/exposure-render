@@ -14,7 +14,6 @@
 #include "Stable.h"
 
 #include "ApertureWidget.h"
-#include "RenderThread.h"
 #include "Camera.h"
 
 QApertureWidget::QApertureWidget(QWidget* pParent) :

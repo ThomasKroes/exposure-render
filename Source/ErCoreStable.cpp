@@ -11,40 +11,4 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
-
-#include "Geometry.h"
-
-#include "RenderInfo.cuh"
-#include "Buffer.cuh"
-#include "Lighting.cuh"
-
-class EXPOSURE_RENDER_DLL vtkErRenderInfo : public vtkObject
-{
-	vtkTypeRevisionMacro(vtkErRenderInfo, vtkObject);
-
-public:
-	static vtkErRenderInfo *New();
-
-	void SetRenderer(vtkRenderer* pRenderer);
-
-	vtkGetMacro(Renderer, vtkRenderer*);
-
-	RenderInfo* GetRenderInfo(void) { return &RendererInfo; }
-
-	virtual void Update();
-
-	void Reset();
-
-protected:
-	vtkErRenderInfo();
-	virtual ~vtkErRenderInfo();
-
-public:
-	RenderInfo				RendererInfo;
-	Lighting				m_Lighting;
-	vtkRenderer*			Renderer;
-
-public:
-	FrameBuffer				m_FrameBuffer;
-};
+#include "ErCoreStable.h"

@@ -11,6 +11,126 @@
 
 cmake_minimum_required(VERSION 2.8)
 
+PROJECT(ExposureRenderCore)
+
+FIND_PACKAGE(CUDA)
+
+# Supported streaming architectures
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
+SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=sm_11;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=compute_11;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=sm_12;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=compute_12;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=sm_13;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=compute_13;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=sm_20;${CUDA_NVCC_FLAGS}")
+# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20;${CUDA_NVCC_FLAGS}")
+
+# Add CUDA includes
+INCLUDE_DIRECTORIES(
+#	${CMAKE_CURRENT_BINARY_DIR}
+#	${CMAKE_CURRENT_SOURCE_DIR}
+	${CUDA_SDK_ROOT_DIR}/common/inc
+	${CUDA_TOOLKIT_INCLUDE}
+)
+
+# Export symbols
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
+
+# Exposure Render core sources
+SET(ErCoreSources
+	Flags.cpp
+	Geometry.cpp
+	CudaUtilities.cpp
+	ErCoreStable.h
+	ErCoreStable.cpp
+)
+
+# Make the "Core" source group
+SOURCE_GROUP("Core" FILES ${ErCoreSources})
+
+# Exposure Render CUDA sources
+SET(ErCudaSources
+	SingleScattering.cuh
+	MultipleScattering.cuh
+	Blur.cuh
+	Utilities.cuh
+	Core.cuh
+	Estimate.cuh
+	Transport.cuh
+	RayMarching.cuh
+	Woodcock.cuh
+	Denoise.cuh
+	Variance.cuh
+	NearestIntersection.cuh
+	SpecularBloom.cuh
+	ToneMap.cuh
+	Shader.cuh
+	Sample.cuh
+	RNG.cuh
+	Camera.cuh
+	Lighting.cuh
+	MonteCarlo.cuh
+	Slice.cuh
+	VolumeInfo.cuh
+	RenderInfo.cuh
+	Buffer.cuh
+	Core.cu
+	CudaUtilities.h
+	CudaUtilities.cpp
+)
+
+# Make the "CUDA" source group
+SOURCE_GROUP("Cuda" FILES ${ErCudaSources})
+
+# VTK Exposure Render sources
+SET(ErVtkSources
+	vtkErVolumeMapper.h
+	vtkErLight.h
+	vtkErAreaLight.h
+	vtkErBackgroundLight.h
+	vtkErSlicePlane.h
+	vtkErVolumeProperty.h
+	vtkErVolumeInfo.h
+	vtkErRenderInfo.h
+	VtkErCamera.h
+	VtkErAreaLightWidget.h
+	vtkErPointWidget.h
+	vtkErArrowSource.h
+	VtkErVolume.h
+	VtkErRenderCanvas.h
+	vtkErVolumeMapper.cpp
+	vtkErLight.cpp
+	vtkErAreaLight.cpp
+	vtkErBackgroundLight.cpp
+	vtkErSlicePlane.cpp
+	vtkErVolumeProperty.cpp
+	vtkErVolumeInfo.cpp
+	vtkErRenderInfo.cpp
+	VtkErCamera.cpp
+	VtkErAreaLightWidget.cpp
+	vtkErPointWidget.cpp
+	vtkErArrowSource.cpp
+	VtkErVolume.cpp
+	VtkErRenderCanvas.cpp
+)
+
+# Make the "Vtk" source group
+SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
+
+# Make the library
+CUDA_ADD_LIBRARY(ExposureRenderCore ${ErCoreSources} ${ErCudaSources} ${ErVtkSources})
+
+# Link with the necessary VTK libraries
+TARGET_LINK_LIBRARIES(ExposureRenderCore vtkRendering vtkGraphics vtkIO vtkWidgets vtkCommon vtkVolumeRendering vtkViews)
+
+# Use precompiled headers
+if (MSVC)
+   set_target_properties(ExposureRenderCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
+   set_source_files_properties(ErCoreStable.cpp PROPERTIES COMPILE_FLAGS "/YcErCoreStable.h")
+endif(MSVC)
+
 PROJECT(ExposureRender)
 
 ### Export of symbols ###
@@ -146,34 +266,12 @@ SET(ExposureRenderSources
 
 	# Core
 	Stable.cpp
-	Flags.cpp
-	Geometry.cpp
-	InteractorStyleRealisticCamera.cpp
-	RenderThread.cpp
 	VtkWidget.cpp
 	Controls.cpp
 	Utilities.cpp
-	CudaUtilities.cpp
 	Status.cpp
 	Timing.cpp
-	Variance.cpp
 	RenderOutputDialog.cpp
-
-	# Vtk
-	vtkErVolumeMapper.cpp
-	vtkErLight.cpp
-	vtkErAreaLight.cpp
-	vtkErBackgroundLight.cpp
-	vtkErSlicePlane.cpp
-	vtkErVolumeProperty.cpp
-	vtkErVolumeInfo.cpp
-	vtkErRenderInfo.cpp
-	VtkErCamera.cpp
-	VtkErAreaLightWidget.cpp
-	vtkErPointWidget.cpp
-	vtkErArrowSource.cpp
-	VtkErVolume.cpp
-	VtkErRenderCanvas.cpp
 
 	# Logging
 	Logger.cpp
@@ -253,35 +351,13 @@ SET(ExposureRenderHeaders
 	Defines.h
 	Dll.h
 	Enumerations.h
-	Flags.h
-	Geometry.h
-	InteractorStyleRealisticCamera.h
-	RenderThread.h
 	VtkWidget.h
 	Controls.h
 	LogWidget.h
 	Utilities.h
-	CudaUtilities.h
 	Status.h
 	Timing.h
-	Variance.h
 	RenderOutputDialog.h
-
-	# Vtk
-	vtkErVolumeMapper.h
-	vtkErLight.h
-	vtkErAreaLight.h
-	vtkErBackgroundLight.h
-	vtkErSlicePlane.h
-	vtkErVolumeProperty.h
-	vtkErVolumeInfo.h
-	vtkErRenderInfo.h
-	VtkErCamera.h
-	VtkErAreaLightWidget.h
-	vtkErPointWidget.h
-	vtkErArrowSource.h
-	VtkErVolume.h
-	VtkErRenderCanvas.cpp
 
 	# Logging
 	Logger.h
@@ -562,102 +638,23 @@ SET(CoreSources
 	Defines.h
 	Dll.h
 	Enumerations.h
-	Flags.h
-	Geometry.h
-	InteractorStyleRealisticCamera.h
-	RenderThread.h
 	VtkWidget.h
 	Controls.h
 	Utilities.h
 	Status.h
 	Timing.h
-	Variance.h
 	RenderOutputDialog.h
 	Stable.cpp
-	Flags.cpp
-	Geometry.cpp
-	InteractorStyleRealisticCamera.cpp
-	RenderThread.cpp
 	VtkWidget.cpp
 	Controls.cpp
 	Utilities.cpp
 	Status.cpp
 	Timing.cpp
-	Variance.cpp
 	RenderOutputDialog.cpp
 )
 
 # Make the core group
 SOURCE_GROUP("Core" FILES ${CoreSources})
-
-# Vtk sources
-SET(VtkSources
-	vtkErVolumeMapper.h
-	vtkErLight.h
-	vtkErAreaLight.h
-	vtkErBackgroundLight.h
-	vtkErSlicePlane.h
-	vtkErVolumeProperty.h
-	vtkErVolumeInfo.h
-	vtkErRenderInfo.h
-	VtkErCamera.h
-	VtkErAreaLightWidget.h
-	vtkErPointWidget.h
-	vtkErArrowSource.h
-	VtkErVolume.h
-	VtkErRenderCanvas.h
-	vtkErVolumeMapper.cpp
-	vtkErLight.cpp
-	vtkErAreaLight.cpp
-	vtkErBackgroundLight.cpp
-	vtkErSlicePlane.cpp
-	vtkErVolumeProperty.cpp
-	vtkErVolumeInfo.cpp
-	vtkErRenderInfo.cpp
-	VtkErCamera.cpp
-	VtkErAreaLightWidget.cpp
-	vtkErPointWidget.cpp
-	vtkErArrowSource.cpp
-	VtkErVolume.cpp
-	VtkErRenderCanvas.cpp
-)
-
-# Make the core group
-SOURCE_GROUP("Vtk" FILES ${VtkSources})
-
-# CUDA sources
-SET(CudaSources
-	SingleScattering.cuh
-	MultipleScattering.cuh
-	Blur.cuh
-	Utilities.cuh
-	Core.cuh
-	Estimate.cuh
-	Transport.cuh
-	RayMarching.cuh
-	Woodcock.cuh
-	Denoise.cuh
-	Variance.cuh
-	NearestIntersection.cuh
-	SpecularBloom.cuh
-	ToneMap.cuh
-	Shader.cuh
-	Sample.cuh
-	RNG.cuh
-	Camera.cuh
-	Lighting.cuh
-	MonteCarlo.cuh
-	Slice.cuh
-	VolumeInfo.cuh
-	RenderInfo.cuh
-	Buffer.cuh
-	Core.cu
-	CudaUtilities.h
-	CudaUtilities.cpp
-)
-
-# Make the CUDA group
-SOURCE_GROUP("Cuda" FILES ${CudaSources})
 
 # Logging sources
 SET(LoggingSources
@@ -679,20 +676,14 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Create executable
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${VtkSources} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CudaHeaders} ${CoreSources} ${CudaSources} ${LoggingSources} ${SlicingSources})
+CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${VtkSources} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CoreSources} ${LoggingSources} ${SlicingSources})
 
 
 
 TARGET_LINK_LIBRARIES(ExposureRender
   QVTK
   ${QT_LIBRARIES}
-  vtkRendering
-  vtkGraphics
-  vtkIO
-  vtkWidgets
-  vtkCommon
-  vtkVolumeRendering
-  vtkViews
+  ExposureRenderCore
 )
 
 ### Precompiled headers ###

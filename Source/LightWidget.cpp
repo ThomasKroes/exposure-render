@@ -15,7 +15,6 @@
 
 #include "LightWidget.h"
 #include "LightsWidget.h"
-#include "RenderThread.h"
 
 QLightWidget::QLightWidget(QWidget* pParent) :
 	QGroupBox(pParent),

@@ -15,11 +15,6 @@
 
 #include "Dll.h"
 
-#include <vtkObject.h>
-#include <vtkSmartPointer.h>
-#include <vtkPiecewiseFunction.h>
-#include <vtkVolumeProperty.h>
-
 class EXPOSURE_RENDER_DLL vtkErVolumeProperty : public vtkVolumeProperty
 {
 	vtkTypeRevisionMacro(vtkErVolumeProperty, vtkVolumeProperty);

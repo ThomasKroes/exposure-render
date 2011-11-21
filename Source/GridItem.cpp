@@ -14,7 +14,6 @@
 #include "Stable.h"
 
 #include "GridItem.h"
-#include "RenderThread.h"
 
 QGridItem::QGridItem(QGraphicsItem* pParent) :
 	QGraphicsRectItem(pParent),

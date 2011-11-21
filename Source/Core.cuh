@@ -16,8 +16,6 @@
 #include "Geometry.h"
 #include "Timing.h"
 
-class CVariance;
-
 struct VolumeInfo;
 struct RenderInfo;
 struct Lighting;

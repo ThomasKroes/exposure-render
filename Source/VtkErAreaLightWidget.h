@@ -13,10 +13,6 @@
 
 #pragma once
 
-#include <vtk3DWidget.h>
-#include <vtkSmartPointer.h>
-#include <vtkLineSource.h>
-
 #include "vtkErAreaLight.h"
 
 class vtkActor;

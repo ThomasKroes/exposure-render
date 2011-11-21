@@ -14,7 +14,6 @@
 #include "Stable.h"
 
 #include "FocusWidget.h"
-#include "RenderThread.h"
 #include "Camera.h"
 
 QFocusWidget::QFocusWidget(QWidget* pParent) :

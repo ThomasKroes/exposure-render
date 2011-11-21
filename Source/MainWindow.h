@@ -13,7 +13,6 @@
 
 #pragma once
 
-#include "RenderThread.h"
 #include "LightingDockWidget.h"
 #include "AppearanceDockWidget.h"
 #include "StatisticsDockWidget.h"

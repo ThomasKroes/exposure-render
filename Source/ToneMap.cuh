@@ -14,7 +14,6 @@
 #pragma once
 
 #include "Geometry.h"
-#include "Variance.h"
 
 #define KRNL_TONE_MAP_BLOCK_W		16 
 #define KRNL_TONE_MAP_BLOCK_H		8
