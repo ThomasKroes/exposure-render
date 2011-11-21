@@ -15,6 +15,8 @@
 
 #include "Geometry.h"
 
+#include "CudaUtilities.h"
+
 struct EXPOSURE_RENDER_DLL VolumeInfo
 {
 	float3	m_Extent;

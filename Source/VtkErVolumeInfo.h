@@ -15,9 +15,11 @@
 
 #include "Geometry.h"
 
+#include <vtkObject.h>
+
 #include "VolumeInfo.cuh"
 
-class EXPOSURE_RENDER_DLL vtkErVolumeInfo : public vtkObject
+class VTK_ER_CORE_EXPORT vtkErVolumeInfo : public vtkObject
 {
 public:
 	vtkTypeRevisionMacro(vtkErVolumeInfo, vtkObject);

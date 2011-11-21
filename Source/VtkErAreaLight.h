@@ -15,7 +15,7 @@
 
 #include "VtkErLight.h"
 
-class EXPOSURE_RENDER_DLL vtkErAreaLight : public vtkErLight
+class VTK_ER_CORE_EXPORT vtkErAreaLight : public vtkErLight
 {
 	vtkTypeMacro(vtkErAreaLight, vtkErLight);
 	static vtkErAreaLight *New();

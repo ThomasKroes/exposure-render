@@ -15,7 +15,7 @@
 
 #include "VtkErLight.h"
 
-class EXPOSURE_RENDER_DLL vtkErBackgroundLight : public vtkErLight
+class VTK_ER_CORE_EXPORT vtkErBackgroundLight : public vtkErLight
 {
 	vtkTypeMacro(vtkErBackgroundLight, vtkErLight);
 	static vtkErBackgroundLight *New();

@@ -19,7 +19,7 @@
 #include "Buffer.cuh"
 #include "Lighting.cuh"
 
-class EXPOSURE_RENDER_DLL vtkErRenderInfo : public vtkObject
+class VTK_ER_CORE_EXPORT vtkErRenderInfo : public vtkObject
 {
 	vtkTypeRevisionMacro(vtkErRenderInfo, vtkObject);
 

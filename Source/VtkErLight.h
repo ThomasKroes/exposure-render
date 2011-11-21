@@ -15,7 +15,7 @@
 
 #include "Geometry.h"
 
-class EXPOSURE_RENDER_DLL vtkErLight : public vtkLight
+class VTK_ER_CORE_EXPORT vtkErLight : public vtkLight
 {
 	vtkTypeRevisionMacro(vtkErLight, vtkLight);
 	static vtkErLight *New();

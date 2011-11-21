@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include "vtkErCoreDll.h"
+
 #include "CudaUtilities.h"
 
 // General VTK stuff
@@ -97,7 +99,6 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
 #include <vtkObjectFactory.h>
-#include <vtkErArrowSource.h>
 
 #include <vtkLight.h>
 
@@ -136,7 +137,6 @@
 #include <vtkMath.h>
 #include <vtkObjectFactory.h>
 #include <vtkPlanes.h>
-#include <vtkErPointWidget.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>

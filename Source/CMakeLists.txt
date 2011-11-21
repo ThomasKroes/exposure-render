@@ -17,9 +17,14 @@ PROJECT(ExposureRenderCore)
 INCLUDE (CMakeOptions.cmake)
 
 FIND_PACKAGE(CUDA)
-FIND_PACKAGE(PYTHONLIBS)
 
-MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR" ${CMAKE_CURRENT_SOURCE_DIR})
+SET(VTK_WRAP_PYTHON_FIND_LIBS 1)
+INCLUDE(vtkWrapPython)
+
+# MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR" ${CMAKE_CURRENT_SOURCE_DIR})
+
+INCLUDE(${VTK_CMAKE_DIR}/FindPythonLibs.cmake)
+# FIND_PACKAGE(PYTHON_LIBRARY)
 
 # Supported streaming architectures
 SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
@@ -32,7 +37,6 @@ SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=compute_13;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=sm_20;${CUDA_NVCC_FLAGS}")
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20;${CUDA_NVCC_FLAGS}")
-
 
 # Add CUDA includes
 INCLUDE_DIRECTORIES(
@@ -52,6 +56,8 @@ SET(ErCoreSources
 	CudaUtilities.cpp
 	ErCoreStable.h
 	ErCoreStable.cpp
+	vtkErCoreDll.h
+	vtkErCoreConfigure.h
 )
 
 # Make the "Core" source group
@@ -117,20 +123,17 @@ SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 # Make Python wrappings
 VTK_WRAP_PYTHON3(ExposureRenderCore ErCorePython_SRCS "${ErVtkSources}")
 
+# Make the library
+CUDA_ADD_LIBRARY(ExposureRenderCore ${ErCoreSources} ${ErCudaSources} ${ErVtkSources})
+
 IF (VTK_WRAP_PYTHON)
 	INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
 	VTK_WRAP_PYTHON3(ExposureRenderCore ExposureRenderCore_SRCS "${ErVtkSources}")
 	ADD_LIBRARY(ExposureRenderCorePythonD ${ExposureRenderCore_SRCS})
-#	ADD_LIBRARY(ExposureRenderCorePython MODULE vtkmyImagingPythonInit.cxx)
+	ADD_LIBRARY(ExposureRenderCorePython MODULE ExposureRenderCoreInit.cxx)
 	TARGET_LINK_LIBRARIES(ExposureRenderCorePythonD)
-#	TARGET_LINK_LIBRARIES(ExposureRenderCorePython vtkmyImagingPythonD)
+	TARGET_LINK_LIBRARIES(ExposureRenderCorePython ExposureRenderCore)
 ENDIF (VTK_WRAP_PYTHON)
-
-
-
-
-# Make the library
-CUDA_ADD_LIBRARY(ExposureRenderCore ${ErCoreSources} ${ErCudaSources} ${ErVtkSources})
 
 # Link with the necessary VTK libraries
 TARGET_LINK_LIBRARIES(ExposureRenderCore vtkRendering vtkGraphics vtkIO vtkWidgets vtkCommon vtkVolumeRendering vtkViews)

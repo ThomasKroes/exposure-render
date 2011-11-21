@@ -22,8 +22,8 @@
 
 #include "vtkImageActor.h"
 
-//vtkCxxRevisionMacro(vtkErVolumeMapper, "$Revision: 1.8 $");
-vtkStandardNewMacro(vtkErVolumeMapper);
+vtkCxxRevisionMacro(vtkErVolumeMapper, "$Revision: 1.8 $");
+//vtkStandardNewMacro(vtkErVolumeMapper);
 
 /*
 // this function runs in an alternate thread to asyncronously generate matrices

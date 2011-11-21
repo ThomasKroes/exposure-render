@@ -13,9 +13,7 @@
 
 #pragma once
 
-#include "Dll.h"
-
-class EXPOSURE_RENDER_DLL vtkErVolumeProperty : public vtkVolumeProperty
+class VTK_ER_CORE_EXPORT vtkErVolumeProperty : public vtkVolumeProperty
 {
 	vtkTypeRevisionMacro(vtkErVolumeProperty, vtkVolumeProperty);
 	static vtkErVolumeProperty *New();

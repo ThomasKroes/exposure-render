@@ -17,7 +17,7 @@
 
 class vtkRenderer;
 
-class EXPOSURE_RENDER_DLL vtkErCamera : public vtkOpenGLCamera
+class VTK_ER_CORE_EXPORT vtkErCamera : public vtkOpenGLCamera
 {
 	vtkTypeRevisionMacro(vtkErCamera, vtkCamera);
 	static vtkErCamera *New();
