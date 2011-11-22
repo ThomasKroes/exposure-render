@@ -13,11 +13,16 @@
 
 #pragma once
 
+#include "vtkErCoreDll.h"
+
 #include "Geometry.h"
+
+#include "VolumeInfo.cuh"
 
 #include <vtkObject.h>
 
-#include "VolumeInfo.cuh"
+class vtkImageData;
+class vtkVolume;
 
 class VTK_ER_CORE_EXPORT vtkErVolumeInfo : public vtkObject
 {

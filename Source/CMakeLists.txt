@@ -12,19 +12,21 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Exposure Render core project
-PROJECT(ExposureRenderCore)
+PROJECT(ErCore)
 
-INCLUDE (CMakeOptions.cmake)
-
+# Find CUDA
 FIND_PACKAGE(CUDA)
 
-SET(VTK_WRAP_PYTHON_FIND_LIBS 1)
-INCLUDE(vtkWrapPython)
+# Find VTK
+IF(NOT VTK_BINARY_DIR)
+	FIND_PACKAGE(VTK)
+	IF(NOT VTK_DIR)
+	 MESSAGE(FATAL_ERROR "Please set VTK_DIR.")
+	ENDIF(NOT VTK_DIR)
+	INCLUDE(${VTK_USE_FILE})
+ENDIF(NOT VTK_BINARY_DIR)
 
-# MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR" ${CMAKE_CURRENT_SOURCE_DIR})
-
-INCLUDE(${VTK_CMAKE_DIR}/FindPythonLibs.cmake)
-# FIND_PACKAGE(PYTHON_LIBRARY)
+INCLUDE(CMakeOptions.cmake)
 
 # Supported streaming architectures
 SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
@@ -40,8 +42,8 @@ SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}
 
 # Add CUDA includes
 INCLUDE_DIRECTORIES(
-#	${CMAKE_CURRENT_BINARY_DIR}
-#	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}
 	${CUDA_SDK_ROOT_DIR}/common/inc
 	${CUDA_TOOLKIT_INCLUDE}
 )
@@ -120,60 +122,35 @@ SET(ErVtkSources
 # Make the "Vtk" source group
 SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 
-# Make Python wrappings
-VTK_WRAP_PYTHON3(ExposureRenderCore ErCorePython_SRCS "${ErVtkSources}")
-
 # Make the library
-CUDA_ADD_LIBRARY(ExposureRenderCore ${ErCoreSources} ${ErCudaSources} ${ErVtkSources})
-
-IF (VTK_WRAP_PYTHON)
-	INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
-	VTK_WRAP_PYTHON3(ExposureRenderCore ExposureRenderCore_SRCS "${ErVtkSources}")
-	ADD_LIBRARY(ExposureRenderCorePythonD ${ExposureRenderCore_SRCS})
-	ADD_LIBRARY(ExposureRenderCorePython MODULE ExposureRenderCoreInit.cxx)
-	TARGET_LINK_LIBRARIES(ExposureRenderCorePythonD)
-	TARGET_LINK_LIBRARIES(ExposureRenderCorePython ExposureRenderCore)
-ENDIF (VTK_WRAP_PYTHON)
+CUDA_ADD_LIBRARY(ErCore ${ErCoreSources} ${ErCudaSources} ${ErVtkSources})
 
 # Link with the necessary VTK libraries
-TARGET_LINK_LIBRARIES(ExposureRenderCore vtkRendering vtkGraphics vtkIO vtkWidgets vtkCommon vtkVolumeRendering vtkViews)
+TARGET_LINK_LIBRARIES(ErCore vtkRendering vtkImaging vtkFiltering vtkGraphics vtkIO vtkWidgets vtkCommon vtkVolumeRendering vtkViews QVTK)
 
 # Use precompiled headers
 if (MSVC)
-   set_target_properties(ExposureRenderCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
+   set_target_properties(ErCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
    set_source_files_properties(ErCoreStable.cpp PROPERTIES COMPILE_FLAGS "/YcErCoreStable.h")
 endif(MSVC)
 
-PROJECT(ExposureRender)
+# Export of symbols
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
 
-### Export of symbols ###
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
+# Create the Exposure Render core Python library.
+IF (VTK_WRAP_PYTHON)
+  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
+  VTK_WRAP_PYTHON3(ErCore ImagingPython_SRCS "${ErVtkSources}")
+  ADD_LIBRARY(ErCorePythonD ${ImagingPython_SRCS})
+  ADD_LIBRARY(ErCorePython MODULE ErCoreInit.cxx)
+  TARGET_LINK_LIBRARIES(ErCorePythonD ErCore vtkRenderingPythonD vtkGraphicsPythonD vtkIOPythonD vtkWidgetsPythonD vtkCommonPythonD vtkVolumeRenderingPythonD vtkViewsPythonD)
+  TARGET_LINK_LIBRARIES(ErCorePython ErCorePythonD)
+ENDIF (VTK_WRAP_PYTHON)
 
-### Set Build Type ###
+PROJECT(ErGUI)
+
+# Set build type
 SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
-
-FIND_PACKAGE(CUDA)
-
-# Supported streaming architectures
-SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")
-SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=compute_10;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=sm_11;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_11,code=compute_11;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=sm_12;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_12,code=compute_12;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=sm_13;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_13,code=compute_13;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=sm_20;${CUDA_NVCC_FLAGS}")
-# SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_20,code=compute_20;${CUDA_NVCC_FLAGS}")
-
-IF(NOT VTK_BINARY_DIR)
-FIND_PACKAGE(VTK)
-IF(NOT VTK_DIR)
-  MESSAGE(FATAL_ERROR "Please set VTK_DIR.")
-ENDIF(NOT VTK_DIR)
-INCLUDE(${VTK_USE_FILE})
-ENDIF(NOT VTK_BINARY_DIR)
-
 
 
 # use what QVTK built with
@@ -206,7 +183,7 @@ INCLUDE_DIRECTORIES(
 )
 
 # Set your files and resources here  
-SET(ExposureRenderSources 
+SET(ErGUISources 
 	
 	ReadMe.txt
 	Copyright.txt
@@ -292,7 +269,7 @@ SET(ExposureRenderSources
 	LogDockWidget.cpp
 )
 
-SET(ExposureRenderHeaders 
+SET(ErGUIHeaders 
 	
 	# Main
 	MainWindow.h
@@ -378,7 +355,7 @@ SET(ExposureRenderHeaders
 	LogDockWidget.h
 )
 
-SET(ExposureRenderMocHeaders 
+SET(ErGUIMocHeaders 
 	# Main
 	MainWindow.h
 	SettingsDockWidget.h
@@ -449,7 +426,7 @@ SET(ExposureRenderMocHeaders
 )
 
 # Resources
-SET(ExposureRenderResources Icons/Icons.qrc)
+SET(ErGUIResources Icons/Icons.qrc)
 
 # PATCHED QT4_WRAP_CPP for use with StdAfx
 # Original source: Qt4Macros.cmake
@@ -475,11 +452,11 @@ ENDMACRO (PCH_QT4_WRAP_CPP)
 # QT4_CREATE_MOC_COMMAND(Icons/Icons.qrc qrc_Icons.cxx "${moc_flags};${moc_flags_append}" "${moc_options}")
 
 # The rest should just work (sure...)
-PCH_QT4_WRAP_CPP(MOCSrcs ${ExposureRenderMocHeaders} )
-# QT4_ADD_RESOURCES(ResourceSrcs ${ExposureRenderResources})
+PCH_QT4_WRAP_CPP(MOCSrcs ${ErGUIMocHeaders} )
+# QT4_ADD_RESOURCES(ResourceSrcs ${ErGUIResources})
 
 SOURCE_GROUP("Resources" FILES
-  ${ExposureRenderResources}
+  ${ErGUIResources}
   ${EXE_ICON}
 )
 
@@ -689,19 +666,19 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Create executable
-CUDA_ADD_EXECUTABLE(ExposureRender MACOSX_BUNDLE ${ExposureRenderSources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${VtkSources} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CoreSources} ${LoggingSources} ${SlicingSources})
+CUDA_ADD_EXECUTABLE(ErGUI MACOSX_BUNDLE ${ErGUISources} ${UISrcs} ${MOCSrcs} ${ResourceSrcs} ${VtkSources} ${MainSources} ${AppearanceSources} ${LightingSources} ${CameraSources} ${PresetsSources} ${CoreSources} ${LoggingSources} ${SlicingSources})
 
 
 
-TARGET_LINK_LIBRARIES(ExposureRender
+TARGET_LINK_LIBRARIES(ErGUI
   QVTK
   ${QT_LIBRARIES}
-  ExposureRenderCore
+  ErCore
 )
 
 ### Precompiled headers ###
 if (MSVC)
-   set_target_properties(ExposureRender PROPERTIES COMPILE_FLAGS "/YuStable.h")
+   set_target_properties(ErGUI PROPERTIES COMPILE_FLAGS "/YuStable.h")
    set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcStable.h")
   # set_source_files_properties(Stable.cpp PROPERTIES COMPILE_FLAGS "/YcUtilities.h")
 endif(MSVC)
@@ -739,7 +716,7 @@ INSTALL_FILES(/bin FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\ReadMe.txt)
 INSTALL_FILES(/bin FILES ${CMAKE_CURRENT_SOURCE_DIR}\\\\Copyright.txt)
 
 #### Install Exposure Render ###
-INSTALL_TARGETS(/bin ExposureRender)
+INSTALL_TARGETS(/bin ErGUI)
 
 # Requires re-distributables
 INCLUDE(InstallRequiredSystemLibraries)

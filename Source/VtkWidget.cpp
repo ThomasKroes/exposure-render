@@ -35,7 +35,8 @@
 #include <vtkImageActor.h>
 
 #include "vtkErBackgroundLight.h"
-#include "vtkErAreaLightWidget.h"
+#include "VtkErAreaLight.h"
+#include "vtkErVolumeMapper.h"
 
 //http://agl.unm.edu/rpf/
 
@@ -132,9 +133,6 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 	m_Renderer->ResetCamera();
 
 	m_Renderer->AddViewProp(m_Volume);
-//	m_Renderer->AddActor(m_RenderCanvas);
-
-	m_RenderCanvas->SetVolumeMapper(m_VolumeMapper);
 
 	vtkErAreaLight* l1 = vtkErAreaLight::New();
 	l1->SetPosition(-4.0,4.0,-1.0);
@@ -181,7 +179,6 @@ void CVtkRenderWidget::SetupVtk(void)
 	m_OverlayRenderer	= vtkRenderer::New();
 	m_TimerCallback		= vtkCallbackCommand::New();
 	m_Camera			= vtkErCamera::New();
-	m_RenderCanvas		= vtkErRenderCanvas::New();
 
 //	m_Renderer->SetInteractive(1);
 //	m_OverlayRenderer->SetInteractive(1);

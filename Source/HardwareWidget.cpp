@@ -146,7 +146,7 @@ void QCudaDevicesModel::EnumerateDevices(void)
 {
 	int NoDevices = 0;
 
-	HandleCudaError(cudaGetDeviceCount(&NoDevices), "no. Cuda capable devices");
+//	HandleCudaError(cudaGetDeviceCount(&NoDevices), "no. Cuda capable devices");
 
 	for (int DeviceID = 0; DeviceID < NoDevices; DeviceID++)
 	{
@@ -254,7 +254,7 @@ QHardwareWidget::QHardwareWidget(QWidget* pParent) :
 
 void QHardwareWidget::OnOptimalDevice(void)
 {
-	const int MaxGigaFlopsDeviceID = GetMaxGigaFlopsDeviceID();
+	const int MaxGigaFlopsDeviceID = 0;//GetMaxGigaFlopsDeviceID();
 
 	m_Devices.selectRow(MaxGigaFlopsDeviceID);
 	m_Devices.setFocus();

@@ -132,7 +132,6 @@ void SaveImage(const unsigned char* pImageBuffer, const int& Width, const int& H
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
 #include <vtkObjectFactory.h>
-#include <vtkErArrowSource.h>
 
 #include <vtkLight.h>
 
@@ -171,7 +170,6 @@ void SaveImage(const unsigned char* pImageBuffer, const int& Width, const int& H
 #include <vtkMath.h>
 #include <vtkObjectFactory.h>
 #include <vtkPlanes.h>
-#include <vtkErPointWidget.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>

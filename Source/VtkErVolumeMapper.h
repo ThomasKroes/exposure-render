@@ -16,13 +16,17 @@
 #include "VtkErVolumeInfo.h"
 #include "VtkErRenderInfo.h"
 
+#include <vtkVolumeMapper.h>
+#include <vtkSmartPointer.h>
+#include <vtkVolumeProperty.h>
+
 class VTK_ER_CORE_EXPORT vtkErVolumeMapper : public vtkVolumeMapper
 {
 public:
 	//BTX
   vtkTypeRevisionMacro(vtkErVolumeMapper,vtkVolumeMapper);
 //	vtkTypeMacro(vtkErVolumeMapper,vtkVolumeMapper);
-//    static vtkErVolumeMapper *New();
+    static vtkErVolumeMapper *New();
 
 	vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
     vtkErVolumeMapper(const vtkErVolumeMapper&);
@@ -47,7 +51,6 @@ public:
 	
 	vtkSmartPointer<vtkErVolumeInfo>	m_CudaVolumeInfo;
 	vtkSmartPointer<vtkErRenderInfo>	m_CudaRenderInfo;
-	vtkSmartPointer<vtkMultiThreader>	MultiThreader;
 
 	vtkErVolumeMapper();
     virtual ~vtkErVolumeMapper();

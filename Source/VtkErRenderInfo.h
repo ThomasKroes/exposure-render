@@ -13,11 +13,17 @@
 
 #pragma once
 
+#include "vtkErCoreDll.h"
+
 #include "Geometry.h"
 
 #include "RenderInfo.cuh"
 #include "Buffer.cuh"
 #include "Lighting.cuh"
+
+#include <vtkObject.h>
+
+class vtkRenderer;
 
 class VTK_ER_CORE_EXPORT vtkErRenderInfo : public vtkObject
 {

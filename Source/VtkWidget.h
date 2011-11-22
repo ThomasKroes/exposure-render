@@ -40,8 +40,6 @@
 #include "VtkErVolumeMapper.h"
 #include "VtkErVolumeProperty.h"
 #include "VtkErCamera.h"
-#include "VtkErVolume.h"
-#include "vtkErRenderCanvas.h"
 
 #include <vtkVolume.h>
 
@@ -94,7 +92,6 @@ public:
 	vtkSmartPointer<vtkRenderer>			m_OverlayRenderer;
 	vtkSmartPointer<vtkCallbackCommand>		m_TimerCallback;
 	vtkSmartPointer<vtkErCamera>			m_Camera;
-	vtkSmartPointer<vtkErRenderCanvas>		m_RenderCanvas;
 };
 
 extern CVtkRenderWidget* gpActiveRenderWidget;

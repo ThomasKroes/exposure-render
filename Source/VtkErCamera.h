@@ -13,13 +13,17 @@
 
 #pragma once
 
+#include "vtkErCoreDll.h"
+
 #include "Geometry.h"
+
+#include "vtkOpenGLCamera.h"
 
 class vtkRenderer;
 
 class VTK_ER_CORE_EXPORT vtkErCamera : public vtkOpenGLCamera
 {
-	vtkTypeRevisionMacro(vtkErCamera, vtkCamera);
+	vtkTypeRevisionMacro(vtkErCamera, vtkOpenGLCamera);
 	static vtkErCamera *New();
 
 	vtkGetMacro(Renderer, vtkRenderer*);

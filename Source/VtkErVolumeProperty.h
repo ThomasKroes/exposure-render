@@ -13,6 +13,12 @@
 
 #pragma once
 
+#include "vtkErCoreDll.h"
+
+#include <vtkVolumeProperty.h>
+#include <vtkSmartPointer.h>
+#include <vtkPiecewiseFunction.h>
+
 class VTK_ER_CORE_EXPORT vtkErVolumeProperty : public vtkVolumeProperty
 {
 	vtkTypeRevisionMacro(vtkErVolumeProperty, vtkVolumeProperty);

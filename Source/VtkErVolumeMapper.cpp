@@ -21,9 +21,10 @@
 #include "Geometry.h"
 
 #include "vtkImageActor.h"
+#include "vtkgl.h"
 
 vtkCxxRevisionMacro(vtkErVolumeMapper, "$Revision: 1.8 $");
-//vtkStandardNewMacro(vtkErVolumeMapper);
+vtkStandardNewMacro(vtkErVolumeMapper);
 
 /*
 // this function runs in an alternate thread to asyncronously generate matrices
@@ -50,7 +51,7 @@ vtkErVolumeMapper::vtkErVolumeMapper()
 //	SetUseCustomRenderSize(false);
 //	SetCustomRenderSize(34, 34);
 
-//	glGenTextures(1, &TextureID);
+	glGenTextures(1, &TextureID);
 
 //	MultiThreader = vtkMultiThreader::New();
 
@@ -65,8 +66,6 @@ vtkErVolumeMapper::~vtkErVolumeMapper()
 void vtkErVolumeMapper::SetInput(vtkImageData* input)
 {
 	this->Superclass::SetInput(input);
-
-
 }
 
 void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
@@ -74,7 +73,6 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	if (!pVolume)
 		return;
 	
-	/*
 	UploadVolumeProperty(pVolume->GetProperty());
 
 	int RenderSize[2];
@@ -149,7 +147,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glEnd();
 
 	glPopAttrib();
-	*/
+	/**/
 }
 
 void vtkErVolumeMapper::PrintSelf(ostream& os, vtkIndent indent)

@@ -13,7 +13,11 @@
 
 #pragma once
 
+#include "vtkErCoreDll.h"
+
 #include "Geometry.h"
+
+#include <vtkLight.h>
 
 class VTK_ER_CORE_EXPORT vtkErLight : public vtkLight
 {
