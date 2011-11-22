@@ -17,13 +17,14 @@
 
 #include "Geometry.h"
 
-#include "vtkOpenGLCamera.h"
+#include <vtkOpenGLCamera.h>
 
 class vtkRenderer;
 
 class VTK_ER_CORE_EXPORT vtkErCamera : public vtkOpenGLCamera
 {
-	vtkTypeRevisionMacro(vtkErCamera, vtkOpenGLCamera);
+public:
+	vtkTypeMacro(vtkErCamera, vtkOpenGLCamera);
 	static vtkErCamera *New();
 
 	vtkGetMacro(Renderer, vtkRenderer*);

@@ -17,10 +17,10 @@
 
 vtkStandardNewMacro(vtkErBackgroundLight);
 
-vtkErBackgroundLight::vtkErBackgroundLight()
+vtkErBackgroundLight::vtkErBackgroundLight(void)
 {
 }
 
-vtkErBackgroundLight::~vtkErBackgroundLight()
+vtkErBackgroundLight::~vtkErBackgroundLight(void)
 {
 }

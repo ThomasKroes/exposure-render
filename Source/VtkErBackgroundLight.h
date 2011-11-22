@@ -17,10 +17,11 @@
 
 class VTK_ER_CORE_EXPORT vtkErBackgroundLight : public vtkErLight
 {
+public:
 	vtkTypeMacro(vtkErBackgroundLight, vtkErLight);
 	static vtkErBackgroundLight *New();
 
 protected:
-	vtkErBackgroundLight();
-	virtual ~vtkErBackgroundLight();
+	vtkErBackgroundLight(void);
+	virtual ~vtkErBackgroundLight(void);
 };

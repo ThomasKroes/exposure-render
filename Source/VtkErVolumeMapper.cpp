@@ -23,7 +23,6 @@
 #include "vtkImageActor.h"
 #include "vtkgl.h"
 
-vtkCxxRevisionMacro(vtkErVolumeMapper, "$Revision: 1.8 $");
 vtkStandardNewMacro(vtkErVolumeMapper);
 
 /*
@@ -41,7 +40,7 @@ static void *vtkTrackerSimulatorRecordThread(vtkMultiThreader::ThreadInfo* pData
 }
 */
 
-vtkErVolumeMapper::vtkErVolumeMapper()
+vtkErVolumeMapper::vtkErVolumeMapper(void)
 {
 	m_CudaVolumeInfo	= vtkErVolumeInfo::New();
 	m_CudaRenderInfo	= vtkErRenderInfo::New();
@@ -59,7 +58,7 @@ vtkErVolumeMapper::vtkErVolumeMapper()
 
 }  
 
-vtkErVolumeMapper::~vtkErVolumeMapper()
+vtkErVolumeMapper::~vtkErVolumeMapper(void)
 {
 }
 
@@ -184,6 +183,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	{
 		vtkErrorMacro("Incompatible volume property (reverting to default property), use vtkErVolumeProperty!");
 		
+		/*
 		vtkSmartPointer<vtkErVolumeProperty> ErVolumeProperty = vtkErVolumeProperty::New();
 
 		ErVolumeProperty->Default(pRange[0], pRange[1]);
@@ -199,6 +199,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 		ErVolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
 		ErVolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
 		ErVolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
+		*/
 	}
 	else
 	{

@@ -17,10 +17,10 @@
 
 vtkStandardNewMacro(vtkErAreaLight);
 
-vtkErAreaLight::vtkErAreaLight()
+vtkErAreaLight::vtkErAreaLight(void)
 {
 }
 
-vtkErAreaLight::~vtkErAreaLight()
+vtkErAreaLight::~vtkErAreaLight(void)
 {
 }

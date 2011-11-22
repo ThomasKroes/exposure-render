@@ -15,15 +15,14 @@
 
 #include "vtkErCamera.h"
 
-vtkCxxRevisionMacro(vtkErCamera, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkErCamera);
 
-vtkErCamera::vtkErCamera()
+vtkErCamera::vtkErCamera(void)
 {
 	Default();
 }
 
-vtkErCamera::~vtkErCamera()
+vtkErCamera::~vtkErCamera(void)
 {
 }
 

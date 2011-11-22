@@ -15,14 +15,7 @@
 
 #include "vtkErLight.h"
 
-vtkCxxRevisionMacro(vtkErLight, "$Revision: 1.0 $");
+#include <vtkObjectFactory.h>
+
+// vtkCxxRevisionMacro(vtkErLight, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkErLight);
-
-vtkErLight::vtkErLight()
-{
-	SetEnabled(true);
-}
-
-vtkErLight::~vtkErLight()
-{
-}

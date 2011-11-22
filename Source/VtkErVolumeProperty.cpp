@@ -15,7 +15,6 @@
 
 #include "vtkErVolumeProperty.h"
 
-vtkCxxRevisionMacro(vtkErVolumeProperty, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkErVolumeProperty);
 
 vtkErVolumeProperty::vtkErVolumeProperty()

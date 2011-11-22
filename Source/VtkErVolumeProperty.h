@@ -21,10 +21,10 @@
 
 class VTK_ER_CORE_EXPORT vtkErVolumeProperty : public vtkVolumeProperty
 {
-	vtkTypeRevisionMacro(vtkErVolumeProperty, vtkVolumeProperty);
+public:
+	vtkTypeMacro(vtkErVolumeProperty, vtkVolumeProperty);
 	static vtkErVolumeProperty *New();
 
-public:
 	void SetOpacity(vtkPiecewiseFunction* pPiecewiseFunction);
 	vtkPiecewiseFunction* GetOpacity(void);
 

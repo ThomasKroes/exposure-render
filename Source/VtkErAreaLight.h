@@ -17,18 +17,17 @@
 
 class VTK_ER_CORE_EXPORT vtkErAreaLight : public vtkErLight
 {
+public:
 	vtkTypeMacro(vtkErAreaLight, vtkErLight);
-	static vtkErAreaLight *New();
+	static vtkErAreaLight* New();
 
 	vtkSetVector3Macro(Size, double);
 	vtkGetVectorMacro(Size, double, 3);
 	void SetSize(float* pSize) { this->SetSize(pSize[0], pSize[1], pSize[2]); };
 
 protected:
-	vtkErAreaLight();
-	virtual ~vtkErAreaLight();
+	vtkErAreaLight(void);
+	virtual ~vtkErAreaLight(void);
 
-	//BTX
 	double Size[3];
-	//ETX
 };

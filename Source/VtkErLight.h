@@ -21,17 +21,20 @@
 
 class VTK_ER_CORE_EXPORT vtkErLight : public vtkLight
 {
-	vtkTypeRevisionMacro(vtkErLight, vtkLight);
-	static vtkErLight *New();
+public:
+	vtkTypeMacro(vtkErLight, vtkLight);
+	static vtkErLight* New();
 
 	vtkGetMacro(Enabled, bool);
 	vtkSetMacro(Enabled, bool);
 
 protected:
-	vtkErLight();
-	virtual ~vtkErLight();
+	vtkErLight(void) { SetEnabled(true); };
+	virtual ~vtkErLight(void) { };
 
-	//BTX
 	bool	Enabled;
-	//ETX
+
+private:
+	vtkErLight(const vtkErLight&);
+	void operator=(const vtkErLight&);
 };

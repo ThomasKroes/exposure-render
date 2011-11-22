@@ -12,7 +12,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Exposure Render core project
-PROJECT(ErCore)
+PROJECT(vtkErCore)
 
 # Find CUDA
 FIND_PACKAGE(CUDA)
@@ -52,7 +52,7 @@ INCLUDE_DIRECTORIES(
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
 
 # Exposure Render core sources
-SET(ErCoreSources
+SET(vtkErCoreSources
 	Flags.cpp
 	Geometry.cpp
 	CudaUtilities.cpp
@@ -63,7 +63,7 @@ SET(ErCoreSources
 )
 
 # Make the "Core" source group
-SOURCE_GROUP("Core" FILES ${ErCoreSources})
+SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 
 # Exposure Render CUDA sources
 SET(ErCudaSources
@@ -119,18 +119,30 @@ SET(ErVtkSources
 	VtkErCamera.cpp
 )
 
+# VTK Exposure Render sources
+SET(ErVtkWrapPythonSources
+	vtkErVolumeMapper.cpp
+	vtkErLight.cpp
+	vtkErAreaLight.cpp
+	vtkErBackgroundLight.cpp
+	vtkErVolumeProperty.cpp
+	vtkErVolumeInfo.cpp
+	vtkErRenderInfo.cpp
+	VtkErCamera.cpp
+)
+
 # Make the "Vtk" source group
 SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${ErCoreSources} ${ErCudaSources} ${ErVtkSources})
+CUDA_ADD_LIBRARY(vtkErCore ${vtkErCoreSources} ${ErCudaSources} ${ErVtkSources})
 
 # Link with the necessary VTK libraries
-TARGET_LINK_LIBRARIES(ErCore vtkRendering vtkImaging vtkFiltering vtkGraphics vtkIO vtkWidgets vtkCommon vtkVolumeRendering vtkViews QVTK)
+TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering QVTK)
 
 # Use precompiled headers
 if (MSVC)
-   set_target_properties(ErCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
+   set_target_properties(vtkErCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
    set_source_files_properties(ErCoreStable.cpp PROPERTIES COMPILE_FLAGS "/YcErCoreStable.h")
 endif(MSVC)
 
@@ -140,12 +152,17 @@ endif(MSVC)
 # Create the Exposure Render core Python library.
 IF (VTK_WRAP_PYTHON)
   INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
-  VTK_WRAP_PYTHON3(ErCore ImagingPython_SRCS "${ErVtkSources}")
-  ADD_LIBRARY(ErCorePythonD ${ImagingPython_SRCS})
-  ADD_LIBRARY(ErCorePython MODULE ErCoreInit.cxx)
-  TARGET_LINK_LIBRARIES(ErCorePythonD ErCore vtkRenderingPythonD vtkGraphicsPythonD vtkIOPythonD vtkWidgetsPythonD vtkCommonPythonD vtkVolumeRenderingPythonD vtkViewsPythonD)
-  TARGET_LINK_LIBRARIES(ErCorePython ErCorePythonD)
+
+  VTK_WRAP_PYTHON3(vtkErCorePython vtkErCorePython_SRCS "${ErVtkWrapPythonSources}")
+  ADD_LIBRARY(vtkErCorePythonD ${vtkErCorePython_SRCS})
+#  ADD_LIBRARY(vtkErCorePython MODULE vtkErCoreInit.cxx)
+  TARGET_LINK_LIBRARIES(vtkErCorePythonD vtkErCore vtkCommonPythonD vtkRenderingPythonD vtkGraphicsPythonD vtkVolumeRenderingPythonD)
+  PYTHON_ADD_MODULE(vtkErCorePython vtkErCorePythonInit.cxx)
+  TARGET_LINK_LIBRARIES(vtkErCorePython vtkErCorePythonD)
+   
+  
 ENDIF (VTK_WRAP_PYTHON)
+
 
 PROJECT(ErGUI)
 
@@ -673,7 +690,7 @@ CUDA_ADD_EXECUTABLE(ErGUI MACOSX_BUNDLE ${ErGUISources} ${UISrcs} ${MOCSrcs} ${R
 TARGET_LINK_LIBRARIES(ErGUI
   QVTK
   ${QT_LIBRARIES}
-  ErCore
+  vtkErCore
 )
 
 ### Precompiled headers ###

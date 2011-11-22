@@ -23,10 +23,8 @@
 class VTK_ER_CORE_EXPORT vtkErVolumeMapper : public vtkVolumeMapper
 {
 public:
-	//BTX
-  vtkTypeRevisionMacro(vtkErVolumeMapper,vtkVolumeMapper);
-//	vtkTypeMacro(vtkErVolumeMapper,vtkVolumeMapper);
-    static vtkErVolumeMapper *New();
+	vtkTypeMacro(vtkErVolumeMapper, vtkVolumeMapper);
+    static vtkErVolumeMapper* New();
 
 	vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
     vtkErVolumeMapper(const vtkErVolumeMapper&);
@@ -39,7 +37,7 @@ public:
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
-    void UpdateOutputResolution(unsigned int width, unsigned int height, bool TypeChanged = false);
+ //   void UpdateOutputResolution(unsigned int width, unsigned int height, bool TypeChanged = false);
 
 	vtkGetMacro(UseCustomRenderSize, bool);
 	vtkSetMacro(UseCustomRenderSize, bool);
@@ -63,7 +61,6 @@ public:
 
 	bool	UseCustomRenderSize;
 	int		CustomRenderSize[2];
-	//ETX
 };
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/
