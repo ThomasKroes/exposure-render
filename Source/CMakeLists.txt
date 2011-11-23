@@ -152,13 +152,16 @@ endif(MSVC)
 # Create the Exposure Render core Python library.
 IF (VTK_WRAP_PYTHON)
   INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
+  
+  
+
 
   VTK_WRAP_PYTHON3(vtkErCorePython vtkErCorePython_SRCS "${ErVtkWrapPythonSources}")
   ADD_LIBRARY(vtkErCorePythonD ${vtkErCorePython_SRCS})
-#  ADD_LIBRARY(vtkErCorePython MODULE vtkErCoreInit.cxx)
-  TARGET_LINK_LIBRARIES(vtkErCorePythonD vtkErCore vtkCommonPythonD vtkRenderingPythonD vtkGraphicsPythonD vtkVolumeRenderingPythonD)
   PYTHON_ADD_MODULE(vtkErCorePython vtkErCorePythonInit.cxx)
   TARGET_LINK_LIBRARIES(vtkErCorePython vtkErCorePythonD)
+  TARGET_LINK_LIBRARIES(vtkErCorePythonD vtkErCore vtkCommonPythonD vtkRenderingPythonD vtkGraphicsPythonD vtkVolumeRenderingPythonD)  
+  
    
   
 ENDIF (VTK_WRAP_PYTHON)

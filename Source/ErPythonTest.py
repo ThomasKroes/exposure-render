@@ -2,7 +2,7 @@
 
 
 #import vtkErCorePython
-import vtkmyImagingPython #ErCorePython
+import ErCorePython
 import vtk.rendering
 # Create the standard renderer, render window and interactor
 ren = vtk.vtkRenderer()
