@@ -255,17 +255,22 @@ void vtkErRenderInfo::Update()
 		pActors->InitTraversal();
 		vtkActor* pActor = pActors->GetNextItem();
 
-		/*
+		count = 0;
+
 		while (pActor != 0)
 		{
 			vtkPlaneSource* pPlaneSource = dynamic_cast<vtkPlaneSource*>(pActor);
 
 			if (pPlaneSource)
 			{
-				m_Lighting.m_Type[count] = 1;
+//				this->Slicing.m_Position	= pPlaneSource->getpo;
 			}
+
+			pActor = pActors->GetNextItem();
+
+			count++;
 		}
-		*/
+		/**/
     }
 }
 

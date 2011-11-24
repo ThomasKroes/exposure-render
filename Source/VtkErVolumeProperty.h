@@ -18,6 +18,7 @@
 #include <vtkVolumeProperty.h>
 #include <vtkSmartPointer.h>
 #include <vtkPiecewiseFunction.h>
+#include <vtkColorTransferFunction.h>
 
 class VTK_ER_CORE_EXPORT vtkErVolumeProperty : public vtkVolumeProperty
 {
@@ -29,15 +30,18 @@ public:
 	vtkPiecewiseFunction* GetOpacity(void);
 
 	void SetDiffuse(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
+//	void SetDiffuse(vtkColorTransferFunction* pDiffuse);
 	vtkPiecewiseFunction* GetDiffuse(int Index);
 
 	void SetSpecular(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
+//	void SetSpecular(vtkColorTransferFunction* pSpecular);
 	vtkPiecewiseFunction* GetSpecular(int Index);
 
 	void SetGlossiness(vtkPiecewiseFunction* pPiecewiseFunction);
 	vtkPiecewiseFunction* GetGlossiness(void);
 
 	void SetEmission(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
+//	void SetEmission(vtkColorTransferFunction* pEmission);
 	vtkPiecewiseFunction* GetEmission(int Index);
 
 	vtkGetMacro(Dirty, bool);

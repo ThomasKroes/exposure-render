@@ -13,52 +13,16 @@
 
 #pragma once
 
-#include "vtkErCoreDll.h"
-
 #include "Geometry.h"
 
-#include "RenderInfo.cuh"
 #include "Buffer.cuh"
-#include "Lighting.cuh"
-#include "Slicing.cuh"
 
-#include <vtkObject.h>
+#define MAX_NO_SLICES	10
 
-class vtkRenderer;
-
-class VTK_ER_CORE_EXPORT vtkErRenderInfo : public vtkObject
+struct EXPOSURE_RENDER_DLL Slicing
 {
-	vtkTypeRevisionMacro(vtkErRenderInfo, vtkObject);
-
-public:
-	static vtkErRenderInfo *New();
-
-	void SetRenderer(vtkRenderer* pRenderer);
-
-	vtkGetMacro(Renderer, vtkRenderer*);
-
-	//BTX
-	RenderInfo* GetRenderInfo(void) { return &RendererInfo; }
-	//ETX
-
-	virtual void Update();
-
-	void Reset();
-
-protected:
-	vtkErRenderInfo();
-	virtual ~vtkErRenderInfo();
-
-public:
-	//BTX
-	RenderInfo		RendererInfo;
-	Lighting		m_Lighting;
-	Slicing			Slicing;
-
-	vtkRenderer*	Renderer;
-	//ETX
-public:
-	//BTX
-	FrameBuffer		m_FrameBuffer;
-	//ETX
+	float3		m_Position[MAX_NO_SLICES];
+	float3		m_Normal[MAX_NO_SLICES];
+	bool		m_Reverse[MAX_NO_SLICES];
+	int			m_NoSlices;
 };

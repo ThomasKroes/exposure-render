@@ -147,7 +147,7 @@ void CVtkRenderWidget::LoadVolume(const QString& FilePath)
 	
 	// Environment light
 	vtkErBackgroundLight* pErBackgroundLight = vtkErBackgroundLight::New();
-	pErBackgroundLight->SetDiffuseColor(5000, 5000, 10000);
+	pErBackgroundLight->SetDiffuseColor(500, 500, 10000);
 	m_Renderer->AddLight(pErBackgroundLight);
 
 	vtkPlaneWidget* planeWidget = vtkPlaneWidget::New();

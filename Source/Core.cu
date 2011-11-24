@@ -13,8 +13,7 @@
 
 #include "Core.cuh"
 
-#include "Slice.cuh"
-
+#include "Slicing.cuh"
 #include "VolumeInfo.cuh"
 #include "RenderInfo.cuh"
 #include "Lighting.cuh"

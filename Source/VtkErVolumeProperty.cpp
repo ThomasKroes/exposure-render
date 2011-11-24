@@ -234,14 +234,14 @@ void vtkErVolumeProperty::Default(double Min, double Max)
 
 	for (int i = 0; i < 3; i++)
 	{
-		Diffuse[0]->AddPoint(Min, 0.5, 0.5, 0);
-		Diffuse[0]->AddPoint(Max, 0.5, 0.5, 0);
+		Diffuse[i]->AddPoint(Min, 0.5, 0.5, 0);
+		Diffuse[i]->AddPoint(Max, 0.5, 0.5, 0);
 	}
 
 	for (int i = 0; i < 3; i++)
 	{
-		Specular[0]->AddPoint(Min, 0.5, 0.5, 0);
-		Specular[0]->AddPoint(Max, 0.5, 0.5, 0);
+		Specular[i]->AddPoint(Min, 0.5, 0.5, 0);
+		Specular[i]->AddPoint(Max, 0.5, 0.5, 0);
 	}
 
 	Glossiness->AddPoint(Min, 1, 0.5, 0);
@@ -249,8 +249,8 @@ void vtkErVolumeProperty::Default(double Min, double Max)
 
 	for (int i = 0; i < 3; i++)
 	{
-		Emission[0]->AddPoint(Min, 0.5, 0.5, 0);
-		Emission[0]->AddPoint(Max, 0.5, 0.5, 0);
+		Emission[i]->AddPoint(Min, 0.5, 0.5, 0);
+		Emission[i]->AddPoint(Max, 0.5, 0.5, 0);
 	}
 
 	SetDensityScale(vtkErVolumeProperty::DefaultDensityScale());

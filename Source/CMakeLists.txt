@@ -87,7 +87,7 @@ SET(ErCudaSources
 	Camera.cuh
 	Lighting.cuh
 	MonteCarlo.cuh
-	Slice.cuh
+	Slicing.cuh
 	VolumeInfo.cuh
 	RenderInfo.cuh
 	Buffer.cuh
@@ -108,7 +108,9 @@ SET(ErVtkSources
 	vtkErVolumeProperty.h
 	vtkErVolumeInfo.h
 	vtkErRenderInfo.h
-	VtkErCamera.h
+	vtkErCamera.h
+	vtkErSlicePlane.h
+	vtkErSlicingPlaneWidget.h
 	vtkErVolumeMapper.cpp
 	vtkErLight.cpp
 	vtkErAreaLight.cpp
@@ -116,7 +118,9 @@ SET(ErVtkSources
 	vtkErVolumeProperty.cpp
 	vtkErVolumeInfo.cpp
 	vtkErRenderInfo.cpp
-	VtkErCamera.cpp
+	vtkErCamera.cpp
+	vtkErSlicePlane.cpp
+	vtkErSlicingPlaneWidget.cpp
 )
 
 # VTK Exposure Render sources
@@ -128,7 +132,9 @@ SET(ErVtkWrapPythonSources
 	vtkErVolumeProperty.cpp
 	vtkErVolumeInfo.cpp
 	vtkErRenderInfo.cpp
-	VtkErCamera.cpp
+	vtkErCamera.cpp
+	vtkErSlicePlane.cpp
+	vtkErSlicingPlaneWidget.cpp
 )
 
 # Make the "Vtk" source group

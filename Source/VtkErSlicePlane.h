@@ -13,36 +13,44 @@
 
 #pragma once
 
+#include "vtkErCoreDll.h"
+
 #include "Geometry.h"
 
-#define MAX_NO_SLICES	10
+#include <vtkProp3D.h>
+#include <vtkSmartPointer.h>
+#include <vtkPlaneSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
 
-struct EXPOSURE_RENDER_DLL CSlice
+class VTK_ER_CORE_EXPORT vtkErSlicePlane : public vtkProp3D
 {
-	bool Contains(const Vec3f& P)
-	{
-		return Dot(P - m_P, m_N) > 0.0f;
-	}
+public:
+	vtkTypeMacro(vtkErSlicePlane, vtkProp3D);
+	static vtkErSlicePlane* New();
 
-	Vec3f	m_P;
-	Vec3f	m_N;
-//	CRange	m_IntensityRange;
-	bool	m_Reversed;
-};
+	vtkGetMacro(Enabled, bool);
+	vtkSetMacro(Enabled, bool);
 
-struct EXPOSURE_RENDER_DLL CSlicing
-{
-	HOD bool Contains(const Vec3f& P)
-	{
-		for (int i = 0; i < MAX_NO_SLICES; i++)
-		{
-			if (m_Slices[i].Contains(P))
-				return true;
-		}
+	double* GetBounds(void);
 
-		return false;
-	}
+  virtual int RenderOpaqueGeometry(vtkViewport* pViewport);
+  virtual int HasTranslucentPolygonalGeometry();
 
-	CSlice	m_Slices[MAX_NO_SLICES];
-	int		m_NoSlices;
+protected:
+	vtkErSlicePlane(void);
+	virtual ~vtkErSlicePlane(void);
+
+	void UpdateViewProps();
+
+private:
+	vtkErSlicePlane(const vtkErSlicePlane&);
+	void operator=(const vtkErSlicePlane&);
+
+	vtkSmartPointer<vtkPlaneSource>		PlaneSource;
+	vtkSmartPointer<vtkPolyDataMapper>	PlaneMapper;
+	vtkSmartPointer<vtkActor>			PlaneActor;
+
+	bool		Enabled;
+	double		Size[2];
 };
