@@ -17,6 +17,7 @@
 #include "vtkErAreaLight.h"
 #include "vtkErBackgroundLight.h"
 #include "vtkErCamera.h"
+#include "vtkErSlicePlane.h"
 
 #include "Core.cuh"
 
@@ -197,7 +198,7 @@ void vtkErRenderInfo::Update()
 
 		vtkLightCollection* pLights = Renderer->GetLights();
 
-		m_Lighting.m_NoLights = pLights->GetNumberOfItems();
+		Lighting.m_NoLights = pLights->GetNumberOfItems();
 
 		 
  
@@ -213,34 +214,34 @@ void vtkErRenderInfo::Update()
 
 			if (pAreaLight && pAreaLight->GetEnabled())
 			{
-				m_Lighting.m_Type[count] = 1;
+				Lighting.m_Type[count] = 1;
 
-				m_Lighting.m_P[count].x = pLight->GetPosition()[0];
-				m_Lighting.m_P[count].y = pLight->GetPosition()[1];
-				m_Lighting.m_P[count].z = pLight->GetPosition()[2];
+				Lighting.m_P[count].x = pLight->GetPosition()[0];
+				Lighting.m_P[count].y = pLight->GetPosition()[1];
+				Lighting.m_P[count].z = pLight->GetPosition()[2];
 
 				ColorXYZf Color;
 
 				Color.FromRGB(pLight->GetDiffuseColor()[0], pLight->GetDiffuseColor()[1], pLight->GetDiffuseColor()[2]);
 
-				m_Lighting.m_Color[count].x = Color[0];
-				m_Lighting.m_Color[count].y = Color[1];
-				m_Lighting.m_Color[count].z = Color[2];
+				Lighting.m_Color[count].x = Color[0];
+				Lighting.m_Color[count].y = Color[1];
+				Lighting.m_Color[count].z = Color[2];
 
 				count++;
 			}
 
 			if (pBackgroundLight && pBackgroundLight->GetEnabled())
 			{
-				m_Lighting.m_Type[count] = 2;
+				Lighting.m_Type[count] = 2;
 
 				ColorXYZf Color;
 
 				Color.FromRGB(pLight->GetDiffuseColor()[0], pLight->GetDiffuseColor()[1], pLight->GetDiffuseColor()[2]);
 
-				m_Lighting.m_Color[count].x = Color[0];
-				m_Lighting.m_Color[count].y = Color[1];
-				m_Lighting.m_Color[count].z = Color[2];
+				Lighting.m_Color[count].x = Color[0];
+				Lighting.m_Color[count].y = Color[1];
+				Lighting.m_Color[count].z = Color[2];
 
 				count++;
 			}
@@ -259,17 +260,29 @@ void vtkErRenderInfo::Update()
 
 		while (pActor != 0)
 		{
-			vtkPlaneSource* pPlaneSource = dynamic_cast<vtkPlaneSource*>(pActor);
+			vtkErSlicePlaneActor* ErPlaneActor = dynamic_cast<vtkErSlicePlaneActor*>(pActor);
 
-			if (pPlaneSource)
+			if (ErPlaneActor)
 			{
-//				this->Slicing.m_Position	= pPlaneSource->getpo;
+//				vtkErrorMacro("Found a slice plane!");
+
+				this->Slicing.m_Position[count].x = 1000.0f * ErPlaneActor->GetPlaneSource()->GetOrigin()[0];
+				this->Slicing.m_Position[count].y = 1000.0f * ErPlaneActor->GetPlaneSource()->GetOrigin()[1];
+				this->Slicing.m_Position[count].z = 1000.0f * ErPlaneActor->GetPlaneSource()->GetOrigin()[2];
+
+				this->Slicing.m_Normal[count].x = 1000.0f * ErPlaneActor->GetPlaneSource()->GetNormal()[0];
+				this->Slicing.m_Normal[count].y = 1000.0f * ErPlaneActor->GetPlaneSource()->GetNormal()[1];
+				this->Slicing.m_Normal[count].z = 1000.0f * ErPlaneActor->GetPlaneSource()->GetNormal()[2];
+
+				this->Slicing.m_Reverse[count] = false;
 			}
 
 			pActor = pActors->GetNextItem();
 
 			count++;
 		}
+
+		this->Slicing.m_NoSlices = count;
 		/**/
     }
 }

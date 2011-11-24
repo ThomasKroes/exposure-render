@@ -17,57 +17,35 @@
 
 #include <vtkObjectFactory.h>
 
-vtkStandardNewMacro(vtkErSlicePlane);
+vtkStandardNewMacro(vtkErSlicePlaneActor);
 
-vtkErSlicePlane::vtkErSlicePlane(void)
+vtkErSlicePlaneActor::vtkErSlicePlaneActor(void)
 {
 	SetEnabled(true);
 };
 
-vtkErSlicePlane::~vtkErSlicePlane(void)
+vtkErSlicePlaneActor::~vtkErSlicePlaneActor(void)
 {
 };
 
-double* vtkErSlicePlane::GetBounds(void)
+/*
+double* vtkErSlicePlaneActor::GetBounds(void)
 {
 	return NULL;
 }
 
-int vtkErSlicePlane::RenderOpaqueGeometry(vtkViewport *viewport)
+int vtkErSlicePlaneActor::RenderOpaqueGeometry(vtkViewport *viewport)
 {
-	this->UpdateViewProps();
-  
-	int result=0;
-  
-	if (this->PlaneActor != NULL && this->PlaneActor->GetMapper() != NULL)
-	{
-		result = this->PlaneActor->RenderOpaqueGeometry(viewport);
-	}
-  
-	return result;
+	return 0;
 }
 
-int vtkErSlicePlane::HasTranslucentPolygonalGeometry()
+int vtkErSlicePlaneActor::HasTranslucentPolygonalGeometry()
 {
 	return false;
 }
 
-void vtkErSlicePlane::UpdateViewProps()
+void vtkErSlicePlaneActor::UpdateViewProps()
 {
-	if (this->PlaneSource == NULL)
-		PlaneSource = vtkPlaneSource::New();
 
-	if (this->PlaneMapper == NULL)
-		PlaneMapper	= vtkPolyDataMapper::New();
-
-	if (this->PlaneActor == NULL)
-		PlaneActor	= vtkActor::New();
-
-	this->PlaneSource->SetPoint1(100, -100, 0);
-	this->PlaneSource->SetPoint2(-100, 100, 0);
-	this->PlaneSource->SetOrigin(0, 0, 0);
-
-	this->PlaneMapper->SetInputConnection(this->PlaneSource->GetOutputPort());
-	this->PlaneActor->SetMapper(this->PlaneMapper);
-//	this->ConeMapper->SetScalarVisibility(0);
 }
+*/

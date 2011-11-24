@@ -110,7 +110,7 @@ SET(ErVtkSources
 	vtkErRenderInfo.h
 	vtkErCamera.h
 	vtkErSlicePlane.h
-	vtkErSlicingPlaneWidget.h
+	vtkErSlicePlaneWidget.h
 	vtkErVolumeMapper.cpp
 	vtkErLight.cpp
 	vtkErAreaLight.cpp
@@ -120,7 +120,7 @@ SET(ErVtkSources
 	vtkErRenderInfo.cpp
 	vtkErCamera.cpp
 	vtkErSlicePlane.cpp
-	vtkErSlicingPlaneWidget.cpp
+	vtkErSlicePlaneWidget.cpp
 )
 
 # VTK Exposure Render sources
@@ -134,7 +134,7 @@ SET(ErVtkWrapPythonSources
 	vtkErRenderInfo.cpp
 	vtkErCamera.cpp
 	vtkErSlicePlane.cpp
-	vtkErSlicingPlaneWidget.cpp
+	vtkErSlicePlaneWidget.cpp
 )
 
 # Make the "Vtk" source group
@@ -144,7 +144,7 @@ SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 CUDA_ADD_LIBRARY(vtkErCore ${vtkErCoreSources} ${ErCudaSources} ${ErVtkSources})
 
 # Link with the necessary VTK libraries
-TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering QVTK)
+TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering vtkWidgets QVTK)
 
 # Use precompiled headers
 if (MSVC)
@@ -166,7 +166,7 @@ IF (VTK_WRAP_PYTHON)
   ADD_LIBRARY(vtkErCorePythonD ${vtkErCorePython_SRCS})
   PYTHON_ADD_MODULE(vtkErCorePython vtkErCorePythonInit.cxx)
   TARGET_LINK_LIBRARIES(vtkErCorePython vtkErCorePythonD)
-  TARGET_LINK_LIBRARIES(vtkErCorePythonD vtkErCore vtkCommonPythonD vtkRenderingPythonD vtkGraphicsPythonD vtkVolumeRenderingPythonD)  
+  TARGET_LINK_LIBRARIES(vtkErCorePythonD vtkErCore vtkCommonPythonD vtkRenderingPythonD vtkGraphicsPythonD vtkVolumeRenderingPythonD vtkWidgetsPythonD)  
   
    
   

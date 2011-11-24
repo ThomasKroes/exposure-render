@@ -52,7 +52,7 @@ protected:
 public:
 	//BTX
 	RenderInfo		RendererInfo;
-	Lighting		m_Lighting;
+	Lighting		Lighting;
 	Slicing			Slicing;
 
 	vtkRenderer*	Renderer;

@@ -74,9 +74,10 @@ Renderer.AddLight(ErBackgroundLight);
 # SlicePlane = vtkErCorePython.vtkErSlicePlane()
 # Renderer.AddViewProp(SlicePlane)
 
-PlaneWidget = vtk.vtkPlaneWidget()
+PlaneWidget = vtkErCorePython.vtkErSlicePlaneWidget()
 PlaneWidget.SetInteractor(Interactor)
 PlaneWidget.On()
+PlaneWidget.PlaceWidget(-150, 150, -150, 150, 0, 0)
 
 InteractorStyle = vtk.vtkInteractorStyleTrackballCamera()
 Interactor.SetInteractorStyle(InteractorStyle)
@@ -86,16 +87,19 @@ RendererWin.SetSize(600, 600)
 RendererWin.Render()
 
 def TimeOut(obj, event):
-    obj.Render()
+    Interactor.Render()
 
 # ER requires progressive updates, so create a repeating timer and Rendererder when it times out
 RendererWin.GetInteractor().AddObserver("TimerEvent", TimeOut)
 RendererWin.GetInteractor().CreateRepeatingTimer(1)
+PlaneWidget.GetPlaneActor().AddObserver("ModifiedEvent", TimeOut)
 
 def CheckAbort(obj, event):
     if obj.GetEventPending() != 0:
         obj.SetAbortRender(1)
- 
+
+
+
 RendererWin.AddObserver("AbortCheckEvent", CheckAbort)
 
 Interactor.Initialize()

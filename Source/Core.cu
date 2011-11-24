@@ -41,6 +41,7 @@ cudaArray* gpEmissionArray				= NULL;
 
 CD VolumeInfo	gVolumeInfo;
 CD Lighting		gLighting;
+CD Slicing		gSlicing;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -212,11 +213,11 @@ void UnbindTransferFunctions1D(void)
 	HandleCudaError(cudaUnbindTexture(gTexEmission));
 }
 
-void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, Lighting* pLighting, FrameBuffer* pFrameBuffer)
+void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, Lighting* pLighting, Slicing* pSlicing, FrameBuffer* pFrameBuffer)
 {
 	HandleCudaError(cudaMemcpyToSymbol("gVolumeInfo", pVolumeInfo, sizeof(VolumeInfo)));
 	HandleCudaError(cudaMemcpyToSymbol("gLighting", pLighting, sizeof(Lighting)));
-
+	HandleCudaError(cudaMemcpyToSymbol("gSlicing", pSlicing, sizeof(Slicing)));
 	
 	RenderInfo*		pDevRenderInfo	= NULL;
 	FrameBuffer*	pDevFrameBuffer	= NULL;

@@ -23,31 +23,34 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 
-class VTK_ER_CORE_EXPORT vtkErSlicePlane : public vtkProp3D
+class VTK_ER_CORE_EXPORT vtkErSlicePlaneActor : public vtkActor
 {
 public:
-	vtkTypeMacro(vtkErSlicePlane, vtkProp3D);
-	static vtkErSlicePlane* New();
+	vtkTypeMacro(vtkErSlicePlaneActor, vtkActor);
+	static vtkErSlicePlaneActor* New();
 
 	vtkGetMacro(Enabled, bool);
 	vtkSetMacro(Enabled, bool);
 
-	double* GetBounds(void);
+	vtkGetMacro(PlaneSource, vtkPlaneSource*);
+	vtkSetMacro(PlaneSource, vtkPlaneSource*);
 
-  virtual int RenderOpaqueGeometry(vtkViewport* pViewport);
-  virtual int HasTranslucentPolygonalGeometry();
+//	double* GetBounds(void);
+
+//	virtual int RenderOpaqueGeometry(vtkViewport* pViewport);
+//	virtual int HasTranslucentPolygonalGeometry();
 
 protected:
-	vtkErSlicePlane(void);
-	virtual ~vtkErSlicePlane(void);
+	vtkErSlicePlaneActor(void);
+	virtual ~vtkErSlicePlaneActor(void);
 
-	void UpdateViewProps();
+//	void UpdateViewProps();
 
 private:
-	vtkErSlicePlane(const vtkErSlicePlane&);
-	void operator=(const vtkErSlicePlane&);
+	vtkErSlicePlaneActor(const vtkErSlicePlaneActor&);
+	void operator=(const vtkErSlicePlaneActor&);
 
-	vtkSmartPointer<vtkPlaneSource>		PlaneSource;
+	vtkPlaneSource*		PlaneSource;
 	vtkSmartPointer<vtkPolyDataMapper>	PlaneMapper;
 	vtkSmartPointer<vtkActor>			PlaneActor;
 

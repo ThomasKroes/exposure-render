@@ -14,30 +14,7 @@
 #include "ErCoreStable.h"
 
 #include "vtkErSlicePlaneWidget.h"
-
-#include "vtkActor.h"
-#include "vtkAssemblyNode.h"
-#include "vtkAssemblyPath.h"
-#include "vtkCallbackCommand.h"
-#include "vtkCamera.h"
-#include "vtkCellArray.h"
-#include "vtkCellPicker.h"
-#include "vtkConeSource.h"
-#include "vtkDoubleArray.h"
-#include "vtkFloatArray.h"
-#include "vtkLineSource.h"
-#include "vtkMath.h"
-#include "vtkObjectFactory.h"
-#include "vtkPlane.h"
-#include "vtkPlaneSource.h"
-#include "vtkPlanes.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkProperty.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkRenderer.h"
-#include "vtkSphereSource.h"
-#include "vtkTransform.h"
+#include "vtkErSlicePlane.h"
 
 vtkStandardNewMacro(vtkErSlicePlaneWidget);
 
@@ -74,8 +51,9 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget() : vtkPolyDataSourceWidget()
   outline->Delete();
   this->PlaneMapper = vtkPolyDataMapper::New();
   this->PlaneMapper->SetInput(this->PlaneSource->GetOutput());
-  this->PlaneActor = vtkActor::New();
+  this->PlaneActor = vtkErSlicePlaneActor::New();
   this->PlaneActor->SetMapper(this->PlaneMapper);
+  this->PlaneActor->SetPlaneSource(this->PlaneSource);
 
   // Create the handles
   this->Handle = new vtkActor* [4];

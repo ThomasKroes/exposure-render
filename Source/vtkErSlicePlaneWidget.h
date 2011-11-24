@@ -17,24 +17,36 @@
 
 #include "vtkPolyDataSourceWidget.h"
 
-class vtkActor;
-class vtkCellPicker;
-class vtkConeSource;
-class vtkLineSource;
-class vtkPlaneSource;
-class vtkPoints;
-class vtkPolyData;
-class vtkPolyDataMapper;
-class vtkProp;
-class vtkProperty;
-class vtkSphereSource;
-class vtkTransform;
-class vtkPlane;
+#include "vtkActor.h"
+#include "vtkAssemblyNode.h"
+#include "vtkAssemblyPath.h"
+#include "vtkCallbackCommand.h"
+#include "vtkCamera.h"
+#include "vtkCellArray.h"
+#include "vtkCellPicker.h"
+#include "vtkConeSource.h"
+#include "vtkDoubleArray.h"
+#include "vtkFloatArray.h"
+#include "vtkLineSource.h"
+#include "vtkMath.h"
+#include "vtkObjectFactory.h"
+#include "vtkPlane.h"
+#include "vtkPlaneSource.h"
+#include "vtkPlanes.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkSphereSource.h"
+#include "vtkTransform.h"
 
 #define VTK_PLANE_OFF 0
 #define VTK_PLANE_OUTLINE 1
 #define VTK_PLANE_WIREFRAME 2
 #define VTK_PLANE_SURFACE 3
+
+#include "vtkErSlicePlane.h"
 
 class VTK_ER_CORE_EXPORT vtkErSlicePlaneWidget : public vtkPolyDataSourceWidget
 {
@@ -43,7 +55,7 @@ public:
   // Instantiate the object.
   static vtkErSlicePlaneWidget *New();
 
-  vtkTypeMacro(vtkErSlicePlaneWidget,vtkPolyDataSourceWidget);
+  vtkTypeMacro(vtkErSlicePlaneWidget, vtkPolyDataSourceWidget);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
@@ -171,6 +183,8 @@ public:
   virtual void SetPlaneProperty(vtkProperty*);
   vtkGetObjectMacro(PlaneProperty,vtkProperty);
   vtkGetObjectMacro(SelectedPlaneProperty,vtkProperty);
+  vtkGetObjectMacro(PlaneActor,vtkErSlicePlaneActor);
+  
   
 protected:
   vtkErSlicePlaneWidget();
@@ -213,7 +227,7 @@ protected:
   void SelectRepresentation();
 
   // the plane
-  vtkActor          *PlaneActor;
+  vtkErSlicePlaneActor          *PlaneActor;
   vtkPolyDataMapper *PlaneMapper;
   vtkPlaneSource    *PlaneSource;
   vtkPolyData       *PlaneOutline;
