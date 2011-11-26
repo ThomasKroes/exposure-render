@@ -107,9 +107,9 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_InvMinAABB.y	= 0.0f;
 		m_VolumeInfo.m_InvMinAABB.z	= 0.0f;
 
-		m_VolumeInfo.m_MaxAABB.x	= 0.001f * PhysicalSize.x;
-		m_VolumeInfo.m_MaxAABB.y	= 0.001f * PhysicalSize.y;
-		m_VolumeInfo.m_MaxAABB.z	= 0.001f * PhysicalSize.z;
+		m_VolumeInfo.m_MaxAABB.x	= PhysicalSize.x;
+		m_VolumeInfo.m_MaxAABB.y	= PhysicalSize.y;
+		m_VolumeInfo.m_MaxAABB.z	= PhysicalSize.z;
 
 		m_VolumeInfo.m_InvMaxAABB.x	= 1.0f / m_VolumeInfo.m_MaxAABB.x;
 		m_VolumeInfo.m_InvMaxAABB.y	= 1.0f / m_VolumeInfo.m_MaxAABB.y;

@@ -35,6 +35,7 @@ DEV float GetOpacity(const float& NormalizedIntensity)
 
 DEV float GetOpacity(const Vec3f& P)
 {
+	/*
 	for (int i = 0; i < gSlicing.m_NoSlices; i++)
 	{
 		Vec3f D = P - ToVec3f(gSlicing.m_Position[i]);
@@ -45,6 +46,7 @@ DEV float GetOpacity(const Vec3f& P)
 
 	if (P.x > 0.5f * gVolumeInfo.m_MaxAABB.x)
 		return 0.0f;
+	*/
 
 	return GetOpacity(GetNormalizedIntensity(P));
 }

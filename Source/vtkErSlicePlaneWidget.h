@@ -40,6 +40,13 @@
 #include "vtkRenderer.h"
 #include "vtkSphereSource.h"
 #include "vtkTransform.h"
+#include "vtkVolume.h"
+#include "vtkPoints.h"
+#include "vtkCubeSource.h"
+#include "vtkLabeledDataMapper.h"
+#include "vtkPointSource.h"
+#include "vtkActor2D.h"
+#include "vtkProperty2D.h"
 
 #define VTK_PLANE_OFF 0
 #define VTK_PLANE_OUTLINE 1
@@ -185,7 +192,10 @@ public:
   vtkGetObjectMacro(SelectedPlaneProperty,vtkProperty);
   vtkGetObjectMacro(PlaneActor,vtkErSlicePlaneActor);
   
-  
+  vtkGetMacro(Volume, vtkVolume*);
+//	vtkSetMacro(Volume, vtkVolume*);
+	void SetVolume(vtkVolume* pVolume);
+
 protected:
   vtkErSlicePlaneWidget();
   ~vtkErSlicePlaneWidget();
@@ -299,6 +309,24 @@ protected:
   int    LastPickValid;
   double HandleSizeFactor;
   
+	vtkVolume*								Volume;
+
+	// Bounding box lines
+	vtkSmartPointer<vtkActor>				BoundingBoxActor;
+	vtkSmartPointer<vtkPolyDataMapper>		BoundingBoxMapper;
+	vtkSmartPointer<vtkCubeSource>			BoundingBoxSource;
+	vtkSmartPointer<vtkProperty>			BoundingBoxProperty;
+
+	// Bounding box points and labels
+	vtkSmartPointer<vtkPoints>				BoundingBoxPoints;
+	vtkSmartPointer<vtkPolyData>			BoundingBoxPointPolyData;
+	vtkSmartPointer<vtkPolyDataMapper>		BoundingBoxPointMapper;
+	vtkSmartPointer<vtkActor>				BoundingBoxPointActor;
+	vtkSmartPointer<vtkProperty>			BoundingBoxPointProperty;
+	vtkSmartPointer<vtkLabeledDataMapper>	BoundingBoxPointLabelMapper;
+	vtkSmartPointer<vtkActor2D>				BoundingBoxPointLabelActor;
+	vtkSmartPointer<vtkProperty2D>			BoundingBoxPointLabelProperty;
+	
 private:
   vtkErSlicePlaneWidget(const vtkErSlicePlaneWidget&);  //Not implemented
   void operator=(const vtkErSlicePlaneWidget&);  //Not implemented

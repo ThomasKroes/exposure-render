@@ -146,6 +146,70 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget() : vtkPolyDataSourceWidget()
   // Call PlaceWidget() LAST in the constructor as it depends on ivar
   // values.
   this->PlaceWidget(bounds);
+  
+	// Bounding box lines
+	this->BoundingBoxActor				= vtkActor::New();
+	this->BoundingBoxMapper				= vtkPolyDataMapper::New();
+	this->BoundingBoxSource				= vtkCubeSource::New();
+	this->BoundingBoxProperty			= vtkProperty::New();
+	
+	this->BoundingBoxActor->SetMapper(BoundingBoxMapper);
+	this->BoundingBoxActor->SetProperty(this->BoundingBoxProperty);
+	this->BoundingBoxMapper->SetInput(BoundingBoxSource->GetOutput());
+	this->BoundingBoxProperty->SetRepresentationToWireframe();
+
+	// Bounding box points and labels
+	this->BoundingBoxPoints				= vtkPoints::New();
+	this->BoundingBoxPointPolyData		= vtkPolyData::New();
+	this->BoundingBoxPointMapper		= vtkPolyDataMapper::New();
+	this->BoundingBoxPointActor			= vtkActor::New();
+	this->BoundingBoxPointProperty		= vtkProperty::New();
+	this->BoundingBoxPointLabelMapper	= vtkLabeledDataMapper::New();
+	this->BoundingBoxPointLabelActor	= vtkActor2D::New();
+	this->BoundingBoxPointLabelProperty	= vtkProperty2D::New();
+
+	this->BoundingBoxPoints->SetNumberOfPoints(8);
+	this->BoundingBoxPointMapper->SetInput(this->BoundingBoxPointPolyData);
+	this->BoundingBoxPointActor->SetProperty(this->BoundingBoxPointProperty);
+	this->BoundingBoxPointActor->SetMapper(this->BoundingBoxPointMapper);
+	this->BoundingBoxPointProperty->SetPointSize(100);
+	this->BoundingBoxPointProperty->SetColor(0.9, 0.6, 0.1);
+	this->BoundingBoxPointLabelActor->SetMapper(this->BoundingBoxPointLabelMapper);
+	this->BoundingBoxPointLabelActor->SetProperty(this->BoundingBoxPointLabelProperty);
+}
+
+void vtkErSlicePlaneWidget::SetVolume(vtkVolume* pVolume)
+{
+	if (pVolume == NULL)
+	{
+		vtkErrorMacro("This widget needs a valid volume!");
+		return;
+	}
+
+	this->Volume = pVolume;
+
+	this->BoundingBoxSource->SetBounds(pVolume->GetMapper()->GetBounds());
+
+	double* pBounds = pVolume->GetMapper()->GetBounds();
+
+	this->BoundingBoxPoints->SetPoint(0, pBounds[0], pBounds[2], pBounds[4]);
+	this->BoundingBoxPoints->SetPoint(1, pBounds[1], pBounds[2], pBounds[4]);
+	this->BoundingBoxPoints->SetPoint(2, pBounds[0], pBounds[3], pBounds[4]);
+	this->BoundingBoxPoints->SetPoint(3, pBounds[1], pBounds[3], pBounds[4]);
+	this->BoundingBoxPoints->SetPoint(4, pBounds[0], pBounds[2], pBounds[5]);
+	this->BoundingBoxPoints->SetPoint(5, pBounds[1], pBounds[2], pBounds[5]);
+	this->BoundingBoxPoints->SetPoint(6, pBounds[0], pBounds[3], pBounds[5]);
+	this->BoundingBoxPoints->SetPoint(7, pBounds[1], pBounds[3], pBounds[5]);
+
+	this->BoundingBoxPointPolyData->SetPoints(this->BoundingBoxPoints);
+	this->BoundingBoxPointPolyData->Update();
+
+	this->BoundingBoxPointPolyData->GetPointData()->SetScalars(this->BoundingBoxPoints->GetData());
+
+	this->BoundingBoxPointLabelMapper->SetLabelModeToLabelScalars();
+	this->BoundingBoxPointLabelMapper->SetInput(this->BoundingBoxPointPolyData);
+	this->BoundingBoxPointLabelMapper->SetLabelFormat("%0.1f");
+	this->BoundingBoxPointLabelMapper->Update();
 }
 
 vtkErSlicePlaneWidget::~vtkErSlicePlaneWidget()
@@ -281,6 +345,10 @@ void vtkErSlicePlaneWidget::SetEnabled(int enabling)
 
     this->SelectRepresentation();
     this->InvokeEvent(vtkCommand::EnableEvent,NULL);
+
+	this->CurrentRenderer->AddActor(this->BoundingBoxActor);
+	this->CurrentRenderer->AddActor(this->BoundingBoxPointActor);
+	this->CurrentRenderer->AddActor(this->BoundingBoxPointLabelActor);
     }
   
   else //disabling----------------------------------------------------------

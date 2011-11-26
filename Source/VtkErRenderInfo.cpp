@@ -111,13 +111,13 @@ void vtkErRenderInfo::Update()
 
 		vtkCamera* pCamera = this->Renderer->GetActiveCamera();
 
-		RendererInfo.m_Camera.m_Pos.x		= 0.001f * pCamera->GetPosition()[0];
-        RendererInfo.m_Camera.m_Pos.y		= 0.001f * pCamera->GetPosition()[1];
-        RendererInfo.m_Camera.m_Pos.z		= 0.001f * pCamera->GetPosition()[2];
+		RendererInfo.m_Camera.m_Pos.x		= pCamera->GetPosition()[0];
+        RendererInfo.m_Camera.m_Pos.y		= pCamera->GetPosition()[1];
+        RendererInfo.m_Camera.m_Pos.z		= pCamera->GetPosition()[2];
 		
-		RendererInfo.m_Camera.m_Target.x	= 0.001f * pCamera->GetFocalPoint()[0];
-        RendererInfo.m_Camera.m_Target.y	= 0.001f * pCamera->GetFocalPoint()[1];
-        RendererInfo.m_Camera.m_Target.z	= 0.001f * pCamera->GetFocalPoint()[2];
+		RendererInfo.m_Camera.m_Target.x	= pCamera->GetFocalPoint()[0];
+        RendererInfo.m_Camera.m_Target.y	= pCamera->GetFocalPoint()[1];
+        RendererInfo.m_Camera.m_Target.z	= pCamera->GetFocalPoint()[2];
 
         RendererInfo.m_Camera.m_Up.x		= pCamera->GetViewUp()[0];
         RendererInfo.m_Camera.m_Up.y		= pCamera->GetViewUp()[1];
@@ -266,13 +266,13 @@ void vtkErRenderInfo::Update()
 			{
 //				vtkErrorMacro("Found a slice plane!");
 
-				this->Slicing.m_Position[count].x = 1000.0f * ErPlaneActor->GetPlaneSource()->GetOrigin()[0];
-				this->Slicing.m_Position[count].y = 1000.0f * ErPlaneActor->GetPlaneSource()->GetOrigin()[1];
-				this->Slicing.m_Position[count].z = 1000.0f * ErPlaneActor->GetPlaneSource()->GetOrigin()[2];
+				this->Slicing.m_Position[count].x = ErPlaneActor->GetPlaneSource()->GetOrigin()[0];
+				this->Slicing.m_Position[count].y = ErPlaneActor->GetPlaneSource()->GetOrigin()[1];
+				this->Slicing.m_Position[count].z = ErPlaneActor->GetPlaneSource()->GetOrigin()[2];
 
-				this->Slicing.m_Normal[count].x = 1000.0f * ErPlaneActor->GetPlaneSource()->GetNormal()[0];
-				this->Slicing.m_Normal[count].y = 1000.0f * ErPlaneActor->GetPlaneSource()->GetNormal()[1];
-				this->Slicing.m_Normal[count].z = 1000.0f * ErPlaneActor->GetPlaneSource()->GetNormal()[2];
+				this->Slicing.m_Normal[count].x = ErPlaneActor->GetPlaneSource()->GetNormal()[0];
+				this->Slicing.m_Normal[count].y = ErPlaneActor->GetPlaneSource()->GetNormal()[1];
+				this->Slicing.m_Normal[count].z = ErPlaneActor->GetPlaneSource()->GetNormal()[2];
 
 				this->Slicing.m_Reverse[count] = false;
 			}

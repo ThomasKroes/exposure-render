@@ -41,7 +41,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 
 		case 2:
 		{
-			Pl	= 150.0f * UniformSampleSphere(RNG.Get2());
+			Pl	= 1500.0f * UniformSampleSphere(RNG.Get2());
 			Pdf	= (Pe - Pl).Length();
 
 			return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
