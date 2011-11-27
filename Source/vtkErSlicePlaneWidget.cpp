@@ -16,10 +16,18 @@
 #include "vtkErSlicePlaneWidget.h"
 #include "vtkErSlicePlane.h"
 
+#define VTK_AVERAGE(a,b,c) \
+  c[0] = (a[0] + b[0]) / 2.0; \
+  c[1] = (a[1] + b[1]) / 2.0; \
+  c[2] = (a[2] + b[2]) / 2.0;
+
 vtkStandardNewMacro(vtkErSlicePlaneWidget);
 
 vtkErSlicePlaneWidget::vtkErSlicePlaneWidget()
 {
+	this->State = vtkErSlicePlaneWidget::Start;
+	this->EventCallbackCommand->SetCallback(vtkErSlicePlaneWidget::ProcessEvents);
+
 	// Bounding box lines
 	this->BoundingBoxActor				= vtkActor::New();
 	this->BoundingBoxMapper				= vtkPolyDataMapper::New();
@@ -50,70 +58,15 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget()
 	this->BoundingBoxPointLabelActor->SetMapper(this->BoundingBoxPointLabelMapper);
 	this->BoundingBoxPointLabelActor->SetProperty(this->BoundingBoxPointLabelProperty);
 
-	// Construct the poly data representing the hex
-	this->HexPolyData	= vtkPolyData::New();
-	this->HexMapper		= vtkPolyDataMapper::New();
-	this->HexActor		= vtkActor::New();
+	// Widgets
+	DefaultPositions	= vtkPoints::New();
+	DefaultNormals		= vtkPoints::New();
 
-	this->HexMapper->SetInput(HexPolyData);
-	this->HexActor->SetMapper(this->HexMapper);
+	DefaultPositions->SetNumberOfPoints(6);
+	DefaultNormals->SetNumberOfPoints(6);
 
-	// Construct initial points
-	this->Points = vtkPoints::New(VTK_DOUBLE);
-	this->Points->SetNumberOfPoints(15);//8 corners; 6 faces; 1 center
-	this->HexPolyData->SetPoints(this->Points);
-  
-	// Construct connectivity for the faces. These are used to perform
-	// the picking.
-	vtkIdType pts[4];
-	vtkCellArray *cells = vtkCellArray::New();
-	cells->Allocate(cells->EstimateSize(6,4));
-	pts[0] = 3; pts[1] = 0; pts[2] = 4; pts[3] = 7;
-	cells->InsertNextCell(4,pts);
-	pts[0] = 1; pts[1] = 2; pts[2] = 6; pts[3] = 5;
-	cells->InsertNextCell(4,pts);
-	pts[0] = 0; pts[1] = 1; pts[2] = 5; pts[3] = 4;
-	cells->InsertNextCell(4,pts);
-	pts[0] = 2; pts[1] = 3; pts[2] = 7; pts[3] = 6;
-	cells->InsertNextCell(4,pts);
-	pts[0] = 0; pts[1] = 3; pts[2] = 2; pts[3] = 1;
-	cells->InsertNextCell(4,pts);
-	pts[0] = 4; pts[1] = 5; pts[2] = 6; pts[3] = 7;
-	cells->InsertNextCell(4,pts);
-	this->HexPolyData->SetPolys(cells);
-	cells->Delete();
-	this->HexPolyData->BuildCells();
-  
-	// The face of the hexahedra
-	cells = vtkCellArray::New();
-	cells->Allocate(cells->EstimateSize(1,4));
-	cells->InsertNextCell(4,pts); //temporary, replaced later
-	this->HexFacePolyData = vtkPolyData::New();
-	this->HexFacePolyData->SetPoints(this->Points);
-	this->HexFacePolyData->SetPolys(cells);
-	this->HexFaceMapper = vtkPolyDataMapper::New();
-	this->HexFaceMapper->SetInput(HexFacePolyData);
-	this->HexFace = vtkActor::New();
-	this->HexFace->SetMapper(this->HexFaceMapper);
-	cells->Delete();
-
-	//Manage the picking stuff
-	this->HandlePicker = vtkCellPicker::New();
-	this->HandlePicker->SetTolerance(0.001);
-	
-	for (int i = 0; i < 7; i++)
-	{
-//		this->HandlePicker->AddPickList(this->Handle[i]);
-	}
-	
-	this->HandlePicker->PickFromListOn();
-
-	this->HexPicker = vtkCellPicker::New();
-	this->HexPicker->SetTolerance(0.001);
-	this->HexPicker->AddPickList(HexActor);
-	this->HexPicker->PickFromListOn();
-  
-	this->CurrentHandle = NULL;
+	for (int i = 0; i < 6; i++)
+		this->PointWidget[i] = vtkPlaneWidget::New();
 }
 
 vtkErSlicePlaneWidget::~vtkErSlicePlaneWidget()
@@ -132,26 +85,7 @@ void vtkErSlicePlaneWidget::SetVolume(vtkVolume* pVolume)
 
 	this->BoundingBoxSource->SetBounds(pVolume->GetMapper()->GetBounds());
 
-	double* pBounds = pVolume->GetMapper()->GetBounds();
-
-	this->BoundingBoxPoints->SetPoint(0, pBounds[0], pBounds[2], pBounds[4]);
-	this->BoundingBoxPoints->SetPoint(1, pBounds[1], pBounds[2], pBounds[4]);
-	this->BoundingBoxPoints->SetPoint(2, pBounds[0], pBounds[3], pBounds[4]);
-	this->BoundingBoxPoints->SetPoint(3, pBounds[1], pBounds[3], pBounds[4]);
-	this->BoundingBoxPoints->SetPoint(4, pBounds[0], pBounds[2], pBounds[5]);
-	this->BoundingBoxPoints->SetPoint(5, pBounds[1], pBounds[2], pBounds[5]);
-	this->BoundingBoxPoints->SetPoint(6, pBounds[0], pBounds[3], pBounds[5]);
-	this->BoundingBoxPoints->SetPoint(7, pBounds[1], pBounds[3], pBounds[5]);
-
-	this->BoundingBoxPointPolyData->SetPoints(this->BoundingBoxPoints);
-	this->BoundingBoxPointPolyData->Update();
-
-	this->BoundingBoxPointPolyData->GetPointData()->SetScalars(this->BoundingBoxPoints->GetData());
-
-	this->BoundingBoxPointLabelMapper->SetLabelModeToLabelScalars();
-	this->BoundingBoxPointLabelMapper->SetInput(this->BoundingBoxPointPolyData);
-	this->BoundingBoxPointLabelMapper->SetLabelFormat("%0.1f");
-	this->BoundingBoxPointLabelMapper->Update();
+	this->PlaceWidget(pVolume->GetMapper()->GetBounds());
 }
 
 void vtkErSlicePlaneWidget::SetEnabled(int enabling)
@@ -179,11 +113,34 @@ void vtkErSlicePlaneWidget::SetEnabled(int enabling)
 
 		this->Enabled = 1;
 
-		this->InvokeEvent(vtkCommand::EnableEvent,NULL);
+		// Listen to the following events
+		vtkRenderWindowInteractor* i = this->Interactor;
+
+		i->AddObserver(vtkCommand::MouseMoveEvent, this->EventCallbackCommand, this->Priority);
+		i->AddObserver(vtkCommand::LeftButtonPressEvent, this->EventCallbackCommand, this->Priority);
+		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->EventCallbackCommand, this->Priority);
+		i->AddObserver(vtkCommand::MiddleButtonPressEvent, this->EventCallbackCommand, this->Priority);
+		i->AddObserver(vtkCommand::MiddleButtonReleaseEvent, this->EventCallbackCommand, this->Priority);
+		i->AddObserver(vtkCommand::RightButtonPressEvent, this->EventCallbackCommand, this->Priority);
+		i->AddObserver(vtkCommand::RightButtonReleaseEvent, this->EventCallbackCommand, this->Priority);
 
 		this->CurrentRenderer->AddActor(this->BoundingBoxActor);
 		this->CurrentRenderer->AddActor(this->BoundingBoxPointActor);
 		this->CurrentRenderer->AddActor(this->BoundingBoxPointLabelActor);
+
+		for (int i = 0; i < 6; i++)
+		{
+			this->PointWidget[i]->SetInteractor(this->Interactor);
+	//		this->PointWidget[i]->TranslationModeOff();
+//			this->PointWidget[i]->SetPlaceFactor(1.0);
+//			this->PointWidget[i]->PlaceWidget(this->Volume->GetBounds());
+	//		this->PointWidget[i]->TranslationModeOn();
+	//		this->PointWidget[i]->SetPosition(100, 100, 100);
+			this->PointWidget[i]->SetCurrentRenderer(this->CurrentRenderer);
+			this->PointWidget[i]->On();
+		}
+
+		this->InvokeEvent(vtkCommand::EnableEvent,NULL);
     }
 	else
     {
@@ -196,7 +153,15 @@ void vtkErSlicePlaneWidget::SetEnabled(int enabling)
 
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 
-		this->CurrentHandle = NULL;
+		this->CurrentRenderer->RemoveActor(this->BoundingBoxActor);
+		this->CurrentRenderer->RemoveActor(this->BoundingBoxPointActor);
+		this->CurrentRenderer->RemoveActor(this->BoundingBoxPointLabelActor);
+
+		for (int i = 0; i < 6; i++)
+		{
+			this->PointWidget[i]->Off();
+		}
+
 		this->InvokeEvent(vtkCommand::DisableEvent,NULL);
 		this->SetCurrentRenderer(NULL);
     }
@@ -204,38 +169,20 @@ void vtkErSlicePlaneWidget::SetEnabled(int enabling)
 	this->Interactor->Render();
 }
 
-void vtkErSlicePlaneWidget::ProcessEvents(vtkObject* vtkNotUsed(object), 
-                                   unsigned long event,
-                                   void* clientdata, 
-                                   void* vtkNotUsed(calldata))
+void vtkErSlicePlaneWidget::ProcessEvents(vtkObject* vtkNotUsed(object), unsigned long event, void* clientdata, void* vtkNotUsed(calldata))
 {
-  vtkErSlicePlaneWidget* self = reinterpret_cast<vtkErSlicePlaneWidget *>( clientdata );
+	vtkErSlicePlaneWidget* self = reinterpret_cast<vtkErSlicePlaneWidget *>( clientdata );
 
-  //okay, let's do the right thing
-  switch(event)
-    {
-    case vtkCommand::LeftButtonPressEvent:
-      self->OnLeftButtonDown();
-      break;
-    case vtkCommand::LeftButtonReleaseEvent:
-      self->OnLeftButtonUp();
-      break;
-    case vtkCommand::MiddleButtonPressEvent:
-      self->OnMiddleButtonDown();
-      break;
-    case vtkCommand::MiddleButtonReleaseEvent:
-      self->OnMiddleButtonUp();
-      break;
-    case vtkCommand::RightButtonPressEvent:
-      self->OnRightButtonDown();
-      break;
-    case vtkCommand::RightButtonReleaseEvent:
-      self->OnRightButtonUp();
-      break;
-    case vtkCommand::MouseMoveEvent:
-      self->OnMouseMove();
-      break;
-    }
+	switch (event)
+	{
+		case vtkCommand::LeftButtonPressEvent:		self->OnLeftButtonDown();		break;
+		case vtkCommand::LeftButtonReleaseEvent:	self->OnLeftButtonUp();			break;
+		case vtkCommand::MiddleButtonPressEvent:	self->OnMiddleButtonDown();		break;
+		case vtkCommand::MiddleButtonReleaseEvent:	self->OnMiddleButtonUp();		break;
+		case vtkCommand::RightButtonPressEvent:		self->OnRightButtonDown();		break;
+		case vtkCommand::RightButtonReleaseEvent:	self->OnRightButtonUp();		break;
+		case vtkCommand::MouseMoveEvent:			self->OnMouseMove();			break;
+	}
 }
 
 void vtkErSlicePlaneWidget::PrintSelf(ostream& os, vtkIndent indent)
@@ -278,10 +225,93 @@ void vtkErSlicePlaneWidget::CreateDefaultProperties()
 {
 }
 
-void vtkErSlicePlaneWidget::PlaceWidget(double bds[6])
+void vtkErSlicePlaneWidget::PlaceWidget(double Bounds[6])
 {
+	this->BoundingBoxPoints->SetPoint(0, Bounds[0], Bounds[2], Bounds[4]);
+	this->BoundingBoxPoints->SetPoint(1, Bounds[1], Bounds[2], Bounds[4]);
+	this->BoundingBoxPoints->SetPoint(2, Bounds[0], Bounds[3], Bounds[4]);
+	this->BoundingBoxPoints->SetPoint(3, Bounds[1], Bounds[3], Bounds[4]);
+	this->BoundingBoxPoints->SetPoint(4, Bounds[0], Bounds[2], Bounds[5]);
+	this->BoundingBoxPoints->SetPoint(5, Bounds[1], Bounds[2], Bounds[5]);
+	this->BoundingBoxPoints->SetPoint(6, Bounds[0], Bounds[3], Bounds[5]);
+	this->BoundingBoxPoints->SetPoint(7, Bounds[1], Bounds[3], Bounds[5]);
+
+	this->BoundingBoxPointPolyData->SetPoints(this->BoundingBoxPoints);
+	this->BoundingBoxPointPolyData->Update();
+
+	this->BoundingBoxPointPolyData->GetPointData()->SetScalars(this->BoundingBoxPoints->GetData());
+
+	this->BoundingBoxPointLabelMapper->SetLabelModeToLabelScalars();
+	this->BoundingBoxPointLabelMapper->SetInput(this->BoundingBoxPointPolyData);
+	this->BoundingBoxPointLabelMapper->SetLabelFormat("%0.1f");
+	this->BoundingBoxPointLabelMapper->Update();
+
+	const double HalfX = 0.5 * (Bounds[1] - Bounds[0]);
+	const double HalfY = 0.5 * (Bounds[3] - Bounds[2]);
+	const double HalfZ = 0.5 * (Bounds[5] - Bounds[4]);
+
+	DefaultPositions->SetPoint(0, HalfX, HalfY, Bounds[4]);
+	DefaultPositions->SetPoint(1, HalfX, HalfY, Bounds[5]);
+	DefaultPositions->SetPoint(2, HalfX, Bounds[2], HalfZ);
+	DefaultPositions->SetPoint(3, HalfX, Bounds[3], HalfZ);
+	DefaultPositions->SetPoint(4, Bounds[0], HalfY, HalfZ);
+	DefaultPositions->SetPoint(5, Bounds[1], HalfY, HalfZ);
+
+	DefaultNormals->SetPoint(0, 0, 0, 1);
+	DefaultNormals->SetPoint(1, 0, 0, -1);
+	DefaultNormals->SetPoint(2, 0, 1, 0);
+	DefaultNormals->SetPoint(3, 0, -1, 0);
+	DefaultNormals->SetPoint(4, 1, 0, 0);
+	DefaultNormals->SetPoint(5, -1, 0, 0);
+
+	for (int i = 0; i < 6; i++)
+	{
+		this->PointWidget[i]->PlaceWidget(Bounds);
+		this->PointWidget[i]->SetCenter(DefaultPositions->GetPoint(i));
+		this->PointWidget[i]->SetNormal(DefaultNormals->GetPoint(i));
+		this->PointWidget[i]->SetPlaceFactor(100);
+		this->PointWidget[i]->UpdatePlacement();
+	}
 }
 
 void vtkErSlicePlaneWidget::UpdatePlacement(void)
 {
+}
+
+void vtkErSlicePlaneWidget::GetPlanes(vtkPlanes* pPlanes)
+{
+	if (!pPlanes)
+		return;
+	  
+//	this->ComputeNormals();
+
+	vtkSmartPointer<vtkPoints> pts = vtkPoints::New(VTK_DOUBLE);
+	pts->SetNumberOfPoints(6);
+  
+	vtkSmartPointer<vtkDoubleArray> normals = vtkDoubleArray::New();
+	normals->SetNumberOfComponents(3);
+	normals->SetNumberOfTuples(6);
+  
+	// Set the normals and coordinate values
+	double factor = 1.0;//(this->InsideOut ? -1.0 : 1.0);
+	
+	for (int i = 0; i < 6; i++)
+	{
+		pts->SetPoint(i, this->PointWidget[i]->GetCenter());
+		normals->SetTuple3(i, factor * this->PointWidget[i]->GetNormal()[0], factor * this->PointWidget[i]->GetNormal()[1], factor * this->PointWidget[i]->GetNormal()[2]);
+	}
+    
+	pPlanes->SetPoints(pts);
+	pPlanes->SetNormals(normals);
+}
+
+vtkPlaneWidget* vtkErSlicePlaneWidget::GetSlicePlaneWidget(int Index)
+{
+	if (Index < 0 || Index >= 6)
+	{
+		vtkErrorMacro("Cannot return slice plane widget, index is out of bounds!");
+		return NULL;
+	}
+
+	return this->PointWidget[Index];
 }

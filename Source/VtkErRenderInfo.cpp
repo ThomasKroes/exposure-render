@@ -250,40 +250,6 @@ void vtkErRenderInfo::Update()
 		}
 
 //		Renderer->GetRenderWindow()->GetInteractor()->get
-
-		vtkActorCollection* pActors = Renderer->GetActors();
-
-		pActors->InitTraversal();
-		vtkActor* pActor = pActors->GetNextItem();
-
-		count = 0;
-
-		while (pActor != 0)
-		{
-			vtkErSlicePlaneActor* ErPlaneActor = dynamic_cast<vtkErSlicePlaneActor*>(pActor);
-
-			if (ErPlaneActor)
-			{
-//				vtkErrorMacro("Found a slice plane!");
-
-				this->Slicing.m_Position[count].x = ErPlaneActor->GetPlaneSource()->GetOrigin()[0];
-				this->Slicing.m_Position[count].y = ErPlaneActor->GetPlaneSource()->GetOrigin()[1];
-				this->Slicing.m_Position[count].z = ErPlaneActor->GetPlaneSource()->GetOrigin()[2];
-
-				this->Slicing.m_Normal[count].x = ErPlaneActor->GetPlaneSource()->GetNormal()[0];
-				this->Slicing.m_Normal[count].y = ErPlaneActor->GetPlaneSource()->GetNormal()[1];
-				this->Slicing.m_Normal[count].z = ErPlaneActor->GetPlaneSource()->GetNormal()[2];
-
-				this->Slicing.m_Reverse[count] = false;
-			}
-
-			pActor = pActors->GetNextItem();
-
-			count++;
-		}
-
-		this->Slicing.m_NoSlices = count;
-		/**/
     }
 }
 

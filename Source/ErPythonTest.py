@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/engine_small.mhd")
+Reader.SetFileName("C:/Volumes/manix_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -87,6 +87,8 @@ PlaneWidget.SetVolume(Volume)
 
 #laneWidget.PlaceWidget(0, 0, 0, 150, 150, 150)
 #PlaneWidget.UpdatePlacement()
+
+ErVolumeMapper.SetSliceWidget(PlaneWidget)
 
 InteractorStyle = vtk.vtkInteractorStyleTrackballCamera()
 Interactor.SetInteractorStyle(InteractorStyle)

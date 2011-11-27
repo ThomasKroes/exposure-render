@@ -30,23 +30,17 @@ DEV float GetNormalizedIntensity(const Vec3f& P)
 DEV float GetOpacity(const float& NormalizedIntensity)
 {
 	return tex1D(gTexOpacity, NormalizedIntensity);
-//	return NormalizedIntensity > 0.1f ? 0.2f : 0.0f;//tex1D(gTexOpacity, NormalizedIntensity);
 }
 
 DEV float GetOpacity(const Vec3f& P)
 {
-	/*
 	for (int i = 0; i < gSlicing.m_NoSlices; i++)
 	{
 		Vec3f D = P - ToVec3f(gSlicing.m_Position[i]);
 
-		if (Dot(D, ToVec3f(gSlicing.m_Normal[i]) < 0.0f))
+		if (Dot(D, ToVec3f(gSlicing.m_Normal[i])) < 0.0f)
 			return 0.0f;
 	}
-
-	if (P.x > 0.5f * gVolumeInfo.m_MaxAABB.x)
-		return 0.0f;
-	*/
 
 	return GetOpacity(GetNormalizedIntensity(P));
 }

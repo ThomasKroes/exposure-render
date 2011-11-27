@@ -22,23 +22,22 @@
 
 #include "vtkImageActor.h"
 #include "vtkgl.h"
+#include "vtkCommand.h"
+
+void vtkErResetCallbackCommand::Execute(vtkObject*, unsigned long, void *)
+{
+	if (!this->VolumeMapper)
+		return;
+
+	this->VolumeMapper->Reset();
+}
+
+void vtkErResetCallbackCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
+{
+	this->VolumeMapper = pVolumeMapper;
+};
 
 vtkStandardNewMacro(vtkErVolumeMapper);
-
-/*
-// this function runs in an alternate thread to asyncronously generate matrices
-static void *vtkTrackerSimulatorRecordThread(vtkMultiThreader::ThreadInfo* pData)
-{
-	vtkErVolumeMapper* pVolumeMapper = (vtkErVolumeMapper*)(pData->UserData);
-
-	if (!pVolumeMapper)
-		return NULL;
-
-//	RenderEstimate(pVolumeMapper->m_CudaVolumeInfo->GetVolumeInfo(), pVolumeMapper->m_CudaRenderInfo->GetRenderInfo(), &pVolumeMapper->m_CudaRenderInfo->m_Lighting, &pVolumeMapper->m_CudaRenderInfo->m_FrameBuffer);
-
-	return NULL;
-}
-*/
 
 vtkErVolumeMapper::vtkErVolumeMapper(void)
 {
@@ -56,6 +55,8 @@ vtkErVolumeMapper::vtkErVolumeMapper(void)
 
 //	MultiThreader->SpawnThread((vtkThreadFunctionType)vtkTrackerSimulatorRecordThread, this);
 
+	this->ResetCallBack = vtkErResetCallbackCommand::New();
+	this->ResetCallBack->SetVolumeMapper(this);
 }  
 
 vtkErVolumeMapper::~vtkErVolumeMapper(void)
@@ -73,6 +74,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 		return;
 	
 	UploadVolumeProperty(pVolume->GetProperty());
+	UpdateSlicing();
 
 	int RenderSize[2];
 
@@ -223,4 +225,42 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	}
 
 	BindTransferFunctions1D(Opacity, Diffuse, Specular, Glossiness, Emission, N);
+}
+
+void vtkErVolumeMapper::SetSliceWidget(vtkErSlicePlaneWidget* pSliceWidget)
+{
+	if (pSliceWidget == NULL)
+	{
+		vtkErrorMacro("Slice widget is NULL!");
+		return;
+	}
+
+	this->SliceWidget = pSliceWidget;
+
+	for (int i = 0; i < 6; i++)
+		pSliceWidget->GetSlicePlaneWidget(i)->AddObserver(vtkCommand::InteractionEvent, this->ResetCallBack, 0.0);
+}
+
+void vtkErVolumeMapper::UpdateSlicing()
+{
+	if (!SliceWidget)
+		return;
+
+	this->m_CudaRenderInfo->Slicing.m_NoSlices = 6;
+
+	for (int i = 0; i < 6; i++)
+	{
+		this->m_CudaRenderInfo->Slicing.m_Position[i].x = SliceWidget->GetSlicePlaneWidget(i)->GetCenter()[0];
+		this->m_CudaRenderInfo->Slicing.m_Position[i].y = SliceWidget->GetSlicePlaneWidget(i)->GetCenter()[1];
+		this->m_CudaRenderInfo->Slicing.m_Position[i].z = SliceWidget->GetSlicePlaneWidget(i)->GetCenter()[2];
+
+		this->m_CudaRenderInfo->Slicing.m_Normal[i].x = SliceWidget->GetSlicePlaneWidget(i)->GetNormal()[0];
+		this->m_CudaRenderInfo->Slicing.m_Normal[i].y = SliceWidget->GetSlicePlaneWidget(i)->GetNormal()[1];
+		this->m_CudaRenderInfo->Slicing.m_Normal[i].z = SliceWidget->GetSlicePlaneWidget(i)->GetNormal()[2];
+	}
+}
+
+void vtkErVolumeMapper::Reset()
+{
+	this->m_CudaRenderInfo->Reset();
 }

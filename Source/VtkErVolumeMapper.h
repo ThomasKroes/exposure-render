@@ -15,10 +15,29 @@
 
 #include "VtkErVolumeInfo.h"
 #include "VtkErRenderInfo.h"
+#include "vtkErSlicePlaneWidget.h"
 
 #include <vtkVolumeMapper.h>
 #include <vtkSmartPointer.h>
 #include <vtkVolumeProperty.h>
+#include <vtkCommand.h>
+
+class vtkErVolumeMapper;
+
+class vtkErResetCallbackCommand : public vtkCommand
+{
+public:
+	static vtkErResetCallbackCommand* New() { return new vtkErResetCallbackCommand; };
+
+	virtual void Execute(vtkObject*, unsigned long, void *);
+	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
+
+protected:
+	vtkErResetCallbackCommand() { this->VolumeMapper = NULL; };
+	~vtkErResetCallbackCommand() {};
+
+	vtkErVolumeMapper*	VolumeMapper;
+};
 
 class VTK_ER_CORE_EXPORT vtkErVolumeMapper : public vtkVolumeMapper
 {
@@ -61,6 +80,17 @@ public:
 
 	bool	UseCustomRenderSize;
 	int		CustomRenderSize[2];
+
+	vtkGetMacro(SliceWidget, vtkErSlicePlaneWidget*);
+//	vtkSetMacro(SliceWidget, vtkErSlicePlaneWidget*);
+	void SetSliceWidget(vtkErSlicePlaneWidget* pSliceWidget);
+
+	void UpdateSlicing();
+	void Reset();
+
+protected:
+	vtkErSlicePlaneWidget*						SliceWidget;
+	vtkSmartPointer<vtkErResetCallbackCommand>	ResetCallBack;
 };
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/

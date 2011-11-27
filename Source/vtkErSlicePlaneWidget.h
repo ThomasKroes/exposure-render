@@ -47,11 +47,7 @@
 #include "vtkPointSource.h"
 #include "vtkActor2D.h"
 #include "vtkProperty2D.h"
-
-#define VTK_PLANE_OFF 0
-#define VTK_PLANE_OUTLINE 1
-#define VTK_PLANE_WIREFRAME 2
-#define VTK_PLANE_SURFACE 3
+#include "vtkPlaneWidget.h"
 
 #include "vtkErSlicePlane.h"
 
@@ -69,9 +65,24 @@ public:
 	vtkGetMacro(Volume, vtkVolume*);
 	void SetVolume(vtkVolume* pVolume);
 
+	void GetPlanes(vtkPlanes* pPlanes);
+	
+	vtkPlaneWidget* GetSlicePlaneWidget(int Index);
+
 protected:
 	vtkErSlicePlaneWidget();
 	~vtkErSlicePlaneWidget();
+
+	//BTX
+	int State;
+	enum WidgetState
+	{
+		Start = 0,
+		Moving,
+		Scaling,
+		Outside
+	};
+	//ETX
 
 	void CreateDefaultProperties();
     
@@ -107,22 +118,10 @@ protected:
 	vtkSmartPointer<vtkActor2D>				BoundingBoxPointLabelActor;
 	vtkSmartPointer<vtkProperty2D>			BoundingBoxPointLabelProperty;
 
-	vtkSmartPointer<vtkActor>				HexActor;
-	vtkSmartPointer<vtkPolyDataMapper>		HexMapper;
-	vtkSmartPointer<vtkPolyData>			HexPolyData;
-	vtkSmartPointer<vtkPoints>				Points;
-	double									N[6][3];
-
-	vtkSmartPointer<vtkActor>				HexFace;
-	vtkSmartPointer<vtkPolyDataMapper>		HexFaceMapper;
-	vtkSmartPointer<vtkPolyData>			HexFacePolyData;
-
-	// Picking
-	vtkSmartPointer<vtkCellPicker>			HandlePicker;
-	vtkSmartPointer<vtkCellPicker>			HexPicker;
-	vtkActor*								CurrentHandle;
-	int										CurrentHexFace;
-
+	// Widgets
+	vtkSmartPointer<vtkPlaneWidget>			PointWidget[6];
+	vtkSmartPointer<vtkPoints>				DefaultPositions;
+	vtkSmartPointer<vtkPoints>				DefaultNormals;
 
 private:
   vtkErSlicePlaneWidget(const vtkErSlicePlaneWidget&);
