@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/backpack.mhd")
+Reader.SetFileName("C:/Volumes/mecanix_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -31,7 +31,7 @@ ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
 Opacity.AddPoint(0, 0.000)
-Opacity.AddPoint(100, 0)
+Opacity.AddPoint(10, 0)
 Opacity.AddPoint(2000, 1)
 Opacity.AddPoint(2055, 1)
 

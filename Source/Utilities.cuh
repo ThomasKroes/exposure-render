@@ -22,7 +22,7 @@ DEV inline Vec3f ToVec3f(const float3& V)
 
 DEV float GetNormalizedIntensity(const Vec3f& P)
 {
-	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, P.x * gVolumeInfo.m_InvMaxAABB.x, P.y * gVolumeInfo.m_InvMaxAABB.y, P.z * gVolumeInfo.m_InvMaxAABB.z));
+	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
 
 	return (Intensity - gVolumeInfo.m_IntensityMin) * gVolumeInfo.m_IntensityInvRange;
 }
