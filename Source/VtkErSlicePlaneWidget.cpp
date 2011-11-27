@@ -13,7 +13,7 @@
 
 #include "ErCoreStable.h"
 
-#include "vtkErSlicePlane.h"
+#include "VtkErSlicePlaneWidget.h"
 
 vtkStandardNewMacro(vtkErSlicePlaneWidget);
 
@@ -30,7 +30,6 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget() : vtkPolyDataSourceWidget()
   this->Representation = VTK_PLANE_WIREFRAME;
 
   //Build the representation of the widget
-  int i;
   // Represent the plane
   this->PlaneSource = vtkPlaneSource::New();
   this->PlaneSource->SetXResolution(4);
@@ -53,29 +52,6 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget() : vtkPolyDataSourceWidget()
   this->PlaneActor = vtkActor::New();
   this->PlaneActor->SetMapper(this->PlaneMapper);
 
-  // Create the handles
-  this->Handle = new vtkActor* [4];
-  this->HandleMapper = new vtkPolyDataMapper* [4];
-  this->HandleGeometry = new vtkSphereSource* [4];
-  for (i=0; i<4; i++)
-    {
-    this->HandleGeometry[i] = vtkSphereSource::New();
-    this->HandleGeometry[i]->SetThetaResolution(16);
-    this->HandleGeometry[i]->SetPhiResolution(8);
-    this->HandleMapper[i] = vtkPolyDataMapper::New();
-    this->HandleMapper[i]->SetInput(this->HandleGeometry[i]->GetOutput());
-    this->Handle[i] = vtkActor::New();
-    this->Handle[i]->SetMapper(this->HandleMapper[i]);
-    }
-  
-  // Create the + plane normal
-  this->LineSource = vtkLineSource::New();
-  this->LineSource->SetResolution(1);
-  this->LineMapper = vtkPolyDataMapper::New();
-  this->LineMapper->SetInput(this->LineSource->GetOutput());
-  this->LineActor = vtkActor::New();
-  this->LineActor->SetMapper(this->LineMapper);
-
   this->ConeSource = vtkConeSource::New();
   this->ConeSource->SetResolution(12);
   this->ConeSource->SetAngle(25.0);
@@ -83,22 +59,6 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget() : vtkPolyDataSourceWidget()
   this->ConeMapper->SetInput(this->ConeSource->GetOutput());
   this->ConeActor = vtkActor::New();
   this->ConeActor->SetMapper(this->ConeMapper);
-
-  // Create the - plane normal
-  this->LineSource2 = vtkLineSource::New();
-  this->LineSource2->SetResolution(1);
-  this->LineMapper2 = vtkPolyDataMapper::New();
-  this->LineMapper2->SetInput(this->LineSource2->GetOutput());
-  this->LineActor2 = vtkActor::New();
-  this->LineActor2->SetMapper(this->LineMapper2);
-
-  this->ConeSource2 = vtkConeSource::New();
-  this->ConeSource2->SetResolution(12);
-  this->ConeSource2->SetAngle(25.0);
-  this->ConeMapper2 = vtkPolyDataMapper::New();
-  this->ConeMapper2->SetInput(this->ConeSource2->GetOutput());
-  this->ConeActor2 = vtkActor::New();
-  this->ConeActor2->SetMapper(this->ConeMapper2);
 
   this->Transform = vtkTransform::New();
 
@@ -111,35 +71,51 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget() : vtkPolyDataSourceWidget()
   bounds[4] = -0.5;
   bounds[5] = 0.5;
 
-  //Manage the picking stuff
-  this->HandlePicker = vtkCellPicker::New();
-  this->HandlePicker->SetTolerance(0.001);
-  for (i=0; i<4; i++)
-    {
-    this->HandlePicker->AddPickList(this->Handle[i]);
-    }
-  this->HandlePicker->PickFromListOn();
 
   this->PlanePicker = vtkCellPicker::New();
   this->PlanePicker->SetTolerance(0.005); //need some fluff
   this->PlanePicker->AddPickList(this->PlaneActor);
   this->PlanePicker->AddPickList(this->ConeActor);
-  this->PlanePicker->AddPickList(this->LineActor);
-  this->PlanePicker->AddPickList(this->ConeActor2);
-  this->PlanePicker->AddPickList(this->LineActor2);
   this->PlanePicker->PickFromListOn();
   
   this->CurrentHandle = NULL;
 
   this->LastPickValid = 0;
-  this->HandleSizeFactor = 1.25;
-  this->SetHandleSize( 0.05 );
+  this->HandleSizeFactor = 0.1;
+  this->SetHandleSize( 0.5 );
   
   // Set up the initial properties
   this->CreateDefaultProperties();
   
   this->SelectRepresentation();
   
+  this->CubeSource				= vtkCubeSource::New();
+  this->CubeMapper				= vtkPolyDataMapper::New();
+  this->CubePolyData			= vtkPolyData::New();
+  this->CubeCutter				= vtkCutter::New();
+  this->CubeCutterMapper		= vtkPolyDataMapper::New();
+  this->CubeCutterPlaneActor	= vtkActor::New();
+
+  this->CubeMapper->SetInput(this->CubePolyData);
+  this->CubeCutterMapper->SetInput(this->CubeCutter->GetOutput());
+
+  this->CubeCutterPlaneActor->GetProperty()->SetColor(0.9, 0.6, 0);
+  this->CubeCutterPlaneActor->GetProperty()->SetLineWidth(1);
+  this->CubeCutterPlaneActor->SetMapper(this->CubeCutterMapper);
+
+  this->ArrowSource		= vtkArrowSource::New();
+  this->ArrowMapper		= vtkPolyDataMapper::New();
+  this->ArrowActor		= vtkActor::New();
+
+  this->ArrowMapper->SetInput(this->ArrowSource->GetOutput());
+  this->ArrowActor->SetMapper(this->ArrowMapper);
+
+	this->ArrowSource->SetShaftRadius(10);
+	this->ArrowSource->SetTipLength(10);
+	this->ArrowSource->SetTipRadius(10);
+
+
+
   // Initial creation of the widget, serves to initialize it
   // Call PlaceWidget() LAST in the constructor as it depends on ivar
   // values.
@@ -153,33 +129,10 @@ vtkErSlicePlaneWidget::~vtkErSlicePlaneWidget()
   this->PlaneSource->Delete();
   this->PlaneOutline->Delete();
 
-  for (int i=0; i<4; i++)
-    {
-    this->HandleGeometry[i]->Delete();
-    this->HandleMapper[i]->Delete();
-    this->Handle[i]->Delete();
-    }
-  delete [] this->Handle;
-  delete [] this->HandleMapper;
-  delete [] this->HandleGeometry;
-  
   this->ConeActor->Delete();
   this->ConeMapper->Delete();
   this->ConeSource->Delete();
 
-  this->LineActor->Delete();
-  this->LineMapper->Delete();
-  this->LineSource->Delete();
-
-  this->ConeActor2->Delete();
-  this->ConeMapper2->Delete();
-  this->ConeSource2->Delete();
-
-  this->LineActor2->Delete();
-  this->LineMapper2->Delete();
-  this->LineSource2->Delete();
-
-  this->HandlePicker->Delete();
   this->PlanePicker->Delete();
 
   if (this->HandleProperty)
@@ -260,22 +213,11 @@ void vtkErSlicePlaneWidget::SetEnabled(int enabling)
     this->CurrentRenderer->AddActor(this->PlaneActor);
     this->PlaneActor->SetProperty(this->PlaneProperty);
 
-    // turn on the handles
-    for (int j=0; j<4; j++)
-      {
-      this->CurrentRenderer->AddActor(this->Handle[j]);
-      this->Handle[j]->SetProperty(this->HandleProperty);
-      }
+//	this->CurrentRenderer->AddActor(this->CubeCutterPlaneActor);
+//	this->CurrentRenderer->AddActor(this->ArrowActor);
 
-    // add the normal vector
-    this->CurrentRenderer->AddActor(this->LineActor);
-    this->LineActor->SetProperty(this->HandleProperty);
-    this->CurrentRenderer->AddActor(this->ConeActor);
-    this->ConeActor->SetProperty(this->HandleProperty);
-    this->CurrentRenderer->AddActor(this->LineActor2);
-    this->LineActor2->SetProperty(this->HandleProperty);
-    this->CurrentRenderer->AddActor(this->ConeActor2);
-    this->ConeActor2->SetProperty(this->HandleProperty);
+//	this->CurrentRenderer->AddActor(this->ThetaHandleActor);
+//	this->CurrentRenderer->AddActor(this->PhiHandleActor);
 
     this->SelectRepresentation();
     this->InvokeEvent(vtkCommand::EnableEvent,NULL);
@@ -298,17 +240,8 @@ void vtkErSlicePlaneWidget::SetEnabled(int enabling)
     // turn off the plane
     this->CurrentRenderer->RemoveActor(this->PlaneActor);
 
-    // turn off the handles
-    for (int i=0; i<4; i++)
-      {
-      this->CurrentRenderer->RemoveActor(this->Handle[i]);
-      }
-
     // turn off the normal vector
-    this->CurrentRenderer->RemoveActor(this->LineActor);
     this->CurrentRenderer->RemoveActor(this->ConeActor);
-    this->CurrentRenderer->RemoveActor(this->LineActor2);
-    this->CurrentRenderer->RemoveActor(this->ConeActor2);
 
     this->CurrentHandle = NULL;
     this->InvokeEvent(vtkCommand::DisableEvent,NULL);
@@ -436,15 +369,10 @@ void vtkErSlicePlaneWidget::PositionHandles()
   double *pt1 = this->PlaneSource->GetPoint1();
   double *pt2 = this->PlaneSource->GetPoint2();
 
-  this->HandleGeometry[0]->SetCenter(o);
-  this->HandleGeometry[1]->SetCenter(pt1);
-  this->HandleGeometry[2]->SetCenter(pt2);
-
   double x[3];
   x[0] = pt1[0] + pt2[0] - o[0];
   x[1] = pt1[1] + pt2[1] - o[1];
   x[2] = pt1[2] + pt2[2] - o[2];
-  this->HandleGeometry[3]->SetCenter(x); //far corner
 
   // set up the outline
   if ( this->Representation == VTK_PLANE_OUTLINE )
@@ -460,8 +388,6 @@ void vtkErSlicePlaneWidget::PositionHandles()
   // Create the normal vector
   double center[3];
   this->PlaneSource->GetCenter(center);
-  this->LineSource->SetPoint1(center);
-  this->LineSource2->SetPoint1(center);
   double p2[3];
   this->PlaneSource->GetNormal(this->Normal);
   vtkMath::Normalize(this->Normal);
@@ -472,16 +398,22 @@ void vtkErSlicePlaneWidget::PositionHandles()
   p2[0] = center[0] + 0.35 * d * this->Normal[0];
   p2[1] = center[1] + 0.35 * d * this->Normal[1];
   p2[2] = center[2] + 0.35 * d * this->Normal[2];
-  this->LineSource->SetPoint2(p2);
   this->ConeSource->SetCenter(p2);
   this->ConeSource->SetDirection(this->Normal);
 
   p2[0] = center[0] - 0.35 * d * this->Normal[0];
   p2[1] = center[1] - 0.35 * d * this->Normal[1];
   p2[2] = center[2] - 0.35 * d * this->Normal[2];
-  this->LineSource2->SetPoint2(p2);
-  this->ConeSource2->SetCenter(p2);
-  this->ConeSource2->SetDirection(this->Normal);
+
+  vtkSmartPointer<vtkPlane> Plane = vtkPlane::New();
+
+  this->GetPlane(Plane);
+
+  this->CubeCutter->SetCutFunction(Plane);
+  this->CubeCutter->SetInput(CubeMapper->GetInput());
+  this->CubeCutter->GenerateValues(1, 0, 0);
+
+  this->ArrowActor->SetPosition(this->PlaneSource->GetCenter());
 }
 
 int vtkErSlicePlaneWidget::HighlightHandle(vtkProp *prop)
@@ -497,15 +429,8 @@ int vtkErSlicePlaneWidget::HighlightHandle(vtkProp *prop)
   if ( this->CurrentHandle )
     {
     this->ValidPick = 1;
-    this->HandlePicker->GetPickPosition(this->LastPickPosition);
+//    this->HandlePicker->GetPickPosition(this->LastPickPosition);
     this->CurrentHandle->SetProperty(this->SelectedHandleProperty);
-    for (int i=0; i<4; i++) //find handle
-      {
-      if ( this->CurrentHandle == this->Handle[i] )
-        {
-        return i;
-        }
-      }
     }
   
   return -1;
@@ -517,17 +442,10 @@ void vtkErSlicePlaneWidget::HighlightNormal(int highlight)
     {
     this->ValidPick = 1;
     this->PlanePicker->GetPickPosition(this->LastPickPosition);
-    this->LineActor->SetProperty(this->SelectedHandleProperty);
     this->ConeActor->SetProperty(this->SelectedHandleProperty);
-    this->LineActor2->SetProperty(this->SelectedHandleProperty);
-    this->ConeActor2->SetProperty(this->SelectedHandleProperty);
     }
   else
     {
-    this->LineActor->SetProperty(this->HandleProperty);
-    this->ConeActor->SetProperty(this->HandleProperty);
-    this->LineActor2->SetProperty(this->HandleProperty);
-    this->ConeActor2->SetProperty(this->HandleProperty);
     }
 }
 
@@ -559,9 +477,9 @@ void vtkErSlicePlaneWidget::OnLeftButtonDown()
   
   // Okay, we can process this. Try to pick handles first;
   // if no handles picked, then try to pick the plane.
-  vtkAssemblyPath *path;
-  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->HandlePicker->GetPath();
+  vtkAssemblyPath *path = NULL;
+//  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
+//  path = this->HandlePicker->GetPath();
   if ( path != NULL )
     {
     this->State = vtkErSlicePlaneWidget::Moving;
@@ -574,8 +492,7 @@ void vtkErSlicePlaneWidget::OnLeftButtonDown()
     if ( path != NULL )
       {
       vtkProp *prop = path->GetFirstNode()->GetViewProp();
-      if ( prop == this->ConeActor || prop == this->LineActor ||
-           prop == this->ConeActor2 || prop == this->LineActor2 )
+      if ( prop == this->ConeActor)
         {
         this->State = vtkErSlicePlaneWidget::Rotating;
         this->HighlightNormal(1);
@@ -639,9 +556,9 @@ void vtkErSlicePlaneWidget::OnMiddleButtonDown()
   
   // Okay, we can process this. If anything is picked, then we
   // can start pushing the plane.
-  vtkAssemblyPath *path;
-  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->HandlePicker->GetPath();
+  vtkAssemblyPath *path = NULL;
+//  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
+ // path = this->HandlePicker->GetPath();
   if ( path != NULL )
     {
     this->State = vtkErSlicePlaneWidget::Pushing;
@@ -706,9 +623,9 @@ void vtkErSlicePlaneWidget::OnRightButtonDown()
   
   // Okay, we can process this. Try to pick handles first;
   // if no handles picked, then pick the bounding box.
-  vtkAssemblyPath *path;
-  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->HandlePicker->GetPath();
+  vtkAssemblyPath *path = NULL;
+//  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
+//  path = this->HandlePicker->GetPath();
   if ( path != NULL )
     {
     this->State = vtkErSlicePlaneWidget::Scaling;
@@ -795,22 +712,7 @@ void vtkErSlicePlaneWidget::OnMouseMove()
     // Okay to process
     if ( this->CurrentHandle )
       {
-      if ( this->CurrentHandle == this->Handle[0] )
-        {
-        this->MoveOrigin(prevPickPoint, pickPoint);
-        }
-      else if ( this->CurrentHandle == this->Handle[1] )
-        {
-        this->MovePoint1(prevPickPoint, pickPoint);
-        }
-      else if ( this->CurrentHandle == this->Handle[2] )
-        {
-        this->MovePoint2(prevPickPoint, pickPoint);
-        }
-      else if ( this->CurrentHandle == this->Handle[3] )
-        {
-        this->MovePoint3(prevPickPoint, pickPoint);
-        }
+
       }
     else //must be moving the plane
       {
@@ -819,7 +721,6 @@ void vtkErSlicePlaneWidget::OnMouseMove()
     }
   else if ( this->State == vtkErSlicePlaneWidget::Scaling )
     {
-    this->Scale(prevPickPoint, pickPoint, X, Y);
     }
   else if ( this->State == vtkErSlicePlaneWidget::Pushing )
     {
@@ -832,7 +733,6 @@ void vtkErSlicePlaneWidget::OnMouseMove()
     }
   else if ( this->State == vtkErSlicePlaneWidget::Spinning )
     {
-    this->Spin(prevPickPoint, pickPoint);
     }
 
 
@@ -896,153 +796,6 @@ void vtkErSlicePlaneWidget::MoveOrigin(double *p1, double *p2)
   this->PositionHandles();
 }
 
-void vtkErSlicePlaneWidget::MovePoint1(double *p1, double *p2)
-{
-  //Get the plane definition
-  double *o = this->PlaneSource->GetOrigin();
-  double *pt1 = this->PlaneSource->GetPoint1();
-  double *pt2 = this->PlaneSource->GetPoint2();
-
-  //Get the vector of motion
-  double v[3];
-  v[0] = p2[0] - p1[0];
-  v[1] = p2[1] - p1[1];
-  v[2] = p2[2] - p1[2];
-
-  // Need the point opposite the origin (pt3) 
-  double pt3[3];
-  pt3[0] = o[0] + (pt1[0] - o[0]) + (pt2[0] - o[0]);
-  pt3[1] = o[1] + (pt1[1] - o[1]) + (pt2[1] - o[1]);
-  pt3[2] = o[2] + (pt1[2] - o[2]) + (pt2[2] - o[2]);
-
-  // Define vectors from point pt2
-  double p32[3], p02[3];
-  p02[0] = o[0] - pt2[0];
-  p02[1] = o[1] - pt2[1];
-  p02[2] = o[2] - pt2[2];
-  p32[0] = pt3[0] - pt2[0];
-  p32[1] = pt3[1] - pt2[1];
-  p32[2] = pt3[2] - pt2[2];
-
-  double vN = vtkMath::Norm(v);
-  double n02 = vtkMath::Norm(p02);
-  double n32 = vtkMath::Norm(p32);
-
-  // Project v onto these vector to determine the amount of motion
-  // Scale it by the relative size of the motion to the vector length
-  double d1 = (vN/n02) * vtkMath::Dot(v,p02) / (vN*n02);
-  double d2 = (vN/n32) * vtkMath::Dot(v,p32) / (vN*n32);
-
-  double point1[3], origin[3];
-  for (int i=0; i<3; i++)
-    {
-    origin[i] = pt2[i] + (1.0+d1)*p02[i];
-    point1[i] = pt2[i] + (1.0+d1)*p02[i] + (1.0+d2)*p32[i];
-    }
-  
-  this->PlaneSource->SetOrigin(origin);
-  this->PlaneSource->SetPoint1(point1);
-  this->PlaneSource->Update();
-
-  this->PositionHandles();
-}
-
-void vtkErSlicePlaneWidget::MovePoint2(double *p1, double *p2)
-{
-  //Get the plane definition
-  double *o = this->PlaneSource->GetOrigin();
-  double *pt1 = this->PlaneSource->GetPoint1();
-  double *pt2 = this->PlaneSource->GetPoint2();
-
-  //Get the vector of motion
-  double v[3];
-  v[0] = p2[0] - p1[0];
-  v[1] = p2[1] - p1[1];
-  v[2] = p2[2] - p1[2];
-
-  // The point opposite point2 (pt1) stays fixed
-  double pt3[3];
-  pt3[0] = o[0] + (pt1[0] - o[0]) + (pt2[0] - o[0]);
-  pt3[1] = o[1] + (pt1[1] - o[1]) + (pt2[1] - o[1]);
-  pt3[2] = o[2] + (pt1[2] - o[2]) + (pt2[2] - o[2]);
-
-  // Define vectors from point pt1
-  double p01[3], p31[3];
-  p31[0] = pt3[0] - pt1[0];
-  p31[1] = pt3[1] - pt1[1];
-  p31[2] = pt3[2] - pt1[2];
-  p01[0] = o[0] - pt1[0];
-  p01[1] = o[1] - pt1[1];
-  p01[2] = o[2] - pt1[2];
-
-  double vN = vtkMath::Norm(v);
-  double n31 = vtkMath::Norm(p31);
-  double n01 = vtkMath::Norm(p01);
-
-  // Project v onto these vector to determine the amount of motion
-  // Scale it by the relative size of the motion to the vector length
-  double d1 = (vN/n31) * vtkMath::Dot(v,p31) / (vN*n31);
-  double d2 = (vN/n01) * vtkMath::Dot(v,p01) / (vN*n01);
-
-  double point2[3], origin[3];
-  for (int i=0; i<3; i++)
-    {
-    point2[i] = pt1[i] + (1.0+d1)*p31[i] + (1.0+d2)*p01[i];
-    origin[i] = pt1[i] + (1.0+d2)*p01[i];
-    }
-  
-  this->PlaneSource->SetOrigin(origin);
-  this->PlaneSource->SetPoint2(point2);
-  this->PlaneSource->Update();
-
-  this->PositionHandles();
-}
-
-void vtkErSlicePlaneWidget::MovePoint3(double *p1, double *p2)
-{
-  //Get the plane definition
-  double *o = this->PlaneSource->GetOrigin();
-  double *pt1 = this->PlaneSource->GetPoint1();
-  double *pt2 = this->PlaneSource->GetPoint2();
-
-  //Get the vector of motion
-  double v[3];
-  v[0] = p2[0] - p1[0];
-  v[1] = p2[1] - p1[1];
-  v[2] = p2[2] - p1[2];
-
-  // Define vectors from point pt3
-  double p10[3], p20[3];
-  p10[0] = pt1[0] - o[0];
-  p10[1] = pt1[1] - o[1];
-  p10[2] = pt1[2] - o[2];
-  p20[0] = pt2[0] - o[0];
-  p20[1] = pt2[1] - o[1];
-  p20[2] = pt2[2] - o[2];
-
-  double vN = vtkMath::Norm(v);
-  double n10 = vtkMath::Norm(p10);
-  double n20 = vtkMath::Norm(p20);
-
-  // Project v onto these vector to determine the amount of motion
-  // Scale it by the relative size of the motion to the vector length
-  double d1 = (vN/n10) * vtkMath::Dot(v,p10) / (vN*n10);
-  double d2 = (vN/n20) * vtkMath::Dot(v,p20) / (vN*n20);
-
-  double point1[3], point2[3];
-  for (int i=0; i<3; i++)
-    {
-    point1[i] = o[i] + (1.0+d1)*p10[i];
-    point2[i] = o[i] + (1.0+d2)*p20[i];
-    }
-  
-  this->PlaneSource->SetPoint1(point1);
-  this->PlaneSource->SetPoint2(point2);
-  this->PlaneSource->Update();
-
-  this->PositionHandles();
-}
-
 void vtkErSlicePlaneWidget::Rotate(int X, int Y, double *p1, double *p2, double *vpn)
 {
   double *o = this->PlaneSource->GetOrigin();
@@ -1093,59 +846,6 @@ void vtkErSlicePlaneWidget::Rotate(int X, int Y, double *p1, double *p2, double 
   this->PositionHandles();
 }
 
-void vtkErSlicePlaneWidget::Spin(double *p1, double *p2)
-{
-  // Mouse motion vector in world space
-  double v[3];
-  v[0] = p2[0] - p1[0];
-  v[1] = p2[1] - p1[1];
-  v[2] = p2[2] - p1[2];
-
-  double* normal = this->PlaneSource->GetNormal();
-  // Axis of rotation
-  double axis[3] = { normal[0], normal[1], normal[2] };
-  vtkMath::Normalize(axis);
-
-  double *o = this->PlaneSource->GetOrigin();
-  double *pt1 = this->PlaneSource->GetPoint1();
-  double *pt2 = this->PlaneSource->GetPoint2();
-  double *center = this->PlaneSource->GetCenter();
-
-  // Radius vector (from center to cursor position)
-  double rv[3] = {p2[0] - center[0],
-                  p2[1] - center[1],
-                  p2[2] - center[2]};
-
-  // Distance between center and cursor location
-  double rs = vtkMath::Normalize(rv);
-
-  // Spin direction
-  double ax_cross_rv[3];
-  vtkMath::Cross(axis,rv,ax_cross_rv);
-
-  // Spin angle
-  double theta = vtkMath::DegreesFromRadians( vtkMath::Dot( v, ax_cross_rv ) / rs );
-
-  // Manipulate the transform to reflect the rotation
-  this->Transform->Identity();
-  this->Transform->Translate(center[0],center[1],center[2]);
-  this->Transform->RotateWXYZ(theta,axis);
-  this->Transform->Translate(-center[0],-center[1],-center[2]);
-
-  //Set the corners
-  double oNew[3], pt1New[3], pt2New[3];
-  this->Transform->TransformPoint(o,oNew);
-  this->Transform->TransformPoint(pt1,pt1New);
-  this->Transform->TransformPoint(pt2,pt2New);
-
-  this->PlaneSource->SetOrigin(oNew);
-  this->PlaneSource->SetPoint1(pt1New);
-  this->PlaneSource->SetPoint2(pt2New);
-  this->PlaneSource->Update();
-
-  this->PositionHandles();
-}
-
 // Loop through all points and translate them
 void vtkErSlicePlaneWidget::Translate(double *p1, double *p2)
 {
@@ -1168,53 +868,6 @@ void vtkErSlicePlaneWidget::Translate(double *p1, double *p2)
     point2[i] = pt2[i] + v[i];
     }
   
-  this->PlaneSource->SetOrigin(origin);
-  this->PlaneSource->SetPoint1(point1);
-  this->PlaneSource->SetPoint2(point2);
-  this->PlaneSource->Update();
-
-  this->PositionHandles();
-}
-
-void vtkErSlicePlaneWidget::Scale(double *p1, double *p2, int vtkNotUsed(X), int Y)
-{
-  //Get the motion vector
-  double v[3];
-  v[0] = p2[0] - p1[0];
-  v[1] = p2[1] - p1[1];
-  v[2] = p2[2] - p1[2];
-
-  //int res = this->PlaneSource->GetXResolution();
-  double *o = this->PlaneSource->GetOrigin();
-  double *pt1 = this->PlaneSource->GetPoint1();
-  double *pt2 = this->PlaneSource->GetPoint2();
-
-  double center[3];
-  center[0] = 0.5 * ( pt1[0] + pt2[0] );
-  center[1] = 0.5 * ( pt1[1] + pt2[1] );
-  center[2] = 0.5 * ( pt1[2] + pt2[2] );
-
-  // Compute the scale factor
-  double sf = 
-    vtkMath::Norm(v) / sqrt(vtkMath::Distance2BetweenPoints(pt1,pt2));
-  if ( Y > this->Interactor->GetLastEventPosition()[1] )
-    {
-    sf = 1.0 + sf;
-    }
-  else
-    {
-    sf = 1.0 - sf;
-    }
-  
-  // Move the corner points
-  double origin[3], point1[3], point2[3];
-  for (int i=0; i<3; i++)
-    {
-    origin[i] = sf * (o[i] - center[i]) + center[i];
-    point1[i] = sf * (pt1[i] - center[i]) + center[i];
-    point2[i] = sf * (pt2[i] - center[i]) + center[i];
-    }
-
   this->PlaneSource->SetOrigin(origin);
   this->PlaneSource->SetPoint1(point1);
   this->PlaneSource->SetPoint2(point2);
@@ -1321,6 +974,12 @@ void vtkErSlicePlaneWidget::PlaceWidget(double bds[6])
     this->InitialLength = sqrt(sqr1 + sqr2);
     }
 
+  this->CubeSource->SetBounds(bds);
+  this->CubeSource->Update();
+  this->CubeMapper->SetInput(this->CubeSource->GetOutput());
+
+  vtkBoundingBox AABB(bds);
+
   // Set the radius on the sphere handles
   this->SizeHandles();
 }
@@ -1329,30 +988,9 @@ void vtkErSlicePlaneWidget::SizeHandles()
 {
   double radius = this->vtk3DWidget::SizeHandles(this->HandleSizeFactor);
   
-  if (this->ValidPick && !this->LastPickValid)
-    {
-    // Adjust factor to preserve old radius.
-    double oldradius = this->HandleGeometry[0]->GetRadius();
-    if (oldradius != 0 && radius != 0)
-      {
-      this->HandleSizeFactor = oldradius / radius;
-      radius = oldradius;
-      }
-    }
-
-  this->LastPickValid = this->ValidPick;
-  
-  for(int i=0; i<4; i++)
-    {
-    this->HandleGeometry[i]->SetRadius(radius);
-    }
-
   // Set the height and radius of the cone
   this->ConeSource->SetHeight(2.0*radius);
   this->ConeSource->SetRadius(radius);
-  this->ConeSource2->SetHeight(2.0*radius);
-  this->ConeSource2->SetRadius(radius);
-  
 }
 
 
@@ -1390,21 +1028,6 @@ void vtkErSlicePlaneWidget::SelectRepresentation()
     }
 }
 
-// Description:
-// Set/Get the resolution (number of subdivisions) of the plane.
-void vtkErSlicePlaneWidget::SetResolution(int r)
-{
-  this->PlaneSource->SetXResolution(r); 
-  this->PlaneSource->SetYResolution(r); 
-}
-
-int vtkErSlicePlaneWidget::GetResolution()
-{ 
-  return this->PlaneSource->GetXResolution(); 
-}
-
-// Description:
-// Set/Get the origin of the plane.
 void vtkErSlicePlaneWidget::SetOrigin(double x, double y, double z) 
 {
   this->PlaneSource->SetOrigin(x,y,z);
@@ -1424,52 +1047,6 @@ double* vtkErSlicePlaneWidget::GetOrigin()
 void vtkErSlicePlaneWidget::GetOrigin(double xyz[3]) 
 {
   this->PlaneSource->GetOrigin(xyz);
-}
-
-// Description:
-// Set/Get the position of the point defining the first axis of the plane.
-void vtkErSlicePlaneWidget::SetPoint1(double x, double y, double z) 
-{
-  this->PlaneSource->SetPoint1(x,y,z);
-  this->PositionHandles();
-}
-
-void vtkErSlicePlaneWidget::SetPoint1(double x[3]) 
-{
-  this->SetPoint1(x[0], x[1], x[2]);
-}
-
-double* vtkErSlicePlaneWidget::GetPoint1() 
-{
-  return this->PlaneSource->GetPoint1();
-}
-
-void vtkErSlicePlaneWidget::GetPoint1(double xyz[3]) 
-{
-  this->PlaneSource->GetPoint1(xyz);
-}
-
-// Description:
-// Set/Get the position of the point defining the second axis of the plane.
-void vtkErSlicePlaneWidget::SetPoint2(double x, double y, double z) 
-{
-  this->PlaneSource->SetPoint2(x,y,z);
-  this->PositionHandles();
-}
-
-void vtkErSlicePlaneWidget::SetPoint2(double x[3]) 
-{
-  this->SetPoint2(x[0], x[1], x[2]);
-}
-
-double* vtkErSlicePlaneWidget::GetPoint2() 
-{
-  return this->PlaneSource->GetPoint2();
-}
-
-void vtkErSlicePlaneWidget::GetPoint2(double xyz[3]) 
-{
-  this->PlaneSource->GetPoint2(xyz);
 }
 
 // Description:

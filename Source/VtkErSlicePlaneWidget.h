@@ -40,6 +40,12 @@
 #include "vtkRenderer.h"
 #include "vtkSphereSource.h"
 #include "vtkTransform.h"
+#include "vtkCubeSource.h"
+#include "vtkCutter.h"
+#include "vtkSmartPointer.h"
+#include "vtkArrowSource.h"
+#include "vtkDiskSource.h"
+#include "vtkBoundingBox.h"
 
 #define VTK_PLANE_OFF 0
 #define VTK_PLANE_OUTLINE 1
@@ -67,32 +73,12 @@ public:
     {this->Superclass::PlaceWidget(xmin,xmax,ymin,ymax,zmin,zmax);}
 
   // Description:
-  // Set/Get the resolution (number of subdivisions) of the plane.
-  void SetResolution(int r);
-  int GetResolution();
-
-  // Description:
   // Set/Get the origin of the plane.
   void SetOrigin(double x, double y, double z);
   void SetOrigin(double x[3]);
   double* GetOrigin();
   void GetOrigin(double xyz[3]);
 
-  // Description:
-  // Set/Get the position of the point defining the first axis of the plane.
-  void SetPoint1(double x, double y, double z);
-  void SetPoint1(double x[3]);
-  double* GetPoint1();
-  void GetPoint1(double xyz[3]);
-  
-  // Description:
-  // Set/Get the position of the point defining the second axis of the plane.
-  void SetPoint2(double x, double y, double z);
-  void SetPoint2(double x[3]);
-  double* GetPoint2();
-  void GetPoint2(double xyz[3]);
-
-  // Description:
   // Get the center of the plane.
   void SetCenter(double x, double y, double z);
   void SetCenter(double x[3]);
@@ -106,6 +92,9 @@ public:
   double* GetNormal();
   void GetNormal(double xyz[3]);
   
+  vtkGetVector3Macro(Up, double);
+  vtkSetVector3Macro(Up, double);
+
   // Description:
   // Control how the plane appears when GetPolyData() is invoked.
   // If the mode is "outline", then just the outline of the plane
@@ -129,15 +118,6 @@ public:
   // Remember that when the state changes, a ModifiedEvent is invoked.
   // This can be used to snap the plane to the axes if it is orginally
   // not aligned.
-  vtkSetMacro(NormalToXAxis,int);
-  vtkGetMacro(NormalToXAxis,int);
-  vtkBooleanMacro(NormalToXAxis,int);
-  vtkSetMacro(NormalToYAxis,int);
-  vtkGetMacro(NormalToYAxis,int);
-  vtkBooleanMacro(NormalToYAxis,int);
-  vtkSetMacro(NormalToZAxis,int);
-  vtkGetMacro(NormalToZAxis,int);
-  vtkBooleanMacro(NormalToZAxis,int);
 
   // Description:
   // Grab the polydata (including points) that defines the plane.  The
@@ -229,10 +209,6 @@ protected:
   vtkPolyData       *PlaneOutline;
   void HighlightPlane(int highlight);
 
-  // glyphs representing hot spots (e.g., handles)
-  vtkActor          **Handle;
-  vtkPolyDataMapper **HandleMapper;
-  vtkSphereSource   **HandleGeometry;
   void PositionHandles();
   void HandlesOn(double length);
   void HandlesOff();
@@ -245,39 +221,18 @@ protected:
   vtkConeSource     *ConeSource;
   void HighlightNormal(int highlight);
 
-  // the normal line
-  vtkActor          *LineActor;
-  vtkPolyDataMapper *LineMapper;
-  vtkLineSource     *LineSource;
-
-  // the normal cone
-  vtkActor          *ConeActor2;
-  vtkPolyDataMapper *ConeMapper2;
-  vtkConeSource     *ConeSource2;
-
-  // the normal line
-  vtkActor          *LineActor2;
-  vtkPolyDataMapper *LineMapper2;
-  vtkLineSource     *LineSource2;
-
-  // Do the picking
-  vtkCellPicker *HandlePicker;
   vtkCellPicker *PlanePicker;
   vtkActor *CurrentHandle;
   
   // Methods to manipulate the hexahedron.
   void MoveOrigin(double *p1, double *p2);
-  void MovePoint1(double *p1, double *p2);
-  void MovePoint2(double *p1, double *p2);
-  void MovePoint3(double *p1, double *p2);
   void Rotate(int X, int Y, double *p1, double *p2, double *vpn);
-  void Spin(double *p1, double *p2);
-  void Scale(double *p1, double *p2, int X, int Y);
   void Translate(double *p1, double *p2);
   void Push(double *p1, double *p2);
   
   // Plane normal, normalized
   double Normal[3];
+  double Up[3];
 
   // Transform the hexahedral points (used for rotations)
   vtkTransform *Transform;
@@ -295,6 +250,17 @@ protected:
   int    LastPickValid;
   double HandleSizeFactor;
   
+  vtkSmartPointer<vtkCubeSource>		CubeSource;
+  vtkSmartPointer<vtkPolyDataMapper>	CubeMapper;
+  vtkSmartPointer<vtkPolyData>			CubePolyData;
+  vtkSmartPointer<vtkCutter>			CubeCutter;
+  vtkSmartPointer<vtkPolyDataMapper>	CubeCutterMapper;
+  vtkSmartPointer<vtkActor>				CubeCutterPlaneActor;
+
+  vtkSmartPointer<vtkArrowSource>		ArrowSource;
+  vtkSmartPointer<vtkPolyDataMapper>	ArrowMapper;
+  vtkSmartPointer<vtkActor>				ArrowActor;
+
 private:
   vtkErSlicePlaneWidget(const vtkErSlicePlaneWidget&);  //Not implemented
   void operator=(const vtkErSlicePlaneWidget&);  //Not implemented

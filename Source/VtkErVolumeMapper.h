@@ -15,7 +15,7 @@
 
 #include "VtkErVolumeInfo.h"
 #include "VtkErRenderInfo.h"
-#include "vtkErSlicePlaneWidget.h"
+#include "vtkErBoxWidget.h"
 
 #include <vtkVolumeMapper.h>
 #include <vtkSmartPointer.h>
@@ -96,14 +96,13 @@ public:
 	bool	UseCustomRenderSize;
 	int		CustomRenderSize[2];
 
-	vtkGetMacro(SliceWidget, vtkErSliceBoxWidget*);
-//	vtkSetMacro(SliceWidget, vtkErSlicePlaneWidget*);
-	void SetSliceWidget(vtkErSliceBoxWidget* pSliceWidget);
+	vtkGetMacro(SliceWidget, vtkErBoxWidget*);
+	void SetSliceWidget(vtkErBoxWidget* pSliceWidget);
 
 	void Reset();
 
 protected:
-	vtkErSliceBoxWidget*						SliceWidget;
+	vtkErBoxWidget*								SliceWidget;
 	vtkSmartPointer<vtkErResetCommand>			ResetCallBack;
 	vtkSmartPointer<vtkErUpdateSlicingCommand>	UpdateSlicingCommand;
 };

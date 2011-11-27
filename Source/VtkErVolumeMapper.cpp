@@ -250,7 +250,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	BindTransferFunctions1D(Opacity, Diffuse, Specular, Glossiness, Emission, N);
 }
 
-void vtkErVolumeMapper::SetSliceWidget(vtkErSliceBoxWidget* pSliceWidget)
+void vtkErVolumeMapper::SetSliceWidget(vtkErBoxWidget* pSliceWidget)
 {
 	if (pSliceWidget == NULL)
 	{

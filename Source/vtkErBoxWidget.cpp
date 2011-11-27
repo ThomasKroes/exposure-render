@@ -13,20 +13,19 @@
 
 #include "ErCoreStable.h"
 
-#include "vtkErSlicePlaneWidget.h"
-#include "vtkErSlicePlane.h"
+#include "vtkErBoxWidget.h"
 
 #define VTK_AVERAGE(a,b,c) \
   c[0] = (a[0] + b[0]) / 2.0; \
   c[1] = (a[1] + b[1]) / 2.0; \
   c[2] = (a[2] + b[2]) / 2.0;
 
-vtkStandardNewMacro(vtkErSliceBoxWidget);
+vtkStandardNewMacro(vtkErBoxWidget);
 
-vtkErSliceBoxWidget::vtkErSliceBoxWidget()
+vtkErBoxWidget::vtkErBoxWidget()
 {
-	this->State = vtkErSliceBoxWidget::Start;
-	this->EventCallbackCommand->SetCallback(vtkErSliceBoxWidget::ProcessEvents);
+	this->State = vtkErBoxWidget::Start;
+	this->EventCallbackCommand->SetCallback(vtkErBoxWidget::ProcessEvents);
 
 	// Bounding box lines
 	this->BoundingBoxActor				= vtkActor::New();
@@ -69,11 +68,11 @@ vtkErSliceBoxWidget::vtkErSliceBoxWidget()
 		this->PointWidget[i] = vtkErSlicePlaneWidget::New();
 }
 
-vtkErSliceBoxWidget::~vtkErSliceBoxWidget()
+vtkErBoxWidget::~vtkErBoxWidget()
 {
 }
 
-void vtkErSliceBoxWidget::SetVolume(vtkVolume* pVolume)
+void vtkErBoxWidget::SetVolume(vtkVolume* pVolume)
 {
 	if (pVolume == NULL)
 	{
@@ -88,7 +87,7 @@ void vtkErSliceBoxWidget::SetVolume(vtkVolume* pVolume)
 	this->PlaceWidget(pVolume->GetMapper()->GetBounds());
 }
 
-void vtkErSliceBoxWidget::SetEnabled(int enabling)
+void vtkErBoxWidget::SetEnabled(int enabling)
 {
 	if (!this->Interactor)
 	{
@@ -169,9 +168,9 @@ void vtkErSliceBoxWidget::SetEnabled(int enabling)
 	this->Interactor->Render();
 }
 
-void vtkErSliceBoxWidget::ProcessEvents(vtkObject* vtkNotUsed(object), unsigned long event, void* clientdata, void* vtkNotUsed(calldata))
+void vtkErBoxWidget::ProcessEvents(vtkObject* vtkNotUsed(object), unsigned long event, void* clientdata, void* vtkNotUsed(calldata))
 {
-	vtkErSliceBoxWidget* self = reinterpret_cast<vtkErSliceBoxWidget *>( clientdata );
+	vtkErBoxWidget* self = reinterpret_cast<vtkErBoxWidget *>( clientdata );
 
 	switch (event)
 	{
@@ -185,47 +184,47 @@ void vtkErSliceBoxWidget::ProcessEvents(vtkObject* vtkNotUsed(object), unsigned 
 	}
 }
 
-void vtkErSliceBoxWidget::PrintSelf(ostream& os, vtkIndent indent)
+void vtkErBoxWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
 }
 
-void vtkErSliceBoxWidget::PositionHandles()
+void vtkErBoxWidget::PositionHandles()
 {
 }
 
-void vtkErSliceBoxWidget::OnLeftButtonDown()
+void vtkErBoxWidget::OnLeftButtonDown()
 {
 }
 
-void vtkErSliceBoxWidget::OnLeftButtonUp()
+void vtkErBoxWidget::OnLeftButtonUp()
 {
 }
 
-void vtkErSliceBoxWidget::OnMiddleButtonDown()
+void vtkErBoxWidget::OnMiddleButtonDown()
 {
 }
 
-void vtkErSliceBoxWidget::OnMiddleButtonUp()
+void vtkErBoxWidget::OnMiddleButtonUp()
 {
 }
 
-void vtkErSliceBoxWidget::OnRightButtonDown()
+void vtkErBoxWidget::OnRightButtonDown()
 {
 }
 
-void vtkErSliceBoxWidget::OnRightButtonUp()
+void vtkErBoxWidget::OnRightButtonUp()
 {
 }
 
-void vtkErSliceBoxWidget::OnMouseMove()
+void vtkErBoxWidget::OnMouseMove()
 {
 }
 
-void vtkErSliceBoxWidget::CreateDefaultProperties()
+void vtkErBoxWidget::CreateDefaultProperties()
 {
 }
 
-void vtkErSliceBoxWidget::PlaceWidget(double Bounds[6])
+void vtkErBoxWidget::PlaceWidget(double Bounds[6])
 {
 	this->BoundingBoxPoints->SetPoint(0, Bounds[0], Bounds[2], Bounds[4]);
 	this->BoundingBoxPoints->SetPoint(1, Bounds[1], Bounds[2], Bounds[4]);
@@ -269,16 +268,17 @@ void vtkErSliceBoxWidget::PlaceWidget(double Bounds[6])
 		this->PointWidget[i]->PlaceWidget(Bounds);
 		this->PointWidget[i]->SetCenter(DefaultPositions->GetPoint(i));
 		this->PointWidget[i]->SetNormal(DefaultNormals->GetPoint(i));
-		this->PointWidget[i]->SetPlaceFactor(100);
+		this->PointWidget[i]->SetPlaceFactor(1);
 		this->PointWidget[i]->UpdatePlacement();
+
 	}
 }
 
-void vtkErSliceBoxWidget::UpdatePlacement(void)
+void vtkErBoxWidget::UpdatePlacement(void)
 {
 }
 
-void vtkErSliceBoxWidget::GetPlanes(vtkPlanes* pPlanes)
+void vtkErBoxWidget::GetPlanes(vtkPlanes* pPlanes)
 {
 	if (!pPlanes)
 		return;
@@ -305,7 +305,7 @@ void vtkErSliceBoxWidget::GetPlanes(vtkPlanes* pPlanes)
 	pPlanes->SetNormals(normals);
 }
 
-vtkErSlicePlaneWidget* vtkErSliceBoxWidget::GetSlicePlaneWidget(int Index)
+vtkErSlicePlaneWidget* vtkErBoxWidget::GetSlicePlaneWidget(int Index)
 {
 	if (Index < 0 || Index >= 6)
 	{

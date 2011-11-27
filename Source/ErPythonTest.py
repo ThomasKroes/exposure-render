@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/macoessix_small.mhd")
+Reader.SetFileName("C:/Volumes/bonsai.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -31,7 +31,7 @@ ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
 Opacity.AddPoint(0, 0.000)
-Opacity.AddPoint(100, 0)
+Opacity.AddPoint(10, 0)
 Opacity.AddPoint(2000, 1)
 Opacity.AddPoint(2055, 1)
 
@@ -77,8 +77,8 @@ Renderer.AddLight(ErBackgroundLight);
 # SlicePlane = vtkErCorePython.vtkErSlicePlane()
 # Renderer.AddViewProp(SlicePlane)
 
-ErBoxWidget = vtkErCorePython.vtkErSliceBoxWidget()
-#PlaneWidget.SetPlaceFactor(10000)
+ErBoxWidget = vtkErCorePython.vtkErBoxWidget()
+ErBoxWidget.SetPlaceFactor(1)
 ErBoxWidget.SetInteractor(Interactor)
 # PlaneWidget.SetOrigin(0, 0, 0)
 # PlaneWidget.SetPoint1(100, 0, 0)
@@ -89,6 +89,18 @@ ErBoxWidget.SetVolume(Volume)
 #PlaneWidget.UpdatePlacement()
 
 ErVolumeMapper.SetSliceWidget(ErBoxWidget)
+
+
+axes = vtk.vtkAxesActor()
+
+widget = vtk.vtkOrientationMarkerWidget()
+
+widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 )
+widget.SetOrientationMarker(axes)
+widget.SetInteractor( Interactor )
+widget.SetViewport(0.0, 0.0, 0.2, 0.2)
+widget.SetEnabled( 1 )
+widget.InteractiveOn()
 
 InteractorStyle = vtk.vtkInteractorStyleTrackballCamera()
 Interactor.SetInteractorStyle(InteractorStyle)
@@ -121,7 +133,7 @@ Interactor.Initialize()
 
 RendererWin.Render()
 
-PlaneWidget.On()
+ErBoxWidget.On()
 
 # Start the event loop.
 Interactor.Start()
