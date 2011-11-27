@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/mecanix_small.mhd")
+Reader.SetFileName("C:/Volumes/engine_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
