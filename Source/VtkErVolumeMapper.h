@@ -24,17 +24,32 @@
 
 class vtkErVolumeMapper;
 
-class vtkErResetCallbackCommand : public vtkCommand
+class vtkErResetCommand : public vtkCommand
 {
 public:
-	static vtkErResetCallbackCommand* New() { return new vtkErResetCallbackCommand; };
+	static vtkErResetCommand* New() { return new vtkErResetCommand; };
 
 	virtual void Execute(vtkObject*, unsigned long, void *);
 	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
 
 protected:
-	vtkErResetCallbackCommand() { this->VolumeMapper = NULL; };
-	~vtkErResetCallbackCommand() {};
+	vtkErResetCommand() { this->VolumeMapper = NULL; };
+	~vtkErResetCommand() {};
+
+	vtkErVolumeMapper*	VolumeMapper;
+};
+
+class vtkErUpdateSlicingCommand : public vtkCommand
+{
+public:
+	static vtkErUpdateSlicingCommand* New() { return new vtkErUpdateSlicingCommand; };
+
+	virtual void Execute(vtkObject*, unsigned long, void *);
+	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
+
+protected:
+	vtkErUpdateSlicingCommand() { this->VolumeMapper = NULL; };
+	~vtkErUpdateSlicingCommand() {};
 
 	vtkErVolumeMapper*	VolumeMapper;
 };
@@ -81,16 +96,16 @@ public:
 	bool	UseCustomRenderSize;
 	int		CustomRenderSize[2];
 
-	vtkGetMacro(SliceWidget, vtkErSlicePlaneWidget*);
+	vtkGetMacro(SliceWidget, vtkErSliceBoxWidget*);
 //	vtkSetMacro(SliceWidget, vtkErSlicePlaneWidget*);
-	void SetSliceWidget(vtkErSlicePlaneWidget* pSliceWidget);
+	void SetSliceWidget(vtkErSliceBoxWidget* pSliceWidget);
 
-	void UpdateSlicing();
 	void Reset();
 
 protected:
-	vtkErSlicePlaneWidget*						SliceWidget;
-	vtkSmartPointer<vtkErResetCallbackCommand>	ResetCallBack;
+	vtkErSliceBoxWidget*						SliceWidget;
+	vtkSmartPointer<vtkErResetCommand>			ResetCallBack;
+	vtkSmartPointer<vtkErUpdateSlicingCommand>	UpdateSlicingCommand;
 };
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/

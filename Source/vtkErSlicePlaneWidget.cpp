@@ -21,12 +21,12 @@
   c[1] = (a[1] + b[1]) / 2.0; \
   c[2] = (a[2] + b[2]) / 2.0;
 
-vtkStandardNewMacro(vtkErSlicePlaneWidget);
+vtkStandardNewMacro(vtkErSliceBoxWidget);
 
-vtkErSlicePlaneWidget::vtkErSlicePlaneWidget()
+vtkErSliceBoxWidget::vtkErSliceBoxWidget()
 {
-	this->State = vtkErSlicePlaneWidget::Start;
-	this->EventCallbackCommand->SetCallback(vtkErSlicePlaneWidget::ProcessEvents);
+	this->State = vtkErSliceBoxWidget::Start;
+	this->EventCallbackCommand->SetCallback(vtkErSliceBoxWidget::ProcessEvents);
 
 	// Bounding box lines
 	this->BoundingBoxActor				= vtkActor::New();
@@ -66,14 +66,14 @@ vtkErSlicePlaneWidget::vtkErSlicePlaneWidget()
 	DefaultNormals->SetNumberOfPoints(6);
 
 	for (int i = 0; i < 6; i++)
-		this->PointWidget[i] = vtkPlaneWidget::New();
+		this->PointWidget[i] = vtkErSlicePlaneWidget::New();
 }
 
-vtkErSlicePlaneWidget::~vtkErSlicePlaneWidget()
+vtkErSliceBoxWidget::~vtkErSliceBoxWidget()
 {
 }
 
-void vtkErSlicePlaneWidget::SetVolume(vtkVolume* pVolume)
+void vtkErSliceBoxWidget::SetVolume(vtkVolume* pVolume)
 {
 	if (pVolume == NULL)
 	{
@@ -88,7 +88,7 @@ void vtkErSlicePlaneWidget::SetVolume(vtkVolume* pVolume)
 	this->PlaceWidget(pVolume->GetMapper()->GetBounds());
 }
 
-void vtkErSlicePlaneWidget::SetEnabled(int enabling)
+void vtkErSliceBoxWidget::SetEnabled(int enabling)
 {
 	if (!this->Interactor)
 	{
@@ -169,9 +169,9 @@ void vtkErSlicePlaneWidget::SetEnabled(int enabling)
 	this->Interactor->Render();
 }
 
-void vtkErSlicePlaneWidget::ProcessEvents(vtkObject* vtkNotUsed(object), unsigned long event, void* clientdata, void* vtkNotUsed(calldata))
+void vtkErSliceBoxWidget::ProcessEvents(vtkObject* vtkNotUsed(object), unsigned long event, void* clientdata, void* vtkNotUsed(calldata))
 {
-	vtkErSlicePlaneWidget* self = reinterpret_cast<vtkErSlicePlaneWidget *>( clientdata );
+	vtkErSliceBoxWidget* self = reinterpret_cast<vtkErSliceBoxWidget *>( clientdata );
 
 	switch (event)
 	{
@@ -185,47 +185,47 @@ void vtkErSlicePlaneWidget::ProcessEvents(vtkObject* vtkNotUsed(object), unsigne
 	}
 }
 
-void vtkErSlicePlaneWidget::PrintSelf(ostream& os, vtkIndent indent)
+void vtkErSliceBoxWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
 }
 
-void vtkErSlicePlaneWidget::PositionHandles()
+void vtkErSliceBoxWidget::PositionHandles()
 {
 }
 
-void vtkErSlicePlaneWidget::OnLeftButtonDown()
+void vtkErSliceBoxWidget::OnLeftButtonDown()
 {
 }
 
-void vtkErSlicePlaneWidget::OnLeftButtonUp()
+void vtkErSliceBoxWidget::OnLeftButtonUp()
 {
 }
 
-void vtkErSlicePlaneWidget::OnMiddleButtonDown()
+void vtkErSliceBoxWidget::OnMiddleButtonDown()
 {
 }
 
-void vtkErSlicePlaneWidget::OnMiddleButtonUp()
+void vtkErSliceBoxWidget::OnMiddleButtonUp()
 {
 }
 
-void vtkErSlicePlaneWidget::OnRightButtonDown()
+void vtkErSliceBoxWidget::OnRightButtonDown()
 {
 }
 
-void vtkErSlicePlaneWidget::OnRightButtonUp()
+void vtkErSliceBoxWidget::OnRightButtonUp()
 {
 }
 
-void vtkErSlicePlaneWidget::OnMouseMove()
+void vtkErSliceBoxWidget::OnMouseMove()
 {
 }
 
-void vtkErSlicePlaneWidget::CreateDefaultProperties()
+void vtkErSliceBoxWidget::CreateDefaultProperties()
 {
 }
 
-void vtkErSlicePlaneWidget::PlaceWidget(double Bounds[6])
+void vtkErSliceBoxWidget::PlaceWidget(double Bounds[6])
 {
 	this->BoundingBoxPoints->SetPoint(0, Bounds[0], Bounds[2], Bounds[4]);
 	this->BoundingBoxPoints->SetPoint(1, Bounds[1], Bounds[2], Bounds[4]);
@@ -246,9 +246,9 @@ void vtkErSlicePlaneWidget::PlaceWidget(double Bounds[6])
 	this->BoundingBoxPointLabelMapper->SetLabelFormat("%0.1f");
 	this->BoundingBoxPointLabelMapper->Update();
 
-	const double HalfX = 0.5 * (Bounds[1] - Bounds[0]);
-	const double HalfY = 0.5 * (Bounds[3] - Bounds[2]);
-	const double HalfZ = 0.5 * (Bounds[5] - Bounds[4]);
+	const double HalfX = 0.5 * (Bounds[1] + Bounds[0]);
+	const double HalfY = 0.5 * (Bounds[3] + Bounds[2]);
+	const double HalfZ = 0.5 * (Bounds[5] + Bounds[4]);
 
 	DefaultPositions->SetPoint(0, HalfX, HalfY, Bounds[4]);
 	DefaultPositions->SetPoint(1, HalfX, HalfY, Bounds[5]);
@@ -274,11 +274,11 @@ void vtkErSlicePlaneWidget::PlaceWidget(double Bounds[6])
 	}
 }
 
-void vtkErSlicePlaneWidget::UpdatePlacement(void)
+void vtkErSliceBoxWidget::UpdatePlacement(void)
 {
 }
 
-void vtkErSlicePlaneWidget::GetPlanes(vtkPlanes* pPlanes)
+void vtkErSliceBoxWidget::GetPlanes(vtkPlanes* pPlanes)
 {
 	if (!pPlanes)
 		return;
@@ -305,7 +305,7 @@ void vtkErSlicePlaneWidget::GetPlanes(vtkPlanes* pPlanes)
 	pPlanes->SetNormals(normals);
 }
 
-vtkPlaneWidget* vtkErSlicePlaneWidget::GetSlicePlaneWidget(int Index)
+vtkErSlicePlaneWidget* vtkErSliceBoxWidget::GetSlicePlaneWidget(int Index)
 {
 	if (Index < 0 || Index >= 6)
 	{

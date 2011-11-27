@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/manix_small.mhd")
+Reader.SetFileName("C:/Volumes/macoessix_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -31,7 +31,7 @@ ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
 Opacity.AddPoint(0, 0.000)
-Opacity.AddPoint(10, 0)
+Opacity.AddPoint(100, 0)
 Opacity.AddPoint(2000, 1)
 Opacity.AddPoint(2055, 1)
 
@@ -77,18 +77,18 @@ Renderer.AddLight(ErBackgroundLight);
 # SlicePlane = vtkErCorePython.vtkErSlicePlane()
 # Renderer.AddViewProp(SlicePlane)
 
-PlaneWidget = vtkErCorePython.vtkErSlicePlaneWidget()
+ErBoxWidget = vtkErCorePython.vtkErSliceBoxWidget()
 #PlaneWidget.SetPlaceFactor(10000)
-PlaneWidget.SetInteractor(Interactor)
+ErBoxWidget.SetInteractor(Interactor)
 # PlaneWidget.SetOrigin(0, 0, 0)
 # PlaneWidget.SetPoint1(100, 0, 0)
 # PlaneWidget.SetPoint2(0, 100, 0)
-PlaneWidget.SetVolume(Volume)
+ErBoxWidget.SetVolume(Volume)
 
 #laneWidget.PlaceWidget(0, 0, 0, 150, 150, 150)
 #PlaneWidget.UpdatePlacement()
 
-ErVolumeMapper.SetSliceWidget(PlaneWidget)
+ErVolumeMapper.SetSliceWidget(ErBoxWidget)
 
 InteractorStyle = vtk.vtkInteractorStyleTrackballCamera()
 Interactor.SetInteractorStyle(InteractorStyle)

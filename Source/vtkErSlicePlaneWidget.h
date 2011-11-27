@@ -47,15 +47,16 @@
 #include "vtkPointSource.h"
 #include "vtkActor2D.h"
 #include "vtkProperty2D.h"
-#include "vtkPlaneWidget.h"
+#include "vtkErSlicePlane.h"
+#include "vtkSmartPointer.h"
 
 #include "vtkErSlicePlane.h"
 
-class VTK_ER_CORE_EXPORT vtkErSlicePlaneWidget : public vtk3DWidget
+class VTK_ER_CORE_EXPORT vtkErSliceBoxWidget : public vtk3DWidget
 {
 public:
-	static vtkErSlicePlaneWidget *New();
-	vtkTypeMacro(vtkErSlicePlaneWidget, vtk3DWidget);
+	static vtkErSliceBoxWidget *New();
+	vtkTypeMacro(vtkErSliceBoxWidget, vtk3DWidget);
 	void PrintSelf(ostream& os, vtkIndent indent);
 
 	virtual void SetEnabled(int);
@@ -67,11 +68,11 @@ public:
 
 	void GetPlanes(vtkPlanes* pPlanes);
 	
-	vtkPlaneWidget* GetSlicePlaneWidget(int Index);
+	vtkErSlicePlaneWidget* GetSlicePlaneWidget(int Index);
 
 protected:
-	vtkErSlicePlaneWidget();
-	~vtkErSlicePlaneWidget();
+	vtkErSliceBoxWidget();
+	~vtkErSliceBoxWidget();
 
 	//BTX
 	int State;
@@ -119,12 +120,12 @@ protected:
 	vtkSmartPointer<vtkProperty2D>			BoundingBoxPointLabelProperty;
 
 	// Widgets
-	vtkSmartPointer<vtkPlaneWidget>			PointWidget[6];
+	vtkSmartPointer<vtkErSlicePlaneWidget>	PointWidget[6];
 	vtkSmartPointer<vtkPoints>				DefaultPositions;
 	vtkSmartPointer<vtkPoints>				DefaultNormals;
 
 private:
-  vtkErSlicePlaneWidget(const vtkErSlicePlaneWidget&);
-  void operator=(const vtkErSlicePlaneWidget&);
+  vtkErSliceBoxWidget(const vtkErSliceBoxWidget&);
+  void operator=(const vtkErSliceBoxWidget&);
 };
 

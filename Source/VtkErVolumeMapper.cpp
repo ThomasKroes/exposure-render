@@ -24,7 +24,7 @@
 #include "vtkgl.h"
 #include "vtkCommand.h"
 
-void vtkErResetCallbackCommand::Execute(vtkObject*, unsigned long, void *)
+void vtkErResetCommand::Execute(vtkObject*, unsigned long, void *)
 {
 	if (!this->VolumeMapper)
 		return;
@@ -32,7 +32,35 @@ void vtkErResetCallbackCommand::Execute(vtkObject*, unsigned long, void *)
 	this->VolumeMapper->Reset();
 }
 
-void vtkErResetCallbackCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
+void vtkErResetCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
+{
+	this->VolumeMapper = pVolumeMapper;
+};
+
+void vtkErUpdateSlicingCommand::Execute(vtkObject*, unsigned long, void *)
+{
+	if (!this->VolumeMapper)
+		return;
+
+	if (!this->VolumeMapper->GetSliceWidget())
+		return;
+
+	this->VolumeMapper->m_CudaRenderInfo->Slicing.m_NoSlices = 6;
+
+	for (int i = 0; i < 6; i++)
+	{
+		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Position[i].x	= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[0];
+		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Position[i].y	= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[1];
+		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Position[i].z	= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[2];
+		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Normal[i].x		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[0];
+		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Normal[i].y		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[1];
+		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Normal[i].z		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[2];
+	}
+
+	this->VolumeMapper->Reset();
+}
+
+void vtkErUpdateSlicingCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
 {
 	this->VolumeMapper = pVolumeMapper;
 };
@@ -46,17 +74,13 @@ vtkErVolumeMapper::vtkErVolumeMapper(void)
 
 	SetCudaDevice(0);
 
-//	SetUseCustomRenderSize(false);
-//	SetCustomRenderSize(34, 34);
-
 	glGenTextures(1, &TextureID);
 
-//	MultiThreader = vtkMultiThreader::New();
-
-//	MultiThreader->SpawnThread((vtkThreadFunctionType)vtkTrackerSimulatorRecordThread, this);
-
-	this->ResetCallBack = vtkErResetCallbackCommand::New();
+	this->ResetCallBack = vtkErResetCommand::New();
 	this->ResetCallBack->SetVolumeMapper(this);
+
+	this->UpdateSlicingCommand = vtkErUpdateSlicingCommand::New();
+	this->UpdateSlicingCommand->SetVolumeMapper(this);
 }  
 
 vtkErVolumeMapper::~vtkErVolumeMapper(void)
@@ -74,7 +98,6 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 		return;
 	
 	UploadVolumeProperty(pVolume->GetProperty());
-	UpdateSlicing();
 
 	int RenderSize[2];
 
@@ -227,7 +250,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	BindTransferFunctions1D(Opacity, Diffuse, Specular, Glossiness, Emission, N);
 }
 
-void vtkErVolumeMapper::SetSliceWidget(vtkErSlicePlaneWidget* pSliceWidget)
+void vtkErVolumeMapper::SetSliceWidget(vtkErSliceBoxWidget* pSliceWidget)
 {
 	if (pSliceWidget == NULL)
 	{
@@ -238,26 +261,7 @@ void vtkErVolumeMapper::SetSliceWidget(vtkErSlicePlaneWidget* pSliceWidget)
 	this->SliceWidget = pSliceWidget;
 
 	for (int i = 0; i < 6; i++)
-		pSliceWidget->GetSlicePlaneWidget(i)->AddObserver(vtkCommand::InteractionEvent, this->ResetCallBack, 0.0);
-}
-
-void vtkErVolumeMapper::UpdateSlicing()
-{
-	if (!SliceWidget)
-		return;
-
-	this->m_CudaRenderInfo->Slicing.m_NoSlices = 6;
-
-	for (int i = 0; i < 6; i++)
-	{
-		this->m_CudaRenderInfo->Slicing.m_Position[i].x = SliceWidget->GetSlicePlaneWidget(i)->GetCenter()[0];
-		this->m_CudaRenderInfo->Slicing.m_Position[i].y = SliceWidget->GetSlicePlaneWidget(i)->GetCenter()[1];
-		this->m_CudaRenderInfo->Slicing.m_Position[i].z = SliceWidget->GetSlicePlaneWidget(i)->GetCenter()[2];
-
-		this->m_CudaRenderInfo->Slicing.m_Normal[i].x = SliceWidget->GetSlicePlaneWidget(i)->GetNormal()[0];
-		this->m_CudaRenderInfo->Slicing.m_Normal[i].y = SliceWidget->GetSlicePlaneWidget(i)->GetNormal()[1];
-		this->m_CudaRenderInfo->Slicing.m_Normal[i].z = SliceWidget->GetSlicePlaneWidget(i)->GetNormal()[2];
-	}
+		pSliceWidget->GetSlicePlaneWidget(i)->AddObserver(vtkCommand::InteractionEvent, this->UpdateSlicingCommand, 0.0);
 }
 
 void vtkErVolumeMapper::Reset()
