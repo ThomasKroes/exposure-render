@@ -84,7 +84,6 @@ SET(ErCudaSources
 	Shader.cuh
 	Sample.cuh
 	RNG.cuh
-	Camera.cuh
 	Lighting.cuh
 	MonteCarlo.cuh
 	Slicing.cuh

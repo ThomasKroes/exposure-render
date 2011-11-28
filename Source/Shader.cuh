@@ -49,7 +49,7 @@ public:
 
 	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
-		return INV_PI_F;//SameHemisphere(Wo, Wi) ? /*AbsCosTheta(Wi) */ INV_PI_F : 0.0f;
+		return AbsCosTheta(Wi) * INV_PI_F;//SameHemisphere(Wo, Wi) ? INV_PI_F : 0.0f;//SameHemisphere(Wo, Wi) ? /*AbsCosTheta(Wi) */ INV_PI_F : 0.0f;
 	}
 
 	ColorXYZf	m_Kd;
@@ -272,7 +272,7 @@ public:
 	HOD CBRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		m_Lambertian(Kd),
 		m_Microfacet(Ks, Ior, Exponent),
-		m_Nn(N),
+		m_Nn(Normalize(N)),
 		m_Nu(Normalize(Cross(N, Wo))),
 		m_Nv(Normalize(Cross(N, m_Nu)))
 	{
@@ -302,7 +302,7 @@ public:
 		ColorXYZf R;
 
 		R += m_Lambertian.F(Wol, Wil);
-		R += m_Microfacet.F(Wol, Wil);
+//		R += m_Microfacet.F(Wol, Wil);
 
 		return R;
 	}
@@ -324,10 +324,10 @@ public:
 		}
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
-		Pdf += m_Microfacet.Pdf(Wol, Wil);
+//		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
 		R += m_Lambertian.F(Wol, Wil);
-		R += m_Microfacet.F(Wol, Wil);
+//		R += m_Microfacet.F(Wol, Wil);
 
 		Wi = LocalToWorld(Wil);
 
@@ -342,7 +342,7 @@ public:
 		float Pdf = 0.0f;
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
-		Pdf += m_Microfacet.Pdf(Wol, Wil);
+//		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
 		return Pdf;
 	}

@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/engine_small.mhd")
+Reader.SetFileName("C:/Volumes/engine_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -65,8 +65,8 @@ ErVolumeProperty.SetSpecular(2, Specular)
 
 # Glossiness
 Glossiness = vtk.vtkPiecewiseFunction()
-Glossiness.AddPoint(0, 0.0001)
-Glossiness.AddPoint(255, 0.0001)
+Glossiness.AddPoint(0, 100)
+Glossiness.AddPoint(255, 100)
 ErVolumeProperty.SetGlossiness(Glossiness)
 
 # IOR
@@ -77,8 +77,8 @@ ErVolumeProperty.SetIOR(IOR)
 
 ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
 ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
-ErVolumeProperty.SetDensityScale(0.6)
-ErVolumeProperty.SetShadingType(0)
+ErVolumeProperty.SetDensityScale(100)
+ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -110,7 +110,7 @@ ErAreaLight.SetSize(0.001, 0.001, 0.001)
 Renderer.AddLight(ErAreaLight);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(100000, 100000, 100000);
+ErBackgroundLight.SetDiffuseColor(1000000, 1000000, 1000000);
 
 # Add the background light to the Renderer
 Renderer.AddLight(ErBackgroundLight);

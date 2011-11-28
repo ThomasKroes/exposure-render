@@ -49,7 +49,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 	}
 }
 
-DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float& Intensity, CLight& Light, CLightingSample& LS, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
+DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, CLight& Light, CLightingSample& LS, Vec3f Wo, Vec3f Pe, Vec3f N, CRNG& RNG)
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
@@ -113,7 +113,7 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 	return Ld;
 }
 
-DEV ColorXYZf UniformSampleOneLight(const CVolumeShader::EType& Type, const float& Intensity, const Vec3f& Wo, const Vec3f& Pe, const Vec3f& N, CRNG& RNG)
+DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, float Intensity, Vec3f Wo, Vec3f Pe, Vec3f N, CRNG& RNG)
 {
 	/*
 	const int NumLights = pScene->m_Lighting.m_NoLights;

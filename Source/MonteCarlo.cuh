@@ -112,7 +112,7 @@ HOD inline float SinPhi(const Vec3f& Ws)
 
 HOD inline bool SameHemisphere(const Vec3f& Ww1, const Vec3f& Ww2)
 {
-   return Ww1.z * Ww2.z > 0.0f;
+   return (Ww1.z * Ww2.z) > 0.0f;
 }
 
 HOD inline bool SameHemisphere(const Vec3f& W1, const Vec3f& W2, const Vec3f& N)

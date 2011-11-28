@@ -18,6 +18,8 @@
 
 #include "Core.cuh"
 
+#include <vtkBoundingBox.h>
+
 vtkCxxRevisionMacro(vtkErVolumeInfo, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkErVolumeInfo);
 
@@ -116,6 +118,18 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_InvMaxAABB.x	= m_VolumeInfo.m_MaxAABB.x != 0.0f ? 1.0f / m_VolumeInfo.m_MaxAABB.x : 0.0f;
 		m_VolumeInfo.m_InvMaxAABB.y	= m_VolumeInfo.m_MaxAABB.y != 0.0f ? 1.0f / m_VolumeInfo.m_MaxAABB.y : 0.0f;
 		m_VolumeInfo.m_InvMaxAABB.z	= m_VolumeInfo.m_MaxAABB.z != 0.0f ? 1.0f / m_VolumeInfo.m_MaxAABB.z : 0.0f;
+
+		m_VolumeInfo.m_GradientDelta		= 1.0f;
+		m_VolumeInfo.m_InvGradientDelta		= 1.0f;
+		m_VolumeInfo.m_GradientDeltaX.x		= m_VolumeInfo.m_GradientDelta;
+		m_VolumeInfo.m_GradientDeltaX.y		= 0.0f;
+		m_VolumeInfo.m_GradientDeltaX.z		= 0.0f;
+		m_VolumeInfo.m_GradientDeltaY.x		= 0.0f;
+		m_VolumeInfo.m_GradientDeltaY.y		= m_VolumeInfo.m_GradientDelta;
+		m_VolumeInfo.m_GradientDeltaY.z		= 0.0f;
+		m_VolumeInfo.m_GradientDeltaZ.x		= 0.0f;
+		m_VolumeInfo.m_GradientDeltaZ.y		= 0.0f;
+		m_VolumeInfo.m_GradientDeltaZ.z		= m_VolumeInfo.m_GradientDelta;
 
 		BindIntensityBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
 		BindGradientMagnitudeBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);

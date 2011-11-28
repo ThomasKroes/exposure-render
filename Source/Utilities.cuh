@@ -20,11 +20,14 @@ DEV inline Vec3f ToVec3f(const float3& V)
 	return Vec3f(V.x, V.y, V.z);
 }
 
+DEV float GetIntensity(const Vec3f& P)
+{
+	return ((float)SHRT_MAX * tex3D(gTexDensity, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
+}
+
 DEV float GetNormalizedIntensity(const Vec3f& P)
 {
-	const float Intensity = ((float)SHRT_MAX * tex3D(gTexDensity, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
-
-	return (Intensity - gVolumeInfo.m_IntensityMin) * gVolumeInfo.m_IntensityInvRange;
+	return (GetIntensity(P) - gVolumeInfo.m_IntensityMin) * gVolumeInfo.m_IntensityInvRange;
 }
 
 DEV float GetOpacity(const float& NormalizedIntensity)
@@ -77,9 +80,9 @@ DEV inline Vec3f NormalizedGradient(const Vec3f& P)
 {
 	Vec3f Gradient;
 
-	Gradient.x = (GetNormalizedIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaX)) - GetNormalizedIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaX))) * gVolumeInfo.m_InvGradientDelta;
-	Gradient.y = (GetNormalizedIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaY)) - GetNormalizedIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaY))) * gVolumeInfo.m_InvGradientDelta;
-	Gradient.z = (GetNormalizedIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaZ)) - GetNormalizedIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaZ))) * gVolumeInfo.m_InvGradientDelta;
+	Gradient.x = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaX)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaX)));// * gVolumeInfo.m_InvGradientDelta;
+	Gradient.y = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaY)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaY)));// * gVolumeInfo.m_InvGradientDelta;
+	Gradient.z = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaZ)));// * gVolumeInfo.m_InvGradientDelta;
 
 	return Normalize(Gradient);
 }
