@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/bonsai.mhd")
+Reader.SetFileName("C:/engine_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -32,13 +32,53 @@ ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 Opacity = vtk.vtkPiecewiseFunction()
 Opacity.AddPoint(0, 0.000)
 Opacity.AddPoint(10, 0)
-Opacity.AddPoint(2000, 1)
+Opacity.AddPoint(11, 1)
 Opacity.AddPoint(2055, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
+
+# Diffuse
+DiffuseR = vtk.vtkPiecewiseFunction()
+DiffuseG = vtk.vtkPiecewiseFunction()
+DiffuseB = vtk.vtkPiecewiseFunction()
+
+DiffuseR.AddPoint(0, 1)
+DiffuseR.AddPoint(255, 1)
+DiffuseG.AddPoint(0, 1)
+DiffuseG.AddPoint(255, 1)
+DiffuseB.AddPoint(0, 1)
+DiffuseB.AddPoint(255, 1)
+
+ErVolumeProperty.SetDiffuse(0, DiffuseR)
+ErVolumeProperty.SetDiffuse(1, DiffuseG)
+ErVolumeProperty.SetDiffuse(2, DiffuseB)
+
+# Specular
+Specular = vtk.vtkPiecewiseFunction()
+
+Specular.AddPoint(0, 1)
+Specular.AddPoint(255, 1)
+
+ErVolumeProperty.SetSpecular(0, Specular)
+ErVolumeProperty.SetSpecular(1, Specular)
+ErVolumeProperty.SetSpecular(2, Specular)
+
+# Glossiness
+Glossiness = vtk.vtkPiecewiseFunction()
+Glossiness.AddPoint(0, 0.0001)
+Glossiness.AddPoint(255, 0.0001)
+ErVolumeProperty.SetGlossiness(Glossiness)
+
+# IOR
+IOR = vtk.vtkPiecewiseFunction()
+IOR.AddPoint(0, 5)
+IOR.AddPoint(255, 5)
+ErVolumeProperty.SetIOR(IOR)
+
 ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
 ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
-ErVolumeProperty.SetDensityScale(100)
+ErVolumeProperty.SetDensityScale(0.6)
+ErVolumeProperty.SetShadingType(0)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -51,6 +91,7 @@ ErCamera.SetRenderer(Renderer)
 ErCamera.SetFocalDisk(0)
 ErCamera.SetPosition(150, 150, 150)
 ErCamera.SetFocalPoint(75, 75, 75)
+ErCamera.SetExposure(10)
 Renderer.SetActiveCamera(ErCamera)
 Renderer.ResetCamera()
 	
@@ -59,9 +100,9 @@ Renderer.RemoveAllLights()
 
 # Configure the light
 ErAreaLight = vtkErCorePython.vtkErAreaLight()
-ErAreaLight.SetPosition(0, -5000, 0);
+ErAreaLight.SetPosition(-5000, -5000, 5000);
 ErAreaLight.SetFocalPoint(300, 300, 300);
-ErAreaLight.SetColor(1000000, 1000000, 1000000);
+ErAreaLight.SetColor(100000, 100000, 100000);
 ErAreaLight.SetPositional(1);
 ErAreaLight.SetSize(0.001, 0.001, 0.001)
 
@@ -69,7 +110,7 @@ ErAreaLight.SetSize(0.001, 0.001, 0.001)
 Renderer.AddLight(ErAreaLight);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(500000, 500000, 1500000);
+ErBackgroundLight.SetDiffuseColor(100000, 100000, 100000);
 
 # Add the background light to the Renderer
 Renderer.AddLight(ErBackgroundLight);

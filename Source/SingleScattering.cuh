@@ -56,8 +56,6 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	
 	CLight* pLight = NULL;
 
-//	SampleDistanceRM(Re, RNG, Pe);
-
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
 		/*
@@ -72,23 +70,21 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 		Lv += GetEmission(Intensity);
 
-		Lv += UniformSampleOneLight(CVolumeShader::Phase, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
-
-		/*
-		switch (pScene->m_ShadingType)
+		switch (gVolumeInfo.m_ShadingType)
 		{
 			case 0:
 			{
-				Lv += UniformSampleOneLight(pScene, CVolumeShader::Brdf, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, true);
+				Lv += UniformSampleOneLight(CVolumeShader::Brdf, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
 				break;
 			}
 		
 			case 1:
 			{
-				Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
+				Lv += UniformSampleOneLight(CVolumeShader::Phase, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
 				break;
 			}
 
+			/*
 			case 2:
 			{
 				const float GradMag = GradientMagnitude(Pe) * gVolumeInfo.m_IntensityInvRange;
@@ -101,11 +97,8 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 				break;
 			}
+			*/
 		}
-		*/
-
-//		Alpha = 1.0f;
-//		pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(255);
 	}
 	else
 	{
@@ -113,9 +106,6 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
 			Lv = Li;
 		*/
-//		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
-//		Alpha = 0.0f;
-//		pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(255);
 	}
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);

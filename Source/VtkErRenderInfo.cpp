@@ -17,7 +17,6 @@
 #include "vtkErAreaLight.h"
 #include "vtkErBackgroundLight.h"
 #include "vtkErCamera.h"
-#include "vtkErSlicePlane.h"
 
 #include "Core.cuh"
 
@@ -131,12 +130,16 @@ void vtkErRenderInfo::Update()
 
 		if (pErCamera)
 		{
-			RendererInfo.m_Camera.m_FocalDistance = pErCamera->GetFocalDistance();
+			RendererInfo.m_Camera.m_FocalDistance	= pErCamera->GetFocalDistance();
+			RendererInfo.m_Exposure					= pErCamera->GetExposure();
 		}
 		else
 		{
-			RendererInfo.m_Camera.m_FocalDistance = vtkErCamera::DefaultFocalDistance();
+			RendererInfo.m_Camera.m_FocalDistance	= vtkErCamera::DefaultFocalDistance();
+			RendererInfo.m_Exposure					= vtkErCamera::DefaultExposure();
 		}
+
+		RendererInfo.m_InvExposure = 1.0f / RendererInfo.m_Exposure;
 
         double ClippingRange[2];
 
@@ -181,8 +184,7 @@ void vtkErRenderInfo::Update()
 
 		RendererInfo.m_Gamma		= 2.2;
 		RendererInfo.m_InvGamma		= 1.0f / RendererInfo.m_Gamma;
-		RendererInfo.m_Exposure		= 10.0f;
-		RendererInfo.m_InvExposure	= 1.0f / RendererInfo.m_Exposure;
+		
 //		RendererInfo.m_NoIterations = 1.0f;
 
 		RendererInfo.m_Denoise.m_Enabled			= false;

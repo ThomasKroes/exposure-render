@@ -62,6 +62,11 @@ DEV float GetGlossiness(const float& NormalizedIntensity)
 	return tex1D(gTexGlossiness, NormalizedIntensity);
 }
 
+DEV float GetIOR(const float& NormalizedIntensity)
+{
+	return tex1D(gTexIOR, NormalizedIntensity);
+}
+
 DEV ColorXYZf GetEmission(const float& NormalizedIntensity)
 {
 	float4 Emission = tex1D(gTexEmission, NormalizedIntensity);

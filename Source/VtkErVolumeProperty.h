@@ -40,6 +40,9 @@ public:
 	void SetGlossiness(vtkPiecewiseFunction* pPiecewiseFunction);
 	vtkPiecewiseFunction* GetGlossiness(void);
 
+	void SetIOR(vtkPiecewiseFunction* pPiecewiseFunction);
+	vtkPiecewiseFunction* GetIOR(void);
+
 	void SetEmission(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
 //	void SetEmission(vtkColorTransferFunction* pEmission);
 	vtkPiecewiseFunction* GetEmission(int Index);
@@ -82,6 +85,7 @@ protected:
 	vtkSmartPointer<vtkPiecewiseFunction>	Diffuse[3];
 	vtkSmartPointer<vtkPiecewiseFunction>	Specular[3];
 	vtkSmartPointer<vtkPiecewiseFunction>	Glossiness;
+	vtkSmartPointer<vtkPiecewiseFunction>	IOR;
 	vtkSmartPointer<vtkPiecewiseFunction>	Emission[3];
 	bool									Dirty;
 	double									DensityScale;

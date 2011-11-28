@@ -25,6 +25,7 @@ texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexOpacity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexSpecular;
 texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexGlossiness;
+texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexIOR;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexEmission;
 texture<uchar4, cudaTextureType2D, cudaReadModeNormalizedFloat>		gTexRunningEstimateRgba;
 
@@ -36,7 +37,8 @@ cudaArray* gpGradientMagnitudeArray		= NULL;
 cudaArray* gpOpacityArray				= NULL;
 cudaArray* gpDiffuseArray				= NULL;
 cudaArray* gpSpecularArray				= NULL;
-cudaArray* gpGlossinessArray				= NULL;
+cudaArray* gpGlossinessArray			= NULL;
+cudaArray* gpIORArray					= NULL;
 cudaArray* gpEmissionArray				= NULL;
 
 CD VolumeInfo	gVolumeInfo;
@@ -113,7 +115,7 @@ void UnbindGradientMagnitudeBuffer(void)
 	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
 }
 
-void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Glossiness[128], float Emission[3][128], int N)
+void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Glossiness[128], float IOR[128], float Emission[3][128], int N)
 {
 	// Opacity
 	gTexOpacity.normalized		= true;
@@ -172,6 +174,17 @@ void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Sp
 
 	HandleCudaError(cudaMemcpyToArray(gpGlossinessArray, 0, 0, Glossiness, N * sizeof(float),  cudaMemcpyHostToDevice));
 	HandleCudaError(cudaBindTextureToArray(gTexGlossiness, gpGlossinessArray, gFloatChannelDesc));
+
+	// IOR
+	gTexIOR.normalized		= true;
+	gTexIOR.filterMode		= cudaFilterModeLinear;
+	gTexIOR.addressMode[0]	= cudaAddressModeClamp;
+
+	if (gpIORArray == NULL)
+		HandleCudaError(cudaMallocArray(&gpIORArray, &gFloatChannelDesc, N, 1));
+
+	HandleCudaError(cudaMemcpyToArray(gpIORArray, 0, 0, IOR, N * sizeof(float),  cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexIOR, gpIORArray, gFloatChannelDesc));
 
 	// Emission
 	gTexEmission.normalized		= true;

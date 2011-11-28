@@ -44,7 +44,7 @@ KERNEL void KrnlToneMap(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetR(RGBA.GetR());
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetG(RGBA.GetG());
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetB(RGBA.GetB());
-	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(100);
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(255);
 }
 
 void ToneMap(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)

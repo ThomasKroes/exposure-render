@@ -53,7 +53,7 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Intensity), GetSpecular(Intensity), 2.5f, GetGlossiness(Intensity));
+	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Intensity), GetSpecular(Intensity), GetIOR(Intensity), GetGlossiness(Intensity));
 
 	CRay Rl; 
 
@@ -85,7 +85,6 @@ DEV ColorXYZf EstimateDirectLight(const CVolumeShader::EType& Type, const float&
 
 		if (Type == CVolumeShader::Phase)
 			Ld += F * Li * WeightMIS / LightPdf;
-//		Ld += F * Li / LightPdf;
 	}
 
 	/*

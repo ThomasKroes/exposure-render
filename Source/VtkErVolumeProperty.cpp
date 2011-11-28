@@ -27,6 +27,7 @@ vtkErVolumeProperty::vtkErVolumeProperty()
 	this->Specular[1]	= vtkPiecewiseFunction::New();
 	this->Specular[2]	= vtkPiecewiseFunction::New();
 	this->Glossiness	= vtkPiecewiseFunction::New();
+	this->IOR			= vtkPiecewiseFunction::New();
 	this->Emission[0]	= vtkPiecewiseFunction::New();
 	this->Emission[1]	= vtkPiecewiseFunction::New();
 	this->Emission[2]	= vtkPiecewiseFunction::New();
@@ -146,6 +147,27 @@ vtkPiecewiseFunction* vtkErVolumeProperty::GetGlossiness(void)
 	return Glossiness.GetPointer();
 }
 
+void vtkErVolumeProperty::SetIOR(vtkPiecewiseFunction* pPiecewiseFunction)
+{
+	if (!pPiecewiseFunction)
+	{
+		vtkErrorMacro("IOR piecewise function is NULL!")
+		return;
+	}
+
+	if (this->IOR != pPiecewiseFunction)
+	{
+		this->IOR = pPiecewiseFunction;
+		this->Modified();
+		this->SetDirty(true);
+	}
+}
+
+vtkPiecewiseFunction* vtkErVolumeProperty::GetIOR(void)
+{
+	return IOR.GetPointer();
+}
+
 void vtkErVolumeProperty::SetEmission(int Index, vtkPiecewiseFunction* pPiecewiseFunction)
 {
 	if (Index < 0|| Index > 3)
@@ -234,23 +256,26 @@ void vtkErVolumeProperty::Default(double Min, double Max)
 
 	for (int i = 0; i < 3; i++)
 	{
-		Diffuse[i]->AddPoint(Min, 0.5, 0.5, 0);
-		Diffuse[i]->AddPoint(Max, 0.5, 0.5, 0);
+		Diffuse[i]->AddPoint(Min, 1.0, 0.5, 0);
+		Diffuse[i]->AddPoint(Max, 1.0, 0.5, 0);
 	}
 
 	for (int i = 0; i < 3; i++)
 	{
-		Specular[i]->AddPoint(Min, 0.5, 0.5, 0);
-		Specular[i]->AddPoint(Max, 0.5, 0.5, 0);
+		Specular[i]->AddPoint(Min, 0, 0.5, 0);
+		Specular[i]->AddPoint(Max, 0, 0.5, 0);
 	}
 
-	Glossiness->AddPoint(Min, 1, 0.5, 0);
-	Glossiness->AddPoint(Max, 1, 0.5, 0);
+	Glossiness->AddPoint(Min, 10000, 0.5, 0);
+	Glossiness->AddPoint(Max, 10000, 0.5, 0);
+
+	IOR->AddPoint(Min, 5, 0.5, 0);
+	IOR->AddPoint(Max, 5, 0.5, 0);
 
 	for (int i = 0; i < 3; i++)
 	{
-		Emission[i]->AddPoint(Min, 0.5, 0.5, 0);
-		Emission[i]->AddPoint(Max, 0.5, 0.5, 0);
+		Emission[i]->AddPoint(Min, 0, 0.5, 0);
+		Emission[i]->AddPoint(Max, 0, 0.5, 0);
 	}
 
 	SetDensityScale(vtkErVolumeProperty::DefaultDensityScale());

@@ -202,6 +202,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	float	Diffuse[3][128];
 	float	Specular[3][128];
 	float	Glossiness[128];
+	float	IOR[128];
 	float	Emission[3][128];
 
 	if (pErVolumeProperty == NULL)
@@ -234,6 +235,8 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 			pErVolumeProperty->SetDirty(false);
 		}
 
+		m_CudaVolumeInfo->m_VolumeInfo.m_ShadingType = pErVolumeProperty->GetShadingType();
+
 		pErVolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
 		pErVolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
 		pErVolumeProperty->GetDiffuse(1)->GetTable(pRange[0], pRange[1], N, Diffuse[1]);
@@ -242,12 +245,13 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 		pErVolumeProperty->GetSpecular(1)->GetTable(pRange[0], pRange[1], N, Specular[1]);
 		pErVolumeProperty->GetSpecular(2)->GetTable(pRange[0], pRange[1], N, Specular[2]);
 		pErVolumeProperty->GetGlossiness()->GetTable(pRange[0], pRange[1], N, Glossiness);
+		pErVolumeProperty->GetIOR()->GetTable(pRange[0], pRange[1], N, IOR);
 		pErVolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
 		pErVolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
 		pErVolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
 	}
 
-	BindTransferFunctions1D(Opacity, Diffuse, Specular, Glossiness, Emission, N);
+	BindTransferFunctions1D(Opacity, Diffuse, Specular, Glossiness, IOR, Emission, N);
 }
 
 void vtkErVolumeMapper::SetSliceWidget(vtkErBoxWidget* pSliceWidget)

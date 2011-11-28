@@ -41,14 +41,14 @@ public:
 	//ETX
 
 	virtual void Update();
-
+VolumeInfo		m_VolumeInfo;
 protected:
 	vtkErVolumeInfo();
 	virtual ~vtkErVolumeInfo();
-
+	
 private:
 	//BTX
-	VolumeInfo		m_VolumeInfo;
+	
 	vtkImageData*   m_pIntensity;
 	vtkImageData*   m_pGradientMagnitude;
 	vtkVolume*      Volume;
