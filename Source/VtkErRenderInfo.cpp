@@ -216,11 +216,19 @@ void vtkErRenderInfo::Update()
 
 			if (pAreaLight && pAreaLight->GetEnabled())
 			{
-				Lighting.m_Type[count] = 1;
+				Lighting.m_Type[count] = 0;
 
-				Lighting.m_P[count].x = pLight->GetPosition()[0];
-				Lighting.m_P[count].y = pLight->GetPosition()[1];
-				Lighting.m_P[count].z = pLight->GetPosition()[2];
+				Lighting.m_P[count].x = pAreaLight->GetPosition()[0];
+				Lighting.m_P[count].y = pAreaLight->GetPosition()[1];
+				Lighting.m_P[count].z = pAreaLight->GetPosition()[2];
+
+				Lighting.m_Size[count].x = pAreaLight->GetSize()[0];
+				Lighting.m_Size[count].y = pAreaLight->GetSize()[1];
+				Lighting.m_Size[count].z = pAreaLight->GetSize()[2];
+
+				double D[3], U[3], V[3];
+
+//				vtkMath::Subtract(pLight->GetFocalPoint(), pL)
 
 				ColorXYZf Color;
 
@@ -229,13 +237,15 @@ void vtkErRenderInfo::Update()
 				Lighting.m_Color[count].x = Color[0];
 				Lighting.m_Color[count].y = Color[1];
 				Lighting.m_Color[count].z = Color[2];
+				
+				Lighting.m_ShapeType[count] = pAreaLight->GetShapeType(); 
 
 				count++;
 			}
 
 			if (pBackgroundLight && pBackgroundLight->GetEnabled())
 			{
-				Lighting.m_Type[count] = 2;
+				Lighting.m_Type[count] = 1;
 
 				ColorXYZf Color;
 

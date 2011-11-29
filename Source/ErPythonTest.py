@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/engine_small.mhd")
+Reader.SetFileName("C:/engine_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -65,8 +65,8 @@ ErVolumeProperty.SetSpecular(2, Specular)
 
 # Glossiness
 Glossiness = vtk.vtkPiecewiseFunction()
-Glossiness.AddPoint(0, 100)
-Glossiness.AddPoint(255, 100)
+Glossiness.AddPoint(0, 1)
+Glossiness.AddPoint(255, 1)
 ErVolumeProperty.SetGlossiness(Glossiness)
 
 # IOR
@@ -77,7 +77,7 @@ ErVolumeProperty.SetIOR(IOR)
 
 ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
 ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
-ErVolumeProperty.SetDensityScale(100)
+ErVolumeProperty.SetDensityScale(5000)
 ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
@@ -99,24 +99,35 @@ Renderer.ResetCamera()
 Renderer.RemoveAllLights()
 
 # Configure the light
-ErAreaLight = vtkErCorePython.vtkErAreaLight()
-ErAreaLight.SetPosition(-5000, -5000, 5000);
-ErAreaLight.SetFocalPoint(300, 300, 300);
-ErAreaLight.SetColor(100000, 100000, 100000);
-ErAreaLight.SetPositional(1);
-ErAreaLight.SetSize(0.001, 0.001, 0.001)
+Key = vtkErCorePython.vtkErAreaLight()
+Key.SetPosition(500, 500, 500);
+Key.SetFocalPoint(300, 300, 300);
+Key.SetColor(100000, 100000, 100000);
+Key.SetPositional(1);
+Key.SetSize(10, 1, 1)
+Key.SetShapeType(2)
+
+Fill = vtkErCorePython.vtkErAreaLight()
+Fill.SetPosition(-500, 100, -400);
+Fill.SetFocalPoint(300, 300, 300);
+Fill.SetColor(0, 100000, 100000);
+Fill.SetPositional(1);
+Fill.SetSize(10, 1, 1)
+Fill.SetShapeType(2)
 
 # Add the area light to the Renderer
-Renderer.AddLight(ErAreaLight);
+Renderer.AddLight(Key);
+Renderer.AddLight(Fill);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(1000000, 1000000, 1000000);
+ErBackgroundLight.SetDiffuseColor(100, 1500, 1);
 
 # Add the background light to the Renderer
-Renderer.AddLight(ErBackgroundLight);
+#Renderer.AddLight(ErBackgroundLight);
 
 # SlicePlane = vtkErCorePython.vtkErSlicePlane()
 # Renderer.AddViewProp(SlicePlane)
+
 
 ErBoxWidget = vtkErCorePython.vtkErBoxWidget()
 ErBoxWidget.SetPlaceFactor(1)
@@ -136,11 +147,11 @@ axes = vtk.vtkAxesActor()
 
 widget = vtk.vtkOrientationMarkerWidget()
 
-widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 )
+widget.SetOutlineColor(0.9300, 0.5700, 0.1300)
 widget.SetOrientationMarker(axes)
-widget.SetInteractor( Interactor )
+widget.SetInteractor(Interactor)
 widget.SetViewport(0.0, 0.0, 0.2, 0.2)
-widget.SetEnabled( 1 )
+widget.SetEnabled(1)
 widget.InteractiveOn()
 
 InteractorStyle = vtk.vtkInteractorStyleTrackballCamera()

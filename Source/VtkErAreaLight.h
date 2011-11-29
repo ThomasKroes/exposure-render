@@ -25,9 +25,17 @@ public:
 	vtkGetVectorMacro(Size, double, 3);
 	void SetSize(float* pSize) { this->SetSize(pSize[0], pSize[1], pSize[2]); };
 
+	vtkGetMacro(ShapeType, int);
+	vtkSetMacro(ShapeType, int);
+
+	vtkSetVector3Macro(Up, double);
+	vtkGetVectorMacro(Up, double, 3);
+
 protected:
 	vtkErAreaLight(void);
 	virtual ~vtkErAreaLight(void);
 
-	double Size[3];
+	int		ShapeType;
+	double	Size[3];
+	double	Up[3];
 };

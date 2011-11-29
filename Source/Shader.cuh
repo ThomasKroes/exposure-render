@@ -49,7 +49,7 @@ public:
 
 	HOD float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
-		return AbsCosTheta(Wi) * INV_PI_F;//SameHemisphere(Wo, Wi) ? INV_PI_F : 0.0f;//SameHemisphere(Wo, Wi) ? /*AbsCosTheta(Wi) */ INV_PI_F : 0.0f;
+		return SameHemisphere(Wo, Wi) ? AbsCosTheta(Wi) * INV_PI_F : 0.0f;
 	}
 
 	ColorXYZf	m_Kd;
@@ -194,9 +194,9 @@ public:
 		  wh = Normalize(wh);
 		  float cosThetaH = Dot(wi, wh);
 
-		  ColorXYZf F = SPEC_WHITE;//m_Fresnel.Evaluate(cosThetaH);
+		  ColorXYZf F = m_Fresnel.Evaluate(cosThetaH);
 
-		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.f * cosThetaI * cosThetaO);
+		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.0f * cosThetaI * cosThetaO);
 	  }
 
 	  HOD ColorXYZf SampleF(const Vec3f& wo, Vec3f& wi, float& Pdf, const Vec2f& U)
@@ -302,7 +302,7 @@ public:
 		ColorXYZf R;
 
 		R += m_Lambertian.F(Wol, Wil);
-//		R += m_Microfacet.F(Wol, Wil);
+		R += m_Microfacet.F(Wol, Wil);
 
 		return R;
 	}
@@ -324,10 +324,10 @@ public:
 		}
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
-//		Pdf += m_Microfacet.Pdf(Wol, Wil);
+		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
 		R += m_Lambertian.F(Wol, Wil);
-//		R += m_Microfacet.F(Wol, Wil);
+		R += m_Microfacet.F(Wol, Wil);
 
 		Wi = LocalToWorld(Wil);
 
@@ -342,7 +342,7 @@ public:
 		float Pdf = 0.0f;
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
-//		Pdf += m_Microfacet.Pdf(Wol, Wil);
+		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
 		return Pdf;
 	}

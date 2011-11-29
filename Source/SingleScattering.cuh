@@ -25,8 +25,6 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	
 	CRNG RNG(pFrameBuffer->m_RandomSeeds1.GetPtr(X, Y), pFrameBuffer->m_RandomSeeds2.GetPtr(X, Y));
 
-	ColorRGBAuc Col;
-
 	Vec2f ScreenPoint;
 
 	ScreenPoint.x = pRenderInfo->m_Camera.m_Screen[0][0] + (pRenderInfo->m_Camera.m_InvScreen.x * (float)X);
@@ -37,7 +35,7 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	Re.m_O		= pRenderInfo->m_Camera.m_Pos;
 	Re.m_D		= Normalize(pRenderInfo->m_Camera.m_N + (-ScreenPoint.x * pRenderInfo->m_Camera.m_U) + (-ScreenPoint.y * pRenderInfo->m_Camera.m_V));
 	Re.m_MinT	= 0.0f;
-	Re.m_MaxT	= 100000000.0f;
+	Re.m_MaxT	= INF_MAX;
 
 	if (pRenderInfo->m_Camera.m_ApertureSize != 0.0f)
 	{
@@ -54,18 +52,14 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 	Vec3f Pe, Pl;
 	
-	CLight* pLight = NULL;
-
 	if (SampleDistanceRM(Re, RNG, Pe))
 	{
-		/*
-		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, pLight))
+		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl))
 		{
-			pView->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
+			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
 			return;
 		}
-		*/
-
+		
 		const float Intensity = GetNormalizedIntensity(Pe);
 
 		Lv += GetEmission(Intensity);
@@ -102,10 +96,8 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	}
 	else
 	{
-		/*
-		if (NearestLight(pScene, CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, pLight))
+		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl))
 			Lv = Li;
-		*/
 	}
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);

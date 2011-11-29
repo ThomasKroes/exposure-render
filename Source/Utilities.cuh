@@ -84,12 +84,42 @@ DEV inline Vec3f NormalizedGradient(const Vec3f& P)
 	Gradient.y = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaY)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaY)));// * gVolumeInfo.m_InvGradientDelta;
 	Gradient.z = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaZ)));// * gVolumeInfo.m_InvGradientDelta;
 
-	return Normalize(Gradient);
+	return -Normalize(Gradient);
 }
 
 DEV float GradientMagnitude(const Vec3f& P)
 {
 	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolumeInfo.m_InvMaxAABB.x, P.y * gVolumeInfo.m_InvMaxAABB.y, P.z * gVolumeInfo.m_InvMaxAABB.z));
+}
+
+DEV bool IntersectPlane(const CRay& R, bool OneSided, Vec3f P, Vec3f N, Vec3f U, Vec3f V, Vec2f Luv, float* pT = NULL, Vec2f* pUV = NULL)
+{
+	const float DotN = Dot(R.m_D, N);
+
+	if (OneSided && DotN >= 0.0f)
+		return false;
+
+	const float T = (Dot((P - R.m_O).Length(), N)) / DotN;
+
+	if (T < R.m_MinT || T > R.m_MaxT)
+		return false;
+
+	const Vec3f Pl = R(T);
+
+	const Vec3f Wl = Pl - P;
+
+	const Vec2f UV = Vec2f(Dot(Wl, U), Dot(Wl, V));
+
+	const float HalfLu = 0.5f * Luv.x;
+	const float HalfLv = 0.5f * Luv.y;
+
+	if (UV.x > HalfLu || UV.x < -HalfLu || UV.y > HalfLv || UV.y < -HalfLv)
+		return false;
+
+	if (pUV)
+		*pUV = UV;
+
+	return true;
 }
 
 DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
@@ -106,6 +136,76 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 	*pFarT	= LargestMaxT;
 
 	return LargestMaxT > LargestMinT;
+}
+
+DEV bool IntersectSphere(CRay R, float Radius, float* pT)
+{
+	// http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
+
+    //Compute A, B and C coefficients
+    float a = Dot(R.m_D, R.m_D);
+	float b = 2 * Dot(R.m_D, R.m_O);
+    float c = Dot(R.m_O, R.m_O) - (Radius * Radius);
+
+    //Find discriminant
+    const float disc = b * b - 4 * a * c;
+    
+    // if discriminant is negative there are no real roots, so return 
+    // false as ray misses sphere
+    if (disc < 0)
+        return false;
+
+    // compute q as described above
+    float distSqrt = sqrtf(disc);
+    float q;
+
+    if (b < 0)
+        q = (-b - distSqrt) / 2.0;
+    else
+        q = (-b + distSqrt) / 2.0;
+
+    // compute t0 and t1
+    float t0 = q / a;
+    float t1 = c / q;
+
+    // make sure t0 is smaller than t1
+    if (t0 > t1)
+    {
+        // if t0 is bigger than t1 swap them around
+        float temp = t0;
+        t0 = t1;
+        t1 = temp;
+    }
+
+
+	if (t0 >= R.m_MinT && t0 < R.m_MaxT)
+	{
+		if (pT)
+			*pT = t0;
+
+        return true;
+	}
+	else
+	{
+		if (t1 >= R.m_MinT && t1 < R.m_MaxT)
+		{
+			if (pT)
+				*pT = t1;
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return false;
+}
+
+DEV bool IntersectEllipsoid(CRay R, float Radius, float* pT)
+{
+	// http://bjarni.us/ray-to-ellipsoid-intersection/
 }
 
 DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)

@@ -352,13 +352,17 @@ DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, CLight*& 
 }
 
 #define MAX_LIGHTS 10
+#define BACKGROUND_LIGHT_RADIUS 1500.0f
 
 struct EXPOSURE_RENDER_DLL Lighting
 {
 	int		m_NoLights;
-	short	m_Type[MAX_LIGHTS];
+	int		m_Type[MAX_LIGHTS];
 	float3	m_P[MAX_LIGHTS];
 	float3	m_N[MAX_LIGHTS];
+	float3	m_U[MAX_LIGHTS];
+	float3	m_V[MAX_LIGHTS];
+	int		m_ShapeType[MAX_LIGHTS];
 	float3	m_Size[MAX_LIGHTS];
 	float3	m_Color[MAX_LIGHTS];
 };
