@@ -15,60 +15,61 @@
 
 #include "vtkErCoreDll.h"
 
-#include <vtkBorderRepresentation.h>
-#include <vtkCameraInterpolator.h>
-#include <vtkCallbackCommand.h>
-#include <vtkObjectFactory.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkCamera.h>
-#include <vtkPoints.h>
+#include <vtkPolyDataAlgorithm.h>
 #include <vtkCellArray.h>
+#include <vtkFloatArray.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkMath.h>
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
+#include <vtkPoints.h>
 #include <vtkPolyData.h>
-#include <vtkPolyDataMapper2D.h>
-#include <vtkProperty2D.h>
-#include <vtkActor2D.h>
 #include <vtkTransform.h>
-#include <vtkTransformPolyDataFilter.h>
-#include <vtkPropCollection.h>
-#include <vtkWindow.h>
-#include <vtkViewport.h>
 
-class VTK_ER_CORE_EXPORT vtkErCameraRepresentation : public vtkBorderRepresentation
+class VTK_ER_CORE_EXPORT vtkErPlaneSource : public vtkPolyDataAlgorithm 
 {
 public:
-	vtkTypeMacro(vtkErCameraRepresentation, vtkBorderRepresentation);
-	static vtkErCameraRepresentation *New();
+	vtkTypeMacro(vtkErPlaneSource,vtkPolyDataAlgorithm);
+	static vtkErPlaneSource *New();
 
-	void SetCamera(vtkCamera *camera);
-	vtkGetObjectMacro(Camera,vtkCamera);
+	vtkSetMacro(XResolution, int);
+	vtkGetMacro(XResolution, int);
 
-	virtual void GetActors2D(vtkPropCollection*);
-	virtual void ReleaseGraphicsResources(vtkWindow*);
-	virtual int RenderOverlay(vtkViewport*);
-	virtual int RenderOpaqueGeometry(vtkViewport*);
-	virtual int RenderTranslucentPolygonalGeometry(vtkViewport*);
-	virtual int HasTranslucentPolygonalGeometry();
-  
-	virtual void BuildRepresentation();
+	vtkSetMacro(YResolution, int);
+	vtkGetMacro(YResolution, int);
+
+	void SetResolution(const int xR, const int yR);
+	void GetResolution(int& xR,int& yR) {
+	xR=this->XResolution; yR=this->YResolution;};
+
+	vtkSetVector3Macro(Position, double);
+	vtkGetVector3Macro(Position, double);
+
+	vtkSetVector3Macro(Normal, double);
+	vtkGetVector3Macro(Normal, double);
+
+	vtkGetVector3Macro(Up, double);
+	void SetUp(double X, double Y, double Z);
+
+	vtkGetVector2Macro(Size, double);
+	void SetSize(double Width, double Height);
 
 protected:
-	vtkErCameraRepresentation();
-	~vtkErCameraRepresentation();
+	vtkErPlaneSource();
+	~vtkErPlaneSource() {};
 
-	// the camera and the interpolator
-	vtkCamera             *Camera;
+	int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
-	// representation of the camera
-	vtkPoints                  *Points;
-	vtkPolyData                *PolyData;
-	vtkTransformPolyDataFilter *TransformFilter;
-	vtkPolyDataMapper2D        *Mapper;
-	vtkProperty2D              *Property;
-	vtkActor2D                 *Actor;
+	int XResolution;
+	int YResolution;
+
+	double Position[3];
+	double Normal[3];
+	double Up[3];
+	double Size[3];
 
 private:
-	vtkErCameraRepresentation(const vtkErCameraRepresentation&);
-	void operator=(const vtkErCameraRepresentation&);
+	vtkErPlaneSource(const vtkErPlaneSource&);
+	void operator=(const vtkErPlaneSource&);
 };

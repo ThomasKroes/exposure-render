@@ -4,7 +4,7 @@ import vtkErCorePython
 # print vtkErCorePython
 
 # The colors module defines various useful colors.
-from vtk.util.colors import tomato
+
 
 Renderer = vtk.vtkRenderer()
 RendererWin = vtk.vtkRenderWindow()
@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/engine_small.mhd")
+Reader.SetFileName("C:/Volumes/manix_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -65,8 +65,8 @@ ErVolumeProperty.SetSpecular(2, Specular)
 
 # Glossiness
 Glossiness = vtk.vtkPiecewiseFunction()
-Glossiness.AddPoint(0, 1)
-Glossiness.AddPoint(255, 1)
+Glossiness.AddPoint(0, 15)
+Glossiness.AddPoint(255, 15)
 ErVolumeProperty.SetGlossiness(Glossiness)
 
 # IOR
@@ -77,8 +77,8 @@ ErVolumeProperty.SetIOR(IOR)
 
 ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
 ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
-ErVolumeProperty.SetDensityScale(5000)
-ErVolumeProperty.SetShadingType(1)
+ErVolumeProperty.SetDensityScale(100)
+ErVolumeProperty.SetShadingType(0)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -116,14 +116,14 @@ Fill.SetSize(10, 1, 1)
 Fill.SetShapeType(2)
 
 # Add the area light to the Renderer
-Renderer.AddLight(Key);
-Renderer.AddLight(Fill);
+#Renderer.AddLight(Key);
+#Renderer.AddLight(Fill);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(100, 1500, 1);
+ErBackgroundLight.SetDiffuseColor(100000, 100000, 100000);
 
 # Add the background light to the Renderer
-#Renderer.AddLight(ErBackgroundLight);
+Renderer.AddLight(ErBackgroundLight);
 
 # SlicePlane = vtkErCorePython.vtkErSlicePlane()
 # Renderer.AddViewProp(SlicePlane)
@@ -153,6 +153,11 @@ widget.SetInteractor(Interactor)
 widget.SetViewport(0.0, 0.0, 0.2, 0.2)
 widget.SetEnabled(1)
 widget.InteractiveOn()
+
+# Camera widget
+CameraWidget = vtkErCorePython.vtkErCameraWidget()
+CameraWidget.SetInteractor(Interactor)
+CameraWidget.SetEnabled(1)
 
 InteractorStyle = vtk.vtkInteractorStyleTrackballCamera()
 Interactor.SetInteractorStyle(InteractorStyle)

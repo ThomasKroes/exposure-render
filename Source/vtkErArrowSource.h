@@ -15,60 +15,62 @@
 
 #include "vtkErCoreDll.h"
 
-#include <vtkBorderRepresentation.h>
-#include <vtkCameraInterpolator.h>
-#include <vtkCallbackCommand.h>
+#include <vtkPolyDataAlgorithm.h>
+#include <vtkAppendPolyData.h>
+#include <vtkConeSource.h>
+#include <vtkCylinderSource.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
 #include <vtkObjectFactory.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkCamera.h>
-#include <vtkPoints.h>
-#include <vtkCellArray.h>
 #include <vtkPolyData.h>
-#include <vtkPolyDataMapper2D.h>
-#include <vtkProperty2D.h>
-#include <vtkActor2D.h>
 #include <vtkTransform.h>
-#include <vtkTransformPolyDataFilter.h>
-#include <vtkPropCollection.h>
-#include <vtkWindow.h>
-#include <vtkViewport.h>
+#include <vtkTransformFilter.h>
 
-class VTK_ER_CORE_EXPORT vtkErCameraRepresentation : public vtkBorderRepresentation
+class VTK_ER_CORE_EXPORT vtkErArrowSource : public vtkPolyDataAlgorithm
 {
 public:
-	vtkTypeMacro(vtkErCameraRepresentation, vtkBorderRepresentation);
-	static vtkErCameraRepresentation *New();
-
-	void SetCamera(vtkCamera *camera);
-	vtkGetObjectMacro(Camera,vtkCamera);
-
-	virtual void GetActors2D(vtkPropCollection*);
-	virtual void ReleaseGraphicsResources(vtkWindow*);
-	virtual int RenderOverlay(vtkViewport*);
-	virtual int RenderOpaqueGeometry(vtkViewport*);
-	virtual int RenderTranslucentPolygonalGeometry(vtkViewport*);
-	virtual int HasTranslucentPolygonalGeometry();
+	vtkTypeMacro(vtkErArrowSource,vtkPolyDataAlgorithm);
+	static vtkErArrowSource *New();
+    
+	vtkGetMacro(ShaftRadius, double);
+	vtkSetMacro(ShaftRadius, double);
   
-	virtual void BuildRepresentation();
+	vtkGetMacro(ShaftLength, double);
+	vtkSetMacro(ShaftLength, double);
+
+	vtkGetMacro(ShaftResolution, int);
+	vtkSetClampMacro(ShaftResolution, int, 0, 128);
+  
+	vtkGetMacro(TipRadius, double);
+	vtkSetMacro(TipRadius, double);
+  
+	vtkGetMacro(TipLength, double);
+	vtkSetMacro(TipLength, double);
+
+	vtkGetMacro(TipResolution, int);
+	vtkSetClampMacro(TipResolution, int, 0, 128);
+
+	static double DefaultShaftRadius(void);
+	static double DefaultShaftLength(void);
+	static int DefaultShaftResolution(void);
+	static double DefaultTipRadius(void);
+	static double DefaultTipLength(void);
+	static int DefaultTipResolution(void);
 
 protected:
-	vtkErCameraRepresentation();
-	~vtkErCameraRepresentation();
+	vtkErArrowSource();
+	~vtkErArrowSource() {};
 
-	// the camera and the interpolator
-	vtkCamera             *Camera;
+	int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
-	// representation of the camera
-	vtkPoints                  *Points;
-	vtkPolyData                *PolyData;
-	vtkTransformPolyDataFilter *TransformFilter;
-	vtkPolyDataMapper2D        *Mapper;
-	vtkProperty2D              *Property;
-	vtkActor2D                 *Actor;
+	double	ShaftRadius;
+	double	ShaftLength;
+	int		ShaftResolution;
+	double	TipRadius;
+	double	TipLength;
+	int		TipResolution;
 
 private:
-	vtkErCameraRepresentation(const vtkErCameraRepresentation&);
-	void operator=(const vtkErCameraRepresentation&);
+	vtkErArrowSource(const vtkErArrowSource&);
+	void operator=(const vtkErArrowSource&);
 };

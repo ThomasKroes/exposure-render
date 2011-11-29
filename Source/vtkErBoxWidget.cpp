@@ -13,6 +13,8 @@
 
 #include "ErCoreStable.h"
 
+#include "Geometry.h"
+
 #include "vtkErBoxWidget.h"
 
 #define VTK_AVERAGE(a,b,c) \
@@ -58,11 +60,13 @@ vtkErBoxWidget::vtkErBoxWidget()
 	this->BoundingBoxPointLabelActor->SetProperty(this->BoundingBoxPointLabelProperty);
 
 	// Widgets
-	DefaultPositions	= vtkPoints::New();
-	DefaultNormals		= vtkPoints::New();
+	this->DefaultPositions	= vtkPoints::New();
+	this->DefaultNormals	= vtkPoints::New();
+	this->DefaultUp			= vtkPoints::New();
 
-	DefaultPositions->SetNumberOfPoints(6);
-	DefaultNormals->SetNumberOfPoints(6);
+	this->DefaultPositions->SetNumberOfPoints(6);
+	this->DefaultNormals->SetNumberOfPoints(6);
+	this->DefaultUp->SetNumberOfPoints(6);
 
 	for (int i = 0; i < 6; i++)
 		this->PointWidget[i] = vtkErSlicePlaneWidget::New();
@@ -226,6 +230,8 @@ void vtkErBoxWidget::CreateDefaultProperties()
 
 void vtkErBoxWidget::PlaceWidget(double Bounds[6])
 {
+	vtkBoundingBox AABB(Bounds);
+
 	this->BoundingBoxPoints->SetPoint(0, Bounds[0], Bounds[2], Bounds[4]);
 	this->BoundingBoxPoints->SetPoint(1, Bounds[1], Bounds[2], Bounds[4]);
 	this->BoundingBoxPoints->SetPoint(2, Bounds[0], Bounds[3], Bounds[4]);
@@ -249,28 +255,42 @@ void vtkErBoxWidget::PlaceWidget(double Bounds[6])
 	const double HalfY = 0.5 * (Bounds[3] + Bounds[2]);
 	const double HalfZ = 0.5 * (Bounds[5] + Bounds[4]);
 
-	DefaultPositions->SetPoint(0, HalfX, HalfY, Bounds[4]);
-	DefaultPositions->SetPoint(1, HalfX, HalfY, Bounds[5]);
-	DefaultPositions->SetPoint(2, HalfX, Bounds[2], HalfZ);
-	DefaultPositions->SetPoint(3, HalfX, Bounds[3], HalfZ);
-	DefaultPositions->SetPoint(4, Bounds[0], HalfY, HalfZ);
-	DefaultPositions->SetPoint(5, Bounds[1], HalfY, HalfZ);
+	this->DefaultPositions->SetPoint(0, HalfX, HalfY, Bounds[4]);
+	this->DefaultPositions->SetPoint(1, HalfX, HalfY, Bounds[5]);
+	this->DefaultPositions->SetPoint(2, HalfX, Bounds[2], HalfZ);
+	this->DefaultPositions->SetPoint(3, HalfX, Bounds[3], HalfZ);
+	this->DefaultPositions->SetPoint(4, Bounds[0], HalfY, HalfZ);
+	this->DefaultPositions->SetPoint(5, Bounds[1], HalfY, HalfZ);
 
-	DefaultNormals->SetPoint(0, 0, 0, 1);
-	DefaultNormals->SetPoint(1, 0, 0, -1);
-	DefaultNormals->SetPoint(2, 0, 1, 0);
-	DefaultNormals->SetPoint(3, 0, -1, 0);
-	DefaultNormals->SetPoint(4, 1, 0, 0);
-	DefaultNormals->SetPoint(5, -1, 0, 0);
+	this->DefaultNormals->SetPoint(0, 0, 0, 1);
+	this->DefaultNormals->SetPoint(1, 0, 0, -1);
+	this->DefaultNormals->SetPoint(2, 0, 1, 0);
+	this->DefaultNormals->SetPoint(3, 0, -1, 0);
+	this->DefaultNormals->SetPoint(4, 1, 0, 0);
+	this->DefaultNormals->SetPoint(5, -1, 0, 0);
+
+	this->DefaultUp->SetPoint(0, 0, 1, 0);
+	this->DefaultUp->SetPoint(1, 0, 1, 0);
+	this->DefaultUp->SetPoint(2, 1, 0, 0);
+	this->DefaultUp->SetPoint(3, 1, 0, 0);
+	this->DefaultUp->SetPoint(4, 0, 1, 0);
+	this->DefaultUp->SetPoint(5, 0, 1, 0);
+
+	double Lengths[3];
+
+	AABB.GetLengths(Lengths);
+
+	const double MinLength = min(Lengths[0], min(Lengths[1], Lengths[2]));
 
 	for (int i = 0; i < 6; i++)
 	{
 		this->PointWidget[i]->PlaceWidget(Bounds);
-		this->PointWidget[i]->SetCenter(DefaultPositions->GetPoint(i));
-		this->PointWidget[i]->SetNormal(DefaultNormals->GetPoint(i));
+		this->PointWidget[i]->SetCenter(this->DefaultPositions->GetPoint(i));
+		this->PointWidget[i]->SetNormal(this->DefaultNormals->GetPoint(i));
+		this->PointWidget[i]->SetUp(this->DefaultUp->GetPoint(i));
 		this->PointWidget[i]->SetPlaceFactor(1);
 		this->PointWidget[i]->UpdatePlacement();
-
+		this->PointWidget[i]->SetSize(0.75 * MinLength, 0.75 * MinLength);
 	}
 }
 

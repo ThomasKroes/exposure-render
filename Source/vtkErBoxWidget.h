@@ -122,6 +122,7 @@ protected:
 	vtkSmartPointer<vtkErSlicePlaneWidget>	PointWidget[6];
 	vtkSmartPointer<vtkPoints>				DefaultPositions;
 	vtkSmartPointer<vtkPoints>				DefaultNormals;
+	vtkSmartPointer<vtkPoints>				DefaultUp;
 
 private:
   vtkErBoxWidget(const vtkErBoxWidget&);

@@ -16,7 +16,6 @@
 #include "vtkErCoreDll.h"
 
 #include "vtkPolyDataSourceWidget.h"
-
 #include "vtkActor.h"
 #include "vtkAssemblyNode.h"
 #include "vtkAssemblyPath.h"
@@ -47,6 +46,9 @@
 #include "vtkDiskSource.h"
 #include "vtkBoundingBox.h"
 
+#include "vtkErPlaneSource.h"
+#include "vtkErArrowSource.h"
+
 #define VTK_PLANE_OFF 0
 #define VTK_PLANE_OUTLINE 1
 #define VTK_PLANE_WIREFRAME 2
@@ -55,12 +57,9 @@
 class VTK_ER_CORE_EXPORT vtkErSlicePlaneWidget : public vtkPolyDataSourceWidget
 {
 public:
-  // Description:
-  // Instantiate the object.
-  static vtkErSlicePlaneWidget *New();
+	vtkTypeMacro(vtkErSlicePlaneWidget,vtkPolyDataSourceWidget);
+	static vtkErSlicePlaneWidget *New();
 
-  vtkTypeMacro(vtkErSlicePlaneWidget,vtkPolyDataSourceWidget);
-  void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
   // Methods that satisfy the superclass' API.
@@ -92,8 +91,7 @@ public:
   double* GetNormal();
   void GetNormal(double xyz[3]);
   
-  vtkGetVector3Macro(Up, double);
-  vtkSetVector3Macro(Up, double);
+  
 
   // Description:
   // Control how the plane appears when GetPolyData() is invoked.
@@ -152,16 +150,24 @@ public:
   // Get the handle properties (the little balls are the handles). The 
   // properties of the handles when selected and normal can be 
   // manipulated.
-  vtkGetObjectMacro(HandleProperty,vtkProperty);
+  vtkGetObjectMacro(HandleProperty, vtkProperty);
   vtkGetObjectMacro(SelectedHandleProperty,vtkProperty);
   
   // Description:
   // Get the plane properties. The properties of the plane when selected 
   // and unselected can be manipulated.
   virtual void SetPlaneProperty(vtkProperty*);
-  vtkGetObjectMacro(PlaneProperty,vtkProperty);
-  vtkGetObjectMacro(SelectedPlaneProperty,vtkProperty);
-  
+//  vtkGetObjectMacro(PlaneProperty, vtkProperty);
+//  vtkGetObjectMacro(SelectedPlaneProperty, vtkProperty);
+
+	vtkGetVector3Macro(Up, double);
+	void SetUp(double X, double Y, double Z);
+	void SetUp(double Up[3]);
+
+	vtkGetVector2Macro(Size, double);
+	void SetSize(double Width, double Height);
+	void SetSize(double Size[2]);
+
 protected:
   vtkErSlicePlaneWidget();
   ~vtkErSlicePlaneWidget();
@@ -203,10 +209,8 @@ protected:
   void SelectRepresentation();
 
   // the plane
-  vtkActor          *PlaneActor;
-  vtkPolyDataMapper *PlaneMapper;
-  vtkPlaneSource    *PlaneSource;
-  vtkPolyData       *PlaneOutline;
+  
+
   void HighlightPlane(int highlight);
 
   void PositionHandles();
@@ -225,7 +229,6 @@ protected:
   vtkActor *CurrentHandle;
   
   // Methods to manipulate the hexahedron.
-  void MoveOrigin(double *p1, double *p2);
   void Rotate(int X, int Y, double *p1, double *p2, double *vpn);
   void Translate(double *p1, double *p2);
   void Push(double *p1, double *p2);
@@ -233,6 +236,7 @@ protected:
   // Plane normal, normalized
   double Normal[3];
   double Up[3];
+  double Size[2];
 
   // Transform the hexahedral points (used for rotations)
   vtkTransform *Transform;
@@ -241,8 +245,7 @@ protected:
   // the manipulator in general.
   vtkProperty *HandleProperty;
   vtkProperty *SelectedHandleProperty;
-  vtkProperty *PlaneProperty;
-  vtkProperty *SelectedPlaneProperty;
+  
   void CreateDefaultProperties();
   
   void GeneratePlane();
@@ -250,18 +253,25 @@ protected:
   int    LastPickValid;
   double HandleSizeFactor;
   
-  vtkSmartPointer<vtkCubeSource>		CubeSource;
-  vtkSmartPointer<vtkPolyDataMapper>	CubeMapper;
-  vtkSmartPointer<vtkPolyData>			CubePolyData;
-  vtkSmartPointer<vtkCutter>			CubeCutter;
-  vtkSmartPointer<vtkPolyDataMapper>	CubeCutterMapper;
-  vtkSmartPointer<vtkActor>				CubeCutterPlaneActor;
+	vtkSmartPointer<vtkActor>			PlaneActor;
+	vtkSmartPointer<vtkPolyDataMapper>	PlaneMapper;
+	vtkSmartPointer<vtkErPlaneSource>	PlaneSource;
+	vtkSmartPointer<vtkPolyData>		PlaneOutline;
+	vtkSmartPointer<vtkProperty>		PlaneProperty;
+	vtkSmartPointer<vtkProperty>		SelectedPlaneProperty;
 
-  vtkSmartPointer<vtkArrowSource>		ArrowSource;
-  vtkSmartPointer<vtkPolyDataMapper>	ArrowMapper;
-  vtkSmartPointer<vtkActor>				ArrowActor;
+	vtkSmartPointer<vtkCubeSource>		CubeSource;
+	vtkSmartPointer<vtkPolyDataMapper>	CubeMapper;
+	vtkSmartPointer<vtkPolyData>		CubePolyData;
+	vtkSmartPointer<vtkCutter>			CubeCutter;
+	vtkSmartPointer<vtkPolyDataMapper>	CubeCutterMapper;
+	vtkSmartPointer<vtkActor>			CubeCutterPlaneActor;
+
+	vtkSmartPointer<vtkErArrowSource>	ArrowSource;
+	vtkSmartPointer<vtkPolyDataMapper>	ArrowMapper;
+	vtkSmartPointer<vtkActor>			ArrowActor;
 
 private:
-  vtkErSlicePlaneWidget(const vtkErSlicePlaneWidget&);  //Not implemented
-  void operator=(const vtkErSlicePlaneWidget&);  //Not implemented
+	vtkErSlicePlaneWidget(const vtkErSlicePlaneWidget&);
+	void operator=(const vtkErSlicePlaneWidget&);
 };

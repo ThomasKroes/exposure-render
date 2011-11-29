@@ -1,76 +1,44 @@
-/*=========================================================================
+/*
+	Copyright (c) 2011, T. Kroes <t.kroes@tudelft.nl>
+	All rights reserved.
 
-  Program:   Visualization Toolkit
-  Module:    vtkCameraWidget.h
+	Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+#pragma once
 
-=========================================================================*/
-// .NAME vtkCameraWidget - 2D widget for saving a series of camera views
-// .SECTION Description
-// This class provides support for interactively saving a series of camera
-// views into an interpolated path (using vtkCameraInterpolator). To use the
-// class start by specifying a camera to interpolate, and then simply start
-// recording by hitting the "record" button, manipulate the camera (by using
-// an interactor, direct scripting, or any other means), and then save the
-// camera view. Repeat this process to record a series of views.  The user
-// can then play back interpolated camera views using the 
-// vtkCameraInterpolator.
+#include "vtkErCoreDll.h"
 
-// .SECTION See Also
-// vtkBorderWidget vtkCameraInterpolator
+#include <vtkBorderWidget.h>
+#include <vtkCameraInterpolator.h>
+#include <vtkCallbackCommand.h>
+#include <vtkObjectFactory.h>
+#include <vtkWidgetRepresentation.h>
 
+#include "vtkErCameraRepresentation.h"
 
-#ifndef __vtkCameraWidget_h
-#define __vtkCameraWidget_h
-
-#include "vtkBorderWidget.h"
-
-class vtkCameraRepresentation;
-
-
-class VTK_WIDGETS_EXPORT vtkCameraWidget : public vtkBorderWidget
+class VTK_ER_CORE_EXPORT vtkErCameraWidget : public vtkBorderWidget
 {
 public:
-  // Description:
-  // Instantiate this class.
-  static vtkCameraWidget *New();
+	vtkTypeMacro(vtkErCameraWidget, vtkBorderWidget);
+	static vtkErCameraWidget *New();
 
-  // Description:
-  // Standar VTK class methods.
-  vtkTypeMacro(vtkCameraWidget,vtkBorderWidget);
-  void PrintSelf(ostream& os, vtkIndent indent);
-
-  // Description:
-  // Specify an instance of vtkWidgetRepresentation used to represent this
-  // widget in the scene. Note that the representation is a subclass of vtkProp
-  // so it can be added to the renderer independent of the widget.
-  void SetRepresentation(vtkCameraRepresentation *r)
-    {this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));}
-  
-  // Description:
-  // Create the default widget representation if one is not set. 
-  void CreateDefaultRepresentation();
+	void SetRepresentation(vtkErCameraRepresentation *r) { this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r)); }
+	void CreateDefaultRepresentation();
 
 protected:
-  vtkCameraWidget();
-  ~vtkCameraWidget();
+	vtkErCameraWidget();
+	~vtkErCameraWidget();
 
-  // Description:
-  // When selecting the interior of this widget, special operations occur 
-  // (i.e., adding a camera view, deleting a path, animating a path). Thus
-  // this methods overrides the superclasses' method.
-  virtual void SelectRegion(double eventPos[2]);
+	virtual void SelectRegion(double eventPos[2]);
 
 private:
-  vtkCameraWidget(const vtkCameraWidget&);  //Not implemented
-  void operator=(const vtkCameraWidget&);  //Not implemented
+	vtkErCameraWidget(const vtkErCameraWidget&);
+	void operator=(const vtkErCameraWidget&);
 };
-
-#endif

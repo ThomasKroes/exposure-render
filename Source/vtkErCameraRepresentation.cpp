@@ -1,46 +1,27 @@
-/*=========================================================================
+/*
+	Copyright (c) 2011, T. Kroes <t.kroes@tudelft.nl>
+	All rights reserved.
 
-  Program:   Visualization Toolkit
-  Module:    vtkCameraRepresentation.cxx
+	Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+#include "ErCoreStable.h"
 
-=========================================================================*/
-#include "vtkCameraRepresentation.h"
-#include "vtkCameraInterpolator.h"
-#include "vtkCallbackCommand.h"
-#include "vtkObjectFactory.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkCamera.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper2D.h"
-#include "vtkProperty2D.h"
-#include "vtkActor2D.h"
-#include "vtkTransform.h"
-#include "vtkTransformPolyDataFilter.h"
+#include "vtkErCameraRepresentation.h"
 
+vtkStandardNewMacro(vtkErCameraRepresentation);
 
-vtkStandardNewMacro(vtkCameraRepresentation);
+vtkCxxSetObjectMacro(vtkErCameraRepresentation, Camera, vtkCamera);
 
-vtkCxxSetObjectMacro(vtkCameraRepresentation, Camera, vtkCamera);
-vtkCxxSetObjectMacro(vtkCameraRepresentation, Interpolator, vtkCameraInterpolator);
-
-//-------------------------------------------------------------------------
-vtkCameraRepresentation::vtkCameraRepresentation()
+vtkErCameraRepresentation::vtkErCameraRepresentation()
 {
   this->Camera = NULL;
-  this->Interpolator = vtkCameraInterpolator::New();
-  this->NumberOfFrames = 24;
   
   // Set up the 
   double size[2];
@@ -124,11 +105,9 @@ vtkCameraRepresentation::vtkCameraRepresentation()
   this->Actor->SetProperty(this->Property);
 }
 
-//-------------------------------------------------------------------------
-vtkCameraRepresentation::~vtkCameraRepresentation()
+vtkErCameraRepresentation::~vtkErCameraRepresentation()
 {
   this->SetCamera(0);
-  this->SetInterpolator(0);
   
   this->Points->Delete();
   this->TransformFilter->Delete();
@@ -138,131 +117,50 @@ vtkCameraRepresentation::~vtkCameraRepresentation()
   this->Actor->Delete();
 }
 
-//-------------------------------------------------------------------------
-void vtkCameraRepresentation::BuildRepresentation()
+void vtkErCameraRepresentation::BuildRepresentation()
 {
   // Note that the transform is updated by the superclass
   this->Superclass::BuildRepresentation();
 }
 
-//-------------------------------------------------------------------------
-void vtkCameraRepresentation::AddCameraToPath()
-{
-  if ( ! this->Camera )
-    {
-    return;
-    }
-  if ( ! this->Interpolator )
-    {
-    this->Interpolator = vtkCameraInterpolator::New();
-    }
-  this->CurrentTime = static_cast<double>(
-    this->Interpolator->GetNumberOfCameras());
-  this->Interpolator->AddCamera(this->CurrentTime,this->Camera);
-}
-
-
-//-------------------------------------------------------------------------
-void vtkCameraRepresentation::AnimatePath(vtkRenderWindowInteractor *rwi)
-{
-  vtkCameraInterpolator *camInt = this->Interpolator;
-  
-  if ( ! camInt || ! rwi )
-    {
-    return;
-    }
-
-  int numCameras = camInt->GetNumberOfCameras();
-  if ( numCameras <= 0 )
-    {
-    return;
-    }
-  double delT = static_cast<double>(numCameras - 1) / this->NumberOfFrames;
-  
-  double t=0.0;
-  for (int i=0; i < this->NumberOfFrames; i++, t+=delT)
-    {
-    camInt->InterpolateCamera(t,this->Camera);
-    rwi->Render();
-    }
-}
-
-//-------------------------------------------------------------------------
-void vtkCameraRepresentation::InitializePath()
-{
-  if ( ! this->Interpolator )
-    {
-    return;
-    }
-  this->Interpolator->Initialize();
-  this->CurrentTime = 0.0;
-}
-
-//-------------------------------------------------------------------------
-void vtkCameraRepresentation::GetActors2D(vtkPropCollection *pc)
+void vtkErCameraRepresentation::GetActors2D(vtkPropCollection *pc)
 {
   pc->AddItem(this->Actor);
   this->Superclass::GetActors2D(pc);
 }
 
-//-------------------------------------------------------------------------
-void vtkCameraRepresentation::ReleaseGraphicsResources(vtkWindow *w)
+void vtkErCameraRepresentation::ReleaseGraphicsResources(vtkWindow *w)
 {
   this->Actor->ReleaseGraphicsResources(w);
   this->Superclass::ReleaseGraphicsResources(w);
 }
 
-//-------------------------------------------------------------------------
-int vtkCameraRepresentation::RenderOverlay(vtkViewport *w)
+int vtkErCameraRepresentation::RenderOverlay(vtkViewport *w)
 {
   int count = this->Superclass::RenderOverlay(w);
   count += this->Actor->RenderOverlay(w);
   return count;
 }
 
-//-------------------------------------------------------------------------
-int vtkCameraRepresentation::RenderOpaqueGeometry(vtkViewport *w)
+int vtkErCameraRepresentation::RenderOpaqueGeometry(vtkViewport *w)
 {
   int count = this->Superclass::RenderOpaqueGeometry(w);
   count += this->Actor->RenderOpaqueGeometry(w);
   return count;
 }
 
-//-------------------------------------------------------------------------
-int vtkCameraRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport *w)
+int vtkErCameraRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport *w)
 {
   int count = this->Superclass::RenderTranslucentPolygonalGeometry(w);
   count += this->Actor->RenderTranslucentPolygonalGeometry(w);
   return count;
 }
 
-//-----------------------------------------------------------------------------
-// Description:
-// Does this prop have some translucent polygonal geometry?
-int vtkCameraRepresentation::HasTranslucentPolygonalGeometry()
+int vtkErCameraRepresentation::HasTranslucentPolygonalGeometry()
 {
   int result = this->Superclass::HasTranslucentPolygonalGeometry();
   result |= this->Actor->HasTranslucentPolygonalGeometry();
   return result;
 }
 
-//-------------------------------------------------------------------------
-void vtkCameraRepresentation::PrintSelf(ostream& os, vtkIndent indent)
-{
-  this->Superclass::PrintSelf(os,indent);
-  
-  if ( this->Property )
-    {
-    os << indent << "Property:\n";
-    this->Property->PrintSelf(os,indent.GetNextIndent());
-    }
-  else
-    {
-    os << indent << "Property: (none)\n";
-    }
 
-  os << indent << "Camera Interpolator: " << this->Interpolator << "\n";
-  os << indent << "Camera: " << this->Camera << "\n";
-  os << indent << "Number of Frames: " << this->NumberOfFrames << "\n";
-  
-}

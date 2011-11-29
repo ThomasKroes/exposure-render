@@ -112,6 +112,8 @@ SET(ErVtkSources
 	vtkErCameraRepresentation.h
 	vtkErSlicePlaneWidget.h
 	vtkErBoxWidget.h
+	vtkErPlaneSource.h
+	vtkErArrowSource.h
 	vtkErVolumeMapper.cpp
 	vtkErLight.cpp
 	vtkErAreaLight.cpp
@@ -124,6 +126,8 @@ SET(ErVtkSources
 	vtkErBoxWidget.cpp
 	vtkErCameraWidget.cpp
 	vtkErCameraRepresentation.cpp
+	vtkErPlaneSource.cpp
+	vtkErArrowSource.cpp
 )
 
 # VTK Exposure Render sources
@@ -136,8 +140,12 @@ SET(ErVtkWrapPythonSources
 	vtkErVolumeInfo.cpp
 	vtkErRenderInfo.cpp
 	vtkErCamera.cpp
+	vtkErCameraWidget.cpp
+	vtkErCameraRepresentation.cpp
 	vtkErSlicePlaneWidget.cpp
 	vtkErBoxWidget.cpp
+	vtkErPlaneSource.cpp
+	vtkErArrowSource.cpp
 )
 
 # Make the "Vtk" source group
