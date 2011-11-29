@@ -12,7 +12,8 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkCameraWidget.h"
+#include "vtkErCameraWidget.h"
+
 #include "vtkCameraRepresentation.h"
 #include "vtkCameraInterpolator.h"
 #include "vtkCallbackCommand.h"

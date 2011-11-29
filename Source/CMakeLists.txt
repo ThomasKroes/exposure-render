@@ -109,6 +109,7 @@ SET(ErVtkSources
 	vtkErRenderInfo.h
 	vtkErCamera.h
 	vtkErCameraWidget.h
+	vtkErCameraRepresentation.h
 	vtkErSlicePlaneWidget.h
 	vtkErBoxWidget.h
 	vtkErVolumeMapper.cpp
@@ -122,6 +123,7 @@ SET(ErVtkSources
 	vtkErSlicePlaneWidget.cpp
 	vtkErBoxWidget.cpp
 	vtkErCameraWidget.cpp
+	vtkErCameraRepresentation.cpp
 )
 
 # VTK Exposure Render sources
