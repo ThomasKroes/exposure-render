@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/manix.mhd")
+Reader.SetFileName("C:/Volumes/engine.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -75,8 +75,8 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(3.0)
-ErVolumeProperty.SetStepSizeFactorSecondary(3.0)
+ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
+ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
 ErVolumeProperty.SetDensityScale(100)
 ErVolumeProperty.SetShadingType(1)
 

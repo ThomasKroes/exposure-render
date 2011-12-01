@@ -60,7 +60,7 @@ public:
 	vtkTypeMacro(vtkErVolumeMapper, vtkVolumeMapper);
     static vtkErVolumeMapper* New();
 
-	void CreateExtinctionVolume();
+	
 
 	vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
     vtkErVolumeMapper(const vtkErVolumeMapper&);

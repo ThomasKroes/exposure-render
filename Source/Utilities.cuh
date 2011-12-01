@@ -20,6 +20,11 @@ DEV inline Vec3f ToVec3f(const float3& V)
 	return Vec3f(V.x, V.y, V.z);
 }
 
+DEV inline float3 FromVec3f(const Vec3f& V)
+{
+	return make_float3(V.x, V.y, V.z);
+}
+
 DEV float GetIntensity(const Vec3f& P)
 {
 	return ((float)SHRT_MAX * tex3D(gTexDensity, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));

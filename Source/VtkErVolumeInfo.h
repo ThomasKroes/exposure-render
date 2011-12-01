@@ -35,7 +35,7 @@ public:
 	//BTX
 	vtkGetMacro(Volume, vtkVolume*);
     vtkSetMacro(Volume, vtkVolume*);
-
+	void CreateExtinctionVolume();
 	
 	VolumeInfo* GetVolumeInfo(void) { return &m_VolumeInfo; }
 	//ETX

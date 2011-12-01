@@ -20,7 +20,7 @@
 
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexDensity;
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
-texture<float, cudaTextureType3D, cudaReadModeElementType>			gTexExtinction;
+texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexExtinction;
 texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexOpacity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexSpecular;
@@ -94,11 +94,11 @@ void BindExtinction(short* pBuffer, cudaExtent Extent)
 	
 	HandleCudaError(cudaMemcpy3D(&CopyParams));
 
-	gTexDensity.normalized		= true;
-	gTexDensity.filterMode		= cudaFilterModeLinear;      
-	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
-	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
-  	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
+	gTexExtinction.normalized		= true;
+	gTexExtinction.filterMode		= cudaFilterModeLinear;      
+	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
+	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
+  	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc));
 }

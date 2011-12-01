@@ -66,13 +66,13 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		
 		double* pBounds = m_pIntensity->GetBounds();
 
-		m_VolumeInfo.m_Extent.x	= pBounds[1] - pBounds[0];
-		m_VolumeInfo.m_Extent.y	= pBounds[3] - pBounds[2];
-		m_VolumeInfo.m_Extent.z	= pBounds[5] - pBounds[4];
+		m_VolumeInfo.m_Extent.x	= pResolution[1] - pResolution[0];
+		m_VolumeInfo.m_Extent.y	= pResolution[3] - pResolution[2];
+		m_VolumeInfo.m_Extent.z	= pResolution[5] - pResolution[4];
 		
-		m_VolumeInfo.m_InvExtent.x	= m_VolumeInfo.m_Extent.x != 0.0f ? 1.0f / m_VolumeInfo.m_Extent.x : 0.0f;
-		m_VolumeInfo.m_InvExtent.y	= m_VolumeInfo.m_Extent.y != 0.0f ? 1.0f / m_VolumeInfo.m_Extent.y : 0.0f;
-		m_VolumeInfo.m_InvExtent.z	= m_VolumeInfo.m_Extent.z != 0.0f ? 1.0f / m_VolumeInfo.m_Extent.z : 0.0f;
+		m_VolumeInfo.m_InvExtent.x	= m_VolumeInfo.m_Extent.x != 0 ? 1.0f / (float)m_VolumeInfo.m_Extent.x : 0.0f;
+		m_VolumeInfo.m_InvExtent.y	= m_VolumeInfo.m_Extent.y != 0 ? 1.0f / (float)m_VolumeInfo.m_Extent.y : 0.0f;
+		m_VolumeInfo.m_InvExtent.z	= m_VolumeInfo.m_Extent.z != 0 ? 1.0f / (float)m_VolumeInfo.m_Extent.z : 0.0f;
 
 		cudaExtent Extent;
 
@@ -131,8 +131,11 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_GradientDeltaZ.y		= 0.0f;
 		m_VolumeInfo.m_GradientDeltaZ.z		= m_VolumeInfo.m_GradientDelta;
 
+		m_VolumeInfo.m_MacroCellSize		= 1.0f / 8.0f;
+
 		BindIntensityBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
 		BindGradientMagnitudeBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
+		CreateExtinctionVolume();
     }
 }
 
@@ -172,4 +175,47 @@ void vtkErVolumeInfo::Update()
 	m_VolumeInfo.m_GradientDeltaZ.x = 0.0f;
 	m_VolumeInfo.m_GradientDeltaZ.y = 0.0f;
 	m_VolumeInfo.m_GradientDeltaZ.z = m_VolumeInfo.m_GradientDelta;
+}
+
+
+void vtkErVolumeInfo::CreateExtinctionVolume()
+{
+	vtkDebugMacro("Generating extinction volume");
+
+	cudaExtent extinctionSize;
+
+	extinctionSize.width	= m_VolumeInfo.m_Extent.x / 8;
+	extinctionSize.height	= m_VolumeInfo.m_Extent.y / 8;
+	extinctionSize.depth	= m_VolumeInfo.m_Extent.z / 8;
+
+	short* extinction = (short*)malloc(sizeof(short)*extinctionSize.width*extinctionSize.height*extinctionSize.depth);
+	
+	for(int i = 0; i<extinctionSize.width*extinctionSize.height*extinctionSize.depth; ++i){
+		extinction[i] = 0.0f;
+	}
+
+//	vtkErrorMacro(<<"Extent" << m_VolumeInfo.m_Extent.x << ", "<< m_VolumeInfo.m_Extent.y << ", "<< m_VolumeInfo.m_Extent.z)
+
+	for(int x = 0; x < m_VolumeInfo.m_Extent.x; ++x)
+	{
+		for(int y = 0; y < m_VolumeInfo.m_Extent.y; ++y)
+		{
+			for(int z = 0; z < m_VolumeInfo.m_Extent.z; ++z)
+			{
+				int index =
+				x / 8 +
+				y / 8 * extinctionSize.width +
+				z / 8 * extinctionSize.width * extinctionSize.height;
+
+				if (index < (extinctionSize.width * extinctionSize.height * extinctionSize.depth) && extinction[index] < (short)m_pIntensity->GetScalarPointer(x, y, z))
+				{
+					extinction[index] = (short)m_pIntensity->GetScalarPointer(x, y, z);
+				}
+			}
+		}
+	}
+
+	BindExtinction(extinction, extinctionSize);
+
+	free(extinction);
 }

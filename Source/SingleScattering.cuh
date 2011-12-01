@@ -52,7 +52,7 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 	Vec3f Pe, Pl;
 	
-	if (SampleDistanceRM(Re, RNG, Pe))
+	if (lightShootDDAWoodcock(Re, RNG, Pe))
 	{
 		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl))
 		{
