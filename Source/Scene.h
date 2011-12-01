@@ -15,7 +15,6 @@
 
 #include "Geometry.h"
 #include "Flags.h"
-#include "Camera.cuh"
 #include "Lighting.cuh"
 #include "Slice.cuh"
 
