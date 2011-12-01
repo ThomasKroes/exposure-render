@@ -33,6 +33,7 @@ cudaChannelFormatDesc gFloatChannelDesc = cudaCreateChannelDesc<float>();
 cudaChannelFormatDesc gFloat4ChannelDesc = cudaCreateChannelDesc<float4>();
 
 cudaArray* gpDensityArray				= NULL;
+cudaArray* gpExtinction					= NULL;
 cudaArray* gpGradientMagnitudeArray		= NULL;
 cudaArray* gpOpacityArray				= NULL;
 cudaArray* gpDiffuseArray				= NULL;
@@ -76,6 +77,30 @@ void BindIntensityBuffer(short* pBuffer, cudaExtent Extent)
   	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexDensity, gpDensityArray, ChannelDesc));
+}
+
+void BindExtinction(short* pBuffer, cudaExtent Extent)
+{
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
+
+	HandleCudaError(cudaMalloc3DArray(&gpExtinction, &ChannelDesc, Extent));
+
+	cudaMemcpy3DParms CopyParams = {0};
+
+	CopyParams.srcPtr	= make_cudaPitchedPtr(pBuffer, Extent.width * sizeof(short), Extent.width, Extent.height);
+	CopyParams.dstArray	= gpExtinction;
+	CopyParams.extent	= Extent;
+	CopyParams.kind		= cudaMemcpyHostToDevice;
+	
+	HandleCudaError(cudaMemcpy3D(&CopyParams));
+
+	gTexDensity.normalized		= true;
+	gTexDensity.filterMode		= cudaFilterModeLinear;      
+	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
+	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
+  	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
+
+	HandleCudaError(cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc));
 }
 
 void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent)

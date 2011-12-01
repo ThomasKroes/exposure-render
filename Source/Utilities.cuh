@@ -80,9 +80,9 @@ DEV inline Vec3f NormalizedGradient(const Vec3f& P)
 {
 	Vec3f Gradient;
 
-	Gradient.x = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaX)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaX)));// * gVolumeInfo.m_InvGradientDelta;
-	Gradient.y = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaY)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaY)));// * gVolumeInfo.m_InvGradientDelta;
-	Gradient.z = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaZ)));// * gVolumeInfo.m_InvGradientDelta;
+	Gradient.x = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaX)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaX))) * gVolumeInfo.m_InvGradientDelta;
+	Gradient.y = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaY)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaY))) * gVolumeInfo.m_InvGradientDelta;
+	Gradient.z = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaZ))) * gVolumeInfo.m_InvGradientDelta;
 
 	return -Normalize(Gradient);
 }

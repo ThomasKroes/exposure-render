@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/manix_small.mhd")
+Reader.SetFileName("C:/Volumes/manix.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -75,10 +75,10 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
-ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
+ErVolumeProperty.SetStepSizeFactorPrimary(3.0)
+ErVolumeProperty.SetStepSizeFactorSecondary(3.0)
 ErVolumeProperty.SetDensityScale(100)
-ErVolumeProperty.SetShadingType(0)
+ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -149,15 +149,15 @@ widget = vtk.vtkOrientationMarkerWidget()
 
 widget.SetOutlineColor(0.9300, 0.5700, 0.1300)
 widget.SetOrientationMarker(axes)
-widget.SetInteractor(Interactor)
+#widget.SetInteractor(Interactor)
 widget.SetViewport(0.0, 0.0, 0.2, 0.2)
-widget.SetEnabled(1)
-widget.InteractiveOn()
+#widget.SetEnabled(1)
+#widget.InteractiveOn()
 
 # Camera widget
 CameraWidget = vtkErCorePython.vtkErCameraWidget()
-CameraWidget.SetInteractor(Interactor)
-CameraWidget.SetEnabled(1)
+#CameraWidget.SetInteractor(Interactor)
+#CameraWidget.SetEnabled(1)
 
 InteractorStyle = vtk.vtkInteractorStyleTrackballCamera()
 Interactor.SetInteractorStyle(InteractorStyle)
@@ -190,7 +190,7 @@ Interactor.Initialize()
 
 RendererWin.Render()
 
-ErBoxWidget.On()
+#ErBoxWidget.On()
 
 # Start the event loop.
 Interactor.Start()

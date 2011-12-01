@@ -19,7 +19,7 @@
 
 struct EXPOSURE_RENDER_DLL VolumeInfo
 {
-	float3	m_Extent;
+	int3	m_Extent;
 	float3	m_InvExtent;
 	float3	m_MinAABB;
 	float3	m_MaxAABB;

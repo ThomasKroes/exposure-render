@@ -23,6 +23,7 @@ struct Slicing;
 class FrameBuffer;
 
 extern "C" void BindIntensityBuffer(short* pBuffer, cudaExtent Extent);
+extern "C" void BindExtinction(short* pBuffer, cudaExtent Extent);
 extern "C" void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent);
 extern "C" void UnbindDensityBuffer(void);
 extern "C" void UnbindGradientMagnitudeBuffer(void);

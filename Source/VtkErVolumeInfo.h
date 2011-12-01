@@ -46,7 +46,7 @@ protected:
 	vtkErVolumeInfo();
 	virtual ~vtkErVolumeInfo();
 	
-private:
+public:
 	//BTX
 	
 	vtkImageData*   m_pIntensity;

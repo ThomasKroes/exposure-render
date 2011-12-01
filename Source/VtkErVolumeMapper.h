@@ -60,6 +60,8 @@ public:
 	vtkTypeMacro(vtkErVolumeMapper, vtkVolumeMapper);
     static vtkErVolumeMapper* New();
 
+	void CreateExtinctionVolume();
+
 	vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
     vtkErVolumeMapper(const vtkErVolumeMapper&);
     virtual void SetInput( vtkImageData * );
@@ -101,10 +103,14 @@ public:
 
 	void Reset();
 
+	vtkGetMacro(MacroCellSize, int);
+	vtkSetMacro(MacroCellSize, int);
+
 protected:
 	vtkErBoxWidget*								SliceWidget;
 	vtkSmartPointer<vtkErResetCommand>			ResetCallBack;
 	vtkSmartPointer<vtkErUpdateSlicingCommand>	UpdateSlicingCommand;
+	int MacroCellSize;
 };
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/

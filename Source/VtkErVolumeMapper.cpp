@@ -24,6 +24,8 @@
 #include "vtkgl.h"
 #include "vtkCommand.h"
 
+#include <vtkImageData.h>
+
 void vtkErResetCommand::Execute(vtkObject*, unsigned long, void *)
 {
 	if (!this->VolumeMapper)
@@ -272,3 +274,44 @@ void vtkErVolumeMapper::Reset()
 {
 	this->m_CudaRenderInfo->Reset();
 }
+
+void vtkErVolumeMapper::CreateExtinctionVolume()
+{
+	/*
+	vtkDebugMacro("Generating extinction volume");
+
+	cudaExtent extinctionSize;
+
+	extinctionSize.width	= m_CudaVolumeInfo->m_VolumeInfo.m_Extent.x / this->GetMacroCellSize();
+	extinctionSize.height	= m_CudaVolumeInfo->m_VolumeInfo.m_Extent.y / this->GetMacroCellSize();
+	extinctionSize.depth	= m_CudaVolumeInfo->m_VolumeInfo.m_Extent.z / this->GetMacroCellSize();
+
+	float* extinction = (float*)malloc(sizeof(float)*extinctionSize.width*extinctionSize.height*extinctionSize.depth);
+	
+	for(int i = 0; i<extinctionSize.width*extinctionSize.height*extinctionSize.depth; ++i){
+		extinction[i] = 0.0f;
+	}
+
+	
+	for(int x = 0; x < m_CudaVolumeInfo->m_VolumeInfo.m_Extent.x; ++x)
+	{
+		for(int y = 0; y < m_CudaVolumeInfo->m_VolumeInfo.m_Extent.y; ++y)
+		{
+			for(int z = 0; z < m_CudaVolumeInfo->m_VolumeInfo.m_Extent.z; ++z)
+			{
+				int index =
+				x / this->GetMacroCellSize() +
+				y / this->GetMacroCellSize() * extinctionSize.width +
+				z / this->GetMacroCellSize() * extinctionSize.width * extinctionSize.height;
+
+				if (extinction[index] < (short)m_CudaVolumeInfo->m_pIntensity->GetScalarPointer(x, y, z))
+				{
+					extinction[index] = (short)m_CudaVolumeInfo->m_pIntensity->GetScalarPointer(x, y, z);
+				}
+			}
+		}
+	}
+	*/
+}
+
+
