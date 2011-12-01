@@ -18,7 +18,7 @@
 #include "RenderInfo.cuh"
 #include "Lighting.cuh"
 
-texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexDensity;
+texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexExtinction;
 texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexOpacity;
@@ -70,13 +70,13 @@ void BindIntensityBuffer(short* pBuffer, cudaExtent Extent)
 	
 	HandleCudaError(cudaMemcpy3D(&CopyParams));
 
-	gTexDensity.normalized		= true;
-	gTexDensity.filterMode		= cudaFilterModeLinear;      
-	gTexDensity.addressMode[0]	= cudaAddressModeClamp;  
-	gTexDensity.addressMode[1]	= cudaAddressModeClamp;
-  	gTexDensity.addressMode[2]	= cudaAddressModeClamp;
+	gTexIntensity.normalized		= true;
+	gTexIntensity.filterMode		= cudaFilterModeLinear;      
+	gTexIntensity.addressMode[0]	= cudaAddressModeClamp;  
+	gTexIntensity.addressMode[1]	= cudaAddressModeClamp;
+  	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
 
-	HandleCudaError(cudaBindTextureToArray(gTexDensity, gpDensityArray, ChannelDesc));
+	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpDensityArray, ChannelDesc));
 }
 
 void BindExtinction(short* pBuffer, cudaExtent Extent)
@@ -95,7 +95,7 @@ void BindExtinction(short* pBuffer, cudaExtent Extent)
 	HandleCudaError(cudaMemcpy3D(&CopyParams));
 
 	gTexExtinction.normalized		= true;
-	gTexExtinction.filterMode		= cudaFilterModeLinear;      
+	gTexExtinction.filterMode		= cudaFilterModePoint;      
 	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
 	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
   	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
@@ -130,7 +130,7 @@ void UnbindDensityBuffer(void)
 {
 	HandleCudaError(cudaFreeArray(gpDensityArray));
 	gpDensityArray = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexDensity));
+	HandleCudaError(cudaUnbindTexture(gTexIntensity));
 }
 
 void UnbindGradientMagnitudeBuffer(void)

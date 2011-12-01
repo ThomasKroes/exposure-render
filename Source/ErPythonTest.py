@@ -77,7 +77,7 @@ ErVolumeProperty.SetIOR(IOR)
 
 ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
 ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
-ErVolumeProperty.SetDensityScale(100)
+ErVolumeProperty.SetDensityScale(1)
 ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
@@ -120,7 +120,7 @@ Fill.SetShapeType(2)
 #Renderer.AddLight(Fill);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(100000, 100000, 100000);
+ErBackgroundLight.SetDiffuseColor(1000, 1000, 1000);
 
 # Add the background light to the Renderer
 Renderer.AddLight(ErBackgroundLight);

@@ -35,8 +35,8 @@ __device__ bool lightShootDDAWoodcock(CRay& R, CRNG& RNG, Vec3f& P)
 
 	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
 		return false;
-	else
-		return true;
+//	else
+//		return true;
 
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
@@ -111,73 +111,72 @@ __device__ bool lightShootDDAWoodcock(CRay& R, CRNG& RNG, Vec3f& P)
 
   int steps = 0;
   
-  bool virtualHit = true;
-  while(virtualHit) {
-    float sigmaMax = tex3D(gTexExtinction, pos.x, pos.y, pos.z);
-    float lastSigmaMax = sigmaMax;
-    float ds = min(t.x, min(t.y, t.z));
-    float sigmaSum = sigmaMax * ds;
-	float s = -log(1.0f - RNG.Get1()) / gVolumeInfo.m_DensityScale;
-    float tt = min(t.x, min(t.y, t.z));
-    float3 entry;
-    float3 exit = FromVec3f(pos) + FromVec3f(tt * dir);
+	bool virtualHit = true;
+	
+	while (virtualHit)
+	{
+		float sigmaMax = gVolumeInfo.m_DensityScale * GetOpacity(pos);
+		float lastSigmaMax = sigmaMax;
+		float ds = min(t.x, min(t.y, t.z));
+		float sigmaSum = sigmaMax * ds;
+		float s = -log(1.0f - RNG.Get1()) / gVolumeInfo.m_DensityScale;
+		float tt = min(t.x, min(t.y, t.z));
+		float3 entry;
+		float3 exit = FromVec3f(pos) + FromVec3f(tt * dir);
 
-    while(sigmaSum < s){
-      if(steps++ > 100.0f){
- //       photon->energy = 0.0f;
-        return false;
-      }
-      entry = exit;
+		while(sigmaSum < s)
+		{
+			if(steps++ > 100.0f)
+				return false;
+		
+			entry = exit;
 
-	  /*
-      if (entry.x <= 0.0f || entry.x >= 1.0f ||
-          entry.y <= 0.0f || entry.y >= 1.0f ||
-          entry.z <= 0.0f || entry.z >= 1.0f){
-  //      photon->energy = 0.0f;
-        return  false;
-      }
-	  */
+			if (!InsideAABB(ToVec3f(entry)))
+				return false;
 
-      if(t.x<t.y && t.x<t.z){
-        cellIndex.x += sign(dir.x);
-        t.x += cpv.x;
-      } else {
-        if(t.y<t.x && t.y<t.z){
-          cellIndex.y += sign(dir.y);
-          t.y += cpv.y;
-        } else {
-          cellIndex.z += sign(dir.z);
-          t.z += cpv.z;
-        }
-      }
+			if(t.x<t.y && t.x<t.z)
+			{
+				cellIndex.x += sign(dir.x);
+				t.x += cpv.x;
+			}
+			else
+			{
+				if(t.y<t.x && t.y<t.z)
+				{
+					cellIndex.y += sign(dir.y);
+					t.y += cpv.y;
+				}
+				else
+				{
+					cellIndex.z += sign(dir.z);
+					t.z += cpv.z;
+				}
+			}
 
-      tt = min(t.x, min(t.y, t.z));
-      exit = FromVec3f(pos) + FromVec3f(tt * dir);
-      ds = length(exit-entry);
-      sigmaSum += ds * sigmaMax;
-      lastSigmaMax = sigmaMax;
-      float3 ePos = (exit + entry) / 2.0f;
-      sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
-      samplePos = entry;
-    }
+			tt = min(t.x, min(t.y, t.z));
+			exit = FromVec3f(pos) + FromVec3f(tt * dir);
+			ds = length(exit-entry);
+			sigmaSum += ds * sigmaMax;
+			lastSigmaMax = sigmaMax;
+			float3 ePos = (exit + entry) / 2.0f;
+			sigmaMax = GetNormalizedExtinction(ToVec3f(ePos));
+			samplePos = entry;
+		}
 
-    float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
-    samplePos += FromVec3f(dir * cS);
+		float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
+		samplePos += FromVec3f(dir * cS);
 
-	/*
-    if (pos.x <= 0.0f || pos.x >= 1.0f ||
-        pos.y <= 0.0f || pos.y >= 1.0f ||
-        pos.z <= 0.0f || pos.z >= 1.0f){
-//      photon->energy = 0.0f;
-      return false;
-    }
-	*/
+		if (!InsideAABB(ToVec3f(samplePos)))
+			return false;
 
-	if(tex3D(gTexDensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1()){
-      virtualHit = false;
-    } else {
-      pos = ToVec3f(exit);
-    }
+		if (GetOpacity(ToVec3f(samplePos)) / GetNormalizedExtinction(ToVec3f(samplePos)) > RNG.Get1())
+		{
+			virtualHit = false;
+		}
+		else
+		{
+			pos = ToVec3f(exit);
+		}
   }
 
 //  photon->energy = photon->energy * c_albedo;

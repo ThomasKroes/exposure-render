@@ -54,6 +54,9 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	
 	if (lightShootDDAWoodcock(Re, RNG, Pe))
 	{
+		Lv = ColorXYZf(1.0f, 0.0f, 0.0f);
+
+		/*
 		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl))
 		{
 			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
@@ -78,7 +81,6 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 				break;
 			}
 
-			/*
 			case 2:
 			{
 				const float GradMag = GradientMagnitude(Pe) * gVolumeInfo.m_IntensityInvRange;
@@ -91,13 +93,15 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 				break;
 			}
-			*/
 		}
+		*/
 	}
 	else
 	{
-		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl))
-			Lv = Li;
+		Lv = ColorXYZf(0.0f, 1.0f, 0.0f);
+
+//		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl))
+//			Lv = Li;
 	}
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);

@@ -27,12 +27,22 @@ DEV inline float3 FromVec3f(const Vec3f& V)
 
 DEV float GetIntensity(const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexDensity, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
+	return ((float)SHRT_MAX * tex3D(gTexIntensity, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
 }
 
 DEV float GetNormalizedIntensity(const Vec3f& P)
 {
 	return (GetIntensity(P) - gVolumeInfo.m_IntensityMin) * gVolumeInfo.m_IntensityInvRange;
+}
+
+DEV float GetExtinction(const Vec3f& P)
+{
+	return ((float)SHRT_MAX * tex3D(gTexExtinction, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
+}
+
+DEV float GetNormalizedExtinction(const Vec3f& P)
+{
+	return GetExtinction(P) * gVolumeInfo.m_IntensityInvRange;
 }
 
 DEV float GetOpacity(const float& NormalizedIntensity)
@@ -141,6 +151,20 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 	*pFarT	= LargestMaxT;
 
 	return LargestMaxT > LargestMinT;
+}
+
+DEV bool InsideAABB(Vec3f P)
+{
+	if (P.x < gVolumeInfo.m_MinAABB.x || P.x > gVolumeInfo.m_MaxAABB.x)
+		return false;
+
+	if (P.y < gVolumeInfo.m_MinAABB.y || P.y > gVolumeInfo.m_MaxAABB.y)
+		return false;
+
+	if (P.z < gVolumeInfo.m_MinAABB.z || P.z > gVolumeInfo.m_MaxAABB.z)
+		return false;
+
+	return true;
 }
 
 DEV bool IntersectSphere(CRay R, float Radius, float* pT)
