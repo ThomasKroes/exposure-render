@@ -23,6 +23,8 @@
 #include <vtkCamera.h>
 #include <vtkTextActor.h>
 
+#include "General.cuh"
+
 class vtkErVolumeMapper;
 class vtkErLight;
 class vtkErVolumeProperty;

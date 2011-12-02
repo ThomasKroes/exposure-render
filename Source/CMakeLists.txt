@@ -102,8 +102,6 @@ SET(ErVtkSources
 	vtkErAreaLight.h
 	vtkErBackgroundLight.h
 	vtkErVolumeProperty.h
-	vtkErVolumeInfo.h
-	vtkErRenderInfo.h
 	vtkErCamera.h
 	vtkErCameraWidget.h
 	vtkErCameraRepresentation.h
@@ -116,8 +114,6 @@ SET(ErVtkSources
 	vtkErAreaLight.cpp
 	vtkErBackgroundLight.cpp
 	vtkErVolumeProperty.cpp
-	vtkErVolumeInfo.cpp
-	vtkErRenderInfo.cpp
 	vtkErCamera.cpp
 	vtkErSlicePlaneWidget.cpp
 	vtkErBoxWidget.cpp
@@ -134,8 +130,6 @@ SET(ErVtkWrapPythonSources
 	vtkErAreaLight.cpp
 	vtkErBackgroundLight.cpp
 	vtkErVolumeProperty.cpp
-	vtkErVolumeInfo.cpp
-	vtkErRenderInfo.cpp
 	vtkErCamera.cpp
 	vtkErCameraWidget.cpp
 	vtkErCameraRepresentation.cpp

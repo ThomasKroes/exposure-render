@@ -46,8 +46,6 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 		Re.m_D = Normalize((Re.m_D * 1.0f) - LI);
 	}
 
-	float Near = 0.0f, Far = 150000.0f;
-
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	Vec3f Pe, Pl;

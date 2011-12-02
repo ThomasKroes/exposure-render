@@ -29,8 +29,6 @@ DEV float vecLen(float4 a, float4 b)
 
 KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 {
-	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
 //	const ColorRGBuc RGBA = pFrameBuffer->m_EstimateRgbLdr.Get(X, Y);
 //	pFrameBuffer->m_DisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);

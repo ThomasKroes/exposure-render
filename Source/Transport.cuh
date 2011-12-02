@@ -16,7 +16,7 @@
 #include "Shader.cuh"
 #include "RayMarching.cuh"
 #include "Woodcock.cuh"
-#include "Lighting.cuh"
+#include "General.cuh"
 
 DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 {
@@ -198,7 +198,7 @@ DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, float* pP
 	return Hit;
 }
 
-DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, CLight& Light, CLightingSample& LS, Vec3f Wo, Vec3f Pe, Vec3f N, CRNG& RNG)
+DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, LightingSample& LS, Vec3f Wo, Vec3f Pe, Vec3f N, CRNG& RNG)
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
@@ -216,8 +216,6 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, CL
 	Rl.m_D		= Normalize(Pe - Pl);
 	Rl.m_MinT	= 0.0f;
 	Rl.m_MaxT	= (Pe - Pl).Length();
-
-	CLight* pLight = NULL;
 
 	Wi = -Rl.m_D; 
 
@@ -283,11 +281,9 @@ DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, float Intensity, 
 	return NumLights * EstimateDirectLight(pScene, Type, Density, Light, LS, Wo, Pe, N, RNG);
 	*/
 
-	CLight* Light;
-
-	CLightingSample LS;
+	LightingSample LS;
 
 	LS.LargeStep(RNG);
 
-	return EstimateDirectLight(Type, Intensity, *Light, LS, Wo, Pe, N, RNG);
+	return EstimateDirectLight(Type, Intensity, LS, Wo, Pe, N, RNG);
 }

@@ -13,10 +13,7 @@
 
 #include "Core.cuh"
 
-#include "Slicing.cuh"
-#include "VolumeInfo.cuh"
-#include "RenderInfo.cuh"
-#include "Lighting.cuh"
+#include "General.cuh"
 
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
 texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;

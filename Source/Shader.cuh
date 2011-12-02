@@ -307,7 +307,7 @@ public:
 		return R;
 	}
 
-	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
+	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		Vec3f Wil;
@@ -388,7 +388,7 @@ public:
 		return 1.0f;
 	}
 
-	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const CBrdfSample& S)
+	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
 	{
 		switch (m_Type)
 		{
