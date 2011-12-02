@@ -17,31 +17,3 @@
 
 #include "CudaUtilities.h"
 
-struct EXPOSURE_RENDER_DLL Volume
-{
-	int3		m_Extent;
-	float3		m_InvExtent;
-	float3		m_MinAABB;
-	float3		m_MaxAABB;
-	float3		m_InvMinAABB;
-	float3		m_InvMaxAABB;
-	float3		m_Size;
-	float3		m_InvSize;
-	float		m_IntensityMin;
-	float		m_IntensityMax;
-	float		m_IntensityRange;
-	float		m_IntensityInvRange;
-	float		m_StepSize;
-	float		m_StepSizeShadow;
-	float		m_DensityScale;
-	float		m_GradientDelta;
-	float		m_InvGradientDelta;
-	float3		m_GradientDeltaX;
-	float3		m_GradientDeltaY;
-	float3		m_GradientDeltaZ;
-	float3		m_Spacing;
-	float3		m_InvSpacing;
-	float		m_GradientFactor;
-	int			m_ShadingType;
-	float3		m_MacroCellSize;
-};

@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "VtkErVolumeInfo.h"
-#include "VtkErRenderInfo.h"
 #include "vtkErBoxWidget.h"
 
 #include <vtkVolumeMapper.h>
@@ -23,6 +21,7 @@
 #include <vtkCommand.h>
 #include <vtkLightCollection.h>
 #include <vtkCamera.h>
+#include <vtkTextActor.h>
 
 class vtkErVolumeMapper;
 class vtkErLight;
@@ -148,6 +147,8 @@ public:
 	float	LerpC;
 };
 
+
+
 class VTK_ER_CORE_EXPORT vtkErVolumeMapper : public vtkVolumeMapper
 {
 public:
@@ -227,6 +228,8 @@ protected:
 
 	vtkImageData*									Intensity;
 	vtkImageData*									GradientMagnitude;
+
+	vtkSmartPointer<vtkTextActor>					BorderWidget;
 
 	friend class vtkErUpdateSlicingCommand;
 	friend class vtkErUpdateLightingCommand;

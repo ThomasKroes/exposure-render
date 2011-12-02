@@ -84,12 +84,9 @@ SET(ErCudaSources
 	Shader.cuh
 	Sample.cuh
 	RNG.cuh
-	Lighting.cuh
 	MonteCarlo.cuh
-	Slicing.cuh
-	VolumeInfo.cuh
-	RenderInfo.cuh
 	Buffer.cuh
+	General.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

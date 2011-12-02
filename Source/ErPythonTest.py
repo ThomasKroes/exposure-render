@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/engine_small.mhd")
+Reader.SetFileName("C:/Volumes/bonsai.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -73,8 +73,8 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
-ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
+ErVolumeProperty.SetStepSizeFactorPrimary(3.0)
+ErVolumeProperty.SetStepSizeFactorSecondary(3.0)
 ErVolumeProperty.SetDensityScale(1000)
 ErVolumeProperty.SetShadingType(1)
 
@@ -117,10 +117,10 @@ Fill.SetShapeType(2)
 
 # Add the area light to the Renderer
 ErVolumeMapper.AddLight(Key);
-ErVolumeMapper.AddLight(Fill);
+#ErVolumeMapper.AddLight(Fill);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(100000, 100000, 100000);
+ErBackgroundLight.SetDiffuseColor(100, 10, 10);
 
 # Add the background light to the Renderer
 ErVolumeMapper.AddLight(ErBackgroundLight);

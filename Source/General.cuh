@@ -13,11 +13,115 @@
 
 #pragma once
 
-#include "MonteCarlo.cuh"
-#include "Sample.cuh"
+#include "Geometry.h"
 
-#define MAX_NO_LIGHTS 32
+#include "Buffer.cuh"
 
+struct EXPOSURE_RENDER_DLL Volume
+{
+	int3		m_Extent;
+	float3		m_InvExtent;
+	float3		m_MinAABB;
+	float3		m_MaxAABB;
+	float3		m_InvMinAABB;
+	float3		m_InvMaxAABB;
+	float3		m_Size;
+	float3		m_InvSize;
+	float		m_IntensityMin;
+	float		m_IntensityMax;
+	float		m_IntensityRange;
+	float		m_IntensityInvRange;
+	float		m_StepSize;
+	float		m_StepSizeShadow;
+	float		m_DensityScale;
+	float		m_GradientDelta;
+	float		m_InvGradientDelta;
+	float3		m_GradientDeltaX;
+	float3		m_GradientDeltaY;
+	float3		m_GradientDeltaZ;
+	float3		m_Spacing;
+	float3		m_InvSpacing;
+	float		m_GradientFactor;
+	int			m_ShadingType;
+	float3		m_MacroCellSize;
+};
+
+struct EXPOSURE_RENDER_DLL Camera
+{
+	int			m_FilmWidth;
+	int			m_FilmHeight;
+	int			m_FilmNoPixels;
+	float3		m_Pos;
+	float3		m_Target;
+	float3		m_Up;
+	float3		m_N;
+	float3		m_U;
+	float3		m_V;
+	float		m_FocalDistance;
+	float		m_ApertureSize;
+	float3		m_ClipNear;
+	float3		m_ClipFar;
+	float		m_Screen[2][2];
+	float2		m_InvScreen;
+	float		m_Exposure;
+	float		m_InvExposure;
+	float		m_Gamma;
+	float		m_InvGamma;
+};
+
+#define MAX_LIGHTS 10
+#define BACKGROUND_LIGHT_RADIUS 1500.0f
+
+struct EXPOSURE_RENDER_DLL Lighting
+{
+	int		m_NoLights;
+	int		m_Type[MAX_LIGHTS];
+	float3	m_P[MAX_LIGHTS];
+	float3	m_N[MAX_LIGHTS];
+	float3	m_U[MAX_LIGHTS];
+	float3	m_V[MAX_LIGHTS];
+	int		m_ShapeType[MAX_LIGHTS];
+	float3	m_Size[MAX_LIGHTS];
+	float3	m_Color[MAX_LIGHTS];
+};
+
+#define MAX_NO_SLICES	10
+
+struct EXPOSURE_RENDER_DLL Slicing
+{
+	float3		m_Position[MAX_NO_SLICES];
+	float3		m_Normal[MAX_NO_SLICES];
+	int			m_NoSlices;
+};
+
+struct EXPOSURE_RENDER_DLL Denoise
+{
+	float	m_Enabled;
+	float	m_WindowRadius;
+	float	m_WindowArea;
+	float	m_InvWindowArea;
+	float	m_Noise;
+	float	m_WeightThreshold;
+	float	m_LerpThreshold;
+	float	m_LerpC;
+};
+
+
+
+struct EXPOSURE_RENDER_DLL Scattering
+{
+	float		m_NoIterations;
+	float		m_InvNoIterations;
+	bool		m_Shadows;
+};
+
+struct EXPOSURE_RENDER_DLL Blur
+{
+	int			m_FilterWidth;
+	float		m_FilterWeights[10];
+};
+
+/*
 class EXPOSURE_RENDER_DLL CLight
 {
 public:
@@ -282,72 +386,4 @@ public:
 		return SPEC_BLACK;
 	}
 };
-
-class EXPOSURE_RENDER_DLL CLighting
-{
-public:
-	CLighting(void) :
-		m_NoLights(0)
-	{
-	}
-
-	HOD CLighting& operator=(const CLighting& Other)
-	{
-		for (int i = 0; i < MAX_NO_LIGHTS; i++)
-		{
-			m_Lights[i] = Other.m_Lights[i];
-		}
-
-		m_NoLights = Other.m_NoLights;
-
-		return *this;
-	}
-
-	void AddLight(const CLight& Light)
-	{
-// 		if (m_NoLights >= MAX_NO_LIGHTS)
-// 			return;
-
-		m_Lights[m_NoLights] = Light;
-
-		m_NoLights = m_NoLights + 1;
-	}
-
-	void Reset(void)
-	{
-		m_NoLights = 0;
-		//memset(m_Lights, 0 , MAX_NO_LIGHTS * sizeof(CLight));
-	}
-
-	CLight		m_Lights[MAX_NO_LIGHTS];
-	int			m_NoLights;
-};
-
-DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, CLight*& pLight, float* pPdf = NULL)
-{
-	bool Hit = false;
-	
-	/*
-	float T = 0.0f;
-
-	CRay RayCopy = R;
-
-	float Pdf = 0.0f;
-
-	for (int i = 0; i < pScene->m_Lighting.m_NoLights; i++)
-	{
-		if (pScene->m_Lighting.m_Lights[i].Intersect(RayCopy, T, LightColor, NULL, &Pdf))
-		{
-			Pl		= R(T);
-			pLight	= &pScene->m_Lighting.m_Lights[i];
-			Hit		= true;
-		}
-	}
-	
-	if (pPdf)
-		*pPdf = Pdf;
-	*/
-
-	return Hit;
-}
-
+*/

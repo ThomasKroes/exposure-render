@@ -17,11 +17,3 @@
 
 #include "Buffer.cuh"
 
-#define MAX_NO_SLICES	10
-
-struct EXPOSURE_RENDER_DLL Slicing
-{
-	float3		m_Position[MAX_NO_SLICES];
-	float3		m_Normal[MAX_NO_SLICES];
-	int			m_NoSlices;
-};

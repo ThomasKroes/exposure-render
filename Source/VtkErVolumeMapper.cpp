@@ -288,8 +288,8 @@ void vtkErUpdateBlurCommand::Execute(vtkObject*, unsigned long, void *)
 		return;
 
 	this->VolumeMapper->Blur.m_FilterWidth			= 2;
-	this->VolumeMapper->Blur.m_FilterWeights[0]		= 1.0f;
-	this->VolumeMapper->Blur.m_FilterWeights[1]		= 0.5f;
+	this->VolumeMapper->Blur.m_FilterWeights[0]		= 0.7f;
+	this->VolumeMapper->Blur.m_FilterWeights[1]		= 0.4f;
 	this->VolumeMapper->Blur.m_FilterWeights[2]		= 0.1f;
 	this->VolumeMapper->Blur.m_FilterWeights[3]		= 1.01f;
 
@@ -335,6 +335,9 @@ vtkErVolumeMapper::vtkErVolumeMapper(void)
 	this->ActiveCamera		= NULL;
 	this->VolumeProperty	= NULL;
 
+	this->BorderWidget		= vtkTextActor::New();
+
+
 //	this->DebugOn();
 
 //	vtkDebugMacro("SDds");
@@ -374,9 +377,9 @@ void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 		
 		double* pBounds = this->Intensity->GetBounds();
 
-		this->Volume.m_Size.x = 1.0f;//pBounds[1] - pBounds[0];
-		this->Volume.m_Size.y = 1.0f;//pBounds[3] - pBounds[2];
-		this->Volume.m_Size.z = 1.0f;//pBounds[5] - pBounds[4];
+		this->Volume.m_Size.x = pBounds[1] - pBounds[0];
+		this->Volume.m_Size.y = pBounds[3] - pBounds[2];
+		this->Volume.m_Size.z = pBounds[5] - pBounds[4];
 
 		this->Volume.m_InvSize.x = 1.0f / this->Volume.m_Size.x;
 		this->Volume.m_InvSize.y = 1.0f / this->Volume.m_Size.y;
@@ -413,17 +416,17 @@ void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 		this->Volume.m_InvSpacing.y = this->Volume.m_Spacing.y != 0.0f ? 1.0f / this->Volume.m_Spacing.y : 0.0f;
 		this->Volume.m_InvSpacing.z = this->Volume.m_Spacing.z != 0.0f ? 1.0f / this->Volume.m_Spacing.z : 0.0f;
 
-		this->Volume.m_MinAABB.x	= 0.0f;//pBounds[0];
-		this->Volume.m_MinAABB.y	= 0.0f;//pBounds[2];
-		this->Volume.m_MinAABB.z	= 0.0f;//pBounds[4];
+		this->Volume.m_MinAABB.x	= pBounds[0];
+		this->Volume.m_MinAABB.y	= pBounds[2];
+		this->Volume.m_MinAABB.z	= pBounds[4];
 
 		this->Volume.m_InvMinAABB.x	= this->Volume.m_MinAABB.x != 0.0f ? 1.0f / this->Volume.m_MinAABB.x : 0.0f;
 		this->Volume.m_InvMinAABB.y	= this->Volume.m_MinAABB.y != 0.0f ? 1.0f / this->Volume.m_MinAABB.y : 0.0f;
 		this->Volume.m_InvMinAABB.z	= this->Volume.m_MinAABB.z != 0.0f ? 1.0f / this->Volume.m_MinAABB.z : 0.0f;
 
-		this->Volume.m_MaxAABB.x	= 1.0f;//pBounds[1];
-		this->Volume.m_MaxAABB.y	= 1.0f;//pBounds[3];
-		this->Volume.m_MaxAABB.z	= 1.0f;//pBounds[5];
+		this->Volume.m_MaxAABB.x	= pBounds[1];
+		this->Volume.m_MaxAABB.y	= pBounds[3];
+		this->Volume.m_MaxAABB.z	= pBounds[5];
 
 		this->Volume.m_InvMaxAABB.x	= this->Volume.m_MaxAABB.x != 0.0f ? 1.0f / this->Volume.m_MaxAABB.x : 0.0f;
 		this->Volume.m_InvMaxAABB.y	= this->Volume.m_MaxAABB.y != 0.0f ? 1.0f / this->Volume.m_MaxAABB.y : 0.0f;
@@ -505,6 +508,25 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 		this->VolumeProperty->Modified();
 	}
 
+	char FPS[255];
+
+	sprintf(FPS, "FPS: %0.5f", 1.0 / this->TimeToDraw); 
+	
+	this->BorderWidget->SetInput(FPS);
+	vtkTextProperty* tprop = this->BorderWidget->GetTextProperty();
+	tprop->SetFontFamilyToCourier();
+		tprop->BoldOn();
+//		tprop->ShadowOn();
+		tprop->SetLineSpacing(1.0);
+		tprop->SetFontSize(11);
+		tprop->SetColor(0.1, 0.1, 0.1);
+		tprop->SetShadowOffset(1,1);
+	this->BorderWidget->SetDisplayPosition(10, 10);
+	pRenderer->AddActor2D(this->BorderWidget);
+
+//	this->BorderWidget->SetInteractor(this->Renderer->GetRenderWindow()->GetInteractor());
+//	this->BorderWidget->SetEnabled(1);
+	
 	// Start the timer to time the length of this render
 	vtkSmartPointer<vtkTimerLog> Timer = vtkTimerLog::New();
 	Timer->StartTimer();
@@ -533,8 +555,6 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pRenderSize[0], pRenderSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, this->Host.GetPtr());
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 
-//	glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-	
 	double d = 0.5;
 	
     pRenderer->SetDisplayPoint(0,0,d);

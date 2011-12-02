@@ -17,51 +17,5 @@
 
 #include "Buffer.cuh"
 
-struct EXPOSURE_RENDER_DLL Denoise
-{
-	float	m_Enabled;
-	float	m_WindowRadius;
-	float	m_WindowArea;
-	float	m_InvWindowArea;
-	float	m_Noise;
-	float	m_WeightThreshold;
-	float	m_LerpThreshold;
-	float	m_LerpC;
-};
 
-struct EXPOSURE_RENDER_DLL Camera
-{
-	int			m_FilmWidth;
-	int			m_FilmHeight;
-	int			m_FilmNoPixels;
-	float3		m_Pos;
-	float3		m_Target;
-	float3		m_Up;
-	float3		m_N;
-	float3		m_U;
-	float3		m_V;
-	float		m_FocalDistance;
-	float		m_ApertureSize;
-	float3		m_ClipNear;
-	float3		m_ClipFar;
-	float		m_Screen[2][2];
-	float2		m_InvScreen;
-	float		m_Exposure;
-	float		m_InvExposure;
-	float		m_Gamma;
-	float		m_InvGamma;
-};
-
-struct EXPOSURE_RENDER_DLL Scattering
-{
-	float		m_NoIterations;
-	float		m_InvNoIterations;
-	bool		m_Shadows;
-};
-
-struct EXPOSURE_RENDER_DLL Blur
-{
-	int			m_FilterWidth;
-	float		m_FilterWeights[10];
-};
 

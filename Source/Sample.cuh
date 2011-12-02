@@ -17,19 +17,18 @@
 
 #include "RNG.cuh"
 
-class CLightSample
+struct EXPOSURE_RENDER_DLL LightSample
 {
-public:
 	Vec2f m_Pos;
 	float m_Component;
 
-	HOD CLightSample(void)
+	HOD LightSample(void)
 	{
 		m_Pos	 	= Vec2f(0.0f);
 		m_Component	= 0.0f;
 	}
 
-	HOD CLightSample& CLightSample::operator=(const CLightSample& Other)
+	HOD LightSample& LightSample::operator=(const LightSample& Other)
 	{
 		m_Pos	 	= Other.m_Pos;
 		m_Component = Other.m_Component;
@@ -44,25 +43,24 @@ public:
 	}
 };
 
-class CBrdfSample
+struct EXPOSURE_RENDER_DLL BrdfSample
 {
-public:
 	float	m_Component;
 	Vec2f	m_Dir;
 
-	HOD CBrdfSample(void)
+	HOD BrdfSample(void)
 	{
 		m_Component = 0.0f;
 		m_Dir 		= Vec2f(0.0f);
 	}
 
-	HOD CBrdfSample(const float& Component, const Vec2f& Dir)
+	HOD BrdfSample(const float& Component, const Vec2f& Dir)
 	{
 		m_Component = Component;
 		m_Dir 		= Dir;
 	}
 
-	HOD CBrdfSample& CBrdfSample::operator=(const CBrdfSample& Other)
+	HOD BrdfSample& BrdfSample::operator=(const BrdfSample& Other)
 	{
 		m_Component = Other.m_Component;
 		m_Dir 		= Other.m_Dir;
@@ -77,19 +75,18 @@ public:
 	}
 };
 
-class CLightingSample
+struct EXPOSURE_RENDER_DLL LightingSample
 {
-public:
-	CBrdfSample		m_BsdfSample;
-	CLightSample 	m_LightSample;
+	BrdfSample		m_BsdfSample;
+	LightSample 	m_LightSample;
 	float			m_LightNum;
 
-	HOD CLightingSample(void)
+	HOD LightingSample(void)
 	{
 		m_LightNum = 0.0f;
 	}
 
-	HOD CLightingSample& CLightingSample::operator=(const CLightingSample& Other)
+	HOD LightingSample& LightingSample::operator=(const LightingSample& Other)
 	{
 		m_BsdfSample	= Other.m_BsdfSample;
 		m_LightNum		= Other.m_LightNum;
@@ -107,29 +104,3 @@ public:
 	}
 };
 
-class EXPOSURE_RENDER_DLL CCameraSample
-{
-public:
-	Vec2f	m_ImageXY;
-	Vec2f	m_LensUV;
-
-	DEV CCameraSample(void)
-	{
-		m_ImageXY	= Vec2f(0.0f);
-		m_LensUV	= Vec2f(0.0f);
-	}
-
-	DEV CCameraSample& CCameraSample::operator=(const CCameraSample& Other)
-	{
-		m_ImageXY	= Other.m_ImageXY;
-		m_LensUV	= Other.m_LensUV;
-
-		return *this;
-	}
-
-	DEV void LargeStep(Vec2f& ImageUV, Vec2f& LensUV, const int& X, const int& Y, const int& KernelSize)
-	{
-		m_ImageXY	= Vec2f(X + ImageUV.x, Y + ImageUV.y);
-		m_LensUV	= LensUV;
-	}
-};
