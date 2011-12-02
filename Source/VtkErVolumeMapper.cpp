@@ -287,7 +287,7 @@ void vtkErUpdateBlurCommand::Execute(vtkObject*, unsigned long, void *)
 	if (this->VolumeMapper == NULL)
 		return;
 
-	this->VolumeMapper->Blur.m_FilterWidth			= 2;
+	this->VolumeMapper->Blur.m_FilterWidth			= 1;
 	this->VolumeMapper->Blur.m_FilterWeights[0]		= 0.7f;
 	this->VolumeMapper->Blur.m_FilterWeights[1]		= 0.4f;
 	this->VolumeMapper->Blur.m_FilterWeights[2]		= 0.1f;

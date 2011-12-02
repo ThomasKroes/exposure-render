@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/bonsai.mhd")
+Reader.SetFileName("C:/Volumes/backpack_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -29,8 +29,8 @@ ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
 Opacity.AddPoint(0, 0)
-Opacity.AddPoint(10, 0)
-Opacity.AddPoint(11, 1)
+Opacity.AddPoint(75, 0)
+Opacity.AddPoint(76, 1)
 Opacity.AddPoint(255, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
@@ -73,10 +73,10 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(3.0)
-ErVolumeProperty.SetStepSizeFactorSecondary(3.0)
-ErVolumeProperty.SetDensityScale(1000)
-ErVolumeProperty.SetShadingType(1)
+ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
+ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
+ErVolumeProperty.SetDensityScale(10000)
+ErVolumeProperty.SetShadingType(0)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -91,7 +91,8 @@ ErCamera.SetRenderer(Renderer)
 ErCamera.SetFocalDisk(0)
 ErCamera.SetPosition(2, 2, 2)
 ErCamera.SetFocalPoint(0.5, 0.5, 0.5)
-ErCamera.SetExposure(10)
+ErCamera.SetExposure(0.1)
+ErCamera.SetViewFront()
 Renderer.SetActiveCamera(ErCamera)
 
 	
@@ -108,19 +109,19 @@ Key.SetSize(10, 1, 1)
 Key.SetShapeType(2)
 
 Fill = vtkErCorePython.vtkErAreaLight()
-Fill.SetPosition(-500, 100, -400);
+Fill.SetPosition(1000, 100, 10);
 Fill.SetFocalPoint(300, 300, 300);
-Fill.SetColor(0, 100000, 100000);
+Fill.SetColor(150, 150, 150);
 Fill.SetPositional(1);
-Fill.SetSize(10, 1, 1)
+Fill.SetSize(0.1, 0.1, 0.1)
 Fill.SetShapeType(2)
 
 # Add the area light to the Renderer
-ErVolumeMapper.AddLight(Key);
-#ErVolumeMapper.AddLight(Fill);
+#ErVolumeMapper.AddLight(Key);
+ErVolumeMapper.AddLight(Fill);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(100, 10, 10);
+ErBackgroundLight.SetDiffuseColor(1000, 1000, 1000);
 
 # Add the background light to the Renderer
 ErVolumeMapper.AddLight(ErBackgroundLight);
