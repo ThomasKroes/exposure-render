@@ -37,10 +37,6 @@ public:
 
 	vtkGetMacro(Renderer, vtkRenderer*);
 
-	//BTX
-	RenderInfo* GetRenderInfo(void) { return &RendererInfo; }
-	//ETX
-
 	virtual void Update();
 
 	void Reset();
@@ -51,10 +47,6 @@ protected:
 
 public:
 	//BTX
-	RenderInfo		RendererInfo;
-	Lighting		Lighting;
-	Slicing			Slicing;
-
 	vtkRenderer*	Renderer;
 	//ETX
 public:

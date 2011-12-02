@@ -37,11 +37,10 @@ public:
     vtkSetMacro(Volume, vtkVolume*);
 	void CreateExtinctionVolume();
 	
-	VolumeInfo* GetVolumeInfo(void) { return &m_VolumeInfo; }
 	//ETX
 
 	virtual void Update();
-VolumeInfo		m_VolumeInfo;
+
 protected:
 	vtkErVolumeInfo();
 	virtual ~vtkErVolumeInfo();
@@ -52,5 +51,6 @@ public:
 	vtkImageData*   m_pIntensity;
 	vtkImageData*   m_pGradientMagnitude;
 	vtkVolume*      Volume;
+	cudaExtent extinctionSize;
 	//ETX
 };

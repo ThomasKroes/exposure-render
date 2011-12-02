@@ -32,19 +32,23 @@ texture<uchar4, cudaTextureType2D, cudaReadModeNormalizedFloat>		gTexRunningEsti
 cudaChannelFormatDesc gFloatChannelDesc = cudaCreateChannelDesc<float>();
 cudaChannelFormatDesc gFloat4ChannelDesc = cudaCreateChannelDesc<float4>();
 
-cudaArray* gpDensityArray				= NULL;
-cudaArray* gpExtinction					= NULL;
-cudaArray* gpGradientMagnitudeArray		= NULL;
-cudaArray* gpOpacityArray				= NULL;
-cudaArray* gpDiffuseArray				= NULL;
-cudaArray* gpSpecularArray				= NULL;
-cudaArray* gpGlossinessArray			= NULL;
-cudaArray* gpIORArray					= NULL;
-cudaArray* gpEmissionArray				= NULL;
+cudaArray* gpDensityArray			= NULL;
+cudaArray* gpExtinction				= NULL;
+cudaArray* gpGradientMagnitudeArray	= NULL;
+cudaArray* gpOpacityArray			= NULL;
+cudaArray* gpDiffuseArray			= NULL;
+cudaArray* gpSpecularArray			= NULL;
+cudaArray* gpGlossinessArray		= NULL;
+cudaArray* gpIORArray				= NULL;
+cudaArray* gpEmissionArray			= NULL;
 
-CD VolumeInfo	gVolumeInfo;
+CD Volume		gVolume;
+CD Camera		gCamera;
 CD Lighting		gLighting;
 CD Slicing		gSlicing;
+CD Denoise		gDenoise;
+CD Scattering	gScattering;
+CD Blur			gBlur;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -251,30 +255,30 @@ void UnbindTransferFunctions1D(void)
 	HandleCudaError(cudaUnbindTexture(gTexEmission));
 }
 
-void RenderEstimate(VolumeInfo* pVolumeInfo, RenderInfo* pRenderInfo, Lighting* pLighting, Slicing* pSlicing, FrameBuffer* pFrameBuffer)
+void RenderEstimate(Volume* pVolume, Camera* pCamera, Lighting* pLighting, Slicing* pSlicing, Denoise* pDenoise, Scattering* pScattering, Blur* pBlur, FrameBuffer* pFrameBuffer)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gVolumeInfo", pVolumeInfo, sizeof(VolumeInfo)));
+	HandleCudaError(cudaMemcpyToSymbol("gVolume", pVolume, sizeof(Volume)));
+	HandleCudaError(cudaMemcpyToSymbol("gCamera", pCamera, sizeof(Camera)));
 	HandleCudaError(cudaMemcpyToSymbol("gLighting", pLighting, sizeof(Lighting)));
 	HandleCudaError(cudaMemcpyToSymbol("gSlicing", pSlicing, sizeof(Slicing)));
+	HandleCudaError(cudaMemcpyToSymbol("gDenoise", pDenoise, sizeof(Denoise)));
+	HandleCudaError(cudaMemcpyToSymbol("gScattering", pScattering, sizeof(Scattering)));
+	HandleCudaError(cudaMemcpyToSymbol("gBlur", pBlur, sizeof(Blur)));
 	
-	RenderInfo*		pDevRenderInfo	= NULL;
-	FrameBuffer*	pDevFrameBuffer	= NULL;
+	FrameBuffer* pDevFrameBuffer = NULL;
 
-	HandleCudaError(cudaMalloc(&pDevRenderInfo, sizeof(RenderInfo)));
 	HandleCudaError(cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer)));
 
-	HandleCudaError(cudaMemcpy(pDevRenderInfo, pRenderInfo, sizeof(RenderInfo), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaMemcpy(pDevFrameBuffer, pFrameBuffer, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 
 	const dim3 BlockDim(8, 8);
-	const dim3 GridDim((int)ceilf((float)pRenderInfo->m_FilmWidth / (float)BlockDim.x), (int)ceilf((float)pRenderInfo->m_FilmHeight / (float)BlockDim.y));
+	const dim3 GridDim((int)ceilf((float)gCamera.m_FilmWidth / (float)BlockDim.x), (int)ceilf((float)gCamera.m_FilmHeight / (float)BlockDim.y));
 
-	SingleScattering(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
-	BlurEstimate(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
-	ComputeEstimate(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
-	ToneMap(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
-//	Denoise(pDevRenderInfo, pDevFrameBuffer, pRenderInfo->m_FilmWidth, pRenderInfo->m_FilmHeight);
+	SingleScattering(pDevFrameBuffer, pCamera->m_FilmWidth, pCamera->m_FilmHeight);
+	BlurEstimate(pDevFrameBuffer, pCamera->m_FilmWidth, pCamera->m_FilmHeight);
+	ComputeEstimate(pDevFrameBuffer, pCamera->m_FilmWidth, pCamera->m_FilmHeight);
+	ToneMap(pDevFrameBuffer, pCamera->m_FilmWidth, pCamera->m_FilmHeight);
+//	ReduceNoise(pDevRenderInfo, pDevFrameBuffer, gCamera.m_FilmWidth, gCamera.m_FilmHeight);
 
-	HandleCudaError(cudaFree(pDevRenderInfo));
 	HandleCudaError(cudaFree(pDevFrameBuffer));
 }

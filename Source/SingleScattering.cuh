@@ -15,33 +15,33 @@
 
 #include "Transport.cuh"
 
-KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
+KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 {
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
+	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
 		return;
 	
 	CRNG RNG(pFrameBuffer->m_RandomSeeds1.GetPtr(X, Y), pFrameBuffer->m_RandomSeeds2.GetPtr(X, Y));
 
 	Vec2f ScreenPoint;
 
-	ScreenPoint.x = pRenderInfo->m_Camera.m_Screen[0][0] + (pRenderInfo->m_Camera.m_InvScreen.x * (float)X);
-	ScreenPoint.y = pRenderInfo->m_Camera.m_Screen[1][0] + (pRenderInfo->m_Camera.m_InvScreen.y * (float)Y);
+	ScreenPoint.x = gCamera.m_Screen[0][0] + (gCamera.m_InvScreen.x * (float)X);
+	ScreenPoint.y = gCamera.m_Screen[1][0] + (gCamera.m_InvScreen.y * (float)Y);
 	
 	CRay Re;
 
-	Re.m_O		= pRenderInfo->m_Camera.m_Pos;
-	Re.m_D		= Normalize(pRenderInfo->m_Camera.m_N + (-ScreenPoint.x * pRenderInfo->m_Camera.m_U) + (-ScreenPoint.y * pRenderInfo->m_Camera.m_V));
+	Re.m_O		= ToVec3f(gCamera.m_Pos);
+	Re.m_D		= Normalize(ToVec3f(gCamera.m_N) + (-ScreenPoint.x * ToVec3f(gCamera.m_U)) + (-ScreenPoint.y * ToVec3f(gCamera.m_V)));
 	Re.m_MinT	= 0.0f;
 	Re.m_MaxT	= INF_MAX;
 
-	if (pRenderInfo->m_Camera.m_ApertureSize != 0.0f)
+	if (gCamera.m_ApertureSize != 0.0f)
 	{
-		Vec2f LensUV = pRenderInfo->m_Camera.m_ApertureSize * ConcentricSampleDisk(RNG.Get2());
+		Vec2f LensUV = gCamera.m_ApertureSize * ConcentricSampleDisk(RNG.Get2());
 
-		Vec3f LI = pRenderInfo->m_Camera.m_U * LensUV.x + pRenderInfo->m_Camera.m_V * LensUV.y;
+		Vec3f LI = ToVec3f(gCamera.m_U) * LensUV.x + ToVec3f(gCamera.m_V) * LensUV.y;
 		Re.m_O += LI;
 		Re.m_D = Normalize((Re.m_D * 1.0f) - LI);
 	}
@@ -52,11 +52,12 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 	Vec3f Pe, Pl;
 	
-	if (lightShootDDAWoodcock(Re, RNG, Pe))
+//	if (lightShootDDAWoodcock(Re, RNG, Pe))
+	if (SampleDistanceRM(Re, RNG, Pe))
 	{
-		Lv = ColorXYZf(1.0f, 0.0f, 0.0f);
+//		Lv = ColorXYZf(1.0f, 0.0f, 0.0f);
 
-		/*
+		
 		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl))
 		{
 			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
@@ -67,7 +68,7 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 
 		Lv += GetEmission(Intensity);
 
-		switch (gVolumeInfo.m_ShadingType)
+		switch (gVolume.m_ShadingType)
 		{
 			case 0:
 			{
@@ -80,10 +81,10 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 				Lv += UniformSampleOneLight(CVolumeShader::Phase, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
 				break;
 			}
-
+			/*
 			case 2:
 			{
-				const float GradMag = GradientMagnitude(Pe) * gVolumeInfo.m_IntensityInvRange;
+				const float GradMag = GradientMagnitude(Pe) * gVolume.m_IntensityInvRange;
 				const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
 
 				if (RNG.Get1() < PdfBrdf)
@@ -92,16 +93,16 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 					Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
 
 				break;
-			}
+			}*/
 		}
-		*/
+		
 	}
 	else
 	{
-		Lv = ColorXYZf(0.0f, 1.0f, 0.0f);
+//		Lv = ColorXYZf(0.0f, 1.0f, 0.0f);
 
-//		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl))
-//			Lv = Li;
+		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl))
+			Lv = Li;
 	}
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);
@@ -109,12 +110,12 @@ KERNEL void KrnlSingleScattering(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuf
 	pFrameBuffer->m_FrameEstimateXyza.Set(L, X, Y);
 }
 
-void SingleScattering(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
+void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_SINGLE_SCATTERING_BLOCK_W, KRNL_SINGLE_SCATTERING_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlSingleScattering<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
+	KrnlSingleScattering<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Single Scattering");
 }

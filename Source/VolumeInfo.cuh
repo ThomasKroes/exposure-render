@@ -17,7 +17,7 @@
 
 #include "CudaUtilities.h"
 
-struct EXPOSURE_RENDER_DLL VolumeInfo
+struct EXPOSURE_RENDER_DLL Volume
 {
 	int3		m_Extent;
 	float3		m_InvExtent;
@@ -25,6 +25,8 @@ struct EXPOSURE_RENDER_DLL VolumeInfo
 	float3		m_MaxAABB;
 	float3		m_InvMinAABB;
 	float3		m_InvMaxAABB;
+	float3		m_Size;
+	float3		m_InvSize;
 	float		m_IntensityMin;
 	float		m_IntensityMax;
 	float		m_IntensityRange;
@@ -41,5 +43,5 @@ struct EXPOSURE_RENDER_DLL VolumeInfo
 	float3		m_InvSpacing;
 	float		m_GradientFactor;
 	int			m_ShadingType;
-	float		m_MacroCellSize;
+	float3		m_MacroCellSize;
 };

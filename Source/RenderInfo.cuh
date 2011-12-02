@@ -31,34 +31,37 @@ struct EXPOSURE_RENDER_DLL Denoise
 
 struct EXPOSURE_RENDER_DLL Camera
 {
-	Vec3f		m_Pos;
-	Vec3f		m_Target;
-	Vec3f		m_Up;
-	Vec3f		m_N;
-	Vec3f		m_U;
-	Vec3f		m_V;
+	int			m_FilmWidth;
+	int			m_FilmHeight;
+	int			m_FilmNoPixels;
+	float3		m_Pos;
+	float3		m_Target;
+	float3		m_Up;
+	float3		m_N;
+	float3		m_U;
+	float3		m_V;
 	float		m_FocalDistance;
 	float		m_ApertureSize;
 	float3		m_ClipNear;
 	float3		m_ClipFar;
 	float		m_Screen[2][2];
 	float2		m_InvScreen;
-};
-
-struct EXPOSURE_RENDER_DLL RenderInfo
-{
-	int			m_FilmWidth;
-	int			m_FilmHeight;
-	int			m_FilmNoPixels;
-	int			m_FilterWidth;
-	float		m_FilterWeights[10];
 	float		m_Exposure;
 	float		m_InvExposure;
 	float		m_Gamma;
 	float		m_InvGamma;
+};
+
+struct EXPOSURE_RENDER_DLL Scattering
+{
 	float		m_NoIterations;
 	float		m_InvNoIterations;
 	bool		m_Shadows;
-	Denoise		m_Denoise;
-	Camera		m_Camera;
 };
+
+struct EXPOSURE_RENDER_DLL Blur
+{
+	int			m_FilterWidth;
+	float		m_FilterWeights[10];
+};
+

@@ -19,12 +19,12 @@
 #include "Core.cuh"
 
 #include <vtkBoundingBox.h>
+#include <vtkImageReslice.h>
 
 vtkCxxRevisionMacro(vtkErVolumeInfo, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkErVolumeInfo);
 
 vtkErVolumeInfo::vtkErVolumeInfo() :
-	m_VolumeInfo(),
 	m_pIntensity(NULL),
 	m_pGradientMagnitude(NULL),
 	Volume(NULL)
@@ -46,9 +46,18 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
     }
     else if (pInputData != m_pIntensity)
     {
+		/*
+		vtkSmartPointer<vtkImageReslice> Reslicer = vtkImageReslice::New();
+
+		Reslicer->SetInput(pInputData);
+		Reslicer->SetInterpolate(1);
+		Reslicer->SetOutputExtent(0, 127, 0, 127, 0, 127);
+		Reslicer->Update();
+
 		vtkSmartPointer<vtkImageCast> ImageCast = vtkImageCast::New();
 		
-		ImageCast->SetInput(pInputData);
+		ImageCast->SetInput(pInputData);//Reslicer->GetOutput());
+
 		ImageCast->SetOutputScalarTypeToShort();
 		ImageCast->Update();
 
@@ -65,6 +74,14 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		int* pResolution = m_pIntensity->GetExtent();
 		
 		double* pBounds = m_pIntensity->GetBounds();
+
+		m_VolumeInfo.m_Size.x = 1.0f;//pBounds[1] - pBounds[0];
+		m_VolumeInfo.m_Size.y = 1.0f;//pBounds[3] - pBounds[2];
+		m_VolumeInfo.m_Size.z = 1.0f;//pBounds[5] - pBounds[4];
+
+		m_VolumeInfo.m_InvSize.x = 1.0f / m_VolumeInfo.m_Size.x;
+		m_VolumeInfo.m_InvSize.y = 1.0f / m_VolumeInfo.m_Size.y;
+		m_VolumeInfo.m_InvSize.z = 1.0f / m_VolumeInfo.m_Size.z;
 
 		m_VolumeInfo.m_Extent.x	= pResolution[1] - pResolution[0];
 		m_VolumeInfo.m_Extent.y	= pResolution[3] - pResolution[2];
@@ -97,23 +114,17 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_InvSpacing.y = m_VolumeInfo.m_Spacing.y != 0.0f ? 1.0f / m_VolumeInfo.m_Spacing.y : 0.0f;
 		m_VolumeInfo.m_InvSpacing.z = m_VolumeInfo.m_Spacing.z != 0.0f ? 1.0f / m_VolumeInfo.m_Spacing.z : 0.0f;
 
-		Vec3f PhysicalSize;
-
-		PhysicalSize.x = m_VolumeInfo.m_Spacing.x * m_VolumeInfo.m_Extent.x;
-		PhysicalSize.y = m_VolumeInfo.m_Spacing.y * m_VolumeInfo.m_Extent.y;
-		PhysicalSize.z = m_VolumeInfo.m_Spacing.z * m_VolumeInfo.m_Extent.z;
-
-		m_VolumeInfo.m_MinAABB.x	= pBounds[0];
-		m_VolumeInfo.m_MinAABB.y	= pBounds[2];
-		m_VolumeInfo.m_MinAABB.z	= pBounds[4];
+		m_VolumeInfo.m_MinAABB.x	= 0.0f;//pBounds[0];
+		m_VolumeInfo.m_MinAABB.y	= 0.0f;//pBounds[2];
+		m_VolumeInfo.m_MinAABB.z	= 0.0f;//pBounds[4];
 
 		m_VolumeInfo.m_InvMinAABB.x	= m_VolumeInfo.m_MinAABB.x != 0.0f ? 1.0f / m_VolumeInfo.m_MinAABB.x : 0.0f;
 		m_VolumeInfo.m_InvMinAABB.y	= m_VolumeInfo.m_MinAABB.y != 0.0f ? 1.0f / m_VolumeInfo.m_MinAABB.y : 0.0f;
 		m_VolumeInfo.m_InvMinAABB.z	= m_VolumeInfo.m_MinAABB.z != 0.0f ? 1.0f / m_VolumeInfo.m_MinAABB.z : 0.0f;
 
-		m_VolumeInfo.m_MaxAABB.x	= pBounds[1];
-		m_VolumeInfo.m_MaxAABB.y	= pBounds[3];
-		m_VolumeInfo.m_MaxAABB.z	= pBounds[5];
+		m_VolumeInfo.m_MaxAABB.x	= 1.0f;//pBounds[1];
+		m_VolumeInfo.m_MaxAABB.y	= 1.0f;//pBounds[3];
+		m_VolumeInfo.m_MaxAABB.z	= 1.0f;//pBounds[5];
 
 		m_VolumeInfo.m_InvMaxAABB.x	= m_VolumeInfo.m_MaxAABB.x != 0.0f ? 1.0f / m_VolumeInfo.m_MaxAABB.x : 0.0f;
 		m_VolumeInfo.m_InvMaxAABB.y	= m_VolumeInfo.m_MaxAABB.y != 0.0f ? 1.0f / m_VolumeInfo.m_MaxAABB.y : 0.0f;
@@ -131,16 +142,22 @@ void vtkErVolumeInfo::SetInputData(vtkImageData* pInputData)
 		m_VolumeInfo.m_GradientDeltaZ.y		= 0.0f;
 		m_VolumeInfo.m_GradientDeltaZ.z		= m_VolumeInfo.m_GradientDelta;
 
-		m_VolumeInfo.m_MacroCellSize		= 1.0f / 8.0f;
+		
 
 		BindIntensityBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
 		BindGradientMagnitudeBuffer((short*)m_pGradientMagnitude->GetScalarPointer(), Extent);
 		CreateExtinctionVolume();
+
+		m_VolumeInfo.m_MacroCellSize.x		= 1.0f / ((float)extinctionSize.width);
+		m_VolumeInfo.m_MacroCellSize.y		= 1.0f / ((float)extinctionSize.height);
+		m_VolumeInfo.m_MacroCellSize.z		= 1.0f / ((float)extinctionSize.depth);
+		*/
     }
 }
 
 void vtkErVolumeInfo::Update()
 {
+	/*
 	vtkErVolumeProperty* pErVolumeProperty = dynamic_cast<vtkErVolumeProperty*>(GetVolume()->GetProperty());
 
 	if (pErVolumeProperty)
@@ -175,26 +192,38 @@ void vtkErVolumeInfo::Update()
 	m_VolumeInfo.m_GradientDeltaZ.x = 0.0f;
 	m_VolumeInfo.m_GradientDeltaZ.y = 0.0f;
 	m_VolumeInfo.m_GradientDeltaZ.z = m_VolumeInfo.m_GradientDelta;
+	*/
 }
 
 
 void vtkErVolumeInfo::CreateExtinctionVolume()
 {
+	/*
 	vtkDebugMacro("Generating extinction volume");
 
-	cudaExtent extinctionSize;
-
-	extinctionSize.width	= m_VolumeInfo.m_Extent.x / 8;
-	extinctionSize.height	= m_VolumeInfo.m_Extent.y / 8;
-	extinctionSize.depth	= m_VolumeInfo.m_Extent.z / 8;
-
-	short* extinction = (short*)malloc(sizeof(short)*extinctionSize.width*extinctionSize.height*extinctionSize.depth);
 	
-	for(int i = 0; i<extinctionSize.width*extinctionSize.height*extinctionSize.depth; ++i){
-		extinction[i] = 0.0f;
-	}
+
+	extinctionSize.width	= ceilf((float)m_VolumeInfo.m_Extent.x / 8.0f);
+	extinctionSize.height	= ceilf((float)m_VolumeInfo.m_Extent.y / 8.0f);
+	extinctionSize.depth	= ceilf((float)m_VolumeInfo.m_Extent.z / 8.0f);
+
+	vtkSmartPointer<vtkImageData> Vol = vtkImageData::New();
+
+	// first we allocate the data
+//	Vol->SetOrigin( origin );
+//	Vol->SetSpacing( spacing );
+	Vol->SetDimensions(extinctionSize.width, extinctionSize.height, extinctionSize.depth);
+	Vol->SetScalarTypeToUnsignedShort(); // the data
+
+	Vol->SetNumberOfScalarComponents(1);
+	Vol->AllocateScalars();
+
+
+
 
 //	vtkErrorMacro(<<"Extent" << m_VolumeInfo.m_Extent.x << ", "<< m_VolumeInfo.m_Extent.y << ", "<< m_VolumeInfo.m_Extent.z)
+
+	vtkErVolumeProperty* pProp = dynamic_cast<vtkErVolumeProperty*>(Volume->GetProperty());
 
 	for(int x = 0; x < m_VolumeInfo.m_Extent.x; ++x)
 	{
@@ -202,20 +231,16 @@ void vtkErVolumeInfo::CreateExtinctionVolume()
 		{
 			for(int z = 0; z < m_VolumeInfo.m_Extent.z; ++z)
 			{
-				int index =
-				x / 8 +
-				y / 8 * extinctionSize.width +
-				z / 8 * extinctionSize.width * extinctionSize.height;
+				short Opacity = pProp->GetOpacity()->GetValue((short)m_pIntensity->GetScalarPointer(x, y, z)) * 255;
 
-				if (index < (extinctionSize.width * extinctionSize.height * extinctionSize.depth) && extinction[index] < (short)m_pIntensity->GetScalarPointer(x, y, z))
+				if ((short)Vol->GetScalarPointer(floorf((float)x / 8.0f), floorf((float)y / 8.0f), floorf((float)z / 8.0f)) < Opacity)
 				{
-					extinction[index] = (short)m_pIntensity->GetScalarPointer(x, y, z);
+					Vol->SetScalarComponentFromDouble(floorf((float)x / 8.0f), floorf((float)y / 8.0f), floorf((float)z / 8.0f), 0, Opacity);
 				}
 			}
 		}
 	}
 
-	BindExtinction(extinction, extinctionSize);
-
-	free(extinction);
+	BindExtinction((short*)Vol->GetScalarPointer(), extinctionSize);
+	*/
 }

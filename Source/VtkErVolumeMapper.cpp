@@ -15,8 +15,12 @@
 
 #include "VtkErVolumeMapper.h"
 #include "VtkErVolumeProperty.h"
+#include "vtkErAreaLight.h"
+#include "VtkErBackgroundLight.h"
+#include "VtkErCamera.h"
 
 #include "Core.cuh"
+#include "cutil_math.h"
 
 #include "Geometry.h"
 
@@ -25,38 +29,41 @@
 #include "vtkCommand.h"
 
 #include <vtkImageData.h>
+#include <vtkTimerLog.h>
+#include <vtkImageReslice.h>
+#include <vtkCamera.h>
 
 void vtkErResetCommand::Execute(vtkObject*, unsigned long, void *)
 {
-	if (!this->VolumeMapper)
-		return;
-
 	this->VolumeMapper->Reset();
 }
 
 void vtkErResetCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
 {
+	if (pVolumeMapper == NULL)
+		return;
+
 	this->VolumeMapper = pVolumeMapper;
 };
 
 void vtkErUpdateSlicingCommand::Execute(vtkObject*, unsigned long, void *)
 {
-	if (!this->VolumeMapper)
+	if (this->VolumeMapper == NULL)
 		return;
 
 	if (!this->VolumeMapper->GetSliceWidget())
 		return;
 
-	this->VolumeMapper->m_CudaRenderInfo->Slicing.m_NoSlices = 6;
+	this->VolumeMapper->Slicing.m_NoSlices = 6;
 
 	for (int i = 0; i < 6; i++)
 	{
-		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Position[i].x	= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[0];
-		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Position[i].y	= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[1];
-		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Position[i].z	= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[2];
-		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Normal[i].x		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[0];
-		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Normal[i].y		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[1];
-		this->VolumeMapper->m_CudaRenderInfo->Slicing.m_Normal[i].z		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[2];
+		this->VolumeMapper->Slicing.m_Position[i].x		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[0];
+		this->VolumeMapper->Slicing.m_Position[i].y		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[1];
+		this->VolumeMapper->Slicing.m_Position[i].z		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetCenter()[2];
+		this->VolumeMapper->Slicing.m_Normal[i].x		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[0];
+		this->VolumeMapper->Slicing.m_Normal[i].y		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[1];
+		this->VolumeMapper->Slicing.m_Normal[i].z		= this->VolumeMapper->GetSliceWidget()->GetSlicePlaneWidget(i)->GetNormal()[2];
 	}
 
 	this->VolumeMapper->Reset();
@@ -64,16 +71,245 @@ void vtkErUpdateSlicingCommand::Execute(vtkObject*, unsigned long, void *)
 
 void vtkErUpdateSlicingCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
 {
+	if (pVolumeMapper == NULL)
+		return;
+
 	this->VolumeMapper = pVolumeMapper;
 };
+
+void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
+{
+	if (this->VolumeMapper == NULL)
+		return;
+
+	vtkLightCollection* pLights = this->VolumeMapper->GetLights();
+
+	this->VolumeMapper->Lighting.m_NoLights = pLights->GetNumberOfItems();
+	
+	vtkDebugWithObjectMacro(this->VolumeMapper, "Processing lighting changes");
+
+	pLights->InitTraversal();
+	
+	vtkLight* pLight = pLights->GetNextItem();
+
+	int count = 0;
+
+	while (pLight != 0)
+	{
+		vtkErAreaLight*			pErAreaLight		= dynamic_cast<vtkErAreaLight*>(pLight);
+		vtkErBackgroundLight*	pErBackgroundLight	= dynamic_cast<vtkErBackgroundLight*>(pLight);
+
+		if (pErAreaLight || pErBackgroundLight)
+		{
+			// Handle ER area light
+			if (pErAreaLight && pErAreaLight->GetEnabled())
+			{
+				this->VolumeMapper->Lighting.m_Type[count] = 0;
+
+				this->VolumeMapper->Lighting.m_P[count].x = pErAreaLight->GetPosition()[0];
+				this->VolumeMapper->Lighting.m_P[count].y = pErAreaLight->GetPosition()[1];
+				this->VolumeMapper->Lighting.m_P[count].z = pErAreaLight->GetPosition()[2];
+
+				this->VolumeMapper->Lighting.m_Size[count].x = pErAreaLight->GetSize()[0];
+				this->VolumeMapper->Lighting.m_Size[count].y = pErAreaLight->GetSize()[1];
+				this->VolumeMapper->Lighting.m_Size[count].z = pErAreaLight->GetSize()[2];
+
+				ColorXYZf Color;
+
+				Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
+
+				this->VolumeMapper->Lighting.m_Color[count].x = Color[0];
+				this->VolumeMapper->Lighting.m_Color[count].y = Color[1];
+				this->VolumeMapper->Lighting.m_Color[count].z = Color[2];
+				
+				this->VolumeMapper->Lighting.m_ShapeType[count] = pErAreaLight->GetShapeType(); 
+
+				count++;
+			}
+
+			// Handle ER background light
+			if (pErBackgroundLight && pErBackgroundLight->GetEnabled())
+			{
+				this->VolumeMapper->Lighting.m_Type[count] = 1;
+
+				ColorXYZf Color;
+
+				Color.FromRGB(pErBackgroundLight->GetDiffuseColor()[0], pErBackgroundLight->GetDiffuseColor()[1], pErBackgroundLight->GetDiffuseColor()[2]);
+
+				this->VolumeMapper->Lighting.m_Color[count].x = Color[0];
+				this->VolumeMapper->Lighting.m_Color[count].y = Color[1];
+				this->VolumeMapper->Lighting.m_Color[count].z = Color[2];
+
+				count++;
+			}
+		}
+		else
+		{
+			// Handle VTK light
+			this->VolumeMapper->Lighting.m_Type[count] = 0;
+
+			this->VolumeMapper->Lighting.m_P[count].x = pLight->GetPosition()[0];
+			this->VolumeMapper->Lighting.m_P[count].y = pLight->GetPosition()[1];
+			this->VolumeMapper->Lighting.m_P[count].z = pLight->GetPosition()[2];
+
+			this->VolumeMapper->Lighting.m_Size[count].x = 0.1f;
+			this->VolumeMapper->Lighting.m_Size[count].y = 0.1f;
+			this->VolumeMapper->Lighting.m_Size[count].z = 0.1f;
+
+			ColorXYZf Color;
+
+			Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
+
+			this->VolumeMapper->Lighting.m_Color[count].x = Color[0];
+			this->VolumeMapper->Lighting.m_Color[count].y = Color[1];
+			this->VolumeMapper->Lighting.m_Color[count].z = Color[2];
+				
+			this->VolumeMapper->Lighting.m_ShapeType[count] = pErAreaLight->GetShapeType(); 
+
+			count++;
+		}
+
+		pLight = pLights->GetNextItem();
+	}
+
+	this->VolumeMapper->Reset();
+}
+
+void vtkErUpdateLightingCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
+{
+	if (pVolumeMapper == NULL)
+		return;
+
+	this->VolumeMapper = pVolumeMapper;
+};
+
+void vtkErUpdateCameraCommand::Execute(vtkObject*, unsigned long, void*)
+{
+	if (this->VolumeMapper == NULL)
+		return;
+
+	vtkRenderer* pRenderer = this->VolumeMapper->Renderer;
+
+	if (pRenderer == NULL)
+		return;
+
+	vtkRenderWindow* pRenderWindow = pRenderer->GetRenderWindow();
+
+	if (pRenderWindow == NULL)
+		return;
+
+	int* pRenderSize = pRenderWindow->GetSize();
+
+	this->VolumeMapper->Camera.m_FilmWidth		= pRenderSize[0];
+	this->VolumeMapper->Camera.m_FilmHeight		= pRenderSize[1];
+	this->VolumeMapper->Camera.m_FilmNoPixels	= this->VolumeMapper->Camera.m_FilmWidth * this->VolumeMapper->Camera.m_FilmHeight;
+
+	vtkCamera* pCamera = pRenderer->GetActiveCamera();
+
+	this->VolumeMapper->Camera.m_Pos.x		= pCamera->GetPosition()[0];
+	this->VolumeMapper->Camera.m_Pos.y		= pCamera->GetPosition()[1];
+	this->VolumeMapper->Camera.m_Pos.z		= pCamera->GetPosition()[2];
+		
+	this->VolumeMapper->Camera.m_Target.x	= pCamera->GetFocalPoint()[0];
+	this->VolumeMapper->Camera.m_Target.y	= pCamera->GetFocalPoint()[1];
+	this->VolumeMapper->Camera.m_Target.z	= pCamera->GetFocalPoint()[2];
+
+	this->VolumeMapper->Camera.m_Up.x		= pCamera->GetViewUp()[0];
+	this->VolumeMapper->Camera.m_Up.y		= pCamera->GetViewUp()[1];
+	this->VolumeMapper->Camera.m_Up.z		= pCamera->GetViewUp()[2];
+
+	this->VolumeMapper->Camera.m_N			= normalize(this->VolumeMapper->Camera.m_Target - this->VolumeMapper->Camera.m_Pos);
+	this->VolumeMapper->Camera.m_U			= -normalize(cross(this->VolumeMapper->Camera.m_Up, this->VolumeMapper->Camera.m_N));
+	this->VolumeMapper->Camera.m_V			= -normalize(cross(this->VolumeMapper->Camera.m_N, this->VolumeMapper->Camera.m_U));
+
+	vtkErCamera* pErCamera = dynamic_cast<vtkErCamera*>(pCamera);
+
+	if (pErCamera)
+	{
+		this->VolumeMapper->Camera.m_FocalDistance	= pErCamera->GetFocalDistance();
+		this->VolumeMapper->Camera.m_Exposure		= pErCamera->GetExposure();
+	}
+	else
+	{
+		this->VolumeMapper->Camera.m_FocalDistance	= vtkErCamera::DefaultFocalDistance();
+		this->VolumeMapper->Camera.m_Exposure		= vtkErCamera::DefaultExposure();
+	}
+
+	this->VolumeMapper->Camera.m_InvExposure = 1.0f / this->VolumeMapper->Camera.m_Exposure;
+
+	double ClippingRange[2];
+
+	pCamera->GetClippingRange(ClippingRange);
+
+	this->VolumeMapper->Camera.m_ClipNear.x	= (float)ClippingRange[0];
+	this->VolumeMapper->Camera.m_ClipFar.y	= (float)ClippingRange[1];
+
+		
+	float Scale = 0.0f;
+
+	Scale = tanf((0.5f * pCamera->GetViewAngle() / RAD_F));
+
+	const float AspectRatio = (float)this->VolumeMapper->Camera.m_FilmHeight / (float)this->VolumeMapper->Camera.m_FilmWidth;
+
+	if (AspectRatio > 1.0f)
+	{
+		this->VolumeMapper->Camera.m_Screen[0][0] = -Scale;
+		this->VolumeMapper->Camera.m_Screen[0][1] = Scale;
+		this->VolumeMapper->Camera.m_Screen[1][0] = -Scale * AspectRatio;
+		this->VolumeMapper->Camera.m_Screen[1][1] = Scale * AspectRatio;
+	}
+	else
+	{
+		this->VolumeMapper->Camera.m_Screen[0][0] = -Scale / AspectRatio;
+		this->VolumeMapper->Camera.m_Screen[0][1] = Scale / AspectRatio;
+		this->VolumeMapper->Camera.m_Screen[1][0] = -Scale;
+		this->VolumeMapper->Camera.m_Screen[1][1] = Scale;
+	}
+
+	this->VolumeMapper->Camera.m_InvScreen.x = (this->VolumeMapper->Camera.m_Screen[0][1] - this->VolumeMapper->Camera.m_Screen[0][0]) / (float)this->VolumeMapper->Camera.m_FilmWidth;
+	this->VolumeMapper->Camera.m_InvScreen.y = (this->VolumeMapper->Camera.m_Screen[1][1] - this->VolumeMapper->Camera.m_Screen[1][0]) / (float)this->VolumeMapper->Camera.m_FilmHeight;
+
+	this->VolumeMapper->Camera.m_ApertureSize = (float)pCamera->GetFocalDisk();
+
+	this->VolumeMapper->Reset();
+}
+
+void vtkErUpdateCameraCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
+{
+	if (pVolumeMapper == NULL)
+		return;
+
+	this->VolumeMapper = pVolumeMapper;
+};
+
+void vtkErUpdateBlurCommand::Execute(vtkObject*, unsigned long, void *)
+{
+	if (this->VolumeMapper == NULL)
+		return;
+
+	this->VolumeMapper->Blur.m_FilterWidth			= 2;
+	this->VolumeMapper->Blur.m_FilterWeights[0]		= 1.0f;
+	this->VolumeMapper->Blur.m_FilterWeights[1]		= 0.5f;
+	this->VolumeMapper->Blur.m_FilterWeights[2]		= 0.1f;
+	this->VolumeMapper->Blur.m_FilterWeights[3]		= 1.01f;
+
+	this->VolumeMapper->Reset();
+}
+
+void vtkErUpdateBlurCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
+{
+	if (pVolumeMapper == NULL)
+		return;
+
+	this->VolumeMapper = pVolumeMapper;
+};
+
+vtkStandardNewMacro(vtkErNoiseReduction);
 
 vtkStandardNewMacro(vtkErVolumeMapper);
 
 vtkErVolumeMapper::vtkErVolumeMapper(void)
 {
-	m_CudaVolumeInfo	= vtkErVolumeInfo::New();
-	m_CudaRenderInfo	= vtkErRenderInfo::New();
-
 	SetCudaDevice(0);
 
 	glGenTextures(1, &TextureID);
@@ -83,45 +319,208 @@ vtkErVolumeMapper::vtkErVolumeMapper(void)
 
 	this->UpdateSlicingCommand = vtkErUpdateSlicingCommand::New();
 	this->UpdateSlicingCommand->SetVolumeMapper(this);
+
+	this->UpdateLightingCommand = vtkErUpdateLightingCommand::New();
+	this->UpdateLightingCommand->SetVolumeMapper(this);
+
+	this->UpdateCameraCommand = vtkErUpdateCameraCommand::New();
+	this->UpdateCameraCommand->SetVolumeMapper(this);
+	
+	this->UpdateBlur = vtkErUpdateBlurCommand::New();
+	this->UpdateBlur->SetVolumeMapper(this);
+
+	this->Lights = vtkLightCollection::New();
+
+	this->Renderer			= NULL;
+	this->ActiveCamera		= NULL;
+	this->VolumeProperty	= NULL;
+
+//	this->DebugOn();
+
+//	vtkDebugMacro("SDds");
 }  
 
 vtkErVolumeMapper::~vtkErVolumeMapper(void)
 {
 }
 
-void vtkErVolumeMapper::SetInput(vtkImageData* input)
+void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 {
-	this->Superclass::SetInput(input);
+	this->Superclass::SetInput(pImageData);
+
+    if (pImageData == NULL)
+    {
+    }
+    else if (pImageData != this->Intensity)
+    {
+		vtkSmartPointer<vtkImageCast> ImageCast = vtkImageCast::New();
+		
+		ImageCast->SetInput(pImageData);
+
+		ImageCast->SetOutputScalarTypeToShort();
+		ImageCast->Update();
+
+		this->Intensity = ImageCast->GetOutput();
+
+		vtkSmartPointer<vtkImageGradientMagnitude> GradientMagnitude = vtkImageGradientMagnitude::New();
+
+		GradientMagnitude->SetDimensionality(3);
+		GradientMagnitude->SetInput(Intensity);
+		GradientMagnitude->Update();
+		
+		this->GradientMagnitude = GradientMagnitude->GetOutput();
+	
+		int* pResolution = this->Intensity->GetExtent();
+		
+		double* pBounds = this->Intensity->GetBounds();
+
+		this->Volume.m_Size.x = 1.0f;//pBounds[1] - pBounds[0];
+		this->Volume.m_Size.y = 1.0f;//pBounds[3] - pBounds[2];
+		this->Volume.m_Size.z = 1.0f;//pBounds[5] - pBounds[4];
+
+		this->Volume.m_InvSize.x = 1.0f / this->Volume.m_Size.x;
+		this->Volume.m_InvSize.y = 1.0f / this->Volume.m_Size.y;
+		this->Volume.m_InvSize.z = 1.0f / this->Volume.m_Size.z;
+
+		this->Volume.m_Extent.x	= pResolution[1] - pResolution[0];
+		this->Volume.m_Extent.y	= pResolution[3] - pResolution[2];
+		this->Volume.m_Extent.z	= pResolution[5] - pResolution[4];
+		
+		this->Volume.m_InvExtent.x	= this->Volume.m_Extent.x != 0 ? 1.0f / (float)this->Volume.m_Extent.x : 0.0f;
+		this->Volume.m_InvExtent.y	= this->Volume.m_Extent.y != 0 ? 1.0f / (float)this->Volume.m_Extent.y : 0.0f;
+		this->Volume.m_InvExtent.z	= this->Volume.m_Extent.z != 0 ? 1.0f / (float)this->Volume.m_Extent.z : 0.0f;
+
+		cudaExtent Extent;
+
+		Extent.width	= pResolution[1] + 1;
+		Extent.height	= pResolution[3] + 1;
+		Extent.depth	= pResolution[5] + 1;
+
+		double* pIntensityRange = this->Intensity->GetScalarRange();
+		
+		this->Volume.m_IntensityMin			= (float)pIntensityRange[0];
+		this->Volume.m_IntensityMax			= (float)pIntensityRange[1];
+		this->Volume.m_IntensityRange		= this->Volume.m_IntensityMax - this->Volume.m_IntensityMin;
+		this->Volume.m_IntensityInvRange	= 1.0f / this->Volume.m_IntensityRange;
+
+		double* pSpacing = this->Intensity->GetSpacing();
+
+		this->Volume.m_Spacing.x = (float)pSpacing[0];
+		this->Volume.m_Spacing.y = (float)pSpacing[1];
+		this->Volume.m_Spacing.z = (float)pSpacing[2];
+
+		this->Volume.m_InvSpacing.x = this->Volume.m_Spacing.x != 0.0f ? 1.0f / this->Volume.m_Spacing.x : 0.0f;
+		this->Volume.m_InvSpacing.y = this->Volume.m_Spacing.y != 0.0f ? 1.0f / this->Volume.m_Spacing.y : 0.0f;
+		this->Volume.m_InvSpacing.z = this->Volume.m_Spacing.z != 0.0f ? 1.0f / this->Volume.m_Spacing.z : 0.0f;
+
+		this->Volume.m_MinAABB.x	= 0.0f;//pBounds[0];
+		this->Volume.m_MinAABB.y	= 0.0f;//pBounds[2];
+		this->Volume.m_MinAABB.z	= 0.0f;//pBounds[4];
+
+		this->Volume.m_InvMinAABB.x	= this->Volume.m_MinAABB.x != 0.0f ? 1.0f / this->Volume.m_MinAABB.x : 0.0f;
+		this->Volume.m_InvMinAABB.y	= this->Volume.m_MinAABB.y != 0.0f ? 1.0f / this->Volume.m_MinAABB.y : 0.0f;
+		this->Volume.m_InvMinAABB.z	= this->Volume.m_MinAABB.z != 0.0f ? 1.0f / this->Volume.m_MinAABB.z : 0.0f;
+
+		this->Volume.m_MaxAABB.x	= 1.0f;//pBounds[1];
+		this->Volume.m_MaxAABB.y	= 1.0f;//pBounds[3];
+		this->Volume.m_MaxAABB.z	= 1.0f;//pBounds[5];
+
+		this->Volume.m_InvMaxAABB.x	= this->Volume.m_MaxAABB.x != 0.0f ? 1.0f / this->Volume.m_MaxAABB.x : 0.0f;
+		this->Volume.m_InvMaxAABB.y	= this->Volume.m_MaxAABB.y != 0.0f ? 1.0f / this->Volume.m_MaxAABB.y : 0.0f;
+		this->Volume.m_InvMaxAABB.z	= this->Volume.m_MaxAABB.z != 0.0f ? 1.0f / this->Volume.m_MaxAABB.z : 0.0f;
+
+		this->Volume.m_GradientDelta		= 1.0f;
+		this->Volume.m_InvGradientDelta		= 1.0f;
+		this->Volume.m_GradientDeltaX.x		= this->Volume.m_GradientDelta;
+		this->Volume.m_GradientDeltaX.y		= 0.0f;
+		this->Volume.m_GradientDeltaX.z		= 0.0f;
+		this->Volume.m_GradientDeltaY.x		= 0.0f;
+		this->Volume.m_GradientDeltaY.y		= this->Volume.m_GradientDelta;
+		this->Volume.m_GradientDeltaY.z		= 0.0f;
+		this->Volume.m_GradientDeltaZ.x		= 0.0f;
+		this->Volume.m_GradientDeltaZ.y		= 0.0f;
+		this->Volume.m_GradientDeltaZ.z		= this->Volume.m_GradientDelta;
+
+		vtkErVolumeProperty* pErVolumeProperty = dynamic_cast<vtkErVolumeProperty*>(this->VolumeProperty);
+
+		if (pErVolumeProperty)
+		{
+			this->Volume.m_DensityScale		= pErVolumeProperty->GetDensityScale();
+			this->Volume.m_StepSize			= pErVolumeProperty->GetStepSizeFactorPrimary() * (this->Volume.m_MaxAABB.x / this->Volume.m_Extent.x);
+			this->Volume.m_StepSizeShadow	= this->Volume.m_StepSize * pErVolumeProperty->GetStepSizeFactorSecondary();
+			this->Volume.m_GradientDelta	= pErVolumeProperty->GetGradientDeltaFactor() * this->Volume.m_Spacing.x;
+			this->Volume.m_InvGradientDelta	= 1.0f / this->Volume.m_GradientDelta;
+			this->Volume.m_GradientFactor	= pErVolumeProperty->GetGradientFactor();
+			this->Volume.m_ShadingType		= pErVolumeProperty->GetShadingType();
+		}
+		else
+		{
+			this->Volume.m_DensityScale		= vtkErVolumeProperty::DefaultDensityScale();
+			this->Volume.m_StepSize			= vtkErVolumeProperty::DefaultStepSizeFactorPrimary() * (this->Volume.m_MaxAABB.x / this->Volume.m_Extent.x);
+			this->Volume.m_StepSizeShadow	= vtkErVolumeProperty::DefaultStepSizeFactorSecondary() * this->Volume.m_StepSize;
+			this->Volume.m_GradientDelta	= vtkErVolumeProperty::DefaultGradientDeltaFactor() * this->Volume.m_Spacing.x;
+			this->Volume.m_InvGradientDelta	= 1.0f / this->Volume.m_GradientDelta;
+			this->Volume.m_GradientFactor	= vtkErVolumeProperty::DefaultGradientFactor();
+			this->Volume.m_ShadingType		= vtkErVolumeProperty::DefaultShadingType();
+		}
+
+		this->Volume.m_GradientDeltaX.x = this->Volume.m_GradientDelta;
+		this->Volume.m_GradientDeltaX.y = 0.0f;
+		this->Volume.m_GradientDeltaX.z = 0.0f;
+
+		this->Volume.m_GradientDeltaY.x = 0.0f;
+		this->Volume.m_GradientDeltaY.y = this->Volume.m_GradientDelta;
+		this->Volume.m_GradientDeltaY.z = 0.0f;
+
+		this->Volume.m_GradientDeltaZ.x = 0.0f;
+		this->Volume.m_GradientDeltaZ.y = 0.0f;
+		this->Volume.m_GradientDeltaZ.z = this->Volume.m_GradientDelta;
+
+		BindIntensityBuffer((short*)this->GradientMagnitude->GetScalarPointer(), Extent);
+		BindGradientMagnitudeBuffer((short*)this->GradientMagnitude->GetScalarPointer(), Extent);
+    }
 }
 
 void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 {
-	if (!pVolume)
+	if (pRenderer == NULL || pVolume == NULL)
 		return;
 	
+	if (this->Renderer != pRenderer)
+	{
+		this->Renderer = pRenderer;
+	}
+
+	if (this->ActiveCamera != pRenderer->GetActiveCamera())
+	{
+		this->ActiveCamera = pRenderer->GetActiveCamera();
+		this->ActiveCamera->AddObserver(vtkCommand::ModifiedEvent, this->UpdateCameraCommand, 0.0f);	
+	}
+
+	if (this->VolumeProperty != pVolume->GetProperty())
+	{
+		this->VolumeProperty = pVolume->GetProperty();
+
+		this->VolumeProperty->AddObserver(vtkCommand::ModifiedEvent, this->UpdateBlur, 0.0f);
+		this->VolumeProperty->Modified();
+	}
+
+	// Start the timer to time the length of this render
+	vtkSmartPointer<vtkTimerLog> Timer = vtkTimerLog::New();
+	Timer->StartTimer();
+
 	UploadVolumeProperty(pVolume->GetProperty());
 
-	int RenderSize[2];
+	int* pRenderSize = pRenderer->GetRenderWindow()->GetSize();
 
-	int* pWindowSize = pRenderer->GetRenderWindow()->GetSize();
+	this->Host.Resize(CResolution2D(pRenderSize[0], pRenderSize[1]));
+	this->FrameBuffer.Resize(CResolution2D(pRenderSize[0], pRenderSize[1]));
 
-	RenderSize[0] = pWindowSize[0];
-	RenderSize[1] = pWindowSize[1];
-	
-	m_CudaRenderInfo->SetRenderer(pRenderer);
-	m_CudaRenderInfo->Update();
-	m_CudaVolumeInfo->SetVolume(pVolume);
-	m_CudaVolumeInfo->SetInputData(this->GetInput());
-	m_CudaVolumeInfo->SetVolume(pVolume);
-	m_CudaVolumeInfo->Update();
-	
-	m_Host.Resize(CResolution2D(RenderSize[0], RenderSize[1]));
+	Scattering.m_NoIterations += 1;
 
-	m_CudaRenderInfo->GetRenderInfo()->m_NoIterations += 1;
+	RenderEstimate(&this->Volume, &this->Camera, &this->Lighting, &this->Slicing, &this->Denoise, &this->Scattering, &this->Blur, &this->FrameBuffer);
 
-	RenderEstimate(m_CudaVolumeInfo->GetVolumeInfo(), m_CudaRenderInfo->GetRenderInfo(), &m_CudaRenderInfo->Lighting, &m_CudaRenderInfo->Slicing, &m_CudaRenderInfo->m_FrameBuffer);
-
-	cudaMemcpy(m_Host.GetPtr(), m_CudaRenderInfo->m_FrameBuffer.m_EstimateRgbaLdr.GetPtr(), m_Host.GetSize(), cudaMemcpyDeviceToHost);
+	cudaMemcpy(this->Host.GetPtr(), this->FrameBuffer.m_EstimateRgbaLdr.GetPtr(), this->Host.GetSize(), cudaMemcpyDeviceToHost);
 	
 	glEnable(GL_TEXTURE_2D);
 
@@ -131,7 +530,7 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, RenderSize[0], RenderSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Host.GetPtr());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pRenderSize[0], pRenderSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, this->Host.GetPtr());
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 
 //	glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
@@ -143,17 +542,17 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
     double coordinatesA[4];
     pRenderer->GetWorldPoint(coordinatesA);
 
-    pRenderer->SetDisplayPoint(RenderSize[0],0,d);
+    pRenderer->SetDisplayPoint(pRenderSize[0],0,d);
     pRenderer->DisplayToWorld();
     double coordinatesB[4];
     pRenderer->GetWorldPoint(coordinatesB);
 
-    pRenderer->SetDisplayPoint(RenderSize[0], RenderSize[1],d);
+    pRenderer->SetDisplayPoint(pRenderSize[0], pRenderSize[1],d);
     pRenderer->DisplayToWorld();
     double coordinatesC[4];
     pRenderer->GetWorldPoint(coordinatesC);
 
-    pRenderer->SetDisplayPoint(0,RenderSize[1],d);
+    pRenderer->SetDisplayPoint(0,pRenderSize[1],d);
     pRenderer->DisplayToWorld();
     double coordinatesD[4];
     pRenderer->GetWorldPoint(coordinatesD);
@@ -174,6 +573,13 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 
 	glPopAttrib();
 	/**/
+
+	// Stop the timer
+	Timer->StopTimer();
+	
+	const double Time = Timer->GetElapsedTime();
+
+	this->TimeToDraw = Time;
 }
 
 void vtkErVolumeMapper::PrintSelf(ostream& os, vtkIndent indent)
@@ -233,11 +639,11 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	{
 		if (pErVolumeProperty->GetDirty())
 		{
-			m_CudaRenderInfo->Reset();
+			this->Reset();
 			pErVolumeProperty->SetDirty(false);
 		}
 
-		m_CudaVolumeInfo->m_VolumeInfo.m_ShadingType = pErVolumeProperty->GetShadingType();
+		this->Volume.m_ShadingType = pErVolumeProperty->GetShadingType();
 
 		pErVolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
 		pErVolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
@@ -272,10 +678,47 @@ void vtkErVolumeMapper::SetSliceWidget(vtkErBoxWidget* pSliceWidget)
 
 void vtkErVolumeMapper::Reset()
 {
-	this->m_CudaRenderInfo->Reset();
+	this->Scattering.m_NoIterations = 0;
 }
 
+void vtkErVolumeMapper::AddLight(vtkLight* pLight)
+{
+	if (pLight == NULL)
+	{
+		vtkErrorMacro("Supplied light pointer is NULL!");
+		return;
+	}
 
+	this->Lights->AddItem(pLight);
 
+	pLight->AddObserver(vtkCommand::AnyEvent, this->UpdateLightingCommand, 0.0);
+	pLight->Modified();
 
+	// Adding a light invalidates the rendering, so restart
+	this->Reset();
+}
+
+void vtkErVolumeMapper::RemoveLight(vtkLight* pLight)
+{
+	if (pLight == NULL)
+	{
+		vtkErrorMacro("Supplied light pointer is NULL!");
+		return;
+	}
+
+	this->Lights->RemoveItem(pLight);
+
+	// Adding a light invalidates the rendering, so restart
+	this->Reset();
+}
+
+vtkLightCollection* vtkErVolumeMapper::GetLights()
+{
+	return this->Lights.GetPointer();
+}
+
+vtkErNoiseReduction* vtkErVolumeMapper::GetNoiseReduction()
+{
+	return this->NoiseReduction.GetPointer();
+}
 

@@ -19,12 +19,12 @@
 #define KRNL_TONE_MAP_BLOCK_H		8
 #define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
 
-KERNEL void KrnlToneMap(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
+KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
+	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
 		return;
 
 	const ColorXYZAf Color = pFrameBuffer->m_RunningEstimateXyza.Get(X, Y);
@@ -33,9 +33,9 @@ KERNEL void KrnlToneMap(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 
 	RgbHdr.FromXYZ(Color.GetX(), Color.GetY(), Color.GetZ());
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * pRenderInfo->m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * pRenderInfo->m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * pRenderInfo->m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gCamera.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gCamera.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gCamera.m_InvExposure)), 0.0, 1.0f));
 
 	ColorRGBAuc RGBA;
 
@@ -47,12 +47,12 @@ KERNEL void KrnlToneMap(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(255);
 }
 
-void ToneMap(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
+void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlToneMap<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
+	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Tone Map");
 }

@@ -26,6 +26,16 @@ float sign(float num){
   return(0.0f);
 }
 
+struct Photon{
+  float3 origin;
+  float3 direction;
+  float energy;
+
+  // gamma photon
+  float photonEnergy;
+  float sigma;
+};
+
 __device__ bool lightShootDDAWoodcock(CRay& R, CRNG& RNG, Vec3f& P)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
@@ -41,147 +51,126 @@ __device__ bool lightShootDDAWoodcock(CRay& R, CRNG& RNG, Vec3f& P)
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
-	Vec3f pos, dir;
+	Photon photon;
 
-	pos = R(MinT[TID]);
-	dir = R.m_D;
+	photon.origin		= FromVec3f(R(MinT[TID]) + RNG.Get1() * 0.01f);
+	photon.direction	= FromVec3f(R.m_D);
 
 	float3 cellIndex;
+	cellIndex.x = floor(photon.origin.x / gVolume.m_MacroCellSize.x);
+  cellIndex.y = floor(photon.origin.y / gVolume.m_MacroCellSize.y);
+  cellIndex.z = floor(photon.origin.z / gVolume.m_MacroCellSize.z);
+  float3 t = make_float3(0.0f);
 
-	cellIndex.x = floor(pos.x / gVolumeInfo.m_MacroCellSize);
-	cellIndex.y = floor(pos.y / gVolumeInfo.m_MacroCellSize);
-	cellIndex.z = floor(pos.z / gVolumeInfo.m_MacroCellSize);
-	
-	float3 t = make_float3(0.0f);
+  if(photon.direction.x > EPS){
+    t.x = ((cellIndex.x + 1) * gVolume.m_MacroCellSize.x - photon.origin.x) / photon.direction.x;
+  } else {
+    if(photon.direction.x < -EPS){
+      t.x = (cellIndex.x * gVolume.m_MacroCellSize.x - photon.origin.x) / photon.direction.x;
+    } else {
+      t.x = 1000.0f;
+    }
+  }
+  if(photon.direction.y > EPS){
+    t.y = ((cellIndex.y + 1) * gVolume.m_MacroCellSize.y - photon.origin.y) / photon.direction.y;
+  } else {
+    if(photon.direction.y < -EPS){
+      t.y = (cellIndex.y * gVolume.m_MacroCellSize.y - photon.origin.y) / photon.direction.y;
+    } else {
+      t.y = 1000.0f;
+    }
+  }
+  if(photon.direction.z > EPS){
+    t.z = ((cellIndex.z + 1) * gVolume.m_MacroCellSize.z - photon.origin.z) / photon.direction.z;
+  } else {
+    if(photon.direction.z < -EPS){
+      t.z = (cellIndex.z * gVolume.m_MacroCellSize.z - photon.origin.z) / photon.direction.z;
+    } else {
+      t.z = 1000.0f;
+    }
+  }
 
-	if (dir.x > EPS)
-	{
-		t.x = ((cellIndex.x + 1) * gVolumeInfo.m_MacroCellSize - pos.x) / dir.x;
-	}
-	else
-	{
-		if (dir.x < -EPS)
-		{
-			t.x = (cellIndex.x * gVolumeInfo.m_MacroCellSize - pos.x) / dir.x;
-		}
-		else
-		{
-			t.x = 1000.0f;
-		}
-	}
+  float3 cpv;
+  cpv.x = gVolume.m_MacroCellSize.x / fabs(photon.direction.x);
+  cpv.y = gVolume.m_MacroCellSize.y / fabs(photon.direction.y);
+  cpv.z = gVolume.m_MacroCellSize.z / fabs(photon.direction.z);
 
-	if (dir.y > EPS)
-	{
-		t.y = ((cellIndex.y + 1) * gVolumeInfo.m_MacroCellSize - pos.y) / dir.y;
-	}
-	else
-	{
-		if (dir.y < -EPS)
-		{
-			t.y = (cellIndex.y * gVolumeInfo.m_MacroCellSize - pos.y) / dir.y;
-		}
-		else
-		{
-			t.y = 1000.0f;
-		}
-	}
-	
-	if (dir.z > EPS)
-	{
-		t.z = ((cellIndex.z + 1) * gVolumeInfo.m_MacroCellSize - pos.z) / dir.z;
-	}
-	else
-	{
-		if (dir.z < -EPS)
-		{
-			t.z = (cellIndex.z * gVolumeInfo.m_MacroCellSize - pos.z) / dir.z;
-		}
-		else
-		{
-			t.z = 1000.0f;
-		}
-	}
-
-	float3 cpv;
-	cpv.x = gVolumeInfo.m_MacroCellSize / fabs(dir.x);
-	cpv.y = gVolumeInfo.m_MacroCellSize / fabs(dir.y);
-	cpv.z = gVolumeInfo.m_MacroCellSize / fabs(dir.z);
-
-  float3 samplePos = FromVec3f(pos);
+  float3 samplePos = photon.origin;
 
   int steps = 0;
   
-	bool virtualHit = true;
-	
-	while (virtualHit)
-	{
-		float sigmaMax = gVolumeInfo.m_DensityScale * GetOpacity(pos);
-		float lastSigmaMax = sigmaMax;
-		float ds = min(t.x, min(t.y, t.z));
-		float sigmaSum = sigmaMax * ds;
-		float s = -log(1.0f - RNG.Get1()) / gVolumeInfo.m_DensityScale;
-		float tt = min(t.x, min(t.y, t.z));
-		float3 entry;
-		float3 exit = FromVec3f(pos) + FromVec3f(tt * dir);
+  bool virtualHit = true;
+  while(virtualHit) {
+    float sigmaMax = GetNormalizedExtinction(ToVec3f(photon.origin));
+    float lastSigmaMax = sigmaMax;
+    float ds = min(t.x, min(t.y, t.z));
+    float sigmaSum = sigmaMax * ds;
+	float s = -log(1.0f - RNG.Get1()) / gVolume.m_DensityScale;
+    float tt = min(t.x, min(t.y, t.z));
+    float3 entry;
+    float3 exit = photon.origin + tt * photon.direction;
 
-		while(sigmaSum < s)
-		{
-			if(steps++ > 100.0f)
-				return false;
-		
-			entry = exit;
+    while(sigmaSum < s){
+      if(steps++ > 100.0f){
+        photon.energy = 0.0f;
+        return false;
+      }
+      entry = exit;
 
-			if (!InsideAABB(ToVec3f(entry)))
-				return false;
+	  if (entry.x <= 0.0f || entry.x >= 1.0f ||
+          entry.y <= 0.0f || entry.y >= 1.0f ||
+          entry.z <= 0.0f || entry.z >= 1.0f){
+        photon.energy = 0.0f;
+        return false;
+      }
 
-			if(t.x<t.y && t.x<t.z)
-			{
-				cellIndex.x += sign(dir.x);
-				t.x += cpv.x;
-			}
-			else
-			{
-				if(t.y<t.x && t.y<t.z)
-				{
-					cellIndex.y += sign(dir.y);
-					t.y += cpv.y;
-				}
-				else
-				{
-					cellIndex.z += sign(dir.z);
-					t.z += cpv.z;
-				}
-			}
+      if(t.x<t.y && t.x<t.z){
+        cellIndex.x += sign(photon.direction.x);
+        t.x += cpv.x;
+      } else {
+        if(t.y<t.x && t.y<t.z){
+          cellIndex.y += sign(photon.direction.y);
+          t.y += cpv.y;
+        } else {
+          cellIndex.z += sign(photon.direction.z);
+          t.z += cpv.z;
+        }
+      }
 
-			tt = min(t.x, min(t.y, t.z));
-			exit = FromVec3f(pos) + FromVec3f(tt * dir);
-			ds = length(exit-entry);
-			sigmaSum += ds * sigmaMax;
-			lastSigmaMax = sigmaMax;
-			float3 ePos = (exit + entry) / 2.0f;
-			sigmaMax = GetNormalizedExtinction(ToVec3f(ePos));
-			samplePos = entry;
-		}
+      tt = min(t.x, min(t.y, t.z));
+      exit = photon.origin + tt * photon.direction;
+      ds = length(exit-entry);
+      sigmaSum += ds * sigmaMax;
+      lastSigmaMax = sigmaMax;
+      float3 ePos = (exit + entry) / 2.0f;
+//      sigmaMax = tex3D(gTexExtinction, ePos.x, ePos.y, ePos.z);
+	  sigmaMax = GetNormalizedExtinction(ToVec3f(ePos));
+	  samplePos = entry;
+    }
 
-		float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
-		samplePos += FromVec3f(dir * cS);
+    float cS = (s - (sigmaSum - ds * lastSigmaMax)) / lastSigmaMax;
+    samplePos += photon.direction * cS;
 
-		if (!InsideAABB(ToVec3f(samplePos)))
-			return false;
+    if (photon.origin.x <= 0.0f || photon.origin.x >= 1.0f ||
+        photon.origin.y <= 0.0f || photon.origin.y >= 1.0f ||
+        photon.origin.z <= 0.0f || photon.origin.z >= 1.0f){
+      photon.energy = 0.0f;
+      return false;
+    }
 
-		if (GetOpacity(ToVec3f(samplePos)) / GetNormalizedExtinction(ToVec3f(samplePos)) > RNG.Get1())
-		{
-			virtualHit = false;
-		}
-		else
-		{
-			pos = ToVec3f(exit);
-		}
+//	if (tex3D(gTexIntensity, samplePos.x, samplePos.y, samplePos.z) / tex3D(gTexExtinction, samplePos.x, samplePos.y, samplePos.z) > RNG.Get1()){
+	if (GetOpacity(ToVec3f(samplePos)) / GetNormalizedExtinction(ToVec3f(samplePos)) > RNG.Get1()){
+      virtualHit = false;
+    } else {
+      photon.origin = exit;
+    }
   }
 
-//  photon->energy = photon->energy * c_albedo;
-  R.m_O = ToVec3f(samplePos);
-  P = R.m_O;
+  if (Length(ToVec3f(samplePos) - R.m_O) > MaxT[TID])
+	  return false;
+
+//  photon.energy = photon.energy * c_albedo;
+//  photon.origin = samplePos;
 
   return true;
 }

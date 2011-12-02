@@ -16,13 +16,11 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/engine.mhd")
+Reader.SetFileName("C:/Volumes/engine_small.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
 ErVolumeMapper = vtkErCorePython.vtkErVolumeMapper()
-
-ErVolumeMapper.SetInput(Reader.GetOutput())
 
 Volume.SetMapper(ErVolumeMapper)
 
@@ -30,10 +28,10 @@ Volume.SetMapper(ErVolumeMapper)
 ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
-Opacity.AddPoint(0, 0.000)
+Opacity.AddPoint(0, 0)
 Opacity.AddPoint(10, 0)
 Opacity.AddPoint(11, 1)
-Opacity.AddPoint(2055, 1)
+Opacity.AddPoint(255, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
 
@@ -77,11 +75,13 @@ ErVolumeProperty.SetIOR(IOR)
 
 ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
 ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
-ErVolumeProperty.SetDensityScale(1)
+ErVolumeProperty.SetDensityScale(1000)
 ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
+
+ErVolumeMapper.SetInput(Reader.GetOutput())
 
 Renderer.AddVolume(Volume)
 
@@ -89,11 +89,11 @@ Renderer.AddVolume(Volume)
 ErCamera = vtkErCorePython.vtkErCamera()
 ErCamera.SetRenderer(Renderer)
 ErCamera.SetFocalDisk(0)
-ErCamera.SetPosition(150, 150, 150)
-ErCamera.SetFocalPoint(75, 75, 75)
+ErCamera.SetPosition(2, 2, 2)
+ErCamera.SetFocalPoint(0.5, 0.5, 0.5)
 ErCamera.SetExposure(10)
 Renderer.SetActiveCamera(ErCamera)
-Renderer.ResetCamera()
+
 	
 # First remove all lights
 Renderer.RemoveAllLights()
@@ -116,18 +116,19 @@ Fill.SetSize(10, 1, 1)
 Fill.SetShapeType(2)
 
 # Add the area light to the Renderer
-#Renderer.AddLight(Key);
-#Renderer.AddLight(Fill);
+ErVolumeMapper.AddLight(Key);
+ErVolumeMapper.AddLight(Fill);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(1000, 1000, 1000);
+ErBackgroundLight.SetDiffuseColor(100000, 100000, 100000);
 
 # Add the background light to the Renderer
-Renderer.AddLight(ErBackgroundLight);
+ErVolumeMapper.AddLight(ErBackgroundLight);
 
 # SlicePlane = vtkErCorePython.vtkErSlicePlane()
 # Renderer.AddViewProp(SlicePlane)
 
+Key.SetPosition(500, 500, 500);
 
 ErBoxWidget = vtkErCorePython.vtkErBoxWidget()
 ErBoxWidget.SetPlaceFactor(1)
@@ -141,7 +142,6 @@ ErBoxWidget.SetVolume(Volume)
 #PlaneWidget.UpdatePlacement()
 
 ErVolumeMapper.SetSliceWidget(ErBoxWidget)
-
 
 axes = vtk.vtkAxesActor()
 

@@ -27,22 +27,22 @@ DEV inline float3 FromVec3f(const Vec3f& V)
 
 DEV float GetIntensity(const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexIntensity, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
+	return ((float)SHRT_MAX * tex3D(gTexIntensity, (P.x - gVolume.m_MinAABB.x) * gVolume.m_InvSize.x, (P.y - gVolume.m_MinAABB.y) * gVolume.m_InvSize.y, (P.z - gVolume.m_MinAABB.z) * gVolume.m_InvSize.z));
 }
 
 DEV float GetNormalizedIntensity(const Vec3f& P)
 {
-	return (GetIntensity(P) - gVolumeInfo.m_IntensityMin) * gVolumeInfo.m_IntensityInvRange;
+	return (GetIntensity(P) - gVolume.m_IntensityMin) * gVolume.m_IntensityInvRange;
 }
 
 DEV float GetExtinction(const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexExtinction, (P.x - gVolumeInfo.m_MinAABB.x) * gVolumeInfo.m_InvExtent.x, (P.y - gVolumeInfo.m_MinAABB.y) * gVolumeInfo.m_InvExtent.y, (P.z - gVolumeInfo.m_MinAABB.z) * gVolumeInfo.m_InvExtent.z));
+	return ((float)SHRT_MAX * tex3D(gTexExtinction, (P.x - gVolume.m_MinAABB.x) * gVolume.m_InvSize.x, (P.y - gVolume.m_MinAABB.y) * gVolume.m_InvSize.y, (P.z - gVolume.m_MinAABB.z) * gVolume.m_InvSize.z));
 }
 
 DEV float GetNormalizedExtinction(const Vec3f& P)
 {
-	return GetExtinction(P) * gVolumeInfo.m_IntensityInvRange;
+	return GetExtinction(P) / 255.0f;
 }
 
 DEV float GetOpacity(const float& NormalizedIntensity)
@@ -95,16 +95,16 @@ DEV inline Vec3f NormalizedGradient(const Vec3f& P)
 {
 	Vec3f Gradient;
 
-	Gradient.x = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaX)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaX))) * gVolumeInfo.m_InvGradientDelta;
-	Gradient.y = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaY)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaY))) * gVolumeInfo.m_InvGradientDelta;
-	Gradient.z = (GetIntensity(P + ToVec3f(gVolumeInfo.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolumeInfo.m_GradientDeltaZ))) * gVolumeInfo.m_InvGradientDelta;
+	Gradient.x = (GetIntensity(P + ToVec3f(gVolume.m_GradientDeltaX)) - GetIntensity(P - ToVec3f(gVolume.m_GradientDeltaX))) * gVolume.m_InvGradientDelta;
+	Gradient.y = (GetIntensity(P + ToVec3f(gVolume.m_GradientDeltaY)) - GetIntensity(P - ToVec3f(gVolume.m_GradientDeltaY))) * gVolume.m_InvGradientDelta;
+	Gradient.z = (GetIntensity(P + ToVec3f(gVolume.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolume.m_GradientDeltaZ))) * gVolume.m_InvGradientDelta;
 
 	return -Normalize(Gradient);
 }
 
 DEV float GradientMagnitude(const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolumeInfo.m_InvMaxAABB.x, P.y * gVolumeInfo.m_InvMaxAABB.y, P.z * gVolumeInfo.m_InvMaxAABB.z));
+	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolume.m_InvMaxAABB.x, P.y * gVolume.m_InvMaxAABB.y, P.z * gVolume.m_InvMaxAABB.z));
 }
 
 DEV bool IntersectPlane(const CRay& R, bool OneSided, Vec3f P, Vec3f N, Vec3f U, Vec3f V, Vec2f Luv, float* pT = NULL, Vec2f* pUV = NULL)
@@ -140,8 +140,8 @@ DEV bool IntersectPlane(const CRay& R, bool OneSided, Vec3f P, Vec3f N, Vec3f U,
 DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * (Vec3f(gVolumeInfo.m_MinAABB.x, gVolumeInfo.m_MinAABB.y, gVolumeInfo.m_MinAABB.z) - R.m_O);
-	const Vec3f TopT		= InvR * (Vec3f(gVolumeInfo.m_MaxAABB.x, gVolumeInfo.m_MaxAABB.y, gVolumeInfo.m_MaxAABB.z) - R.m_O);
+	const Vec3f BottomT		= InvR * (Vec3f(gVolume.m_MinAABB.x, gVolume.m_MinAABB.y, gVolume.m_MinAABB.z) - R.m_O);
+	const Vec3f TopT		= InvR * (Vec3f(gVolume.m_MaxAABB.x, gVolume.m_MaxAABB.y, gVolume.m_MaxAABB.z) - R.m_O);
 	const Vec3f MinT		= MinVec3f(TopT, BottomT);
 	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
@@ -155,13 +155,13 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 
 DEV bool InsideAABB(Vec3f P)
 {
-	if (P.x < gVolumeInfo.m_MinAABB.x || P.x > gVolumeInfo.m_MaxAABB.x)
+	if (P.x < gVolume.m_MinAABB.x || P.x > gVolume.m_MaxAABB.x)
 		return false;
 
-	if (P.y < gVolumeInfo.m_MinAABB.y || P.y > gVolumeInfo.m_MaxAABB.y)
+	if (P.y < gVolume.m_MinAABB.y || P.y > gVolume.m_MaxAABB.y)
 		return false;
 
-	if (P.z < gVolumeInfo.m_MinAABB.z || P.z > gVolumeInfo.m_MaxAABB.z)
+	if (P.z < gVolume.m_MinAABB.z || P.z > gVolume.m_MaxAABB.z)
 		return false;
 
 	return true;

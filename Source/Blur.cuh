@@ -21,17 +21,17 @@
 #define KRNL_BLUR_BLOCK_H		8
 #define KRNL_BLUR_BLOCK_SIZE	KRNL_BLUR_BLOCK_W * KRNL_BLUR_BLOCK_H
 
-KERNEL void KrnlBlurEstimateH(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
+KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
+	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
 		return;
 
-	const int X0 = max((int)ceilf(X - pRenderInfo->m_FilterWidth), 0);
-	const int X1 = min((int)floorf(X + pRenderInfo->m_FilterWidth), (int)pRenderInfo->m_FilmWidth - 1);
+	const int X0 = max((int)ceilf(X - gBlur.m_FilterWidth), 0);
+	const int X1 = min((int)floorf(X + gBlur.m_FilterWidth), (int)gCamera.m_FilmWidth - 1);
 
 	ColorXYZAf Sum;
 
@@ -45,7 +45,7 @@ KERNEL void KrnlBlurEstimateH(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer
 
 	for (int x = X0; x <= X1; x++)
 	{
-		FW[TID] = pRenderInfo->m_FilterWeights[(int)fabs((float)x - X)];
+		FW[TID] = gBlur.m_FilterWeights[(int)fabs((float)x - X)];
 
 		Sum			+= pFrameBuffer->m_FrameEstimateXyza.Get(x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
@@ -57,17 +57,17 @@ KERNEL void KrnlBlurEstimateH(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer
 		pFrameBuffer->m_FrameBlurXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
-KERNEL void KrnlBlurEstimateV(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer)
+KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= pRenderInfo->m_FilmWidth || Y >= pRenderInfo->m_FilmHeight)
+	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
 		return;
 
-	const int Y0 = max((int)ceilf (Y - pRenderInfo->m_FilterWidth), 0);
-	const int Y1 = min((int)floorf(Y + pRenderInfo->m_FilterWidth), pRenderInfo->m_FilmHeight - 1);
+	const int Y0 = max((int)ceilf (Y - gBlur.m_FilterWidth), 0);
+	const int Y1 = min((int)floorf(Y + gBlur.m_FilterWidth), gCamera.m_FilmHeight - 1);
 
 	ColorXYZAf Sum;
 
@@ -81,7 +81,7 @@ KERNEL void KrnlBlurEstimateV(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer
 
 	for (int y = Y0; y <= Y1; y++)
 	{
-		FW[TID] = pRenderInfo->m_FilterWeights[(int)fabs((float)y - Y)];
+		FW[TID] = gBlur.m_FilterWeights[(int)fabs((float)y - Y)];
 
 		Sum			+= pFrameBuffer->m_FrameBlurXyza.Get(X, y) * FW[TID];
 		SumW[TID]	+= FW[TID];
@@ -93,16 +93,16 @@ KERNEL void KrnlBlurEstimateV(RenderInfo* pRenderInfo, FrameBuffer* pFrameBuffer
 		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
-void BlurEstimate(RenderInfo* pDevRenderInfo, FrameBuffer* pFrameBuffer, int Width, int Height)
+void BlurEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_BLUR_BLOCK_W, KRNL_BLUR_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlBlurEstimateH<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
+	KrnlBlurEstimateH<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate H");
 	
-	KrnlBlurEstimateV<<<GridDim, BlockDim>>>(pDevRenderInfo, pFrameBuffer);
+	KrnlBlurEstimateV<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
 	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate V");
 }

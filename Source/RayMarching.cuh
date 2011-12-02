@@ -33,11 +33,11 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
-	const float S	= -log(RNG.Get1()) / gVolumeInfo.m_DensityScale;
+	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT[TID] += RNG.Get1() * gVolumeInfo.m_StepSize;
+	MinT[TID] += RNG.Get1() * gVolume.m_StepSize;
 
 	while (Sum < S)
 	{
@@ -46,10 +46,10 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 		if (MinT[TID] >= MaxT[TID])
 			return false;
 		
-		SigmaT	= gVolumeInfo.m_DensityScale * GetOpacity(Ps);
+		SigmaT	= gVolume.m_DensityScale * GetOpacity(Ps);
 
-		Sum			+= SigmaT * gVolumeInfo.m_StepSize;
-		MinT[TID]	+= gVolumeInfo.m_StepSize;
+		Sum			+= SigmaT * gVolume.m_StepSize;
+		MinT[TID]	+= gVolume.m_StepSize;
 	}
 
 	return true;
@@ -69,11 +69,11 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
 
-	const float S	= -log(RNG.Get1()) / gVolumeInfo.m_DensityScale;
+	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT[TID] += RNG.Get1() * gVolumeInfo.m_StepSizeShadow;
+	MinT[TID] += RNG.Get1() * gVolume.m_StepSizeShadow;
 
 	while (Sum < S)
 	{
@@ -82,10 +82,10 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 		if (MinT[TID] > MaxT[TID])
 			return false;
 		
-		SigmaT	= gVolumeInfo.m_DensityScale * GetOpacity(Ps[TID]);
+		SigmaT	= gVolume.m_DensityScale * GetOpacity(Ps[TID]);
 
-		Sum			+= SigmaT * gVolumeInfo.m_StepSizeShadow;
-		MinT[TID]	+= gVolumeInfo.m_StepSizeShadow;
+		Sum			+= SigmaT * gVolume.m_StepSizeShadow;
+		MinT[TID]	+= gVolume.m_StepSizeShadow;
 	}
 
 	return true;
@@ -104,7 +104,7 @@ DEV inline bool NearestIntersection(CRay R, CRNG& RNG, float& T)
 
 	Vec3f Ps; 
 
-	T = MinT + RNG.Get1() * gVolumeInfo.m_StepSize;
+	T = MinT + RNG.Get1() * gVolume.m_StepSize;
 
 	while (T < MaxT)
 	{
@@ -113,7 +113,7 @@ DEV inline bool NearestIntersection(CRay R, CRNG& RNG, float& T)
 		if (GetOpacity(GetNormalizedIntensity(Ps)) > 0.0f)
 			return true;
 
-		T += gVolumeInfo.m_StepSize;
+		T += gVolume.m_StepSize;
 	}
 	*/
 

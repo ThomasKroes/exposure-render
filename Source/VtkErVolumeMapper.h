@@ -21,8 +21,12 @@
 #include <vtkSmartPointer.h>
 #include <vtkVolumeProperty.h>
 #include <vtkCommand.h>
+#include <vtkLightCollection.h>
+#include <vtkCamera.h>
 
 class vtkErVolumeMapper;
+class vtkErLight;
+class vtkErVolumeProperty;
 
 class vtkErResetCommand : public vtkCommand
 {
@@ -30,6 +34,7 @@ public:
 	static vtkErResetCommand* New() { return new vtkErResetCommand; };
 
 	virtual void Execute(vtkObject*, unsigned long, void *);
+	
 	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
 
 protected:
@@ -45,6 +50,7 @@ public:
 	static vtkErUpdateSlicingCommand* New() { return new vtkErUpdateSlicingCommand; };
 
 	virtual void Execute(vtkObject*, unsigned long, void *);
+	
 	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
 
 protected:
@@ -54,49 +60,119 @@ protected:
 	vtkErVolumeMapper*	VolumeMapper;
 };
 
+class vtkErUpdateLightingCommand : public vtkCommand
+{
+public:
+	static vtkErUpdateLightingCommand* New() { return new vtkErUpdateLightingCommand; };
+
+	virtual void Execute(vtkObject*, unsigned long, void *);
+	
+	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
+
+protected:
+	vtkErUpdateLightingCommand() { this->VolumeMapper = NULL; };
+	~vtkErUpdateLightingCommand() {};
+
+	vtkErVolumeMapper*	VolumeMapper;
+};
+
+class vtkErUpdateCameraCommand : public vtkCommand
+{
+public:
+	static vtkErUpdateCameraCommand* New() { return new vtkErUpdateCameraCommand; };
+
+	virtual void Execute(vtkObject*, unsigned long, void *);
+	
+	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
+
+protected:
+	vtkErUpdateCameraCommand() { this->VolumeMapper = NULL; };
+	~vtkErUpdateCameraCommand() {};
+
+	vtkErVolumeMapper*	VolumeMapper;
+};
+
+class vtkErUpdateBlurCommand : public vtkCommand
+{
+public:
+	static vtkErUpdateBlurCommand* New() { return new vtkErUpdateBlurCommand; };
+
+	virtual void Execute(vtkObject*, unsigned long, void *);
+	
+	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
+
+protected:
+	vtkErUpdateBlurCommand() { this->VolumeMapper = NULL; };
+	~vtkErUpdateBlurCommand() {};
+
+	vtkErVolumeMapper*	VolumeMapper;
+};
+
+class VTK_ER_CORE_EXPORT vtkErNoiseReduction : public vtkObject
+{
+public:
+	static vtkErNoiseReduction *New();
+
+	void Reset();
+
+	vtkGetMacro(Enabled, float);
+	vtkSetMacro(Enabled, float);
+
+	vtkGetMacro(WindowRadius, float);
+	vtkSetMacro(WindowRadius, float);
+
+	vtkGetMacro(Noise, float);
+	vtkSetMacro(Noise, float);
+
+	vtkGetMacro(WeightThreshold, float);
+	vtkSetMacro(WeightThreshold, float);
+
+	vtkGetMacro(LerpThreshold, float);
+	vtkSetMacro(LerpThreshold, float);
+
+	vtkGetMacro(LerpC, float);
+	vtkSetMacro(LerpC, float);
+
+protected:
+	vtkErNoiseReduction() {};
+	virtual ~vtkErNoiseReduction() {};
+
+public:
+	float	Enabled;
+	float	WindowRadius;
+	float	WindowArea;
+	float	InvWindowArea;
+	float	Noise;
+	float	WeightThreshold;
+	float	LerpThreshold;
+	float	LerpC;
+};
+
 class VTK_ER_CORE_EXPORT vtkErVolumeMapper : public vtkVolumeMapper
 {
 public:
 	vtkTypeMacro(vtkErVolumeMapper, vtkVolumeMapper);
     static vtkErVolumeMapper* New();
 
-	
-
 	vtkErVolumeMapper operator=(const vtkErVolumeMapper&);
     vtkErVolumeMapper(const vtkErVolumeMapper&);
-    virtual void SetInput( vtkImageData * );
-//	virtual void SetInput( vtkDataSet * );
-    virtual void Render(vtkRenderer *, vtkVolume *);
+    
+	virtual void SetInput(vtkImageData* pImageData);
+    
+	virtual void Render(vtkRenderer* pRenderer, vtkVolume* pVolume);
+
 	virtual int FillInputPortInformation(int, vtkInformation*);
 
    vtkImageData* GetOutput() { return NULL;  }
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
- //   void UpdateOutputResolution(unsigned int width, unsigned int height, bool TypeChanged = false);
-
-	vtkGetMacro(UseCustomRenderSize, bool);
-	vtkSetMacro(UseCustomRenderSize, bool);
-
-	vtkGetVector2Macro(CustomRenderSize, int);
-	vtkSetVector2Macro(CustomRenderSize, int);
-
-//	void DoIt(void* pData);
-	
-	vtkSmartPointer<vtkErVolumeInfo>	m_CudaVolumeInfo;
-	vtkSmartPointer<vtkErRenderInfo>	m_CudaRenderInfo;
-
 	vtkErVolumeMapper();
     virtual ~vtkErVolumeMapper();
 
 	void UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty);
 
-	CHostBuffer2D<ColorRGBAuc>	m_Host;
-//	CCudaView	m_CudaView;
 	unsigned int TextureID;
-
-	bool	UseCustomRenderSize;
-	int		CustomRenderSize[2];
 
 	vtkGetMacro(SliceWidget, vtkErBoxWidget*);
 	void SetSliceWidget(vtkErBoxWidget* pSliceWidget);
@@ -106,11 +182,56 @@ public:
 	vtkGetMacro(MacroCellSize, int);
 	vtkSetMacro(MacroCellSize, int);
 
+	vtkGetMacro(ShowFPS, bool);
+	vtkSetMacro(ShowFPS, bool);
+
+	void AddLight(vtkLight* pLight);
+	void RemoveLight(vtkLight* pLight);
+
+	vtkErNoiseReduction* GetNoiseReduction();
+
 protected:
-	vtkErBoxWidget*								SliceWidget;
-	vtkSmartPointer<vtkErResetCommand>			ResetCallBack;
-	vtkSmartPointer<vtkErUpdateSlicingCommand>	UpdateSlicingCommand;
-	int MacroCellSize;
+	vtkRenderer*									Renderer;
+	vtkCamera*										ActiveCamera;
+	vtkVolumeProperty*								VolumeProperty;
+
+	vtkErBoxWidget*									SliceWidget;
+
+	vtkSmartPointer<vtkErResetCommand>				ResetCallBack;
+	vtkSmartPointer<vtkErUpdateSlicingCommand>		UpdateSlicingCommand;
+	vtkSmartPointer<vtkErUpdateLightingCommand>		UpdateLightingCommand;
+	vtkSmartPointer<vtkErUpdateCameraCommand>		UpdateCameraCommand;
+	vtkSmartPointer<vtkErUpdateBlurCommand>			UpdateBlur;
+
+	int												MacroCellSize;
+	bool											ShowFPS;
+
+	vtkSmartPointer<vtkLightCollection>				Lights;
+
+	vtkLightCollection* GetLights();
+
+	vtkSmartPointer<vtkErNoiseReduction>			NoiseReduction;
+
+	//BTX
+	Volume											Volume;
+	Camera											Camera;
+	Lighting										Lighting;
+	Slicing											Slicing;
+	Denoise											Denoise;
+	Scattering										Scattering;
+	Blur											Blur;
+	FrameBuffer										FrameBuffer;
+	//ETX
+
+	CHostBuffer2D<ColorRGBAuc>						Host;
+
+	vtkImageData*									Intensity;
+	vtkImageData*									GradientMagnitude;
+
+	friend class vtkErUpdateSlicingCommand;
+	friend class vtkErUpdateLightingCommand;
+	friend class vtkErUpdateCameraCommand;
+	friend class vtkErUpdateBlurCommand;
 };
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/

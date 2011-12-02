@@ -30,11 +30,9 @@ public:
 	vtkPiecewiseFunction* GetOpacity(void);
 
 	void SetDiffuse(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
-//	void SetDiffuse(vtkColorTransferFunction* pDiffuse);
 	vtkPiecewiseFunction* GetDiffuse(int Index);
 
 	void SetSpecular(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
-//	void SetSpecular(vtkColorTransferFunction* pSpecular);
 	vtkPiecewiseFunction* GetSpecular(int Index);
 
 	void SetGlossiness(vtkPiecewiseFunction* pPiecewiseFunction);
@@ -44,7 +42,6 @@ public:
 	vtkPiecewiseFunction* GetIOR(void);
 
 	void SetEmission(int Index, vtkPiecewiseFunction* pPiecewiseFunction);
-//	void SetEmission(vtkColorTransferFunction* pEmission);
 	vtkPiecewiseFunction* GetEmission(int Index);
 
 	vtkGetMacro(Dirty, bool);
