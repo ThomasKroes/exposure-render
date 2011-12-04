@@ -16,7 +16,7 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/backpack_small.mhd")
+Reader.SetFileName("C:/Volumes/backpack.mhd")
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -29,8 +29,8 @@ ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
 Opacity.AddPoint(0, 0)
-Opacity.AddPoint(75, 0)
-Opacity.AddPoint(76, 1)
+Opacity.AddPoint(10, 0)
+Opacity.AddPoint(11, 1)
 Opacity.AddPoint(255, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
@@ -73,10 +73,10 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(1.0)
-ErVolumeProperty.SetStepSizeFactorSecondary(1.0)
-ErVolumeProperty.SetDensityScale(10000)
-ErVolumeProperty.SetShadingType(0)
+ErVolumeProperty.SetStepSizeFactorPrimary(1)
+ErVolumeProperty.SetStepSizeFactorSecondary(1)
+ErVolumeProperty.SetDensityScale(10000000)
+ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -109,7 +109,7 @@ Key.SetSize(10, 1, 1)
 Key.SetShapeType(2)
 
 Fill = vtkErCorePython.vtkErAreaLight()
-Fill.SetPosition(1000, 100, 10);
+Fill.SetPosition(1000, 1000, 1000);
 Fill.SetFocalPoint(300, 300, 300);
 Fill.SetColor(150, 150, 150);
 Fill.SetPositional(1);

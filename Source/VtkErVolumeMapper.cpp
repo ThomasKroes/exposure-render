@@ -244,7 +244,9 @@ void vtkErUpdateCameraCommand::Execute(vtkObject*, unsigned long, void*)
 	this->VolumeMapper->Camera.m_ClipNear.x	= (float)ClippingRange[0];
 	this->VolumeMapper->Camera.m_ClipFar.y	= (float)ClippingRange[1];
 
-		
+	this->VolumeMapper->Camera.m_Gamma		= 2.2f;
+	this->VolumeMapper->Camera.m_InvGamma	= 1.0f / this->VolumeMapper->Camera.m_Gamma;
+
 	float Scale = 0.0f;
 
 	Scale = tanf((0.5f * pCamera->GetViewAngle() / RAD_F));
