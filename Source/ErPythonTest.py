@@ -5,6 +5,7 @@ import vtkErCorePython
 
 # The colors module defines various useful colors.
 
+VolumeFile = "C:/engine_small.mhd"
 
 Renderer = vtk.vtkRenderer()
 RendererWin = vtk.vtkRenderWindow()
@@ -16,7 +17,11 @@ Volume = vtk.vtkVolume()
 
 # Read volume
 Reader = vtk.vtkMetaImageReader()
-Reader.SetFileName("C:/Volumes/backpack.mhd")
+Reader.SetFileName(VolumeFile)
+
+# if Reader.CanReadFile(VolumeFile) == 0:
+#    Interactor.TerminateApp()
+
 Reader.Update()
 
 # Exposure Rendererder volume mapper
@@ -73,10 +78,10 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(1)
-ErVolumeProperty.SetStepSizeFactorSecondary(1)
+ErVolumeProperty.SetStepSizeFactorPrimary(3)
+ErVolumeProperty.SetStepSizeFactorSecondary(3)
 ErVolumeProperty.SetDensityScale(10000000)
-ErVolumeProperty.SetShadingType(1)
+ErVolumeProperty.SetShadingType(0)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -111,20 +116,20 @@ Key.SetShapeType(2)
 Fill = vtkErCorePython.vtkErAreaLight()
 Fill.SetPosition(1000, 1000, 1000);
 Fill.SetFocalPoint(300, 300, 300);
-Fill.SetColor(150, 150, 150);
+Fill.SetColor(10, 10, 10);
 Fill.SetPositional(1);
-Fill.SetSize(0.1, 0.1, 0.1)
-Fill.SetShapeType(2)
+Fill.SetSize(1, 1, 1)
+Fill.SetShapeType(0)
 
 # Add the area light to the Renderer
 #ErVolumeMapper.AddLight(Key);
 ErVolumeMapper.AddLight(Fill);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(1000, 1000, 1000);
+ErBackgroundLight.SetDiffuseColor(0.1, 0.1, 0.1);
 
 # Add the background light to the Renderer
-ErVolumeMapper.AddLight(ErBackgroundLight);
+#ErVolumeMapper.AddLight(ErBackgroundLight);
 
 # SlicePlane = vtkErCorePython.vtkErSlicePlane()
 # Renderer.AddViewProp(SlicePlane)

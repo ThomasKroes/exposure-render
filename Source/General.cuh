@@ -70,16 +70,16 @@ struct EXPOSURE_RENDER_DLL Camera
 };
 
 #define MAX_LIGHTS 10
-#define BACKGROUND_LIGHT_RADIUS 1500.0f
+#define BACKGROUND_LIGHT_RADIUS 150000.0f
 
 struct EXPOSURE_RENDER_DLL Lighting
 {
 	int		m_NoLights;
 	int		m_Type[MAX_LIGHTS];
 	float3	m_P[MAX_LIGHTS];
-	float3	m_N[MAX_LIGHTS];
 	float3	m_U[MAX_LIGHTS];
 	float3	m_V[MAX_LIGHTS];
+	float3	m_W[MAX_LIGHTS];
 	int		m_ShapeType[MAX_LIGHTS];
 	float3	m_Size[MAX_LIGHTS];
 	float3	m_Color[MAX_LIGHTS];

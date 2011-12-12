@@ -15,6 +15,9 @@
 
 #include "VtkErLight.h"
 
+#include <vtkSmartPointer.h>
+#include <vtkMatrix4x4.h>
+
 class VTK_ER_CORE_EXPORT vtkErAreaLight : public vtkErLight
 {
 public:
@@ -31,11 +34,22 @@ public:
 	vtkSetVector3Macro(Up, double);
 	vtkGetVectorMacro(Up, double, 3);
 
+	vtkGetVector3Macro(N, double);
+	vtkGetVector3Macro(U, double);
+	vtkGetVector3Macro(V, double);
+
+	vtkMatrix4x4* GetTransformMatrix();
+
 protected:
 	vtkErAreaLight(void);
 	virtual ~vtkErAreaLight(void);
 
-	int		ShapeType;
-	double	Size[3];
-	double	Up[3];
+	int								ShapeType;
+	double							Size[3];
+	double							Up[3];
+	double							N[3];
+	double							U[3];
+	double							V[3];
+	vtkSmartPointer<vtkMatrix4x4>	TransformMatrix;
+	vtkSmartPointer<vtkMatrix4x4>	UserTransformMatrix;
 };

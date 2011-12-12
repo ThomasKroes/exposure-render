@@ -17,10 +17,51 @@
 
 vtkStandardNewMacro(vtkErAreaLight);
 
-vtkErAreaLight::vtkErAreaLight(void)
+vtkErAreaLight::vtkErAreaLight()
+{
+	TransformMatrix = vtkMatrix4x4::New();
+}
+
+vtkErAreaLight::~vtkErAreaLight()
 {
 }
 
-vtkErAreaLight::~vtkErAreaLight(void)
+vtkMatrix4x4* vtkErAreaLight::GetTransformMatrix()
 {
+	double N[3];
+	double U[3];
+	double V[3];
+
+	vtkMath::Subtract(this->GetFocalPoint(), this->GetPosition(), N);
+	vtkMath::Normalize(N);
+
+	vtkMath::Cross(N, this->GetUp(), U);
+	vtkMath::Normalize(U);
+
+	vtkMath::Cross(N, U, V);
+	vtkMath::Normalize(V);
+
+	TransformMatrix->SetElement(0, 0, U[0]);
+	TransformMatrix->SetElement(1, 0, U[1]);
+	TransformMatrix->SetElement(2, 0, U[2]);
+
+	TransformMatrix->SetElement(0, 1, V[0]);
+	TransformMatrix->SetElement(1, 1, V[1]);
+	TransformMatrix->SetElement(2, 1, V[2]);
+
+	TransformMatrix->SetElement(0, 2, N[0]);
+	TransformMatrix->SetElement(1, 2, N[1]);
+	TransformMatrix->SetElement(2, 2, N[2]);
+
+	TransformMatrix->SetElement(3, 0, this->GetPosition()[0]);
+	TransformMatrix->SetElement(3, 1, this->GetPosition()[1]);
+	TransformMatrix->SetElement(3, 2, this->GetPosition()[2]);
+
+	TransformMatrix->SetElement(3, 3, 1);
+
+	TransformMatrix->SetElement(0, 3, 0);
+	TransformMatrix->SetElement(1, 3, 0);
+	TransformMatrix->SetElement(2, 3, 0);
+
+	return TransformMatrix;
 }

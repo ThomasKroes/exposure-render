@@ -101,7 +101,7 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 
 		if (pErAreaLight || pErBackgroundLight)
 		{
-			// Handle ER area light
+			// ER area light
 			if (pErAreaLight && pErAreaLight->GetEnabled())
 			{
 				this->VolumeMapper->Lighting.m_Type[count] = 0;
@@ -122,12 +122,24 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 				this->VolumeMapper->Lighting.m_Color[count].y = Color[1];
 				this->VolumeMapper->Lighting.m_Color[count].z = Color[2];
 				
+				this->VolumeMapper->Lighting.m_U[count].x = pErAreaLight->GetTransformMatrix()->GetElement(0, 0);
+				this->VolumeMapper->Lighting.m_U[count].y = pErAreaLight->GetTransformMatrix()->GetElement(1, 0);
+				this->VolumeMapper->Lighting.m_U[count].z = pErAreaLight->GetTransformMatrix()->GetElement(2, 0);
+
+				this->VolumeMapper->Lighting.m_V[count].x = pErAreaLight->GetTransformMatrix()->GetElement(0, 1);
+				this->VolumeMapper->Lighting.m_V[count].y = pErAreaLight->GetTransformMatrix()->GetElement(1, 1);
+				this->VolumeMapper->Lighting.m_V[count].z = pErAreaLight->GetTransformMatrix()->GetElement(2, 1);
+
+				this->VolumeMapper->Lighting.m_W[count].x = pErAreaLight->GetTransformMatrix()->GetElement(0, 2);
+				this->VolumeMapper->Lighting.m_W[count].y = pErAreaLight->GetTransformMatrix()->GetElement(1, 2);
+				this->VolumeMapper->Lighting.m_W[count].z = pErAreaLight->GetTransformMatrix()->GetElement(2, 2);
+
 				this->VolumeMapper->Lighting.m_ShapeType[count] = pErAreaLight->GetShapeType(); 
 
 				count++;
 			}
 
-			// Handle ER background light
+			// ER background light
 			if (pErBackgroundLight && pErBackgroundLight->GetEnabled())
 			{
 				this->VolumeMapper->Lighting.m_Type[count] = 1;
@@ -145,7 +157,7 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 		}
 		else
 		{
-			// Handle VTK light
+			// VTK light
 			this->VolumeMapper->Lighting.m_Type[count] = 0;
 
 			this->VolumeMapper->Lighting.m_P[count].x = pLight->GetPosition()[0];
