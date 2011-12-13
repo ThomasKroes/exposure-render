@@ -20,6 +20,31 @@
 struct EXPOSURE_RENDER_DLL TransformMatrix
 {
 	float		NN[4][4];
+
+	DEV Vec3f GetPosition()
+	{
+		return Vec3f(NN[0][3], NN[1][3], NN[2][3]);
+	}
+
+	DEV Vec3f GetScale()
+	{
+		return Vec3f(NN[3][0], NN[3][1], NN[3][2]);
+	}
+
+	DEV Vec3f GetU()
+	{
+		return Vec3f(NN[0][0], NN[1][0], NN[2][0]);
+	}
+
+	DEV Vec3f GetV()
+	{
+		return Vec3f(NN[0][1], NN[1][1], NN[2][1]);
+	}
+
+	DEV Vec3f GetW()
+	{
+		return Vec3f(NN[0][2], NN[1][2], NN[2][2]);
+	}
 };
 
 struct EXPOSURE_RENDER_DLL Volume
@@ -80,14 +105,14 @@ struct EXPOSURE_RENDER_DLL Camera
 struct EXPOSURE_RENDER_DLL Light
 {
 	int				m_Type;
-	float3			m_P;
-	float3			m_U;
-	float3			m_V;
-	float3			m_W;
+//	float3			m_P;
+//	float3			m_U;
+//	float3			m_V;
+//	float3			m_W;
 	int				m_ShapeType;
-	float3			m_Size;
 	float3			m_Color;
 	TransformMatrix	m_TM;
+	TransformMatrix	m_InvTM;
 };
 
 struct EXPOSURE_RENDER_DLL Lighting

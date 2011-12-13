@@ -32,6 +32,7 @@
 #include <vtkTimerLog.h>
 #include <vtkImageReslice.h>
 #include <vtkCamera.h>
+#include <vtkTransform.h>
 
 void vtkErResetCommand::Execute(vtkObject*, unsigned long, void *)
 {
@@ -108,13 +109,9 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 			{
 				L.m_Type = 0;
 
-				L.m_P.x = pErAreaLight->GetPosition()[0];
-				L.m_P.y = pErAreaLight->GetPosition()[1];
-				L.m_P.z = pErAreaLight->GetPosition()[2];
-
-				L.m_Size.x = pErAreaLight->GetSize()[0];
-				L.m_Size.y = pErAreaLight->GetSize()[1];
-				L.m_Size.z = pErAreaLight->GetSize()[2];
+//				L.m_P.x = pErAreaLight->GetPosition()[0];
+//				L.m_P.y = pErAreaLight->GetPosition()[1];
+//				L.m_P.z = pErAreaLight->GetPosition()[2];
 
 				ColorXYZf Color;
 
@@ -124,19 +121,35 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 				L.m_Color.y = Color[1];
 				L.m_Color.z = Color[2];
 				
-				L.m_U.x = pErAreaLight->GetTransformMatrix()->GetElement(0, 0);
-				L.m_U.y = pErAreaLight->GetTransformMatrix()->GetElement(1, 0);
-				L.m_U.z = pErAreaLight->GetTransformMatrix()->GetElement(2, 0);
+				vtkSmartPointer<vtkTransform> TM = vtkTransform::New(), InvTM = vtkTransform::New();
 
-				L.m_V.x = pErAreaLight->GetTransformMatrix()->GetElement(0, 1);
-				L.m_V.y = pErAreaLight->GetTransformMatrix()->GetElement(1, 1);
-				L.m_V.z = pErAreaLight->GetTransformMatrix()->GetElement(2, 1);
+				TM->DeepCopy(pErAreaLight->GetTransform());
+				InvTM->DeepCopy(pErAreaLight->GetTransform());
 
-				L.m_W.x = pErAreaLight->GetTransformMatrix()->GetElement(0, 2);
-				L.m_W.y = pErAreaLight->GetTransformMatrix()->GetElement(1, 2);
-				L.m_W.z = pErAreaLight->GetTransformMatrix()->GetElement(2, 2);
+				InvTM->Inverse();
+
+//				L.m_U.x = (float)TM->GetMatrix()->GetElement(0, 0);
+//				L.m_U.y = (float)TM->GetMatrix()->GetElement(1, 0);
+//				L.m_U.z = (float)TM->GetMatrix()->GetElement(2, 0);
+
+//				L.m_V.x = (float)TM->GetMatrix()->GetElement(0, 1);
+//				L.m_V.y = (float)TM->GetMatrix()->GetElement(1, 1);
+//				L.m_V.z = (float)TM->GetMatrix()->GetElement(2, 1);
+
+//				L.m_W.x = (float)TM->GetMatrix()->GetElement(0, 2);
+//				L.m_W.y = (float)TM->GetMatrix()->GetElement(1, 2);
+//				L.m_W.z = (float)TM->GetMatrix()->GetElement(2, 2);
 
 				L.m_ShapeType = pErAreaLight->GetShapeType(); 
+
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						L.m_TM.NN[i][j]		= (float)TM->GetMatrix()->GetElement(i, j);
+						L.m_InvTM.NN[i][j]	= (float)InvTM->GetMatrix()->GetElement(i, j);
+					}
+				}
 
 				count++;
 			}
@@ -162,13 +175,9 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 			// VTK light
 			L.m_Type = 0;
 
-			L.m_P.x = pLight->GetPosition()[0];
-			L.m_P.y = pLight->GetPosition()[1];
-			L.m_P.z = pLight->GetPosition()[2];
-
-			L.m_Size.x = 0.1f;
-			L.m_Size.y = 0.1f;
-			L.m_Size.z = 0.1f;
+//			L.m_P.x = pLight->GetPosition()[0];
+//			L.m_P.y = pLight->GetPosition()[1];
+//			L.m_P.z = pLight->GetPosition()[2];
 
 			ColorXYZf Color;
 

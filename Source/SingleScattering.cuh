@@ -58,10 +58,11 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 		
 		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl))
 		{
-			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Lv), X, Y);
+			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Li), X, Y);
 			return;
 		}
-		
+		/**/
+
 		const float Intensity = GetNormalizedIntensity(Pe);
 
 		Lv += GetEmission(Intensity);

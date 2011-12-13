@@ -19,14 +19,15 @@ vtkStandardNewMacro(vtkErAreaLight);
 
 vtkErAreaLight::vtkErAreaLight()
 {
-	TransformMatrix = vtkMatrix4x4::New();
+	this->TransformMatrix = vtkTransform::New();
+	this->TransformMatrix->Identity();
 }
 
 vtkErAreaLight::~vtkErAreaLight()
 {
 }
 
-vtkMatrix4x4* vtkErAreaLight::GetTransformMatrix()
+vtkTransform* vtkErAreaLight::GetTransform()
 {
 	double N[3];
 	double U[3];
@@ -40,7 +41,8 @@ vtkMatrix4x4* vtkErAreaLight::GetTransformMatrix()
 
 	vtkMath::Cross(N, U, V);
 	vtkMath::Normalize(V);
-
+	
+	/*
 	TransformMatrix->SetElement(0, 0, U[0]);
 	TransformMatrix->SetElement(1, 0, U[1]);
 	TransformMatrix->SetElement(2, 0, U[2]);
@@ -62,6 +64,11 @@ vtkMatrix4x4* vtkErAreaLight::GetTransformMatrix()
 	TransformMatrix->SetElement(0, 3, 0);
 	TransformMatrix->SetElement(1, 3, 0);
 	TransformMatrix->SetElement(2, 3, 0);
+	*/
+	
+//	TransformMatrix->Identity();
+//	TransformMatrix->Translate(this->GetPosition()[0], this->GetPosition()[1], this->GetPosition()[2]);
+//	TransformMatrix->Scale(this->Scale);
 
 	return TransformMatrix;
 }

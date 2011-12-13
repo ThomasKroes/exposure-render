@@ -125,6 +125,11 @@ HOD inline bool InShadingHemisphere(const Vec3f& W1, const Vec3f& W2, const Vec3
    return Dot(W1, N) >= 0.0f && Dot(W2, N) >= 0.0f;
 }
 
+HOD inline Vec2f UniformSamplePlane(Vec2f U)
+{
+	return Vec2f(-0.5) + U;
+}
+
 HOD inline Vec2f UniformSampleDisk(const Vec2f& U)
 {
 	float r = sqrtf(U.x);

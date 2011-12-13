@@ -137,6 +137,30 @@ DEV bool IntersectPlane(const CRay& R, bool OneSided, Vec3f P, Vec3f N, Vec3f U,
 	return true;
 }
 
+DEV bool IntersectUniformDisk(CRay R, bool OneSided, Vec3f Scale, float* pT = NULL, Vec2f* pUV = NULL)
+{
+	if (R.m_O.z < 0)
+		return false;
+
+	const float DotN = AbsDot(R.m_D, Vec3f(0.0f, 0.0f, 1.0f));
+
+	const float T = R.m_O.z / DotN;
+
+	if (pT)
+		*pT = T;
+
+	if (T < R.m_MinT || T > R.m_MaxT)
+		return false;
+
+	if (R(T).Length() > 1.0f)
+		return false;
+
+//	if (pUV)
+//		*pUV = UV;
+
+	return true;
+}
+
 DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
@@ -149,6 +173,25 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 
 	*pNearT = LargestMinT;
 	*pFarT	= LargestMaxT;
+
+	return LargestMaxT > LargestMinT;
+}
+
+DEV bool IntersectCenteredBox(CRay R, Vec3f Size, float* pNearT, float* pFarT)
+{
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
+	const Vec3f BottomT		= InvR * ((-0.5f * Size) - R.m_O);
+	const Vec3f TopT		= InvR * ((0.5f * Size) - R.m_O);
+	const Vec3f MinT		= MinVec3f(TopT, BottomT);
+	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
+	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
+
+	if (pNearT)
+		*pNearT = LargestMinT;
+
+	if (pFarT)
+		*pFarT = LargestMaxT;
 
 	return LargestMaxT > LargestMinT;
 }

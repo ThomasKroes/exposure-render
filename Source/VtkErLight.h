@@ -28,11 +28,15 @@ public:
 	vtkGetMacro(Enabled, bool);
 	vtkSetMacro(Enabled, bool);
 
+	vtkGetMacro(OneSided, bool);
+	vtkSetMacro(OneSided, bool);
+
 protected:
 	vtkErLight(void) { SetEnabled(true); };
 	virtual ~vtkErLight(void) { };
 
 	bool	Enabled;
+	bool	OneSided;
 
 private:
 	vtkErLight(const vtkErLight&);

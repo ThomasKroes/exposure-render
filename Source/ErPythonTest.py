@@ -78,8 +78,8 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(3)
-ErVolumeProperty.SetStepSizeFactorSecondary(3)
+ErVolumeProperty.SetStepSizeFactorPrimary(1)
+ErVolumeProperty.SetStepSizeFactorSecondary(1)
 ErVolumeProperty.SetDensityScale(10000000)
 ErVolumeProperty.SetShadingType(1)
 
@@ -110,17 +110,18 @@ Key.SetPosition(500, 500, 500);
 Key.SetFocalPoint(300, 300, 300);
 Key.SetColor(100000, 100000, 100000);
 Key.SetPositional(1);
-Key.SetSize(10, 1, 1)
-Key.SetShapeType(2)
+Key.SetShapeType(0)
 
 Fill = vtkErCorePython.vtkErAreaLight()
 Fill.SetPosition(1000, 1000, 1000);
 Fill.SetFocalPoint(300, 300, 300);
-Fill.SetColor(10, 10, 10);
+Fill.SetColor(1, 1, 1)
 Fill.SetPositional(1);
-Fill.SetSize(1, 1, 1)
-Fill.SetShapeType(2)
-
+Fill.SetShapeType(3)
+Fill.SetScale(1, 1, 1);
+# Fill.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
+Fill.GetTransform().Translate(150, 0, 0)
+    
 # Add the area light to the Renderer
 #ErVolumeMapper.AddLight(Key);
 ErVolumeMapper.AddLight(Fill);
@@ -155,9 +156,9 @@ widget = vtk.vtkOrientationMarkerWidget()
 
 widget.SetOutlineColor(0.9300, 0.5700, 0.1300)
 widget.SetOrientationMarker(axes)
-#widget.SetInteractor(Interactor)
+widget.SetInteractor(Interactor)
 widget.SetViewport(0.0, 0.0, 0.2, 0.2)
-#widget.SetEnabled(1)
+widget.SetEnabled(1)
 #widget.InteractiveOn()
 
 # Camera widget
