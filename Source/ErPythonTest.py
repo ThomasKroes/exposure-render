@@ -81,7 +81,7 @@ ErVolumeProperty.SetIOR(IOR)
 ErVolumeProperty.SetStepSizeFactorPrimary(3)
 ErVolumeProperty.SetStepSizeFactorSecondary(3)
 ErVolumeProperty.SetDensityScale(10000000)
-ErVolumeProperty.SetShadingType(0)
+ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -119,7 +119,7 @@ Fill.SetFocalPoint(300, 300, 300);
 Fill.SetColor(10, 10, 10);
 Fill.SetPositional(1);
 Fill.SetSize(1, 1, 1)
-Fill.SetShapeType(0)
+Fill.SetShapeType(2)
 
 # Add the area light to the Renderer
 #ErVolumeMapper.AddLight(Key);

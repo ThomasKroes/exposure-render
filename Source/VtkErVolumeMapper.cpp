@@ -99,42 +99,44 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 		vtkErAreaLight*			pErAreaLight		= dynamic_cast<vtkErAreaLight*>(pLight);
 		vtkErBackgroundLight*	pErBackgroundLight	= dynamic_cast<vtkErBackgroundLight*>(pLight);
 
+		Light& L = this->VolumeMapper->Lighting.m_Lights[count];
+
 		if (pErAreaLight || pErBackgroundLight)
 		{
 			// ER area light
 			if (pErAreaLight && pErAreaLight->GetEnabled())
 			{
-				this->VolumeMapper->Lighting.m_Type[count] = 0;
+				L.m_Type = 0;
 
-				this->VolumeMapper->Lighting.m_P[count].x = pErAreaLight->GetPosition()[0];
-				this->VolumeMapper->Lighting.m_P[count].y = pErAreaLight->GetPosition()[1];
-				this->VolumeMapper->Lighting.m_P[count].z = pErAreaLight->GetPosition()[2];
+				L.m_P.x = pErAreaLight->GetPosition()[0];
+				L.m_P.y = pErAreaLight->GetPosition()[1];
+				L.m_P.z = pErAreaLight->GetPosition()[2];
 
-				this->VolumeMapper->Lighting.m_Size[count].x = pErAreaLight->GetSize()[0];
-				this->VolumeMapper->Lighting.m_Size[count].y = pErAreaLight->GetSize()[1];
-				this->VolumeMapper->Lighting.m_Size[count].z = pErAreaLight->GetSize()[2];
+				L.m_Size.x = pErAreaLight->GetSize()[0];
+				L.m_Size.y = pErAreaLight->GetSize()[1];
+				L.m_Size.z = pErAreaLight->GetSize()[2];
 
 				ColorXYZf Color;
 
 				Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
 
-				this->VolumeMapper->Lighting.m_Color[count].x = Color[0];
-				this->VolumeMapper->Lighting.m_Color[count].y = Color[1];
-				this->VolumeMapper->Lighting.m_Color[count].z = Color[2];
+				L.m_Color.x = Color[0];
+				L.m_Color.y = Color[1];
+				L.m_Color.z = Color[2];
 				
-				this->VolumeMapper->Lighting.m_U[count].x = pErAreaLight->GetTransformMatrix()->GetElement(0, 0);
-				this->VolumeMapper->Lighting.m_U[count].y = pErAreaLight->GetTransformMatrix()->GetElement(1, 0);
-				this->VolumeMapper->Lighting.m_U[count].z = pErAreaLight->GetTransformMatrix()->GetElement(2, 0);
+				L.m_U.x = pErAreaLight->GetTransformMatrix()->GetElement(0, 0);
+				L.m_U.y = pErAreaLight->GetTransformMatrix()->GetElement(1, 0);
+				L.m_U.z = pErAreaLight->GetTransformMatrix()->GetElement(2, 0);
 
-				this->VolumeMapper->Lighting.m_V[count].x = pErAreaLight->GetTransformMatrix()->GetElement(0, 1);
-				this->VolumeMapper->Lighting.m_V[count].y = pErAreaLight->GetTransformMatrix()->GetElement(1, 1);
-				this->VolumeMapper->Lighting.m_V[count].z = pErAreaLight->GetTransformMatrix()->GetElement(2, 1);
+				L.m_V.x = pErAreaLight->GetTransformMatrix()->GetElement(0, 1);
+				L.m_V.y = pErAreaLight->GetTransformMatrix()->GetElement(1, 1);
+				L.m_V.z = pErAreaLight->GetTransformMatrix()->GetElement(2, 1);
 
-				this->VolumeMapper->Lighting.m_W[count].x = pErAreaLight->GetTransformMatrix()->GetElement(0, 2);
-				this->VolumeMapper->Lighting.m_W[count].y = pErAreaLight->GetTransformMatrix()->GetElement(1, 2);
-				this->VolumeMapper->Lighting.m_W[count].z = pErAreaLight->GetTransformMatrix()->GetElement(2, 2);
+				L.m_W.x = pErAreaLight->GetTransformMatrix()->GetElement(0, 2);
+				L.m_W.y = pErAreaLight->GetTransformMatrix()->GetElement(1, 2);
+				L.m_W.z = pErAreaLight->GetTransformMatrix()->GetElement(2, 2);
 
-				this->VolumeMapper->Lighting.m_ShapeType[count] = pErAreaLight->GetShapeType(); 
+				L.m_ShapeType = pErAreaLight->GetShapeType(); 
 
 				count++;
 			}
@@ -142,15 +144,15 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 			// ER background light
 			if (pErBackgroundLight && pErBackgroundLight->GetEnabled())
 			{
-				this->VolumeMapper->Lighting.m_Type[count] = 1;
+				L.m_Type = 1;
 
 				ColorXYZf Color;
 
 				Color.FromRGB(pErBackgroundLight->GetDiffuseColor()[0], pErBackgroundLight->GetDiffuseColor()[1], pErBackgroundLight->GetDiffuseColor()[2]);
 
-				this->VolumeMapper->Lighting.m_Color[count].x = Color[0];
-				this->VolumeMapper->Lighting.m_Color[count].y = Color[1];
-				this->VolumeMapper->Lighting.m_Color[count].z = Color[2];
+				L.m_Color.x = Color[0];
+				L.m_Color.y = Color[1];
+				L.m_Color.z = Color[2];
 
 				count++;
 			}
@@ -158,25 +160,25 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 		else
 		{
 			// VTK light
-			this->VolumeMapper->Lighting.m_Type[count] = 0;
+			L.m_Type = 0;
 
-			this->VolumeMapper->Lighting.m_P[count].x = pLight->GetPosition()[0];
-			this->VolumeMapper->Lighting.m_P[count].y = pLight->GetPosition()[1];
-			this->VolumeMapper->Lighting.m_P[count].z = pLight->GetPosition()[2];
+			L.m_P.x = pLight->GetPosition()[0];
+			L.m_P.y = pLight->GetPosition()[1];
+			L.m_P.z = pLight->GetPosition()[2];
 
-			this->VolumeMapper->Lighting.m_Size[count].x = 0.1f;
-			this->VolumeMapper->Lighting.m_Size[count].y = 0.1f;
-			this->VolumeMapper->Lighting.m_Size[count].z = 0.1f;
+			L.m_Size.x = 0.1f;
+			L.m_Size.y = 0.1f;
+			L.m_Size.z = 0.1f;
 
 			ColorXYZf Color;
 
 			Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
 
-			this->VolumeMapper->Lighting.m_Color[count].x = Color[0];
-			this->VolumeMapper->Lighting.m_Color[count].y = Color[1];
-			this->VolumeMapper->Lighting.m_Color[count].z = Color[2];
+			L.m_Color.x = Color[0];
+			L.m_Color.y = Color[1];
+			L.m_Color.z = Color[2];
 				
-			this->VolumeMapper->Lighting.m_ShapeType[count] = pErAreaLight->GetShapeType(); 
+			L.m_ShapeType = pErAreaLight->GetShapeType(); 
 
 			count++;
 		}

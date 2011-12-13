@@ -22,19 +22,19 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 {
 	const int LID = floorf(RNG.Get1() * gLighting.m_NoLights);
 
-	switch (gLighting.m_Type[LID])
+	switch (gLighting.m_Lights[LID].m_Type)
 	{
 		// Sample area light
 		case 0:
 		{
-			switch (gLighting.m_ShapeType[LID])
+			switch (gLighting.m_Lights[LID].m_ShapeType)
 			{
 				// Plane
 				case 0:
 				{
-					Pl	= ToVec3f(gLighting.m_P[LID]) + (-0.5f + RNG.Get1()) * (gLighting.m_Size[LID].x * ToVec3f(gLighting.m_V[LID])) + (-0.5f + RNG.Get1()) * (gLighting.m_Size[LID].y * ToVec3f(gLighting.m_W[LID]));
+					Pl	= ToVec3f(gLighting.m_Lights[LID].m_P) + (-0.5f + RNG.Get1()) * (gLighting.m_Lights[LID].m_Size.x * ToVec3f(gLighting.m_Lights[LID].m_V)) + (-0.5f + RNG.Get1()) * (gLighting.m_Lights[LID].m_Size.y * ToVec3f(gLighting.m_Lights[LID].m_W));
 
-					const float DotN = Dot(Normalize(Pe - Pl), ToVec3f(gLighting.m_W[LID]));
+					const float DotN = Dot(Normalize(Pe - Pl), ToVec3f(gLighting.m_Lights[LID].m_W));
 
 					if (DotN < 0.0f)
 					{
@@ -44,29 +44,29 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 
 					Pdf	= DotN;// * (DistanceSquared(Pe, Pl) / (gLighting.m_Size[LID].x * gLighting.m_Size[LID].y));
 
-					return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
+					return ColorXYZf(gLighting.m_Lights[LID].m_Color.x, gLighting.m_Lights[LID].m_Color.y, gLighting.m_Lights[LID].m_Color.z);
 				}
 
 				// Box
 				case 1:
 				{
-					Pl	= ToVec3f(gLighting.m_P[LID]) +
-							(-0.5f + RNG.Get1()) * (gLighting.m_Size[LID].x * ToVec3f(gLighting.m_U[LID])) + 
-							(-0.5f + RNG.Get1()) * (gLighting.m_Size[LID].y * ToVec3f(gLighting.m_V[LID])) + 
-							(-0.5f + RNG.Get1()) * (gLighting.m_Size[LID].z * ToVec3f(gLighting.m_W[LID]));
+					Pl	= ToVec3f(gLighting.m_Lights[LID].m_P) +
+							(-0.5f + RNG.Get1()) * (gLighting.m_Lights[LID].m_Size.x * ToVec3f(gLighting.m_Lights[LID].m_U)) + 
+							(-0.5f + RNG.Get1()) * (gLighting.m_Lights[LID].m_Size.y * ToVec3f(gLighting.m_Lights[LID].m_V)) + 
+							(-0.5f + RNG.Get1()) * (gLighting.m_Lights[LID].m_Size.z * ToVec3f(gLighting.m_Lights[LID].m_W));
 
-					Pdf	= DistanceSquared(Pe, Pl) / (gLighting.m_Size[LID].x * gLighting.m_Size[LID].y);
+					Pdf	= DistanceSquared(Pe, Pl) / (gLighting.m_Lights[LID].m_Size.x * gLighting.m_Lights[LID].m_Size.y);
 
-					return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
+					return ColorXYZf(gLighting.m_Lights[LID].m_Color.x, gLighting.m_Lights[LID].m_Color.y, gLighting.m_Lights[LID].m_Color.z);
 				}
 
 				// Sphere
 				case 2:
 				{
-					Pl	= ToVec3f(gLighting.m_P[LID]) + UniformSampleSphere(RNG.Get2()) * ToVec3f(gLighting.m_Size[LID]);
+					Pl	= ToVec3f(gLighting.m_Lights[LID].m_P) + UniformSampleSphere(RNG.Get2()) * ToVec3f(gLighting.m_Lights[LID].m_Size);
 					Pdf	= (Pe - Pl).Length();
 
-					return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
+					return ColorXYZf(gLighting.m_Lights[LID].m_Color.x, gLighting.m_Lights[LID].m_Color.y, gLighting.m_Lights[LID].m_Color.z);
 				}
 			}
 		}
@@ -77,31 +77,31 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 			Pl	= BACKGROUND_LIGHT_RADIUS * UniformSampleSphere(RNG.Get2());
 			Pdf	= (Pe - Pl).Length();
 
-			return ColorXYZf(gLighting.m_Color[LID].x, gLighting.m_Color[LID].y, gLighting.m_Color[LID].z);
+			return ColorXYZf(gLighting.m_Lights[LID].m_Color.x, gLighting.m_Lights[LID].m_Color.y, gLighting.m_Lights[LID].m_Color.z);
 		}
 	}
 }
 
 DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV = NULL, float* pPdf = NULL)
 {
-	switch (gLighting.m_Type[LightID])
+	switch (gLighting.m_Lights[LightID].m_Type)
 	{
 		// Intersect with area light
 		case 0:
 		{
-			switch (gLighting.m_ShapeType[LightID])
+			switch (gLighting.m_Lights[LightID].m_ShapeType)
 			{
 				// Plane
 				case 0:
 				{
-					Vec2f Luv = Vec2f(gLighting.m_Size[LightID].x, gLighting.m_Size[LightID].y);
+					Vec2f Luv = Vec2f(gLighting.m_Lights[LightID].m_Size.x, gLighting.m_Lights[LightID].m_Size.y);
 
-					if (!IntersectPlane(R, true, R.m_O, ToVec3f(gLighting.m_W[LightID]), ToVec3f(gLighting.m_U[LightID]), ToVec3f(gLighting.m_V[LightID]), Luv, &T, pUV))
+					if (!IntersectPlane(R, true, R.m_O, ToVec3f(gLighting.m_Lights[LightID].m_W), ToVec3f(gLighting.m_Lights[LightID].m_U), ToVec3f(gLighting.m_Lights[LightID].m_V), Luv, &T, pUV))
 						return false;
 					
 					R.m_MaxT = T;
 
-					Le = ColorXYZf(gLighting.m_Color[LightID].x, gLighting.m_Color[LightID].y, gLighting.m_Color[LightID].z);
+					Le = ColorXYZf(gLighting.m_Lights[LightID].m_Color.x, gLighting.m_Lights[LightID].m_Color.y, gLighting.m_Lights[LightID].m_Color.z);
 
 					if (pPdf)
 						*pPdf = 1.0f;//DistanceSquared(R.m_O, Pl) / (DotN * m_Area);
@@ -118,7 +118,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Sphere
 				case 2:
 				{
-					if (IntersectSphere(R, ToVec3f(gLighting.m_Size[LightID]).x, &T))
+					if (IntersectSphere(R, ToVec3f(gLighting.m_Lights[LightID].m_Size).x, &T))
 						return true;
 				}
 			}
@@ -133,7 +133,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 			if (IntersectSphere(R, BACKGROUND_LIGHT_RADIUS, &T))
 			{
 				R.m_MaxT = T;
-				Le = ColorXYZf(gLighting.m_Color[LightID].x, gLighting.m_Color[LightID].y, gLighting.m_Color[LightID].z);
+				Le = ColorXYZf(gLighting.m_Lights[LightID].m_Color.x, gLighting.m_Lights[LightID].m_Color.y, gLighting.m_Lights[LightID].m_Color.z);
 				
 				if (pPdf)
 					*pPdf = 1.0f;//powf(BACKGROUND_LIGHT_RADIUS, 2.0f) / m_Area;
