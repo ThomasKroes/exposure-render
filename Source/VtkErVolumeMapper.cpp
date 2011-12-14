@@ -121,12 +121,12 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 				L.m_Color.y = Color[1];
 				L.m_Color.z = Color[2];
 				
-				vtkSmartPointer<vtkTransform> TM = vtkTransform::New(), InvTM = vtkTransform::New();
+				vtkSmartPointer<vtkMatrix4x4> TM = vtkMatrix4x4::New(), InvTM = vtkMatrix4x4::New();
 
-				TM->DeepCopy(pErAreaLight->GetTransform());
-				InvTM->DeepCopy(pErAreaLight->GetTransform());
+				TM->DeepCopy(pErAreaLight->GetTransform()->GetMatrix());
+				InvTM->DeepCopy(TM);
 
-				InvTM->Inverse();
+				InvTM->Invert();
 
 //				L.m_U.x = (float)TM->GetMatrix()->GetElement(0, 0);
 //				L.m_U.y = (float)TM->GetMatrix()->GetElement(1, 0);
@@ -146,8 +146,8 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 				{
 					for (int j = 0; j < 4; j++)
 					{
-						L.m_TM.NN[i][j]		= (float)TM->GetMatrix()->GetElement(i, j);
-						L.m_InvTM.NN[i][j]	= (float)InvTM->GetMatrix()->GetElement(i, j);
+						L.m_TM.NN[i][j]		= (float)TM->GetElement(i, j);
+						L.m_InvTM.NN[i][j]	= (float)InvTM->GetElement(i, j);
 					}
 				}
 

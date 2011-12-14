@@ -18,16 +18,32 @@
 #include "Woodcock.cuh"
 #include "General.cuh"
 
-DEV Vec3f mul(TransformMatrix TM, Vec3f v){
+DEV Vec3f TransformVector(TransformMatrix TM, Vec3f v)
+{
   Vec3f r;
-  r.x = Dot(v, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
-  r.y = Dot(v, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
-  r.z = Dot(v, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
+//  r.x = Dot(v, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
+//  r.y = Dot(v, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
+//  r.z = Dot(v, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
+
+  float x = v.x, y = v.y, z = v.z;
+
+  r.x = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
+  r.y = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
+  r.z = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
+
   return r;
 }
 
-DEV Vec3f Transform(TransformMatrix TM, Vec3f pt)
+DEV Vec3f TransformPoint(TransformMatrix TM, Vec3f pt)
 {
+	/*
+	float x = pt.x, y = pt.y, z = pt.z;
+    ptrans->x = m.m[0][0]*x + m.m[0][1]*y + m.m[0][2]*z + m.m[0][3];
+    ptrans->y = m.m[1][0]*x + m.m[1][1]*y + m.m[1][2]*z + m.m[1][3];
+    ptrans->z = m.m[2][0]*x + m.m[2][1]*y + m.m[2][2]*z + m.m[2][3];
+    float w   = m.m[3][0]*x + m.m[3][1]*y + m.m[3][2]*z + m.m[3][3];
+    if (w != 1.) *ptrans /= w;
+	*/
     float x = pt.x, y = pt.y, z = pt.z;
     float xp = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
     float yp = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
@@ -36,29 +52,29 @@ DEV Vec3f Transform(TransformMatrix TM, Vec3f pt)
     
 //	Assert(wp != 0);
     
-	if (wp == 1.)
+//	if (wp == 1.)
 		return Vec3f(xp, yp, zp);
-    else
-		return Vec3f(xp, yp, zp) * (1.0f / wp);
+ //   else
+//		return Vec3f(xp, yp, zp) * (1.0f / wp);
 }
 
 DEV CRay TransformRay(CRay R, TransformMatrix TM)
 {
 	CRay TR;
 
-//	Vec3f O(TM.NN[0][3], TM.NN[1][3], TM.NN[2][3]);
+	Vec3f O(TM.NN[0][3], TM.NN[1][3], TM.NN[2][3]);
 
-//	TR.m_O.x	= Dot(TR.m_O - O, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
-//	TR.m_O.y	= Dot(TR.m_O - O, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
-//	TR.m_O.z	= Dot(TR.m_O - O, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
+	TR.m_O.x	= Dot(TR.m_O - O, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
+	TR.m_O.y	= Dot(TR.m_O - O, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
+	TR.m_O.z	= Dot(TR.m_O - O, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
 
-	TR.m_O = Transform(TM, R.m_O);
+	TR.m_O = TransformPoint(TM, R.m_O);
 
-//	TR.m_D.x	= Dot(TR.m_D, Vec3f(TM.NN[0][0], TM.NN[0][1], TM.NN[0][2]));
-//	TR.m_D.y	= Dot(TR.m_D, Vec3f(TM.NN[1][0], TM.NN[1][1], TM.NN[1][2]));
-//	TR.m_D.z	= Dot(TR.m_D, Vec3f(TM.NN[2][0], TM.NN[2][1], TM.NN[2][2]));
+	TR.m_D.x	= Dot(TR.m_D, Vec3f(TM.NN[0][0], TM.NN[0][1], TM.NN[0][2]));
+	TR.m_D.y	= Dot(TR.m_D, Vec3f(TM.NN[1][0], TM.NN[1][1], TM.NN[1][2]));
+	TR.m_D.z	= Dot(TR.m_D, Vec3f(TM.NN[2][0], TM.NN[2][1], TM.NN[2][2]));
 
-	TR.m_D = mul(TM, R.m_D);
+	TR.m_D = TransformVector(TM, R.m_D);
 
 	TR.m_MinT	= R.m_MinT;
 	TR.m_MaxT	= R.m_MaxT;
@@ -87,6 +103,8 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				{
 					Vec2f P = UniformSamplePlane(RNG.Get2());
 					LocalP = Vec3f(P.x, P.y, 0.0f);
+
+					break;
 				}
 
 				// Box
@@ -98,6 +116,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 							(-0.5f + RNG.Get1()) * (L.m_Size.y * ToVec3f(L.m_V)) + 
 							(-0.5f + RNG.Get1()) * (L.m_Size.z * ToVec3f(L.m_W));
 */
+					break;
 				}
 
 				// Sphere
@@ -107,6 +126,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 					Pl	= ToVec3f(L.m_P) + UniformSampleSphere(RNG.Get2()) * ToVec3f(L.m_Size);
 					*/
 
+					break;
 				}
 
 				// Disk
@@ -114,6 +134,8 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				{
 					Vec2f P = UniformSampleDisk(RNG.Get2());
 					LocalP = Vec3f(P.x, P.y, 0.0f);
+
+					break;
 				}
 			}
 		}
@@ -125,9 +147,9 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 		}
 	}
 
-	Pdf = Clamp(0.0f, 1.0f, Dot(Normalize(Pe - Pl), L.m_TM.GetW()));
+	Pdf = Length(Pe - Pl);//Clamp(0.0f, 1.0f, Dot(Normalize(Pe - Pl), L.m_TM.GetW()));
 
-	Pl = Transform(L.m_InvTM, LocalP);
+	Pl = TransformPoint(L.m_TM, LocalP);
 
 	return ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
 }
@@ -150,9 +172,8 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				case 0:
 				{
 
-					return false;
-					/*
-					if (IntersectCenteredBox(TR, ToVec3f(L.m_Size), NULL, NULL))
+					
+					if (IntersectCenteredBox(TR, Vec3f(1.0f), NULL, NULL))
 					{
 						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
 						
@@ -163,8 +184,8 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 					}
 					else
 						return false;
-					
-					Vec2f Luv = Vec2f(L.m_Size.x, L.m_Size.y);
+					/*
+					Vec2f Luv = Vec2f(50, 50);
 
 					if (!IntersectPlane(R, true, R.m_O, ToVec3f(L.m_W), ToVec3f(L.m_U), ToVec3f(L.m_V), Luv, &T, pUV))
 						return false;
@@ -189,12 +210,8 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Sphere
 				case 2:
 				{
-					return false;
-
-					/*
-					if (IntersectSphere(R, ToVec3f(L.m_Size).x, &T))
+					if (IntersectSphere(R, 20, &T))
 						return true;
-					*/
 
 					break;
 				}
@@ -280,7 +297,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 
  	Li = SampleLight(RNG, Pe, Pl, LightPdf);
 	
-	Rl.m_O		= Pe;
+	Rl.m_O		= Pl;
 	Rl.m_D		= Normalize(Pe - Pl);
 	Rl.m_MinT	= 0.0f;
 	Rl.m_MaxT	= (Pe - Pl).Length();

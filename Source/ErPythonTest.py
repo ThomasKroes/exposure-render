@@ -5,7 +5,7 @@ import vtkErCorePython
 
 # The colors module defines various useful colors.
 
-VolumeFile = "C:/engine_small.mhd"
+VolumeFile = "C:/volumes/engine_small.mhd"
 
 Renderer = vtk.vtkRenderer()
 RendererWin = vtk.vtkRenderWindow()
@@ -78,8 +78,8 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(1)
-ErVolumeProperty.SetStepSizeFactorSecondary(1)
+ErVolumeProperty.SetStepSizeFactorPrimary(3)
+ErVolumeProperty.SetStepSizeFactorSecondary(3)
 ErVolumeProperty.SetDensityScale(10000000)
 ErVolumeProperty.SetShadingType(1)
 
@@ -113,18 +113,32 @@ Key.SetPositional(1);
 Key.SetShapeType(0)
 
 Fill = vtkErCorePython.vtkErAreaLight()
-Fill.SetPosition(1000, 1000, 1000);
+#Fill.SetPosition(0, 0, 1000000);
 Fill.SetFocalPoint(300, 300, 300);
-Fill.SetColor(1, 1, 1)
+Fill.SetColor(600, 600, 600)
 Fill.SetPositional(1);
-Fill.SetShapeType(3)
+Fill.SetShapeType(0)
 Fill.SetScale(1, 1, 1);
-# Fill.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
-Fill.GetTransform().Translate(150, 0, 0)
+#Fill.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
+Fill.GetTransform().Translate(250, 250, 250)
+Fill.GetTransform().Scale(1, 1, 250)
     
 # Add the area light to the Renderer
 #ErVolumeMapper.AddLight(Key);
 ErVolumeMapper.AddLight(Fill);
+
+Rim = vtkErCorePython.vtkErAreaLight()
+#Fill.SetPosition(0, 0, 1000000);
+Rim.SetFocalPoint(300, 300, 300);
+Rim.SetColor(600, 10, 100)
+Rim.SetPositional(1);
+Rim.SetShapeType(0)
+Rim.SetScale(1, 1, 1);
+#Rim.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
+Rim.GetTransform().Translate(50, 450, 250)
+Rim.GetTransform().Scale(1, 1, 250)
+
+ErVolumeMapper.AddLight(Rim);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
 ErBackgroundLight.SetDiffuseColor(0.1, 0.1, 0.1);

@@ -130,6 +130,11 @@ HOD inline Vec2f UniformSamplePlane(Vec2f U)
 	return Vec2f(-0.5) + U;
 }
 
+HOD inline Vec2f UniformSampleBox(Vec2f U)
+{
+	return Vec2f(-0.5) + U;
+}
+
 HOD inline Vec2f UniformSampleDisk(const Vec2f& U)
 {
 	float r = sqrtf(U.x);

@@ -64,9 +64,13 @@ vtkTransform* vtkErAreaLight::GetTransform()
 	TransformMatrix->SetElement(0, 3, 0);
 	TransformMatrix->SetElement(1, 3, 0);
 	TransformMatrix->SetElement(2, 3, 0);
-	*/
 	
-//	TransformMatrix->Identity();
+	
+	TransformMatrix->Identity();
+	TransformMatrix->GetMatrix()->SetElement(0, 3, 1000);
+	TransformMatrix->GetMatrix()->SetElement(1, 3, 0);
+	TransformMatrix->GetMatrix()->SetElement(2, 3, 0);
+*/
 //	TransformMatrix->Translate(this->GetPosition()[0], this->GetPosition()[1], this->GetPosition()[2]);
 //	TransformMatrix->Scale(this->Scale);
 
