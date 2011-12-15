@@ -269,6 +269,16 @@ HOD inline Vec3f UniformSampleSphereSurface(const Vec2f& U)
 	return Vec3f(x, y, z);
 }
 
+HOD inline Vec3f SampleUnitSphereSurface(const Vec2f& U)
+{
+	float z = 1.f - 2.f * U.x;
+	float r = sqrtf(max(0.f, 1.f - z*z));
+	float phi = 2.f * PI_F * U.y;
+	float x = r * cosf(phi);
+	float y = r * sinf(phi);
+	return Vec3f(x, y, z);
+}
+
 HOD inline Vec3f UniformSampleHemisphere(const Vec2f& U)
 {
 	float z = U.x;

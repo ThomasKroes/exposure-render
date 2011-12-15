@@ -107,21 +107,19 @@ DEV float GradientMagnitude(const Vec3f& P)
 	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolume.m_InvMaxAABB.x, P.y * gVolume.m_InvMaxAABB.y, P.z * gVolume.m_InvMaxAABB.z));
 }
 
-DEV bool IntersectUnitPlane(const CRay& R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)
+DEV bool IntersectUnitPlane(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)
 {
-	const float DotN = R.m_D.z;
+//	if (OneSided && R.m_D.z >= 0.0f)
+//		return false;
 
-	if (OneSided && DotN >= 0.0f)
-		return false;
+	const float T = Dot(R.m_O.z / R.m_D.z;
 
-	const float T = (Dot(R.m_O.Length(), Vec3f(0.0f, 0.0f, 1.0f))) / DotN;
-
-	if (T < R.m_MinT || T > R.m_MaxT)
-		return false;
+//	if (T < R.m_MinT || T > R.m_MaxT)
+//		return false;
 
 	const Vec3f Pl = R(T);
 
-	if (Pl.x > 0.5f || Pl.x < -0.5f || Pl.y > 0.5f || Pl.y < -0.5f)
+	if (Pl.x < -0.5f || Pl.x > 0.5f || Pl.y < -0.5f || Pl.y > 0.5f)
 		return false;
 
 	if (pUV)
@@ -170,15 +168,18 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 	return LargestMaxT > LargestMinT;
 }
 
-DEV bool IntersectCenteredBox(CRay R, Vec3f Size, float* pNearT, float* pFarT)
+DEV bool IntersectUnitBox(CRay R, float* pNearT, float* pFarT)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * ((-0.5f * Size) - R.m_O);
-	const Vec3f TopT		= InvR * ((0.5f * Size) - R.m_O);
+	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.m_O);
+	const Vec3f TopT		= InvR * (Vec3f(0.5f) - R.m_O);
 	const Vec3f MinT		= MinVec3f(TopT, BottomT);
 	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
 	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
+
+	if (LargestMinT < R.m_MinT || LargestMinT > R.m_MaxT)
+		return false;
 
 	if (pNearT)
 		*pNearT = LargestMinT;
@@ -211,6 +212,69 @@ DEV bool IntersectSphere(CRay R, float Radius, float* pT)
     float a = Dot(R.m_D, R.m_D);
 	float b = 2 * Dot(R.m_D, R.m_O);
     float c = Dot(R.m_O, R.m_O) - (Radius * Radius);
+
+    //Find discriminant
+    const float disc = b * b - 4 * a * c;
+    
+    // if discriminant is negative there are no real roots, so return 
+    // false as ray misses sphere
+    if (disc < 0)
+        return false;
+
+    // compute q as described above
+    float distSqrt = sqrtf(disc);
+    float q;
+
+    if (b < 0)
+        q = (-b - distSqrt) / 2.0;
+    else
+        q = (-b + distSqrt) / 2.0;
+
+    // compute t0 and t1
+    float t0 = q / a;
+    float t1 = c / q;
+
+    // make sure t0 is smaller than t1
+    if (t0 > t1)
+    {
+        // if t0 is bigger than t1 swap them around
+        float temp = t0;
+        t0 = t1;
+        t1 = temp;
+    }
+
+
+	if (t0 >= R.m_MinT && t0 < R.m_MaxT)
+	{
+		if (pT)
+			*pT = t0;
+
+        return true;
+	}
+	else
+	{
+		if (t1 >= R.m_MinT && t1 < R.m_MaxT)
+		{
+			if (pT)
+				*pT = t1;
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return false;
+}
+
+DEV bool IntersectUnitSphere(CRay R, float* pT)
+{
+    //Compute A, B and C coefficients
+    float a = Dot(R.m_D, R.m_D);
+	float b = 2 * Dot(R.m_D, R.m_O);
+    float c = Dot(R.m_O, R.m_O)-1;
 
     //Find discriminant
     const float disc = b * b - 4 * a * c;

@@ -39,11 +39,15 @@ public:
 	
 	vtkTransform* GetTransform();
 
+	vtkGetMacro(OneSided, bool);
+	vtkSetMacro(OneSided, bool);
+
 protected:
 	vtkErAreaLight(void);
 	virtual ~vtkErAreaLight(void);
 
 	int								ShapeType;
+	bool							OneSided;
 	double							Up[3];
 	double							N[3];
 	double							U[3];

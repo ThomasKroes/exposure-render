@@ -119,9 +119,10 @@ Fill.SetColor(600, 1600, 600)
 Fill.SetPositional(1);
 Fill.SetShapeType(0)
 Fill.SetScale(1, 1, 1);
+Fill.SetOneSided(0)
 #Fill.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
-Fill.GetTransform().Translate(250, 250, 250)
-Fill.GetTransform().Scale(1, 1, 1)
+Fill.GetTransform().Translate(250, 250, 0)
+Fill.GetTransform().Scale(100, 100, 100)
     
 # Add the area light to the Renderer
 #ErVolumeMapper.AddLight(Key);
@@ -131,14 +132,15 @@ Rim = vtkErCorePython.vtkErAreaLight()
 #Fill.SetPosition(0, 0, 1000000);
 Rim.SetFocalPoint(300, 300, 300);
 Rim.SetColor(600, 10, 100)
-Rim.SetPositional(1);
+Rim.SetPositional(1)
 Rim.SetShapeType(0)
-Rim.SetScale(1, 1, 1);
+Rim.SetScale(1, 1, 1)
+Rim.SetOneSided(0)
 #Rim.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
-Rim.GetTransform().Translate(50, 450, 250)
-Rim.GetTransform().Scale(100, 100, 250)
+Rim.GetTransform().Translate(150, 150, 150)
+Rim.GetTransform().Scale(100, 100, 100)
 
-ErVolumeMapper.AddLight(Rim);
+#ErVolumeMapper.AddLight(Rim);
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
 ErBackgroundLight.SetDiffuseColor(0.1, 0.1, 0.1);

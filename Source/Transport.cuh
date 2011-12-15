@@ -119,7 +119,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				// Sphere
 				case 2:
 				{
-					Pl	= UniformSampleSphereSurface(RNG.Get2());
+					LocalP = SampleUnitSphereSurface(RNG.Get2());
 
 					break;
 				}
@@ -166,7 +166,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Plane
 				case 0:
 				{
-					if (IntersectUnitPlane(TR, true, &T, NULL))
+					if (IntersectUnitPlane(TR, L.m_OneSided, &T, NULL))
 					{
 						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
 						
@@ -199,7 +199,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Box
 				case 1:
 				{
-					if (IntersectCenteredBox(TR, Vec3f(1.0f), NULL, NULL))
+					if (IntersectUnitBox(TR, NULL, NULL))
 					{
 						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
 						
@@ -215,10 +215,17 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Sphere
 				case 2:
 				{
-					if (IntersectSphere(R, 20, &T))
-						return true;
+					if (IntersectUnitSphere(TR, &T))
+					{
+						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
+						
+						if (pPdf)
+							*pPdf = 1.0f;
 
-					break;
+						return true;
+					}
+					else
+						return false;
 				}
 
 				// Disk

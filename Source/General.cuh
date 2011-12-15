@@ -105,6 +105,7 @@ struct EXPOSURE_RENDER_DLL Camera
 struct EXPOSURE_RENDER_DLL Light
 {
 	int				m_Type;
+	bool			m_OneSided;
 //	float3			m_P;
 //	float3			m_U;
 //	float3			m_V;

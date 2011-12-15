@@ -107,7 +107,8 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 			// ER area light
 			if (pErAreaLight && pErAreaLight->GetEnabled())
 			{
-				L.m_Type = 0;
+				L.m_Type		= 0;
+				L.m_OneSided	= pErAreaLight->GetOneSided();
 
 //				L.m_P.x = pErAreaLight->GetPosition()[0];
 //				L.m_P.y = pErAreaLight->GetPosition()[1];
