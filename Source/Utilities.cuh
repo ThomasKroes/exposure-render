@@ -107,32 +107,25 @@ DEV float GradientMagnitude(const Vec3f& P)
 	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolume.m_InvMaxAABB.x, P.y * gVolume.m_InvMaxAABB.y, P.z * gVolume.m_InvMaxAABB.z));
 }
 
-DEV bool IntersectPlane(const CRay& R, bool OneSided, Vec3f P, Vec3f N, Vec3f U, Vec3f V, Vec2f Luv, float* pT = NULL, Vec2f* pUV = NULL)
+DEV bool IntersectUnitPlane(const CRay& R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)
 {
-	const float DotN = Dot(R.m_D, N);
+	const float DotN = R.m_D.z;
 
 	if (OneSided && DotN >= 0.0f)
 		return false;
 
-	const float T = (Dot((P - R.m_O).Length(), N)) / DotN;
+	const float T = (Dot(R.m_O.Length(), Vec3f(0.0f, 0.0f, 1.0f))) / DotN;
 
 	if (T < R.m_MinT || T > R.m_MaxT)
 		return false;
 
 	const Vec3f Pl = R(T);
 
-	const Vec3f Wl = Pl - P;
-
-	const Vec2f UV = Vec2f(Dot(Wl, U), Dot(Wl, V));
-
-	const float HalfLu = 0.5f * Luv.x;
-	const float HalfLv = 0.5f * Luv.y;
-
-	if (UV.x > HalfLu || UV.x < -HalfLu || UV.y > HalfLv || UV.y < -HalfLv)
+	if (Pl.x > 0.5f || Pl.x < -0.5f || Pl.y > 0.5f || Pl.y < -0.5f)
 		return false;
 
 	if (pUV)
-		*pUV = UV;
+		*pUV = Vec2f(Pl.x, Pl.y);
 
 	return true;
 }

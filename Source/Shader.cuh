@@ -252,7 +252,7 @@ public:
 
 	HOD ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
-		Wi	= UniformSampleSphere(U);
+		Wi	= UniformSampleSphereSurface(U);
 		Pdf	= this->Pdf(Wo, Wi);
 
 		return F(Wo, Wi);

@@ -96,6 +96,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 		// Sample area light
 		case 0:
 		{
+			// Shape types
 			switch (L.m_ShapeType)
 			{
 				// Plane
@@ -110,21 +111,15 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				// Box
 				case 1:
 				{
-					/*
-					Pl	= ToVec3f(L.m_P) +
-							(-0.5f + RNG.Get1()) * (L.m_Size.x * ToVec3f(L.m_U)) + 
-							(-0.5f + RNG.Get1()) * (L.m_Size.y * ToVec3f(L.m_V)) + 
-							(-0.5f + RNG.Get1()) * (L.m_Size.z * ToVec3f(L.m_W));
-*/
+					LocalP = Vec3f(-0.5f) + RNG.Get3();
+	
 					break;
 				}
 
 				// Sphere
 				case 2:
 				{
-					/*
-					Pl	= ToVec3f(L.m_P) + UniformSampleSphere(RNG.Get2()) * ToVec3f(L.m_Size);
-					*/
+					Pl	= UniformSampleSphereSurface(RNG.Get2());
 
 					break;
 				}
@@ -132,7 +127,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				// Disk
 				case 3:
 				{
-					Vec2f P = UniformSampleDisk(RNG.Get2());
+					Vec2f P = UniformSampleDiskSurface(RNG.Get2());
 					LocalP = Vec3f(P.x, P.y, 0.0f);
 
 					break;
@@ -143,7 +138,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 		// Sample background light
 		case 1:
 		{
-			Pl	= BACKGROUND_LIGHT_RADIUS * UniformSampleSphere(RNG.Get2());
+			Pl	= BACKGROUND_LIGHT_RADIUS * UniformSampleSphereSurface(RNG.Get2());
 		}
 	}
 
@@ -171,9 +166,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Plane
 				case 0:
 				{
-
-					
-					if (IntersectCenteredBox(TR, Vec3f(1.0f), NULL, NULL))
+					if (IntersectUnitPlane(TR, true, &T, NULL))
 					{
 						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
 						
@@ -184,6 +177,8 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 					}
 					else
 						return false;
+					
+					
 					/*
 					Vec2f Luv = Vec2f(50, 50);
 
@@ -204,7 +199,17 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Box
 				case 1:
 				{
-					return false;
+					if (IntersectCenteredBox(TR, Vec3f(1.0f), NULL, NULL))
+					{
+						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
+						
+						if (pPdf)
+							*pPdf = 1.0f;
+
+						return true;
+					}
+					else
+						return false;
 				}
 
 				// Sphere

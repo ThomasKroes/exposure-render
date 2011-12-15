@@ -115,13 +115,13 @@ Key.SetShapeType(0)
 Fill = vtkErCorePython.vtkErAreaLight()
 #Fill.SetPosition(0, 0, 1000000);
 Fill.SetFocalPoint(300, 300, 300);
-Fill.SetColor(600, 600, 600)
+Fill.SetColor(600, 1600, 600)
 Fill.SetPositional(1);
 Fill.SetShapeType(0)
 Fill.SetScale(1, 1, 1);
 #Fill.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
 Fill.GetTransform().Translate(250, 250, 250)
-Fill.GetTransform().Scale(1, 1, 250)
+Fill.GetTransform().Scale(1, 1, 1)
     
 # Add the area light to the Renderer
 #ErVolumeMapper.AddLight(Key);
@@ -136,7 +136,7 @@ Rim.SetShapeType(0)
 Rim.SetScale(1, 1, 1);
 #Rim.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
 Rim.GetTransform().Translate(50, 450, 250)
-Rim.GetTransform().Scale(1, 1, 250)
+Rim.GetTransform().Scale(100, 100, 250)
 
 ErVolumeMapper.AddLight(Rim);
 

@@ -135,7 +135,7 @@ HOD inline Vec2f UniformSampleBox(Vec2f U)
 	return Vec2f(-0.5) + U;
 }
 
-HOD inline Vec2f UniformSampleDisk(const Vec2f& U)
+HOD inline Vec2f UniformSampleDiskSurface(const Vec2f& U)
 {
 	float r = sqrtf(U.x);
 	float theta = 2.0f * PI_F * U.y;
@@ -144,7 +144,7 @@ HOD inline Vec2f UniformSampleDisk(const Vec2f& U)
 
 HOD inline Vec3f UniformSampleDisk(const Vec2f& U, const Vec3f& N)
 {
-	const Vec2f UV = UniformSampleDisk(U);
+	const Vec2f UV = UniformSampleDiskSurface(U);
 
 	Vec3f Ucs, Vcs;
 
@@ -259,7 +259,7 @@ HOD inline Vec2f UniformSampleTriangle(const Vec2f& U)
 	return Vec2f(1.0f - su1, U.y * su1);
 }
 
-HOD inline Vec3f UniformSampleSphere(const Vec2f& U)
+HOD inline Vec3f UniformSampleSphereSurface(const Vec2f& U)
 {
 	float z = 1.f - 2.f * U.x;
 	float r = sqrtf(max(0.f, 1.f - z*z));
