@@ -112,7 +112,7 @@ DEV bool IntersectUnitPlane(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV 
 //	if (OneSided && R.m_D.z >= 0.0f)
 //		return false;
 
-	const float T = Dot(R.m_O.z / R.m_D.z;
+	const float T = Dot(R.m_O, Vec3f(0,0,1)) / Dot(R.m_D, Vec3f(0,0,1));
 
 //	if (T < R.m_MinT || T > R.m_MaxT)
 //		return false;

@@ -117,7 +117,7 @@ Fill = vtkErCorePython.vtkErAreaLight()
 Fill.SetFocalPoint(300, 300, 300);
 Fill.SetColor(600, 1600, 600)
 Fill.SetPositional(1);
-Fill.SetShapeType(0)
+Fill.SetShapeType(1)
 Fill.SetScale(1, 1, 1);
 Fill.SetOneSided(0)
 #Fill.GetTransform().RotateWXYZ(45, 0.5, 0.1, 0.9)
