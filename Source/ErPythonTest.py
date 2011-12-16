@@ -1,4 +1,4 @@
-import vtk
+#import vtk
 import vtkErCorePython
 
 # print vtkErCorePython

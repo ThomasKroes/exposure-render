@@ -28,31 +28,25 @@ public:
 	vtkSetMacro(ShapeType, int);
 
 	vtkSetVector3Macro(Up, double);
-	vtkGetVectorMacro(Up, double, 3);
-
-	vtkGetVector3Macro(N, double);
-	vtkGetVector3Macro(U, double);
-	vtkGetVector3Macro(V, double);
-
-	vtkGetVector3Macro(Scale, double);
-	vtkSetVector3Macro(Scale, double);
-	
-	vtkTransform* GetTransform();
+	vtkGetVector3Macro(Up, double);
 
 	vtkGetMacro(OneSided, bool);
 	vtkSetMacro(OneSided, bool);
+
+	vtkGetMacro(Offset, double);
+	vtkSetMacro(Offset, double);
+
+	vtkTransform* GetTransform();
 
 protected:
 	vtkErAreaLight(void);
 	virtual ~vtkErAreaLight(void);
 
-	int								ShapeType;
-	bool							OneSided;
-	double							Up[3];
-	double							N[3];
-	double							U[3];
-	double							V[3];
-	double							Scale[3];
-	vtkSmartPointer<vtkTransform>	TransformMatrix;
-	vtkSmartPointer<vtkTransform>	UserTransformMatrix;
+	int									ShapeType;
+	bool								OneSided;
+	double								Up[3];
+	double								Offset;
+
+	vtkSmartPointer<vtkTransform>		TransformMatrix;
+	vtkSmartPointer<vtkTransform>		UserTransformMatrix;
 };

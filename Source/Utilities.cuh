@@ -15,6 +15,44 @@
 
 #include <cuda_runtime.h>
 
+#define SetVec3(name, type) \
+virtual void Set##name (type _arg1, type _arg2, type _arg3) \
+{ \
+	if ((this->name[0] != _arg1)||(this->name[1] != _arg2)||(this->name[2] != _arg3)) \
+	{ \
+		this->name[0] = _arg1; \
+		this->name[1] = _arg2; \
+		this->name[2] = _arg3; \
+    } \
+}; \
+virtual void Set##name (type _arg[3]) \
+{ \
+	this->Set##name(_arg[0], _arg[1], _arg[2]);\
+}
+
+#define GetVec3(name, type) \
+virtual type *Get##name () \
+{ \
+	return this->name; \
+} \
+virtual void Get##name(type &_arg1, type &_arg2, type &_arg3) \
+{ \
+	_arg1 = this->name[0]; \
+    _arg2 = this->name[1]; \
+    _arg3 = this->name[2]; \
+}; \
+virtual void Get##name(type _arg[3]) \
+{ \
+this->Get##name(_arg[0], _arg[1], _arg[2]);\
+} 
+
+#define GetSetVec3(name, type) \
+	GetVec3(name, type) \
+	SetVec3(name, type)
+
+
+
+
 DEV inline Vec3f ToVec3f(const float3& V)
 {
 	return Vec3f(V.x, V.y, V.z);
