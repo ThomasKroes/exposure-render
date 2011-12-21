@@ -56,7 +56,7 @@ vtkMatrix4x4* vtkErAreaLight::GetTransformMatrix()
 	switch (this->Type)
 	{
 		case 0:
-		case 2:
+//		case 2:
 		{
 			const double Elevation = vtkMath::RadiansFromDegrees(this->Elevation);
 			const double Azimuth   = vtkMath::RadiansFromDegrees(this->Azimuth);
@@ -90,7 +90,7 @@ vtkMatrix4x4* vtkErAreaLight::GetTransformMatrix()
 			this->Transform->GetMatrix()->SetElement(1, 2, W[1]);
 			this->Transform->GetMatrix()->SetElement(2, 2, W[2]);
 
-//			this->Transform->Scale(this->Scale);
+			this->Transform->Scale(1, 1, 1);
 
 			if (this->Type == 0)
 				return this->Transform->GetMatrix();

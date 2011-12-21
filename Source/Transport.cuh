@@ -155,7 +155,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 	Pl = TransformPoint(L.m_TM, LocalP);
 	Vec3f N = TransformVector(L.m_TM, LocalN);
 
-	Pdf = 1.0f;//DistanceSquared(Pe, Pl) / L.m_Area;// * Clamp(0.0f, 1.0f, Dot(Normalize(Pe - Pl), N));
+	Pdf = DistanceSquared(Pe, Pl) / L.m_Area;// * Dot(Normalize(Pe - Pl), N);
 
 	return ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z) / L.m_Area;
 }
@@ -200,7 +200,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Box
 				case 3:
 				{
-					Res = IntersectBox(TR, NULL, NULL);
+					Res = IntersectBox(TR, ToVec3f(L.m_Size), NULL, NULL);
 					break;
 				}
 
@@ -300,6 +300,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 
 	ShaderPdf = Shader.Pdf(Wo, -Wi);
 
+	/**/
 	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
@@ -310,16 +311,14 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 		if (Type == CVolumeShader::Phase)
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
-
-	/*
+	
+	
 	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
 	{
-		if (NearestLight(pScene, CRay(Pe, Wi, 0.0f), Li, Pl, pLight, &LightPdf))
+		if (NearestLight(CRay(Pe, Wi, 0.0f), Li, Pl, &LightPdf))
 		{
-			LightPdf = pLight->Pdf(Pe, Wi);
-
 			if (LightPdf > 0.0f && !Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), RNG)) 
 			{
 				const float WeightMIS = PowerHeuristic(1.0f, ShaderPdf, 1.0f, LightPdf);
@@ -332,7 +331,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 			}
 		}
 	}
-	*/
+	
 
 	return Ld;
 }

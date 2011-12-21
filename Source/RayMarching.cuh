@@ -27,7 +27,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps)
 	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
+	if (!IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB), &MinT[TID], &MaxT[TID]))
 		return false;
 
 	MinT[TID] = max(MinT[TID], R.m_MinT);
@@ -63,7 +63,7 @@ DEV inline bool FreePathRM(CRay& R, CRNG& RNG)
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ Vec3f Ps[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
+	if (!IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB), &MinT[TID], &MaxT[TID]))
 		return false;
 
 	MinT[TID] = max(MinT[TID], R.m_MinT);

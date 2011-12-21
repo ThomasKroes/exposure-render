@@ -500,6 +500,9 @@ void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 			this->Volume.m_ShadingType		= vtkErVolumeProperty::DefaultShadingType();
 		}
 
+		this->Volume.m_StepSize			= this->Volume.m_Spacing.x;
+		this->Volume.m_StepSizeShadow	= this->Volume.m_Spacing.x;
+
 		this->Volume.m_GradientDeltaX.x = this->Volume.m_GradientDelta;
 		this->Volume.m_GradientDeltaX.y = 0.0f;
 		this->Volume.m_GradientDeltaX.z = 0.0f;

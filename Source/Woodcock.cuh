@@ -43,7 +43,7 @@ __device__ bool lightShootDDAWoodcock(CRay& R, CRNG& RNG, Vec3f& P)
 	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	if (!IntersectBox(R, &MinT[TID], &MaxT[TID]))
+	if (!IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB), &MinT[TID], &MaxT[TID]))
 		return false;
 //	else
 //		return true;

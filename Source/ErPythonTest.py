@@ -34,8 +34,8 @@ ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
 Opacity.AddPoint(0, 0)
-Opacity.AddPoint(10, 0)
-Opacity.AddPoint(11, 1)
+Opacity.AddPoint(240, 0)
+Opacity.AddPoint(241, 1)
 Opacity.AddPoint(255, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
@@ -78,15 +78,25 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(1)
-ErVolumeProperty.SetStepSizeFactorSecondary(1)
-ErVolumeProperty.SetDensityScale(10000000)
+ErVolumeProperty.SetStepSizeFactorPrimary(110)
+ErVolumeProperty.SetStepSizeFactorSecondary(100)
+ErVolumeProperty.SetDensityScale(0.000011)
 ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
 
-ErVolumeMapper.SetInput(Reader.GetOutput())
+ChangeInformation = vtk.vtkImageChangeInformation()
+
+ChangeInformation.SetInput(Reader.GetOutput())
+ChangeInformation.Update()
+ChangeInformation.CenterImageOn()
+ChangeInformation.SetOutputSpacing(0.01, 0.01, 0.01)
+ChangeInformation.Update()
+
+#Reader.GetOutput().UpdateInformation();
+
+ErVolumeMapper.SetInput(ChangeInformation.GetOutput())
 
 Renderer.AddVolume(Volume)
 
@@ -105,20 +115,20 @@ Renderer.SetActiveCamera(ErCamera)
 Renderer.RemoveAllLights()
 
 Fill = vtkErCorePython.vtkErAreaLight()
-Fill.SetType(1)
-Fill.SetPosition(75, 1, 1)
+Fill.SetType(0)
+Fill.SetPosition(10, 10, 10)
 Fill.SetFocalPoint(0, 0, 0)
-Fill.SetColor(6000, 6000, 6000)
+Fill.SetColor(1, 1, 1)
 Fill.SetPositional(1);
-Fill.SetShapeType(1)
+Fill.SetShapeType(0)
 Fill.SetOneSided(1)
-Fill.SetDistance(2)
+Fill.SetDistance(1.5)
 #Fill.SetScale(100, 100, 10)
 Fill.SetElevation(45)
-Fill.SetAzimuth(45)
-Fill.SetInnerRadius(90)
-Fill.SetOuterRadius(100)
-Fill.SetSize(500, 500, 500)
+Fill.SetAzimuth(90)
+Fill.SetInnerRadius(0.01)
+Fill.SetOuterRadius(0.01)
+Fill.SetSize(1, 1, 1)
 #Fill.SetCamera(ErCamera)
 
 ErVolumeMapper.AddLight(Fill)

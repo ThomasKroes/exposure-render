@@ -284,11 +284,11 @@ DEV bool IntersectUnitBox(CRay R, float* pNearT, float* pFarT)
 	return LargestMaxT > LargestMinT;
 }
 
-DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
+DEV bool IntersectBox(CRay R, Vec3f Min, Vec3f Max, float* pNearT, float* pFarT)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * (Vec3f(gVolume.m_MinAABB.x, gVolume.m_MinAABB.y, gVolume.m_MinAABB.z) - R.m_O);
-	const Vec3f TopT		= InvR * (Vec3f(gVolume.m_MaxAABB.x, gVolume.m_MaxAABB.y, gVolume.m_MaxAABB.z) - R.m_O);
+	const Vec3f BottomT		= InvR * (Min - R.m_O);
+	const Vec3f TopT		= InvR * (Max - R.m_O);
 	const Vec3f MinT		= MinVec3f(TopT, BottomT);
 	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
@@ -298,6 +298,11 @@ DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
 	*pFarT	= LargestMaxT;
 
 	return LargestMaxT > LargestMinT;
+}
+
+DEV bool IntersectBox(CRay R, Vec3f Size, float* pNearT, float* pFarT)
+{
+	return IntersectBox(R, -0.5f * Size, 0.5f * Size, pNearT, pFarT);
 }
 
 DEV bool InsideAABB(Vec3f P)
