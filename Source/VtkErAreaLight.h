@@ -17,6 +17,9 @@
 
 #include <vtkSmartPointer.h>
 #include <vtkTransform.h>
+#include <vtkMatrix4x4.h>
+
+class vtkCamera;
 
 class VTK_ER_CORE_EXPORT vtkErAreaLight : public vtkErLight
 {
@@ -24,29 +27,82 @@ public:
 	vtkTypeMacro(vtkErAreaLight, vtkErLight);
 	static vtkErAreaLight* New();
 
+	// Light types:
+	// 0 - Spherical positioning (focal point + elevation + azimuth + distance)
+	// 1 - Target positioning (focal point + origin + up vector)
+	// 2 - Camera light (focal point + elevation + azimuth + distance)
+	vtkGetMacro(Type, int);
+	vtkSetMacro(Type, int);
+
+	// Shape types:
+	// 0 - Plane
+	// 1 - Disk
+	// 2 - Ring
+	// 3 - Box
+	// 4 - Sphere
+	// 5 - Cylinder
 	vtkGetMacro(ShapeType, int);
 	vtkSetMacro(ShapeType, int);
-
-	vtkSetVector3Macro(Up, double);
-	vtkGetVector3Macro(Up, double);
 
 	vtkGetMacro(OneSided, bool);
 	vtkSetMacro(OneSided, bool);
 
+	vtkSetVector3Macro(Up, double);
+	vtkGetVector3Macro(Up, double);
+
+	vtkSetVector3Macro(Size, double);
+	vtkGetVector3Macro(Size, double);
+
+	vtkMatrix4x4* GetTransformMatrix();
+
+	vtkGetMacro(Elevation, double);
+	vtkSetMacro(Elevation, double);
+
+	vtkGetMacro(Azimuth, double);
+	vtkSetMacro(Azimuth, double);
+
+	vtkGetMacro(Distance, double);
+	vtkSetMacro(Distance, double);
+
 	vtkGetMacro(Offset, double);
 	vtkSetMacro(Offset, double);
 
-	vtkTransform* GetTransform();
+	vtkGetMacro(InnerRadius, double);
+	vtkSetMacro(InnerRadius, double);
+
+	vtkGetMacro(OuterRadius, double);
+	vtkSetMacro(OuterRadius, double);
+
+	vtkGetMacro(Camera, vtkCamera*);
+	vtkSetMacro(Camera, vtkCamera*);
+
+	double GetArea() const;
+
+	static int		DefaultType();
+	static int		DefaultShapeType();
+	static bool		DefaultOneSided();
+	static double	DefaultElevation();
+	static double	DefaultAzimuth();
+	static double	DefaultDistance();
+	static double	DefaultOffset();
+	static double	DefaultInnerRadius();
+	static double	DefaultOuterRadius();
 
 protected:
 	vtkErAreaLight(void);
 	virtual ~vtkErAreaLight(void);
 
-	int									ShapeType;
-	bool								OneSided;
-	double								Up[3];
-	double								Offset;
-
-	vtkSmartPointer<vtkTransform>		TransformMatrix;
-	vtkSmartPointer<vtkTransform>		UserTransformMatrix;
+	int								Type;
+	int								ShapeType;
+	bool							OneSided;
+	double							Up[3];
+	double							Size[3];
+	double							Elevation;
+	double							Azimuth;
+	double							Distance;
+	double							Offset;
+	double							InnerRadius;
+	double							OuterRadius;
+	vtkCamera*						Camera;
+	vtkSmartPointer<vtkTransform>	Transform;
 };

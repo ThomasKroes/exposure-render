@@ -124,7 +124,7 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 				
 				vtkSmartPointer<vtkMatrix4x4> TM = vtkMatrix4x4::New(), InvTM = vtkMatrix4x4::New();
 
-				TM->DeepCopy(pErAreaLight->GetTransform()->GetMatrix());
+				TM->DeepCopy(pErAreaLight->GetTransformMatrix());
 				InvTM->DeepCopy(TM);
 
 				InvTM->Invert();
@@ -151,6 +151,11 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 						L.m_InvTM.NN[i][j]	= (float)InvTM->GetElement(i, j);
 					}
 				}
+
+				L.m_Size			= make_float3(pErAreaLight->GetSize()[0], pErAreaLight->GetSize()[1], pErAreaLight->GetSize()[2]);
+				L.m_InnerRadius		= pErAreaLight->GetInnerRadius();
+				L.m_OuterRadius		= pErAreaLight->GetOuterRadius();
+				L.m_Area			= pErAreaLight->GetArea();
 
 				count++;
 			}
@@ -245,6 +250,8 @@ void vtkErUpdateCameraCommand::Execute(vtkObject*, unsigned long, void*)
 	this->VolumeMapper->Camera.m_N			= normalize(this->VolumeMapper->Camera.m_Target - this->VolumeMapper->Camera.m_Pos);
 	this->VolumeMapper->Camera.m_U			= -normalize(cross(this->VolumeMapper->Camera.m_Up, this->VolumeMapper->Camera.m_N));
 	this->VolumeMapper->Camera.m_V			= -normalize(cross(this->VolumeMapper->Camera.m_N, this->VolumeMapper->Camera.m_U));
+
+	pCamera->GetViewTransformMatrix();
 
 	vtkErCamera* pErCamera = dynamic_cast<vtkErCamera*>(pCamera);
 

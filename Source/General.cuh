@@ -114,6 +114,10 @@ struct EXPOSURE_RENDER_DLL Light
 	float3			m_Color;
 	TransformMatrix	m_TM;
 	TransformMatrix	m_InvTM;
+	float3			m_Size;
+	float			m_Area;
+	float			m_InnerRadius;
+	float			m_OuterRadius;
 };
 
 struct EXPOSURE_RENDER_DLL Lighting

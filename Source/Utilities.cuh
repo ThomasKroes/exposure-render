@@ -15,44 +15,6 @@
 
 #include <cuda_runtime.h>
 
-#define SetVec3(name, type) \
-virtual void Set##name (type _arg1, type _arg2, type _arg3) \
-{ \
-	if ((this->name[0] != _arg1)||(this->name[1] != _arg2)||(this->name[2] != _arg3)) \
-	{ \
-		this->name[0] = _arg1; \
-		this->name[1] = _arg2; \
-		this->name[2] = _arg3; \
-    } \
-}; \
-virtual void Set##name (type _arg[3]) \
-{ \
-	this->Set##name(_arg[0], _arg[1], _arg[2]);\
-}
-
-#define GetVec3(name, type) \
-virtual type *Get##name () \
-{ \
-	return this->name; \
-} \
-virtual void Get##name(type &_arg1, type &_arg2, type &_arg3) \
-{ \
-	_arg1 = this->name[0]; \
-    _arg2 = this->name[1]; \
-    _arg3 = this->name[2]; \
-}; \
-virtual void Get##name(type _arg[3]) \
-{ \
-this->Get##name(_arg[0], _arg[1], _arg[2]);\
-} 
-
-#define GetSetVec3(name, type) \
-	GetVec3(name, type) \
-	SetVec3(name, type)
-
-
-
-
 DEV inline Vec3f ToVec3f(const float3& V)
 {
 	return Vec3f(V.x, V.y, V.z);
@@ -145,65 +107,159 @@ DEV float GradientMagnitude(const Vec3f& P)
 	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolume.m_InvMaxAABB.x, P.y * gVolume.m_InvMaxAABB.y, P.z * gVolume.m_InvMaxAABB.z));
 }
 
-DEV bool IntersectUnitPlane(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)
+#define INTERSECTION_EPSILON 0.001f
+
+DEV int IntersectPlane(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)
 {
-//	if (OneSided && R.m_D.z >= 0.0f)
-//		return false;
+	// Avoid floating point precision issues near parallel intersections
+	if (fabs(R.m_O.z - R.m_D.z) < INTERSECTION_EPSILON)
+		return 0;
 
-	const float T = Dot(R.m_O, Vec3f(0,0,1)) / Dot(R.m_D, Vec3f(0,0,1));
+	// Compute intersection distance
+	const float T = (0.0f - R.m_O.z) / R.m_D.z;
 
-//	if (T < R.m_MinT || T > R.m_MaxT)
-//		return false;
+	// Satisfy the ray's parametric range
+	if (T < R.m_MinT || T > R.m_MaxT)
+		return 0;
 
-	const Vec3f Pl = R(T);
+	Vec3f Pl;
 
-	if (Pl.x < -0.5f || Pl.x > 0.5f || Pl.y < -0.5f || Pl.y > 0.5f)
-		return false;
+	// Compute intersection point
+	Pl.x = R.m_O.x + T * (R.m_D.x);
+	Pl.y = R.m_O.y + T * (R.m_D.y);
+	Pl.z = 0.0f;
 
 	if (pUV)
 		*pUV = Vec2f(Pl.x, Pl.y);
 
-	return true;
+	if (OneSided && R.m_D.z > 0.0f)
+		return 2;
+	else
+		return 1;
 }
 
-DEV bool IntersectUniformDisk(CRay R, bool OneSided, Vec3f Scale, float* pT = NULL, Vec2f* pUV = NULL)
+DEV int IntersectUnitPlane(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)
 {
-	if (R.m_O.z < 0)
-		return false;
+	Vec2f UV;
 
-	const float DotN = AbsDot(R.m_D, Vec3f(0.0f, 0.0f, 1.0f));
+	int Res = IntersectPlane(R, OneSided, pT, &UV);
 
-	const float T = R.m_O.z / DotN;
+	if (Res <= 0)
+		return 0;
+	else
+	{
+		if (UV.x < -0.5f || UV.x > 0.5f || UV.y < -0.5f || UV.y > 0.5f)
+			return 0;
+	}
 
-	if (pT)
-		*pT = T;
+	if (pUV)
+		*pUV = UV;
 
-	if (T < R.m_MinT || T > R.m_MaxT)
-		return false;
-
-	if (R(T).Length() > 1.0f)
-		return false;
-
-//	if (pUV)
-//		*pUV = UV;
-
-	return true;
+	return Res;
 }
 
-DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
+DEV int IntersectPlane(CRay R, bool OneSided, Vec3f Size, float* pT = NULL, Vec2f* pUV = NULL)
 {
-	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * (Vec3f(gVolume.m_MinAABB.x, gVolume.m_MinAABB.y, gVolume.m_MinAABB.z) - R.m_O);
-	const Vec3f TopT		= InvR * (Vec3f(gVolume.m_MaxAABB.x, gVolume.m_MaxAABB.y, gVolume.m_MaxAABB.z) - R.m_O);
-	const Vec3f MinT		= MinVec3f(TopT, BottomT);
-	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
-	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
-	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
+	Vec2f UV;
 
-	*pNearT = LargestMinT;
-	*pFarT	= LargestMaxT;
+	int Res = IntersectPlane(R, OneSided, pT, &UV);
 
-	return LargestMaxT > LargestMinT;
+	if (Res <= 0)
+		return 0;
+	else
+	{
+		if (UV.x < -0.5f * Size.x || UV.x > 0.5f * Size.x || UV.y < -0.5f * Size.y || UV.y > 0.5f * Size.y)
+			return 0;
+	}
+
+	if (pUV)
+		*pUV = UV;
+
+	return Res;
+}
+
+DEV int IntersectUnitDisk(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)
+{
+	Vec2f UV;
+
+	int Res = IntersectUnitPlane(R, OneSided, pT, &UV);
+
+	if (Res <= 0)
+		return 0;
+
+	if (Res > 0)
+	{
+		if (UV.Length() > 0.5f)
+			return 0;
+	}
+
+	if (pUV)
+		*pUV = UV;
+
+	return Res;
+}
+
+DEV int IntersectDisk(CRay R, bool OneSided, float Radius, float* pT = NULL, Vec2f* pUV = NULL)
+{
+	Vec2f UV;
+
+	int Res = IntersectPlane(R, OneSided, pT, &UV);
+
+	if (Res <= 0)
+		return 0;
+
+	if (Res > 0)
+	{
+		if (UV.Length() > Radius)
+			return 0;
+	}
+
+	if (pUV)
+		*pUV = UV;
+
+	return Res;
+}
+
+DEV int IntersectUnitRing(CRay R, bool OneSided, float InnerRadius, float* pT = NULL, Vec2f* pUV = NULL)
+{
+	Vec2f UV;
+
+	int Res = IntersectPlane(R, OneSided, pT, &UV);
+
+	if (Res <= 0)
+		return 0;
+
+	if (Res > 0)
+	{
+		if (UV.Length() < InnerRadius || UV.Length() > 1.0f)
+			return 0;
+	}
+
+	if (pUV)
+		*pUV = UV;
+
+	return Res;
+}
+
+DEV int IntersectRing(CRay R, bool OneSided, float InnerRadius, float OuterRadius, float* pT = NULL, Vec2f* pUV = NULL)
+{
+	Vec2f UV;
+
+	int Res = IntersectPlane(R, OneSided, pT, &UV);
+
+	if (Res <= 0)
+		return 0;
+
+	if (Res > 0)
+	{
+		if (UV.Length() < InnerRadius || UV.Length() > OuterRadius)
+			return 0;
+	}
+
+	if (pUV)
+		*pUV = UV;
+
+	return Res;
 }
 
 DEV bool IntersectUnitBox(CRay R, float* pNearT, float* pFarT)
@@ -224,6 +280,22 @@ DEV bool IntersectUnitBox(CRay R, float* pNearT, float* pFarT)
 
 	if (pFarT)
 		*pFarT = LargestMaxT;
+
+	return LargestMaxT > LargestMinT;
+}
+
+DEV bool IntersectBox(const CRay& R, float* pNearT, float* pFarT)
+{
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
+	const Vec3f BottomT		= InvR * (Vec3f(gVolume.m_MinAABB.x, gVolume.m_MinAABB.y, gVolume.m_MinAABB.z) - R.m_O);
+	const Vec3f TopT		= InvR * (Vec3f(gVolume.m_MaxAABB.x, gVolume.m_MaxAABB.y, gVolume.m_MaxAABB.z) - R.m_O);
+	const Vec3f MinT		= MinVec3f(TopT, BottomT);
+	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
+	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
+
+	*pNearT = LargestMinT;
+	*pFarT	= LargestMaxT;
 
 	return LargestMaxT > LargestMinT;
 }
@@ -254,8 +326,7 @@ DEV bool IntersectSphere(CRay R, float Radius, float* pT)
     //Find discriminant
     const float disc = b * b - 4 * a * c;
     
-    // if discriminant is negative there are no real roots, so return 
-    // false as ray misses sphere
+    // if discriminant is negative there are no real roots, so return false, as ray misses sphere
     if (disc < 0)
         return false;
 
@@ -303,8 +374,6 @@ DEV bool IntersectSphere(CRay R, float Radius, float* pT)
 			return false;
 		}
 	}
-
-	return false;
 }
 
 DEV bool IntersectUnitSphere(CRay R, float* pT)
@@ -366,14 +435,12 @@ DEV bool IntersectUnitSphere(CRay R, float* pT)
 			return false;
 		}
 	}
-
-	return false;
 }
 
-DEV bool IntersectEllipsoid(CRay R, float Radius, float* pT)
-{
+//DEV bool IntersectEllipsoid(CRay R, float Radius, float* pT)
+//{
 	// http://bjarni.us/ray-to-ellipsoid-intersection/
-}
+//}
 
 DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
 {

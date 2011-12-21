@@ -48,7 +48,7 @@ DEV Vec3f TransformPoint(TransformMatrix TM, Vec3f pt)
     float xp = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
     float yp = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
     float zp = TM.NN[2][0]*x + TM.NN[2][1]*y + TM.NN[2][2]*z + TM.NN[2][3];
-    float wp = TM.NN[3][0]*x + TM.NN[3][1]*y + TM.NN[3][2]*z + TM.NN[3][3];
+//    float wp = TM.NN[3][0]*x + TM.NN[3][1]*y + TM.NN[3][2]*z + TM.NN[3][3];
     
 //	Assert(wp != 0);
     
@@ -89,7 +89,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 	Light& L = gLighting.m_Lights[LID];
 
 	// Sample point in light coordinates
-	Vec3f LocalP;
+	Vec3f LocalP, LocalN;
 
 	switch (L.m_Type)
 	{
@@ -102,34 +102,42 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				// Plane
 				case 0:
 				{
-					Vec2f P = UniformSamplePlane(RNG.Get2());
-					LocalP = Vec3f(P.x, P.y, 0.0f);
-
-					break;
-				}
-
-				// Box
-				case 1:
-				{
-					LocalP = Vec3f(-0.5f) + RNG.Get3();
-	
-					break;
-				}
-
-				// Sphere
-				case 2:
-				{
-					LocalP = SampleUnitSphereSurface(RNG.Get2());
-
+					LocalP = SamplePlane(RNG.Get2(), ToVec3f(L.m_Size), &LocalN);
 					break;
 				}
 
 				// Disk
+				case 1:
+				{
+					LocalP = SampleDisk(RNG.Get2(), L.m_OuterRadius, &LocalN);
+					break;
+				}
+
+				// Ring
+				case 2:
+				{
+					LocalP = SampleRing(RNG.Get2(), L.m_InnerRadius, L.m_OuterRadius, &LocalN);
+					break;
+				}
+
+				// Box
 				case 3:
 				{
-					Vec2f P = UniformSampleDiskSurface(RNG.Get2());
-					LocalP = Vec3f(P.x, P.y, 0.0f);
+					LocalP = SampleBox(RNG.Get3(), ToVec3f(L.m_Size), &LocalN);
+					break;
+				}
 
+				// Sphere
+				case 4:
+				{
+					LocalP = SampleSphere(RNG.Get2(), L.m_OuterRadius, &LocalN);
+					break;
+				}
+
+				// Cylinder
+				case 5:
+				{
+					LocalP = SampleUnitSphere(RNG.Get2(), &LocalN);
 					break;
 				}
 			}
@@ -139,14 +147,17 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 		case 1:
 		{
 			Pl	= BACKGROUND_LIGHT_RADIUS * UniformSampleSphereSurface(RNG.Get2());
+
+			break;
 		}
 	}
 
-	Pdf = Length(Pe - Pl);//Clamp(0.0f, 1.0f, Dot(Normalize(Pe - Pl), L.m_TM.GetW()));
-
 	Pl = TransformPoint(L.m_TM, LocalP);
+	Vec3f N = TransformVector(L.m_TM, LocalN);
 
-	return ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
+	Pdf = 1.0f;//DistanceSquared(Pe, Pl) / L.m_Area;// * Clamp(0.0f, 1.0f, Dot(Normalize(Pe - Pl), N));
+
+	return ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z) / L.m_Area;
 }
 
 DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV = NULL, float* pPdf = NULL)
@@ -155,6 +166,8 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 
 	// Transform ray into local shape coordinates
 	CRay TR = TransformRay(R, L.m_InvTM);
+
+	int Res = 0;
 
 	switch (L.m_Type)
 	{
@@ -166,88 +179,47 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Plane
 				case 0:
 				{
-					if (IntersectUnitPlane(TR, L.m_OneSided, &T, NULL))
-					{
-						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
-						
-						if (pPdf)
-							*pPdf = 1.0f;
-
-						return true;
-					}
-					else
-						return false;
-					
-					
-					/*
-					Vec2f Luv = Vec2f(50, 50);
-
-					if (!IntersectPlane(R, true, R.m_O, ToVec3f(L.m_W), ToVec3f(L.m_U), ToVec3f(L.m_V), Luv, &T, pUV))
-						return false;
-					
-					R.m_MaxT = T;
-
-					Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
-
-					if (pPdf)
-						*pPdf = 1.0f;//DistanceSquared(R.m_O, Pl) / (DotN * m_Area);
-
-					return true;
-					*/
-				}
-
-				// Box
-				case 1:
-				{
-					if (IntersectUnitBox(TR, NULL, NULL))
-					{
-						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
-						
-						if (pPdf)
-							*pPdf = 1.0f;
-
-						return true;
-					}
-					else
-						return false;
-				}
-
-				// Sphere
-				case 2:
-				{
-					if (IntersectUnitSphere(TR, &T))
-					{
-						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
-						
-						if (pPdf)
-							*pPdf = 1.0f;
-
-						return true;
-					}
-					else
-						return false;
+					Res = IntersectPlane(TR, L.m_OneSided, ToVec3f(L.m_Size), &T, NULL);
+					break;
 				}
 
 				// Disk
+				case 1:
+				{
+					Res = IntersectDisk(TR, L.m_OneSided, L.m_OuterRadius, &T, NULL);
+					break;
+				}
+
+				// Ring
+				case 2:
+				{
+					Res = IntersectRing(TR, L.m_OneSided, L.m_InnerRadius, L.m_OuterRadius, &T, NULL);
+					break;
+				}
+
+				// Box
 				case 3:
 				{
-					if (IntersectUniformDisk(TR, true, L.m_TM.GetScale(), &T))
-					{
-						Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
-						
-						if (pPdf)
-							*pPdf = 1.0f;
+					Res = IntersectBox(TR, NULL, NULL);
+					break;
+				}
 
-						return true;
-					}
-					else
-						return false;
+				// Sphere
+				case 4:
+				{
+					Res = IntersectSphere(TR, L.m_OuterRadius, &T);
+					break;
+				}
+
+				// Cylinder
+				case 5:
+				{
+					break;
 				}
 			}
 
 			break;
 		}
-		/**/
 
 		// Intersect with background light
 		case 1:
@@ -267,6 +239,14 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				return false;
 			}
 		}
+	}
+
+	if (Res > 0)
+	{
+		Le = Res == 1 ? ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z) : ColorXYZf(0.0f);
+		
+		*pPdf = 1.0f;
+		return true;
 	}
 
 	return false;
