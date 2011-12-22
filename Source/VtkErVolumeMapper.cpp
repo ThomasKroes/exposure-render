@@ -118,9 +118,9 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 
 				Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
 
-				L.m_Color.x = Color[0];
-				L.m_Color.y = Color[1];
-				L.m_Color.z = Color[2];
+				L.m_Color.x = Color[0] * pErAreaLight->GetIntensity();
+				L.m_Color.y = Color[1] * pErAreaLight->GetIntensity();
+				L.m_Color.z = Color[2] * pErAreaLight->GetIntensity();
 				
 				vtkSmartPointer<vtkMatrix4x4> TM = vtkMatrix4x4::New(), InvTM = vtkMatrix4x4::New();
 
@@ -189,9 +189,9 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 
 			Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
 
-			L.m_Color.x = Color[0];
-			L.m_Color.y = Color[1];
-			L.m_Color.z = Color[2];
+			L.m_Color.x = Color[0] * pErAreaLight->GetIntensity();
+			L.m_Color.y = Color[1] * pErAreaLight->GetIntensity();
+			L.m_Color.z = Color[2] * pErAreaLight->GetIntensity();
 				
 			L.m_ShapeType = pErAreaLight->GetShapeType(); 
 

@@ -1,11 +1,7 @@
 import vtk
 import vtkErCorePython
 
-print vtkErCorePython
-
-# The colors module defines various useful colors.
-
-VolumeFile = "examples/engine_small.mhd"
+VolumeFile = "examples/manix_small.mhd"
 
 Renderer = vtk.vtkRenderer()
 RendererWin = vtk.vtkRenderWindow()
@@ -18,9 +14,6 @@ Volume = vtk.vtkVolume()
 # Read volume
 Reader = vtk.vtkMetaImageReader()
 Reader.SetFileName(VolumeFile)
-
-# if Reader.CanReadFile(VolumeFile) == 0:
-#    Interactor.TerminateApp()
 
 Reader.Update()
 
@@ -91,17 +84,10 @@ ChangeInformation = vtk.vtkImageChangeInformation()
 ChangeInformation.SetInput(Reader.GetOutput())
 ChangeInformation.Update()
 ChangeInformation.CenterImageOn()
-ChangeInformation.SetSpacingScale(0.01, 0.01, 0.01)
-ChangeInformation.SetOutputSpacing(0.01, 0.01, 0.01)
+ChangeInformation.SetOutputSpacing(0.001 * Reader.GetOutput().GetSpacing()[0], 0.001 * Reader.GetOutput().GetSpacing()[1], 0.001 * Reader.GetOutput().GetSpacing()[2])
 
-ChangeInformation.Update()
-
-print Reader
-print ChangeInformation
-
-Reader.GetOutput().UpdateInformation();
-
-print Reader
+Reader.GetOutput().SetSpacing(0.1, 0.1, 0.1)
+Reader.GetOutput().Update()
 
 ErVolumeMapper.SetInput(ChangeInformation.GetOutput())
 
@@ -125,17 +111,17 @@ Fill = vtkErCorePython.vtkErAreaLight()
 Fill.SetType(0)
 Fill.SetPosition(10, 10, 10)
 Fill.SetFocalPoint(0, 0, 0)
-Fill.SetColor(1, 0.5, 0.5)
-Fill.SetIntensity(100)
+Fill.SetColor(0.1, 0.6, 0.9)
+Fill.SetIntensity(0.1)
 Fill.SetPositional(1);
-Fill.SetShapeType(1)
+Fill.SetShapeType(2)
 Fill.SetOneSided(1)
-Fill.SetDistance(1.5)
-Fill.SetElevation(45)
+Fill.SetDistance(0.1)
+Fill.SetElevation(75)
 Fill.SetAzimuth(90)
-Fill.SetInnerRadius(0.3)
-Fill.SetOuterRadius(0.4)
-Fill.SetSize(1, 1, 1)
+Fill.SetInnerRadius(0.2)
+Fill.SetOuterRadius(0.21)
+Fill.SetSize(0.1, 0.1, 1)
 #Fill.SetCamera(ErCamera)
 
 ErVolumeMapper.AddLight(Fill)
@@ -192,7 +178,6 @@ def CheckAbort(obj, event):
     
 def CheckKeyPress(obj, event) :
     if (obj.GetKeySym() == "Escape"):
-        print "Terminating app..."
         obj.GetRenderWindow().Finalize();
         obj.TerminateApp()
         
