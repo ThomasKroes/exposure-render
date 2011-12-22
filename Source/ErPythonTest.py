@@ -5,7 +5,7 @@ print vtkErCorePython
 
 # The colors module defines various useful colors.
 
-VolumeFile = "C:/volumes/engine_small.mhd"
+VolumeFile = "examples/engine_small.mhd"
 
 Renderer = vtk.vtkRenderer()
 RendererWin = vtk.vtkRenderWindow()
@@ -33,9 +33,9 @@ Volume.SetMapper(ErVolumeMapper)
 ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
-Opacity.AddPoint(0, 0)
-Opacity.AddPoint(240, 0)
-Opacity.AddPoint(241, 1)
+Opacity.AddPoint(-1000, 0)
+Opacity.AddPoint(40, 0)
+Opacity.AddPoint(65, 1)
 Opacity.AddPoint(255, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
@@ -80,7 +80,7 @@ ErVolumeProperty.SetIOR(IOR)
 
 ErVolumeProperty.SetStepSizeFactorPrimary(110)
 ErVolumeProperty.SetStepSizeFactorSecondary(100)
-ErVolumeProperty.SetDensityScale(0.000011)
+ErVolumeProperty.SetDensityScale(1000000)
 ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
@@ -91,10 +91,17 @@ ChangeInformation = vtk.vtkImageChangeInformation()
 ChangeInformation.SetInput(Reader.GetOutput())
 ChangeInformation.Update()
 ChangeInformation.CenterImageOn()
+ChangeInformation.SetSpacingScale(0.01, 0.01, 0.01)
 ChangeInformation.SetOutputSpacing(0.01, 0.01, 0.01)
+
 ChangeInformation.Update()
 
-#Reader.GetOutput().UpdateInformation();
+print Reader
+print ChangeInformation
+
+Reader.GetOutput().UpdateInformation();
+
+print Reader
 
 ErVolumeMapper.SetInput(ChangeInformation.GetOutput())
 
@@ -118,16 +125,16 @@ Fill = vtkErCorePython.vtkErAreaLight()
 Fill.SetType(0)
 Fill.SetPosition(10, 10, 10)
 Fill.SetFocalPoint(0, 0, 0)
-Fill.SetColor(1, 1, 1)
+Fill.SetColor(1, 0.5, 0.5)
+Fill.SetIntensity(100)
 Fill.SetPositional(1);
-Fill.SetShapeType(0)
+Fill.SetShapeType(1)
 Fill.SetOneSided(1)
 Fill.SetDistance(1.5)
-#Fill.SetScale(100, 100, 10)
 Fill.SetElevation(45)
 Fill.SetAzimuth(90)
-Fill.SetInnerRadius(0.01)
-Fill.SetOuterRadius(0.01)
+Fill.SetInnerRadius(0.3)
+Fill.SetOuterRadius(0.4)
 Fill.SetSize(1, 1, 1)
 #Fill.SetCamera(ErCamera)
 

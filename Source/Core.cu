@@ -15,9 +15,7 @@
 
 #include "General.cuh"
 
-texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
-texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
-texture<short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexExtinction;
+texture<float, cudaTextureType3D, cudaReadModeElementType>			gTexIntensity;
 texture<float, cudaTextureType1D, cudaReadModeElementType>			gTexOpacity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexDiffuse;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>			gTexSpecular;
@@ -29,15 +27,15 @@ texture<uchar4, cudaTextureType2D, cudaReadModeNormalizedFloat>		gTexRunningEsti
 cudaChannelFormatDesc gFloatChannelDesc = cudaCreateChannelDesc<float>();
 cudaChannelFormatDesc gFloat4ChannelDesc = cudaCreateChannelDesc<float4>();
 
-cudaArray* gpDensityArray			= NULL;
-cudaArray* gpExtinction				= NULL;
-cudaArray* gpGradientMagnitudeArray	= NULL;
-cudaArray* gpOpacityArray			= NULL;
-cudaArray* gpDiffuseArray			= NULL;
-cudaArray* gpSpecularArray			= NULL;
-cudaArray* gpGlossinessArray		= NULL;
-cudaArray* gpIORArray				= NULL;
-cudaArray* gpEmissionArray			= NULL;
+cudaArray* gpIntensity			= NULL;
+cudaArray* gpExtinction			= NULL;
+cudaArray* gpGradientMagnitude	= NULL;
+cudaArray* gpOpacity			= NULL;
+cudaArray* gpDiffuse			= NULL;
+cudaArray* gpSpecular			= NULL;
+cudaArray* gpGlossiness			= NULL;
+cudaArray* gpIOR				= NULL;
+cudaArray* gpEmission			= NULL;
 
 CD Volume		gVolume;
 CD Camera		gCamera;
@@ -56,16 +54,16 @@ CD Blur			gBlur;
 #include "SpecularBloom.cuh"
 #include "ToneMap.cuh"
 
-void BindIntensityBuffer(short* pBuffer, cudaExtent Extent)
+void BindIntensityBuffer(float* pBuffer, cudaExtent Extent)
 {
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<float>();
 
-	HandleCudaError(cudaMalloc3DArray(&gpDensityArray, &ChannelDesc, Extent));
+	HandleCudaError(cudaMalloc3DArray(&gpIntensity, &ChannelDesc, Extent));
 
 	cudaMemcpy3DParms CopyParams = {0};
 
-	CopyParams.srcPtr	= make_cudaPitchedPtr(pBuffer, Extent.width * sizeof(short), Extent.width, Extent.height);
-	CopyParams.dstArray	= gpDensityArray;
+	CopyParams.srcPtr	= make_cudaPitchedPtr(pBuffer, Extent.width * sizeof(float), Extent.width, Extent.height);
+	CopyParams.dstArray	= gpIntensity;
 	CopyParams.extent	= Extent;
 	CopyParams.kind		= cudaMemcpyHostToDevice;
 	
@@ -77,68 +75,14 @@ void BindIntensityBuffer(short* pBuffer, cudaExtent Extent)
 	gTexIntensity.addressMode[1]	= cudaAddressModeClamp;
   	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
 
-	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpDensityArray, ChannelDesc));
-}
-
-void BindExtinction(short* pBuffer, cudaExtent Extent)
-{
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
-
-	HandleCudaError(cudaMalloc3DArray(&gpExtinction, &ChannelDesc, Extent));
-
-	cudaMemcpy3DParms CopyParams = {0};
-
-	CopyParams.srcPtr	= make_cudaPitchedPtr(pBuffer, Extent.width * sizeof(short), Extent.width, Extent.height);
-	CopyParams.dstArray	= gpExtinction;
-	CopyParams.extent	= Extent;
-	CopyParams.kind		= cudaMemcpyHostToDevice;
-	
-	HandleCudaError(cudaMemcpy3D(&CopyParams));
-
-	gTexExtinction.normalized		= true;
-	gTexExtinction.filterMode		= cudaFilterModePoint;      
-	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
-	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
-  	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
-
-	HandleCudaError(cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc));
-}
-
-void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent)
-{
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<short>();
-	HandleCudaError(cudaMalloc3DArray(&gpGradientMagnitudeArray, &ChannelDesc, Extent));
-
-	cudaMemcpy3DParms CopyParams = {0};
-
-	CopyParams.srcPtr	= make_cudaPitchedPtr(pBuffer, Extent.width * sizeof(short), Extent.width, Extent.height);
-	CopyParams.dstArray	= gpGradientMagnitudeArray;
-	CopyParams.extent	= Extent;
-	CopyParams.kind		= cudaMemcpyHostToDevice;
-	
-	HandleCudaError(cudaMemcpy3D(&CopyParams));
-
-	gTexGradientMagnitude.normalized		= true;
-	gTexGradientMagnitude.filterMode		= cudaFilterModeLinear;      
-	gTexGradientMagnitude.addressMode[0]	= cudaAddressModeClamp;  
-	gTexGradientMagnitude.addressMode[1]	= cudaAddressModeClamp;
-  	gTexGradientMagnitude.addressMode[2]	= cudaAddressModeClamp;
-
-	HandleCudaError(cudaBindTextureToArray(gTexGradientMagnitude, gpGradientMagnitudeArray, ChannelDesc));
+	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc));
 }
 
 void UnbindDensityBuffer(void)
 {
-	HandleCudaError(cudaFreeArray(gpDensityArray));
-	gpDensityArray = NULL;
+	HandleCudaError(cudaFreeArray(gpIntensity));
+	gpIntensity = NULL;
 	HandleCudaError(cudaUnbindTexture(gTexIntensity));
-}
-
-void UnbindGradientMagnitudeBuffer(void)
-{
-	HandleCudaError(cudaFreeArray(gpGradientMagnitudeArray));
-	gpGradientMagnitudeArray = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexGradientMagnitude));
 }
 
 void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Glossiness[128], float IOR[128], float Emission[3][128], int N)
@@ -148,27 +92,27 @@ void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Sp
 	gTexOpacity.filterMode		= cudaFilterModeLinear;
 	gTexOpacity.addressMode[0]	= cudaAddressModeClamp;
 
-	if (gpOpacityArray == NULL)
-		HandleCudaError(cudaMallocArray(&gpOpacityArray, &gFloatChannelDesc, N, 1));
+	if (gpOpacity == NULL)
+		HandleCudaError(cudaMallocArray(&gpOpacity, &gFloatChannelDesc, N, 1));
 
-	HandleCudaError(cudaMemcpyToArray(gpOpacityArray, 0, 0, Opacity, N * sizeof(float), cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexOpacity, gpOpacityArray, gFloatChannelDesc));
+	HandleCudaError(cudaMemcpyToArray(gpOpacity, 0, 0, Opacity, N * sizeof(float), cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexOpacity, gpOpacity, gFloatChannelDesc));
 
 	// Diffuse
 	gTexDiffuse.normalized		= true;
 	gTexDiffuse.filterMode		= cudaFilterModeLinear;
 	gTexDiffuse.addressMode[0]	= cudaAddressModeClamp;
 
-	if (gpDiffuseArray == NULL)
-		HandleCudaError(cudaMallocArray(&gpDiffuseArray, &gFloat4ChannelDesc, N, 1));
+	if (gpDiffuse == NULL)
+		HandleCudaError(cudaMallocArray(&gpDiffuse, &gFloat4ChannelDesc, N, 1));
 
 	ColorXYZAf* pDiffuseXYZA = new ColorXYZAf[N];
 
 	for (int i = 0; i < N; i++)
 		pDiffuseXYZA[i].FromRGB(Diffuse[0][i], Diffuse[1][i], Diffuse[2][i]);
 
-	HandleCudaError(cudaMemcpyToArray(gpDiffuseArray, 0, 0, pDiffuseXYZA, N * sizeof(float4), cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexDiffuse, gpDiffuseArray, gFloat4ChannelDesc));
+	HandleCudaError(cudaMemcpyToArray(gpDiffuse, 0, 0, pDiffuseXYZA, N * sizeof(float4), cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexDiffuse, gpDiffuse, gFloat4ChannelDesc));
 
 	delete[] pDiffuseXYZA;
 
@@ -177,16 +121,16 @@ void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Sp
 	gTexSpecular.filterMode		= cudaFilterModeLinear;
 	gTexSpecular.addressMode[0]	= cudaAddressModeClamp;
 
-	if (gpSpecularArray == NULL)
-		HandleCudaError(cudaMallocArray(&gpSpecularArray, &gFloat4ChannelDesc, N, 1));
+	if (gpSpecular == NULL)
+		HandleCudaError(cudaMallocArray(&gpSpecular, &gFloat4ChannelDesc, N, 1));
 
 	ColorXYZAf* pSpecularXYZA = new ColorXYZAf[N];
 
 	for (int i = 0; i < N; i++)
 		pSpecularXYZA[i].FromRGB(Specular[0][i], Specular[1][i], Specular[2][i]);
 
-	HandleCudaError(cudaMemcpyToArray(gpSpecularArray, 0, 0, pSpecularXYZA, N * sizeof(float4), cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexSpecular, gpSpecularArray, gFloat4ChannelDesc));
+	HandleCudaError(cudaMemcpyToArray(gpSpecular, 0, 0, pSpecularXYZA, N * sizeof(float4), cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexSpecular, gpSpecular, gFloat4ChannelDesc));
 
 	delete[] pSpecularXYZA;
 
@@ -195,55 +139,55 @@ void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Sp
 	gTexGlossiness.filterMode		= cudaFilterModeLinear;
 	gTexGlossiness.addressMode[0]	= cudaAddressModeClamp;
 
-	if (gpGlossinessArray == NULL)
-		HandleCudaError(cudaMallocArray(&gpGlossinessArray, &gFloatChannelDesc, N, 1));
+	if (gpGlossiness == NULL)
+		HandleCudaError(cudaMallocArray(&gpGlossiness, &gFloatChannelDesc, N, 1));
 
-	HandleCudaError(cudaMemcpyToArray(gpGlossinessArray, 0, 0, Glossiness, N * sizeof(float),  cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexGlossiness, gpGlossinessArray, gFloatChannelDesc));
+	HandleCudaError(cudaMemcpyToArray(gpGlossiness, 0, 0, Glossiness, N * sizeof(float),  cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexGlossiness, gpGlossiness, gFloatChannelDesc));
 
 	// IOR
 	gTexIOR.normalized		= true;
 	gTexIOR.filterMode		= cudaFilterModeLinear;
 	gTexIOR.addressMode[0]	= cudaAddressModeClamp;
 
-	if (gpIORArray == NULL)
-		HandleCudaError(cudaMallocArray(&gpIORArray, &gFloatChannelDesc, N, 1));
+	if (gpIOR == NULL)
+		HandleCudaError(cudaMallocArray(&gpIOR, &gFloatChannelDesc, N, 1));
 
-	HandleCudaError(cudaMemcpyToArray(gpIORArray, 0, 0, IOR, N * sizeof(float),  cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexIOR, gpIORArray, gFloatChannelDesc));
+	HandleCudaError(cudaMemcpyToArray(gpIOR, 0, 0, IOR, N * sizeof(float),  cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexIOR, gpIOR, gFloatChannelDesc));
 
 	// Emission
 	gTexEmission.normalized		= true;
 	gTexEmission.filterMode		= cudaFilterModeLinear;
 	gTexEmission.addressMode[0]	= cudaAddressModeClamp;
 
-	if (gpEmissionArray == NULL)
-		HandleCudaError(cudaMallocArray(&gpEmissionArray, &gFloat4ChannelDesc, N, 1));
+	if (gpEmission == NULL)
+		HandleCudaError(cudaMallocArray(&gpEmission, &gFloat4ChannelDesc, N, 1));
 
 	ColorXYZAf* pEmissionXYZA = new ColorXYZAf[N];
 
 	for (int i = 0; i < N; i++)
 		pEmissionXYZA[i].FromRGB(Emission[0][i], Emission[1][i], Emission[2][i]);
 
-	HandleCudaError(cudaMemcpyToArray(gpEmissionArray, 0, 0, pEmissionXYZA, N * sizeof(float4),  cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexEmission, gpEmissionArray, gFloat4ChannelDesc));
+	HandleCudaError(cudaMemcpyToArray(gpEmission, 0, 0, pEmissionXYZA, N * sizeof(float4),  cudaMemcpyHostToDevice));
+	HandleCudaError(cudaBindTextureToArray(gTexEmission, gpEmission, gFloat4ChannelDesc));
 
 	delete[] pEmissionXYZA;
 }
 
 void UnbindTransferFunctions1D(void)
 {
-	HandleCudaError(cudaFreeArray(gpOpacityArray));
-	HandleCudaError(cudaFreeArray(gpDiffuseArray));
-	HandleCudaError(cudaFreeArray(gpSpecularArray));
-	HandleCudaError(cudaFreeArray(gpGlossinessArray));
-	HandleCudaError(cudaFreeArray(gpEmissionArray));
+	HandleCudaError(cudaFreeArray(gpOpacity));
+	HandleCudaError(cudaFreeArray(gpDiffuse));
+	HandleCudaError(cudaFreeArray(gpSpecular));
+	HandleCudaError(cudaFreeArray(gpGlossiness));
+	HandleCudaError(cudaFreeArray(gpEmission));
 
-	gpOpacityArray		= NULL;
-	gpDiffuseArray		= NULL;
-	gpSpecularArray		= NULL;
-	gpGlossinessArray	= NULL;
-	gpEmissionArray		= NULL;
+	gpOpacity		= NULL;
+	gpDiffuse		= NULL;
+	gpSpecular		= NULL;
+	gpGlossiness	= NULL;
+	gpEmission		= NULL;
 
 	HandleCudaError(cudaUnbindTexture(gTexOpacity));
 	HandleCudaError(cudaUnbindTexture(gTexDiffuse));

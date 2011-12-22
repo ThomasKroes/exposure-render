@@ -188,6 +188,9 @@ public:
 	vtkGetMacro(ShowFPS, bool);
 	vtkSetMacro(ShowFPS, bool);
 
+	vtkGetMacro(SceneScale, double);
+	vtkSetMacro(SceneScale, double);
+
 	void AddLight(vtkLight* pLight);
 	void RemoveLight(vtkLight* pLight);
 
@@ -208,6 +211,8 @@ protected:
 
 	int												MacroCellSize;
 	bool											ShowFPS;
+
+	double											SceneScale;
 
 	vtkSmartPointer<vtkLightCollection>				Lights;
 

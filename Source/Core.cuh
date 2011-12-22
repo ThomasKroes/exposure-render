@@ -25,9 +25,7 @@ struct Scattering;
 struct Blur;
 class FrameBuffer;
 
-extern "C" void BindIntensityBuffer(short* pBuffer, cudaExtent Extent);
-extern "C" void BindExtinction(short* pBuffer, cudaExtent Extent);
-extern "C" void BindGradientMagnitudeBuffer(short* pBuffer, cudaExtent Extent);
+extern "C" void BindIntensityBuffer(float* pBuffer, cudaExtent Extent);
 extern "C" void UnbindDensityBuffer(void);
 extern "C" void UnbindGradientMagnitudeBuffer(void);
 extern "C" void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Glossiness[128], float IOR[128], float Emission[3][128], int N);

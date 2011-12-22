@@ -169,9 +169,9 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 
 				Color.FromRGB(pErBackgroundLight->GetDiffuseColor()[0], pErBackgroundLight->GetDiffuseColor()[1], pErBackgroundLight->GetDiffuseColor()[2]);
 
-				L.m_Color.x = Color[0];
-				L.m_Color.y = Color[1];
-				L.m_Color.z = Color[2];
+				L.m_Color.x = Color[0] * pErAreaLight->GetIntensity();
+				L.m_Color.y = Color[1] * pErAreaLight->GetIntensity();
+				L.m_Color.z = Color[2] * pErAreaLight->GetIntensity();
 
 				count++;
 			}
@@ -393,19 +393,11 @@ void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 		
 		ImageCast->SetInput(pImageData);
 
-		ImageCast->SetOutputScalarTypeToShort();
+		ImageCast->SetOutputScalarTypeToFloat();
 		ImageCast->Update();
 
 		this->Intensity = ImageCast->GetOutput();
 
-		vtkSmartPointer<vtkImageGradientMagnitude> GradientMagnitude = vtkImageGradientMagnitude::New();
-
-		GradientMagnitude->SetDimensionality(3);
-		GradientMagnitude->SetInput(Intensity);
-		GradientMagnitude->Update();
-		
-		this->GradientMagnitude = GradientMagnitude->GetOutput();
-	
 		int* pResolution = this->Intensity->GetExtent();
 		
 		double* pBounds = this->Intensity->GetBounds();
@@ -515,8 +507,7 @@ void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 		this->Volume.m_GradientDeltaZ.y = 0.0f;
 		this->Volume.m_GradientDeltaZ.z = this->Volume.m_GradientDelta;
 
-		BindIntensityBuffer((short*)this->GradientMagnitude->GetScalarPointer(), Extent);
-		BindGradientMagnitudeBuffer((short*)this->GradientMagnitude->GetScalarPointer(), Extent);
+		BindIntensityBuffer((float*)this->Intensity->GetScalarPointer(), Extent);
     }
 }
 

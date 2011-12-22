@@ -299,8 +299,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 	F = Shader.F(Wo, -Wi); 
 
 	ShaderPdf = Shader.Pdf(Wo, -Wi);
-
-	/**/
+	
 	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
@@ -312,7 +311,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
 	
-	
+	/*
 	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
@@ -331,7 +330,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 			}
 		}
 	}
-	
+	*/
 
 	return Ld;
 }

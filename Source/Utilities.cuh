@@ -27,22 +27,12 @@ DEV inline float3 FromVec3f(const Vec3f& V)
 
 DEV float GetIntensity(const Vec3f& P)
 {
-	return ((float)SHRT_MAX * tex3D(gTexIntensity, (P.x - gVolume.m_MinAABB.x) * gVolume.m_InvSize.x, (P.y - gVolume.m_MinAABB.y) * gVolume.m_InvSize.y, (P.z - gVolume.m_MinAABB.z) * gVolume.m_InvSize.z));
+	return tex3D(gTexIntensity, (P.x - gVolume.m_MinAABB.x) * gVolume.m_InvSize.x, (P.y - gVolume.m_MinAABB.y) * gVolume.m_InvSize.y, (P.z - gVolume.m_MinAABB.z) * gVolume.m_InvSize.z);
 }
 
 DEV float GetNormalizedIntensity(const Vec3f& P)
 {
 	return (GetIntensity(P) - gVolume.m_IntensityMin) * gVolume.m_IntensityInvRange;
-}
-
-DEV float GetExtinction(const Vec3f& P)
-{
-	return ((float)SHRT_MAX * tex3D(gTexExtinction, (P.x - gVolume.m_MinAABB.x) * gVolume.m_InvSize.x, (P.y - gVolume.m_MinAABB.y) * gVolume.m_InvSize.y, (P.z - gVolume.m_MinAABB.z) * gVolume.m_InvSize.z));
-}
-
-DEV float GetNormalizedExtinction(const Vec3f& P)
-{
-	return GetExtinction(P) / 255.0f;
 }
 
 DEV float GetOpacity(const float& NormalizedIntensity)
@@ -100,11 +90,6 @@ DEV inline Vec3f NormalizedGradient(const Vec3f& P)
 	Gradient.z = (GetIntensity(P + ToVec3f(gVolume.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolume.m_GradientDeltaZ))) * gVolume.m_InvGradientDelta;
 
 	return -Normalize(Gradient);
-}
-
-DEV float GradientMagnitude(const Vec3f& P)
-{
-	return ((float)SHRT_MAX * tex3D(gTexGradientMagnitude, P.x * gVolume.m_InvMaxAABB.x, P.y * gVolume.m_InvMaxAABB.y, P.z * gVolume.m_InvMaxAABB.z));
 }
 
 #define INTERSECTION_EPSILON 0.001f
