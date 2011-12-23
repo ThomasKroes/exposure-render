@@ -110,13 +110,9 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 				L.m_Type		= 0;
 				L.m_OneSided	= pErAreaLight->GetOneSided();
 
-//				L.m_P.x = pErAreaLight->GetPosition()[0];
-//				L.m_P.y = pErAreaLight->GetPosition()[1];
-//				L.m_P.z = pErAreaLight->GetPosition()[2];
-
 				ColorXYZf Color;
 
-				Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
+				Color.FromRGB(pErAreaLight->GetColor()[0], pErAreaLight->GetColor()[1], pErAreaLight->GetColor()[2]);
 
 				L.m_Color.x = Color[0] * pErAreaLight->GetIntensity();
 				L.m_Color.y = Color[1] * pErAreaLight->GetIntensity();
@@ -128,18 +124,6 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 				InvTM->DeepCopy(TM);
 
 				InvTM->Invert();
-
-//				L.m_U.x = (float)TM->GetMatrix()->GetElement(0, 0);
-//				L.m_U.y = (float)TM->GetMatrix()->GetElement(1, 0);
-//				L.m_U.z = (float)TM->GetMatrix()->GetElement(2, 0);
-
-//				L.m_V.x = (float)TM->GetMatrix()->GetElement(0, 1);
-//				L.m_V.y = (float)TM->GetMatrix()->GetElement(1, 1);
-//				L.m_V.z = (float)TM->GetMatrix()->GetElement(2, 1);
-
-//				L.m_W.x = (float)TM->GetMatrix()->GetElement(0, 2);
-//				L.m_W.y = (float)TM->GetMatrix()->GetElement(1, 2);
-//				L.m_W.z = (float)TM->GetMatrix()->GetElement(2, 2);
 
 				L.m_ShapeType = pErAreaLight->GetShapeType(); 
 

@@ -1,7 +1,7 @@
 import vtk
 import vtkErCorePython
 
-VolumeFile = "examples/manix_small.mhd"
+VolumeFile = "examples/engine_small.mhd"
 
 Renderer = vtk.vtkRenderer()
 RendererWin = vtk.vtkRenderWindow()
@@ -86,9 +86,6 @@ ChangeInformation.Update()
 ChangeInformation.CenterImageOn()
 ChangeInformation.SetOutputSpacing(0.001 * Reader.GetOutput().GetSpacing()[0], 0.001 * Reader.GetOutput().GetSpacing()[1], 0.001 * Reader.GetOutput().GetSpacing()[2])
 
-Reader.GetOutput().SetSpacing(0.1, 0.1, 0.1)
-Reader.GetOutput().Update()
-
 ErVolumeMapper.SetInput(ChangeInformation.GetOutput())
 
 Renderer.AddVolume(Volume)
@@ -108,20 +105,20 @@ Renderer.SetActiveCamera(ErCamera)
 Renderer.RemoveAllLights()
 
 Fill = vtkErCorePython.vtkErAreaLight()
-Fill.SetType(0)
-Fill.SetPosition(10, 10, 10)
+Fill.SetType(1)
+Fill.SetPosition(0.1, 0.1, 0.1)
 Fill.SetFocalPoint(0, 0, 0)
-Fill.SetColor(0.1, 0.6, 0.9)
-Fill.SetIntensity(0.1)
-Fill.SetPositional(1);
-Fill.SetShapeType(2)
+Fill.SetDiffuseColor(0.2, 1.0, 1.0)
+Fill.SetIntensity(0.2)
+Fill.SetPositional(1)
+Fill.SetShapeType(0)
 Fill.SetOneSided(1)
-Fill.SetDistance(0.1)
+Fill.SetDistance(0.9)
 Fill.SetElevation(75)
 Fill.SetAzimuth(90)
 Fill.SetInnerRadius(0.2)
 Fill.SetOuterRadius(0.21)
-Fill.SetSize(0.1, 0.1, 1)
+Fill.SetSize(0.3, 0.1, 0.1)
 #Fill.SetCamera(ErCamera)
 
 ErVolumeMapper.AddLight(Fill)

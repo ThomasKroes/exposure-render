@@ -188,7 +188,7 @@ double vtkErAreaLight::GetArea() const
 
 		case 3:
 		{
-			return (2 * this->Size[0] * this->Size[1]) + (2 * this->Size[0] * this->Size[2]) + (2 * this->Size[1] * this->Size[2]);
+			return 0.0001;//(2 * this->Size[0] * this->Size[1]) + (2 * this->Size[0] * this->Size[2]) + (2 * this->Size[1] * this->Size[2]);
 		}
 
 		case 4:

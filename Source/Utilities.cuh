@@ -279,10 +279,16 @@ DEV bool IntersectBox(CRay R, Vec3f Min, Vec3f Max, float* pNearT, float* pFarT)
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
 	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
 
-	*pNearT = LargestMinT;
-	*pFarT	= LargestMaxT;
+	if (pNearT)
+		*pNearT = LargestMinT;
 
-	return LargestMaxT > LargestMinT;
+	if (pFarT)
+		*pFarT = LargestMaxT;
+
+	if (LargestMaxT < LargestMinT || LargestMinT < R.m_MinT || LargestMinT > R.m_MaxT)
+		return 0;
+	else
+		return 1;
 }
 
 DEV bool IntersectBox(CRay R, Vec3f Size, float* pNearT, float* pFarT)

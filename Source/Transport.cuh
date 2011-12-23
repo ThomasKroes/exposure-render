@@ -133,13 +133,6 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 					LocalP = SampleSphere(RNG.Get2(), L.m_OuterRadius, &LocalN);
 					break;
 				}
-
-				// Cylinder
-				case 5:
-				{
-					LocalP = SampleUnitSphere(RNG.Get2(), &LocalN);
-					break;
-				}
 			}
 		}
 		
@@ -152,10 +145,8 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 		}
 	}
 
-	Pl = TransformPoint(L.m_TM, LocalP);
-	Vec3f N = TransformVector(L.m_TM, LocalN);
-
-	Pdf = DistanceSquared(Pe, Pl) / L.m_Area;// * Dot(Normalize(Pe - Pl), N);
+	Pl	= TransformPoint(L.m_TM, LocalP);
+	Pdf	= DistanceSquared(Pe, Pl) / L.m_Area;
 
 	return ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z) / L.m_Area;
 }
@@ -200,7 +191,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Box
 				case 3:
 				{
-					Res = IntersectBox(TR, ToVec3f(L.m_Size), NULL, NULL);
+					Res = IntersectBox(TR, ToVec3f(L.m_Size), &T, NULL);
 					break;
 				}
 
@@ -208,12 +199,6 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				case 4:
 				{
 					Res = IntersectSphere(TR, L.m_OuterRadius, &T);
-					break;
-				}
-
-				// Cylinder
-				case 5:
-				{
 					break;
 				}
 			}
