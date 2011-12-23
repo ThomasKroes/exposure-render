@@ -288,7 +288,7 @@ void vtkErVolumeProperty::Default(double Min, double Max)
 
 double vtkErVolumeProperty::DefaultDensityScale(void)
 {
-	return 50.0;
+	return 50000.0;
 }
 
 double vtkErVolumeProperty::DefaultStepSizeFactorPrimary(void)

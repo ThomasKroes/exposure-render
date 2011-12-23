@@ -24,3 +24,8 @@ vtkErBackgroundLight::vtkErBackgroundLight(void)
 vtkErBackgroundLight::~vtkErBackgroundLight(void)
 {
 }
+
+double vtkErBackgroundLight::GetArea() const
+{
+	return 1.0f;
+}

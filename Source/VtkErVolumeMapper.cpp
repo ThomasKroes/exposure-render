@@ -112,7 +112,7 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 
 				ColorXYZf Color;
 
-				Color.FromRGB(pErAreaLight->GetColor()[0], pErAreaLight->GetColor()[1], pErAreaLight->GetColor()[2]);
+				Color.FromRGB(pErAreaLight->GetDiffuseColor()[0], pErAreaLight->GetDiffuseColor()[1], pErAreaLight->GetDiffuseColor()[2]);
 
 				L.m_Color.x = Color[0] * pErAreaLight->GetIntensity();
 				L.m_Color.y = Color[1] * pErAreaLight->GetIntensity();
@@ -149,13 +149,31 @@ void vtkErUpdateLightingCommand::Execute(vtkObject*, unsigned long, void*)
 			{
 				L.m_Type = 1;
 
+				vtkSmartPointer<vtkMatrix4x4> TM = vtkMatrix4x4::New(), InvTM = vtkMatrix4x4::New();
+
+				TM->Identity();
+				InvTM->Identity();
+
+				InvTM->Invert();
+
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						L.m_TM.NN[i][j]		= (float)TM->GetElement(i, j);
+						L.m_InvTM.NN[i][j]	= (float)InvTM->GetElement(i, j);
+					}
+				}
+
 				ColorXYZf Color;
 
 				Color.FromRGB(pErBackgroundLight->GetDiffuseColor()[0], pErBackgroundLight->GetDiffuseColor()[1], pErBackgroundLight->GetDiffuseColor()[2]);
 
-				L.m_Color.x = Color[0] * pErAreaLight->GetIntensity();
-				L.m_Color.y = Color[1] * pErAreaLight->GetIntensity();
-				L.m_Color.z = Color[2] * pErAreaLight->GetIntensity();
+				L.m_Color.x = Color[0] * pErBackgroundLight->GetIntensity();
+				L.m_Color.y = Color[1] * pErBackgroundLight->GetIntensity();
+				L.m_Color.z = Color[2] * pErBackgroundLight->GetIntensity();
+
+				L.m_Area = pErBackgroundLight->GetArea();
 
 				count++;
 			}
@@ -455,11 +473,15 @@ void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 
 		vtkErVolumeProperty* pErVolumeProperty = dynamic_cast<vtkErVolumeProperty*>(this->VolumeProperty);
 
+		const Vec3f Spacing(this->Volume.m_Spacing.x, this->Volume.m_Spacing.y, this->Volume.m_Spacing.z);
+
+		const float MinSpacing = Spacing.Min();
+
 		if (pErVolumeProperty)
 		{
 			this->Volume.m_DensityScale		= pErVolumeProperty->GetDensityScale();
-			this->Volume.m_StepSize			= pErVolumeProperty->GetStepSizeFactorPrimary() * (this->Volume.m_MaxAABB.x / this->Volume.m_Extent.x);
-			this->Volume.m_StepSizeShadow	= this->Volume.m_StepSize * pErVolumeProperty->GetStepSizeFactorSecondary();
+			this->Volume.m_StepSize			= pErVolumeProperty->GetStepSizeFactorPrimary() * MinSpacing;
+			this->Volume.m_StepSizeShadow	= pErVolumeProperty->GetStepSizeFactorSecondary() * MinSpacing;
 			this->Volume.m_GradientDelta	= pErVolumeProperty->GetGradientDeltaFactor() * this->Volume.m_Spacing.x;
 			this->Volume.m_InvGradientDelta	= 1.0f / this->Volume.m_GradientDelta;
 			this->Volume.m_GradientFactor	= pErVolumeProperty->GetGradientFactor();
@@ -468,16 +490,13 @@ void vtkErVolumeMapper::SetInput(vtkImageData* pImageData)
 		else
 		{
 			this->Volume.m_DensityScale		= vtkErVolumeProperty::DefaultDensityScale();
-			this->Volume.m_StepSize			= vtkErVolumeProperty::DefaultStepSizeFactorPrimary() * (this->Volume.m_MaxAABB.x / this->Volume.m_Extent.x);
-			this->Volume.m_StepSizeShadow	= vtkErVolumeProperty::DefaultStepSizeFactorSecondary() * this->Volume.m_StepSize;
+			this->Volume.m_StepSize			= vtkErVolumeProperty::DefaultStepSizeFactorPrimary() * MinSpacing;
+			this->Volume.m_StepSizeShadow	= vtkErVolumeProperty::DefaultStepSizeFactorSecondary() * MinSpacing;
 			this->Volume.m_GradientDelta	= vtkErVolumeProperty::DefaultGradientDeltaFactor() * this->Volume.m_Spacing.x;
 			this->Volume.m_InvGradientDelta	= 1.0f / this->Volume.m_GradientDelta;
 			this->Volume.m_GradientFactor	= vtkErVolumeProperty::DefaultGradientFactor();
 			this->Volume.m_ShadingType		= vtkErVolumeProperty::DefaultShadingType();
 		}
-
-		this->Volume.m_StepSize			= this->Volume.m_Spacing.x;
-		this->Volume.m_StepSizeShadow	= this->Volume.m_Spacing.x;
 
 		this->Volume.m_GradientDeltaX.x = this->Volume.m_GradientDelta;
 		this->Volume.m_GradientDeltaX.y = 0.0f;

@@ -134,13 +134,14 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 					break;
 				}
 			}
+
+			break;
 		}
 		
 		// Sample background light
 		case 1:
 		{
-			Pl	= BACKGROUND_LIGHT_RADIUS * UniformSampleSphereSurface(RNG.Get2());
-
+			LocalP = BACKGROUND_LIGHT_RADIUS * SampleUnitSphere(RNG.Get2());
 			break;
 		}
 	}
@@ -211,7 +212,6 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 		{
 			if (IntersectSphere(R, BACKGROUND_LIGHT_RADIUS, &T))
 			{
-				R.m_MaxT = T;
 				Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
 				
 				if (pPdf)
@@ -296,7 +296,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
 	
-	/*
+	
 	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
@@ -315,7 +315,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 			}
 		}
 	}
-	*/
+	/**/
 
 	return Ld;
 }

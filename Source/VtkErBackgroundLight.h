@@ -21,6 +21,8 @@ public:
 	vtkTypeMacro(vtkErBackgroundLight, vtkErLight);
 	static vtkErBackgroundLight *New();
 
+	double GetArea() const;
+
 protected:
 	vtkErBackgroundLight(void);
 	virtual ~vtkErBackgroundLight(void);

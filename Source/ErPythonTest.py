@@ -26,9 +26,9 @@ Volume.SetMapper(ErVolumeMapper)
 ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
-Opacity.AddPoint(-1000, 0)
-Opacity.AddPoint(40, 0)
-Opacity.AddPoint(65, 1)
+Opacity.AddPoint(0, 0)
+Opacity.AddPoint(30, 0)
+Opacity.AddPoint(45, 1)
 Opacity.AddPoint(255, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
@@ -61,8 +61,8 @@ ErVolumeProperty.SetSpecular(2, Specular)
 
 # Glossiness
 Glossiness = vtk.vtkPiecewiseFunction()
-Glossiness.AddPoint(0, 15)
-Glossiness.AddPoint(255, 15)
+Glossiness.AddPoint(0, 150000)
+Glossiness.AddPoint(255, 150000)
 ErVolumeProperty.SetGlossiness(Glossiness)
 
 # IOR
@@ -71,10 +71,10 @@ IOR.AddPoint(0, 5)
 IOR.AddPoint(255, 5)
 ErVolumeProperty.SetIOR(IOR)
 
-ErVolumeProperty.SetStepSizeFactorPrimary(110)
-ErVolumeProperty.SetStepSizeFactorSecondary(100)
-ErVolumeProperty.SetDensityScale(1000000)
-ErVolumeProperty.SetShadingType(1)
+ErVolumeProperty.SetStepSizeFactorPrimary(0.1)
+ErVolumeProperty.SetStepSizeFactorSecondary(0.1)
+ErVolumeProperty.SetDensityScale(0.0001)
+ErVolumeProperty.SetShadingType(0)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -105,26 +105,29 @@ Renderer.SetActiveCamera(ErCamera)
 Renderer.RemoveAllLights()
 
 Fill = vtkErCorePython.vtkErAreaLight()
-Fill.SetType(1)
+Fill.SetType(0)
 Fill.SetPosition(0.1, 0.1, 0.1)
 Fill.SetFocalPoint(0, 0, 0)
-Fill.SetDiffuseColor(0.2, 1.0, 1.0)
-Fill.SetIntensity(0.2)
+Fill.SetDiffuseColor(1, 1, 1)
+Fill.SetIntensity(1.5)
 Fill.SetPositional(1)
 Fill.SetShapeType(0)
 Fill.SetOneSided(1)
-Fill.SetDistance(0.9)
-Fill.SetElevation(75)
-Fill.SetAzimuth(90)
-Fill.SetInnerRadius(0.2)
-Fill.SetOuterRadius(0.21)
-Fill.SetSize(0.3, 0.1, 0.1)
+Fill.SetDistance(1)
+Fill.SetElevation(45)
+Fill.SetAzimuth(-45)
+Fill.SetInnerRadius(0.1)
+Fill.SetOuterRadius(0.2)
+Fill.SetSize(0.03, 0.03, 0.03)
 #Fill.SetCamera(ErCamera)
 
-ErVolumeMapper.AddLight(Fill)
+#ErVolumeMapper.AddLight(Fill)
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(0.1, 0.1, 0.1);
+ErBackgroundLight.SetDiffuseColor(0.9, 0.6, 0.1);
+ErBackgroundLight.SetIntensity(0.5)
+
+ErVolumeMapper.AddLight(ErBackgroundLight)
 
 ErBoxWidget = vtkErCorePython.vtkErBoxWidget()
 ErBoxWidget.SetPlaceFactor(1)

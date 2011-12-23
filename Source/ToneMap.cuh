@@ -37,9 +37,9 @@ KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gCamera.m_InvExposure)), 0.0, 1.0f));
 	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gCamera.m_InvExposure)), 0.0, 1.0f));
 
-	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gCamera.m_InvGamma)), 0.0f, 255.0f));
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gCamera.m_InvGamma)), 0.0f, 255.0f));
 	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), gCamera.m_InvGamma)), 0.0f, 255.0f));
-	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gCamera.m_InvGamma)), 0.0f, 255.0f));
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gCamera.m_InvGamma)), 0.0f, 255.0f));
 
 //	ColorRGBAuc RGBA;
 
