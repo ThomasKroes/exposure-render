@@ -247,7 +247,7 @@ DEV int IntersectRing(CRay R, bool OneSided, float InnerRadius, float OuterRadiu
 	return Res;
 }
 
-DEV bool IntersectUnitBox(CRay R, float* pNearT, float* pFarT)
+DEV int IntersectUnitBox(CRay R, float* pNearT, float* pFarT)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
 	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.m_O);
@@ -257,19 +257,30 @@ DEV bool IntersectUnitBox(CRay R, float* pNearT, float* pFarT)
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
 	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
 
-	if (LargestMinT < R.m_MinT || LargestMinT > R.m_MaxT)
-		return false;
+	if (LargestMinT > 0.0f)
+	{
+		if (pNearT)
+			*pNearT = LargestMinT;
 
-	if (pNearT)
-		*pNearT = LargestMinT;
+		if (pFarT)
+			*pFarT = LargestMaxT;
+	}
+	else
+	{
+		if (pNearT)
+			*pNearT = 0.0f;
 
-	if (pFarT)
-		*pFarT = LargestMaxT;
+		if (pFarT)
+			*pFarT = LargestMaxT;
+	}
 
-	return LargestMaxT > LargestMinT;
+	if (*pNearT < R.m_MinT || *pNearT > R.m_MaxT)
+		return 0;
+
+	return 1;
 }
 
-DEV bool IntersectBox(CRay R, Vec3f Min, Vec3f Max, float* pNearT, float* pFarT)
+DEV int IntersectBox(CRay R, Vec3f Min, Vec3f Max, float* pNearT, float* pFarT)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
 	const Vec3f BottomT		= InvR * (Min - R.m_O);
@@ -279,16 +290,30 @@ DEV bool IntersectBox(CRay R, Vec3f Min, Vec3f Max, float* pNearT, float* pFarT)
 	const float LargestMinT = fmaxf(fmaxf(MinT.x, MinT.y), fmaxf(MinT.x, MinT.z));
 	const float LargestMaxT = fminf(fminf(MaxT.x, MaxT.y), fminf(MaxT.x, MaxT.z));
 
-	if (pNearT)
-		*pNearT = LargestMinT;
-
-	if (pFarT)
-		*pFarT = LargestMaxT;
-
-	if (LargestMaxT < LargestMinT || LargestMinT < R.m_MinT || LargestMinT > R.m_MaxT)
+	if (LargestMaxT < LargestMinT)
 		return 0;
+
+	if (LargestMinT > 0.0f)
+	{
+		if (pNearT)
+			*pNearT = LargestMinT;
+
+		if (pFarT)
+			*pFarT = LargestMaxT;
+	}
 	else
-		return 1;
+	{
+		if (pNearT)
+			*pNearT = 0.0f;
+
+		if (pFarT)
+			*pFarT = LargestMaxT;
+	}
+
+	if (*pNearT < R.m_MinT || *pNearT > R.m_MaxT)
+		return 0;
+
+	return 1;
 }
 
 DEV bool IntersectBox(CRay R, Vec3f Size, float* pNearT, float* pFarT)
@@ -324,7 +349,7 @@ DEV bool IntersectSphere(CRay R, float Radius, float* pT)
     
     // if discriminant is negative there are no real roots, so return false, as ray misses sphere
     if (disc < 0)
-        return false;
+        return 0;
 
     // compute q as described above
     float distSqrt = sqrtf(disc);
@@ -354,7 +379,7 @@ DEV bool IntersectSphere(CRay R, float Radius, float* pT)
 		if (pT)
 			*pT = t0;
 
-        return true;
+        return 1;
 	}
 	else
 	{
@@ -363,11 +388,11 @@ DEV bool IntersectSphere(CRay R, float Radius, float* pT)
 			if (pT)
 				*pT = t1;
 
-			return true;
+			return 1;
 		}
 		else
 		{
-			return false;
+			return 0;
 		}
 	}
 }
@@ -385,7 +410,7 @@ DEV bool IntersectUnitSphere(CRay R, float* pT)
     // if discriminant is negative there are no real roots, so return 
     // false as ray misses sphere
     if (disc < 0)
-        return false;
+        return 0;
 
     // compute q as described above
     float distSqrt = sqrtf(disc);
@@ -415,7 +440,7 @@ DEV bool IntersectUnitSphere(CRay R, float* pT)
 		if (pT)
 			*pT = t0;
 
-        return true;
+        return 1;
 	}
 	else
 	{
@@ -424,11 +449,11 @@ DEV bool IntersectUnitSphere(CRay R, float* pT)
 			if (pT)
 				*pT = t1;
 
-			return true;
+			return 1;
 		}
 		else
 		{
-			return false;
+			return 0;
 		}
 	}
 }

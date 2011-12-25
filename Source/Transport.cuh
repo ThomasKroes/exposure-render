@@ -159,7 +159,11 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 	// Transform ray into local shape coordinates
 	CRay TR = TransformRay(R, L.m_InvTM);
 
+	// Result of intersection
 	int Res = 0;
+
+	// Hit distance in local coordinates
+	float Tl = 0.0f;
 
 	switch (L.m_Type)
 	{
@@ -171,35 +175,35 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Plane
 				case 0:
 				{
-					Res = IntersectPlane(TR, L.m_OneSided, ToVec3f(L.m_Size), &T, NULL);
+					Res = IntersectPlane(TR, L.m_OneSided, ToVec3f(L.m_Size), &Tl, NULL);
 					break;
 				}
 
 				// Disk
 				case 1:
 				{
-					Res = IntersectDisk(TR, L.m_OneSided, L.m_OuterRadius, &T, NULL);
+					Res = IntersectDisk(TR, L.m_OneSided, L.m_OuterRadius, &Tl, NULL);
 					break;
 				}
 
 				// Ring
 				case 2:
 				{
-					Res = IntersectRing(TR, L.m_OneSided, L.m_InnerRadius, L.m_OuterRadius, &T, NULL);
+					Res = IntersectRing(TR, L.m_OneSided, L.m_InnerRadius, L.m_OuterRadius, &Tl, NULL);
 					break;
 				}
 
 				// Box
 				case 3:
 				{
-					Res = IntersectBox(TR, ToVec3f(L.m_Size), &T, NULL);
+					Res = IntersectBox(TR, ToVec3f(L.m_Size), &Tl, NULL);
 					break;
 				}
 
 				// Sphere
 				case 4:
 				{
-					Res = IntersectSphere(TR, L.m_OuterRadius, &T);
+					Res = IntersectSphere(TR, L.m_OuterRadius, &Tl);
 					break;
 				}
 			}
@@ -210,19 +214,8 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 		// Intersect with background light
 		case 1:
 		{
-			if (IntersectSphere(R, BACKGROUND_LIGHT_RADIUS, &T))
-			{
-				Le = ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z);
-				
-				if (pPdf)
-					*pPdf = 1.0f;//powf(BACKGROUND_LIGHT_RADIUS, 2.0f) / m_Area;
-
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			Res = IntersectSphere(TR, BACKGROUND_LIGHT_RADIUS, &Tl);
+			break;
 		}
 	}
 
@@ -230,7 +223,14 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 	{
 		Le = Res == 1 ? ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z) : ColorXYZf(0.0f);
 		
+		// Compute intersection point in world coordinates
+		const Vec3f P = TransformPoint(L.m_TM, TR(Tl));
+
+		// Compute worl distance to intersection
+		T = Length(P - R.m_D);
+
 		*pPdf = 1.0f;
+
 		return true;
 	}
 
@@ -281,9 +281,9 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 
 	Wi = -Rl.m_D; 
 
-	F = Shader.F(Wo, -Wi); 
+	F = Shader.F(Wo, Wi); 
 
-	ShaderPdf = Shader.Pdf(Wo, -Wi);
+	ShaderPdf = Shader.Pdf(Wo, Wi);
 	
 	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
@@ -303,7 +303,13 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 	{
 		if (NearestLight(CRay(Pe, Wi, 0.0f), Li, Pl, &LightPdf))
 		{
-			if (LightPdf > 0.0f && !Li.IsBlack() && !FreePathRM(CRay(Pl, Normalize(Pe - Pl), 0.0f, (Pe - Pl).Length()), RNG)) 
+			// Compose light ray
+			Rl.m_O		= Pl;
+			Rl.m_D		= Normalize(Pe - Pl);
+			Rl.m_MinT	= 0.0f;
+			Rl.m_MaxT	= (Pe - Pl).Length();
+
+			if (LightPdf > 0.0f && !Li.IsBlack() && !FreePathRM(Rl, RNG)) 
 			{
 				const float WeightMIS = PowerHeuristic(1.0f, ShaderPdf, 1.0f, LightPdf);
 

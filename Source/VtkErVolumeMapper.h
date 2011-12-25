@@ -109,6 +109,22 @@ protected:
 	vtkErVolumeMapper*	VolumeMapper;
 };
 
+class vtkErUpdatePropertyCommand : public vtkCommand
+{
+public:
+	static vtkErUpdatePropertyCommand* New() { return new vtkErUpdatePropertyCommand; };
+
+	virtual void Execute(vtkObject*, unsigned long, void *);
+	
+	void SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper);
+
+protected:
+	vtkErUpdatePropertyCommand() { this->VolumeMapper = NULL; };
+	~vtkErUpdatePropertyCommand() {};
+
+	vtkErVolumeMapper*	VolumeMapper;
+};
+
 class VTK_ER_CORE_EXPORT vtkErNoiseReduction : public vtkObject
 {
 public:
@@ -199,7 +215,7 @@ public:
 protected:
 	vtkRenderer*									Renderer;
 	vtkCamera*										ActiveCamera;
-	vtkVolumeProperty*								VolumeProperty;
+	vtkErVolumeProperty*							VolumeProperty;
 
 	vtkErBoxWidget*									SliceWidget;
 
@@ -207,7 +223,8 @@ protected:
 	vtkSmartPointer<vtkErUpdateSlicingCommand>		UpdateSlicingCommand;
 	vtkSmartPointer<vtkErUpdateLightingCommand>		UpdateLightingCommand;
 	vtkSmartPointer<vtkErUpdateCameraCommand>		UpdateCameraCommand;
-	vtkSmartPointer<vtkErUpdateBlurCommand>			UpdateBlur;
+	vtkSmartPointer<vtkErUpdateBlurCommand>			UpdateBlurCommand;
+	vtkSmartPointer<vtkErUpdatePropertyCommand>		UpdatePropertyCommand;
 
 	int												MacroCellSize;
 	bool											ShowFPS;
@@ -242,6 +259,7 @@ protected:
 	friend class vtkErUpdateLightingCommand;
 	friend class vtkErUpdateCameraCommand;
 	friend class vtkErUpdateBlurCommand;
+	friend class vtkErUpdatePropertyCommand;
 };
 
 // http://www.na-mic.org/svn/Slicer3/branches/cuda/Modules/VolumeRenderingCuda/

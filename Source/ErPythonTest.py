@@ -1,7 +1,7 @@
 import vtk
 import vtkErCorePython
 
-VolumeFile = "examples/engine_small.mhd"
+VolumeFile = "examples/bonsai_small.mhd"
 
 Renderer = vtk.vtkRenderer()
 RendererWin = vtk.vtkRenderWindow()
@@ -26,9 +26,9 @@ Volume.SetMapper(ErVolumeMapper)
 ErVolumeProperty = vtkErCorePython.vtkErVolumeProperty()
 
 Opacity = vtk.vtkPiecewiseFunction()
-Opacity.AddPoint(0, 0)
-Opacity.AddPoint(30, 0)
-Opacity.AddPoint(45, 1)
+Opacity.AddPoint(0, 0.001)
+Opacity.AddPoint(20, 0)
+Opacity.AddPoint(25, 1)
 Opacity.AddPoint(255, 1)
 
 ErVolumeProperty.SetOpacity(Opacity)
@@ -52,8 +52,8 @@ ErVolumeProperty.SetDiffuse(2, DiffuseB)
 # Specular
 Specular = vtk.vtkPiecewiseFunction()
 
-Specular.AddPoint(0, 1)
-Specular.AddPoint(255, 1)
+Specular.AddPoint(0, 0.5)
+Specular.AddPoint(255, 0.5)
 
 ErVolumeProperty.SetSpecular(0, Specular)
 ErVolumeProperty.SetSpecular(1, Specular)
@@ -61,8 +61,8 @@ ErVolumeProperty.SetSpecular(2, Specular)
 
 # Glossiness
 Glossiness = vtk.vtkPiecewiseFunction()
-Glossiness.AddPoint(0, 150000)
-Glossiness.AddPoint(255, 150000)
+Glossiness.AddPoint(0, 150)
+Glossiness.AddPoint(255, 150)
 ErVolumeProperty.SetGlossiness(Glossiness)
 
 # IOR
@@ -73,8 +73,8 @@ ErVolumeProperty.SetIOR(IOR)
 
 ErVolumeProperty.SetStepSizeFactorPrimary(0.1)
 ErVolumeProperty.SetStepSizeFactorSecondary(0.1)
-ErVolumeProperty.SetDensityScale(0.0001)
-ErVolumeProperty.SetShadingType(0)
+ErVolumeProperty.SetDensityScale(100)
+ErVolumeProperty.SetShadingType(1)
 
 # Assign the ER volume 
 Volume.SetProperty(ErVolumeProperty)
@@ -106,28 +106,28 @@ Renderer.RemoveAllLights()
 
 Fill = vtkErCorePython.vtkErAreaLight()
 Fill.SetType(0)
-Fill.SetPosition(0.1, 0.1, 0.1)
+Fill.SetPosition(0.03, 0.03, 0.03)
 Fill.SetFocalPoint(0, 0, 0)
-Fill.SetDiffuseColor(1, 1, 1)
-Fill.SetIntensity(1.5)
+Fill.SetDiffuseColor(.9, 0.6, 0.23)
+Fill.SetIntensity(0.01)
 Fill.SetPositional(1)
 Fill.SetShapeType(0)
 Fill.SetOneSided(1)
-Fill.SetDistance(1)
+Fill.SetDistance(0.1)
 Fill.SetElevation(45)
-Fill.SetAzimuth(-45)
-Fill.SetInnerRadius(0.1)
-Fill.SetOuterRadius(0.2)
-Fill.SetSize(0.03, 0.03, 0.03)
+Fill.SetAzimuth(0)
+Fill.SetInnerRadius(0.08)
+Fill.SetOuterRadius(0.01)
+Fill.SetSize(0.005, 0.005, 0.03)
 #Fill.SetCamera(ErCamera)
 
-#ErVolumeMapper.AddLight(Fill)
+ErVolumeMapper.AddLight(Fill)
 
 ErBackgroundLight = vtkErCorePython.vtkErBackgroundLight();
-ErBackgroundLight.SetDiffuseColor(0.9, 0.6, 0.1);
-ErBackgroundLight.SetIntensity(0.5)
+ErBackgroundLight.SetDiffuseColor(1, 1, 1);
+ErBackgroundLight.SetIntensity(0.8)
 
-ErVolumeMapper.AddLight(ErBackgroundLight)
+#ErVolumeMapper.AddLight(ErBackgroundLight)
 
 ErBoxWidget = vtkErCorePython.vtkErBoxWidget()
 ErBoxWidget.SetPlaceFactor(1)

@@ -322,7 +322,7 @@ void vtkErUpdateBlurCommand::Execute(vtkObject*, unsigned long, void *)
 	if (this->VolumeMapper == NULL)
 		return;
 
-	this->VolumeMapper->Blur.m_FilterWidth			= 1;
+	this->VolumeMapper->Blur.m_FilterWidth			= 2;
 	this->VolumeMapper->Blur.m_FilterWeights[0]		= 0.7f;
 	this->VolumeMapper->Blur.m_FilterWeights[1]		= 0.4f;
 	this->VolumeMapper->Blur.m_FilterWeights[2]		= 0.1f;
@@ -332,6 +332,32 @@ void vtkErUpdateBlurCommand::Execute(vtkObject*, unsigned long, void *)
 }
 
 void vtkErUpdateBlurCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
+{
+	if (pVolumeMapper == NULL)
+		return;
+
+	this->VolumeMapper = pVolumeMapper;
+};
+
+void vtkErUpdatePropertyCommand::Execute(vtkObject*, unsigned long, void *)
+{
+	if (this->VolumeMapper == NULL)
+		return;
+
+	if (this->VolumeMapper->VolumeProperty)
+	{
+		this->VolumeMapper->Volume.m_DensityScale			= this->VolumeMapper->VolumeProperty->GetDensityScale();
+//		this->VolumeMapper->Volume.m_StepSize				= this->VolumeMapper->VolumeProperty->GetStepSizeFactorPrimary();
+//		this->VolumeMapper->Volume.m_StepSizeShadow			= this->VolumeMapper->VolumeProperty->GetStepSizeFactorPrimary();
+//		this->VolumeMapper->Volume.m_GradientDeltaFactor	= this->VolumeMapper->VolumeProperty->GetGradientDeltaFactor();//
+//		this->VolumeMapper->Volume.m_GradientFactor			= this->VolumeMapper->VolumeProperty->GetGradientFactor();
+//		this->VolumeMapper->Volume.m_ShadingType			= this->VolumeMapper->VolumeProperty->GetShadingType();
+	}
+
+	this->VolumeMapper->Reset();
+}
+
+void vtkErUpdatePropertyCommand::SetVolumeMapper(vtkErVolumeMapper* pVolumeMapper)
 {
 	if (pVolumeMapper == NULL)
 		return;
@@ -361,8 +387,11 @@ vtkErVolumeMapper::vtkErVolumeMapper(void)
 	this->UpdateCameraCommand = vtkErUpdateCameraCommand::New();
 	this->UpdateCameraCommand->SetVolumeMapper(this);
 	
-	this->UpdateBlur = vtkErUpdateBlurCommand::New();
-	this->UpdateBlur->SetVolumeMapper(this);
+	this->UpdateBlurCommand = vtkErUpdateBlurCommand::New();
+	this->UpdateBlurCommand->SetVolumeMapper(this);
+
+	this->UpdatePropertyCommand = vtkErUpdatePropertyCommand::New();
+	this->UpdatePropertyCommand->SetVolumeMapper(this);
 
 	this->Lights = vtkLightCollection::New();
 
@@ -532,9 +561,11 @@ void vtkErVolumeMapper::Render(vtkRenderer* pRenderer, vtkVolume* pVolume)
 
 	if (this->VolumeProperty != pVolume->GetProperty())
 	{
-		this->VolumeProperty = pVolume->GetProperty();
+		this->VolumeProperty = dynamic_cast<vtkErVolumeProperty*>(pVolume->GetProperty());
 
-		this->VolumeProperty->AddObserver(vtkCommand::ModifiedEvent, this->UpdateBlur, 0.0f);
+		this->VolumeProperty->AddObserver(vtkCommand::ModifiedEvent, this->UpdateBlurCommand, 0.0f);
+		this->VolumeProperty->AddObserver(vtkCommand::ModifiedEvent, this->UpdatePropertyCommand, 0.0f);
+		
 		this->VolumeProperty->Modified();
 	}
 
@@ -650,7 +681,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 		return;
 	}
 
-	vtkErVolumeProperty* pErVolumeProperty = dynamic_cast<vtkErVolumeProperty*>(pVolumeProperty);
+	this->VolumeProperty = dynamic_cast<vtkErVolumeProperty*>(pVolumeProperty);
 
 	double* pRange = GetDataSetInput()->GetScalarRange();
 
@@ -663,7 +694,7 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	float	IOR[128];
 	float	Emission[3][128];
 
-	if (pErVolumeProperty == NULL)
+	if (this->VolumeProperty == NULL)
 	{
 		vtkErrorMacro("Incompatible volume property (reverting to default property), use vtkErVolumeProperty!");
 		
@@ -687,26 +718,26 @@ void vtkErVolumeMapper::UploadVolumeProperty(vtkVolumeProperty* pVolumeProperty)
 	}
 	else
 	{
-		if (pErVolumeProperty->GetDirty())
+		if (this->VolumeProperty->GetDirty())
 		{
 			this->Reset();
-			pErVolumeProperty->SetDirty(false);
+			this->VolumeProperty->SetDirty(false);
 		}
 
-		this->Volume.m_ShadingType = pErVolumeProperty->GetShadingType();
+		this->Volume.m_ShadingType = this->VolumeProperty->GetShadingType();
 
-		pErVolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
-		pErVolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
-		pErVolumeProperty->GetDiffuse(1)->GetTable(pRange[0], pRange[1], N, Diffuse[1]);
-		pErVolumeProperty->GetDiffuse(2)->GetTable(pRange[0], pRange[1], N, Diffuse[2]);
-		pErVolumeProperty->GetSpecular(0)->GetTable(pRange[0], pRange[1], N, Specular[0]);
-		pErVolumeProperty->GetSpecular(1)->GetTable(pRange[0], pRange[1], N, Specular[1]);
-		pErVolumeProperty->GetSpecular(2)->GetTable(pRange[0], pRange[1], N, Specular[2]);
-		pErVolumeProperty->GetGlossiness()->GetTable(pRange[0], pRange[1], N, Glossiness);
-		pErVolumeProperty->GetIOR()->GetTable(pRange[0], pRange[1], N, IOR);
-		pErVolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
-		pErVolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
-		pErVolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
+		this->VolumeProperty->GetOpacity()->GetTable(pRange[0], pRange[1], N, Opacity);
+		this->VolumeProperty->GetDiffuse(0)->GetTable(pRange[0], pRange[1], N, Diffuse[0]);
+		this->VolumeProperty->GetDiffuse(1)->GetTable(pRange[0], pRange[1], N, Diffuse[1]);
+		this->VolumeProperty->GetDiffuse(2)->GetTable(pRange[0], pRange[1], N, Diffuse[2]);
+		this->VolumeProperty->GetSpecular(0)->GetTable(pRange[0], pRange[1], N, Specular[0]);
+		this->VolumeProperty->GetSpecular(1)->GetTable(pRange[0], pRange[1], N, Specular[1]);
+		this->VolumeProperty->GetSpecular(2)->GetTable(pRange[0], pRange[1], N, Specular[2]);
+		this->VolumeProperty->GetGlossiness()->GetTable(pRange[0], pRange[1], N, Glossiness);
+		this->VolumeProperty->GetIOR()->GetTable(pRange[0], pRange[1], N, IOR);
+		this->VolumeProperty->GetEmission(0)->GetTable(pRange[0], pRange[1], N, Emission[0]);
+		this->VolumeProperty->GetEmission(1)->GetTable(pRange[0], pRange[1], N, Emission[1]);
+		this->VolumeProperty->GetEmission(2)->GetTable(pRange[0], pRange[1], N, Emission[2]);
 	}
 
 	BindTransferFunctions1D(Opacity, Diffuse, Specular, Glossiness, IOR, Emission, N);
