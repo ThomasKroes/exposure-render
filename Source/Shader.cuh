@@ -398,6 +398,8 @@ public:
 			case Phase:
 				return m_IsotropicPhase.SampleF(Wo, Wi, Pdf, S.m_Dir);
 		}
+
+		return ColorXYZf(0.0f);
 	}
 
 	DEV float Pdf(const Vec3f& Wo, const Vec3f& Wi)

@@ -89,14 +89,16 @@ DEV inline void Swap(int& I1, int& I2)
 }
 class CColorXyz;
 
-DEV inline void XYZToRGB(const float xyz[3], float rgb[3]) {
+DEV inline void XYZToRGB(const float xyz[3], float rgb[3])
+{
 	rgb[0] =  3.240479f*xyz[0] - 1.537150f*xyz[1] - 0.498535f*xyz[2];
 	rgb[1] = -0.969256f*xyz[0] + 1.875991f*xyz[1] + 0.041556f*xyz[2];
 	rgb[2] =  0.055648f*xyz[0] - 0.204043f*xyz[1] + 1.057311f*xyz[2];
 }
 
 
-DEV inline void RGBToXYZ(const float rgb[3], float xyz[3]) {
+DEV inline void RGBToXYZ(const float rgb[3], float xyz[3])
+{
 	xyz[0] = 0.412453f*rgb[0] + 0.357580f*rgb[1] + 0.180423f*rgb[2];
 	xyz[1] = 0.212671f*rgb[0] + 0.715160f*rgb[1] + 0.072169f*rgb[2];
 	xyz[2] = 0.019334f*rgb[0] + 0.119193f*rgb[1] + 0.950227f*rgb[2];
@@ -1237,8 +1239,8 @@ class EXPOSURE_RENDER_DLL Vec2 : public Vec<T, 2>
 public:
 	DEV Vec2(void)
 	{
-//		m_D[0] = T();
-//		m_D[1] = T();
+		m_D[0] = T();
+		m_D[1] = T();
 	}
 
 	DEV Vec2(const T& V1, const T& V2)
@@ -1342,7 +1344,6 @@ public:
 	{
 		Set(T(), T(), T());
 	}
-	/**/
 };
 
 template <class T>
@@ -1719,7 +1720,7 @@ public:
 		Set(X, Y, Z, A);
 	}
 	
-	DEV void Set(float X, float Y, const float& Z)
+	DEV void Set(float X, float Y, float Z)
 	{
 		SetX(X);
 		SetY(Y);

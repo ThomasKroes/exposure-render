@@ -15,7 +15,6 @@
 
 #include "Shader.cuh"
 #include "RayMarching.cuh"
-#include "Woodcock.cuh"
 #include "General.cuh"
 
 DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)

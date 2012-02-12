@@ -27,7 +27,7 @@ public:
 	{
 	}
 
-	virtual ~CCudaBuffer2D(void)
+	~CCudaBuffer2D(void)
 	{
 		Free();
 	}
@@ -116,7 +116,7 @@ public:
 			return &m_pData[Y * GetWidth() + X];
 	}
 
-	DEV void Set(T& Value, int X = 0, int Y = 0)
+	DEV void Set(T Value, int X = 0, int Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return;
