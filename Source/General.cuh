@@ -160,6 +160,18 @@ struct EXPOSURE_RENDER_DLL _Clipping
 	_ClippingObject		m_ClippingObjects[32];
 };
 
+struct EXPOSURE_RENDER_DLL _ReflectionObject
+{
+	_TransformMatrix	m_TM;
+	_TransformMatrix	m_InvTM;
+};
+
+struct EXPOSURE_RENDER_DLL _Reflections
+{
+	int					m_NoReflectionObjects;
+	_ReflectionObject	m_ReflectionObjects[32];
+};
+
 struct EXPOSURE_RENDER_DLL _Denoise
 {
 	float	m_Enabled;

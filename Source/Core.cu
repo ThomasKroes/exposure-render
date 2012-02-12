@@ -36,20 +36,21 @@ cudaArray* gpGlossiness			= NULL;
 cudaArray* gpIor				= NULL;
 cudaArray* gpEmission			= NULL;
 
-CD _Volume		gVolume;
-CD _Camera		gCamera;
-CD _Lighting	gLighting;
-CD _Clipping	gClipping;
-CD _Denoise		gDenoise;
-CD _Scattering	gScattering;
-CD _Blur		gBlur;
+CD _Volume			gVolume;
+CD _Camera			gCamera;
+CD _Lighting		gLighting;
+CD _Clipping		gClipping;
+CD _Reflections		gReflections;
+CD _Denoise			gDenoise;
+CD _Scattering		gScattering;
+CD _Blur			gBlur;
 
-CD Interval		gOpacityRange;
-CD Interval		gDiffuseRange;
-CD Interval		gSpecularRange;
-CD Interval		gGlossinessRange;
-CD Interval		gIorRange;
-CD Interval		gEmissionRange;
+CD Interval			gOpacityRange;
+CD Interval			gDiffuseRange;
+CD Interval			gSpecularRange;
+CD Interval			gGlossinessRange;
+CD Interval			gIorRange;
+CD Interval			gEmissionRange;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -369,6 +370,11 @@ void ErBindLighting(_Lighting* pLighting)
 void ErBindClipping(_Clipping* pClipping)
 {
 	HandleCudaError(cudaMemcpyToSymbol("gClipping", pClipping, sizeof(_Clipping)));
+}
+
+void ErBindReflections(_Reflections* pReflections)
+{
+	HandleCudaError(cudaMemcpyToSymbol("gReflections", pReflections, sizeof(_Reflections)));
 }
 
 void ErBindDenoise(_Denoise* pDenoise)

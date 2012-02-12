@@ -117,7 +117,7 @@ DEV bool Inside(_ClippingObject& ClippingObject, Vec3f P)
 		// Plane
 		case 0:
 		{
-			Inside = P.y > 0.0f;
+			Inside = P.z > 0.0f;
 			break;
 		}
 

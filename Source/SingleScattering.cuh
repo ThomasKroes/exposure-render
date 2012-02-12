@@ -97,8 +97,63 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	}
 	else
 	{
+		/*
+		float NearestT = 1500.0f;
+
+		for (int i = 0; i < gReflections.m_NoReflectionObjects; i++)
+		{
+			CRay TR = TransformRay(Re, gReflections.m_ReflectionObjects[i].m_InvTM);
+
+			int Res = 0;
+
+			float T = 0.0f;
+
+			Res = IntersectPlane(TR, false, Vec3f(1.0f), &T, NULL);
+			
+			if (Res > 0)
+			{
+				if (T < NearestT)
+				{
+					NearestT = T;
+				}
+			}
+
+			if (NearestT < 1500.0f)
+			{
+				Lv = ColorXYZf(1.0f);
+
+
+				Vec3f HitP = Re(NearestT);
+
+				CVolumeShader Shader(CVolumeShader::Brdf, Vec3f(0.0f, 1.0f, 0.0f), -Re.m_D, ColorXYZf(1.0f), ColorXYZf(1.0f), 5.0f, 50.0f);
+
+				Vec3f Wi, Pl;
+
+				float LightPdf = 1.0f, ShaderPdf = 1.0f;
+
+				ColorXYZf F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
+
+
+
+			}
+			else
+			{
+				Lv = ColorXYZf(0.0f);
+			}
+		}
+		*/
+		
+		/*
+		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, true))
+		{
+			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Li), X, Y);
+			return;
+		}
+
+
 		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, true))
 			Lv = Li;
+		*/
 	}
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);
