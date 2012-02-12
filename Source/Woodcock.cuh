@@ -13,6 +13,6 @@
 
 #pragma once
 
-#include "Geometry.h"
+#include "Geometry.cuh"
 
 #include "Utilities.cuh"

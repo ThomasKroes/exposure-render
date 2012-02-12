@@ -20,50 +20,48 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
+	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 	
 	CRNG RNG(pFrameBuffer->m_RandomSeeds1.GetPtr(X, Y), pFrameBuffer->m_RandomSeeds2.GetPtr(X, Y));
 
 	Vec2f ScreenPoint;
 
-	ScreenPoint.x = gCamera.m_Screen[0][0] + (gCamera.m_InvScreen.x * (float)X);
-	ScreenPoint.y = gCamera.m_Screen[1][0] + (gCamera.m_InvScreen.y * (float)Y);
+	ScreenPoint.x = gCamera.m_Screen[0][0] + (gCamera.m_InvScreen[0] * (float)X);
+	ScreenPoint.y = gCamera.m_Screen[1][0] + (gCamera.m_InvScreen[1] * (float)Y);
 	
 	CRay Re;
 
 	Re.m_O		= ToVec3f(gCamera.m_Pos);
-	Re.m_D		= Normalize(ToVec3f(gCamera.m_N) + (-ScreenPoint.x * ToVec3f(gCamera.m_U)) + (-ScreenPoint.y * ToVec3f(gCamera.m_V)));
-	Re.m_MinT	= 0.0f;
-	Re.m_MaxT	= INF_MAX;
+	Re.m_D		= Normalize(ToVec3f(gCamera.m_N) + (ScreenPoint.x * ToVec3f(gCamera.m_U)) - (ScreenPoint.y * ToVec3f(gCamera.m_V)));
+	Re.m_MinT	= gCamera.m_ClipNear;
+	Re.m_MaxT	= gCamera.m_ClipFar;
 
 	if (gCamera.m_ApertureSize != 0.0f)
 	{
-		Vec2f LensUV = gCamera.m_ApertureSize * ConcentricSampleDisk(RNG.Get2());
+		const Vec2f LensUV = gCamera.m_ApertureSize * ConcentricSampleDisk(RNG.Get2());
 
-		Vec3f LI = ToVec3f(gCamera.m_U) * LensUV.x + ToVec3f(gCamera.m_V) * LensUV.y;
+		const Vec3f LI = ToVec3f(gCamera.m_U) * LensUV.x + ToVec3f(gCamera.m_V) * LensUV.y;
+
 		Re.m_O += LI;
-		Re.m_D = Normalize((Re.m_D * 1.0f) - LI);
+		Re.m_D = Normalize(Re.m_D * gCamera.m_FocalDistance - LI);
 	}
 
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
 	Vec3f Pe, Pl;
 	
-//	if (lightShootDDAWoodcock(Re, RNG, Pe))
-	if (SampleDistanceRM(Re, RNG, Pe))
-	{
-//		Lv = ColorXYZf(1.0f, 0.0f, 0.0f);
+	float T = 0.0f;
 
-		
-		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl))
+	if (SampleDistanceRM(Re, RNG, Pe, T) && T >= gCamera.m_ClipNear && T < gCamera.m_ClipFar)
+	{
+		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, true))
 		{
 			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Li), X, Y);
 			return;
 		}
-		/**/
 
-		const float Intensity = GetNormalizedIntensity(Pe);
+		const float Intensity = GetIntensity(Pe);
 
 		Lv += GetEmission(Intensity);
 
@@ -80,6 +78,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 				Lv += UniformSampleOneLight(CVolumeShader::Phase, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
 				break;
 			}
+			
 			/*
 			case 2:
 			{
@@ -92,15 +91,13 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 					Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
 
 				break;
-			}*/
+			}
+			*/
 		}
-		
 	}
 	else
 	{
-//		Lv = ColorXYZf(0.0f, 1.0f, 0.0f);
-
-		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl))
+		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, true))
 			Lv = Li;
 	}
 

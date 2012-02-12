@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Geometry.h"
+#include "Geometry.cuh"
 
 #define KRNL_ESTIMATE_BLOCK_W		16
 #define KRNL_ESTIMATE_BLOCK_H		8
@@ -24,7 +24,7 @@ KERNEL void KrnlComputeEstimate(FrameBuffer* pFrameBuffer)
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
+	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 
 	pFrameBuffer->m_RunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->m_RunningEstimateXyza.Get(X, Y), pFrameBuffer->m_FrameEstimateXyza.Get(X, Y), gScattering.m_NoIterations), X, Y);

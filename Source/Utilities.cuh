@@ -15,81 +15,247 @@
 
 #include <cuda_runtime.h>
 
-DEV inline Vec3f ToVec3f(const float3& V)
+#include "General.cuh"
+
+DEV Vec3f TransformVector(_TransformMatrix TM, Vec3f v)
+{
+  Vec3f r;
+
+  float x = v.x, y = v.y, z = v.z;
+
+  r.x = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
+  r.y = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
+  r.z = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
+
+  return r;
+}
+
+DEV Vec3f TransformPoint(_TransformMatrix TM, Vec3f pt)
+{
+	/*
+	float x = pt.x, y = pt.y, z = pt.z;
+    ptrans->x = m.m[0][0]*x + m.m[0][1]*y + m.m[0][2]*z + m.m[0][3];
+    ptrans->y = m.m[1][0]*x + m.m[1][1]*y + m.m[1][2]*z + m.m[1][3];
+    ptrans->z = m.m[2][0]*x + m.m[2][1]*y + m.m[2][2]*z + m.m[2][3];
+    float w   = m.m[3][0]*x + m.m[3][1]*y + m.m[3][2]*z + m.m[3][3];
+    if (w != 1.) *ptrans /= w;
+	*/
+    float x = pt.x, y = pt.y, z = pt.z;
+    float xp = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
+    float yp = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
+    float zp = TM.NN[2][0]*x + TM.NN[2][1]*y + TM.NN[2][2]*z + TM.NN[2][3];
+//    float wp = TM.NN[3][0]*x + TM.NN[3][1]*y + TM.NN[3][2]*z + TM.NN[3][3];
+    
+//	Assert(wp != 0);
+    
+//	if (wp == 1.)
+		return Vec3f(xp, yp, zp);
+ //   else
+//		return Vec3f(xp, yp, zp) * (1.0f / wp);
+}
+
+DEV CRay TransformRay(CRay R, _TransformMatrix TM)
+{
+	CRay TR;
+
+	Vec3f O(TM.NN[0][3], TM.NN[1][3], TM.NN[2][3]);
+
+	TR.m_O.x	= Dot(TR.m_O - O, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
+	TR.m_O.y	= Dot(TR.m_O - O, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
+	TR.m_O.z	= Dot(TR.m_O - O, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
+
+	TR.m_O = TransformPoint(TM, R.m_O);
+
+	TR.m_D.x	= Dot(TR.m_D, Vec3f(TM.NN[0][0], TM.NN[0][1], TM.NN[0][2]));
+	TR.m_D.y	= Dot(TR.m_D, Vec3f(TM.NN[1][0], TM.NN[1][1], TM.NN[1][2]));
+	TR.m_D.z	= Dot(TR.m_D, Vec3f(TM.NN[2][0], TM.NN[2][1], TM.NN[2][2]));
+
+	TR.m_D = TransformVector(TM, R.m_D);
+
+	TR.m_MinT	= R.m_MinT;
+	TR.m_MaxT	= R.m_MaxT;
+
+	return TR;
+}
+
+HOD inline Vec3f ToVec3f(const float3& V)
 {
 	return Vec3f(V.x, V.y, V.z);
 }
 
-DEV inline float3 FromVec3f(const Vec3f& V)
+HOD inline Vec3f ToVec3f(float V[3])
+{
+	return Vec3f(V[0], V[1], V[2]);
+}
+
+HOD inline float3 FromVec3f(const Vec3f& V)
 {
 	return make_float3(V.x, V.y, V.z);
 }
 
-DEV float GetIntensity(const Vec3f& P)
+DEV float GetIntensity(Vec3f P)
 {
-	return tex3D(gTexIntensity, (P.x - gVolume.m_MinAABB.x) * gVolume.m_InvSize.x, (P.y - gVolume.m_MinAABB.y) * gVolume.m_InvSize.y, (P.z - gVolume.m_MinAABB.z) * gVolume.m_InvSize.z);
+	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P.x - gVolume.m_MinAABB[0]) * gVolume.m_InvSize[0], (P.y - gVolume.m_MinAABB[1]) * gVolume.m_InvSize[1], (P.z - gVolume.m_MinAABB[2]) * gVolume.m_InvSize[2]));
 }
 
-DEV float GetNormalizedIntensity(const Vec3f& P)
+DEV float GetNormalizedIntensity(Vec3f P)
 {
 	return (GetIntensity(P) - gVolume.m_IntensityMin) * gVolume.m_IntensityInvRange;
 }
 
-DEV float GetOpacity(const float& NormalizedIntensity)
+DEV float GetOpacity(float NormalizedIntensity)
 {
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEV float GetOpacity(const Vec3f& P)
+DEV bool Inside(_ClippingObject& ClippingObject, Vec3f P)
 {
-	for (int i = 0; i < gSlicing.m_NoSlices; i++)
-	{
-		Vec3f D = P - ToVec3f(gSlicing.m_Position[i]);
+	bool Inside = false;
 
-		if (Dot(D, ToVec3f(gSlicing.m_Normal[i])) < 0.0f)
+	switch (ClippingObject.m_ShapeType)
+	{
+		// Plane
+		case 0:
+		{
+			Inside = P.y > 0.0f;
+			break;
+		}
+
+		// Box
+		case 1:
+		{
+			const float HalfSize[3] = { 0.5f * ClippingObject.m_Size[0], 0.5f * ClippingObject.m_Size[1], 0.5f * ClippingObject.m_Size[2] };
+
+			Inside = P.x > -HalfSize[0] && P.x < HalfSize[0] && P.y > -HalfSize[1] && P.y < HalfSize[1] && P.z > -HalfSize[2] && P.z < HalfSize[2];
+			break;
+		}
+
+		// Sphere
+		case 2:
+		{
+			Inside = Length(P) < ClippingObject.m_Radius;
+			break;
+		}
+
+		// Cylinder
+		case 3:
+		{
+			Inside = sqrtf((P.x * P.x) + (P.z * P.z)) < ClippingObject.m_Radius && fabs(P.y) < (0.5f * ClippingObject.m_Size[1]);
+			break;
+		}
+	}
+
+	return ClippingObject.m_Invert ? !Inside : Inside;
+}
+
+DEV bool Inside(Vec3f P)
+{
+	for (int i = 0; i < gClipping.m_NoClippingObjects; i++)
+	{
+		_ClippingObject& ClippingObject = gClipping.m_ClippingObjects[i];
+
+		const Vec3f P2 = TransformPoint(ClippingObject.m_InvTM, P);
+
+		if (Inside(ClippingObject, P2))
+			return true;
+	}
+
+	return false;
+}
+
+DEV float GetOpacity(Vec3f P)
+{
+	const float Intensity = GetIntensity(P);
+	
+	for (int i = 0; i < gClipping.m_NoClippingObjects; i++)
+	{
+		_ClippingObject& ClippingObject = gClipping.m_ClippingObjects[i];
+
+		const Vec3f P2 = TransformPoint(ClippingObject.m_TM, P);
+
+//		const bool InRange = Intensity > ClippingObject.m_MinIntensity && Intensity < ClippingObject.m_MaxIntensity;
+
+		if (Inside(ClippingObject, P2))
 			return 0.0f;
 	}
 
-	return GetOpacity(GetNormalizedIntensity(P));
+	const float NormalizedIntensity = (Intensity - gOpacityRange.m_Min) * gOpacityRange.m_InvRange;
+
+	return GetOpacity(NormalizedIntensity);
 }
 
-DEV ColorXYZf GetDiffuse(const float& NormalizedIntensity)
+DEV ColorXYZf GetDiffuse(float Intensity)
 {
+	const float NormalizedIntensity = (Intensity - gDiffuseRange.m_Min) * gDiffuseRange.m_InvRange;
+
 	float4 Diffuse = tex1D(gTexDiffuse, NormalizedIntensity);
 	return ColorXYZf(Diffuse.x, Diffuse.y, Diffuse.z);
 }
 
-DEV ColorXYZf GetSpecular(const float& NormalizedIntensity)
+DEV ColorXYZf GetSpecular(float Intensity)
 {
+	const float NormalizedIntensity = (Intensity - gSpecularRange.m_Min) * gSpecularRange.m_InvRange;
+
 	float4 Specular = tex1D(gTexSpecular, NormalizedIntensity);
 	return ColorXYZf(Specular.x, Specular.y, Specular.z);
 }
 
-DEV float GetGlossiness(const float& NormalizedIntensity)
+DEV float GetGlossiness(float Intensity)
 {
+	const float NormalizedIntensity = (Intensity - gGlossinessRange.m_Min) * gGlossinessRange.m_InvRange;
+
 	return tex1D(gTexGlossiness, NormalizedIntensity);
 }
 
-DEV float GetIOR(const float& NormalizedIntensity)
+DEV float GetIor(float Intensity)
 {
-	return tex1D(gTexIOR, NormalizedIntensity);
+	const float NormalizedIntensity = (Intensity - gIorRange.m_Min) * gIorRange.m_InvRange;
+
+	return tex1D(gTexIor, NormalizedIntensity);
 }
 
-DEV ColorXYZf GetEmission(const float& NormalizedIntensity)
+DEV ColorXYZf GetEmission(float Intensity)
 {
+	const float NormalizedIntensity = (Intensity - gEmissionRange.m_Min) * gEmissionRange.m_InvRange;
+
 	float4 Emission = tex1D(gTexEmission, NormalizedIntensity);
 	return ColorXYZf(Emission.x, Emission.y, Emission.z);
 }
 
-DEV inline Vec3f NormalizedGradient(const Vec3f& P)
+DEV inline Vec3f NormalizedGradient(Vec3f P)
 {
 	Vec3f Gradient;
 
-	Gradient.x = (GetIntensity(P + ToVec3f(gVolume.m_GradientDeltaX)) - GetIntensity(P - ToVec3f(gVolume.m_GradientDeltaX))) * gVolume.m_InvGradientDelta;
-	Gradient.y = (GetIntensity(P + ToVec3f(gVolume.m_GradientDeltaY)) - GetIntensity(P - ToVec3f(gVolume.m_GradientDeltaY))) * gVolume.m_InvGradientDelta;
-	Gradient.z = (GetIntensity(P + ToVec3f(gVolume.m_GradientDeltaZ)) - GetIntensity(P - ToVec3f(gVolume.m_GradientDeltaZ))) * gVolume.m_InvGradientDelta;
+	Vec3f Pts[3][2];
 
-	return -Normalize(Gradient);
+	Pts[0][0] = P + ToVec3f(gVolume.m_GradientDeltaX);
+	Pts[0][1] = P - ToVec3f(gVolume.m_GradientDeltaX);
+	Pts[1][0] = P + ToVec3f(gVolume.m_GradientDeltaY);
+	Pts[1][1] = P - ToVec3f(gVolume.m_GradientDeltaY);
+	Pts[2][0] = P + ToVec3f(gVolume.m_GradientDeltaZ);
+	Pts[2][1] = P - ToVec3f(gVolume.m_GradientDeltaZ);
+
+	float Ints[3][2];
+
+	//Ints[0][0] = Inside(Pts[0][0]) ? 0.0f : GetIntensity(Pts[0][0]);
+	//Ints[0][1] = Inside(Pts[0][1]) ? 0.0f : GetIntensity(Pts[0][1]);
+	//Ints[1][0] = Inside(Pts[1][0]) ? 0.0f : GetIntensity(Pts[1][0]);
+	//Ints[1][1] = Inside(Pts[1][1]) ? 0.0f : GetIntensity(Pts[1][1]);
+	//Ints[2][0] = Inside(Pts[2][0]) ? 0.0f : GetIntensity(Pts[2][0]);
+	//Ints[2][1] = Inside(Pts[2][1]) ? 0.0f : GetIntensity(Pts[2][1]);
+
+	Ints[0][0] = GetIntensity(Pts[0][0]);
+	Ints[0][1] = GetIntensity(Pts[0][1]);
+	Ints[1][0] = GetIntensity(Pts[1][0]);
+	Ints[1][1] = GetIntensity(Pts[1][1]);
+	Ints[2][0] = GetIntensity(Pts[2][0]);
+	Ints[2][1] = GetIntensity(Pts[2][1]);
+
+	Gradient.x = (Ints[0][1] - Ints[0][0]) * gVolume.m_InvGradientDelta;
+	Gradient.y = (Ints[1][1] - Ints[1][0]) * gVolume.m_InvGradientDelta;
+	Gradient.z = (Ints[2][1] - Ints[2][0]) * gVolume.m_InvGradientDelta;
+
+	return Normalize(Gradient);
 }
 
 #define INTERSECTION_EPSILON 0.001f
@@ -323,13 +489,13 @@ DEV bool IntersectBox(CRay R, Vec3f Size, float* pNearT, float* pFarT)
 
 DEV bool InsideAABB(Vec3f P)
 {
-	if (P.x < gVolume.m_MinAABB.x || P.x > gVolume.m_MaxAABB.x)
+	if (P.x < gVolume.m_MinAABB[0] || P.x > gVolume.m_MaxAABB[0])
 		return false;
 
-	if (P.y < gVolume.m_MinAABB.y || P.y > gVolume.m_MaxAABB.y)
+	if (P.y < gVolume.m_MinAABB[1] || P.y > gVolume.m_MaxAABB[1])
 		return false;
 
-	if (P.z < gVolume.m_MinAABB.z || P.z > gVolume.m_MaxAABB.z)
+	if (P.z < gVolume.m_MinAABB[2] || P.z > gVolume.m_MaxAABB[2])
 		return false;
 
 	return true;

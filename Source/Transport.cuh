@@ -18,75 +18,11 @@
 #include "Woodcock.cuh"
 #include "General.cuh"
 
-DEV Vec3f TransformVector(TransformMatrix TM, Vec3f v)
-{
-  Vec3f r;
-//  r.x = Dot(v, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
-//  r.y = Dot(v, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
-//  r.z = Dot(v, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
-
-  float x = v.x, y = v.y, z = v.z;
-
-  r.x = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
-  r.y = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
-  r.z = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
-
-  return r;
-}
-
-DEV Vec3f TransformPoint(TransformMatrix TM, Vec3f pt)
-{
-	/*
-	float x = pt.x, y = pt.y, z = pt.z;
-    ptrans->x = m.m[0][0]*x + m.m[0][1]*y + m.m[0][2]*z + m.m[0][3];
-    ptrans->y = m.m[1][0]*x + m.m[1][1]*y + m.m[1][2]*z + m.m[1][3];
-    ptrans->z = m.m[2][0]*x + m.m[2][1]*y + m.m[2][2]*z + m.m[2][3];
-    float w   = m.m[3][0]*x + m.m[3][1]*y + m.m[3][2]*z + m.m[3][3];
-    if (w != 1.) *ptrans /= w;
-	*/
-    float x = pt.x, y = pt.y, z = pt.z;
-    float xp = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
-    float yp = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
-    float zp = TM.NN[2][0]*x + TM.NN[2][1]*y + TM.NN[2][2]*z + TM.NN[2][3];
-//    float wp = TM.NN[3][0]*x + TM.NN[3][1]*y + TM.NN[3][2]*z + TM.NN[3][3];
-    
-//	Assert(wp != 0);
-    
-//	if (wp == 1.)
-		return Vec3f(xp, yp, zp);
- //   else
-//		return Vec3f(xp, yp, zp) * (1.0f / wp);
-}
-
-DEV CRay TransformRay(CRay R, TransformMatrix TM)
-{
-	CRay TR;
-
-	Vec3f O(TM.NN[0][3], TM.NN[1][3], TM.NN[2][3]);
-
-	TR.m_O.x	= Dot(TR.m_O - O, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
-	TR.m_O.y	= Dot(TR.m_O - O, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
-	TR.m_O.z	= Dot(TR.m_O - O, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
-
-	TR.m_O = TransformPoint(TM, R.m_O);
-
-	TR.m_D.x	= Dot(TR.m_D, Vec3f(TM.NN[0][0], TM.NN[0][1], TM.NN[0][2]));
-	TR.m_D.y	= Dot(TR.m_D, Vec3f(TM.NN[1][0], TM.NN[1][1], TM.NN[1][2]));
-	TR.m_D.z	= Dot(TR.m_D, Vec3f(TM.NN[2][0], TM.NN[2][1], TM.NN[2][2]));
-
-	TR.m_D = TransformVector(TM, R.m_D);
-
-	TR.m_MinT	= R.m_MinT;
-	TR.m_MaxT	= R.m_MaxT;
-
-	return TR;
-}
-
 DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 {
 	const int LID = floorf(RNG.Get1() * gLighting.m_NoLights);
 
-	Light& L = gLighting.m_Lights[LID];
+	_Light& L = gLighting.m_Lights[LID];
 
 	// Sample point in light coordinates
 	Vec3f LocalP, LocalN;
@@ -141,7 +77,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 		// Sample background light
 		case 1:
 		{
-			LocalP = BACKGROUND_LIGHT_RADIUS * SampleUnitSphere(RNG.Get2());
+			LocalP = L.m_InnerRadius * SampleUnitSphere(RNG.Get2());
 			break;
 		}
 	}
@@ -149,12 +85,51 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 	Pl	= TransformPoint(L.m_TM, LocalP);
 	Pdf	= DistanceSquared(Pe, Pl) / L.m_Area;
 
-	return ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z) / L.m_Area;
+	ColorXYZf Le;
+
+	switch (L.m_Type)
+	{
+		// Area light
+		case 0:
+		{
+			Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]);
+			break;
+		}
+
+		// Environment light
+		case 1:
+		{
+			switch (L.m_TextureType)
+			{
+				// Uniform color
+				case 0:
+				{
+					Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]);
+					break;
+				}
+
+				// Gradient
+				case 1:
+				{
+					float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pl).y);
+					Le = ColorXYZf(Col.x, Col.y, Col.z);
+					break;
+				}
+			}
+
+			break;
+		}
+	}
+
+	return Le / L.m_Area;
 }
 
-DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV = NULL, float* pPdf = NULL)
+DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, bool RespectVisibility, Vec2f* pUV = NULL, float* pPdf = NULL)
 {
-	Light& L = gLighting.m_Lights[LightID];
+	_Light& L = gLighting.m_Lights[LightID];
+
+	if (RespectVisibility && !L.m_Visible)
+		return false;
 
 	// Transform ray into local shape coordinates
 	CRay TR = TransformRay(R, L.m_InvTM);
@@ -175,21 +150,21 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 				// Plane
 				case 0:
 				{
-					Res = IntersectPlane(TR, L.m_OneSided, ToVec3f(L.m_Size), &Tl, NULL);
+					Res = IntersectPlane(TR, L.m_OneSided, ToVec3f(L.m_Size), &Tl, pUV);
 					break;
 				}
 
 				// Disk
 				case 1:
 				{
-					Res = IntersectDisk(TR, L.m_OneSided, L.m_OuterRadius, &Tl, NULL);
+					Res = IntersectDisk(TR, L.m_OneSided, L.m_OuterRadius, &Tl, pUV);
 					break;
 				}
 
 				// Ring
 				case 2:
 				{
-					Res = IntersectRing(TR, L.m_OneSided, L.m_InnerRadius, L.m_OuterRadius, &Tl, NULL);
+					Res = IntersectRing(TR, L.m_OneSided, L.m_InnerRadius, L.m_OuterRadius, &Tl, pUV);
 					break;
 				}
 
@@ -214,22 +189,63 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 		// Intersect with background light
 		case 1:
 		{
-			Res = IntersectSphere(TR, BACKGROUND_LIGHT_RADIUS, &Tl);
+			Res = IntersectSphere(TR, L.m_InnerRadius, &Tl);
 			break;
 		}
 	}
 
 	if (Res > 0)
 	{
-		Le = Res == 1 ? ColorXYZf(L.m_Color.x, L.m_Color.y, L.m_Color.z) : ColorXYZf(0.0f);
-		
 		// Compute intersection point in world coordinates
 		const Vec3f P = TransformPoint(L.m_TM, TR(Tl));
 
-		// Compute worl distance to intersection
+		// Compute world distance to intersection
 		T = Length(P - R.m_D);
 
-		*pPdf = 1.0f;
+		// Compute PDF
+		if (pPdf)
+			*pPdf = 1.0f / L.m_Area;
+
+		if (Res == 2)
+		{
+			Le = ColorXYZf(0.0f);
+		}
+		else
+		{
+			switch (L.m_Type)
+			{
+				// Area light
+				case 0:
+				{
+					Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / L.m_Area;
+					break;
+				}
+
+				// Environment light
+				case 1:
+				{
+					switch (L.m_TextureType)
+					{
+						// Uniform color
+						case 0:
+						{
+							Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / L.m_Area;
+							break;
+						}
+
+						// Gradient
+						case 1:
+						{
+							float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(P).y);
+							Le = ColorXYZf(Col.x, Col.y, Col.z) / L.m_Area;
+							break;
+						}
+					}
+
+					break;
+				}
+			}
+		}
 
 		return true;
 	}
@@ -237,7 +253,7 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, Vec2f* pUV 
 	return false;
 }
 
-DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, float* pPdf = NULL)
+DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, bool RespectVisibility = false, float* pPdf = NULL)
 {
 	bool Hit = false;
 	
@@ -247,10 +263,11 @@ DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, float* pP
 
 	for (int LID = 0; LID < gLighting.m_NoLights; LID++)
 	{
-		if (HitTestLight(LID, R, T, LightColor, NULL, &Pdf))
+		if (HitTestLight(LID, R, T, LightColor, RespectVisibility, NULL, &Pdf))
 		{
-			Pl	= R(T);
-			Hit	= true;
+			Pl			= R(T);
+			Hit			= true;
+			R.m_MaxT	= T;
 		}
 	}
 	
@@ -264,7 +281,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Intensity), GetSpecular(Intensity), GetIOR(Intensity), GetGlossiness(Intensity));
+	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Intensity), GetSpecular(Intensity), 5.0f, GetGlossiness(Intensity));
 
 	CRay Rl; 
 
@@ -295,7 +312,6 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 		if (Type == CVolumeShader::Phase)
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
-	
 	
 	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
@@ -328,25 +344,6 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, Li
 
 DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, float Intensity, Vec3f Wo, Vec3f Pe, Vec3f N, CRNG& RNG)
 {
-	/*
-	const int NumLights = pScene->m_Lighting.m_NoLights;
-
- 	if (NumLights == 0)
- 		return SPEC_BLACK;
-
-	ColorXYZf Li;
-
-	CLightingSample LS;
-
-	LS.LargeStep(RNG);
-
-	const int WhichLight = (int)floorf(LS.m_LightNum * (float)NumLights);
-
-	CLight& Light = pScene->m_Lighting.m_Lights[WhichLight];
-	
-	return NumLights * EstimateDirectLight(pScene, Type, Density, Light, LS, Wo, Pe, N, RNG);
-	*/
-
 	LightingSample LS;
 
 	LS.LargeStep(RNG);

@@ -15,6 +15,7 @@
 
 #include "CudaUtilities.h"
 
+
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 #define min(a,b)    (((a) < (b)) ? (a) : (b))
 
@@ -153,7 +154,7 @@ int _ConvertSMVer2Cores(int major, int minor)
 		}
 		index++;
 	}
-	printf("MapSMtoCores undefined SMversion %d.%d!\n", major, minor);
+//	printf("MapSMtoCores undefined SMversion %d.%d!\n", major, minor);
 	return -1;
 }
 

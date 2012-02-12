@@ -13,9 +13,12 @@
 
 #pragma once
 
-#include "Geometry.h"
+#include "Geometry.cuh"
 #include "CudaUtilities.h"
+
 #include "cutil_math.h"
+
+#include "Buffer.cuh"
 
 #define KRNL_BLUR_BLOCK_W		16
 #define KRNL_BLUR_BLOCK_H		8
@@ -27,7 +30,7 @@ KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
+	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 
 	const int X0 = max((int)ceilf(X - gBlur.m_FilterWidth), 0);
@@ -63,7 +66,7 @@ KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
+	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 
 	const int Y0 = max((int)ceilf (Y - gBlur.m_FilterWidth), 0);

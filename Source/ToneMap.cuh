@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Geometry.h"
+#include "Geometry.cuh"
 
 #define KRNL_TONE_MAP_BLOCK_W		16 
 #define KRNL_TONE_MAP_BLOCK_H		8
@@ -24,7 +24,7 @@ KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gCamera.m_FilmWidth || Y >= gCamera.m_FilmHeight)
+	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 
 	const ColorXYZAf Color = pFrameBuffer->m_RunningEstimateXyza.Get(X, Y);
@@ -45,10 +45,12 @@ KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 
 //	RGBA.FromRGBAf(RgbHdr[0], RgbHdr[1], RgbHdr[2], Color.GetA());
 
-//	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetR(RGBA.GetR());
-//	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetG(RGBA.GetG());
-//	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetB(RGBA.GetB());
-	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(255);
+	/*
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetR(0);
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetG(255);
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetB(255);*/
+	pFrameBuffer->m_EstimateRgbaLdr.GetPtr(X, Y)->SetA(0);
+	
 }
 
 void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)

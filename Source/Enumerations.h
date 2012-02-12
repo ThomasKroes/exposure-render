@@ -111,41 +111,6 @@ enum EMeshObjectsViewColumns
 	MeshObjectsViewColumnFaceCount,
 };
 
-// Scene status
-enum ESceneStatus
-{
-	SceneStatusUndefined	= 0x000,
- 	SceneStatusSuspend		= 0x001,
-	SceneStatusIdle			= 0x002,
-	SceneStatusLoaded		= 0x004,
-	SceneStatusIO			= 0x008,
- 	SceneStatusLocked		= 0x010,
- 	SceneStatusPaused		= 0x010,
-// 	SceneStatus				= 0x020,
-// 	SceneStatus				= 0x040,
-// 	SceneStatus				= 0x080,
-// 	SceneStatus				= 0x100,
-// 	SceneStatus				= 0x200,
-// 	SceneStatus				= 0x400,
-};							
-
-// Type of material
-enum EMaterialType
-{
-	MaterialTypeUndefined = 0,
-	MaterialTypeLambert,
-	MaterialTypeDiffuse,
-	MaterialTypeGlossy,
-	MaterialTypeSpecular
-};
-
-// Type of environment
-enum EEnvironmentType
-{
-	EnvironmentTypeDaylight,
-	EnvironmentTypeTexture
-};
-
 // CUDA memory types
 enum ECudaAllocationType
 {

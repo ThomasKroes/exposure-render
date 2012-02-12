@@ -13,14 +13,33 @@
 
 #pragma once
 
-#include "Geometry.h"
+#ifdef _EXPORTING
+	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
+#else
+	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
+#endif
 
-#include "Buffer.cuh"
+struct EXPOSURE_RENDER_DLL Interval
+{
+	float	m_Min;
+	float	m_Max;
+	float	m_Range;
+	float	m_InvRange;
 
-struct EXPOSURE_RENDER_DLL TransformMatrix
+	void Set(float Range[2])
+	{
+		m_Min		= Range[0];
+		m_Max		= Range[1];
+		m_Range		= m_Max- m_Min;
+		m_InvRange	= m_Range != 0.0f ? 1.0f / m_Range : 0.0f;
+	}
+};
+
+struct EXPOSURE_RENDER_DLL _TransformMatrix
 {
 	float		NN[4][4];
 
+	/*
 	DEV Vec3f GetPosition()
 	{
 		return Vec3f(NN[0][3], NN[1][3], NN[2][3]);
@@ -45,18 +64,19 @@ struct EXPOSURE_RENDER_DLL TransformMatrix
 	{
 		return Vec3f(NN[0][2], NN[1][2], NN[2][2]);
 	}
+	*/
 };
 
-struct EXPOSURE_RENDER_DLL Volume
+struct EXPOSURE_RENDER_DLL _Volume
 {
-	int3		m_Extent;
-	float3		m_InvExtent;
-	float3		m_MinAABB;
-	float3		m_MaxAABB;
-	float3		m_InvMinAABB;
-	float3		m_InvMaxAABB;
-	float3		m_Size;
-	float3		m_InvSize;
+	int			m_Extent[3];
+	float		m_InvExtent[3];
+	float		m_MinAABB[3];
+	float		m_MaxAABB[3];
+	float		m_InvMinAABB[3];
+	float		m_InvMaxAABB[3];
+	float		m_Size[3];
+	float		m_InvSize[3];
 	float		m_IntensityMin;
 	float		m_IntensityMax;
 	float		m_IntensityRange;
@@ -66,76 +86,81 @@ struct EXPOSURE_RENDER_DLL Volume
 	float		m_DensityScale;
 	float		m_GradientDelta;
 	float		m_InvGradientDelta;
-	float3		m_GradientDeltaX;
-	float3		m_GradientDeltaY;
-	float3		m_GradientDeltaZ;
-	float3		m_Spacing;
-	float3		m_InvSpacing;
+	float		m_GradientDeltaX[3];
+	float		m_GradientDeltaY[3];
+	float		m_GradientDeltaZ[3];
+	float		m_Spacing[3];
+	float		m_InvSpacing[3];
 	float		m_GradientFactor;
 	int			m_ShadingType;
-	float3		m_MacroCellSize;
+	float		m_MacroCellSize[3];
 };
 
-struct EXPOSURE_RENDER_DLL Camera
+struct EXPOSURE_RENDER_DLL _Camera
 {
 	int			m_FilmWidth;
 	int			m_FilmHeight;
 	int			m_FilmNoPixels;
-	float3		m_Pos;
-	float3		m_Target;
-	float3		m_Up;
-	float3		m_N;
-	float3		m_U;
-	float3		m_V;
+	float		m_Pos[3];
+	float		m_Target[3];
+	float		m_Up[3];
+	float		m_N[3];
+	float		m_U[3];
+	float		m_V[3];
 	float		m_FocalDistance;
 	float		m_ApertureSize;
-	float3		m_ClipNear;
-	float3		m_ClipFar;
+	float		m_ClipNear;
+	float		m_ClipFar;
 	float		m_Screen[2][2];
-	float2		m_InvScreen;
+	float		m_InvScreen[2];
 	float		m_Exposure;
 	float		m_InvExposure;
 	float		m_Gamma;
 	float		m_InvGamma;
+	float		m_FOV;
 };
 
-#define MAX_LIGHTS 10
-#define BACKGROUND_LIGHT_RADIUS 1000.0f
-
-struct EXPOSURE_RENDER_DLL Light
+struct EXPOSURE_RENDER_DLL _Light
 {
-	int				m_Type;
-	bool			m_OneSided;
-//	float3			m_P;
-//	float3			m_U;
-//	float3			m_V;
-//	float3			m_W;
-	int				m_ShapeType;
-	float3			m_Color;
-	TransformMatrix	m_TM;
-	TransformMatrix	m_InvTM;
-	float3			m_Size;
-	float			m_Area;
-	float			m_InnerRadius;
-	float			m_OuterRadius;
+	bool				m_Visible;
+	int					m_Type;
+	int					m_TextureType;
+	bool				m_OneSided;
+	int					m_ShapeType;
+	float				m_Color[3];
+	_TransformMatrix	m_TM;
+	_TransformMatrix	m_InvTM;
+	float				m_Size[3];
+	float				m_Area;
+	float				m_InnerRadius;
+	float				m_OuterRadius;
 };
 
-struct EXPOSURE_RENDER_DLL Lighting
+struct EXPOSURE_RENDER_DLL _Lighting
 {
-	int				m_NoLights;
-	Light			m_Lights[MAX_LIGHTS];
+	int					m_NoLights;
+	_Light				m_Lights[32];
 };
 
-#define MAX_NO_SLICES	10
-
-struct EXPOSURE_RENDER_DLL Slicing
+struct EXPOSURE_RENDER_DLL _ClippingObject
 {
-	float3		m_Position[MAX_NO_SLICES];
-	float3		m_Normal[MAX_NO_SLICES];
-	int			m_NoSlices;
+	int					m_ShapeType;
+	float				m_Size[3];
+	float				m_Radius;
+	bool				m_Invert;
+	float				m_MinIntensity;
+	float				m_MaxIntensity;
+	_TransformMatrix	m_TM;
+	_TransformMatrix	m_InvTM;
 };
 
-struct EXPOSURE_RENDER_DLL Denoise
+struct EXPOSURE_RENDER_DLL _Clipping
+{
+	int					m_NoClippingObjects;
+	_ClippingObject		m_ClippingObjects[32];
+};
+
+struct EXPOSURE_RENDER_DLL _Denoise
 {
 	float	m_Enabled;
 	float	m_WindowRadius;
@@ -147,284 +172,15 @@ struct EXPOSURE_RENDER_DLL Denoise
 	float	m_LerpC;
 };
 
-
-
-struct EXPOSURE_RENDER_DLL Scattering
+struct EXPOSURE_RENDER_DLL _Scattering
 {
 	float		m_NoIterations;
 	float		m_InvNoIterations;
 	bool		m_Shadows;
 };
 
-struct EXPOSURE_RENDER_DLL Blur
+struct EXPOSURE_RENDER_DLL _Blur
 {
 	int			m_FilterWidth;
 	float		m_FilterWeights[10];
 };
-
-/*
-class EXPOSURE_RENDER_DLL CLight
-{
-public:
-	float		m_Theta;
-	float		m_Phi;
-	float		m_Width;
-	float		m_InvWidth;
-	float		m_HalfWidth;
-	float		m_InvHalfWidth;
-	float		m_Height;
-	float		m_InvHeight;
-	float		m_HalfHeight;
-	float		m_InvHalfHeight;
-	float		m_Distance;
-	float		m_SkyRadius;
-	Vec3f		m_P;
-	Vec3f		m_Target;
-	Vec3f		m_N;					
-	Vec3f		m_U;					
-	Vec3f		m_V;					
-	float		m_Area;					
-	float		m_AreaPdf;
-	ColorXYZf	m_Color;
-	ColorXYZf	m_ColorTop;
-	ColorXYZf	m_ColorMiddle;
-	ColorXYZf	m_ColorBottom;
-	int			m_T;
-
-	CLight(void) :
-		m_Theta(0.0f),
-		m_Phi(0.0f),
-		m_Width(1.0f),
-		m_InvWidth(1.0f / m_Width),
-		m_HalfWidth(0.5f * m_Width),
-		m_InvHalfWidth(1.0f / m_HalfWidth),
-		m_Height(1.0f),
-		m_InvHeight(1.0f / m_Height),
-		m_HalfHeight(0.5f * m_Height),
-		m_InvHalfHeight(1.0f / m_HalfHeight),
-		m_Distance(1.0f),
-		m_SkyRadius(100.0f),
-		m_P(1.0f, 1.0f, 1.0f),
-		m_Target(0.0f, 0.0f, 0.0f),
-		m_N(1.0f, 0.0f, 0.0f),
-		m_U(1.0f, 0.0f, 0.0f),
-		m_V(1.0f, 0.0f, 0.0f),
-		m_Area(m_Width * m_Height),
-		m_AreaPdf(1.0f / m_Area),
-		m_Color(10.0f),
-		m_ColorTop(10.0f),
-		m_ColorMiddle(10.0f),
-		m_ColorBottom(10.0f),
-		m_T(0)
-	{
-	}
-
-	HOD CLight& operator=(const CLight& Other)
-	{
-		m_Theta				= Other.m_Theta;
-		m_Phi				= Other.m_Phi;
-		m_Width				= Other.m_Width;
-		m_InvWidth			= Other.m_InvWidth;
-		m_HalfWidth			= Other.m_HalfWidth;
-		m_InvHalfWidth		= Other.m_InvHalfWidth;
-		m_Height			= Other.m_Height;
-		m_InvHeight			= Other.m_InvHeight;
-		m_HalfHeight		= Other.m_HalfHeight;
-		m_InvHalfHeight		= Other.m_InvHalfHeight;
-		m_Distance			= Other.m_Distance;
-		m_SkyRadius			= Other.m_SkyRadius;
-		m_P					= Other.m_P;
-		m_Target			= Other.m_Target;
-		m_N					= Other.m_N;
-		m_U					= Other.m_U;
-		m_V					= Other.m_V;
-		m_Area				= Other.m_Area;
-		m_AreaPdf			= Other.m_AreaPdf;
-		m_Color				= Other.m_Color;
-		m_ColorTop			= Other.m_ColorTop;
-		m_ColorMiddle		= Other.m_ColorMiddle;
-		m_ColorBottom		= Other.m_ColorBottom;
-		m_T					= Other.m_T;
-
-		return *this;
-	}
-
-	HOD void Update(const CBoundingBox& BoundingBox)
-	{
-		m_InvWidth		= 1.0f / m_Width;
-		m_HalfWidth		= 0.5f * m_Width;
-		m_InvHalfWidth	= 1.0f / m_HalfWidth;
-		m_InvHeight		= 1.0f / m_Height;
-		m_HalfHeight	= 0.5f * m_Height;
-		m_InvHalfHeight	= 1.0f / m_HalfHeight;
-		m_Target		= BoundingBox.GetCenter();
-
-		// Determine light position
-		m_P.x = m_Distance * cosf(m_Phi) * sinf(m_Theta);
-		m_P.z = m_Distance * cosf(m_Phi) * cosf(m_Theta);
-		m_P.y = m_Distance * sinf(m_Phi);
-
-		m_P += m_Target;
-
-		// Determine area
-		if (m_T == 0)
-		{
-			m_Area		= m_Width * m_Height;
-			m_AreaPdf	= 1.0f / m_Area;
-		}
-
-		if (m_T == 1)
-		{
-			m_P				= BoundingBox.GetCenter();
-			m_SkyRadius		= 1000.0f * (BoundingBox.GetMaxP() - BoundingBox.GetMinP()).Length();
-			m_Area			= 4.0f * PI_F * powf(m_SkyRadius, 2.0f);
-			m_AreaPdf		= 1.0f / m_Area;
-		}
-
-		// Compute orthogonal basis frame
-		m_N = Normalize(m_Target - m_P);
-		m_U	= Normalize(Cross(m_N, Vec3f(0.0f, 1.0f, 0.0f)));
-		m_V	= Normalize(Cross(m_N, m_U));
-	}
-
-	// Samples the light
-	HOD ColorXYZf SampleL(const Vec3f& P, CRay& Rl, float& Pdf, CLightingSample& LS)
-	{
-		ColorXYZf L = SPEC_BLACK;
-
-		if (m_T == 0)
-		{
-			Rl.m_O	= m_P + ((-0.5f + LS.m_LightSample.m_Pos.x) * m_Width * m_U) + ((-0.5f + LS.m_LightSample.m_Pos.y) * m_Height * m_V);
-			Rl.m_D	= Normalize(P - Rl.m_O);
-			L		= Dot(Rl.m_D, m_N) > 0.0f ? Le(Vec2f(0.0f)) : SPEC_BLACK;
-			Pdf		= AbsDot(Rl.m_D, m_N) > 0.0f ? DistanceSquared(P, Rl.m_O) / (AbsDot(Rl.m_D, m_N) * m_Area) : 0.0f;
-		}
-
-		if (m_T == 1)
-		{
-			Rl.m_O	= m_P + m_SkyRadius * UniformSampleSphere(LS.m_LightSample.m_Pos);
-			Rl.m_D	= Normalize(P - Rl.m_O);
-			L		= Le(Vec2f(1.0f) - 2.0f * LS.m_LightSample.m_Pos);
-			Pdf		= powf(m_SkyRadius, 2.0f) / m_Area;
-		}
-
-		Rl.m_MinT	= 0.0f;
-		Rl.m_MaxT	= (P - Rl.m_O).Length();
-
-		return L;
-	}
-
-	// Intersect ray with light
-	HOD bool Intersect(CRay& R, float& T, ColorXYZf& L, Vec2f* pUV = NULL, float* pPdf = NULL)
-	{
-		if (m_T == 0)
-		{
-			// Compute projection
-			const float DotN = Dot(R.m_D, m_N);
-
-			// Rays is co-planar with light surface
-			if (DotN >= 0.0f)
-				return false;
-
-			// Compute hit distance
-			T = (-m_Distance - Dot(R.m_O, m_N)) / DotN;
-
-			// Intersection is in ray's negative direction
-			if (T < R.m_MinT || T > R.m_MaxT)
-				return false;
-
-			// Determine position on light
-			const Vec3f Pl = R(T);
-
-			// Vector from point on area light to center of area light
-			const Vec3f Wl = Pl - m_P;
-
-			// Compute texture coordinates
-			const Vec2f UV = Vec2f(Dot(Wl, m_U), Dot(Wl, m_V));
-
-			// Check if within bounds of light surface
-			if (UV.x > m_HalfWidth || UV.x < -m_HalfWidth || UV.y > m_HalfHeight || UV.y < -m_HalfHeight)
-				return false;
-
-			R.m_MaxT = T;
-
-			if (pUV)
-				*pUV = UV;
-
- 			if (DotN < 0.0f)
-				L = m_Color / m_Area;
- 			else
- 				L = SPEC_BLACK;
-
-			if (pPdf)
-				*pPdf = DistanceSquared(R.m_O, Pl) / (DotN * m_Area);
-
-			return true;
-		}
-
-		if (m_T == 1)
-		{
-			T = m_SkyRadius;
-			
-			// Intersection is in ray's negative direction
-			if (T < R.m_MinT || T > R.m_MaxT)
-				return false;
-			
-			R.m_MaxT = T;
-
-			Vec2f UV = Vec2f(SphericalPhi(R.m_D) * INV_TWO_PI_F, SphericalTheta(R.m_D) * INV_PI_F);
-
-			L	= Le(Vec2f(1.0f) - 2.0f * UV);
-
-			if (pPdf)
-				*pPdf = powf(m_SkyRadius, 2.0f) / m_Area;
-
-			return true;
-		}
-
-		return false;
-	}
-
-	HOD float Pdf(const Vec3f& P, const Vec3f& Wi)
-	{
-		ColorXYZf L;
-		Vec2f UV;
-		float Pdf = 1.0f;
-
-		CRay Rl = CRay(P, Wi, 0.0f, INF_MAX);
-
-		if (m_T == 0)
-		{
-			float T = 0.0f;
-			
-			if (!Intersect(Rl, T, L, NULL, &Pdf))
-				return 0.0f;
-
-			return powf(T, 2.0f) / (AbsDot(m_N, -Wi) * m_Area);
-		}
-
-		if (m_T == 1)
-		{
-			return powf(m_SkyRadius, 2.0f) / m_Area;
-		}
-
-		return 0.0f;
-	}
-
-	HOD ColorXYZf Le(const Vec2f& UV)
-	{
-		if (m_T == 0)
-			return m_Color / m_Area;
-
-		if (m_T == 1)
-		{
-			if (UV.y > 0.0f)
-				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorTop);
-			else
-				return Lerp(fabs(UV.y), m_ColorMiddle, m_ColorBottom);
-		}
-
-		return SPEC_BLACK;
-	}
-};
-*/

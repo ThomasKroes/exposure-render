@@ -13,21 +13,43 @@
 
 #pragma once
 
-#include "Geometry.h"
-#include "Timing.h"
-
-struct Volume;
-struct Camera;
-struct Lighting;
-struct Slicing;
-struct Denoise;
-struct Scattering;
-struct Blur;
+struct _Volume;
+struct _Camera;
+struct _Lighting;
+struct _Clipping;
+struct _Denoise;
+struct _Scattering;
+struct _Blur;
 class FrameBuffer;
 
-extern "C" void BindIntensityBuffer(float* pBuffer, cudaExtent Extent);
-extern "C" void UnbindDensityBuffer(void);
-extern "C" void UnbindGradientMagnitudeBuffer(void);
-extern "C" void BindTransferFunctions1D(float Opacity[128], float Diffuse[3][128], float Specular[3][128], float Glossiness[128], float IOR[128], float Emission[3][128], int N);
-extern "C" void UnbindTransferFunctions1D(void);
-extern "C" void RenderEstimate(Volume* pVolume, Camera* pCamera, Lighting* pLighting, Slicing* pSlicing, Denoise* pDenoise, Scattering* pScattering, Blur* pBlur, FrameBuffer* pFrameBuffer);
+#define NO_GRADIENT_STEPS 256
+
+__declspec(dllexport) void ErInitialize();
+__declspec(dllexport) void ErDeinitialize();
+__declspec(dllexport) void ErResize(int Size[2]);
+__declspec(dllexport) void ErResetFrameBuffer();
+__declspec(dllexport) void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3]);
+__declspec(dllexport) void ErUnbindDensityBuffer(void);
+__declspec(dllexport) void ErBindEnvironmentGradient(float EnvironmentGradient[3][NO_GRADIENT_STEPS]);
+__declspec(dllexport) void ErUnbindEnvironmentGradient(void);
+__declspec(dllexport) void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindSpecular1D(float Specular[3][NO_GRADIENT_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindGlossiness1D(float Glossiness[NO_GRADIENT_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindIor1D(float IOR[NO_GRADIENT_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2]);
+__declspec(dllexport) void ErUnbindOpacity1D(void);
+__declspec(dllexport) void ErUnbindDiffuse1D(void);
+__declspec(dllexport) void ErUnbindSpecular1D(void);
+__declspec(dllexport) void ErUnbindGlossiness1D(void);
+__declspec(dllexport) void ErUnbindIor1D(void);
+__declspec(dllexport) void ErUnbindEmission1D(void);
+__declspec(dllexport) void ErBindVolume(_Volume* pVolume);
+__declspec(dllexport) void ErBindCamera(_Camera* pCamera);
+__declspec(dllexport) void ErBindLighting(_Lighting* pLighting);
+__declspec(dllexport) void ErBindClipping(_Clipping* pClipping);
+__declspec(dllexport) void ErBindDenoise(_Denoise* pDenoise);
+__declspec(dllexport) void ErBindScattering(_Scattering* pScattering);
+__declspec(dllexport) void ErBindBlur(_Blur* pBlur);
+__declspec(dllexport) void ErRenderEstimate();
+__declspec(dllexport) void ErGetRenderBuffer(unsigned char* pData);

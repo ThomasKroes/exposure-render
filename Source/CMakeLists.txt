@@ -14,8 +14,10 @@ cmake_minimum_required(VERSION 2.8)
 # Exposure Render core project
 PROJECT(vtkErCore)
 
+
 # Find CUDA
 FIND_PACKAGE(CUDA)
+
 
 # Find VTK
 IF(NOT VTK_BINARY_DIR)
@@ -53,13 +55,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
 
 # Exposure Render core sources
 SET(vtkErCoreSources
-	Flags.cpp
-	Geometry.cpp
 	CudaUtilities.cpp
-	ErCoreStable.h
-	ErCoreStable.cpp
-	vtkErCoreDll.h
-	vtkErCoreConfigure.h
 )
 
 # Make the "Core" source group
@@ -68,18 +64,15 @@ SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 # Exposure Render CUDA sources
 SET(ErCudaSources
 	SingleScattering.cuh
-	MultipleScattering.cuh
 	Blur.cuh
 	Utilities.cuh
 	Core.cuh
+	Geometry.cuh
 	Estimate.cuh
 	Transport.cuh
 	RayMarching.cuh
-	Woodcock.cuh
 	Denoise.cuh
 	Variance.cuh
-	NearestIntersection.cuh
-	SpecularBloom.cuh
 	ToneMap.cuh
 	Shader.cuh
 	Sample.cuh
@@ -143,10 +136,10 @@ SET(ErVtkWrapPythonSources
 SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 
 # Make the library
-CUDA_ADD_LIBRARY(vtkErCore ${vtkErCoreSources} ${ErCudaSources} ${ErVtkSources})
+CUDA_ADD_LIBRARY(vtkErCore ${vtkErCoreSources} ${ErCudaSources})
 
 # Link with the necessary VTK libraries
-TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering vtkWidgets QVTK)
+#TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering vtkWidgets QVTK)
 
 # Use precompiled headers
 if (MSVC)

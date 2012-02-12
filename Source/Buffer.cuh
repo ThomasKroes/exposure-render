@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Geometry.h"
+#include "Geometry.cuh"
 #include "CudaUtilities.h"
 
 template<class T, bool Pitched>
@@ -83,7 +83,7 @@ public:
 			return GetNoElements() * sizeof(T);
 	}
 
-	HOD T Get(const int& X = 0, const int& Y = 0)
+	DEV T Get(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -94,7 +94,7 @@ public:
 			return m_pData[Y * GetWidth() + X];
 	}
 
-	HOD T& GetRef(const int& X = 0, const int& Y = 0)
+	DEV T& GetRef(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -116,7 +116,7 @@ public:
 			return &m_pData[Y * GetWidth() + X];
 	}
 
-	HOD void Set(T& Value, int X = 0, int Y = 0)
+	DEV void Set(T& Value, int X = 0, int Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return;
@@ -213,7 +213,7 @@ public:
 		return GetNoElements() * sizeof(T);
 	}
 
-	HOD T Get(const int& X = 0, const int& Y = 0)
+	DEV T Get(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -221,7 +221,7 @@ public:
 		return m_pData[Y * GetWidth() + X];
 	}
 
-	HOD T& GetRef(const int& X = 0, const int& Y = 0)
+	DEV T& GetRef(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -237,7 +237,7 @@ public:
 		return &m_pData[Y * GetWidth() + X];
 	}
 
-	HOD void Set(T& Value, const int& X = 0, const int& Y = 0)
+	DEV void Set(T& Value, const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return;
@@ -290,6 +290,7 @@ public:
 		m_FrameBlurXyza(),
 		m_EstimateRgbaLdr(),
 		m_DisplayEstimateRgbLdr(),
+		m_DisplayEstimateRgbaLdrHost(),
 		m_RandomSeeds1(),
 		m_RandomSeeds2()
 	{
@@ -312,6 +313,7 @@ public:
 		m_FrameBlurXyza.Resize(m_Resolution);
 		m_EstimateRgbaLdr.Resize(m_Resolution);
 		m_DisplayEstimateRgbLdr.Resize(m_Resolution);
+		m_DisplayEstimateRgbaLdrHost.Resize(m_Resolution);
 		m_RandomSeeds1.Resize(m_Resolution);
 		m_RandomSeeds2.Resize(m_Resolution);
 	}
@@ -323,8 +325,9 @@ public:
 //		m_FrameBlurXyza.Reset();
 		m_EstimateRgbaLdr.Reset();
 		m_DisplayEstimateRgbLdr.Reset();
-		m_RandomSeeds1.Reset();
-		m_RandomSeeds2.Reset();
+		m_DisplayEstimateRgbaLdrHost.Reset();
+//		m_RandomSeeds1.Reset();
+//		m_RandomSeeds2.Reset();
 	}
 
 	void Free(void)
@@ -334,18 +337,19 @@ public:
 		m_FrameBlurXyza.Free();
 		m_EstimateRgbaLdr.Free();
 		m_DisplayEstimateRgbLdr.Free();
+		m_DisplayEstimateRgbaLdrHost.Free();
 		m_RandomSeeds1.Free();
 		m_RandomSeeds2.Free();
 
 		m_Resolution.Set(Vec2i(0, 0));
 	}
 
-	HOD int GetWidth(void) const
+	DEV int GetWidth(void) const
 	{
 		return m_Resolution.GetResX();
 	}
 
-	HOD int GetHeight(void) const
+	DEV int GetHeight(void) const
 	{
 		return m_Resolution.GetResY();
 	}
@@ -356,6 +360,7 @@ public:
 	CCudaBuffer2D<ColorXYZAf, false>	m_FrameBlurXyza;
 	CCudaBuffer2D<ColorRGBAuc, false>	m_EstimateRgbaLdr;
 	CCudaBuffer2D<ColorRGBuc, false>	m_DisplayEstimateRgbLdr;
+	CHostBuffer2D<ColorRGBAuc>			m_DisplayEstimateRgbaLdrHost;
 	CCudaRandomBuffer2D					m_RandomSeeds1;
 	CCudaRandomBuffer2D					m_RandomSeeds2;
 };
