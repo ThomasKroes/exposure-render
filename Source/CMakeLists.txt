@@ -55,10 +55,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
 
 # Exposure Render core sources
 SET(vtkErCoreSources
-	Core.h
-	Core.cpp
-	ErCoreStable.h
-	ErCoreStable.cpp
 	CudaUtilities.cpp
 )
 
@@ -70,6 +66,7 @@ SET(ErCudaSources
 	SingleScattering.cuh
 	Blur.cuh
 	Utilities.cuh
+	Geometry.cuh
 	Core.cuh
 	Estimate.cuh
 	Transport.cuh
@@ -138,16 +135,16 @@ SET(ErVtkWrapPythonSources
 SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 
 # Make the library
-CUDA_ADD_LIBRARY(vtkErCore ${vtkErCoreSources} ${ErCudaSources})
+CUDA_ADD_LIBRARY(ErCore ${vtkErCoreSources} ${ErCudaSources})
 
 # Link with the necessary VTK libraries
 #TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering vtkWidgets QVTK)
 
 # Use precompiled headers
-if (MSVC)
-   set_target_properties(vtkErCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
-   set_source_files_properties(ErCoreStable.cpp PROPERTIES COMPILE_FLAGS "/YcErCoreStable.h")
-endif(MSVC)
+#if (MSVC)
+#   set_target_properties(vtkErCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
+#   set_source_files_properties(ErCoreStable.cpp PROPERTIES COMPILE_FLAGS "/YcErCoreStable.h")
+#endif(MSVC)
 
 # Export of symbols
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
@@ -159,11 +156,11 @@ IF (VTK_WRAP_PYTHON)
   
 
 
-  VTK_WRAP_PYTHON3(vtkErCorePython vtkErCorePython_SRCS "${ErVtkWrapPythonSources}")
-  ADD_LIBRARY(vtkErCorePythonD ${vtkErCorePython_SRCS})
-  PYTHON_ADD_MODULE(vtkErCorePython vtkErCorePythonInit.cxx)
-  TARGET_LINK_LIBRARIES(vtkErCorePython vtkErCorePythonD)
-  TARGET_LINK_LIBRARIES(vtkErCorePythonD vtkErCore vtkCommonPythonD vtkRenderingPythonD vtkGraphicsPythonD vtkVolumeRenderingPythonD vtkWidgetsPythonD)  
+#  VTK_WRAP_PYTHON3(vtkErCorePython vtkErCorePython_SRCS "${ErVtkWrapPythonSources}")
+#  ADD_LIBRARY(vtkErCorePythonD ${vtkErCorePython_SRCS})
+#  PYTHON_ADD_MODULE(vtkErCorePython vtkErCorePythonInit.cxx)
+#  TARGET_LINK_LIBRARIES(vtkErCorePython vtkErCorePythonD)
+#  TARGET_LINK_LIBRARIES(vtkErCorePythonD vtkErCore vtkCommonPythonD vtkRenderingPythonD vtkGraphicsPythonD vtkVolumeRenderingPythonD vtkWidgetsPythonD)  
   
    
   

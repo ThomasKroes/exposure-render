@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Core.h"
+#include "Geometry.cuh"
 #include "CudaUtilities.h"
 
 #include "cutil_math.h"

@@ -13,8 +13,9 @@
 
 #pragma once
 
-#include "Core.h"
 #include "CudaUtilities.h"
+
+#include "Geometry.cuh"
 
 template<class T, bool Pitched>
 class CCudaBuffer2D

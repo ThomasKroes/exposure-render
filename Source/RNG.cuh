@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Core.h"
+#include "Geometry.cuh"
 
 class CRNG
 {

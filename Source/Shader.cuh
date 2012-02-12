@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Core.h"
+#include "Geometry.cuh"
 
 #include "MonteCarlo.cuh"
 #include "Sample.cuh"
