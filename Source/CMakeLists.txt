@@ -55,6 +55,10 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
 
 # Exposure Render core sources
 SET(vtkErCoreSources
+	Core.h
+	Core.cpp
+	ErCoreStable.h
+	ErCoreStable.cpp
 	CudaUtilities.cpp
 )
 
@@ -67,7 +71,6 @@ SET(ErCudaSources
 	Blur.cuh
 	Utilities.cuh
 	Core.cuh
-	Geometry.cuh
 	Estimate.cuh
 	Transport.cuh
 	RayMarching.cuh
@@ -141,10 +144,10 @@ CUDA_ADD_LIBRARY(vtkErCore ${vtkErCoreSources} ${ErCudaSources})
 #TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering vtkWidgets QVTK)
 
 # Use precompiled headers
-#if (MSVC)
-#   set_target_properties(vtkErCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
-#   set_source_files_properties(ErCoreStable.cpp PROPERTIES COMPILE_FLAGS "/YcErCoreStable.h")
-#endif(MSVC)
+if (MSVC)
+   set_target_properties(vtkErCore PROPERTIES COMPILE_FLAGS "/YuErCoreStable.h")
+   set_source_files_properties(ErCoreStable.cpp PROPERTIES COMPILE_FLAGS "/YcErCoreStable.h")
+endif(MSVC)
 
 # Export of symbols
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")

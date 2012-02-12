@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Geometry.cuh"
+#include "Core.h"
 
 #include "RNG.cuh"
 

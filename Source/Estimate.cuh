@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Geometry.cuh"
+#include "Core.h"
 
 #define KRNL_ESTIMATE_BLOCK_W		16
 #define KRNL_ESTIMATE_BLOCK_H		8

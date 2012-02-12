@@ -13,7 +13,7 @@
 */
 #pragma once
 
-#include "Geometry.cuh"
+#include "Core.h"
 #include "CudaUtilities.h"
 
 #define KRNL_SINGLE_SCATTERING_BLOCK_W		16

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Geometry.cuh"
+#include "Core.h"
 #include "CudaUtilities.h"
 
 template<class T, bool Pitched>
@@ -296,7 +296,7 @@ public:
 	{
 	}
 
-	virtual ~FrameBuffer(void)
+	~FrameBuffer(void)
 	{
 		Free();
 	}

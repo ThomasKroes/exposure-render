@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Geometry.cuh"
+#include "Core.h"
 
 #define KRNL_TONE_MAP_BLOCK_W		16 
 #define KRNL_TONE_MAP_BLOCK_H		8
