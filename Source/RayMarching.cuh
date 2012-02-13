@@ -20,7 +20,7 @@
 #define KRNL_SINGLE_SCATTERING_BLOCK_H		8
 #define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
 
-DEV inline void SampleDistanceRM(CRay R, CRNG& RNG, RaySample& RS)
+DEV inline void SampleVolume(CRay R, CRNG& RNG, RaySample& RS)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 

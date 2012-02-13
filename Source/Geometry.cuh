@@ -1491,6 +1491,11 @@ public:
 		SetZ(Z);
 	}
 
+	HOD ColorXYZf(float V[3])
+	{
+		Set(V[0], V[1], V[2]);
+	}
+
 	HOD float GetX(void) const
 	{
 		return m_D[0];
@@ -2119,6 +2124,14 @@ inline HOD Vec3f MaxVec3f(Vec3f a, Vec3f b)
 
 struct EXPOSURE_RENDER_DLL RaySample
 {
+	enum SampleType
+	{
+		Volume,
+		Light,
+		Reflector
+	};
+
+	SampleType	Type;
 	bool		Valid;
 	float		T;
 	Vec3f		P;
@@ -2126,13 +2139,16 @@ struct EXPOSURE_RENDER_DLL RaySample
 	Vec3f		Wo;
 	ColorXYZf	Le;
 	float		Pdf;
-	
-	HOD RaySample()
+	Vec2f		UV;
+	int			ReflectorID;
+
+	HOD RaySample(SampleType Type)
 	{
+		this->Type = Type;
 		this->SetInvalid();
 	}
 
-	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, float Pdf = 1.0f)
+	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, Vec2f UV = Vec2f(0.0f), float Pdf = 1.0f)
 	{
 		this->Valid		= true;
 		this->T			= T;
@@ -2140,6 +2156,7 @@ struct EXPOSURE_RENDER_DLL RaySample
 		this->N			= N;
 		this->Wo		= Wo;
 		this->Le		= Le;
+		this->UV		= UV;
 		this->Pdf		= Pdf;
 	}
 
@@ -2151,7 +2168,24 @@ struct EXPOSURE_RENDER_DLL RaySample
 		this->N			= Vec3f(0.0f);
 		this->Wo		= Vec3f(0.0f);
 		this->Le		= ColorXYZf(0.0f);
+		this->UV		= Vec2f(0.0f);
 		this->Pdf		= 0.0f;
+	}
+
+	HOD RaySample& RaySample::operator = (const RaySample& Other)
+	{
+		this->Type			= Other.Type;
+		this->Valid			= Other.Valid;	
+		this->T				= Other.T;
+		this->P				= Other.P;
+		this->N				= Other.N;
+		this->Wo			= Other.Wo;
+		this->Le			= Other.Le;
+		this->UV			= Other.UV;
+		this->Pdf			= Other.Pdf;
+		this->ReflectorID	= Other.ReflectorID;
+
+		return *this;
 	}
 };
 

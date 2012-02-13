@@ -58,20 +58,8 @@ DEV CRay TransformRay(CRay R, _TransformMatrix TM)
 {
 	CRay TR;
 
-	Vec3f O(TM.NN[0][3], TM.NN[1][3], TM.NN[2][3]);
-
-	TR.m_O.x	= Dot(TR.m_O - O, Vec3f(TM.NN[0][0], TM.NN[1][0], TM.NN[2][0]));
-	TR.m_O.y	= Dot(TR.m_O - O, Vec3f(TM.NN[0][1], TM.NN[1][1], TM.NN[2][1]));
-	TR.m_O.z	= Dot(TR.m_O - O, Vec3f(TM.NN[0][2], TM.NN[1][2], TM.NN[2][2]));
-
-	TR.m_O = TransformPoint(TM, R.m_O);
-
-	TR.m_D.x	= Dot(TR.m_D, Vec3f(TM.NN[0][0], TM.NN[0][1], TM.NN[0][2]));
-	TR.m_D.y	= Dot(TR.m_D, Vec3f(TM.NN[1][0], TM.NN[1][1], TM.NN[1][2]));
-	TR.m_D.z	= Dot(TR.m_D, Vec3f(TM.NN[2][0], TM.NN[2][1], TM.NN[2][2]));
-
-	TR.m_D = TransformVector(TM, R.m_D);
-
+	TR.m_O 		= TransformPoint(TM, R.m_O);
+	TR.m_D 		= TransformVector(TM, R.m_D);
 	TR.m_MinT	= R.m_MinT;
 	TR.m_MaxT	= R.m_MaxT;
 
@@ -279,6 +267,9 @@ DEV int IntersectPlane(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV = NUL
 	Pl.x = R.m_O.x + T * (R.m_D.x);
 	Pl.y = R.m_O.y + T * (R.m_D.y);
 	Pl.z = 0.0f;
+
+	if (pT)
+		*pT = T;
 
 	if (pUV)
 		*pUV = Vec2f(Pl.x, Pl.y);

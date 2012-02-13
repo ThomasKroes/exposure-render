@@ -49,52 +49,48 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
-	// Ray sample for: voxel (RSv), light (RSl), reflector (RSr)
-	RaySample RSv, RSl, RSr;
+	RaySample RS[3] = { RaySample(RaySample::Volume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
 
-	SampleDistanceRM(Re, RNG, RSv);
-//	NearestLight(Re, Li, Pl, Tl, true);
+	SampleVolume(Re, RNG, RS[0]);
+	SampleLights(Re, RS[1], true);
+	SampleReflectors(Re, RS[2]);
 
-	float I = GetIntensity(RSv.P);
+	float T = 1500.0f;
 
-	// if ( && T >= gCamera.m_ClipNear && T < gCamera.m_ClipFar)
-	// Lv += GetEmission(Intensity);
+	RaySample SmallestRS(RaySample::Volume);
 
-	if (RSv.Valid)
+	for (int i = 0; i < 3; i++)
 	{
-		// Decide which sample to evaluate
-		switch (gVolume.m_ShadingType)
+		if (RS[i].Valid && RS[i].T < T) //RS[i].T >= gCamera.m_ClipNear && RS[i].T < gCamera.m_ClipFar && 
 		{
-			case 0:
+			SmallestRS = RS[i];
+			T = RS[i].T;
+		}
+	}
+	
+	if (SmallestRS.Valid)
+	{
+		switch (SmallestRS.Type)
+		{
+			case RaySample::Volume:
 			{
-				CVolumeShader Shader(CVolumeShader::Brdf, RSv.N, RSv.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
-				Lv += UniformSampleOneLight(CVolumeShader::Brdf, RSv, RNG, Shader);
+				Lv += UniformSampleOneLightVolume(SmallestRS, RNG);
 				break;
 			}
-		
-			case 1:
+			
+			case RaySample::Light:
 			{
-				CVolumeShader Shader(CVolumeShader::Phase, RSv.N, RSv.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
-				Lv += UniformSampleOneLight(CVolumeShader::Phase, RSv, RNG, Shader);
+				Lv += SmallestRS.Le;
+				break;
+			}
+
+			case RaySample::Reflector:
+			{
+				Lv += UniformSampleOneLightReflector(SmallestRS, RNG);
 				break;
 			}
 		}
 	}
-
-	/*
-	case 2:
-	{
-		const float GradMag = GradientMagnitude(Pe) * gVolume.m_IntensityInvRange;
-		const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
-
-		if (RNG.Get1() < PdfBrdf)
-			Lv += UniformSampleOneLight(pScene, CVolumeShader::Brdf, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, true);
-		else
-			Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
-
-		break;
-	}
-	*/
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);
 

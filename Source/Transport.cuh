@@ -123,61 +123,54 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 	return Le / L.m_Area;
 }
 
-DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, bool RespectVisibility, Vec2f* pUV = NULL, float* pPdf = NULL)
+DEV void HitTestLight(_Light& Light, CRay R, RaySample& RS, bool RespectVisibility)
 {
-	_Light& L = gLighting.m_Lights[LightID];
-
-	if (RespectVisibility && !L.m_Visible)
-		return false;
+	if (RespectVisibility && !Light.m_Visible)
+		return;
 
 	// Transform ray into local shape coordinates
-	CRay TR = TransformRay(R, L.m_InvTM);
+	CRay TR = TransformRay(R, Light.m_InvTM);
 
 	// Result of intersection
 	int Res = 0;
 
 	// Hit distance in local coordinates
-	float Tl = 0.0f;
+	float To = 0.0f;
 
-	switch (L.m_Type)
+	switch (Light.m_Type)
 	{
 		// Intersect with area light
 		case 0:
 		{
-			switch (L.m_ShapeType)
+			switch (Light.m_ShapeType)
 			{
-				// Plane
 				case 0:
 				{
-					Res = IntersectPlane(TR, L.m_OneSided, ToVec3f(L.m_Size), &Tl, pUV);
+					Res = IntersectPlane(TR, Light.m_OneSided, ToVec3f(Light.m_Size), &To);
 					break;
 				}
 
-				// Disk
 				case 1:
 				{
-					Res = IntersectDisk(TR, L.m_OneSided, L.m_OuterRadius, &Tl, pUV);
+					Res = IntersectDisk(TR, Light.m_OneSided, Light.m_OuterRadius, &To);
 					break;
 				}
 
-				// Ring
 				case 2:
 				{
-					Res = IntersectRing(TR, L.m_OneSided, L.m_InnerRadius, L.m_OuterRadius, &Tl, pUV);
+					Res = IntersectRing(TR, Light.m_OneSided, Light.m_InnerRadius, Light.m_OuterRadius, &To);
 					break;
 				}
 
-				// Box
 				case 3:
 				{
-					Res = IntersectBox(TR, ToVec3f(L.m_Size), &Tl, NULL);
+					Res = IntersectBox(TR, ToVec3f(Light.m_Size), &To, NULL);
 					break;
 				}
 
-				// Sphere
 				case 4:
 				{
-					Res = IntersectSphere(TR, L.m_OuterRadius, &Tl);
+					Res = IntersectSphere(TR, Light.m_OuterRadius, &To);
 					break;
 				}
 			}
@@ -185,25 +178,25 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, bool Respec
 			break;
 		}
 
-		// Intersect with background light
 		case 1:
 		{
-			Res = IntersectSphere(TR, L.m_InnerRadius, &Tl);
+			Res = IntersectSphere(TR, Light.m_InnerRadius, &To);
 			break;
 		}
 	}
 
+	ColorXYZf Le;
+
 	if (Res > 0)
 	{
 		// Compute intersection point in world coordinates
-		const Vec3f P = TransformPoint(L.m_TM, TR(Tl));
+		const Vec3f Pw = TransformPoint(Light.m_TM, TR(To));
 
 		// Compute world distance to intersection
-		T = Length(P - R.m_D);
+		const float Tw = Length(Pw - R.m_O);
 
 		// Compute PDF
-		if (pPdf)
-			*pPdf = 1.0f / L.m_Area;
+		const float Pdf = 1.0f / Light.m_Area;
 
 		if (Res == 2)
 		{
@@ -211,32 +204,32 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, bool Respec
 		}
 		else
 		{
-			switch (L.m_Type)
+			switch (Light.m_Type)
 			{
 				// Area light
 				case 0:
 				{
-					Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / L.m_Area;
+					Le = ColorXYZf(Light.m_Color[0], Light.m_Color[1], Light.m_Color[2]) / Light.m_Area;
 					break;
 				}
 
 				// Environment light
 				case 1:
 				{
-					switch (L.m_TextureType)
+					switch (Light.m_TextureType)
 					{
 						// Uniform color
 						case 0:
 						{
-							Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / L.m_Area;
+							Le = ColorXYZf(Light.m_Color[0], Light.m_Color[1], Light.m_Color[2]) / Light.m_Area;
 							break;
 						}
 
 						// Gradient
 						case 1:
 						{
-							float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(P).y);
-							Le = ColorXYZf(Col.x, Col.y, Col.z) / L.m_Area;
+							float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pw).y);
+							Le = ColorXYZf(Col.x, Col.y, Col.z) / Light.m_Area;
 							break;
 						}
 					}
@@ -246,30 +239,28 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, bool Respec
 			}
 		}
 
-		return true;
+		RS.SetValid(Tw, Pw, Vec3f(0.0f, 1.0f, 0.0f), -R.m_D, Le, Vec2f(0.0f), Pdf);
 	}
-
-	return false;
 }
 
-DEV inline void NearestLight(CRay R, RaySample& RS, bool RespectVisibility = false)
+DEV inline void SampleLights(CRay R, RaySample& RS, bool RespectVisibility = false)
 {
-	bool Hit = false;
-	
-	float T = 0.0f; float Pdf = 0.0f; ColorXYZf L; Vec3f P;
+	float T = FLT_MAX;
 
-	for (int LID = 0; LID < gLighting.m_NoLights; LID++)
+	for (int i = 0; i < gLighting.m_NoLights; i++)
 	{
-		if (HitTestLight(LID, R, T, L, RespectVisibility, NULL, &Pdf))
+		_Light& Light = gLighting.m_Lights[i];
+		
+		RaySample LocalRS(RaySample::Light);
+
+		HitTestLight(Light, R, LocalRS, RespectVisibility);
+
+		if (LocalRS.Valid && LocalRS.T < T)
 		{
-			P			= R(T);
-			Hit			= true;
-			R.m_MaxT	= T;
+			RS = LocalRS;
+			T = LocalRS.T;
 		}
 	}
-	
-	if (Hit)
-		RS.SetValid(T, P, Vec3f(0.0f), -R.m_D, L, Pdf);
 }
 
 DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
@@ -306,12 +297,12 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
 
-	/*
+	
 	F = Shader.SampleF(RS.Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
 	{
-		NearestLight(CRay(RS.P, Wi, 0.0f), RS);
+		SampleLights(CRay(RS.P, Wi, 0.0f), RS);
 
 		if (RS.Valid)
 		{
@@ -333,7 +324,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 			}
 		}
 	}
-	*/
+	/**/
 
 	return Ld;
 }
@@ -345,4 +336,111 @@ DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, RaySample RS, CRN
 	LS.LargeStep(RNG);
 
 	return EstimateDirectLight(Type, LS, RS, RNG, Shader);
+}
+
+DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
+{
+	const float I = GetIntensity(RS.P);
+
+//	Lv += GetEmission(Intensity);
+
+	switch (gVolume.m_ShadingType)
+	{
+		case 0:
+		{
+			CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+			return UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
+		}
+	
+		case 1:
+		{
+			CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+			return UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
+		}
+
+		/*
+		case 2:
+		{
+			const float GradMag = GradientMagnitude(Pe) * gVolume.m_IntensityInvRange;
+			const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
+
+			if (RNG.Get1() < PdfBrdf)
+				Lv += UniformSampleOneLight(pScene, CVolumeShader::Brdf, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, true);
+			else
+				Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
+
+			break;
+		}
+		*/
+	}
+
+	return ColorXYZf(0.0f);
+}
+
+DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
+{
+	CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(gReflections.m_ReflectionObjects[RS.ReflectorID].DiffuseColor), ColorXYZf(gReflections.m_ReflectionObjects[RS.ReflectorID].SpecularColor), gReflections.m_ReflectionObjects[RS.ReflectorID].Ior, gReflections.m_ReflectionObjects[RS.ReflectorID].Glossiness);
+	//CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 2.5f, 500.0f);
+	return UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEV void HitTestReflector(_ReflectionObject& Reflector, CRay R, RaySample& RS)
+{
+	// Transform ray into local shape coordinates
+	CRay TR = TransformRay(R, Reflector.m_InvTM);
+
+	// Result of intersection
+	int Res = 0;
+
+	float To = 0.0f;
+
+	Vec2f UV;
+
+	Res = IntersectPlane(TR, false, Vec3f(Reflector.Size[0], Reflector.Size[1], 0.0f), &To, &UV);
+
+	if (Res > 0)
+	{
+		// Compute intersection point in world coordinates
+		const Vec3f Pw = TransformPoint(Reflector.m_TM, TR(To));
+
+		// Compute world distance to intersection
+		const float Tw = Length(Pw - R.m_O);
+
+		RS.SetValid(Tw, Pw, Vec3f(0.0f, 1.0f, 0.0f), -R.m_D, ColorXYZf(0.0f), UV, 1.0f);
+	}
+}
+
+DEV inline void SampleReflectors(CRay R, RaySample& RS)
+{
+	float T = FLT_MAX;
+
+	for (int i = 0; i < gReflections.m_NoReflectionObjects; i++)
+	{
+		_ReflectionObject& RO = gReflections.m_ReflectionObjects[i];
+
+		RaySample LocalRS(RaySample::Reflector);
+
+		LocalRS.ReflectorID = i;
+
+		HitTestReflector(RO, R, LocalRS);
+
+		if (LocalRS.Valid)
+		{
+			RS = LocalRS;
+			T = LocalRS.T;
+		}
+	}
 }

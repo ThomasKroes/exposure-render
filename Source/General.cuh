@@ -162,6 +162,11 @@ struct EXPOSURE_RENDER_DLL _Clipping
 
 struct EXPOSURE_RENDER_DLL _ReflectionObject
 {
+	float				Size[2];
+	float				DiffuseColor[3];
+	float				SpecularColor[3];
+	float				Glossiness;
+	float				Ior;
 	_TransformMatrix	m_TM;
 	_TransformMatrix	m_InvTM;
 };
