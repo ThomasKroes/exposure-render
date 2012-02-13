@@ -49,112 +49,52 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
-	Vec3f Pe, Pl;
-	
-	float T = 0.0f;
+	// Ray sample for: voxel (RSv), light (RSl), reflector (RSr)
+	RaySample RSv, RSl, RSr;
 
-	if (SampleDistanceRM(Re, RNG, Pe, T) && T >= gCamera.m_ClipNear && T < gCamera.m_ClipFar)
+	SampleDistanceRM(Re, RNG, RSv);
+//	NearestLight(Re, Li, Pl, Tl, true);
+
+	float I = GetIntensity(RSv.P);
+
+	// if ( && T >= gCamera.m_ClipNear && T < gCamera.m_ClipFar)
+	// Lv += GetEmission(Intensity);
+
+	if (RSv.Valid)
 	{
-		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, true))
-		{
-			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Li), X, Y);
-			return;
-		}
-
-		const float Intensity = GetIntensity(Pe);
-
-		Lv += GetEmission(Intensity);
-
+		// Decide which sample to evaluate
 		switch (gVolume.m_ShadingType)
 		{
 			case 0:
 			{
-				Lv += UniformSampleOneLight(CVolumeShader::Brdf, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
+				CVolumeShader Shader(CVolumeShader::Brdf, RSv.N, RSv.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				Lv += UniformSampleOneLight(CVolumeShader::Brdf, RSv, RNG, Shader);
 				break;
 			}
 		
 			case 1:
 			{
-				Lv += UniformSampleOneLight(CVolumeShader::Phase, Intensity, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG);
+				CVolumeShader Shader(CVolumeShader::Phase, RSv.N, RSv.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				Lv += UniformSampleOneLight(CVolumeShader::Phase, RSv, RNG, Shader);
 				break;
 			}
-			
-			/*
-			case 2:
-			{
-				const float GradMag = GradientMagnitude(Pe) * gVolume.m_IntensityInvRange;
-				const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
-
-				if (RNG.Get1() < PdfBrdf)
-  					Lv += UniformSampleOneLight(pScene, CVolumeShader::Brdf, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, true);
-				else
-					Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
-
-				break;
-			}
-			*/
 		}
 	}
-	else
+
+	/*
+	case 2:
 	{
-		/*
-		float NearestT = 1500.0f;
+		const float GradMag = GradientMagnitude(Pe) * gVolume.m_IntensityInvRange;
+		const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
 
-		for (int i = 0; i < gReflections.m_NoReflectionObjects; i++)
-		{
-			CRay TR = TransformRay(Re, gReflections.m_ReflectionObjects[i].m_InvTM);
+		if (RNG.Get1() < PdfBrdf)
+			Lv += UniformSampleOneLight(pScene, CVolumeShader::Brdf, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, true);
+		else
+			Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
 
-			int Res = 0;
-
-			float T = 0.0f;
-
-			Res = IntersectPlane(TR, false, Vec3f(1.0f), &T, NULL);
-			
-			if (Res > 0)
-			{
-				if (T < NearestT)
-				{
-					NearestT = T;
-				}
-			}
-
-			if (NearestT < 1500.0f)
-			{
-				Lv = ColorXYZf(1.0f);
-
-
-				Vec3f HitP = Re(NearestT);
-
-				CVolumeShader Shader(CVolumeShader::Brdf, Vec3f(0.0f, 1.0f, 0.0f), -Re.m_D, ColorXYZf(1.0f), ColorXYZf(1.0f), 5.0f, 50.0f);
-
-				Vec3f Wi, Pl;
-
-				float LightPdf = 1.0f, ShaderPdf = 1.0f;
-
-				ColorXYZf F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
-
-
-
-			}
-			else
-			{
-				Lv = ColorXYZf(0.0f);
-			}
-		}
-		*/
-		
-		/*
-		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, (Pe - Re.m_O).Length()), Li, Pl, true))
-		{
-			pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(Li), X, Y);
-			return;
-		}
-
-
-		if (NearestLight(CRay(Re.m_O, Re.m_D, 0.0f, INF_MAX), Li, Pl, true))
-			Lv = Li;
-		*/
+		break;
 	}
+	*/
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);
 

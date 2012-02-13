@@ -252,100 +252,97 @@ DEV bool HitTestLight(int LightID, CRay& R, float& T, ColorXYZf& Le, bool Respec
 	return false;
 }
 
-DEV inline bool NearestLight(CRay R, ColorXYZf& LightColor, Vec3f& Pl, bool RespectVisibility = false, float* pPdf = NULL)
+DEV inline void NearestLight(CRay R, RaySample& RS, bool RespectVisibility = false)
 {
 	bool Hit = false;
 	
-	float T = 0.0f;
-
-	float Pdf = 0.0f;
+	float T = 0.0f; float Pdf = 0.0f; ColorXYZf L; Vec3f P;
 
 	for (int LID = 0; LID < gLighting.m_NoLights; LID++)
 	{
-		if (HitTestLight(LID, R, T, LightColor, RespectVisibility, NULL, &Pdf))
+		if (HitTestLight(LID, R, T, L, RespectVisibility, NULL, &Pdf))
 		{
-			Pl			= R(T);
+			P			= R(T);
 			Hit			= true;
 			R.m_MaxT	= T;
 		}
 	}
 	
-	if (pPdf)
-		*pPdf = Pdf;
-
-	return Hit;
+	if (Hit)
+		RS.SetValid(T, P, Vec3f(0.0f), -R.m_D, L, Pdf);
 }
 
-DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, float Intensity, LightingSample& LS, Vec3f Wo, Vec3f Pe, Vec3f N, CRNG& RNG)
+DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
 {
 	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
 	
-	CVolumeShader Shader(Type, N, Wo, GetDiffuse(Intensity), GetSpecular(Intensity), 5.0f, GetGlossiness(Intensity));
-
 	CRay Rl; 
 
 	float LightPdf = 1.0f, ShaderPdf = 1.0f;
 
 	Vec3f Wi, Pl;
 
- 	Li = SampleLight(RNG, Pe, Pl, LightPdf);
+	Li = SampleLight(RNG, RS.P, Pl, LightPdf);
 	
 	Rl.m_O		= Pl;
-	Rl.m_D		= Normalize(Pe - Pl);
+	Rl.m_D		= Normalize(RS.P - Pl);
 	Rl.m_MinT	= 0.0f;
-	Rl.m_MaxT	= (Pe - Pl).Length();
+	Rl.m_MaxT	= (RS.P - Pl).Length();
 
 	Wi = -Rl.m_D; 
 
-	F = Shader.F(Wo, Wi); 
+	F = Shader.F(RS.Wo, Wi); 
 
-	ShaderPdf = Shader.Pdf(Wo, Wi);
+	ShaderPdf = Shader.Pdf(RS.Wo, Wi);
 	
 	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
 		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
 		
 		if (Type == CVolumeShader::Brdf)
-			Ld += F * Li * AbsDot(Wi, N) * WeightMIS / LightPdf;
+			Ld += F * Li * AbsDot(Wi, RS.N) * WeightMIS / LightPdf;
 
 		if (Type == CVolumeShader::Phase)
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
-	
-	F = Shader.SampleF(Wo, Wi, ShaderPdf, LS.m_BsdfSample);
+
+	/*
+	F = Shader.SampleF(RS.Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
 	{
-		if (NearestLight(CRay(Pe, Wi, 0.0f), Li, Pl, &LightPdf))
+		NearestLight(CRay(RS.P, Wi, 0.0f), RS);
+
+		if (RS.Valid)
 		{
 			// Compose light ray
 			Rl.m_O		= Pl;
-			Rl.m_D		= Normalize(Pe - Pl);
+			Rl.m_D		= Normalize(RS.P - Pl);
 			Rl.m_MinT	= 0.0f;
-			Rl.m_MaxT	= (Pe - Pl).Length();
+			Rl.m_MaxT	= (RS.P - Pl).Length();
 
 			if (LightPdf > 0.0f && !Li.IsBlack() && !FreePathRM(Rl, RNG)) 
 			{
 				const float WeightMIS = PowerHeuristic(1.0f, ShaderPdf, 1.0f, LightPdf);
 
 				if (Type == CVolumeShader::Brdf)
-					Ld += F * Li * AbsDot(Wi, N) * WeightMIS / ShaderPdf;
+					Ld += F * Li * AbsDot(Wi, RS.N) * WeightMIS / ShaderPdf;
 
 				if (Type == CVolumeShader::Phase)
 					Ld += F * Li * WeightMIS / ShaderPdf;
 			}
 		}
 	}
-	/**/
+	*/
 
 	return Ld;
 }
 
-DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, float Intensity, Vec3f Wo, Vec3f Pe, Vec3f N, CRNG& RNG)
+DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
 {
 	LightingSample LS;
 
 	LS.LargeStep(RNG);
 
-	return EstimateDirectLight(Type, Intensity, LS, Wo, Pe, N, RNG);
+	return EstimateDirectLight(Type, LS, RS, RNG, Shader);
 }

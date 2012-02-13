@@ -2117,6 +2117,44 @@ inline HOD Vec3f MaxVec3f(Vec3f a, Vec3f b)
 	return Vec3f(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
 
+struct EXPOSURE_RENDER_DLL RaySample
+{
+	bool		Valid;
+	float		T;
+	Vec3f		P;
+	Vec3f		N;
+	Vec3f		Wo;
+	ColorXYZf	Le;
+	float		Pdf;
+	
+	HOD RaySample()
+	{
+		this->SetInvalid();
+	}
+
+	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, float Pdf = 1.0f)
+	{
+		this->Valid		= true;
+		this->T			= T;
+		this->P			= P;
+		this->N			= N;
+		this->Wo		= Wo;
+		this->Le		= Le;
+		this->Pdf		= Pdf;
+	}
+
+	HOD void SetInvalid()
+	{
+		this->Valid		= false;
+		this->T			= 0.0f;
+		this->P			= Vec3f(0.0f);
+		this->N			= Vec3f(0.0f);
+		this->Wo		= Vec3f(0.0f);
+		this->Le		= ColorXYZf(0.0f);
+		this->Pdf		= 0.0f;
+	}
+};
+
 #define CLR_RAD_BLACK										ColorXYZf(0.0f)
 #define CLR_RAD_WHITE										ColorXYZf(1.0f)
 #define CLR_RAD_RED											ColorXYZf(1.0f, 0.0f, 0.0)

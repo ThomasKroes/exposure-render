@@ -20,7 +20,7 @@
 #define KRNL_SINGLE_SCATTERING_BLOCK_H		8
 #define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
 
-DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, float& T)
+DEV inline void SampleDistanceRM(CRay R, CRNG& RNG, RaySample& RS)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
@@ -28,7 +28,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, float& T)
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
 	if (!IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB), &MinT[TID], &MaxT[TID]))
-		return false;
+		return ;
 
 	MinT[TID] = max(MinT[TID], R.m_MinT);
 	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
@@ -37,6 +37,8 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, float& T)
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
+	Vec3f Ps;
+
 	MinT[TID] += RNG.Get1() * gVolume.m_StepSize;
 
 	while (Sum < S)
@@ -44,7 +46,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, float& T)
 		Ps = R.m_O + MinT[TID] * R.m_D;
 
 		if (MinT[TID] >= MaxT[TID])
-			return false;
+			return;
 		
 		SigmaT	= gVolume.m_DensityScale * GetOpacity(Ps);
 
@@ -52,9 +54,7 @@ DEV inline bool SampleDistanceRM(CRay& R, CRNG& RNG, Vec3f& Ps, float& T)
 		MinT[TID]	+= gVolume.m_StepSize;
 	}
 
-	T = MinT[TID];
-
-	return true;
+	RS.SetValid(MinT[TID], Ps, NormalizedGradient(Ps), -R.m_D, ColorXYZf());
 }
 
 DEV inline bool FreePathRM(CRay R, CRNG& RNG)
