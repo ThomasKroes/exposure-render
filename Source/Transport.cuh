@@ -297,34 +297,36 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 			Ld += F * Li * WeightMIS / LightPdf;
 	}
 
-	
+	/*
 	F = Shader.SampleF(RS.Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
 	{
-		SampleLights(CRay(RS.P, Wi, 0.0f), RS);
+		RaySample RSn(RaySample::Light);
 
-		if (RS.Valid)
+		SampleLights(CRay(RS.P, Wi, 0.0f), RSn);
+
+		if (RSn.Valid)
 		{
 			// Compose light ray
 			Rl.m_O		= Pl;
-			Rl.m_D		= Normalize(RS.P - Pl);
+			Rl.m_D		= Normalize(RSn.P - Pl);
 			Rl.m_MinT	= 0.0f;
-			Rl.m_MaxT	= (RS.P - Pl).Length();
+			Rl.m_MaxT	= (RSn.P - Pl).Length();
 
-			if (LightPdf > 0.0f && !Li.IsBlack() && !FreePathRM(Rl, RNG)) 
+			if (RSn.Pdf > 0.0f && !RSn.Le.IsBlack() && !FreePathRM(Rl, RNG)) 
 			{
-				const float WeightMIS = PowerHeuristic(1.0f, ShaderPdf, 1.0f, LightPdf);
+				const float WeightMIS = PowerHeuristic(1.0f, ShaderPdf, 1.0f, RSn.Pdf);
 
 				if (Type == CVolumeShader::Brdf)
-					Ld += F * Li * AbsDot(Wi, RS.N) * WeightMIS / ShaderPdf;
+					Ld += F * Li * AbsDot(Wi, RSn.N) * WeightMIS / ShaderPdf;
 
 				if (Type == CVolumeShader::Phase)
 					Ld += F * Li * WeightMIS / ShaderPdf;
 			}
 		}
 	}
-	/**/
+	*/
 
 	return Ld;
 }
@@ -399,27 +401,17 @@ DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 
 DEV void HitTestReflector(_ReflectionObject& Reflector, CRay R, RaySample& RS)
 {
-	// Transform ray into local shape coordinates
 	CRay TR = TransformRay(R, Reflector.m_InvTM);
 
-	// Result of intersection
-	int Res = 0;
+	Intersection Int = IntersectPlane(TR, false, Vec2f(Reflector.Size[0], Reflector.Size[1]));
 
-	float To = 0.0f;
-
-	Vec2f UV;
-
-	Res = IntersectPlane(TR, false, Vec3f(Reflector.Size[0], Reflector.Size[1], 0.0f), &To, &UV);
-
-	if (Res > 0)
+	if (Int.Valid)
 	{
-		// Compute intersection point in world coordinates
-		const Vec3f Pw = TransformPoint(Reflector.m_TM, TR(To));
-
-		// Compute world distance to intersection
+		const Vec3f Pw = TransformPoint(Reflector.m_TM, Int.P);
+		const Vec3f Nw = TransformVector(Reflector.m_TM, Int.N);
 		const float Tw = Length(Pw - R.m_O);
 
-		RS.SetValid(Tw, Pw, Vec3f(0.0f, 1.0f, 0.0f), -R.m_D, ColorXYZf(0.0f), UV, 1.0f);
+		RS.SetValid(Tw, Pw, Nw, -R.m_D, ColorXYZf(0.0f), Int.UV, 1.0f);
 	}
 }
 
@@ -437,7 +429,7 @@ DEV inline void SampleReflectors(CRay R, RaySample& RS)
 
 		HitTestReflector(RO, R, LocalRS);
 
-		if (LocalRS.Valid)
+		if (LocalRS.Valid && LocalRS.T < T)
 		{
 			RS = LocalRS;
 			T = LocalRS.T;

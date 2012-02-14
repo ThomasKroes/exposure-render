@@ -194,7 +194,7 @@ public:
 		  wh = Normalize(wh);
 		  float cosThetaH = Dot(wi, wh);
 
-		  ColorXYZf F = m_Fresnel.Evaluate(cosThetaH);
+		  ColorXYZf F(1.0f);// = m_Fresnel.Evaluate(cosThetaH);
 
 		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.0f * cosThetaI * cosThetaO);
 	  }

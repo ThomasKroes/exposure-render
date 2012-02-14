@@ -2189,6 +2189,49 @@ struct EXPOSURE_RENDER_DLL RaySample
 	}
 };
 
+struct EXPOSURE_RENDER_DLL Intersection
+{
+	bool		Valid;
+	float		T;
+	Vec3f		P;
+	Vec3f		N;
+	Vec2f		UV;
+
+	HOD Intersection()
+	{
+		this->SetInvalid();
+	}
+
+	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec2f UV = Vec2f(0.0f))
+	{
+		this->Valid		= true;
+		this->T			= T;
+		this->P			= P;
+		this->N			= N;
+		this->UV		= UV;
+	}
+
+	HOD void SetInvalid()
+	{
+		this->Valid		= false;
+		this->T			= 0.0f;
+		this->P			= Vec3f(0.0f);
+		this->N			= Vec3f(0.0f);
+		this->UV		= Vec2f(0.0f);
+	}
+
+	HOD Intersection& Intersection::operator = (const Intersection& Other)
+	{
+		this->Valid			= Other.Valid;	
+		this->T				= Other.T;
+		this->P				= Other.P;
+		this->N				= Other.N;
+		this->UV			= Other.UV;
+
+		return *this;
+	}
+};
+
 #define CLR_RAD_BLACK										ColorXYZf(0.0f)
 #define CLR_RAD_WHITE										ColorXYZf(1.0f)
 #define CLR_RAD_RED											ColorXYZf(1.0f, 0.0f, 0.0)

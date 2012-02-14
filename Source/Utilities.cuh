@@ -159,7 +159,7 @@ DEV float GetOpacity(Vec3f P)
 	{
 		_ClippingObject& ClippingObject = gClipping.m_ClippingObjects[i];
 
-		const Vec3f P2 = TransformPoint(ClippingObject.m_TM, P);
+		const Vec3f P2 = TransformPoint(ClippingObject.m_InvTM, P);
 
 //		const bool InRange = Intensity > ClippingObject.m_MinIntensity && Intensity < ClippingObject.m_MaxIntensity;
 
@@ -317,7 +317,30 @@ DEV int IntersectPlane(CRay R, bool OneSided, Vec3f Size, float* pT = NULL, Vec2
 	if (pUV)
 		*pUV = UV;
 
+//	pI->SetValid(*pT, R(*pT), Vec3f(0.0f, 0.0f, 1.0f), -R.m_D, *pUV);
+
 	return Res;
+}
+
+DEV Intersection IntersectPlane(CRay R, bool OneSided, Vec2f Size)
+{
+	Intersection Int;
+
+	Vec2f UV;
+
+	int Res = IntersectPlane(R, OneSided, &Int.T, &Int.UV);
+
+	if (Res <= 0)
+		return Int;
+	else
+	{
+		if (Int.UV.x < -0.5f * Size.x || Int.UV.x > 0.5f * Size.x || Int.UV.y < -0.5f * Size.y || Int.UV.y > 0.5f * Size.y)
+			return Int;
+	}
+
+	Int.SetValid(Int.T, R(Int.T), Vec3f(0.0f, 0.0f, 1.0f), Vec2f(0.0f));
+
+	return Int;
 }
 
 DEV int IntersectUnitDisk(CRay R, bool OneSided, float* pT = NULL, Vec2f* pUV = NULL)

@@ -15,6 +15,30 @@
 
 #include "Transport.cuh"
 
+DEV RaySample SampleRay(CRay R, CRNG& RNG)
+{
+	RaySample RS[3] = { RaySample(RaySample::Volume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
+
+	SampleVolume(R, RNG, RS[0]);
+	SampleLights(R, RS[1], true);
+	SampleReflectors(R, RS[2]);
+
+	float T = FLT_MAX;
+
+	RaySample NearestRS(RaySample::Volume);
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (RS[i].Valid && RS[i].T < T)
+		{
+			NearestRS = RS[i];
+			T = RS[i].T;
+		}
+	}
+
+	return NearestRS;
+}
+
 KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 {
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
@@ -49,44 +73,47 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
-	RaySample RS[3] = { RaySample(RaySample::Volume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
-
-	SampleVolume(Re, RNG, RS[0]);
-	SampleLights(Re, RS[1], true);
-	SampleReflectors(Re, RS[2]);
-
-	float T = 1500.0f;
-
-	RaySample SmallestRS(RaySample::Volume);
-
-	for (int i = 0; i < 3; i++)
-	{
-		if (RS[i].Valid && RS[i].T < T) //RS[i].T >= gCamera.m_ClipNear && RS[i].T < gCamera.m_ClipFar && 
-		{
-			SmallestRS = RS[i];
-			T = RS[i].T;
-		}
-	}
+	const RaySample NearestRS = SampleRay(Re, RNG);
 	
-	if (SmallestRS.Valid)
+	if (NearestRS.Valid)
 	{
-		switch (SmallestRS.Type)
+		switch (NearestRS.Type)
 		{
 			case RaySample::Volume:
 			{
-				Lv += UniformSampleOneLightVolume(SmallestRS, RNG);
+				Lv += UniformSampleOneLightVolume(NearestRS, RNG);
 				break;
 			}
 			
 			case RaySample::Light:
 			{
-				Lv += SmallestRS.Le;
+				Lv += NearestRS.Le;
 				break;
 			}
 
 			case RaySample::Reflector:
 			{
-				Lv += UniformSampleOneLightReflector(SmallestRS, RNG);
+				Lv += UniformSampleOneLightReflector(NearestRS, RNG);
+
+				CVolumeShader Shader(CVolumeShader::Brdf, NearestRS.N, NearestRS.Wo, ColorXYZf(gReflections.m_ReflectionObjects[NearestRS.ReflectorID].DiffuseColor), ColorXYZf(gReflections.m_ReflectionObjects[NearestRS.ReflectorID].SpecularColor), gReflections.m_ReflectionObjects[NearestRS.ReflectorID].Ior, gReflections.m_ReflectionObjects[NearestRS.ReflectorID].Glossiness);
+				
+				BrdfSample S;
+
+				S.LargeStep(RNG);
+				
+				Vec3f Wi;
+
+				float Pdf;
+
+				const ColorXYZf F = Shader.SampleF(-Re.m_D, Wi, Pdf, S);
+
+				const RaySample ReflectorRS = SampleRay(CRay(NearestRS.P, Wi, 0.0f), RNG);
+
+				if (ReflectorRS.Valid && ReflectorRS.Type == RaySample::Volume)
+				{
+					Lv += F * UniformSampleOneLightVolume(ReflectorRS, RNG) / Pdf;
+				}
+				
 				break;
 			}
 		}
