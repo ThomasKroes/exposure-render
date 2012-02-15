@@ -63,6 +63,12 @@ SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 
 # Exposure Render CUDA sources
 SET(ErCudaSources
+	Plane.cuh
+	Box.cuh
+	Disk.cuh
+	Ring.cuh
+	Sphere.cuh
+	Cylinder.cuh
 	SingleScattering.cuh
 	Blur.cuh
 	Utilities.cuh

@@ -40,7 +40,7 @@ CD _Volume			gVolume;
 CD _Camera			gCamera;
 CD _Lighting		gLighting;
 CD _Clipping		gClipping;
-CD _Reflections		gReflections;
+CD _Reflectors		gReflectors;
 CD _Denoise			gDenoise;
 CD _Scattering		gScattering;
 CD _Blur			gBlur;
@@ -372,9 +372,9 @@ void ErBindClipping(_Clipping* pClipping)
 	HandleCudaError(cudaMemcpyToSymbol("gClipping", pClipping, sizeof(_Clipping)));
 }
 
-void ErBindReflections(_Reflections* pReflections)
+void ErBindReflectors(_Reflectors* pReflectors)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gReflections", pReflections, sizeof(_Reflections)));
+	HandleCudaError(cudaMemcpyToSymbol("gReflectors", pReflectors, sizeof(_Reflectors)));
 }
 
 void ErBindDenoise(_Denoise* pDenoise)

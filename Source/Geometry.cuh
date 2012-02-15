@@ -2192,20 +2192,22 @@ struct EXPOSURE_RENDER_DLL RaySample
 struct EXPOSURE_RENDER_DLL Intersection
 {
 	bool		Valid;
-	float		T;
+	bool		Front;
+	float		NearT;
+	float		FarT;
 	Vec3f		P;
 	Vec3f		N;
 	Vec2f		UV;
-
+	
 	HOD Intersection()
 	{
 		this->SetInvalid();
 	}
 
-	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec2f UV = Vec2f(0.0f))
+	HOD void SetValid(float NearT, Vec3f P, Vec3f N, Vec2f UV = Vec2f(0.0f))
 	{
 		this->Valid		= true;
-		this->T			= T;
+		this->NearT		= NearT;
 		this->P			= P;
 		this->N			= N;
 		this->UV		= UV;
@@ -2214,7 +2216,9 @@ struct EXPOSURE_RENDER_DLL Intersection
 	HOD void SetInvalid()
 	{
 		this->Valid		= false;
-		this->T			= 0.0f;
+		this->Front		= true;
+		this->NearT		= 0.0f;
+		this->FarT		= FLT_MAX;
 		this->P			= Vec3f(0.0f);
 		this->N			= Vec3f(0.0f);
 		this->UV		= Vec2f(0.0f);
@@ -2223,7 +2227,9 @@ struct EXPOSURE_RENDER_DLL Intersection
 	HOD Intersection& Intersection::operator = (const Intersection& Other)
 	{
 		this->Valid			= Other.Valid;	
-		this->T				= Other.T;
+		this->Front			= Other.Front;
+		this->NearT			= Other.NearT;
+		this->FarT			= Other.FarT;
 		this->P				= Other.P;
 		this->N				= Other.N;
 		this->UV			= Other.UV;

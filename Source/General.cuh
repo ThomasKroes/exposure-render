@@ -37,87 +37,60 @@ struct EXPOSURE_RENDER_DLL Interval
 
 struct EXPOSURE_RENDER_DLL _TransformMatrix
 {
-	float		NN[4][4];
-
-	/*
-	DEV Vec3f GetPosition()
-	{
-		return Vec3f(NN[0][3], NN[1][3], NN[2][3]);
-	}
-
-	DEV Vec3f GetScale()
-	{
-		return Vec3f(NN[3][0], NN[3][1], NN[3][2]);
-	}
-
-	DEV Vec3f GetU()
-	{
-		return Vec3f(NN[0][0], NN[1][0], NN[2][0]);
-	}
-
-	DEV Vec3f GetV()
-	{
-		return Vec3f(NN[0][1], NN[1][1], NN[2][1]);
-	}
-
-	DEV Vec3f GetW()
-	{
-		return Vec3f(NN[0][2], NN[1][2], NN[2][2]);
-	}
-	*/
+	float				NN[4][4];
 };
 
 struct EXPOSURE_RENDER_DLL _Volume
 {
-	int			m_Extent[3];
-	float		m_InvExtent[3];
-	float		m_MinAABB[3];
-	float		m_MaxAABB[3];
-	float		m_InvMinAABB[3];
-	float		m_InvMaxAABB[3];
-	float		m_Size[3];
-	float		m_InvSize[3];
-	float		m_IntensityMin;
-	float		m_IntensityMax;
-	float		m_IntensityRange;
-	float		m_IntensityInvRange;
-	float		m_StepSize;
-	float		m_StepSizeShadow;
-	float		m_DensityScale;
-	float		m_GradientDelta;
-	float		m_InvGradientDelta;
-	float		m_GradientDeltaX[3];
-	float		m_GradientDeltaY[3];
-	float		m_GradientDeltaZ[3];
-	float		m_Spacing[3];
-	float		m_InvSpacing[3];
-	float		m_GradientFactor;
-	int			m_ShadingType;
-	float		m_MacroCellSize[3];
+	int					m_Extent[3];
+	float				m_InvExtent[3];
+	float				m_MinAABB[3];
+	float				m_MaxAABB[3];
+	float				m_InvMinAABB[3];
+	float				m_InvMaxAABB[3];
+	float				m_Size[3];
+	float				m_InvSize[3];
+	float				m_IntensityMin;
+	float				m_IntensityMax;
+	float				m_IntensityRange;
+	float				m_IntensityInvRange;
+	float				m_StepSize;
+	float				m_StepSizeShadow;
+	float				m_DensityScale;
+	float				m_GradientDelta;
+	float				m_InvGradientDelta;
+	float				m_GradientDeltaX[3];
+	float				m_GradientDeltaY[3];
+	float				m_GradientDeltaZ[3];
+	float				m_Spacing[3];
+	float				m_InvSpacing[3];
+	float				m_GradientFactor;
+	int					m_ShadingType;
+	float				m_MacroCellSize[3];
 };
 
 struct EXPOSURE_RENDER_DLL _Camera
 {
-	int			m_FilmWidth;
-	int			m_FilmHeight;
-	int			m_FilmNoPixels;
-	float		m_Pos[3];
-	float		m_Target[3];
-	float		m_Up[3];
-	float		m_N[3];
-	float		m_U[3];
-	float		m_V[3];
-	float		m_FocalDistance;
-	float		m_ApertureSize;
-	float		m_ClipNear;
-	float		m_ClipFar;
-	float		m_Screen[2][2];
-	float		m_InvScreen[2];
-	float		m_Exposure;
-	float		m_InvExposure;
-	float		m_Gamma;
-	float		m_InvGamma;
-	float		m_FOV;
+	int					m_FilmWidth;
+	int					m_FilmHeight;
+	int					m_FilmNoPixels;
+	float				m_Pos[3];
+	float				m_Target[3];
+	float				m_Up[3];
+	float				m_N[3];
+	float				m_U[3];
+	float				m_V[3];
+	float				m_FocalDistance;
+	float				m_ApertureSize;
+	float				m_ClipNear;
+	float				m_ClipFar;
+	float				m_Screen[2][2];
+	float				m_InvScreen[2];
+	float				m_Exposure;
+	float				m_InvExposure;
+	float				m_Gamma;
+	float				m_InvGamma;
+	float				m_FOV;
 };
 
 struct EXPOSURE_RENDER_DLL _Light
@@ -144,60 +117,61 @@ struct EXPOSURE_RENDER_DLL _Lighting
 
 struct EXPOSURE_RENDER_DLL _ClippingObject
 {
-	int					m_ShapeType;
-	float				m_Size[3];
-	float				m_Radius;
-	bool				m_Invert;
-	float				m_MinIntensity;
-	float				m_MaxIntensity;
-	_TransformMatrix	m_TM;
-	_TransformMatrix	m_InvTM;
+	int					ShapeType;
+	float				Size[3];
+	float				Radius;
+	bool				Invert;
+	float				MinIntensity;
+	float				MaxIntensity;
+	float				Opacity;
+	_TransformMatrix	TM;
+	_TransformMatrix	InvTM;
 };
 
 struct EXPOSURE_RENDER_DLL _Clipping
 {
-	int					m_NoClippingObjects;
-	_ClippingObject		m_ClippingObjects[32];
+	int					NoClippingObjects;
+	_ClippingObject		ClippingObjects[32];
 };
 
-struct EXPOSURE_RENDER_DLL _ReflectionObject
+struct EXPOSURE_RENDER_DLL _Reflector
 {
 	float				Size[2];
 	float				DiffuseColor[3];
 	float				SpecularColor[3];
 	float				Glossiness;
 	float				Ior;
-	_TransformMatrix	m_TM;
-	_TransformMatrix	m_InvTM;
+	_TransformMatrix	TM;
+	_TransformMatrix	InvTM;
 };
 
-struct EXPOSURE_RENDER_DLL _Reflections
+struct EXPOSURE_RENDER_DLL _Reflectors
 {
-	int					m_NoReflectionObjects;
-	_ReflectionObject	m_ReflectionObjects[32];
+	int					NoReflectors;
+	_Reflector			Reflectors[32];
 };
 
 struct EXPOSURE_RENDER_DLL _Denoise
 {
-	float	m_Enabled;
-	float	m_WindowRadius;
-	float	m_WindowArea;
-	float	m_InvWindowArea;
-	float	m_Noise;
-	float	m_WeightThreshold;
-	float	m_LerpThreshold;
-	float	m_LerpC;
+	float				Enabled;
+	float				WindowRadius;
+	float				WindowArea;
+	float				InvWindowArea;
+	float				Noise;
+	float				WeightThreshold;
+	float				LerpThreshold;
+	float				LerpC;
 };
 
 struct EXPOSURE_RENDER_DLL _Scattering
 {
-	float		m_NoIterations;
-	float		m_InvNoIterations;
-	bool		m_Shadows;
+	float				NoIterations;
+	float				InvNoIterations;
+	bool				Shadows;
 };
 
 struct EXPOSURE_RENDER_DLL _Blur
 {
-	int			m_FilterWidth;
-	float		m_FilterWeights[10];
+	int					FilterWidth;
+	float				FilterWeights[10];
 };

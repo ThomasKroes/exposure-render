@@ -33,8 +33,8 @@ KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 
-	const int X0 = max((int)ceilf(X - gBlur.m_FilterWidth), 0);
-	const int X1 = min((int)floorf(X + gBlur.m_FilterWidth), (int)gCamera.m_FilmWidth - 1);
+	const int X0 = max((int)ceilf(X - gBlur.FilterWidth), 0);
+	const int X1 = min((int)floorf(X + gBlur.FilterWidth), (int)gCamera.m_FilmWidth - 1);
 
 	ColorXYZAf Sum;
 
@@ -48,7 +48,7 @@ KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 
 	for (int x = X0; x <= X1; x++)
 	{
-		FW[TID] = gBlur.m_FilterWeights[(int)fabs((float)x - X)];
+		FW[TID] = gBlur.FilterWeights[(int)fabs((float)x - X)];
 
 		Sum			+= pFrameBuffer->m_FrameEstimateXyza.Get(x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
@@ -69,8 +69,8 @@ KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 
-	const int Y0 = max((int)ceilf (Y - gBlur.m_FilterWidth), 0);
-	const int Y1 = min((int)floorf(Y + gBlur.m_FilterWidth), gCamera.m_FilmHeight - 1);
+	const int Y0 = max((int)ceilf (Y - gBlur.FilterWidth), 0);
+	const int Y1 = min((int)floorf(Y + gBlur.FilterWidth), gCamera.m_FilmHeight - 1);
 
 	ColorXYZAf Sum;
 
@@ -84,7 +84,7 @@ KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 
 	for (int y = Y0; y <= Y1; y++)
 	{
-		FW[TID] = gBlur.m_FilterWeights[(int)fabs((float)y - Y)];
+		FW[TID] = gBlur.FilterWeights[(int)fabs((float)y - Y)];
 
 		Sum			+= pFrameBuffer->m_FrameBlurXyza.Get(X, y) * FW[TID];
 		SumW[TID]	+= FW[TID];

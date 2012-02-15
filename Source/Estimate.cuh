@@ -27,7 +27,7 @@ KERNEL void KrnlComputeEstimate(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
 		return;
 
-	pFrameBuffer->m_RunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->m_RunningEstimateXyza.Get(X, Y), pFrameBuffer->m_FrameEstimateXyza.Get(X, Y), gScattering.m_NoIterations), X, Y);
+	pFrameBuffer->m_RunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->m_RunningEstimateXyza.Get(X, Y), pFrameBuffer->m_FrameEstimateXyza.Get(X, Y), gScattering.NoIterations), X, Y);
 }
 
 void ComputeEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)

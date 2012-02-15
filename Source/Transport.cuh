@@ -132,10 +132,7 @@ DEV void HitTestLight(_Light& Light, CRay R, RaySample& RS, bool RespectVisibili
 	CRay TR = TransformRay(R, Light.m_InvTM);
 
 	// Result of intersection
-	int Res = 0;
-
-	// Hit distance in local coordinates
-	float To = 0.0f;
+	Intersection Int;
 
 	switch (Light.m_Type)
 	{
@@ -146,31 +143,37 @@ DEV void HitTestLight(_Light& Light, CRay R, RaySample& RS, bool RespectVisibili
 			{
 				case 0:
 				{
-					Res = IntersectPlane(TR, Light.m_OneSided, ToVec3f(Light.m_Size), &To);
+					Int = IntersectPlane(TR, Light.m_OneSided, Vec2f(Light.m_Size[0], Light.m_Size[1]));
 					break;
 				}
 
 				case 1:
 				{
-					Res = IntersectDisk(TR, Light.m_OneSided, Light.m_OuterRadius, &To);
+					Int = IntersectDisk(TR, Light.m_OneSided, Light.m_OuterRadius);
 					break;
 				}
 
 				case 2:
 				{
-					Res = IntersectRing(TR, Light.m_OneSided, Light.m_InnerRadius, Light.m_OuterRadius, &To);
+					Int = IntersectRing(TR, Light.m_OneSided, Light.m_InnerRadius, Light.m_OuterRadius);
 					break;
 				}
 
 				case 3:
 				{
-					Res = IntersectBox(TR, ToVec3f(Light.m_Size), &To, NULL);
+					Int = IntersectBox(TR, ToVec3f(Light.m_Size), NULL);
 					break;
 				}
 
 				case 4:
 				{
-					Res = IntersectSphere(TR, Light.m_OuterRadius, &To);
+					Int = IntersectSphere(TR, Light.m_OuterRadius);
+					break;
+				}
+
+				case 5:
+				{
+					Int = IntersectCylinder(TR, Light.m_OuterRadius, Light.m_Size[1]);
 					break;
 				}
 			}
@@ -180,66 +183,57 @@ DEV void HitTestLight(_Light& Light, CRay R, RaySample& RS, bool RespectVisibili
 
 		case 1:
 		{
-			Res = IntersectSphere(TR, Light.m_InnerRadius, &To);
+			Int = IntersectSphere(TR, Light.m_InnerRadius);
 			break;
 		}
 	}
 
 	ColorXYZf Le;
 
-	if (Res > 0)
+	if (Int.Valid)
 	{
-		// Compute intersection point in world coordinates
-		const Vec3f Pw = TransformPoint(Light.m_TM, TR(To));
-
-		// Compute world distance to intersection
+		const Vec3f Pw = TransformPoint(Light.m_TM, Int.P);
+		const Vec3f Nw = TransformVector(Light.m_TM, Int.N);
 		const float Tw = Length(Pw - R.m_O);
 
 		// Compute PDF
 		const float Pdf = 1.0f / Light.m_Area;
 
-		if (Res == 2)
+		switch (Light.m_Type)
 		{
-			Le = ColorXYZf(0.0f);
-		}
-		else
-		{
-			switch (Light.m_Type)
+			// Area light
+			case 0:
 			{
-				// Area light
-				case 0:
-				{
-					Le = ColorXYZf(Light.m_Color[0], Light.m_Color[1], Light.m_Color[2]) / Light.m_Area;
-					break;
-				}
+				Le = ColorXYZf(Light.m_Color[0], Light.m_Color[1], Light.m_Color[2]) / Light.m_Area;
+				break;
+			}
 
-				// Environment light
-				case 1:
+			// Environment light
+			case 1:
+			{
+				switch (Light.m_TextureType)
 				{
-					switch (Light.m_TextureType)
+					// Uniform color
+					case 0:
 					{
-						// Uniform color
-						case 0:
-						{
-							Le = ColorXYZf(Light.m_Color[0], Light.m_Color[1], Light.m_Color[2]) / Light.m_Area;
-							break;
-						}
-
-						// Gradient
-						case 1:
-						{
-							float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pw).y);
-							Le = ColorXYZf(Col.x, Col.y, Col.z) / Light.m_Area;
-							break;
-						}
+						Le = ColorXYZf(Light.m_Color[0], Light.m_Color[1], Light.m_Color[2]) / Light.m_Area;
+						break;
 					}
 
-					break;
+					// Gradient
+					case 1:
+					{
+						float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pw).y);
+						Le = ColorXYZf(Col.x, Col.y, Col.z) / Light.m_Area;
+						break;
+					}
 				}
+
+				break;
 			}
 		}
 
-		RS.SetValid(Tw, Pw, Vec3f(0.0f, 1.0f, 0.0f), -R.m_D, Le, Vec2f(0.0f), Pdf);
+		RS.SetValid(Tw, Pw, Nw, -R.m_D, Le, Int.UV, Pdf);
 	}
 }
 
@@ -381,7 +375,7 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 {
-	CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(gReflections.m_ReflectionObjects[RS.ReflectorID].DiffuseColor), ColorXYZf(gReflections.m_ReflectionObjects[RS.ReflectorID].SpecularColor), gReflections.m_ReflectionObjects[RS.ReflectorID].Ior, gReflections.m_ReflectionObjects[RS.ReflectorID].Glossiness);
+	CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(gReflectors.Reflectors[RS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.Reflectors[RS.ReflectorID].SpecularColor), gReflectors.Reflectors[RS.ReflectorID].Ior, gReflectors.Reflectors[RS.ReflectorID].Glossiness);
 	//CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 2.5f, 500.0f);
 	return UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
 }
@@ -399,16 +393,16 @@ DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 
 
 
-DEV void HitTestReflector(_ReflectionObject& Reflector, CRay R, RaySample& RS)
+DEV void HitTestReflector(_Reflector& Reflector, CRay R, RaySample& RS)
 {
-	CRay TR = TransformRay(R, Reflector.m_InvTM);
+	CRay TR = TransformRay(R, Reflector.InvTM);
 
 	Intersection Int = IntersectPlane(TR, false, Vec2f(Reflector.Size[0], Reflector.Size[1]));
 
 	if (Int.Valid)
 	{
-		const Vec3f Pw = TransformPoint(Reflector.m_TM, Int.P);
-		const Vec3f Nw = TransformVector(Reflector.m_TM, Int.N);
+		const Vec3f Pw = TransformPoint(Reflector.TM, Int.P);
+		const Vec3f Nw = TransformVector(Reflector.TM, Int.N);
 		const float Tw = Length(Pw - R.m_O);
 
 		RS.SetValid(Tw, Pw, Nw, -R.m_D, ColorXYZf(0.0f), Int.UV, 1.0f);
@@ -419,9 +413,9 @@ DEV inline void SampleReflectors(CRay R, RaySample& RS)
 {
 	float T = FLT_MAX;
 
-	for (int i = 0; i < gReflections.m_NoReflectionObjects; i++)
+	for (int i = 0; i < gReflectors.NoReflectors; i++)
 	{
-		_ReflectionObject& RO = gReflections.m_ReflectionObjects[i];
+		_Reflector& RO = gReflectors.Reflectors[i];
 
 		RaySample LocalRS(RaySample::Reflector);
 

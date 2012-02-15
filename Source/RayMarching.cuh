@@ -27,11 +27,13 @@ DEV inline void SampleVolume(CRay R, CRNG& RNG, RaySample& RS)
 	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	if (!IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB), &MinT[TID], &MaxT[TID]))
-		return ;
+	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB));
 
-	MinT[TID] = max(MinT[TID], R.m_MinT);
-	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
+	if (!Int.Valid)
+		return;
+
+	MinT[TID] = max(Int.NearT, R.m_MinT);
+	MaxT[TID] = min(Int.FarT, R.m_MaxT);
 
 	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
 	float Sum		= 0.0f;
@@ -65,11 +67,13 @@ DEV inline bool FreePathRM(CRay R, CRNG& RNG)
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ Vec3f Ps[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	if (!IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB), &MinT[TID], &MaxT[TID]))
+	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB));
+	
+	if (!Int.Valid)
 		return false;
 
-	MinT[TID] = max(MinT[TID], R.m_MinT);
-	MaxT[TID] = min(MaxT[TID], R.m_MaxT);
+	MinT[TID] = max(Int.NearT, R.m_MinT);
+	MaxT[TID] = min(Int.FarT, R.m_MaxT);
 
 	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
 	float Sum		= 0.0f;

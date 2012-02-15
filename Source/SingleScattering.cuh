@@ -95,7 +95,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 			{
 				Lv += UniformSampleOneLightReflector(NearestRS, RNG);
 
-				CVolumeShader Shader(CVolumeShader::Brdf, NearestRS.N, NearestRS.Wo, ColorXYZf(gReflections.m_ReflectionObjects[NearestRS.ReflectorID].DiffuseColor), ColorXYZf(gReflections.m_ReflectionObjects[NearestRS.ReflectorID].SpecularColor), gReflections.m_ReflectionObjects[NearestRS.ReflectorID].Ior, gReflections.m_ReflectionObjects[NearestRS.ReflectorID].Glossiness);
+				CVolumeShader Shader(CVolumeShader::Brdf, NearestRS.N, NearestRS.Wo, ColorXYZf(gReflectors.Reflectors[NearestRS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.Reflectors[NearestRS.ReflectorID].SpecularColor), gReflectors.Reflectors[NearestRS.ReflectorID].Ior, gReflectors.Reflectors[NearestRS.ReflectorID].Glossiness);
 				
 				BrdfSample S;
 
