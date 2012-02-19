@@ -15,9 +15,6 @@
 
 class FrameBuffer;
 
-//namespace ExposureRender
-//{
-
 struct ErVolume;
 struct ErCamera;
 struct ErLights;
@@ -59,5 +56,3 @@ __declspec(dllexport) void ErBindScattering(ErScattering* pScattering);
 __declspec(dllexport) void ErBindBlur(ErBlur* pBlur);
 __declspec(dllexport) void ErRenderEstimate();
 __declspec(dllexport) void ErGetRenderBuffer(unsigned char* pData);
-
-//}

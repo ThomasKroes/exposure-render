@@ -15,8 +15,7 @@
 #include "General.cuh"
 #include "Buffer.cuh"
 
-//namespace ExposureRender
-//{
+// using namespace ExposureRender;
 
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexEnvironmentGradient;
@@ -418,5 +417,3 @@ void ErGetRenderBuffer(unsigned char* pData)
 	cudaMemcpy(FB.m_DisplayEstimateRgbaLdrHost.GetPtr(), FB.m_EstimateRgbaLdr.GetPtr(), FB.m_EstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
 	memcpy(pData, FB.m_DisplayEstimateRgbaLdrHost.GetPtr(), FB.m_EstimateRgbaLdr.GetSize());
 }
-
-//}

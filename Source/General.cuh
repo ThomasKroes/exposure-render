@@ -13,9 +13,6 @@
 
 #pragma once
 
-//namespace ExposureRender
-//{
-
 #ifdef _EXPORTING
 	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
 #else
@@ -178,5 +175,3 @@ struct EXPOSURE_RENDER_DLL ErBlur
 	int					FilterWidth;
 	float				FilterWeights[10];
 };
-
-//}
