@@ -24,7 +24,7 @@
 #include "Sphere.cuh"
 #include "Cylinder.cuh"
 
-DEV Vec3f TransformVector(_TransformMatrix TM, Vec3f v)
+DEV Vec3f TransformVector(ErMatrix44 TM, Vec3f v)
 {
   Vec3f r;
 
@@ -37,7 +37,7 @@ DEV Vec3f TransformVector(_TransformMatrix TM, Vec3f v)
   return r;
 }
 
-DEV Vec3f TransformPoint(_TransformMatrix TM, Vec3f pt)
+DEV Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
 {
 	/*
 	float x = pt.x, y = pt.y, z = pt.z;
@@ -61,7 +61,7 @@ DEV Vec3f TransformPoint(_TransformMatrix TM, Vec3f pt)
 //		return Vec3f(xp, yp, zp) * (1.0f / wp);
 }
 
-DEV CRay TransformRay(CRay R, _TransformMatrix TM)
+DEV CRay TransformRay(CRay R, ErMatrix44 TM)
 {
 	CRay TR;
 
@@ -103,11 +103,11 @@ DEV float GetOpacity(float NormalizedIntensity)
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEV bool Inside(_ClippingObject& ClippingObject, Vec3f P)
+DEV bool Inside(ErClipper& C, Vec3f P)
 {
 	bool Inside = false;
 
-	switch (ClippingObject.ShapeType)
+	switch (C.ShapeType)
 	{
 		case 0:		
 		{
@@ -117,35 +117,35 @@ DEV bool Inside(_ClippingObject& ClippingObject, Vec3f P)
 
 		case 1:
 		{
-			Inside = InsideBox(P, ToVec3f(ClippingObject.Size));
+			Inside = InsideBox(P, ToVec3f(C.Size));
 			break;
 		}
 
 		case 2:
 		{
-			Inside = InsideSphere(P, ClippingObject.Radius);
+			Inside = InsideSphere(P, C.Radius);
 			break;
 		}
 
 		case 3:
 		{
-			Inside = InsideCylinder(P, ClippingObject.Radius, ClippingObject.Size[1]);
+			Inside = InsideCylinder(P, C.Radius, C.Size[1]);
 			break;
 		}
 	}
 
-	return ClippingObject.Invert ? !Inside : Inside;
+	return C.Invert ? !Inside : Inside;
 }
 
 DEV bool Inside(Vec3f P)
 {
-	for (int i = 0; i < gClipping.NoClippingObjects; i++)
+	for (int i = 0; i < gClippers.NoClippers; i++)
 	{
-		_ClippingObject& ClippingObject = gClipping.ClippingObjects[i];
+		ErClipper& C = gClippers.ClipperList[i];
 
-		const Vec3f P2 = TransformPoint(ClippingObject.InvTM, P);
+		const Vec3f P2 = TransformPoint(C.InvTM, P);
 
-		if (Inside(ClippingObject, P2))
+		if (Inside(C, P2))
 			return true;
 	}
 
@@ -160,16 +160,14 @@ DEV float GetOpacity(Vec3f P)
 
 	const float Opacity = GetOpacity(NormalizedIntensity);
 
-	for (int i = 0; i < gClipping.NoClippingObjects; i++)
+	for (int i = 0; i < gClippers.NoClippers; i++)
 	{
-		_ClippingObject& ClippingObject = gClipping.ClippingObjects[i];
+		ErClipper& C = gClippers.ClipperList[i];
 
-		const Vec3f P2 = TransformPoint(ClippingObject.InvTM, P);
+		const Vec3f P2 = TransformPoint(C.InvTM, P);
 
-		const bool InRange = Intensity > ClippingObject.MinIntensity && Intensity < ClippingObject.MaxIntensity;
-
-		if (Inside(ClippingObject, P2) && InRange)
-			return ClippingObject.Opacity * Opacity;
+		if (Inside(C, P2))
+			return 0.0f;
 	}
 
 	return Opacity;

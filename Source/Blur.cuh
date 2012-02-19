@@ -13,11 +13,6 @@
 
 #pragma once
 
-#include "Geometry.cuh"
-#include "CudaUtilities.h"
-
-#include "cutil_math.h"
-
 #include "Buffer.cuh"
 
 #define KRNL_BLUR_BLOCK_W		16

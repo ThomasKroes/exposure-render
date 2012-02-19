@@ -13,15 +13,19 @@
 
 #pragma once
 
-struct _Volume;
-struct _Camera;
-struct _Lighting;
-struct _Clipping;
-struct _Reflectors;
-struct _Denoise;
-struct _Scattering;
-struct _Blur;
 class FrameBuffer;
+
+//namespace ExposureRender
+//{
+
+struct ErVolume;
+struct ErCamera;
+struct ErLights;
+struct ErClippers;
+struct ErReflectors;
+struct ErDenoise;
+struct ErScattering;
+struct ErBlur;
 
 #define NO_GRADIENT_STEPS 256
 
@@ -45,13 +49,15 @@ __declspec(dllexport) void ErUnbindSpecular1D(void);
 __declspec(dllexport) void ErUnbindGlossiness1D(void);
 __declspec(dllexport) void ErUnbindIor1D(void);
 __declspec(dllexport) void ErUnbindEmission1D(void);
-__declspec(dllexport) void ErBindVolume(_Volume* pVolume);
-__declspec(dllexport) void ErBindCamera(_Camera* pCamera);
-__declspec(dllexport) void ErBindLighting(_Lighting* pLighting);
-__declspec(dllexport) void ErBindClipping(_Clipping* pClipping);
-__declspec(dllexport) void ErBindReflectors(_Reflectors* pReflectors);
-__declspec(dllexport) void ErBindDenoise(_Denoise* pDenoise);
-__declspec(dllexport) void ErBindScattering(_Scattering* pScattering);
-__declspec(dllexport) void ErBindBlur(_Blur* pBlur);
+__declspec(dllexport) void ErBindVolume(ErVolume* pVolume);
+__declspec(dllexport) void ErBindCamera(ErCamera* pCamera);
+__declspec(dllexport) void ErBindLights(ErLights* pLights);
+__declspec(dllexport) void ErBindClippers(ErClippers* pClippers);
+__declspec(dllexport) void ErBindReflectors(ErReflectors* pReflectors);
+__declspec(dllexport) void ErBindDenoise(ErDenoise* pDenoise);
+__declspec(dllexport) void ErBindScattering(ErScattering* pScattering);
+__declspec(dllexport) void ErBindBlur(ErBlur* pBlur);
 __declspec(dllexport) void ErRenderEstimate();
 __declspec(dllexport) void ErGetRenderBuffer(unsigned char* pData);
+
+//}

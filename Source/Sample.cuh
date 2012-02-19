@@ -17,7 +17,7 @@
 
 #include "RNG.cuh"
 
-struct EXPOSURE_RENDER_DLL LightSample
+struct LightSample
 {
 	Vec2f m_Pos;
 	float m_Component;
@@ -43,7 +43,7 @@ struct EXPOSURE_RENDER_DLL LightSample
 	}
 };
 
-struct EXPOSURE_RENDER_DLL BrdfSample
+struct BrdfSample
 {
 	float	m_Component;
 	Vec2f	m_Dir;
@@ -75,7 +75,7 @@ struct EXPOSURE_RENDER_DLL BrdfSample
 	}
 };
 
-struct EXPOSURE_RENDER_DLL LightingSample
+struct LightingSample
 {
 	BrdfSample		m_BsdfSample;
 	LightSample 	m_LightSample;
@@ -103,4 +103,3 @@ struct EXPOSURE_RENDER_DLL LightingSample
 		m_LightNum = Rnd.Get1();
 	}
 };
-

@@ -17,11 +17,13 @@
 #include "RayMarching.cuh"
 #include "General.cuh"
 
+//using namespace ExposureRender;
+
 DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 {
-	const int LID = floorf(RNG.Get1() * gLighting.m_NoLights);
+	const int LID = floorf(RNG.Get1() * gLights.m_NoLights);
 
-	_Light& L = gLighting.m_Lights[LID];
+	ErLight& L = gLights.m_LightList[LID];
 
 	// Sample point in light coordinates
 	Vec3f LocalP, LocalN;
@@ -123,7 +125,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 	return Le / L.m_Area;
 }
 
-DEV void HitTestLight(_Light& Light, CRay R, RaySample& RS, bool RespectVisibility)
+DEV void HitTestLight(ErLight& Light, CRay R, RaySample& RS, bool RespectVisibility)
 {
 	if (RespectVisibility && !Light.m_Visible)
 		return;
@@ -241,9 +243,9 @@ DEV inline void SampleLights(CRay R, RaySample& RS, bool RespectVisibility = fal
 {
 	float T = FLT_MAX;
 
-	for (int i = 0; i < gLighting.m_NoLights; i++)
+	for (int i = 0; i < gLights.m_NoLights; i++)
 	{
-		_Light& Light = gLighting.m_Lights[i];
+		ErLight& Light = gLights.m_LightList[i];
 		
 		RaySample LocalRS(RaySample::Light);
 
@@ -375,7 +377,7 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 {
-	CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(gReflectors.Reflectors[RS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.Reflectors[RS.ReflectorID].SpecularColor), gReflectors.Reflectors[RS.ReflectorID].Ior, gReflectors.Reflectors[RS.ReflectorID].Glossiness);
+	CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(gReflectors.ReflectorList[RS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.ReflectorList[RS.ReflectorID].SpecularColor), gReflectors.ReflectorList[RS.ReflectorID].Ior, gReflectors.ReflectorList[RS.ReflectorID].Glossiness);
 	//CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 2.5f, 500.0f);
 	return UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
 }
@@ -393,7 +395,7 @@ DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 
 
 
-DEV void HitTestReflector(_Reflector& Reflector, CRay R, RaySample& RS)
+DEV void HitTestReflector(ErReflector& Reflector, CRay R, RaySample& RS)
 {
 	CRay TR = TransformRay(R, Reflector.InvTM);
 
@@ -415,7 +417,7 @@ DEV inline void SampleReflectors(CRay R, RaySample& RS)
 
 	for (int i = 0; i < gReflectors.NoReflectors; i++)
 	{
-		_Reflector& RO = gReflectors.Reflectors[i];
+		ErReflector& RO = gReflectors.ReflectorList[i];
 
 		RaySample LocalRS(RaySample::Reflector);
 

@@ -18,12 +18,6 @@
 #include <algorithm>
 #include <math.h>
 
-#ifdef _EXPORTING
-	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
-#else
-	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
-#endif
-
 using namespace std;
 
 class CColorRgbHdr;
@@ -109,7 +103,7 @@ CD static float YWeight[3] =
 	0.212671f, 0.715160f, 0.072169f
 };
 
-class EXPOSURE_RENDER_DLL Vec2f
+class Vec2f
 {
 public:
 	HOD Vec2f(void)
@@ -217,7 +211,7 @@ public:
 	float x, y;
 };
 
-class EXPOSURE_RENDER_DLL  Vec2i
+class Vec2i
 {
 public:
 	HOD Vec2i(void)
@@ -286,7 +280,7 @@ public:
 	int x, y;
 };
 
-class EXPOSURE_RENDER_DLL Vec3i
+class Vec3i
 {
 public:
 	HOD Vec3i(void)
@@ -387,7 +381,7 @@ public:
 	int x, y, z;
 };
 
-class EXPOSURE_RENDER_DLL Vec3f
+class Vec3f
 {
 public:
 	HOD Vec3f(void)
@@ -628,7 +622,7 @@ public:
 	float x, y, z;
 };
 
-class EXPOSURE_RENDER_DLL Vec4i
+class Vec4i
 {
 public:
 	HOD Vec4i(void)
@@ -658,7 +652,7 @@ public:
 	int x, y, z, w;
 };
 
-class EXPOSURE_RENDER_DLL Vec4f
+class Vec4f
 {
 public:
 	HOD Vec4f(void)
@@ -714,7 +708,7 @@ inline HOD Vec3f operator / (const Vec3f& v1, const Vec3f& v2) 		{ return Vec3f(
 
 inline HOD Vec2f operator * (Vec2f& V2f, Vec2i& V2i)	{ return Vec2f(V2f.x * V2i.x, V2f.y * V2i.y);				};
 
-class EXPOSURE_RENDER_DLL CRay
+class CRay
 {	
 public:
 	// ToDo: Add description
@@ -763,7 +757,7 @@ public:
 	int		m_PixelID;		/*!< Pixel ID associated with the ray */
 };
 
-class EXPOSURE_RENDER_DLL CPixel
+class CPixel
 {
 public:
 	HOD CPixel(void)
@@ -790,7 +784,7 @@ public:
 	int		m_ID;		/*!< Pixel ID */
 };
 
-class EXPOSURE_RENDER_DLL CResolution2D
+class CResolution2D
 {
 public:
 	// ToDo: Add description
@@ -885,7 +879,7 @@ private:
 	float	m_DiagonalLength;		/*!< Diagonal length */
 };
 
-class EXPOSURE_RENDER_DLL CResolution3D
+class CResolution3D
 {
 public:
 	// ToDo: Add description
@@ -1092,7 +1086,7 @@ inline float RandomFloat(void)
 typedef unsigned char uChar;
 
 template <class T, int Size>
-class EXPOSURE_RENDER_DLL Vec
+class Vec
 {
 public:
 	HOD Vec()
@@ -1234,7 +1228,7 @@ protected:
 };
 
 template <class T>
-class EXPOSURE_RENDER_DLL Vec2 : public Vec<T, 2>
+class Vec2 : public Vec<T, 2>
 {
 public:
 	HOD Vec2(void)
@@ -1251,7 +1245,7 @@ public:
 };
 
 template <class T>
-class EXPOSURE_RENDER_DLL Vec3 : public Vec<T, 3>
+class Vec3 : public Vec<T, 3>
 {
 public:
 	HOD Vec3()
@@ -1270,7 +1264,7 @@ public:
 };
 
 template <class T>
-class EXPOSURE_RENDER_DLL Vec4 : public Vec<T, 4>
+class Vec4 : public Vec<T, 4>
 {
 public:
 	HOD Vec4(void)
@@ -1291,7 +1285,7 @@ public:
 };
 
 template <class T, int Size>
-class EXPOSURE_RENDER_DLL ColorRGB : public Vec<T, Size>
+class ColorRGB : public Vec<T, Size>
 {
 public:
 	HOD ColorRGB(void)
@@ -1347,7 +1341,7 @@ public:
 };
 
 template <class T>
-class EXPOSURE_RENDER_DLL ColorRGBA : public ColorRGB<T, 4>
+class ColorRGBA : public ColorRGB<T, 4>
 {
 public:
 	HOD void Set(const T& R, const T& G, const T& B, const T& A)
@@ -1369,7 +1363,7 @@ public:
 	}
 };
 
-class EXPOSURE_RENDER_DLL ColorRGBuc : public ColorRGB<unsigned char, 3>
+class ColorRGBuc : public ColorRGB<unsigned char, 3>
 {
 public:
 	HOD ColorRGBuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0)
@@ -1416,7 +1410,7 @@ public:
 	}
 };
 
-class EXPOSURE_RENDER_DLL ColorRGBAuc : public ColorRGBA<unsigned char>
+class ColorRGBAuc : public ColorRGBA<unsigned char>
 {
 public:
 	HOD ColorRGBAuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0, const unsigned char& A = 0)
@@ -1471,7 +1465,7 @@ public:
 	}
 };
 
-class EXPOSURE_RENDER_DLL ColorXYZf : public Vec3<float>
+class ColorXYZf : public Vec3<float>
 {
 public:
 	HOD ColorXYZf(float V = 0.0f)
@@ -1702,7 +1696,7 @@ HOD inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& 
 	return ColorXYZf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ());
 }
 
-class EXPOSURE_RENDER_DLL ColorXYZAf : public Vec4<float>
+class ColorXYZAf : public Vec4<float>
 {
 public:
 	HOD ColorXYZAf(float V = 0.0f)
@@ -1956,7 +1950,7 @@ HOD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZA
 	return ColorXYZAf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ(), OneMinusT * C1.GetA() + T * C2.GetA());
 }
 
-class EXPOSURE_RENDER_DLL ColorRGBf : public Vec3<float>
+class ColorRGBf : public Vec3<float>
 {
 public:
 	HOD ColorRGBf(void)
@@ -2122,11 +2116,11 @@ inline HOD Vec3f MaxVec3f(Vec3f a, Vec3f b)
 	return Vec3f(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
 
-struct EXPOSURE_RENDER_DLL RaySample
+struct RaySample
 {
 	enum SampleType
 	{
-		Volume,
+		ErVolume,
 		Light,
 		Reflector
 	};
@@ -2189,7 +2183,7 @@ struct EXPOSURE_RENDER_DLL RaySample
 	}
 };
 
-struct EXPOSURE_RENDER_DLL Intersection
+struct Intersection
 {
 	bool		Valid;
 	bool		Front;

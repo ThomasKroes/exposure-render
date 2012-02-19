@@ -13,13 +13,16 @@
 
 #pragma once
 
+//namespace ExposureRender
+//{
+
 #ifdef _EXPORTING
 	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
 #else
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
 
-struct EXPOSURE_RENDER_DLL Interval
+struct EXPOSURE_RENDER_DLL ErInterval
 {
 	float	m_Min;
 	float	m_Max;
@@ -35,12 +38,12 @@ struct EXPOSURE_RENDER_DLL Interval
 	}
 };
 
-struct EXPOSURE_RENDER_DLL _TransformMatrix
+struct EXPOSURE_RENDER_DLL ErMatrix44
 {
 	float				NN[4][4];
 };
 
-struct EXPOSURE_RENDER_DLL _Volume
+struct EXPOSURE_RENDER_DLL ErVolume
 {
 	int					m_Extent[3];
 	float				m_InvExtent[3];
@@ -69,7 +72,7 @@ struct EXPOSURE_RENDER_DLL _Volume
 	float				m_MacroCellSize[3];
 };
 
-struct EXPOSURE_RENDER_DLL _Camera
+struct EXPOSURE_RENDER_DLL ErCamera
 {
 	int					m_FilmWidth;
 	int					m_FilmHeight;
@@ -93,7 +96,7 @@ struct EXPOSURE_RENDER_DLL _Camera
 	float				m_FOV;
 };
 
-struct EXPOSURE_RENDER_DLL _Light
+struct EXPOSURE_RENDER_DLL ErLight
 {
 	bool				m_Visible;
 	int					m_Type;
@@ -101,21 +104,21 @@ struct EXPOSURE_RENDER_DLL _Light
 	bool				m_OneSided;
 	int					m_ShapeType;
 	float				m_Color[3];
-	_TransformMatrix	m_TM;
-	_TransformMatrix	m_InvTM;
+	ErMatrix44			m_TM;
+	ErMatrix44			m_InvTM;
 	float				m_Size[3];
 	float				m_Area;
 	float				m_InnerRadius;
 	float				m_OuterRadius;
 };
 
-struct EXPOSURE_RENDER_DLL _Lighting
+struct EXPOSURE_RENDER_DLL ErLights
 {
 	int					m_NoLights;
-	_Light				m_Lights[32];
+	ErLight				m_LightList[32];
 };
 
-struct EXPOSURE_RENDER_DLL _ClippingObject
+struct EXPOSURE_RENDER_DLL ErClipper
 {
 	int					ShapeType;
 	float				Size[3];
@@ -124,34 +127,34 @@ struct EXPOSURE_RENDER_DLL _ClippingObject
 	float				MinIntensity;
 	float				MaxIntensity;
 	float				Opacity;
-	_TransformMatrix	TM;
-	_TransformMatrix	InvTM;
+	ErMatrix44			TM;
+	ErMatrix44			InvTM;
 };
 
-struct EXPOSURE_RENDER_DLL _Clipping
+struct EXPOSURE_RENDER_DLL ErClippers
 {
-	int					NoClippingObjects;
-	_ClippingObject		ClippingObjects[32];
+	int					NoClippers;
+	ErClipper			ClipperList[32];
 };
 
-struct EXPOSURE_RENDER_DLL _Reflector
+struct EXPOSURE_RENDER_DLL ErReflector
 {
 	float				Size[2];
 	float				DiffuseColor[3];
 	float				SpecularColor[3];
 	float				Glossiness;
 	float				Ior;
-	_TransformMatrix	TM;
-	_TransformMatrix	InvTM;
+	ErMatrix44			TM;
+	ErMatrix44			InvTM;
 };
 
-struct EXPOSURE_RENDER_DLL _Reflectors
+struct EXPOSURE_RENDER_DLL ErReflectors
 {
 	int					NoReflectors;
-	_Reflector			Reflectors[32];
+	ErReflector			ReflectorList[32];
 };
 
-struct EXPOSURE_RENDER_DLL _Denoise
+struct EXPOSURE_RENDER_DLL ErDenoise
 {
 	float				Enabled;
 	float				WindowRadius;
@@ -163,15 +166,17 @@ struct EXPOSURE_RENDER_DLL _Denoise
 	float				LerpC;
 };
 
-struct EXPOSURE_RENDER_DLL _Scattering
+struct EXPOSURE_RENDER_DLL ErScattering
 {
 	float				NoIterations;
 	float				InvNoIterations;
 	bool				Shadows;
 };
 
-struct EXPOSURE_RENDER_DLL _Blur
+struct EXPOSURE_RENDER_DLL ErBlur
 {
 	int					FilterWidth;
 	float				FilterWeights[10];
 };
+
+//}

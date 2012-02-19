@@ -17,7 +17,7 @@
 
 DEV RaySample SampleRay(CRay R, CRNG& RNG)
 {
-	RaySample RS[3] = { RaySample(RaySample::Volume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
+	RaySample RS[3] = { RaySample(RaySample::ErVolume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
 
 	SampleVolume(R, RNG, RS[0]);
 	SampleLights(R, RS[1], true);
@@ -25,7 +25,7 @@ DEV RaySample SampleRay(CRay R, CRNG& RNG)
 
 	float T = FLT_MAX;
 
-	RaySample NearestRS(RaySample::Volume);
+	RaySample NearestRS(RaySample::ErVolume);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -79,7 +79,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	{
 		switch (NearestRS.Type)
 		{
-			case RaySample::Volume:
+			case RaySample::ErVolume:
 			{
 				Lv += UniformSampleOneLightVolume(NearestRS, RNG);
 				break;
@@ -95,7 +95,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 			{
 				Lv += UniformSampleOneLightReflector(NearestRS, RNG);
 
-				CVolumeShader Shader(CVolumeShader::Brdf, NearestRS.N, NearestRS.Wo, ColorXYZf(gReflectors.Reflectors[NearestRS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.Reflectors[NearestRS.ReflectorID].SpecularColor), gReflectors.Reflectors[NearestRS.ReflectorID].Ior, gReflectors.Reflectors[NearestRS.ReflectorID].Glossiness);
+				CVolumeShader Shader(CVolumeShader::Brdf, NearestRS.N, NearestRS.Wo, ColorXYZf(gReflectors.ReflectorList[NearestRS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.ReflectorList[NearestRS.ReflectorID].SpecularColor), gReflectors.ReflectorList[NearestRS.ReflectorID].Ior, gReflectors.ReflectorList[NearestRS.ReflectorID].Glossiness);
 				
 				BrdfSample S;
 
@@ -109,7 +109,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 				const RaySample ReflectorRS = SampleRay(CRay(NearestRS.P, Wi, 0.0f), RNG);
 
-				if (ReflectorRS.Valid && ReflectorRS.Type == RaySample::Volume)
+				if (ReflectorRS.Valid && ReflectorRS.Type == RaySample::ErVolume)
 				{
 					Lv += F * UniformSampleOneLightVolume(ReflectorRS, RNG) / Pdf;
 				}
