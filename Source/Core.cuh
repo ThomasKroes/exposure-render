@@ -55,4 +55,6 @@ __declspec(dllexport) void ErBindDenoise(ErDenoise* pDenoise);
 __declspec(dllexport) void ErBindScattering(ErScattering* pScattering);
 __declspec(dllexport) void ErBindBlur(ErBlur* pBlur);
 __declspec(dllexport) void ErRenderEstimate();
-__declspec(dllexport) void ErGetRenderBuffer(unsigned char* pData);
+__declspec(dllexport) void ErGetEstimate(unsigned char* pData);
+__declspec(dllexport) void ErGetFrameEstimate(unsigned char* pData);
+__declspec(dllexport) void ErGetDepthBuffer(unsigned char* pData);

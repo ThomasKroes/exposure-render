@@ -84,6 +84,7 @@ SET(ErCudaSources
 	RNG.cuh
 	MonteCarlo.cuh
 	Buffer.cuh
+	Framebuffer.cuh
 	General.cuh
 	Vector.cuh
 	Color.cuh

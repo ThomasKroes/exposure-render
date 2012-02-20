@@ -31,7 +31,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 {
 
 //	const ColorRGBuc RGBA = pFrameBuffer->m_EstimateRgbLdr.Get(X, Y);
-//	pFrameBuffer->m_DisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
+//	pFrameBuffer->CudaDisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
 
 	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
@@ -82,12 +82,12 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 		clr.y = lerpf(clr.y, clr00.y, LerpQ);
 		clr.z = lerpf(clr.z, clr00.z, LerpQ);
 
-		pView->m_DisplayEstimateRgbLdr.Set(ColorRGBuc(255 * clr.x, 255 * clr.y, 255 * clr.z), X, Y);
+		pView->CudaDisplayEstimateRgbLdr.Set(ColorRGBuc(255 * clr.x, 255 * clr.y, 255 * clr.z), X, Y);
     }
 	else
 	{
-		const ColorRGBAuc RGBA = pView->m_EstimateRgbaLdr.Get(X, Y);
-		pView->m_DisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
+		const ColorRGBAuc RGBA = pView->CudaEstimateRgbaLdr.Get(X, Y);
+		pView->CudaDisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
 	}
 	*/
 }

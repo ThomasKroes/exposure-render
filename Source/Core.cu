@@ -13,7 +13,7 @@
 
 #include "Core.cuh"
 #include "General.cuh"
-#include "Buffer.cuh"
+#include "Framebuffer.cuh"
 
 // using namespace ExposureRender;
 
@@ -403,17 +403,29 @@ void ErRenderEstimate()
 //	HandleCudaError(cudaMemcpy(pDevFrameBuffer, pFrameBuffer, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 
-	SingleScattering(pDevFrameBuffer, FB.m_Resolution[0], FB.m_Resolution[1]);
-	BlurEstimate(pDevFrameBuffer, FB.m_Resolution[0], FB.m_Resolution[1]);
-	ComputeEstimate(pDevFrameBuffer, FB.m_Resolution[0], FB.m_Resolution[1]);
-	ToneMap(pDevFrameBuffer, FB.m_Resolution[0], FB.m_Resolution[1]);
+	SingleScattering(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+	BlurEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+	ComputeEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+	ToneMap(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 //	ReduceNoise(pDevRenderInfo, pDevFrameBuffer, gCamera.m_FilmWidth, gCamera.m_FilmHeight);
 
 	HandleCudaError(cudaFree(pDevFrameBuffer));
 }
 
-void ErGetRenderBuffer(unsigned char* pData)
+void ErGetEstimate(unsigned char* pData)
 {
-	cudaMemcpy(FB.m_DisplayEstimateRgbaLdrHost.GetPtr(), FB.m_EstimateRgbaLdr.GetPtr(), FB.m_EstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
-	memcpy(pData, FB.m_DisplayEstimateRgbaLdrHost.GetPtr(), FB.m_EstimateRgbaLdr.GetSize());
+	cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
+	memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize());
+}
+
+void ErGetFrameEstimate(unsigned char* pData)
+{
+	//cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
+	//memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize());
+}
+
+void ErGetDepthBuffer(unsigned char* pData)
+{
+	//cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
+	//memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize());
 }

@@ -25,7 +25,7 @@ KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
+	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
 	const int X0 = max((int)ceilf(X - gBlur.FilterWidth), 0);
@@ -45,14 +45,14 @@ KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 	{
 		FW[TID] = gBlur.FilterWeights[(int)fabs((float)x - X)];
 
-		Sum			+= pFrameBuffer->m_FrameEstimateXyza.Get(x, Y) * FW[TID];
+		Sum			+= pFrameBuffer->CudaFrameEstimateXyza.Get(x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
-		pFrameBuffer->m_FrameBlurXyza.Set(Sum / SumW[TID], X, Y);
+		pFrameBuffer->CudaFrameBlurXyza.Set(Sum / SumW[TID], X, Y);
 	else
-		pFrameBuffer->m_FrameBlurXyza.Set(ColorXYZAf(0.0f), X, Y);
+		pFrameBuffer->CudaFrameBlurXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
 KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
@@ -61,7 +61,7 @@ KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
 
-	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
+	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
 	const int Y0 = max((int)ceilf (Y - gBlur.FilterWidth), 0);
@@ -81,14 +81,14 @@ KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 	{
 		FW[TID] = gBlur.FilterWeights[(int)fabs((float)y - Y)];
 
-		Sum			+= pFrameBuffer->m_FrameBlurXyza.Get(X, y) * FW[TID];
+		Sum			+= pFrameBuffer->CudaFrameBlurXyza.Get(X, y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
 	if (SumW[TID] > 0.0f)
-		pFrameBuffer->m_FrameEstimateXyza.Set(Sum / SumW[TID], X, Y);
+		pFrameBuffer->CudaFrameEstimateXyza.Set(Sum / SumW[TID], X, Y);
 	else
-		pFrameBuffer->m_FrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
+		pFrameBuffer->CudaFrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
 void BlurEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)

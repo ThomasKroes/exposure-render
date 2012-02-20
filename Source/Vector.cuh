@@ -415,31 +415,24 @@ typedef Vec4<int>				Vec4i;
 typedef Vec4<float>				Vec4f;
 typedef Vec4<double>			Vec4d;
 
-template <class T>	inline HOD Vec2<T> operator * (const Vec2<T>& V, const float& F)		{ return V * F;		};
-template <class T>	inline HOD Vec2<T> operator * (const float& F, const Vec2<T>& V)		{ return V * F;		};
-template <class T>	inline HOD Vec2<T> operator * (const Vec2<T>& V1, const Vec2<T>& V2)	{ return V1 * V2;	};
-template <class T>	inline HOD Vec2<T> operator / (const Vec2<T>& V, const float& F)		{ return V / F;		};
-template <class T>	inline HOD Vec2<T> operator / (const float& F, const Vec2<T>& V)		{ return V / F;		};
-template <class T>	inline HOD Vec2<T> operator / (const Vec2<T>& V1, const Vec2<T>& V2)	{ return V1 / V2;	};
+template <class T> inline HOD Vec2<T> operator + (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] + B[0], A[1] + B[1]);							};
+template <class T> inline HOD Vec2<T> operator - (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] - B[0], A[1] - B[1]);							};
+template <class T> inline HOD Vec2<T> operator * (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] * F, V[1] * F);								};
+template <class T> inline HOD Vec2<T> operator * (T F, Vec2<T> V)							{ return Vec2<T>(V[0] * F, V[1] * F);								};
+template <class T> inline HOD Vec2<T> operator * (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] * B[0], A[1] * B[1]);							};
+template <class T> inline HOD Vec2<T> operator / (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] / F, V[1] / F);								};
+template <class T> inline HOD Vec2<T> operator / (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] / B[0], A[1] / B[1]);							};
 
-inline HOD Vec3f operator + (const Vec3f& V1, const Vec3f& V3)		{ return Vec3f(V1[0] + V3[0], V1[1] + V3[1], V1[2] + V3[2]);	};
-inline HOD Vec3f operator - (const Vec3f& V1, const Vec3f& V3)		{ return Vec3f(V1[0] - V3[0], V1[1] - V3[1], V1[2] - V3[2]);	};
-inline HOD Vec3f operator * (const Vec3f& V, const float& F)		{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);	};
-inline HOD Vec3f operator * (float F, Vec3f V)						{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);	};
-inline HOD Vec3f operator * (int I, Vec3f V)						{ return Vec3f(V[0] * I, V[1] * I, V[2] * I);	};
-inline HOD Vec3f operator * (const Vec3f& A, const Vec3f& B)		{ return Vec3f(A[0] * B[0], A[1] * B[1], A[2] * B[2]);	};
-inline HOD Vec3f operator / (const Vec3f& V, const float& F)		{ return Vec3f(V[0] / F, V[1] / F, V[2] / F);	};
-inline HOD Vec3f operator / (const Vec3f& A, const Vec3f& B)		{ return Vec3f(A[0] / B[0], A[1] / B[1], A[2] / B[2]);	};
+template <class T> inline HOD Vec3<T> operator + (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] + V3[0], V1[1] + V3[1], V1[2] + V3[2]);		};
+template <class T> inline HOD Vec3<T> operator - (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] - V3[0], V1[1] - V3[1], V1[2] - V3[2]);		};
+template <class T> inline HOD Vec3<T> operator * (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
+template <class T> inline HOD Vec3<T> operator * (T F, Vec3<T> V)							{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
+template <class T> inline HOD Vec3<T> operator * (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] * B[0], A[1] * B[1], A[2] * B[2]);			};
+template <class T> inline HOD Vec3<T> operator / (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] / F, V[1] / F, V[2] / F);						};
+template <class T> inline HOD Vec3<T> operator / (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] / B[0], A[1] / B[1], A[2] / B[2]);			};
 
-template <class T>	inline HOD Vec4<T> operator * (const Vec4<T>& V, const float& F)		{ return V * F;		};
-template <class T>	inline HOD Vec4<T> operator * (const float& F, const Vec4<T>& V)		{ return V * F;		};
-template <class T>	inline HOD Vec4<T> operator * (const Vec4<T>& V1, const Vec4<T>& V4)	{ return V1 * V4;	};
-template <class T>	inline HOD Vec4<T> operator / (const Vec4<T>& V, const float& F)		{ return V / F;		};
-template <class T>	inline HOD Vec4<T> operator / (const float& F, const Vec4<T>& V)		{ return V / F;		};
-template <class T>	inline HOD Vec4<T> operator / (const Vec4<T>& V1, const Vec4<T>& V4)	{ return V1 / V4;	};
-
-template <class T> HOD inline Vec2<T> Normalize(Vec2<T> V)						{ Vec2<T> R = V; R.Normalize(); return R; 	};
-template <class T> HOD inline Vec3<T> Normalize(Vec3<T> V)						{ Vec3<T> R = V; R.Normalize(); return R; 	};
+template <class T> HOD inline Vec2<T> Normalize(Vec2<T> V)									{ Vec2<T> R = V; R.Normalize(); return R; 							};
+template <class T> HOD inline Vec3<T> Normalize(Vec3<T> V)									{ Vec3<T> R = V; R.Normalize(); return R; 							};
 
 HOD inline float Length(Vec3f V)											{ return V.Length();						};
 HOD inline Vec3f Cross(Vec3f A, Vec3f B)									{ return A.Cross(B);						};

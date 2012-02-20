@@ -44,10 +44,10 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= pFrameBuffer->m_Resolution[0] || Y >= pFrameBuffer->m_Resolution[1])
+	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 	
-	CRNG RNG(pFrameBuffer->m_RandomSeeds1.GetPtr(X, Y), pFrameBuffer->m_RandomSeeds2.GetPtr(X, Y));
+	CRNG RNG(pFrameBuffer->CudaRandomSeeds1.GetPtr(X, Y), pFrameBuffer->CudaRandomSeeds2.GetPtr(X, Y));
 
 	Vec2f ScreenPoint;
 
@@ -121,7 +121,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);
 
-	pFrameBuffer->m_FrameEstimateXyza.Set(L, X, Y);
+	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
 }
 
 void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)
