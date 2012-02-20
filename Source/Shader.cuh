@@ -39,8 +39,8 @@ public:
 	{
 		Wi = CosineWeightedHemisphere(U);
 
-		if (Wo.z < 0.0f)
-			Wi.z *= -1.0f;
+		if (Wo[2] < 0.0f)
+			Wi[2] *= -1.0f;
 
 		Pdf = this->Pdf(Wo, Wi);
 
@@ -120,9 +120,9 @@ public:
 	  DEV void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	  {
 		  // Compute sampled half-angle vector $\wh$ for Blinn distribution
-		  float costheta = powf(U.x, 1.f / (m_Exponent+1));
+		  float costheta = powf(U[0], 1.f / (m_Exponent+1));
 		  float sintheta = sqrtf(max(0.f, 1.f - costheta*costheta));
-		  float phi = U.y * 2.f * PI_F;
+		  float phi = U[1] * 2.f * PI_F;
 
 		  Vec3f wh = SphericalDirection(sintheta, costheta, phi);
 
@@ -188,7 +188,7 @@ public:
 
 		  Vec3f wh = wi + wo;
 
-		  if (wh.x == 0. && wh.y == 0. && wh.z == 0.)
+		  if (wh[0] == 0. && wh[1] == 0. && wh[2] == 0.)
 			  return ColorXYZf(0.0f);
 
 		  wh = Normalize(wh);
@@ -289,9 +289,9 @@ public:
 
 	DEV Vec3f LocalToWorld(const Vec3f& W)
 	{
-		return Vec3f(	m_Nu.x * W.x + m_Nv.x * W.y + m_Nn.x * W.z,
-						m_Nu.y * W.x + m_Nv.y * W.y + m_Nn.y * W.z,
-						m_Nu.z * W.x + m_Nv.z * W.y + m_Nn.z * W.z);
+		return Vec3f(	m_Nu[0] * W[0] + m_Nv[0] * W[1] + m_Nn[0] * W[2],
+						m_Nu[1] * W[0] + m_Nv[1] * W[1] + m_Nn[1] * W[2],
+						m_Nu[2] * W[0] + m_Nv[2] * W[1] + m_Nn[2] * W[2]);
 	}
 
 	DEV ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)

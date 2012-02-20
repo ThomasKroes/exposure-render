@@ -28,11 +28,11 @@ DEV Vec3f TransformVector(ErMatrix44 TM, Vec3f v)
 {
   Vec3f r;
 
-  float x = v.x, y = v.y, z = v.z;
+  float x = v[0], y = v[1], z = v[2];
 
-  r.x = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
-  r.y = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
-  r.z = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
+  r[0] = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
+  r[1] = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
+  r[2] = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
 
   return r;
 }
@@ -47,7 +47,7 @@ DEV Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
     float w   = m.m[3][0]*x + m.m[3][1]*y + m.m[3][2]*z + m.m[3][3];
     if (w != 1.) *ptrans /= w;
 	*/
-    float x = pt.x, y = pt.y, z = pt.z;
+    float x = pt[0], y = pt[1], z = pt[2];
     float xp = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
     float yp = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
     float zp = TM.NN[2][0]*x + TM.NN[2][1]*y + TM.NN[2][2]*z + TM.NN[2][3];
@@ -85,12 +85,12 @@ HOD inline Vec3f ToVec3f(float V[3])
 
 HOD inline float3 FromVec3f(const Vec3f& V)
 {
-	return make_float3(V.x, V.y, V.z);
+	return make_float3(V[0], V[1], V[2]);
 }
 
 DEV float GetIntensity(Vec3f P)
 {
-	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P.x - gVolume.m_MinAABB[0]) * gVolume.m_InvSize[0], (P.y - gVolume.m_MinAABB[1]) * gVolume.m_InvSize[1], (P.z - gVolume.m_MinAABB[2]) * gVolume.m_InvSize[2]));
+	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolume.m_MinAABB[0]) * gVolume.m_InvSize[0], (P[1] - gVolume.m_MinAABB[1]) * gVolume.m_InvSize[1], (P[2] - gVolume.m_MinAABB[2]) * gVolume.m_InvSize[2]));
 }
 
 DEV float GetNormalizedIntensity(Vec3f P)
@@ -240,27 +240,11 @@ DEV inline Vec3f NormalizedGradient(Vec3f P)
 	Ints[2][0] = GetIntensity(Pts[2][0]);
 	Ints[2][1] = GetIntensity(Pts[2][1]);
 
-	Gradient.x = (Ints[0][1] - Ints[0][0]) * gVolume.m_InvGradientDelta;
-	Gradient.y = (Ints[1][1] - Ints[1][0]) * gVolume.m_InvGradientDelta;
-	Gradient.z = (Ints[2][1] - Ints[2][0]) * gVolume.m_InvGradientDelta;
+	Gradient[0] = (Ints[0][1] - Ints[0][0]) * gVolume.m_InvGradientDelta;
+	Gradient[1] = (Ints[1][1] - Ints[1][0]) * gVolume.m_InvGradientDelta;
+	Gradient[2] = (Ints[2][1] - Ints[2][0]) * gVolume.m_InvGradientDelta;
 
 	return Normalize(Gradient);
-}
-
-
-
-DEV bool InsideAABB(Vec3f P)
-{
-	if (P.x < gVolume.m_MinAABB[0] || P.x > gVolume.m_MaxAABB[0])
-		return false;
-
-	if (P.y < gVolume.m_MinAABB[1] || P.y > gVolume.m_MaxAABB[1])
-		return false;
-
-	if (P.z < gVolume.m_MinAABB[2] || P.z > gVolume.m_MaxAABB[2])
-		return false;
-
-	return true;
 }
 
 DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)

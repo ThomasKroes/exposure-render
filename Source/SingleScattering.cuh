@@ -51,13 +51,13 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	Vec2f ScreenPoint;
 
-	ScreenPoint.x = gCamera.m_Screen[0][0] + (gCamera.m_InvScreen[0] * (float)X);
-	ScreenPoint.y = gCamera.m_Screen[1][0] + (gCamera.m_InvScreen[1] * (float)Y);
+	ScreenPoint[0] = gCamera.m_Screen[0][0] + (gCamera.m_InvScreen[0] * (float)X);
+	ScreenPoint[1] = gCamera.m_Screen[1][0] + (gCamera.m_InvScreen[1] * (float)Y);
 	
 	CRay Re;
 
 	Re.m_O		= ToVec3f(gCamera.m_Pos);
-	Re.m_D		= Normalize(ToVec3f(gCamera.m_N) + (ScreenPoint.x * ToVec3f(gCamera.m_U)) - (ScreenPoint.y * ToVec3f(gCamera.m_V)));
+	Re.m_D		= Normalize(ToVec3f(gCamera.m_N) + (ScreenPoint[0] * ToVec3f(gCamera.m_U)) - (ScreenPoint[1] * ToVec3f(gCamera.m_V)));
 	Re.m_MinT	= gCamera.m_ClipNear;
 	Re.m_MaxT	= gCamera.m_ClipFar;
 
@@ -65,7 +65,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	{
 		const Vec2f LensUV = gCamera.m_ApertureSize * ConcentricSampleDisk(RNG.Get2());
 
-		const Vec3f LI = ToVec3f(gCamera.m_U) * LensUV.x + ToVec3f(gCamera.m_V) * LensUV.y;
+		const Vec3f LI = ToVec3f(gCamera.m_U) * LensUV[0] + ToVec3f(gCamera.m_V) * LensUV[1];
 
 		Re.m_O += LI;
 		Re.m_D = Normalize(Re.m_D * gCamera.m_FocalDistance - LI);

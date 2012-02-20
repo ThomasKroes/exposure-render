@@ -112,7 +112,7 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				// Gradient
 				case 1:
 				{
-					float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pl).y);
+					float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pl)[1]);
 					Le = ColorXYZf(Col.x, Col.y, Col.z);
 					break;
 				}
@@ -225,7 +225,7 @@ DEV void HitTestLight(ErLight& Light, CRay R, RaySample& RS, bool RespectVisibil
 					// Gradient
 					case 1:
 					{
-						float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pw).y);
+						float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pw)[1]);
 						Le = ColorXYZf(Col.x, Col.y, Col.z) / Light.m_Area;
 						break;
 					}

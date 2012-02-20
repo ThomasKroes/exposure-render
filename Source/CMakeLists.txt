@@ -85,6 +85,8 @@ SET(ErCudaSources
 	MonteCarlo.cuh
 	Buffer.cuh
 	General.cuh
+	Vector.cuh
+	Color.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

@@ -1,0 +1,101 @@
+/*
+	Copyright (c) 2011, T. Kroes <t.kroes@tudelft.nl>
+	All rights reserved.
+
+	Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+	- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+	- Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+	- Neither the name of the TU Delft nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+	
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#pragma once
+
+#include "CudaUtilities.h"
+
+#include "Geometry.cuh"
+
+DEV Intersection IntersectUnitBox(CRay R)
+{
+	Intersection Int;
+
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
+	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.m_O);
+	const Vec3f TopT		= InvR * (Vec3f(0.5f) - R.m_O);
+	const Vec3f MinT		= MinVec3f(TopT, BottomT);
+	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
+	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
+
+	if (LargestMaxT < LargestMinT)
+		return Int;
+
+	Int.NearT	= LargestMinT > 0.0f ? LargestMinT : 0.0f;
+	Int.FarT	= LargestMaxT;
+
+	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+		return Int;
+
+	Int.Valid	= true;
+	Int.P		= R(Int.NearT);
+	Int.N		= Vec3f(0.0f, 0.0f, 1.0f);
+	Int.UV		= Vec2f(0.0f, 0.0f);
+
+	return Int;
+}
+
+DEV Intersection IntersectBox(CRay R, Vec3f Min, Vec3f Max)
+{
+	Intersection Int;
+
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
+	const Vec3f BottomT		= InvR * (Min - R.m_O);
+	const Vec3f TopT		= InvR * (Max - R.m_O);
+	const Vec3f MinT		= MinVec3f(TopT, BottomT);
+	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
+	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
+
+	if (LargestMaxT < LargestMinT)
+		return Int;
+
+	Int.NearT	= LargestMinT > 0.0f ? LargestMinT : 0.0f;
+	Int.FarT	= LargestMaxT;
+
+	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+		return Int;
+
+	Int.Valid	= true;
+	Int.P		= R(Int.NearT);
+	Int.N		= Vec3f(0.0f, 0.0f, 1.0f);
+	Int.UV		= Vec2f(0.0f, 0.0f);
+
+	return Int;
+}
+
+DEV Intersection IntersectBox(CRay R, Vec3f Size)
+{
+	return IntersectBox(R, -0.5f * Size, 0.5f * Size);
+}
+
+DEV bool InsideBox(Vec3f P, Vec3f Size)
+{
+	const float HalfSize[3] = { 0.5f * Size[0], 0.5f * Size[1], 0.5f * Size[2] };
+	return P[0] > -HalfSize[0] && P[0] < HalfSize[0] && P[1] > -HalfSize[1] && P[1] < HalfSize[1] && P[2] > -HalfSize[2] && P[2] < HalfSize[2];
+}
+
+DEV bool InsideAABB(Vec3f P)
+{
+	if (P[0] < gVolume.m_MinAABB[0] || P[0] > gVolume.m_MaxAABB[0])
+		return false;
+
+	if (P[1] < gVolume.m_MinAABB[1] || P[1] > gVolume.m_MaxAABB[1])
+		return false;
+
+	if (P[2] < gVolume.m_MinAABB[2] || P[2] > gVolume.m_MaxAABB[2])
+		return false;
+
+	return true;
+}

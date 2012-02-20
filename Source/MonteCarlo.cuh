@@ -30,7 +30,7 @@ HOD inline Vec2f StratifiedSample2D(const int& Pass, const Vec2f& U, const int& 
 	const int Y	= (int)((float)Pass / (float)NumX);
 	const int X	= Pass - (Y * NumX);
 	
-	return Vec2f((float)(X + U.x) * Dx, (float)(Y + U.y) * Dy);
+	return Vec2f((float)(X + U[0]) * Dx, (float)(Y + U[1]) * Dy);
 }
 
 HOD inline Vec2f StratifiedSample2D(const int& StratumX, const int& StratumY, const Vec2f& U, const int& NumX = 4, const int& NumY = 4)
@@ -38,51 +38,23 @@ HOD inline Vec2f StratifiedSample2D(const int& StratumX, const int& StratumY, co
 	const float Dx	= 1.0f / ((float)NumX);
 	const float Dy	= 1.0f / ((float)NumY);
 
-	return Vec2f((float)(StratumX + U.x) * Dx, (float)(StratumY + U.y) * Dy);
-}
-
-HOD inline Vec3f WorldToLocal(const Vec3f& W, const Vec3f& N)
-{
-	const Vec3f U = Normalize(Cross(N, Vec3f(0.0072f, 0.0034f, 1.0f)));
-	const Vec3f V = Normalize(Cross(N, U));
-	
-	return Vec3f(Dot(W, U), Dot(W, V), Dot(W, N));
-}
-
-HOD inline Vec3f LocalToWorld(const Vec3f& W, const Vec3f& N)
-{
-	const Vec3f U = Normalize(Cross(N, Vec3f(0.0072f, 0.0034f, 1.0f)));
-	const Vec3f V = Normalize(Cross(N, U));
-
-	return Vec3f(	U.x * W.x + V.x * W.y + N.x * W.z,
-						U.y * W.x + V.y * W.y + N.y * W.z,
-						U.z * W.x + V.z * W.y + N.z * W.z);
-}
-
-HOD inline Vec3f WorldToLocal(const Vec3f& U, const Vec3f& V, const Vec3f& N, const Vec3f& W)
-{
-	return Vec3f(Dot(W, U), Dot(W, V), Dot(W, N));
-}
-
-HOD inline Vec3f LocalToWorld(const Vec3f& U, const Vec3f& V, const Vec3f& N, const Vec3f& W)
-{
-	return Vec3f(U.x * W.x + V.x * W.y + N.x * W.z,	U.y * W.x + V.y * W.y + N.y * W.z, U.z * W.x + V.z * W.y + N.z * W.z);
+	return Vec2f((float)(StratumX + U[0]) * Dx, (float)(StratumY + U[1]) * Dy);
 }
 
 HOD inline float SphericalTheta(const Vec3f& Wl)
 {
-	return acosf(Clamp(Wl.y, -1.f, 1.f));
+	return acosf(Clamp(Wl[1], -1.f, 1.f));
 }
 
 HOD inline float SphericalPhi(const Vec3f& Wl)
 {
-	float p = atan2f(Wl.z, Wl.x);
+	float p = atan2f(Wl[2], Wl[0]);
 	return (p < 0.f) ? p + 2.f * PI_F : p;
 }
 
 HOD inline float CosTheta(const Vec3f& Ws)
 {
-	return Ws.z;
+	return Ws[2];
 }
 
 HOD inline float AbsCosTheta(const Vec3f &Ws)
@@ -92,7 +64,7 @@ HOD inline float AbsCosTheta(const Vec3f &Ws)
 
 HOD inline float SinTheta(const Vec3f& Ws)
 {
-	return sqrtf(max(0.f, 1.f - Ws.z * Ws.z));
+	return sqrtf(max(0.f, 1.f - Ws[2] * Ws[2]));
 }
 
 HOD inline float SinTheta2(const Vec3f& Ws)
@@ -102,17 +74,17 @@ HOD inline float SinTheta2(const Vec3f& Ws)
 
 HOD inline float CosPhi(const Vec3f& Ws)
 {
-	return Ws.x / SinTheta(Ws);
+	return Ws[0] / SinTheta(Ws);
 }
 
 HOD inline float SinPhi(const Vec3f& Ws)
 {
-	return Ws.y / SinTheta(Ws);
+	return Ws[1] / SinTheta(Ws);
 }
 
 HOD inline bool SameHemisphere(const Vec3f& Ww1, const Vec3f& Ww2)
 {
-   return (Ww1.z * Ww2.z) > 0.0f;
+   return (Ww1[2] * Ww2[2]) > 0.0f;
 }
 
 HOD inline bool SameHemisphere(const Vec3f& W1, const Vec3f& W2, const Vec3f& N)
@@ -130,12 +102,12 @@ HOD inline Vec3f SampleUnitPlane(Vec2f U, Vec3f* pN = NULL)
 	if (pN)
 		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	return Vec3f(-0.5f + U.x, -0.5f + U.y, 0.0f);
+	return Vec3f(-0.5f + U[0], -0.5f + U[1], 0.0f);
 }
 
 HOD inline Vec3f SamplePlane(Vec2f U, Vec3f Size, Vec3f* pN = NULL)
 {
-	return SampleUnitPlane(U, pN) * Vec3f(Size.x, Size.y, 0.0f);
+	return SampleUnitPlane(U, pN) * Vec3f(Size[0], Size[1], 0.0f);
 }
 
 HOD inline Vec3f SampleUnitBox(Vec3f U, Vec3f* pN = NULL)
@@ -143,7 +115,7 @@ HOD inline Vec3f SampleUnitBox(Vec3f U, Vec3f* pN = NULL)
 	if (pN)
 		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	return Vec3f(-0.5f * U.x, -0.5f + U.y, -0.5f + U.z);
+	return Vec3f(-0.5f * U[0], -0.5f + U[1], -0.5f + U[2]);
 }
 
 HOD inline Vec3f SampleBox(Vec3f U, Vec3f Size, Vec3f* pN = NULL)
@@ -156,8 +128,8 @@ HOD inline Vec3f SampleUnitDisk(const Vec2f& U, Vec3f* pN = NULL)
 	if (pN)
 		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	float r = sqrtf(U.x);
-	float theta = 2.0f * PI_F * U.y;
+	float r = sqrtf(U[0]);
+	float theta = 2.0f * PI_F * U[1];
 
 	return Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
 }
@@ -172,8 +144,8 @@ HOD inline Vec3f SampleUnitRing(const Vec2f& U, float InnerRadius, Vec3f* pN = N
 	if (pN)
 		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(U.x);
-	float theta = 2.0f * PI_F * U.y;
+	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(U[0]);
+	float theta = 2.0f * PI_F * U[1];
 
 	return Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
 }
@@ -183,17 +155,17 @@ HOD inline Vec3f SampleRing(const Vec2f& U, float InnerRadius, float OuterRadius
 	if (pN)
 		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	float r = sqrtf(InnerRadius + U.x * (OuterRadius - InnerRadius));
-	float theta = 2.0f * PI_F * U.y;
+	float r = sqrtf(InnerRadius + U[0] * (OuterRadius - InnerRadius));
+	float theta = 2.0f * PI_F * U[1];
 
 	return Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
 }
 
 HOD inline Vec3f SampleUnitSphere(Vec2f U, Vec3f* pN = NULL)
 {
-	float z		= 1.0f - 2.0f * U.x;
+	float z		= 1.0f - 2.0f * U[0];
 	float r		= sqrtf(max(0.0f, 1.0f - z * z));
-	float phi	= 2.0f * PI_F * U.y;
+	float phi	= 2.0f * PI_F * U[1];
 	float x		= r * cosf(phi);
 	float y		= r * sinf(phi);
 
@@ -210,9 +182,9 @@ HOD inline Vec3f SampleSphere(Vec2f U, float Radius, Vec3f* pN = NULL)
 
 HOD inline Vec3f SampleUnitHemisphere(Vec2f U, Vec3f* pN = NULL)
 {
-	float z		= U.x;
+	float z		= U[0];
 	float r		= sqrtf(max(0.0f, 1.0f - z * z));
-	float phi	= 2 * PI_F * U.y;
+	float phi	= 2 * PI_F * U[1];
 	float x		= r * cosf(phi);
 	float y		= r * sinf(phi);
 
@@ -247,8 +219,8 @@ HOD inline Vec2f ConcentricSampleDisk(const Vec2f& U)
 {
 	float r, theta;
 	// Map uniform random numbers to $[-1,1]^2$
-	float sx = 2 * U.x - 1;
-	float sy = 2 * U.y - 1;
+	float sx = 2 * U[0] - 1;
+	float sy = 2 * U[1] - 1;
 	// Map square to $(r,\theta)$
 	// Handle degeneracy at the origin
 	
@@ -299,7 +271,7 @@ HOD inline Vec2f ConcentricSampleDisk(const Vec2f& U)
 HOD inline Vec3f CosineWeightedHemisphere(const Vec2f& U)
 {
 	const Vec2f ret = ConcentricSampleDisk(U);
-	return Vec3f(ret.x, ret.y, sqrtf(max(0.f, 1.f - ret.x * ret.x - ret.y * ret.y)));
+	return Vec3f(ret[0], ret[1], sqrtf(max(0.f, 1.f - ret[0] * ret[0] - ret[1] * ret[1])));
 }
 
 HOD inline Vec3f CosineWeightedHemisphere(const Vec2f& U, const Vec3f& N)
@@ -309,9 +281,9 @@ HOD inline Vec3f CosineWeightedHemisphere(const Vec2f& U, const Vec3f& N)
 	const Vec3f u = Normalize(Cross(N, N));
 	const Vec3f v = Normalize(Cross(N, u));
 
-	return Vec3f(	u.x * Wl.x + v.x * Wl.y + N.x * Wl.z,
-						u.y * Wl.x + v.y * Wl.y + N.y * Wl.z,
-						u.z * Wl.x + v.z * Wl.y + N.z * Wl.z);
+	return Vec3f(	u[0] * Wl[0] + v[0] * Wl[1] + N[0] * Wl[2],
+						u[1] * Wl[0] + v[1] * Wl[1] + N[1] * Wl[2],
+						u[2] * Wl[0] + v[2] * Wl[1] + N[2] * Wl[2]);
 }
 
 HOD inline float CosineWeightedHemispherePdf(const float& CosTheta, const float& Phi)
@@ -336,24 +308,24 @@ HOD inline Vec3f SphericalDirection(const float& SinTheta, const float& CosTheta
 	const Vec3f u = Normalize(Cross(N, Vec3f(0.0072f, 1.0f, 0.0034f)));
 	const Vec3f v = Normalize(Cross(N, u));
 
-	return Vec3f(	u.x * Wl.x + v.x * Wl.y + N.x * Wl.z,
-						u.y * Wl.x + v.y * Wl.y + N.y * Wl.z,
-						u.z * Wl.x + v.z * Wl.y + N.z * Wl.z);
+	return Vec3f(	u[0] * Wl[0] + v[0] * Wl[1] + N[0] * Wl[2],
+						u[1] * Wl[0] + v[1] * Wl[1] + N[1] * Wl[2],
+						u[2] * Wl[0] + v[2] * Wl[1] + N[2] * Wl[2]);
 }
 
 
 HOD inline Vec2f UniformSampleTriangle(const Vec2f& U)
 {
-	float su1 = sqrtf(U.x);
+	float su1 = sqrtf(U[0]);
 
-	return Vec2f(1.0f - su1, U.y * su1);
+	return Vec2f(1.0f - su1, U[1] * su1);
 }
 
 HOD inline Vec3f UniformSampleSphereSurface(const Vec2f& U)
 {
-	float z = 1.f - 2.f * U.x;
+	float z = 1.f - 2.f * U[0];
 	float r = sqrtf(max(0.f, 1.f - z*z));
-	float phi = 2.f * PI_F * U.y;
+	float phi = 2.f * PI_F * U[1];
 	float x = r * cosf(phi);
 	float y = r * sinf(phi);
 	return Vec3f(x, y, z);
@@ -361,9 +333,9 @@ HOD inline Vec3f UniformSampleSphereSurface(const Vec2f& U)
 
 HOD inline Vec3f UniformSampleHemisphere(const Vec2f& U)
 {
-	float z = U.x;
+	float z = U[0];
 	float r = sqrtf(max(0.f, 1.f - z*z));
-	float phi = 2 * PI_F * U.y;
+	float phi = 2 * PI_F * U[1];
 	float x = r * cosf(phi);
 	float y = r * sinf(phi);
 	return Vec3f(x, y, z);
@@ -376,16 +348,16 @@ DEV inline Vec3f UniformSampleHemisphere(const Vec2f& U, const Vec3f& N)
 	const Vec3f u = Normalize(Cross(N, Vec3f(0.0072f, 1.0f, 0.0034f)));
 	const Vec3f v = Normalize(Cross(N, u));
 
-	return Vec3f(	u.x * Wl.x + v.x * Wl.y + N.x * Wl.z,
-						u.y * Wl.x + v.y * Wl.y + N.y * Wl.z,
-						u.z * Wl.x + v.z * Wl.y + N.z * Wl.z);
+	return Vec3f(	u[0] * Wl[0] + v[0] * Wl[1] + N[0] * Wl[2],
+						u[1] * Wl[0] + v[1] * Wl[1] + N[1] * Wl[2],
+						u[2] * Wl[0] + v[2] * Wl[1] + N[2] * Wl[2]);
 }
 
 HOD inline Vec3f UniformSampleCone(const Vec2f& U, const float& CosThetaMax)
 {
-	float costheta = Lerp(U.x, CosThetaMax, 1.f);
+	float costheta = Lerp(U[0], CosThetaMax, 1.f);
 	float sintheta = sqrtf(1.f - costheta*costheta);
-	float phi = U.y * 2.f * PI_F;
+	float phi = U[1] * 2.f * PI_F;
 	return Vec3f(cosf(phi) * sintheta, sinf(phi) * sintheta, costheta);
 }
 
@@ -396,9 +368,9 @@ HOD inline Vec3f UniformSampleCone(const Vec2f& U, const float& CosThetaMax, con
 	const Vec3f u = Normalize(Cross(N, Vec3f(0.0072f, 1.0f, 0.0034f)));
 	const Vec3f v = Normalize(Cross(N, u));
 
-	return Vec3f(	u.x * Wl.x + v.x * Wl.y + N.x * Wl.z,
-						u.y * Wl.x + v.y * Wl.y + N.y * Wl.z,
-						u.z * Wl.x + v.z * Wl.y + N.z * Wl.z);
+	return Vec3f(	u[0] * Wl[0] + v[0] * Wl[1] + N[0] * Wl[2],
+						u[1] * Wl[0] + v[1] * Wl[1] + N[1] * Wl[2],
+						u[2] * Wl[0] + v[2] * Wl[1] + N[2] * Wl[2]);
 }
 
 HOD inline float UniformConePdf(float CosThetaMax)
@@ -411,31 +383,10 @@ HOD inline float UniformSpherePdf(void)
 	return 1.0f / (4.0f * PI_F);
 }
 
-HOD inline Vec3f UniformSampleTriangle(Vec4i* pIndicesV, Vec3f* pVertices, Vec4i* pIndicesVN, Vec3f* pVertexNormals, int SampleTriangleIndex, Vec2f U, Vec3f& N, Vec2f& UV)
-{
-	const Vec4i Face = pIndicesV[SampleTriangleIndex];
-
-	const Vec3f P[3] = { pVertices[Face.x], pVertices[Face.y], pVertices[Face.z] };
-
-	UV = UniformSampleTriangle(U);
-
-	const float B0 = 1.0f - UV.x - UV.y;
-
-	const Vec3f VN[3] = 
-	{
-		pVertexNormals[pIndicesVN[SampleTriangleIndex].x],
-		pVertexNormals[pIndicesVN[SampleTriangleIndex].y],
-		pVertexNormals[pIndicesVN[SampleTriangleIndex].z]	
-	};
-
-	N = Normalize(B0 * VN[0] + UV.x * VN[1] + UV.y * VN[2]);
-
-	return B0 * P[0] + UV.x * P[1] + UV.y * P[2];
-}
 
 HOD inline void ShirleyDisk(const Vec2f& U, float& u, float& v)
 {
-	float phi = 0, r = 0, a = 2 * U.x - 1, b = 2 * U.y - 1;
+	float phi = 0, r = 0, a = 2 * U[0] - 1, b = 2 * U[1] - 1;
 	
 	if (a >- b)
 	{
@@ -479,7 +430,7 @@ HOD inline void ShirleyDisk(const Vec2f& U, float& u, float& v)
 HOD inline Vec3f ShirleyDisk(const Vec3f& N, const Vec2f& U)
 {
 	float u, v;
-	float phi = 0, r = 0, a = 2 * U.x - 1, b = 2 * U.y - 1;
+	float phi = 0, r = 0, a = 2 * U[0] - 1, b = 2 * U[1] - 1;
 	
 	if (a >- b)
 	{
@@ -521,7 +472,7 @@ HOD inline Vec3f ShirleyDisk(const Vec3f& N, const Vec2f& U)
 
 	Vec3f Ucs, Vcs;
 
-	CreateCS(N, Ucs, Vcs);
+//	CreateCS(N, Ucs, Vcs);
 
 	return (u * Ucs) + (v * Vcs);
 }
