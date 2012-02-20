@@ -167,7 +167,7 @@ struct EXPOSURE_RENDER_DLL ErScattering
 {
 	float				NoIterations;
 	float				InvNoIterations;
-	bool				Shadows;
+	int					SamplingStrategy;
 };
 
 struct EXPOSURE_RENDER_DLL ErBlur

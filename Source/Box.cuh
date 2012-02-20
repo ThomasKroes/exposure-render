@@ -99,3 +99,76 @@ DEV bool InsideAABB(Vec3f P)
 
 	return true;
 }
+
+HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
+{
+	int Side = floorf(UVW[0] * 6.0f);
+
+	switch (Side)
+	{
+		case 0:
+		{
+			SS.P[0] = -0.5f;
+			SS.P[1] = -0.5f + UVW[2];
+			SS.P[1] = -0.5f + UVW[1];
+			SS.N	= Vec3f(-1.0f, 0.0f, 0.0f);
+			break;
+		}
+
+		case 1:
+		{
+			SS.P[0] = 0.5f;
+			SS.P[1] = -0.5f + UVW[2];
+			SS.P[1] = -0.5f + UVW[1];
+			SS.N	= Vec3f(1.0f, 0.0f, 0.0f);
+			break;
+		}
+
+		case 2:
+		{
+			SS.P[0] = -0.5f + UVW[1];
+			SS.P[1] = -0.5f;
+			SS.P[1] = -0.5f + UVW[2];
+			SS.N	= Vec3f(0.0f, 0.0f, -1.0f);
+			break;
+		}
+
+		case 3:
+		{
+			SS.P[0] = -0.5f + UVW[1];
+			SS.P[1] = 0.5f;
+			SS.P[1] = -0.5f + UVW[2];
+			SS.N	= Vec3f(0.0f, 1.0f, 0.0f);
+			break;
+		}
+
+		case 4:
+		{
+			SS.P[0] = -0.5f + UVW[1];
+			SS.P[1] = -0.5f + UVW[2];
+			SS.P[1] = -0.5f;
+			SS.N	= Vec3f(0.0f, -1.0f, 0.0f);
+			break;
+		}
+
+		case 5:
+		{
+			SS.P[0] = -0.5f + UVW[1];
+			SS.P[1] = -0.5f + UVW[2];
+			SS.P[1] = 0.5f;
+			SS.N	= Vec3f(0.0f, 0.0f, 1.0f);
+			break;
+		}
+	}
+
+	SS.UV	= Vec2f(UVW[1], UVW[2]);
+	SS.Area	= 6.0f;
+}
+
+HOD inline void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
+{
+	SampleUnitBox(SS, UVW);
+
+	SS.P *= Size;
+	SS.Area = 2.0f * ((Size[0] * Size[1]) + (Size[0] * Size[2]) + (Size[1] * Size[2]));
+}

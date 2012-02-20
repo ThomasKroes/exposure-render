@@ -27,20 +27,16 @@ KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-	const ColorXYZAf Color = pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y);
+//	const float Variance = pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Variance(gScattering.NoIterations);
 
-	ColorRGBf RgbHdr;
+//	RgbHdr.Set(Variance, Variance, Variance);
 
-	RgbHdr.FromXYZ(Color.GetX(), Color.GetY(), Color.GetZ());
+	ColorRGBuc Color = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gCamera.m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gCamera.m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gCamera.m_InvExposure)), 0.0, 1.0f));
-
-	pFrameBuffer->CudaEstimateRgbaLdr.GetPtr(X, Y)->SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gCamera.m_InvGamma)), 0.0f, 255.0f));
-	pFrameBuffer->CudaEstimateRgbaLdr.GetPtr(X, Y)->SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), gCamera.m_InvGamma)), 0.0f, 255.0f));
-	pFrameBuffer->CudaEstimateRgbaLdr.GetPtr(X, Y)->SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gCamera.m_InvGamma)), 0.0f, 255.0f));
-	pFrameBuffer->CudaEstimateRgbaLdr.GetPtr(X, Y)->SetA(0);
+	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetR(Color.GetR());
+	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetG(Color.GetG());
+	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetB(Color.GetB());
+	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetA(0);
 }
 
 void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)

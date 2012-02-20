@@ -15,7 +15,7 @@
 
 #include "CudaUtilities.h"
 
-#include "Geometry.cuh"
+#include "MonteCarlo.cuh"
 
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
 
@@ -70,6 +70,9 @@ DEV Intersection IntersectSphere(CRay R, float Radius)
 			return Int;
 	}
 
+	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+		return Int;
+
 	Int.Valid	= true;
 	Int.P		= R(Int.NearT);
 	Int.N		= Normalize(Int.P);
@@ -86,4 +89,31 @@ DEV Intersection IntersectUnitSphere(CRay R)
 DEV bool InsideSphere(Vec3f P, float Radius)
 {
 	return Length(P) < Radius;
+}
+
+HOD inline float SphereArea(float Radius)
+{
+	return 4.0f * PI_F * (Radius * Radius);
+}
+
+HOD inline void SampleUnitSphere(SurfaceSample& SS, Vec2f UV)
+{
+	float z		= 1.0f - 2.0f * UV[0];
+	float r		= sqrtf(max(0.0f, 1.0f - z * z));
+	float phi	= 2.0f * PI_F * UV[1];
+	float x		= r * cosf(phi);
+	float y		= r * sinf(phi);
+
+	SS.P	= Vec3f(x, y, z);
+	SS.N	= SS.N;
+	SS.Area	= SphereArea(1.0f);
+	SS.UV	= Vec2f(SphericalTheta(SS.P), SphericalPhi(SS.P));
+}
+
+HOD inline void SampleSphere(SurfaceSample& SS, Vec2f UV, float Radius)
+{
+	SampleUnitSphere(SS, UV);
+
+	SS.P *= Radius;
+	SS.Area	= SphereArea(Radius);
 }

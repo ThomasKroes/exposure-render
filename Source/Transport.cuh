@@ -19,81 +19,42 @@
 
 //using namespace ExposureRender;
 
-DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
+DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P)
 {
 	const int LID = floorf(RNG.Get1() * gLights.m_NoLights);
 
 	ErLight& L = gLights.m_LightList[LID];
 
-	// Sample point in light coordinates
-	Vec3f LocalP, LocalN;
+	SurfaceSample SS;
 
 	switch (L.m_Type)
 	{
-		// Sample area light
 		case 0:
 		{
-			// Shape types
 			switch (L.m_ShapeType)
 			{
-				// Plane
-				case 0:
-				{
-					LocalP = SamplePlane(RNG.Get2(), ToVec3f(L.m_Size), &LocalN);
-					break;
-				}
-
-				// Disk
-				case 1:
-				{
-					LocalP = SampleDisk(RNG.Get2(), L.m_OuterRadius, &LocalN);
-					break;
-				}
-
-				// Ring
-				case 2:
-				{
-					LocalP = SampleRing(RNG.Get2(), L.m_InnerRadius, L.m_OuterRadius, &LocalN);
-					break;
-				}
-
-				// Box
-				case 3:
-				{
-					LocalP = SampleBox(RNG.Get3(), ToVec3f(L.m_Size), &LocalN);
-					break;
-				}
-
-				// Sphere
-				case 4:
-				{
-					LocalP = SampleSphere(RNG.Get2(), L.m_OuterRadius, &LocalN);
-					break;
-				}
+				case 0:	SamplePlane(SS, RNG.Get2(), Vec2f(L.m_Size[0], L.m_Size[1]));		break;
+				case 1:	SampleDisk(SS, RNG.Get2(), L.m_OuterRadius);						break;
+				case 2:	SampleRing(SS, RNG.Get2(), L.m_InnerRadius, L.m_OuterRadius);		break;
+				case 3:	SampleBox(SS, RNG.Get3(), ToVec3f(L.m_Size));						break;
+				case 4:	SampleSphere(SS, RNG.Get2(), L.m_OuterRadius);						break;
 			}
 
 			break;
 		}
 		
-		// Sample background light
-		case 1:
-		{
-			LocalP = L.m_InnerRadius * SampleUnitSphere(RNG.Get2());
-			break;
-		}
+		case 1:	SampleSphere(SS, RNG.Get2(), L.m_InnerRadius);	break;
 	}
 
-	Pl	= TransformPoint(L.m_TM, LocalP);
-	Pdf	= DistanceSquared(Pe, Pl) / L.m_Area;
-
-	ColorXYZf Le;
+	LSS.P	= TransformPoint(L.m_TM, SS.P);
+	LSS.Pdf	= DistanceSquared(P, LSS.P) / SS.Area;
 
 	switch (L.m_Type)
 	{
 		// Area light
 		case 0:
 		{
-			Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]);
+			LSS.Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / SS.Area;
 			break;
 		}
 
@@ -105,15 +66,15 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 				// Uniform color
 				case 0:
 				{
-					Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]);
+					LSS.Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / SS.Area;
 					break;
 				}
 
 				// Gradient
 				case 1:
 				{
-					float4 Col = tex1D(gTexEnvironmentGradient, 0.5f + 0.5f * Normalize(Pl)[1]);
-					Le = ColorXYZf(Col.x, Col.y, Col.z);
+					float4 Col = tex1D(gTexEnvironmentGradient, SS.UV[1]);
+					LSS.Le = ColorXYZf(Col.x, Col.y, Col.z) / SS.Area;
 					break;
 				}
 			}
@@ -121,8 +82,6 @@ DEV ColorXYZf SampleLight(CRNG& RNG, const Vec3f& Pe, Vec3f& Pl, float& Pdf)
 			break;
 		}
 	}
-
-	return Le / L.m_Area;
 }
 
 DEV void HitTestLight(ErLight& Light, CRay R, RaySample& RS, bool RespectVisibility)
@@ -259,42 +218,56 @@ DEV inline void SampleLights(CRay R, RaySample& RS, bool RespectVisibility = fal
 	}
 }
 
-DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
+DEV ColorXYZf SampleLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
 {
-	ColorXYZf Ld = SPEC_BLACK, Li = SPEC_BLACK, F = SPEC_BLACK;
+	CRay Rl;
+
+	float ShaderPdf = 1.0f;
+
+	Vec3f Wi;
+
+	RaySample RSn(RaySample::Light);
+
+	LightSurfaceSample LSS;
+
+	SampleLightSurface(LSS, RNG, RS.P);
 	
-	CRay Rl; 
-
-	float LightPdf = 1.0f, ShaderPdf = 1.0f;
-
-	Vec3f Wi, Pl;
-
-	Li = SampleLight(RNG, RS.P, Pl, LightPdf);
-	
-	Rl.m_O		= Pl;
-	Rl.m_D		= Normalize(RS.P - Pl);
+	Rl.m_O		= LSS.P;
+	Rl.m_D		= Normalize(RS.P - LSS.P);
 	Rl.m_MinT	= 0.0f;
-	Rl.m_MaxT	= (RS.P - Pl).Length();
+	Rl.m_MaxT	= (RS.P - LSS.P).Length();
 
 	Wi = -Rl.m_D; 
 
-	F = Shader.F(RS.Wo, Wi); 
+	ColorXYZf F = Shader.F(RS.Wo, Wi); 
 
 	ShaderPdf = Shader.Pdf(RS.Wo, Wi);
-	
-	if (!Li.IsBlack() && ShaderPdf > 0.0f && LightPdf > 0.0f && !FreePathRM(Rl, RNG))
+
+	if (!LSS.Le.IsBlack() && ShaderPdf > 0.0f && LSS.Pdf > 0.0f && !FreePathRM(Rl, RNG))
 	{
-		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
+		const float WeightMIS = PowerHeuristic(1.0f, LSS.Pdf, 1.0f, ShaderPdf);
 		
 		if (Type == CVolumeShader::Brdf)
-			Ld += F * Li * AbsDot(Wi, RS.N) * WeightMIS / LightPdf;
+			return F * LSS.Le * AbsDot(Wi, RS.N) * WeightMIS / LSS.Pdf;
 
 		if (Type == CVolumeShader::Phase)
-			Ld += F * Li * WeightMIS / LightPdf;
+			return F * LSS.Le * WeightMIS / LSS.Pdf;
 	}
 
-	/*
-	F = Shader.SampleF(RS.Wo, Wi, ShaderPdf, LS.m_BsdfSample);
+	return ColorXYZf(0.0f);
+}
+
+DEV ColorXYZf SampleShader(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
+{
+	ColorXYZf Ld;
+
+	CRay Rl;
+
+	float ShaderPdf = 1.0f;
+
+	Vec3f Wi;
+
+	ColorXYZf F = Shader.SampleF(RS.Wo, Wi, ShaderPdf, LS.m_BsdfSample);
 
 	if (!F.IsBlack() && ShaderPdf > 0.0f)
 	{
@@ -305,24 +278,36 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 		if (RSn.Valid)
 		{
 			// Compose light ray
-			Rl.m_O		= Pl;
-			Rl.m_D		= Normalize(RSn.P - Pl);
+			Rl.m_O		= RSn.P;
+			Rl.m_D		= Normalize(RS.P - RSn.P);
 			Rl.m_MinT	= 0.0f;
-			Rl.m_MaxT	= (RSn.P - Pl).Length();
+			Rl.m_MaxT	= (RS.P - RSn.P).Length();
 
 			if (RSn.Pdf > 0.0f && !RSn.Le.IsBlack() && !FreePathRM(Rl, RNG)) 
 			{
 				const float WeightMIS = PowerHeuristic(1.0f, ShaderPdf, 1.0f, RSn.Pdf);
 
 				if (Type == CVolumeShader::Brdf)
-					Ld += F * Li * AbsDot(Wi, RSn.N) * WeightMIS / ShaderPdf;
+					return F * RSn.Le * AbsDot(Wi, RSn.N) * WeightMIS / ShaderPdf;
 
 				if (Type == CVolumeShader::Phase)
-					Ld += F * Li * WeightMIS / ShaderPdf;
+					return F * RSn.Le * WeightMIS / ShaderPdf;
 			}
 		}
 	}
-	*/
+
+	return ColorXYZf(0.0f);
+}
+
+DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
+{
+	ColorXYZf Ld;
+	
+	if (gScattering.SamplingStrategy == 0 || gScattering.SamplingStrategy == 2)
+		Ld += SampleLight(Type, LS, RS, RNG, Shader);
+
+	if (gScattering.SamplingStrategy == 1 || gScattering.SamplingStrategy == 2)
+		Ld += SampleShader(Type, LS, RS, RNG, Shader);
 
 	return Ld;
 }

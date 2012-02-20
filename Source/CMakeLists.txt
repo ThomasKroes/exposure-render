@@ -88,6 +88,7 @@ SET(ErCudaSources
 	General.cuh
 	Vector.cuh
 	Color.cuh
+	Statistics.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

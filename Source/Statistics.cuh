@@ -11,50 +11,48 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+// http://www.johndcook.com/standard_deviation.html
 
-#include "CudaUtilities.h"
+#include "Defines.h"
 
-#include "Geometry.cuh"
-#include "Disk.cuh"
-
-DEV Intersection IntersectUnitRing(CRay R, bool OneSided, float InnerRadius)
+struct RunningStats
 {
-	Intersection Int = IntersectPlane(R, OneSided);
+	HOD void Push(float Value, int N)
+	{
+//		m_n++;
 
-	if (Int.Valid && (Int.UV.Length() < InnerRadius || Int.UV.Length() >= 1.0f))
-		Int.Valid = false;
+		// See Knuth TAOCP vol 2, 3rd edition, page 232
+		if (N == 1)
+		{
+			m_oldM = m_newM = Value;
+			m_oldS = 0.0;
+		}
+		else
+		{
+			m_newM = m_oldM + (Value - m_oldM) / (float)N;
+			m_newS = m_oldS + (Value - m_oldM) * (Value - m_newM);
 
-	return Int;
-}
+			// set up for next iteration
+			m_oldM = m_newM; 
+			m_oldS = m_newS;
+		}
+	}
 
-DEV Intersection IntersectRing(CRay R, bool OneSided, float InnerRadius, float OuterRadius)
-{
-	Intersection Int = IntersectPlane(R, OneSided);
+	HOD double Mean(int N) const
+	{
+		return (N > 0) ? m_newM : 0.0f;
+	}
 
-	if (Int.Valid && (Int.UV.Length() < InnerRadius || Int.UV.Length() > OuterRadius))
-		Int.Valid = false;
+	HOD double Variance(int N) const
+	{
+		return ((N > 1) ? m_newS / (float)(N - 1) : 0.0f);
+	}
 
-	return Int;
-}
+	HOD double StandardDeviation(int N) const
+	{
+		return sqrtf(Variance(N));
+	}
 
-HOD inline void SampleUnitRing(SurfaceSample& SS, Vec2f UV, float InnerRadius)
-{
-	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(UV[0]);
-	float theta = 2.0f * PI_F * UV[1];
-
-	SS.P 	= Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
-	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
-	SS.Area	= 1.0f / (DiskArea(1.0f) - DiskArea(InnerRadius));
-	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
-}
-
-HOD inline void SampleRing(SurfaceSample& SS, Vec2f UV, float InnerRadius, float OuterRadius)
-{
-	SampleUnitRing(SS, UV, InnerRadius / OuterRadius);
-
-	SS.P *= OuterRadius;
-	SS.Area	= DiskArea(OuterRadius) - DiskArea(InnerRadius);
-	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
-
-}
+//	int m_n;
+	float m_oldM, m_newM, m_oldS, m_newS;
+};

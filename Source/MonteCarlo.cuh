@@ -97,88 +97,13 @@ HOD inline bool InShadingHemisphere(const Vec3f& W1, const Vec3f& W2, const Vec3
    return Dot(W1, N) >= 0.0f && Dot(W2, N) >= 0.0f;
 }
 
-HOD inline Vec3f SampleUnitPlane(Vec2f U, Vec3f* pN = NULL)
-{
-	if (pN)
-		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	return Vec3f(-0.5f + U[0], -0.5f + U[1], 0.0f);
-}
 
-HOD inline Vec3f SamplePlane(Vec2f U, Vec3f Size, Vec3f* pN = NULL)
-{
-	return SampleUnitPlane(U, pN) * Vec3f(Size[0], Size[1], 0.0f);
-}
 
-HOD inline Vec3f SampleUnitBox(Vec3f U, Vec3f* pN = NULL)
-{
-	if (pN)
-		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	return Vec3f(-0.5f * U[0], -0.5f + U[1], -0.5f + U[2]);
-}
 
-HOD inline Vec3f SampleBox(Vec3f U, Vec3f Size, Vec3f* pN = NULL)
-{
-	return SampleUnitBox(U, pN) * Size;
-}
 
-HOD inline Vec3f SampleUnitDisk(const Vec2f& U, Vec3f* pN = NULL)
-{
-	if (pN)
-		*pN = Vec3f(0.0f, 0.0f, 1.0f);
 
-	float r = sqrtf(U[0]);
-	float theta = 2.0f * PI_F * U[1];
-
-	return Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
-}
-
-HOD inline Vec3f SampleDisk(const Vec2f& U, float Radius, Vec3f* pN = NULL)
-{
-	return SampleUnitDisk(U, pN) * Vec3f(Radius, Radius, 0.0f);
-}
-
-HOD inline Vec3f SampleUnitRing(const Vec2f& U, float InnerRadius, Vec3f* pN = NULL)
-{
-	if (pN)
-		*pN = Vec3f(0.0f, 0.0f, 1.0f);
-
-	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(U[0]);
-	float theta = 2.0f * PI_F * U[1];
-
-	return Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
-}
-
-HOD inline Vec3f SampleRing(const Vec2f& U, float InnerRadius, float OuterRadius, Vec3f* pN = NULL)
-{
-	if (pN)
-		*pN = Vec3f(0.0f, 0.0f, 1.0f);
-
-	float r = sqrtf(InnerRadius + U[0] * (OuterRadius - InnerRadius));
-	float theta = 2.0f * PI_F * U[1];
-
-	return Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
-}
-
-HOD inline Vec3f SampleUnitSphere(Vec2f U, Vec3f* pN = NULL)
-{
-	float z		= 1.0f - 2.0f * U[0];
-	float r		= sqrtf(max(0.0f, 1.0f - z * z));
-	float phi	= 2.0f * PI_F * U[1];
-	float x		= r * cosf(phi);
-	float y		= r * sinf(phi);
-
-	if (pN)
-		*pN = Vec3f(x, y, z);
-
-	return Vec3f(x, y, z);
-}
-
-HOD inline Vec3f SampleSphere(Vec2f U, float Radius, Vec3f* pN = NULL)
-{
-	return SampleUnitSphere(U, pN) * Radius;
-}
 
 HOD inline Vec3f SampleUnitHemisphere(Vec2f U, Vec3f* pN = NULL)
 {

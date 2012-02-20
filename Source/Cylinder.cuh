@@ -49,6 +49,10 @@ DEV Intersection IntersectCylinder(CRay R, float Radius, float Height)
     }
 
 	Int.NearT	= T0;
+
+	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+		return Int;
+
 	Int.FarT	= T1;
 	Int.P		= R(Int.NearT);
 

@@ -120,6 +120,14 @@ public:
 		return *this;
 	}
 
+	HOD Vec<T, Size>& operator *= (const Vec<T, Size>& V)
+	{
+		for (int i = 0; i < Size; i++)
+			m_D[i] *= V[i];
+
+		return *this;
+	}
+
 	HOD Vec<T, Size> operator / (const float& f) const
 	{
 		const float Inv = 1.0f / f;
@@ -138,6 +146,14 @@ public:
 
 		for (int i = 0; i < Size; i++)
 			m_D[i] *= Inv;
+
+		return *this;
+	}
+
+	HOD Vec<T, Size>& operator /= (Vec<T, Size> V)
+	{
+		for (int i = 0; i < Size; i++)
+			m_D[i] / V[i];
 
 		return *this;
 	}

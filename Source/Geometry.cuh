@@ -317,6 +317,40 @@ struct RaySample
 	}
 };
 
+struct SurfaceSample
+{
+	Vec3f		P;
+	Vec3f		N;
+	float		Area;
+	Vec2f		UV;
+
+	HOD SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
+	{
+		this->P		= Other.P;
+		this->N		= Other.N;
+		this->Area	= Other.Area;
+		this->UV	= Other.UV;
+
+		return *this;
+	}
+};
+
+struct LightSurfaceSample : public SurfaceSample
+{
+	Vec3f		Wo;
+	ColorXYZf	Le;
+	float		Pdf;
+
+	HOD LightSurfaceSample& LightSurfaceSample::operator = (const LightSurfaceSample& Other)
+	{
+		this->Wo	= Other.Wo;
+		this->Le	= Other.Le;
+		this->Pdf	= Other.Pdf;
+
+		return *this;
+	}
+};
+
 struct Intersection
 {
 	bool		Valid;

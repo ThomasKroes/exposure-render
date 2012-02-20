@@ -65,8 +65,16 @@ DEV CRay TransformRay(CRay R, ErMatrix44 TM)
 {
 	CRay TR;
 
-	TR.m_O 		= TransformPoint(TM, R.m_O);
-	TR.m_D 		= TransformVector(TM, R.m_D);
+	Vec3f O		= TransformPoint(TM, R.m_O);
+	Vec3f D		= TransformVector(TM, R.m_D);
+	Vec3f MinP = R(R.m_MinT);
+	Vec3f MaxP = R(R.m_MaxT);
+
+	float MinT = Length(MinP - O);
+	float MaxT = Length(MaxP - O);
+
+	TR.m_O		= O;
+	TR.m_D		= D;
 	TR.m_MinT	= R.m_MinT;
 	TR.m_MaxT	= R.m_MaxT;
 
@@ -226,13 +234,6 @@ DEV inline Vec3f NormalizedGradient(Vec3f P)
 
 	float Ints[3][2];
 
-	//Ints[0][0] = Inside(Pts[0][0]) ? 0.0f : GetIntensity(Pts[0][0]);
-	//Ints[0][1] = Inside(Pts[0][1]) ? 0.0f : GetIntensity(Pts[0][1]);
-	//Ints[1][0] = Inside(Pts[1][0]) ? 0.0f : GetIntensity(Pts[1][0]);
-	//Ints[1][1] = Inside(Pts[1][1]) ? 0.0f : GetIntensity(Pts[1][1]);
-	//Ints[2][0] = Inside(Pts[2][0]) ? 0.0f : GetIntensity(Pts[2][0]);
-	//Ints[2][1] = Inside(Pts[2][1]) ? 0.0f : GetIntensity(Pts[2][1]);
-
 	Ints[0][0] = GetIntensity(Pts[0][0]);
 	Ints[0][1] = GetIntensity(Pts[0][1]);
 	Ints[1][0] = GetIntensity(Pts[1][0]);
@@ -255,4 +256,23 @@ DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax
 DEV ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
 {
 	 return A + ((Ax - A) / max((float)N, 1.0f));
+}
+
+HOD ColorRGBuc ToneMap(ColorXYZAf XYZA)
+{
+	ColorRGBf RgbHdr;
+
+	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
+
+	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gCamera.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gCamera.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gCamera.m_InvExposure)), 0.0, 1.0f));
+	
+	ColorRGBuc Result;
+
+	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gCamera.m_InvGamma)), 0.0f, 255.0f));
+	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), gCamera.m_InvGamma)), 0.0f, 255.0f));
+	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gCamera.m_InvGamma)), 0.0f, 255.0f));
+
+	return Result;
 }

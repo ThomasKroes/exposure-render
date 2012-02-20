@@ -414,18 +414,18 @@ void ErRenderEstimate()
 
 void ErGetEstimate(unsigned char* pData)
 {
-	cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
-	memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize());
+	cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
+	memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize());
 }
 
 void ErGetFrameEstimate(unsigned char* pData)
 {
-	//cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
-	//memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize());
+	//cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
+	//memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize());
 }
 
 void ErGetDepthBuffer(unsigned char* pData)
 {
-	//cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
-	//memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaEstimateRgbaLdr.GetSize());
+	//cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
+	//memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize());
 }

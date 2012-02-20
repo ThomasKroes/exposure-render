@@ -30,12 +30,15 @@ DEV Intersection IntersectPlane(CRay R, bool OneSided, float Offset = 0.0f)
 	// Compute intersection distance
 	Int.NearT = (Offset - R.m_O[2]) / R.m_D[2];
 	
+	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+		return Int;
+
 	// Compute intersection point
-	Int.P[0] = R.m_O[0] + Int.NearT * (R.m_D[0]);
-	Int.P[1] = R.m_O[1] + Int.NearT * (R.m_D[1]);
-	Int.P[2] = 0.0f;
-	Int.UV	= Vec2f(Int.P[0], Int.P[1]);
-	Int.N	= Vec3f(0.0f, 0.0f, 1.0f);
+	Int.P[0] 	= R.m_O[0] + Int.NearT * (R.m_D[0]);
+	Int.P[1] 	= R.m_O[1] + Int.NearT * (R.m_D[1]);
+	Int.P[2] 	= 0.0f;
+	Int.UV		= Vec2f(Int.P[0], Int.P[1]);
+	Int.N		= Vec3f(0.0f, 0.0f, 1.0f);
 
 	if (OneSided && R.m_D[2] <= 0.0f)
 		Int.Front = false;
@@ -68,4 +71,18 @@ DEV Intersection IntersectPlane(CRay R, bool OneSided, Vec2f Size)
 DEV bool InsidePlane(Vec3f P)
 {
 	return P[2] > 0.0f;
+}
+
+HOD inline void SampleUnitPlane(SurfaceSample& SS, Vec2f UV)
+{
+	SS.P 	= Vec3f(-0.5f + UV[0], -0.5f + UV[1], 0.0f);
+	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
+	SS.Area	= 1.0f;
+	SS.UV	= UV;
+}
+
+HOD inline void SamplePlane(SurfaceSample& SS, Vec2f UV, Vec2f Size)
+{
+	SS.P *= Vec3f(Size[0], Size[1], 0.0f);
+	SS.Area = Size[0] * Size[1];
 }

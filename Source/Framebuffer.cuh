@@ -16,6 +16,7 @@
 #include "CudaUtilities.h"
 
 #include "Buffer.cuh"
+#include "Statistics.cuh"
 
 class FrameBuffer
 {
@@ -25,7 +26,7 @@ public:
 		CudaRunningEstimateXyza(),
 		CudaFrameEstimateXyza(),
 		CudaFrameBlurXyza(),
-		CudaEstimateRgbaLdr(),
+		CudaRunningEstimateRgbaLdr(),
 		CudaDisplayEstimateRgbLdr(),
 		CudaRandomSeeds1(),
 		CudaRandomSeeds2(),
@@ -50,13 +51,14 @@ public:
 		this->CudaRunningEstimateXyza.Resize(this->Resolution);
 		this->CudaFrameEstimateXyza.Resize(this->Resolution);
 		this->CudaFrameBlurXyza.Resize(this->Resolution);
-		this->CudaEstimateRgbaLdr.Resize(this->Resolution);
+		this->CudaRunningEstimateRgbaLdr.Resize(this->Resolution);
 		this->CudaDisplayEstimateRgbLdr.Resize(this->Resolution);
 		this->CudaRandomSeeds1.Resize(this->Resolution);
 		this->CudaRandomSeeds2.Resize(this->Resolution);
 		this->HostDisplayEstimateRgbaLdr.Resize(this->Resolution);
 		this->HostFrameEstimate.Resize(this->Resolution);
 		this->HostDepthBuffer.Resize(this->Resolution);
+		this->CudaRunningStats.Resize(this->Resolution);
 	}
 
 	void Reset(void)
@@ -64,11 +66,12 @@ public:
 //		this->CudaRunningEstimateXyza.Reset();
 		this->CudaFrameEstimateXyza.Reset();
 //		this->CudaFrameBlurXyza.Reset();
-		this->CudaEstimateRgbaLdr.Reset();
+		this->CudaRunningEstimateRgbaLdr.Reset();
 		this->CudaDisplayEstimateRgbLdr.Reset();
 		this->HostDisplayEstimateRgbaLdr.Reset();
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
+//		this->CudaRunningStats.Reset();
 	}
 
 	void Free(void)
@@ -76,13 +79,14 @@ public:
 		this->CudaRunningEstimateXyza.Free();
 		this->CudaFrameEstimateXyza.Free();
 		this->CudaFrameBlurXyza.Free();
-		this->CudaEstimateRgbaLdr.Free();
+		this->CudaRunningEstimateRgbaLdr.Free();
 		this->CudaDisplayEstimateRgbLdr.Free();
 		this->CudaRandomSeeds1.Free();
 		this->CudaRandomSeeds2.Free();
 		this->HostDisplayEstimateRgbaLdr.Free();
 		this->HostFrameEstimate.Free();
 		this->HostDepthBuffer.Free();
+		this->CudaRunningStats.Free();
 
 		this->Resolution.Set(Vec2i(0, 0));
 	}
@@ -97,16 +101,27 @@ public:
 		return this->Resolution.GetResY();
 	}
 
-	CResolution2D						Resolution;
-	CCudaBuffer2D<ColorXYZAf, false>	CudaRunningEstimateXyza;
-	CCudaBuffer2D<ColorXYZAf, false>	CudaFrameEstimateXyza;
-	CCudaBuffer2D<ColorXYZAf, false>	CudaFrameBlurXyza;
-	CCudaBuffer2D<ColorRGBAuc, false>	CudaEstimateRgbaLdr;
-	CCudaBuffer2D<ColorRGBuc, false>	CudaDisplayEstimateRgbLdr;
-	CCudaRandomBuffer2D					CudaRandomSeeds1;
-	CCudaRandomBuffer2D					CudaRandomSeeds2;
+	CResolution2D							Resolution;
+	
+	// Running estimate
+	CCudaBuffer2D<ColorXYZAf, false>		CudaRunningEstimateXyza;
+	CCudaBuffer2D<ColorRGBAuc, false>		CudaRunningEstimateRgbaLdr;
 
-	CHostBuffer2D<ColorRGBAuc>			HostDisplayEstimateRgbaLdr;
-	CHostBuffer2D<ColorRGBAuc>			HostFrameEstimate;
-	CHostBuffer2D<ColorRGBAuc>			HostDepthBuffer;
+	// Frame estimate
+	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateXyza;
+	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameBlurXyza;
+	
+	CCudaBuffer2D<ColorRGBuc, false>		CudaDisplayEstimateRgbLdr;
+
+	// Random seeds
+	CCudaRandomBuffer2D						CudaRandomSeeds1;
+	CCudaRandomBuffer2D						CudaRandomSeeds2;
+
+	// Host buffers
+	CHostBuffer2D<ColorRGBAuc>				HostDisplayEstimateRgbaLdr;
+	CHostBuffer2D<ColorRGBAuc>				HostFrameEstimate;
+	CHostBuffer2D<ColorRGBAuc>				HostDepthBuffer;
+
+	// Variance
+	CCudaBuffer2D<RunningStats, false>		CudaRunningStats;
 };

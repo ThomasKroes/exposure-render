@@ -86,7 +86,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
     }
 	else
 	{
-		const ColorRGBAuc RGBA = pView->CudaEstimateRgbaLdr.Get(X, Y);
+		const ColorRGBAuc RGBA = pView->CudaRunningEstimateRgbaLdr.Get(X, Y);
 		pView->CudaDisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
 	}
 	*/
