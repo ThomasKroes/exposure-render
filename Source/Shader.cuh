@@ -169,7 +169,7 @@ class CMicrofacet
 public:
 	DEV CMicrofacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
 	  m_R(Reflectance),
-		  m_Fresnel(Ior, 1.0f),
+		  m_Fresnel(1.0f, Ior),
 		  m_Blinn(Exponent)
 	  {
 	  }
@@ -194,7 +194,7 @@ public:
 		  wh = Normalize(wh);
 		  float cosThetaH = Dot(wi, wh);
 
-		  ColorXYZf F(1.0f);// = m_Fresnel.Evaluate(cosThetaH);
+		  ColorXYZf F = m_Fresnel.Evaluate(cosThetaH);
 
 		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.0f * cosThetaI * cosThetaO);
 	  }

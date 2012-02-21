@@ -93,26 +93,32 @@ struct EXPOSURE_RENDER_DLL ErCamera
 	float				m_FOV;
 };
 
+struct EXPOSURE_RENDER_DLL ErShape
+{
+	ErMatrix44			TM;
+	ErMatrix44			InvTM;
+	bool				OneSided;
+	int					Type;
+	float				Color[3];
+	float				Size[3];
+	float				Area;
+	float				InnerRadius;
+	float				OuterRadius;
+};
+
 struct EXPOSURE_RENDER_DLL ErLight
 {
-	bool				m_Visible;
-	int					m_Type;
-	int					m_TextureType;
-	bool				m_OneSided;
-	int					m_ShapeType;
-	float				m_Color[3];
-	ErMatrix44			m_TM;
-	ErMatrix44			m_InvTM;
-	float				m_Size[3];
-	float				m_Area;
-	float				m_InnerRadius;
-	float				m_OuterRadius;
+	bool				Visible;
+	int					Type;
+	int					TextureType;
+	ErShape				Shape;
+	float				Color[3];
 };
 
 struct EXPOSURE_RENDER_DLL ErLights
 {
-	int					m_NoLights;
-	ErLight				m_LightList[32];
+	int					NoLights;
+	ErLight				LightList[32];
 };
 
 struct EXPOSURE_RENDER_DLL ErClipper
@@ -136,13 +142,11 @@ struct EXPOSURE_RENDER_DLL ErClippers
 
 struct EXPOSURE_RENDER_DLL ErReflector
 {
-	float				Size[2];
+	ErShape				Shape;
 	float				DiffuseColor[3];
 	float				SpecularColor[3];
 	float				Glossiness;
 	float				Ior;
-	ErMatrix44			TM;
-	ErMatrix44			InvTM;
 };
 
 struct EXPOSURE_RENDER_DLL ErReflectors

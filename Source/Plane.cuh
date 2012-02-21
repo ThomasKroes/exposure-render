@@ -23,22 +23,17 @@ DEV Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
 {
 	Intersection Int;
 
-	// Avoid floating point precision issues near parallel intersections
 	if (fabs(R.O[2] - R.D[2]) < INTERSECTION_EPSILON)
 		return Int;
 
-	// Compute intersection distance
 	Int.NearT = (Offset - R.O[2]) / R.D[2];
 	
 	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
 		return Int;
 
-	// Compute intersection point
-	Int.P[0] 	= R.O[0] + Int.NearT * (R.D[0]);
-	Int.P[1] 	= R.O[1] + Int.NearT * (R.D[1]);
-	Int.P[2] 	= 0.0f;
-	Int.UV		= Vec2f(Int.P[0], Int.P[1]);
-	Int.N		= Vec3f(0.0f, 0.0f, 1.0f);
+	Int.P 	= R(Int.NearT);
+	Int.UV	= Vec2f(Int.P[0], Int.P[1]);
+	Int.N	= Vec3f(0.0f, 0.0f, 1.0f);
 
 	if (OneSided && R.D[2] <= 0.0f)
 		Int.Front = false;

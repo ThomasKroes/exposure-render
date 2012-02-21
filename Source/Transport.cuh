@@ -21,31 +21,31 @@
 
 DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int LightID)
 {
-	ErLight& L = gLights.m_LightList[LightID];
+	ErLight& L = gLights.LightList[LightID];
 
 	SurfaceSample SS;
 
-	switch (L.m_Type)
+	switch (L.Type)
 	{
 		case 0:
 		{
-			switch (L.m_ShapeType)
+			switch (L.Shape.Type)
 			{
-				case 0:	SamplePlane(SS, RNG.Get2(), Vec2f(L.m_Size[0], L.m_Size[1]));		break;
-				case 1:	SampleDisk(SS, RNG.Get2(), L.m_OuterRadius);						break;
-				case 2:	SampleRing(SS, RNG.Get2(), L.m_InnerRadius, L.m_OuterRadius);		break;
-				case 3:	SampleBox(SS, RNG.Get3(), ToVec3f(L.m_Size));						break;
-				case 4:	SampleSphere(SS, RNG.Get2(), L.m_OuterRadius);						break;
+				case 0:	SamplePlane(SS, RNG.Get2(), Vec2f(L.Shape.Size[0], L.Shape.Size[1]));		break;
+				case 1:	SampleDisk(SS, RNG.Get2(), L.Shape.OuterRadius);							break;
+				case 2:	SampleRing(SS, RNG.Get2(), L.Shape.InnerRadius, L.Shape.OuterRadius);		break;
+				case 3:	SampleBox(SS, RNG.Get3(), ToVec3f(L.Shape.Size));							break;
+				case 4:	SampleSphere(SS, RNG.Get2(), L.Shape.OuterRadius);							break;
 			}
 
 			break;
 		}
 		
-		case 1:	SampleSphere(SS, RNG.Get2(), L.m_InnerRadius);	break;
+		case 1:	SampleSphere(SS, RNG.Get2(), L.Shape.InnerRadius);	break;
 	}
 
-	LSS.P	= TransformPoint(L.m_TM, SS.P);
-	LSS.N	= TransformVector(L.m_TM, SS.N);
+	LSS.P	= TransformPoint(L.Shape.TM, SS.P);
+	LSS.N	= TransformVector(L.Shape.TM, SS.N);
 	LSS.Wi	= Normalize(P - LSS.P);
 	LSS.Pdf	= DistanceSquared(P, LSS.P) / SS.Area;
 //	LSS.Pdf	= DistanceSquared(P, LSS.P) / AbsDot(LSS.Wi, LSS.N) * SS.Area;
@@ -53,24 +53,24 @@ DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int Lig
 //	if (L.m_OneSided && Dot(LSS.Wi, LSS.N) < 0.0f)
 //		return;
 
-	switch (L.m_Type)
+	switch (L.Type)
 	{
 		// Area light
 		case 0:
 		{
-			LSS.Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / SS.Area;
+			LSS.Le = ColorXYZf(L.Color[0], L.Color[1], L.Color[2]) / SS.Area;
 			break;
 		}
 
 		// Environment light
 		case 1:
 		{
-			switch (L.m_TextureType)
+			switch (L.TextureType)
 			{
 				// Uniform color
 				case 0:
 				{
-					LSS.Le = ColorXYZf(L.m_Color[0], L.m_Color[1], L.m_Color[2]) / SS.Area;
+					LSS.Le = ColorXYZf(L.Color[0], L.Color[1], L.Color[2]) / SS.Area;
 					break;
 				}
 
@@ -90,32 +90,32 @@ DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int Lig
 
 DEV void HitTestLight(ErLight& Light, Ray R, RaySample& RS, bool RespectVisibility)
 {
-	if (RespectVisibility && !Light.m_Visible)
+	if (RespectVisibility && !Light.Visible)
 		return;
 
-	Ray TR = TransformRay(R, Light.m_InvTM);
+	Ray TR = TransformRay(R, Light.Shape.InvTM);
 
 	Intersection Int;
 
-	switch (Light.m_Type)
+	switch (Light.Type)
 	{
 		case 0:
 		{
-			switch (Light.m_ShapeType)
+			switch (Light.Shape.Type)
 			{
-				case 0:	Int = IntersectPlane(TR, Light.m_OneSided, Vec2f(Light.m_Size[0], Light.m_Size[1]));	break;
-				case 1:	Int = IntersectDisk(TR, Light.m_OneSided, Light.m_OuterRadius);							break;
-				case 2:	Int = IntersectRing(TR, Light.m_OneSided, Light.m_InnerRadius, Light.m_OuterRadius);	break;
-				case 3:	Int = IntersectBox(TR, ToVec3f(Light.m_Size), NULL);									break;
-				case 4:	Int = IntersectSphere(TR, Light.m_OuterRadius);											break;
-				case 5:	Int = IntersectCylinder(TR, Light.m_OuterRadius, Light.m_Size[1]);						break;
+				case 0:	Int = IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));	break;
+				case 1:	Int = IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius);								break;
+				case 2:	Int = IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius);	break;
+				case 3:	Int = IntersectBox(TR, ToVec3f(Light.Shape.Size), NULL);											break;
+				case 4:	Int = IntersectSphere(TR, Light.Shape.OuterRadius);													break;
+				case 5:	Int = IntersectCylinder(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);							break;
 			}
 			break;
 		}
 
 		case 1:
 		{
-			Int = IntersectSphere(TR, Light.m_InnerRadius);
+			Int = IntersectSphere(TR, Light.Shape.OuterRadius);
 			break;
 		}
 	}
@@ -123,12 +123,12 @@ DEV void HitTestLight(ErLight& Light, Ray R, RaySample& RS, bool RespectVisibili
 	if (Int.Valid)
 	{
 		RS.Valid	= true;
-		RS.P 		= TransformPoint(Light.m_TM, Int.P);
-		RS.N 		= TransformVector(Light.m_TM, Int.N);
+		RS.P 		= TransformPoint(Light.Shape.TM, Int.P);
+		RS.N 		= TransformVector(Light.Shape.TM, Int.N);
 		RS.T 		= Length(RS.P - R.O);
 		RS.Wo		= -R.D;
-		RS.Le		= ColorXYZf(Light.m_Color[0], Light.m_Color[1], Light.m_Color[2]) / Light.m_Area;
-		RS.Pdf		= DistanceSquared(R.O, RS.P) / (AbsDot(Normalize(R.O - RS.P), RS.N) * Light.m_Area);
+		RS.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]) / Light.Shape.Area;
+		RS.Pdf		= DistanceSquared(R.O, RS.P) / (AbsDot(Normalize(R.O - RS.P), RS.N) * Light.Shape.Area);
 		RS.UV		= Int.UV;
 	}
 }
@@ -137,9 +137,9 @@ DEV inline void SampleLights(Ray R, RaySample& RS, bool RespectVisibility = fals
 {
 	float T = FLT_MAX;
 
-	for (int i = 0; i < gLights.m_NoLights; i++)
+	for (int i = 0; i < gLights.NoLights; i++)
 	{
-		ErLight& Light = gLights.m_LightList[i];
+		ErLight& Light = gLights.LightList[i];
 		
 		RaySample LocalRS(RaySample::Light);
 
@@ -241,7 +241,7 @@ DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, RaySample RS, CRN
 
 	LS.LargeStep(RNG);
 
-	const int LightID = floorf(RNG.Get1() * gLights.m_NoLights);
+	const int LightID = floorf(RNG.Get1() * gLights.NoLights);
 
 	return EstimateDirectLight(Type, LS, RS, RNG, Shader, LightID);
 }
@@ -307,17 +307,30 @@ DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 
 DEV void HitTestReflector(ErReflector& Reflector, Ray R, RaySample& RS)
 {
-	Ray TR = TransformRay(R, Reflector.InvTM);
+	Ray TR = TransformRay(R, Reflector.Shape.InvTM);
 
-	Intersection Int = IntersectPlane(TR, false, Vec2f(Reflector.Size[0], Reflector.Size[1]));
+	Intersection Int;
+
+	switch (Reflector.Shape.Type)
+	{
+		case 0:	Int = IntersectPlane(TR, Reflector.Shape.OneSided, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]));		break;
+		case 1:	Int = IntersectDisk(TR, Reflector.Shape.OneSided, Reflector.Shape.OuterRadius);										break;
+		case 2:	Int = IntersectRing(TR, Reflector.Shape.OneSided, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius);		break;
+		case 3:	Int = IntersectBox(TR, ToVec3f(Reflector.Shape.Size), NULL);														break;
+		case 4:	Int = IntersectSphere(TR, Reflector.Shape.OuterRadius);																break;
+		case 5:	Int = IntersectCylinder(TR, Reflector.Shape.OuterRadius, Reflector.Shape.Size[1]);									break;
+	}
 
 	if (Int.Valid)
 	{
-		const Vec3f Pw = TransformPoint(Reflector.TM, Int.P);
-		const Vec3f Nw = TransformVector(Reflector.TM, Int.N);
-		const float Tw = Length(Pw - R.O);
-
-		RS.SetValid(Tw, Pw, Nw, -R.D, ColorXYZf(0.0f), Int.UV, 1.0f);
+		RS.Valid	= true;
+		RS.P 		= TransformPoint(Reflector.Shape.TM, Int.P);
+		RS.N 		= TransformVector(Reflector.Shape.TM, Int.N);
+		RS.T 		= Length(RS.P - R.O);
+		RS.Wo		= -R.D;
+		RS.Le		= ColorXYZf(0.0f);
+		RS.Pdf		= 1.0f;
+		RS.UV		= Int.UV;
 	}
 }
 
