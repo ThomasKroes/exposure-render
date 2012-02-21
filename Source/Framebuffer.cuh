@@ -63,7 +63,7 @@ public:
 
 	void Reset(void)
 	{
-//		this->CudaRunningEstimateXyza.Reset();
+		this->CudaRunningEstimateXyza.Reset();
 		this->CudaFrameEstimateXyza.Reset();
 //		this->CudaFrameBlurXyza.Reset();
 		this->CudaRunningEstimateRgbaLdr.Reset();

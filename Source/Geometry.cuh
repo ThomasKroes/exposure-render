@@ -191,6 +191,7 @@ struct RaySample
 	float		Pdf;
 	Vec2f		UV;
 	int			ReflectorID;
+	int			LightID;
 
 	HOD RaySample(SampleType Type)
 	{
@@ -234,6 +235,7 @@ struct RaySample
 		this->UV			= Other.UV;
 		this->Pdf			= Other.Pdf;
 		this->ReflectorID	= Other.ReflectorID;
+		this->LightID		= Other.LightID;
 
 		return *this;
 	}
@@ -260,12 +262,14 @@ struct SurfaceSample
 struct LightSurfaceSample : public SurfaceSample
 {
 	Vec3f		Wo;
+	Vec3f		Wi;
 	ColorXYZf	Le;
 	float		Pdf;
 
 	HOD LightSurfaceSample& LightSurfaceSample::operator = (const LightSurfaceSample& Other)
 	{
 		this->Wo	= Other.Wo;
+		this->Wi	= Other.Wi;
 		this->Le	= Other.Le;
 		this->Pdf	= Other.Pdf;
 
