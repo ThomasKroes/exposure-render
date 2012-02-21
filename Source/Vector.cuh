@@ -34,13 +34,19 @@ public:
 	HOD Vec()
 	{
 		for (int i = 0; i < Size; i++)
-			m_D[i] = T();
+			this->m_D[i] = T();
+	}
+
+	HOD Vec(T V)
+	{
+		for (int i = 0; i < Size; i++)
+			this->m_D[i] = V;
 	}
 
 	HOD Vec(const Vec<T, Size>& D)
 	{
 		for (int i = 0; i < Size; i++)
-			m_D[i] = D[i];
+			this->m_D[i] = D[i];
 	}
 
 	HOD Vec(const T& Other)
@@ -51,19 +57,19 @@ public:
 	HOD Vec<T, Size>& operator = (const Vec<T, Size>& Other)
 	{
 		for (int i = 0; i < Size; i++)
-			m_D[i] = Other[i];
+			this->m_D[i] = Other[i];
 
 		return *this;
 	}
 
 	HOD T operator[](const int& i) const
 	{
-		return m_D[i];
+		return this->m_D[i];
 	}
 
 	HOD T& operator[](const int& i)
 	{
-		return m_D[i];
+		return this->m_D[i];
 	}
 
 	HOD Vec<T, Size> operator + (Vec<T, Size> V) const
@@ -107,7 +113,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = m_D[i] * f;
+			Result[i] = this->m_D[i] * f;
 
 		return Result;
 	}
@@ -115,7 +121,7 @@ public:
 	HOD Vec<T, Size>& operator *= (const float& f)
 	{
 		for (int i = 0; i < Size; i++)
-			m_D[i] *= f;
+			this->m_D[i] *= f;
 
 		return *this;
 	}
@@ -123,7 +129,7 @@ public:
 	HOD Vec<T, Size>& operator *= (const Vec<T, Size>& V)
 	{
 		for (int i = 0; i < Size; i++)
-			m_D[i] *= V[i];
+			this->m_D[i] *= V[i];
 
 		return *this;
 	}
@@ -135,7 +141,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = m_D[i] * Inv;
+			Result[i] = this->m_D[i] * Inv;
 
 		return Result;
 	}
@@ -145,7 +151,7 @@ public:
 		const float Inv = 1.0f / f;
 
 		for (int i = 0; i < Size; i++)
-			m_D[i] *= Inv;
+			this->m_D[i] *= Inv;
 
 		return *this;
 	}
@@ -153,7 +159,7 @@ public:
 	HOD Vec<T, Size>& operator /= (Vec<T, Size> V)
 	{
 		for (int i = 0; i < Size; i++)
-			m_D[i] / V[i];
+			this->m_D[i] / V[i];
 
 		return *this;
 	}
@@ -162,7 +168,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (m_D[i] > V[i])
+			if (this->m_D[i] > V[i])
 				return false;
 		}
 
@@ -173,7 +179,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (m_D[i] > V[i])
+			if (this->m_D[i] > V[i])
 				return false;
 		}
 
@@ -184,7 +190,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (m_D[i] < V[i])
+			if (this->m_D[i] < V[i])
 				return false;
 		}
 
@@ -195,7 +201,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (m_D[i] < V[i])
+			if (this->m_D[i] < V[i])
 				return false;
 		}
 
@@ -206,7 +212,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (m_D[i] != V[i])
+			if (this->m_D[i] != V[i])
 				return false;
 		}
 
@@ -217,7 +223,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (m_D[i] != V[i])
+			if (this->m_D[i] != V[i])
 				return true;
 		}
 
@@ -230,8 +236,8 @@ public:
 
 		for (int i = 1; i < Size; i++)
 		{
-			if (m_D[i] > m_D[i - 1])
-				Max = m_D[i];
+			if (m_D[i] > this->m_D[i - 1])
+				Max = this->m_D[i];
 		}
 
 		return Max;
@@ -243,11 +249,17 @@ public:
 
 		for (int i = 1; i < Size; i++)
 		{
-			if (m_D[i] < m_D[i - 1])
-				Min = m_D[i];
+			if (this->m_D[i] < m_D[i - 1])
+				Min = this->m_D[i];
 		}
 
 		return Min;
+	}
+
+	HOD void Clamp(T Min, T Max)
+	{
+		for (int i = 0; i < Size; ++i)
+			this->m_D[i] = max(Min, min(this->m_D[i], Max));
 	}
 
 protected:
@@ -258,22 +270,22 @@ template <class T>
 class Vec2 : public Vec<T, 2>
 {
 public:
-	HOD Vec2(void)
+	HOD Vec2()
 	{
-		this->m_D[0] = T();
-		this->m_D[1] = T();
+		for (int i = 0; i < 2; i++)
+			this->m_D[i] = T();
+	}
+
+	HOD Vec2(T V)
+	{
+		for (int i = 0; i < 2; i++)
+			this->m_D[i] = V;
 	}
 
 	HOD Vec2(T V1, T V2)
 	{
 		this->m_D[0] = V1;
 		this->m_D[1] = V2;
-	}
-
-	HOD Vec2(float xy)
-	{
-		this->m_D[0] = xy;
-		this->m_D[1] = xy;
 	}
 
 	HOD float LengthSquared(void) const
@@ -300,9 +312,14 @@ class Vec3 : public Vec<T, 3>
 public:
 	HOD Vec3()
 	{
-		m_D[0] = T();
-		m_D[1] = T();
-		m_D[2] = T();
+		for (int i = 0; i < 3; i++)
+			this->m_D[i] = T();
+	}
+
+	HOD Vec3(T V)
+	{
+		for (int i = 0; i < 3; i++)
+			this->m_D[i] = V;
 	}
 
 	HOD Vec3(T V1, T V2, T V3)
@@ -310,13 +327,6 @@ public:
 		m_D[0] = V1;
 		m_D[1] = V2;
 		m_D[2] = V3;
-	}
-
-	HOD Vec3(float F)
-	{
-		this->m_D[0] = F;
-		this->m_D[1] = F;
-		this->m_D[2] = F;
 	}
 
 	HOD float LengthSquared(void) const
@@ -369,12 +379,16 @@ template <class T>
 class Vec4 : public Vec<T, 4>
 {
 public:
-	HOD Vec4(void)
+	HOD Vec4()
 	{
-		m_D[0] = T();
-		m_D[1] = T();
-		m_D[2] = T();
-		m_D[3] = T();
+		for (int i = 0; i < 4; i++)
+			this->m_D[i] = T();
+	}
+
+	HOD Vec4(T V)
+	{
+		for (int i = 0; i < 4; i++)
+			this->m_D[i] = V;
 	}
 
 	HOD Vec4(T V1, T V2, T V3, T V4)
@@ -383,33 +397,6 @@ public:
 		m_D[1] = V2;
 		m_D[2] = V3;
 		m_D[3] = V4;
-	}
-
-	HOD Vec4(float F)
-	{
-		this->m_D[0] = F;
-		this->m_D[1] = F;
-		this->m_D[2] = F;
-		this->m_D[3] = F;
-	}
-
-	HOD float LengthSquared(void) const
-	{
-		return this->m_D[0] * this->m_D[0] + this->m_D[1] * this->m_D[1] + this->m_D[2] * this->m_D[2] + this->m_D[3] * this->m_D[3];
-	}
-
-	HOD float Length(void) const
-	{
-		return sqrtf(this->LengthSquared());
-	}
-
-	HOD void Normalize(void)
-	{
-		const float L = this->Length();
-		this->m_D[0] /= L;
-		this->m_D[1] /= L;
-		this->m_D[2] /= L;
-		this->m_D[3] /= L;
 	}
 };
 

@@ -26,15 +26,15 @@
 
 DEV Vec3f TransformVector(ErMatrix44 TM, Vec3f v)
 {
-  Vec3f r;
+	Vec3f r;
 
-  float x = v[0], y = v[1], z = v[2];
+	float x = v[0], y = v[1], z = v[2];
 
-  r[0] = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
-  r[1] = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
-  r[2] = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
+	r[0] = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
+	r[1] = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
+	r[2] = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
 
-  return r;
+	return r;
 }
 
 DEV Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)

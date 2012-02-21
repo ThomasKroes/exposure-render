@@ -20,14 +20,14 @@ class CRNG
 public:
 	HOD CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
 	{
-		m_pSeed0 = pSeed0;
-		m_pSeed1 = pSeed1;
+		this->m_pSeed0 = pSeed0;
+		this->m_pSeed1 = pSeed1;
 	}
 
 	HOD float Get1(void)
 	{
-		*m_pSeed0 = 36969 * ((*m_pSeed0) & 65535) + ((*m_pSeed0) >> 16);
-		*m_pSeed1 = 18000 * ((*m_pSeed1) & 65535) + ((*m_pSeed1) >> 16);
+		*this->m_pSeed0 = 36969 * ((*m_pSeed0) & 65535) + ((*m_pSeed0) >> 16);
+		*this->m_pSeed1 = 18000 * ((*m_pSeed1) & 65535) + ((*m_pSeed1) >> 16);
 
 		unsigned int ires = ((*m_pSeed0) << 16) + (*m_pSeed1);
 

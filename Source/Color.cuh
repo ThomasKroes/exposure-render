@@ -41,53 +41,59 @@ class ColorRGB : public Vec<T, Size>
 public:
 	HOD ColorRGB(void)
 	{
+		this->SetBlack();
 	}
 
-	HOD ColorRGB(const T& R, const T& G, const T& B)
+	HOD ColorRGB(T RGB)
 	{
-		Set(R, G, B);
+		this->Set(RGB, RGB, RGB);
 	}
 
-	HOD void Set(const T& R, const T& G, const T& B)
+	HOD ColorRGB(T R, T G, T B)
 	{
-		SetR(R);
-		SetG(G);
-		SetB(B);
+		this->Set(R, G, B);
+	}
+
+	HOD void Set(T R, T G, T B)
+	{
+		this->SetR(R);
+		this->SetG(G);
+		this->SetB(B);
 	}
 
 	HOD T GetR(void) const
 	{
-		return m_D[0];
+		return this->m_D[0];
 	}
 
 	HOD void SetR(const T& R)
 	{
-		m_D[0] = R;
+		this->m_D[0] = R;
 	}
 
 	HOD T GetG(void) const
 	{
-		return m_D[1];
+		return this->m_D[1];
 	}
 
 	HOD void SetG(const T& G)
 	{
-		m_D[1] = G;
+		this->m_D[1] = G;
 	}
 
 	HOD T GetB(void) const
 	{
-		return m_D[2];
+		return this->m_D[2];
 	}
 
 	HOD void SetB(const T& B)
 	{
-		m_D[2] = B;
+		this->m_D[2] = B;
 	}
 
 	HOD void SetBlack(void)
 	{
-		Set(T(), T(), T());
+		this->Set(T(), T(), T());
 	}
 };
 
@@ -95,38 +101,53 @@ template <class T>
 class ColorRGBA : public ColorRGB<T, 4>
 {
 public:
-	HOD void Set(const T& R, const T& G, const T& B, const T& A)
+	HOD ColorRGBA(void)
 	{
-		SetR(R);
-		SetG(G);
-		SetB(B);
-		SetA(A);
+		this->SetBlack();
+	}
+
+	HOD ColorRGBA(T RGBA)
+	{
+		this->Set(RGBA, RGBA, RGBA, RGBA);
+	}
+
+	HOD void Set(T R, T G, T B, T A)
+	{
+		this->SetR(R);
+		this->SetG(G);
+		this->SetB(B);
+		this->SetA(A);
 	}
 
 	HOD T GetA(void) const
 	{
-		return m_D[3];
+		return this->m_D[3];
 	}
 
 	HOD void SetA(const T& A)
 	{
-		m_D[3] = A;
+		this->m_D[3] = A;
 	}
 };
 
 class ColorRGBuc : public ColorRGB<unsigned char, 3>
 {
 public:
+	HOD ColorRGBuc(unsigned char RGB)
+	{
+		this->Set(RGB, RGB, RGB);
+	}
+
 	HOD ColorRGBuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0)
 	{
-		Set(R, G, B);
+		this->Set(R, G, B);
 	}
 
 	HOD void FromRGBf(const float& R, const float& G, const float& B)
 	{
-		SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
-		SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
-		SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
+		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
+		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
+		this->SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
 	}
 
 	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
@@ -145,43 +166,48 @@ public:
 		clamp2(G, 0.0f, 1.0f);
 		clamp2(B, 0.0f, 1.0f);
 
-		SetR((unsigned char)(R * 255.0f));
-		SetG((unsigned char)(G * 255.0f));
-		SetB((unsigned char)(B * 255.0f));
+		this->SetR((unsigned char)(R * 255.0f));
+		this->SetG((unsigned char)(G * 255.0f));
+		this->SetB((unsigned char)(B * 255.0f));
 	}
 
 	HOD void SetBlack(void)
 	{
-		Set(0, 0, 0);
+		this->Set(0, 0, 0);
 	}
 
 	HOD void SetWhite(void)
 	{
-		Set(255, 255, 255);
+		this->Set(255, 255, 255);
 	}
 };
 
 class ColorRGBAuc : public ColorRGBA<unsigned char>
 {
 public:
+	HOD ColorRGBAuc(unsigned char RGBA)
+	{
+		this->Set(RGBA, RGBA, RGBA, RGBA);
+	}
+
 	HOD ColorRGBAuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0, const unsigned char& A = 0)
 	{
-		Set(R, G, B, A);
+		this->Set(R, G, B, A);
 	}
 
 	HOD ColorRGBAuc(const ColorRGBuc& RGB)
 	{
-		SetR(RGB.GetR());
-		SetG(RGB.GetG());
-		SetB(RGB.GetB());
+		this->SetR(RGB.GetR());
+		this->SetG(RGB.GetG());
+		this->SetB(RGB.GetB());
 	}
 
 	HOD void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
 	{
-		SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
-		SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
-		SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
-		SetA(clamp2(A, 0.0f, 1.0f) * 255.0f);
+		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
+		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
+		this->SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
+		this->SetA(clamp2(A, 0.0f, 1.0f) * 255.0f);
 	}
 
 	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
@@ -200,19 +226,19 @@ public:
 		clamp2(G, 0.0f, 1.0f);
 		clamp2(B, 0.0f, 1.0f);
 
-		SetR((unsigned char)(R * 255.0f));
-		SetG((unsigned char)(G * 255.0f));
-		SetB((unsigned char)(B * 255.0f));
+		this->SetR((unsigned char)(R * 255.0f));
+		this->SetG((unsigned char)(G * 255.0f));
+		this->SetB((unsigned char)(B * 255.0f));
 	}
 
 	HOD void SetBlack(void)
 	{
-		Set(0, 0, 0, 0);
+		this->Set(0, 0, 0, 0);
 	}
 
 	HOD void SetWhite(void)
 	{
-		Set(255, 255, 255, 0);
+		this->Set(255, 255, 255, 0);
 	}
 };
 
@@ -221,62 +247,54 @@ class ColorXYZf : public Vec3f
 public:
 	HOD ColorXYZf(float V = 0.0f)
 	{
-		Set(V, V, V);
+		this->Set(V, V, V);
 	}
 
 	HOD ColorXYZf(float X, float Y, float Z)
 	{
-		Set(X, Y, Z);
+		this->Set(X, Y, Z);
 	}
 
 	HOD void Set(float X, float Y, float Z)
 	{
-		SetX(X);
-		SetY(Y);
-		SetZ(Z);
+		this->SetX(X);
+		this->SetY(Y);
+		this->SetZ(Z);
 	}
 
 	HOD ColorXYZf(float V[3])
 	{
-		Set(V[0], V[1], V[2]);
+		this->Set(V[0], V[1], V[2]);
 	}
 
 	HOD float GetX(void) const
 	{
-		return m_D[0];
+		return this->m_D[0];
 	}
 
 	HOD void SetX(float X)
 	{
-		m_D[0] = X;
+		this->m_D[0] = X;
 	}
 
 	HOD float GetY(void) const
 	{
-		return m_D[1];
+		return this->m_D[1];
 	}
 
 	HOD void SetY(float Y)
 	{
-		m_D[1] = Y;
+		this->m_D[1] = Y;
 	}
 
 	HOD float GetZ(void) const
 	{
-		return m_D[2];
+		return this->m_D[2];
 	}
 
 	HOD void SetZ(float Z)
 	{
-		m_D[2] = Z;
-	}
-
-	HOD ColorXYZf& operator += (const ColorXYZf& XYZ)
-	{
-		for (int i = 0; i < 3; ++i)
-			m_D[i] += XYZ[i];
-
-		return *this;
+		this->m_D[2] = Z;
 	}
 
 	HOD ColorXYZf operator + (const ColorXYZf& XYZ) const
@@ -288,7 +306,7 @@ public:
 
 		return Result;
 	}
-
+	
 	HOD ColorXYZf operator - (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
@@ -322,7 +340,7 @@ public:
 	HOD ColorXYZf& operator *= (const ColorXYZf& XYZ)
 	{
 		for (int i = 0; i < 3; i++)
-			m_D[i] *= XYZ[i];
+			this->m_D[i] *= XYZ[i];
 
 		return *this;
 	}
@@ -340,7 +358,7 @@ public:
 	HOD ColorXYZf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; ++i)
-			m_D[i] *= F;
+			this->m_D[i] *= F;
 
 		return *this;
 	}
@@ -363,30 +381,6 @@ public:
 		return *this;
 	}
 
-	HOD bool operator == (const ColorXYZf& XYZ) const
-	{
-		for (int i = 0; i < 3; ++i)
-			if (m_D[i] != XYZ[i])
-				return false;
-
-		return true;
-	}
-
-	HOD bool operator != (const ColorXYZf& XYZ) const
-	{
-		return !(*this == XYZ);
-	}
-
-	HOD float& operator[](int i)
-	{
-		return m_D[i];
-	}
-
-	HOD float operator[](int i) const
-	{
-		return m_D[i];
-	}
-
 	HOD ColorXYZf& ColorXYZf::operator = (const ColorXYZf& Other)
 	{
 		for (int i = 0; i < 3; ++i)
@@ -402,16 +396,6 @@ public:
 				return false;
 
 		return true;
-	}
-
-	HOD ColorXYZf Clamp(const float& L = 0.0f, const float& H = 1.0f) const
-	{
-		ColorXYZf Result;
-
-		for (int i = 0; i < 3; ++i)
-			Result[i] = clamp2(m_D[i], L, H);
-
-		return Result;
 	}
 
 	HOD float Y() const
@@ -617,30 +601,6 @@ public:
 		return *this;
 	}
 
-	HOD bool operator == (const ColorXYZAf& XYZ) const
-	{
-		for (int i = 0; i < 3; ++i)
-			if (m_D[i] != XYZ[i])
-				return false;
-
-		return true;
-	}
-
-	HOD bool operator != (const ColorXYZAf& XYZ) const
-	{
-		return !(*this == XYZ);
-	}
-
-	HOD float& operator[](int i)
-	{
-		return m_D[i];
-	}
-
-	HOD float operator[](int i) const
-	{
-		return m_D[i];
-	}
-
 	HOD ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
 	{
 		for (int i = 0; i < 3; ++i)
@@ -656,16 +616,6 @@ public:
 				return false;
 
 		return true;
-	}
-
-	HOD ColorXYZAf Clamp(const float& L = 0.0f, const float& H = 1.0f) const
-	{
-		ColorXYZAf Result;
-
-		for (int i = 0; i < 3; ++i)
-			Result[i] = clamp2(m_D[i], L, H);
-
-		return Result;
 	}
 
 	HOD float Y() const
@@ -843,11 +793,13 @@ public:
 		Set(rWeight[0] * X + rWeight[1] * Y + rWeight[2] * Z, gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z, bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z);
 	}
 
-	HOD void ToneMap(const float& InvExposure)
+	HOD void ToneMap(float InvExposure)
 	{
-		m_D[0] = Clamp(1.0f - expf(-(m_D[0] * InvExposure)), 0.0f, 1.0f);
-		m_D[1] = Clamp(1.0f - expf(-(m_D[1] * InvExposure)), 0.0f, 1.0f);
-		m_D[2] = Clamp(1.0f - expf(-(m_D[2] * InvExposure)), 0.0f, 1.0f);
+		this->m_D[0] = 1.0f - expf(-(this->m_D[0] * InvExposure));
+		this->m_D[1] = 1.0f - expf(-(this->m_D[1] * InvExposure));
+		this->m_D[2] = 1.0f - expf(-(this->m_D[2] * InvExposure));
+
+		this->Clamp(0.0f, 1.0f);
 	}
 };
 

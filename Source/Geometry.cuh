@@ -70,7 +70,6 @@ HOD inline void Swap(int& I1, int& I2)
 	I2 = TempInt;
 
 }
-class CColorXyz;
 
 class CRay
 {	
@@ -119,33 +118,6 @@ public:
 	float	m_MinT;			/*!< Minimum parametric range */
 	float	m_MaxT;			/*!< Maximum parametric range */
 	int		m_PixelID;		/*!< Pixel ID associated with the ray */
-};
-
-class CPixel
-{
-public:
-	HOD CPixel(void)
-	{
-		m_XY	= Vec2i(256);
-		m_ID	= 0;
-	}
-
-	HOD CPixel(const Vec2f& ImageXY, const Vec2i& Resolution)
-	{
-		m_XY	= Vec2i(floorf(ImageXY[0]), floorf(ImageXY[1]));
-		m_ID	= (m_XY[1] * Resolution[0]) + m_XY[0];
-	}
-
-	HOD CPixel& operator = (const CPixel& Other)
-	{
-		m_XY	= Other.m_XY; 
-		m_ID	= Other.m_ID;
-
-		return *this;
-	}
-
-	Vec2i	m_XY;		/*!< Pixel coordinates */
-	int		m_ID;		/*!< Pixel ID */
 };
 
 class CResolution2D
