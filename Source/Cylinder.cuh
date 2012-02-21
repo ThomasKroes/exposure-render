@@ -21,15 +21,15 @@
 // http://www.cl.cam.ac.uk/teaching/1999/AGraphHCI/SMAG/node2.html
 // http://mrl.nyu.edu/~dzorin/intro-graphics/lectures/lecture11/index.htm
 
-DEV Intersection IntersectCylinder(CRay R, float Radius, float Height)
+DEV Intersection IntersectCylinder(Ray R, float Radius, float Height)
 {
 	Intersection Int;
 
 	const float HalfHeight = 0.5f * Height;
 
-	const float A = (R.m_D[0] * R.m_D[0]) + (R.m_D[1] * R.m_D[1]);
-	const float B = 2.0f * (R.m_O[0]) * (R.m_D[0]) + 2.0f * (R.m_O[1]) * (R.m_D[1]);
-	const float C = (R.m_O[0] * R.m_O[0]) + (R.m_O[1] * R.m_O[1]) - (Radius * Radius);
+	const float A = (R.D[0] * R.D[0]) + (R.D[1] * R.D[1]);
+	const float B = 2.0f * (R.O[0]) * (R.D[0]) + 2.0f * (R.O[1]) * (R.D[1]);
+	const float C = (R.O[0] * R.O[0]) + (R.O[1] * R.O[1]) - (Radius * Radius);
     const float D = (B * B) - 4.0f * A * C;
     
     if (D < 0)
@@ -50,7 +50,7 @@ DEV Intersection IntersectCylinder(CRay R, float Radius, float Height)
 
 	Int.NearT	= T0;
 
-	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
 		return Int;
 
 	Int.FarT	= T1;

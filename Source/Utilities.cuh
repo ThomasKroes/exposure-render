@@ -61,22 +61,22 @@ DEV Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
 //		return Vec3f(xp, yp, zp) * (1.0f / wp);
 }
 
-DEV CRay TransformRay(CRay R, ErMatrix44 TM)
+DEV Ray TransformRay(Ray R, ErMatrix44 TM)
 {
-	CRay TR;
+	Ray TR;
 
-	Vec3f O		= TransformPoint(TM, R.m_O);
-	Vec3f D		= TransformVector(TM, R.m_D);
-	Vec3f MinP = R(R.m_MinT);
-	Vec3f MaxP = R(R.m_MaxT);
+	Vec3f O		= TransformPoint(TM, R.O);
+	Vec3f D		= TransformVector(TM, R.D);
+	Vec3f MinP 	= R(R.MinT);
+	Vec3f MaxP 	= R(R.MaxT);
 
 	float MinT = Length(MinP - O);
 	float MaxT = Length(MaxP - O);
 
-	TR.m_O		= O;
-	TR.m_D		= D;
-	TR.m_MinT	= R.m_MinT;
-	TR.m_MaxT	= R.m_MaxT;
+	TR.O		= O;
+	TR.D		= D;
+	TR.MinT		= R.MinT;
+	TR.MaxT		= R.MaxT;
 
 	return TR;
 }

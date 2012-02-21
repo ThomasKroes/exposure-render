@@ -21,7 +21,7 @@
 #define KRNL_SINGLE_SCATTERING_BLOCK_H		8
 #define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
 
-DEV inline void SampleVolume(CRay R, CRNG& RNG, RaySample& RS)
+DEV inline void SampleVolume(Ray R, CRNG& RNG, RaySample& RS)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
@@ -33,8 +33,8 @@ DEV inline void SampleVolume(CRay R, CRNG& RNG, RaySample& RS)
 	if (!Int.Valid)
 		return;
 
-	MinT[TID] = max(Int.NearT, R.m_MinT);
-	MaxT[TID] = min(Int.FarT, R.m_MaxT);
+	MinT[TID] = max(Int.NearT, R.MinT);
+	MaxT[TID] = min(Int.FarT, R.MaxT);
 
 	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
 	float Sum		= 0.0f;
@@ -46,7 +46,7 @@ DEV inline void SampleVolume(CRay R, CRNG& RNG, RaySample& RS)
 
 	while (Sum < S)
 	{
-		Ps = R.m_O + MinT[TID] * R.m_D;
+		Ps = R.O + MinT[TID] * R.D;
 
 		if (MinT[TID] >= MaxT[TID])
 			return;
@@ -57,10 +57,10 @@ DEV inline void SampleVolume(CRay R, CRNG& RNG, RaySample& RS)
 		MinT[TID]	+= gVolume.m_StepSize;
 	}
 
-	RS.SetValid(MinT[TID], Ps, NormalizedGradient(Ps), -R.m_D, ColorXYZf());
+	RS.SetValid(MinT[TID], Ps, NormalizedGradient(Ps), -R.D, ColorXYZf());
 }
 
-DEV inline bool FreePathRM(CRay R, CRNG& RNG)
+DEV inline bool FreePathRM(Ray R, CRNG& RNG)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
@@ -73,8 +73,8 @@ DEV inline bool FreePathRM(CRay R, CRNG& RNG)
 	if (!Int.Valid)
 		return false;
 
-	MinT[TID] = max(Int.NearT, R.m_MinT);
-	MaxT[TID] = min(Int.FarT, R.m_MaxT);
+	MinT[TID] = max(Int.NearT, R.MinT);
+	MaxT[TID] = min(Int.FarT, R.MaxT);
 
 	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
 	float Sum		= 0.0f;
@@ -84,7 +84,7 @@ DEV inline bool FreePathRM(CRay R, CRNG& RNG)
 
 	while (Sum < S)
 	{
-		Ps[TID] = R.m_O + MinT[TID] * R.m_D;
+		Ps[TID] = R.O + MinT[TID] * R.D;
 
 		if (MinT[TID] > MaxT[TID])
 			return false;

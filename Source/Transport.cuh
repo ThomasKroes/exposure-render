@@ -84,13 +84,13 @@ DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P)
 	}
 }
 
-DEV void HitTestLight(ErLight& Light, CRay R, RaySample& RS, bool RespectVisibility)
+DEV void HitTestLight(ErLight& Light, Ray R, RaySample& RS, bool RespectVisibility)
 {
 	if (RespectVisibility && !Light.m_Visible)
 		return;
 
 	// Transform ray into local shape coordinates
-	CRay TR = TransformRay(R, Light.m_InvTM);
+	Ray TR = TransformRay(R, Light.m_InvTM);
 
 	// Result of intersection
 	Intersection Int;
@@ -155,7 +155,7 @@ DEV void HitTestLight(ErLight& Light, CRay R, RaySample& RS, bool RespectVisibil
 	{
 		const Vec3f Pw = TransformPoint(Light.m_TM, Int.P);
 		const Vec3f Nw = TransformVector(Light.m_TM, Int.N);
-		const float Tw = Length(Pw - R.m_O);
+		const float Tw = Length(Pw - R.O);
 
 		// Compute PDF
 		const float Pdf = 1.0f / Light.m_Area;
@@ -194,11 +194,11 @@ DEV void HitTestLight(ErLight& Light, CRay R, RaySample& RS, bool RespectVisibil
 			}
 		}
 
-		RS.SetValid(Tw, Pw, Nw, -R.m_D, Le, Int.UV, Pdf);
+		RS.SetValid(Tw, Pw, Nw, -R.D, Le, Int.UV, Pdf);
 	}
 }
 
-DEV inline void SampleLights(CRay R, RaySample& RS, bool RespectVisibility = false)
+DEV inline void SampleLights(Ray R, RaySample& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX;
 
@@ -220,7 +220,7 @@ DEV inline void SampleLights(CRay R, RaySample& RS, bool RespectVisibility = fal
 
 DEV ColorXYZf SampleLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
 {
-	CRay Rl;
+	Ray Rl;
 
 	float ShaderPdf = 1.0f;
 
@@ -232,12 +232,12 @@ DEV ColorXYZf SampleLight(CVolumeShader::EType Type, LightingSample& LS, RaySamp
 
 	SampleLightSurface(LSS, RNG, RS.P);
 	
-	Rl.m_O		= LSS.P;
-	Rl.m_D		= Normalize(RS.P - LSS.P);
-	Rl.m_MinT	= 0.0f;
-	Rl.m_MaxT	= (RS.P - LSS.P).Length();
+	Rl.O		= LSS.P;
+	Rl.D		= Normalize(RS.P - LSS.P);
+	Rl.MinT		= 0.0f;
+	Rl.MaxT		= (RS.P - LSS.P).Length();
 
-	Wi = -Rl.m_D; 
+	Wi = -Rl.D; 
 
 	ColorXYZf F = Shader.F(RS.Wo, Wi); 
 
@@ -261,7 +261,7 @@ DEV ColorXYZf SampleShader(CVolumeShader::EType Type, LightingSample& LS, RaySam
 {
 	ColorXYZf Ld;
 
-	CRay Rl;
+	Ray Rl;
 
 	float ShaderPdf = 1.0f;
 
@@ -273,15 +273,15 @@ DEV ColorXYZf SampleShader(CVolumeShader::EType Type, LightingSample& LS, RaySam
 	{
 		RaySample RSn(RaySample::Light);
 
-		SampleLights(CRay(RS.P, Wi, 0.0f), RSn);
+		SampleLights(Ray(RS.P, Wi, 0.0f), RSn);
 
 		if (RSn.Valid)
 		{
 			// Compose light ray
-			Rl.m_O		= RSn.P;
-			Rl.m_D		= Normalize(RS.P - RSn.P);
-			Rl.m_MinT	= 0.0f;
-			Rl.m_MaxT	= (RS.P - RSn.P).Length();
+			Rl.O		= RSn.P;
+			Rl.D		= Normalize(RS.P - RSn.P);
+			Rl.MinT		= 0.0f;
+			Rl.MaxT		= (RS.P - RSn.P).Length();
 
 			if (RSn.Pdf > 0.0f && !RSn.Le.IsBlack() && !FreePathRM(Rl, RNG)) 
 			{
@@ -380,9 +380,9 @@ DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 
 
 
-DEV void HitTestReflector(ErReflector& Reflector, CRay R, RaySample& RS)
+DEV void HitTestReflector(ErReflector& Reflector, Ray R, RaySample& RS)
 {
-	CRay TR = TransformRay(R, Reflector.InvTM);
+	Ray TR = TransformRay(R, Reflector.InvTM);
 
 	Intersection Int = IntersectPlane(TR, false, Vec2f(Reflector.Size[0], Reflector.Size[1]));
 
@@ -390,13 +390,13 @@ DEV void HitTestReflector(ErReflector& Reflector, CRay R, RaySample& RS)
 	{
 		const Vec3f Pw = TransformPoint(Reflector.TM, Int.P);
 		const Vec3f Nw = TransformVector(Reflector.TM, Int.N);
-		const float Tw = Length(Pw - R.m_O);
+		const float Tw = Length(Pw - R.O);
 
-		RS.SetValid(Tw, Pw, Nw, -R.m_D, ColorXYZf(0.0f), Int.UV, 1.0f);
+		RS.SetValid(Tw, Pw, Nw, -R.D, ColorXYZf(0.0f), Int.UV, 1.0f);
 	}
 }
 
-DEV inline void SampleReflectors(CRay R, RaySample& RS)
+DEV inline void SampleReflectors(Ray R, RaySample& RS)
 {
 	float T = FLT_MAX;
 

@@ -20,6 +20,7 @@
 
 #include "Vector.cuh"
 #include "Color.cuh"
+#include "Ray.cuh"
 
 using namespace std;
 
@@ -70,55 +71,6 @@ HOD inline void Swap(int& I1, int& I2)
 	I2 = TempInt;
 
 }
-
-class CRay
-{	
-public:
-	// ToDo: Add description
-	HOD CRay(void)
-	{
-	};
-
-	// ToDo: Add description
-	HOD CRay(Vec3f Origin, Vec3f Dir, float MinT, float MaxT = INF_MAX, int PixelID = 0)
-	{
-		m_O			= Origin;
-		m_D			= Dir;
-		m_MinT		= MinT;
-		m_MaxT		= MaxT;
-		m_PixelID	= PixelID;
-	}
-
-	// ToDo: Add description
-	HOD ~CRay(void)
-	{
-	}
-
-	// ToDo: Add description
-	HOD CRay& operator=(const CRay& Other)
-	{
-		m_O			= Other.m_O;
-		m_D			= Other.m_D;
-		m_MinT		= Other.m_MinT;
-		m_MaxT		= Other.m_MaxT;
-		m_PixelID	= Other.m_PixelID;
-
-		// By convention, always return *this
-		return *this;
-	}
-
-	// ToDo: Add description
-	HOD Vec3f operator()(float t) const
-	{
-		return m_O + Normalize(m_D) * t;
-	}
-
-	Vec3f 	m_O;			/*!< Ray origin */
-	Vec3f 	m_D;			/*!< Ray direction */
-	float	m_MinT;			/*!< Minimum parametric range */
-	float	m_MaxT;			/*!< Maximum parametric range */
-	int		m_PixelID;		/*!< Pixel ID associated with the ray */
-};
 
 class CResolution2D
 {
@@ -219,8 +171,6 @@ inline float RandomFloat(void)
 {
 	return (float)rand() / RAND_MAX;
 }
-
-typedef unsigned char uChar;
 
 struct RaySample
 {

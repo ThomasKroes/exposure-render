@@ -17,13 +17,13 @@
 
 #include "Geometry.cuh"
 
-DEV Intersection IntersectUnitBox(CRay R)
+DEV Intersection IntersectUnitBox(Ray R)
 {
 	Intersection Int;
 
-	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.m_O);
-	const Vec3f TopT		= InvR * (Vec3f(0.5f) - R.m_O);
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
+	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.O);
+	const Vec3f TopT		= InvR * (Vec3f(0.5f) - R.O);
 	const Vec3f MinT		= MinVec3f(TopT, BottomT);
 	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
@@ -35,7 +35,7 @@ DEV Intersection IntersectUnitBox(CRay R)
 	Int.NearT	= LargestMinT > 0.0f ? LargestMinT : 0.0f;
 	Int.FarT	= LargestMaxT;
 
-	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
 		return Int;
 
 	Int.Valid	= true;
@@ -46,13 +46,13 @@ DEV Intersection IntersectUnitBox(CRay R)
 	return Int;
 }
 
-DEV Intersection IntersectBox(CRay R, Vec3f Min, Vec3f Max)
+DEV Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 {
 	Intersection Int;
 
-	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.m_D;
-	const Vec3f BottomT		= InvR * (Min - R.m_O);
-	const Vec3f TopT		= InvR * (Max - R.m_O);
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
+	const Vec3f BottomT		= InvR * (Min - R.O);
+	const Vec3f TopT		= InvR * (Max - R.O);
 	const Vec3f MinT		= MinVec3f(TopT, BottomT);
 	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
@@ -64,7 +64,7 @@ DEV Intersection IntersectBox(CRay R, Vec3f Min, Vec3f Max)
 	Int.NearT	= LargestMinT > 0.0f ? LargestMinT : 0.0f;
 	Int.FarT	= LargestMaxT;
 
-	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
 		return Int;
 
 	Int.Valid	= true;
@@ -75,7 +75,7 @@ DEV Intersection IntersectBox(CRay R, Vec3f Min, Vec3f Max)
 	return Int;
 }
 
-DEV Intersection IntersectBox(CRay R, Vec3f Size)
+DEV Intersection IntersectBox(Ray R, Vec3f Size)
 {
 	return IntersectBox(R, -0.5f * Size, 0.5f * Size);
 }

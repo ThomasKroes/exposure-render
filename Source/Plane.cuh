@@ -19,28 +19,28 @@
 
 #define INTERSECTION_EPSILON 0.0001f
 
-DEV Intersection IntersectPlane(CRay R, bool OneSided, float Offset = 0.0f)
+DEV Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
 {
 	Intersection Int;
 
 	// Avoid floating point precision issues near parallel intersections
-	if (fabs(R.m_O[2] - R.m_D[2]) < INTERSECTION_EPSILON)
+	if (fabs(R.O[2] - R.D[2]) < INTERSECTION_EPSILON)
 		return Int;
 
 	// Compute intersection distance
-	Int.NearT = (Offset - R.m_O[2]) / R.m_D[2];
+	Int.NearT = (Offset - R.O[2]) / R.D[2];
 	
-	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
 		return Int;
 
 	// Compute intersection point
-	Int.P[0] 	= R.m_O[0] + Int.NearT * (R.m_D[0]);
-	Int.P[1] 	= R.m_O[1] + Int.NearT * (R.m_D[1]);
+	Int.P[0] 	= R.O[0] + Int.NearT * (R.D[0]);
+	Int.P[1] 	= R.O[1] + Int.NearT * (R.D[1]);
 	Int.P[2] 	= 0.0f;
 	Int.UV		= Vec2f(Int.P[0], Int.P[1]);
 	Int.N		= Vec3f(0.0f, 0.0f, 1.0f);
 
-	if (OneSided && R.m_D[2] <= 0.0f)
+	if (OneSided && R.D[2] <= 0.0f)
 		Int.Front = false;
 
 	Int.Valid = true;
@@ -48,7 +48,7 @@ DEV Intersection IntersectPlane(CRay R, bool OneSided, float Offset = 0.0f)
 	return Int;
 }
 
-DEV Intersection IntersectUnitPlane(CRay R, bool OneSided)
+DEV Intersection IntersectUnitPlane(Ray R, bool OneSided)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -58,7 +58,7 @@ DEV Intersection IntersectUnitPlane(CRay R, bool OneSided)
 	return Int;
 }
 
-DEV Intersection IntersectPlane(CRay R, bool OneSided, Vec2f Size)
+DEV Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 

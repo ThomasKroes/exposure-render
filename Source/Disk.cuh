@@ -18,7 +18,7 @@
 #include "Geometry.cuh"
 #include "Plane.cuh"
 
-DEV Intersection IntersectUnitDisk(CRay R, bool OneSided)
+DEV Intersection IntersectUnitDisk(Ray R, bool OneSided)
 {
 	Intersection Int = IntersectUnitPlane(R, OneSided);
 
@@ -28,7 +28,7 @@ DEV Intersection IntersectUnitDisk(CRay R, bool OneSided)
 	return Int;
 }
 
-DEV Intersection IntersectDisk(CRay R, bool OneSided, float Radius)
+DEV Intersection IntersectDisk(Ray R, bool OneSided, float Radius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -38,7 +38,7 @@ DEV Intersection IntersectDisk(CRay R, bool OneSided, float Radius)
 	return Int;
 }
 
-DEV Intersection IntersectDisk(CRay R, bool OneSided, float Radius, float Offset)
+DEV Intersection IntersectDisk(Ray R, bool OneSided, float Radius, float Offset)
 {
 	Intersection Int = IntersectPlane(R, OneSided, Offset);
 

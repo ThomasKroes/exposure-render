@@ -18,7 +18,7 @@
 #include "Geometry.cuh"
 #include "Disk.cuh"
 
-DEV Intersection IntersectUnitRing(CRay R, bool OneSided, float InnerRadius)
+DEV Intersection IntersectUnitRing(Ray R, bool OneSided, float InnerRadius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -28,7 +28,7 @@ DEV Intersection IntersectUnitRing(CRay R, bool OneSided, float InnerRadius)
 	return Int;
 }
 
-DEV Intersection IntersectRing(CRay R, bool OneSided, float InnerRadius, float OuterRadius)
+DEV Intersection IntersectRing(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 

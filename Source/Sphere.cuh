@@ -19,14 +19,14 @@
 
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
 
-DEV Intersection IntersectSphere(CRay R, float Radius)
+DEV Intersection IntersectSphere(Ray R, float Radius)
 {
 	Intersection Int;
 
 	// Compute A, B and C coefficients
-    float a = Dot(R.m_D, R.m_D);
-	float b = 2 * Dot(R.m_D, R.m_O);
-    float c = Dot(R.m_O, R.m_O) - (Radius * Radius);
+    float a = Dot(R.D, R.D);
+	float b = 2 * Dot(R.D, R.O);
+    float c = Dot(R.O, R.O) - (Radius * Radius);
 
     //Find discriminant
     const float disc = b * b - 4 * a * c;
@@ -58,19 +58,19 @@ DEV Intersection IntersectSphere(CRay R, float Radius)
     }
 
 
-	if (t0 >= R.m_MinT && t0 < R.m_MaxT)
+	if (t0 >= R.MinT && t0 < R.MaxT)
 	{
 		Int.NearT = t0;
 	}
 	else
 	{
-		if (t1 >= R.m_MinT && t1 < R.m_MaxT)
+		if (t1 >= R.MinT && t1 < R.MaxT)
 			Int.NearT = t1;
 		else
 			return Int;
 	}
 
-	if (Int.NearT < R.m_MinT || Int.NearT > R.m_MaxT)
+	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
 		return Int;
 
 	Int.Valid	= true;
@@ -81,7 +81,7 @@ DEV Intersection IntersectSphere(CRay R, float Radius)
 	return Int;
 }
 
-DEV Intersection IntersectUnitSphere(CRay R)
+DEV Intersection IntersectUnitSphere(Ray R)
 {
 	return IntersectSphere(R, 1.0f);
 }

@@ -15,7 +15,7 @@
 
 #include "Transport.cuh"
 
-DEV RaySample SampleRay(CRay R, CRNG& RNG)
+DEV RaySample SampleRay(Ray R, CRNG& RNG)
 {
 	RaySample RS[3] = { RaySample(RaySample::ErVolume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
 
@@ -54,12 +54,12 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	ScreenPoint[0] = gCamera.m_Screen[0][0] + (gCamera.m_InvScreen[0] * (float)X);
 	ScreenPoint[1] = gCamera.m_Screen[1][0] + (gCamera.m_InvScreen[1] * (float)Y);
 	
-	CRay Re;
+	Ray Re;
 
-	Re.m_O		= ToVec3f(gCamera.m_Pos);
-	Re.m_D		= Normalize(ToVec3f(gCamera.m_N) + (ScreenPoint[0] * ToVec3f(gCamera.m_U)) - (ScreenPoint[1] * ToVec3f(gCamera.m_V)));
-	Re.m_MinT	= gCamera.m_ClipNear;
-	Re.m_MaxT	= gCamera.m_ClipFar;
+	Re.O	= ToVec3f(gCamera.m_Pos);
+	Re.D	= Normalize(ToVec3f(gCamera.m_N) + (ScreenPoint[0] * ToVec3f(gCamera.m_U)) - (ScreenPoint[1] * ToVec3f(gCamera.m_V)));
+	Re.MinT	= gCamera.m_ClipNear;
+	Re.MaxT	= gCamera.m_ClipFar;
 
 	if (gCamera.m_ApertureSize != 0.0f)
 	{
@@ -67,8 +67,8 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 		const Vec3f LI = ToVec3f(gCamera.m_U) * LensUV[0] + ToVec3f(gCamera.m_V) * LensUV[1];
 
-		Re.m_O += LI;
-		Re.m_D = Normalize(Re.m_D * gCamera.m_FocalDistance - LI);
+		Re.O += LI;
+		Re.D = Normalize(Re.D * gCamera.m_FocalDistance - LI);
 	}
 
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
@@ -105,9 +105,9 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 				float Pdf;
 
-				const ColorXYZf F = Shader.SampleF(-Re.m_D, Wi, Pdf, S);
+				const ColorXYZf F = Shader.SampleF(-Re.D, Wi, Pdf, S);
 
-				const RaySample ReflectorRS = SampleRay(CRay(NearestRS.P, Wi, 0.0f), RNG);
+				const RaySample ReflectorRS = SampleRay(Ray(NearestRS.P, Wi, 0.0f), RNG);
 
 				if (ReflectorRS.Valid && ReflectorRS.Type == RaySample::ErVolume)
 				{
