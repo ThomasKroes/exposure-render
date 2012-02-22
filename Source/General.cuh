@@ -54,6 +54,10 @@ struct EXPOSURE_RENDER_DLL ErVolume
 	float				m_IntensityMax;
 	float				m_IntensityRange;
 	float				m_IntensityInvRange;
+	float				m_GradientMin;
+	float				m_GradientMax;
+	float				m_GradientRange;
+	float				m_GradientInvRange;
 	float				m_StepSize;
 	float				m_StepSizeShadow;
 	float				m_DensityScale;
