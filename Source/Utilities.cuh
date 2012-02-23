@@ -219,7 +219,7 @@ DEV ColorXYZf GetEmission(float Intensity)
 	return ColorXYZf(Emission.x, Emission.y, Emission.z);
 }
 
-DEV inline Vec3f NormalizedGradient(Vec3f P)
+DEV inline Vec3f Gradient(Vec3f P)
 {
 	Vec3f Gradient;
 
@@ -245,7 +245,17 @@ DEV inline Vec3f NormalizedGradient(Vec3f P)
 	Gradient[1] = (Ints[1][1] - Ints[1][0]) * gVolume.m_InvGradientDelta;
 	Gradient[2] = (Ints[2][1] - Ints[2][0]) * gVolume.m_InvGradientDelta;
 
-	return Normalize(Gradient);
+	return Gradient;
+}
+
+DEV inline Vec3f NormalizedGradient(Vec3f P)
+{
+	return Normalize(Gradient(P));
+}
+
+DEV inline float GradientMagnitude(Vec3f P)
+{
+	return Gradient(P).Length();
 }
 
 DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)

@@ -250,36 +250,69 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 {
 	const float I = GetIntensity(RS.P);
 
-//	Lv += GetEmission(Intensity);
-
 	switch (gVolume.m_ShadingType)
 	{
 		case 0:
 		{
 			CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
-			return UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
+			return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
 		}
 	
 		case 1:
 		{
 			CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
-			return UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
+			return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
 		}
 
-		/*
 		case 2:
 		{
-			const float GradMag = GradientMagnitude(Pe) * gVolume.m_IntensityInvRange;
-			const float PdfBrdf = (1.0f - __expf(-pScene->m_GradientFactor * GradMag));
+			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
+			const float PdfBrdf = (1.0f - __expf(-gVolume.m_GradientFactor * NormalizedGradientMagnitude));
 
 			if (RNG.Get1() < PdfBrdf)
-				Lv += UniformSampleOneLight(pScene, CVolumeShader::Brdf, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, true);
+			{
+				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
+			}
 			else
-				Lv += 0.5f * UniformSampleOneLight(pScene, CVolumeShader::Phase, D, Normalize(-Re.m_D), Pe, NormalizedGradient(Pe), RNG, false);
-
-			break;
+			{
+				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				return GetEmission(I) + 0.5f * UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
+			}
 		}
-		*/
+
+		case 3:
+		{
+			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
+			const float PdfBrdf = NormalizedGradientMagnitude;
+
+			if (RNG.Get1() < PdfBrdf)
+			{
+				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
+			}
+			else
+			{
+				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				return GetEmission(I) + 0.5f * UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
+			}
+		}
+
+		case 4:
+		{
+			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
+
+			if (NormalizedGradientMagnitude < gVolume.GradientThreshold)
+			{
+				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
+			}
+			else
+			{
+				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				return GetEmission(I) + 0.5f * UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
+			}
+		}
 	}
 
 	return ColorXYZf(0.0f);
