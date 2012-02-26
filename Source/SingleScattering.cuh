@@ -20,8 +20,8 @@ DEV RaySample SampleRay(Ray R, CRNG& RNG)
 	RaySample RS[3] = { RaySample(RaySample::ErVolume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
 
 	SampleVolume(R, RNG, RS[0]);
-	SampleLights(R, RS[1], true);
-	SampleReflectors(R, RS[2]);
+	IntersectLights(R, RS[1], true);
+	IntersectReflectors(R, RS[2]);
 
 	float T = FLT_MAX;
 
@@ -121,7 +121,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 		}
 	}
 
-	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), 0.0f);
+	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), NearestRS.Valid ? 1.0f : 0.0f);
 
 	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
 

@@ -18,6 +18,7 @@
 // using namespace ExposureRender;
 
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
+texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexEnvironmentGradient;
 texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexOpacity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexDiffuse;
@@ -30,6 +31,7 @@ cudaChannelFormatDesc gFloatChannelDesc = cudaCreateChannelDesc<float>();
 cudaChannelFormatDesc gFloat4ChannelDesc = cudaCreateChannelDesc<float4>();
 
 cudaArray* gpIntensity			= NULL;
+cudaArray* gpGradientMagnitude	= NULL;
 cudaArray* gEnvironmentGradient	= NULL;
 cudaArray* gpOpacity			= NULL;
 cudaArray* gpDiffuse			= NULL;
@@ -110,6 +112,39 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 }
 
 void ErUnbindDensityBuffer(void)
+{
+	HandleCudaError(cudaFreeArray(gpIntensity));
+	gpIntensity = NULL;
+	HandleCudaError(cudaUnbindTexture(gTexIntensity));
+}
+
+void ErBindGradientMagnitude(unsigned short* pGradientMagnitude, int Extent[3])
+{
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<unsigned short>();
+
+	cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
+
+	HandleCudaError(cudaMalloc3DArray(&gpIntensity, &ChannelDesc, CudaExtent));
+
+	cudaMemcpy3DParms CopyParams = {0};
+
+	CopyParams.srcPtr		= make_cudaPitchedPtr(pGradientMagnitude, CudaExtent.width * sizeof(unsigned short), CudaExtent.width, CudaExtent.height);
+	CopyParams.dstArray		= gpIntensity;
+	CopyParams.extent		= CudaExtent;
+	CopyParams.kind			= cudaMemcpyHostToDevice;
+	
+	HandleCudaError(cudaMemcpy3D(&CopyParams));
+
+	gTexIntensity.normalized		= true;
+	gTexIntensity.filterMode		= cudaFilterModeLinear;      
+	gTexIntensity.addressMode[0]	= cudaAddressModeClamp;  
+	gTexIntensity.addressMode[1]	= cudaAddressModeClamp;
+  	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
+
+	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc));
+}
+
+void ErUnbindGradientMagnitude(void)
 {
 	HandleCudaError(cudaFreeArray(gpIntensity));
 	gpIntensity = NULL;

@@ -255,12 +255,13 @@ DEV inline Vec3f NormalizedGradient(Vec3f P)
 
 DEV inline float GradientMagnitude(Vec3f P)
 {
+//	return (float)(USHRT_MAX * tex3D(gTexGradientMagnitude, (P[0] - gVolume.m_MinAABB[0]) * gVolume.m_InvSize[0], (P[1] - gVolume.m_MinAABB[1]) * gVolume.m_InvSize[1], (P[2] - gVolume.m_MinAABB[2]) * gVolume.m_InvSize[2]));
 	return Gradient(P).Length();
 }
 
 DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
 {
-	 return A + ((Ax - A) / max((float)N, 1.0f));
+	return A + (Ax - A) / max((float)N, 1.0f);
 }
 
 DEV ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)

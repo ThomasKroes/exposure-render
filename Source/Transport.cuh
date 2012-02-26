@@ -13,147 +13,8 @@
 
 #pragma once
 
-#include "Shader.cuh"
-#include "RayMarching.cuh"
-#include "General.cuh"
-
-//using namespace ExposureRender;
-
-DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int LightID)
-{
-	ErLight& L = gLights.LightList[LightID];
-
-	SurfaceSample SS;
-
-	switch (L.Type)
-	{
-		case 0:
-		{
-			switch (L.Shape.Type)
-			{
-				case 0:	SamplePlane(SS, RNG.Get2(), Vec2f(L.Shape.Size[0], L.Shape.Size[1]));		break;
-				case 1:	SampleDisk(SS, RNG.Get2(), L.Shape.OuterRadius);							break;
-				case 2:	SampleRing(SS, RNG.Get2(), L.Shape.InnerRadius, L.Shape.OuterRadius);		break;
-				case 3:	SampleBox(SS, RNG.Get3(), ToVec3f(L.Shape.Size));							break;
-				case 4:	SampleSphere(SS, RNG.Get2(), L.Shape.OuterRadius);							break;
-			}
-
-			break;
-		}
-		
-		case 1:	SampleSphere(SS, RNG.Get2(), L.Shape.InnerRadius);	break;
-	}
-
-	LSS.P	= TransformPoint(L.Shape.TM, SS.P);
-	LSS.N	= TransformVector(L.Shape.TM, SS.N);
-	LSS.Wi	= Normalize(P - LSS.P);
-	LSS.Pdf	= DistanceSquared(P, LSS.P) / SS.Area;
-//	LSS.Pdf	= DistanceSquared(P, LSS.P) / AbsDot(LSS.Wi, LSS.N) * SS.Area;
-
-//	if (L.m_OneSided && Dot(LSS.Wi, LSS.N) < 0.0f)
-//		return;
-
-	switch (L.Type)
-	{
-		// Area light
-		case 0:
-		{
-			LSS.Le = ColorXYZf(L.Color[0], L.Color[1], L.Color[2]) / SS.Area;
-			break;
-		}
-
-		// Environment light
-		case 1:
-		{
-			switch (L.TextureType)
-			{
-				// Uniform color
-				case 0:
-				{
-					LSS.Le = ColorXYZf(L.Color[0], L.Color[1], L.Color[2]) / SS.Area;
-					break;
-				}
-
-				// Gradient
-				case 1:
-				{
-					float4 Col = tex1D(gTexEnvironmentGradient, SS.UV[1]);
-					LSS.Le = ColorXYZf(Col.x, Col.y, Col.z) / SS.Area;
-					break;
-				}
-			}
-
-			break;
-		}
-	}
-}
-
-DEV void HitTestLight(ErLight& Light, Ray R, RaySample& RS, bool RespectVisibility)
-{
-	if (RespectVisibility && !Light.Visible)
-		return;
-
-	Ray TR = TransformRay(R, Light.Shape.InvTM);
-
-	Intersection Int;
-
-	switch (Light.Type)
-	{
-		case 0:
-		{
-			switch (Light.Shape.Type)
-			{
-				case 0:	Int = IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));	break;
-				case 1:	Int = IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius);								break;
-				case 2:	Int = IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius);	break;
-				case 3:	Int = IntersectBox(TR, ToVec3f(Light.Shape.Size), NULL);											break;
-				case 4:	Int = IntersectSphere(TR, Light.Shape.OuterRadius);													break;
-				case 5:	Int = IntersectCylinder(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);							break;
-			}
-			break;
-		}
-
-		case 1:
-		{
-			Int = IntersectSphere(TR, Light.Shape.OuterRadius);
-			break;
-		}
-	}
-
-	if (Int.Valid)
-	{
-		RS.Valid	= true;
-		RS.P 		= TransformPoint(Light.Shape.TM, Int.P);
-		RS.N 		= TransformVector(Light.Shape.TM, Int.N);
-		RS.T 		= Length(RS.P - R.O);
-		RS.Wo		= -R.D;
-		RS.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]) / Light.Shape.Area;
-		RS.Pdf		= DistanceSquared(R.O, RS.P) / (AbsDot(Normalize(R.O - RS.P), RS.N) * Light.Shape.Area);
-		RS.UV		= Int.UV;
-	}
-}
-
-DEV inline void SampleLights(Ray R, RaySample& RS, bool RespectVisibility = false)
-{
-	float T = FLT_MAX;
-
-	for (int i = 0; i < gLights.NoLights; i++)
-	{
-		ErLight& Light = gLights.LightList[i];
-		
-		RaySample LocalRS(RaySample::Light);
-
-		LocalRS.LightID = i;
-
-		HitTestLight(Light, R, LocalRS, RespectVisibility);
-
-		if (LocalRS.Valid && LocalRS.T < T)
-		{
-			RS = LocalRS;
-			T = LocalRS.T;
-		}
-	}
-}
+#include "Light.cuh"
+#include "Reflector.cuh"
 
 DEV ColorXYZf SampleLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader, int LightID)
 {
@@ -203,7 +64,7 @@ DEV ColorXYZf SampleShader(CVolumeShader::EType Type, LightingSample& LS, RaySam
 	
 	RaySample HitRS(RaySample::Light);
 
-	SampleLights(Ray(RS.P, Wi), HitRS);
+	IntersectLights(Ray(RS.P, Wi), HitRS);
 
 	if (!HitRS.Valid || HitRS.LightID != LightID || HitRS.Pdf <= 0.0f)
 		return SPEC_BLACK;
@@ -232,7 +93,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 	if (gScattering.SamplingStrategy == 1 || gScattering.SamplingStrategy == 2)
 		Ld += SampleShader(Type, LS, RS, RNG, Shader, LightID);
 
-	return Ld;
+	return (float)gLights.NoLights * Ld;
 }
 
 DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
@@ -254,29 +115,29 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 	{
 		case 0:
 		{
-			CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+			CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 			return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
 		}
 	
 		case 1:
 		{
-			CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+			CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 			return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
 		}
 
 		case 2:
 		{
 			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
-			const float PdfBrdf = (1.0f - __expf(-gVolume.m_GradientFactor * NormalizedGradientMagnitude));
+			const float PdfBrdf = GetOpacity(RS.P) * (1.0f - __expf(-gVolume.m_GradientFactor * NormalizedGradientMagnitude));
 
 			if (RNG.Get1() < PdfBrdf)
 			{
-				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 				return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
 			}
 			else
 			{
-				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 				return GetEmission(I) + 0.5f * UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
 			}
 		}
@@ -288,12 +149,12 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 			if (RNG.Get1() < PdfBrdf)
 			{
-				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 				return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
 			}
 			else
 			{
-				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 				return GetEmission(I) + 0.5f * UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
 			}
 		}
@@ -302,14 +163,16 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 		{
 			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
 
+			return NormalizedGradientMagnitude > 0.0f && NormalizedGradientMagnitude <= 1.0f ? ColorXYZf(10.0f, 0.0f, 0.0f) : ColorXYZf(0.0f, 10.0f, 0.0f);
+
 			if (NormalizedGradientMagnitude < gVolume.GradientThreshold)
 			{
-				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 				return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
 			}
 			else
 			{
-				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 5.0f, GetGlossiness(I));
+				CVolumeShader Shader(CVolumeShader::Phase, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), 50.0f, GetGlossiness(I));
 				return GetEmission(I) + 0.5f * UniformSampleOneLight(CVolumeShader::Phase, RS, RNG, Shader);
 			}
 		}
@@ -321,70 +184,6 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
 {
 	CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(gReflectors.ReflectorList[RS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.ReflectorList[RS.ReflectorID].SpecularColor), gReflectors.ReflectorList[RS.ReflectorID].Ior, gReflectors.ReflectorList[RS.ReflectorID].Glossiness);
-	//CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 2.5f, 500.0f);
+	
 	return UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-DEV void HitTestReflector(ErReflector& Reflector, Ray R, RaySample& RS)
-{
-	Ray TR = TransformRay(R, Reflector.Shape.InvTM);
-
-	Intersection Int;
-
-	switch (Reflector.Shape.Type)
-	{
-		case 0:	Int = IntersectPlane(TR, Reflector.Shape.OneSided, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]));		break;
-		case 1:	Int = IntersectDisk(TR, Reflector.Shape.OneSided, Reflector.Shape.OuterRadius);										break;
-		case 2:	Int = IntersectRing(TR, Reflector.Shape.OneSided, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius);		break;
-		case 3:	Int = IntersectBox(TR, ToVec3f(Reflector.Shape.Size), NULL);														break;
-		case 4:	Int = IntersectSphere(TR, Reflector.Shape.OuterRadius);																break;
-		case 5:	Int = IntersectCylinder(TR, Reflector.Shape.OuterRadius, Reflector.Shape.Size[1]);									break;
-	}
-
-	if (Int.Valid)
-	{
-		RS.Valid	= true;
-		RS.P 		= TransformPoint(Reflector.Shape.TM, Int.P);
-		RS.N 		= TransformVector(Reflector.Shape.TM, Int.N);
-		RS.T 		= Length(RS.P - R.O);
-		RS.Wo		= -R.D;
-		RS.Le		= ColorXYZf(0.0f);
-		RS.Pdf		= 1.0f;
-		RS.UV		= Int.UV;
-	}
-}
-
-DEV inline void SampleReflectors(Ray R, RaySample& RS)
-{
-	float T = FLT_MAX;
-
-	for (int i = 0; i < gReflectors.NoReflectors; i++)
-	{
-		ErReflector& RO = gReflectors.ReflectorList[i];
-
-		RaySample LocalRS(RaySample::Reflector);
-
-		LocalRS.ReflectorID = i;
-
-		HitTestReflector(RO, R, LocalRS);
-
-		if (LocalRS.Valid && LocalRS.T < T)
-		{
-			RS = LocalRS;
-			T = LocalRS.T;
-		}
-	}
 }

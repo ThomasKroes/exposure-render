@@ -511,7 +511,7 @@ public:
 
 	HOD ColorXYZAf& operator += (const ColorXYZAf& XYZ)
 	{
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 4; ++i)
 			m_D[i] += XYZ[i];
 
 		return *this;
@@ -521,7 +521,7 @@ public:
 	{
 		ColorXYZAf Result = *this;
 
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 4; ++i)
 			Result.m_D[i] += XYZ[i];
 
 		return Result;
@@ -531,32 +531,34 @@ public:
 	{
 		ColorXYZAf Result = *this;
 
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 4; ++i)
 			Result.m_D[i] -= XYZ[i];
 
 		return Result;
 	}
 
-	HOD ColorXYZAf operator / (const ColorXYZAf& XYZ) const
+	
+	HOD ColorXYZAf operator / (const ColorXYZAf& XYZA) const
 	{
 		ColorXYZAf Result = *this;
 
-		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] /= XYZ[i];
+		for (int i = 0; i < 4; ++i)
+			Result.m_D[i] /= XYZA[i];
 
 		return Result;
 	}
+	/**/
 
-	HOD ColorXYZAf operator * (const ColorXYZAf& XYZ) const
+	HOD ColorXYZAf operator * (const ColorXYZAf& XYZA) const
 	{
 		ColorXYZAf Result = *this;
 
-		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] *= XYZ[i];
+		for (int i = 0; i < 4; ++i)
+			Result.m_D[i] *= XYZA[i];
 
 		return Result;
 	}
-
+/*
 	HOD ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 3; ++i)
@@ -593,22 +595,24 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZAf& operator/=(float a)
+	
+	HOD ColorXYZAf& operator /= (float a)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] /= a;
 
 		return *this;
 	}
+	
 
 	HOD ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
 	{
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 4; ++i)
 			m_D[i] = Other[i];
 
 		return *this;
 	}
-
+*/
 	HOD bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)

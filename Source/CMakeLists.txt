@@ -90,6 +90,8 @@ SET(ErCudaSources
 	Color.cuh
 	Ray.cuh
 	Statistics.cuh
+	Light.cuh
+	Reflector.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

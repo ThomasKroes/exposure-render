@@ -32,6 +32,8 @@ __declspec(dllexport) void ErResize(int Size[2]);
 __declspec(dllexport) void ErResetFrameBuffer();
 __declspec(dllexport) void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3]);
 __declspec(dllexport) void ErUnbindDensityBuffer(void);
+__declspec(dllexport) void ErBindGradientMagnitude(unsigned short* pGradientMagnitude, int Extent[3]);
+__declspec(dllexport) void ErUnbindGradientMagnitude(void);
 __declspec(dllexport) void ErBindEnvironmentGradient(float EnvironmentGradient[3][NO_GRADIENT_STEPS]);
 __declspec(dllexport) void ErUnbindEnvironmentGradient(void);
 __declspec(dllexport) void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2]);
