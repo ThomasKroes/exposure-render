@@ -114,8 +114,6 @@ struct EXPOSURE_RENDER_DLL ErShape
 struct EXPOSURE_RENDER_DLL ErLight
 {
 	bool				Visible;
-	int					Type;
-	int					TextureType;
 	ErShape				Shape;
 	float				Color[3];
 };
@@ -128,15 +126,8 @@ struct EXPOSURE_RENDER_DLL ErLights
 
 struct EXPOSURE_RENDER_DLL ErClipper
 {
-	int					ShapeType;
-	float				Size[3];
-	float				Radius;
+	ErShape				Shape;
 	bool				Invert;
-	float				MinIntensity;
-	float				MaxIntensity;
-	float				Opacity;
-	ErMatrix44			TM;
-	ErMatrix44			InvTM;
 };
 
 struct EXPOSURE_RENDER_DLL ErClippers

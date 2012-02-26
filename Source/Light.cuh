@@ -17,8 +17,10 @@
 #include "RayMarching.cuh"
 #include "General.cuh"
 
-DEV void SampleAreaLight(ErLight& Light, LightSurfaceSample& LSS, Vec3f P, CRNG& RNG)
+DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int LightID)
 {
+	ErLight& Light = gLights.LightList[LightID];
+
 	SurfaceSample SS;
 
 	switch (Light.Shape.Type)
@@ -35,30 +37,6 @@ DEV void SampleAreaLight(ErLight& Light, LightSurfaceSample& LSS, Vec3f P, CRNG&
 	LSS.N	= TransformVector(Light.Shape.TM, SS.N);
 	LSS.Wi	= Normalize(P - LSS.P);
 	LSS.Pdf	= DistanceSquared(P, LSS.P) / SS.Area;
-}
-
-DEV void SampleEnvironmentLight(ErLight& Light, LightSurfaceSample& LSS, Vec3f P, CRNG& RNG)
-{
-	SurfaceSample SS;
-
-	SampleUnitSphere(SS, RNG.Get2());
-
-	LSS.Le	= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
-	LSS.P	= P + 1000.0f * SS.P;//TransformPoint(L.Shape.TM, SS.P);float4 Col = tex1D(gTexEnvironmentGradient, SS.UV[1]);
-//	LSS.N	= TransformVector(L.Shape.TM, SS.N);
-	LSS.Wi	= Normalize(P - LSS.P);
-	LSS.Pdf	= UniformSpherePdf();
-}
-
-DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int LightID)
-{
-	ErLight& Light = gLights.LightList[LightID];
-
-	switch (Light.Type)
-	{
-		case 0:	SampleAreaLight(Light, LSS, P, RNG);			break;
-		case 1: SampleEnvironmentLight(Light, LSS, P, RNG);		break;
-	}
 }
 
 DEV void IntersectAreaLight(ErLight& Light, Ray R, RaySample& RS)
@@ -85,37 +63,12 @@ DEV void IntersectAreaLight(ErLight& Light, Ray R, RaySample& RS)
 		RS.T 		= Length(RS.P - R.O);
 		RS.Wo		= -R.D;
 		RS.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
-		RS.Pdf		= DistanceSquared(R.O, RS.P) / (/*AbsDot(Normalize(R.O - RS.P), RS.N) * */Light.Shape.Area);
+		RS.Pdf		= DistanceSquared(R.O, RS.P) / (AbsDot(Normalize(R.O - RS.P), RS.N) * Light.Shape.Area);
 		RS.UV		= Int.UV;
 	}
 }
 
-DEV void IntersectEnvironmentLight(ErLight& Light, Ray R, RaySample& RS)
-{
-	Intersection Int;
-
-	Int.Valid	= true;
-	Int.Front	= true;
-	Int.NearT	= 0.0f;
-	Int.FarT	= 10000.0f;
-	Int.P		= R(Int.FarT);
-	Int.N		= -R.D;
-	Int.UV		= Vec2f(SphericalPhi(R.D) * INV_TWO_PI_F, SphericalTheta(R.D) * INV_PI_F);
-
-	if (Int.Valid)
-	{
-		RS.Valid	= true;
-		RS.P 		= TransformPoint(Light.Shape.TM, Int.P);
-		RS.N 		= TransformVector(Light.Shape.TM, Int.N);
-		RS.T 		= Int.NearT;
-		RS.Wo		= -R.D;
-		RS.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
-		RS.Pdf		= INV_TWO_PI_F;//AbsDot(n, wi) * INV_TWOPI;
-		RS.UV		= Int.UV;
-	}
-}
-
-DEV inline void IntersectLights(Ray R, RaySample& RS, bool RespectVisibility = false)
+DEV inline void IntersectAreaLights(Ray R, RaySample& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX;
 
@@ -130,11 +83,7 @@ DEV inline void IntersectLights(Ray R, RaySample& RS, bool RespectVisibility = f
 		if (RespectVisibility && !Light.Visible)
 			return;
 
-		switch (Light.Type)
-		{
-			case 0:		IntersectAreaLight(Light, R, LocalRS);			break;
-			case 1:		IntersectEnvironmentLight(Light, R, LocalRS);	break;
-		}
+		IntersectAreaLight(Light, R, LocalRS);
 
 		if (LocalRS.Valid && LocalRS.T < T)
 		{

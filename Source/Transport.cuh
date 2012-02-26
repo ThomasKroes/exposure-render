@@ -64,7 +64,7 @@ DEV ColorXYZf SampleShader(CVolumeShader::EType Type, LightingSample& LS, RaySam
 	
 	RaySample HitRS(RaySample::Light);
 
-	IntersectLights(Ray(RS.P, Wi), HitRS);
+	IntersectAreaLights(Ray(RS.P, Wi), HitRS);
 
 	if (!HitRS.Valid || HitRS.LightID != LightID || HitRS.Pdf <= 0.0f)
 		return SPEC_BLACK;

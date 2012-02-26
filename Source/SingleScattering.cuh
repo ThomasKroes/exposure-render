@@ -20,7 +20,7 @@ DEV RaySample SampleRay(Ray R, CRNG& RNG)
 	RaySample RS[3] = { RaySample(RaySample::ErVolume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
 
 	SampleVolume(R, RNG, RS[0]);
-	IntersectLights(R, RS[1], true);
+	IntersectAreaLights(R, RS[1], true);
 	IntersectReflectors(R, RS[2]);
 
 	float T = FLT_MAX;

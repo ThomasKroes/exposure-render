@@ -115,7 +115,7 @@ DEV bool Inside(ErClipper& C, Vec3f P)
 {
 	bool Inside = false;
 
-	switch (C.ShapeType)
+	switch (C.Shape.Type)
 	{
 		case 0:		
 		{
@@ -125,19 +125,19 @@ DEV bool Inside(ErClipper& C, Vec3f P)
 
 		case 1:
 		{
-			Inside = InsideBox(P, ToVec3f(C.Size));
+			Inside = InsideBox(P, ToVec3f(C.Shape.Size));
 			break;
 		}
 
 		case 2:
 		{
-			Inside = InsideSphere(P, C.Radius);
+			Inside = InsideSphere(P, C.Shape.OuterRadius);
 			break;
 		}
 
 		case 3:
 		{
-			Inside = InsideCylinder(P, C.Radius, C.Size[1]);
+			Inside = InsideCylinder(P, C.Shape.OuterRadius, C.Shape.Size[1]);
 			break;
 		}
 	}
@@ -151,7 +151,7 @@ DEV bool Inside(Vec3f P)
 	{
 		ErClipper& C = gClippers.ClipperList[i];
 
-		const Vec3f P2 = TransformPoint(C.InvTM, P);
+		const Vec3f P2 = TransformPoint(C.Shape.InvTM, P);
 
 		if (Inside(C, P2))
 			return true;
@@ -172,7 +172,7 @@ DEV float GetOpacity(Vec3f P)
 	{
 		ErClipper& C = gClippers.ClipperList[i];
 
-		const Vec3f P2 = TransformPoint(C.InvTM, P);
+		const Vec3f P2 = TransformPoint(C.Shape.InvTM, P);
 
 		if (Inside(C, P2))
 			return 0.0f;
