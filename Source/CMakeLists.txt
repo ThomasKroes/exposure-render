@@ -92,6 +92,7 @@ SET(ErCudaSources
 	Statistics.cuh
 	Light.cuh
 	Reflector.cuh
+	Benchmark.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

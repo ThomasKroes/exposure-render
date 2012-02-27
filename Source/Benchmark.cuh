@@ -15,11 +15,13 @@
 
 #include "Geometry.cuh"
 
+#include <thrust/reduce.h>
+
 #define KRNL_TONE_MAP_BLOCK_W		16 
 #define KRNL_TONE_MAP_BLOCK_H		8
 #define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
 
-KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
+KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -27,24 +29,40 @@ KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-//	const float Variance = pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Variance(gScattering.NoIterations);
+	ColorRGBAuc& RunningEstimate	= *pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y);
+	ColorRGBAuc& ReferenceEstimate	= *pFrameBuffer->BenchmarkEstimateRgbaLdr.GetPtr(X, Y);
 
-//	RgbHdr.Set(Variance, Variance, Variance);
+	const float ErrorRGB[] = 
+	{
+		RunningEstimate.GetR() - ReferenceEstimate.GetR(),
+		RunningEstimate.GetG() - ReferenceEstimate.GetG(),
+		RunningEstimate.GetB() - ReferenceEstimate.GetB()
+	};
 
-	ColorRGBuc Color = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
+	const float ErrorSquaredRGB[] = 
+	{
+		ErrorRGB[0] * ErrorRGB[0],
+		ErrorRGB[1] * ErrorRGB[1],
+		ErrorRGB[2] * ErrorRGB[2]
+	};
 
-	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetR(Color.GetR());
-	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetG(Color.GetG());
-	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetB(Color.GetB());
-	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetA(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y).GetA() * 255.0f);
+	const float NrmsError = (sqrtf(ErrorSquaredRGB[0]) + sqrtf(ErrorSquaredRGB[1]) + sqrtf(ErrorSquaredRGB[2])) / 3.0f;
+
+	*pFrameBuffer->RmsError.GetPtr(X, Y) = NrmsError;
 }
 
-void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)
+void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Width, int Height, float& AverageNrmsError)
 {
 	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
+	KrnlComputeNrmsError<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Tone Map");
+	HandleCudaKernelError(cudaGetLastError(), "Benchmark");
+
+	thrust::device_ptr<float> dev_ptr(FB.RmsError.GetPtr()); 
+
+	float result = thrust::reduce(dev_ptr, dev_ptr + Width * Height);
+	
+	AverageNrmsError = (result / (float)(Width * Height)) / 255.0f;
 }

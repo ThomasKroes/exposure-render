@@ -14,8 +14,7 @@
 #include "Core.cuh"
 #include "General.cuh"
 #include "Framebuffer.cuh"
-
-// using namespace ExposureRender;
+#include "Benchmark.cuh"
 
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
@@ -432,10 +431,7 @@ void ErBindBlur(ErBlur* pBlur)
 void ErRenderEstimate()
 {
 	FrameBuffer* pDevFrameBuffer = NULL;
-
 	HandleCudaError(cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer)));
-
-//	HandleCudaError(cudaMemcpy(pDevFrameBuffer, pFrameBuffer, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 	HandleCudaError(cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 
 	SingleScattering(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
@@ -467,10 +463,16 @@ void ErGetDepthBuffer(unsigned char* pData)
 
 void ErRecordBenchmarkImage()
 {
-	cudaMemcpy(FB.BenchmarkEstimateRgbLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(FB.BenchmarkEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToDevice);
 }
 
 void ErGetAverageNrmsError(float& AverageNrmsError)
 {
+	FrameBuffer* pDevFrameBuffer = NULL;
+	HandleCudaError(cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer)));
+	HandleCudaError(cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
 
+	ComputeAverageNrmsError(FB, pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1], AverageNrmsError);
+
+	HandleCudaError(cudaFree(pDevFrameBuffer));
 }
