@@ -60,3 +60,5 @@ __declspec(dllexport) void ErRenderEstimate();
 __declspec(dllexport) void ErGetEstimate(unsigned char* pData);
 __declspec(dllexport) void ErGetFrameEstimate(unsigned char* pData);
 __declspec(dllexport) void ErGetDepthBuffer(unsigned char* pData);
+__declspec(dllexport) void ErRecordBenchmarkImage();
+__declspec(dllexport) void ErGetAverageNrmsError(float& AverageNrmsError);

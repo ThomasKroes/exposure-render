@@ -464,3 +464,13 @@ void ErGetDepthBuffer(unsigned char* pData)
 	//cudaMemcpy(FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
 	//memcpy(pData, FB.HostDisplayEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize());
 }
+
+void ErRecordBenchmarkImage()
+{
+	cudaMemcpy(FB.BenchmarkEstimateRgbLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToDevice);
+}
+
+void ErGetAverageNrmsError(float& AverageNrmsError)
+{
+
+}

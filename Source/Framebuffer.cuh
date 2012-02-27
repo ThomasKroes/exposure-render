@@ -32,7 +32,9 @@ public:
 		CudaRandomSeeds2(),
 		HostDisplayEstimateRgbaLdr(),
 		HostFrameEstimate(),
-		HostDepthBuffer()
+		HostDepthBuffer(),
+		BenchmarkEstimateRgbLdr(),
+		RmsError()
 	{
 	}
 
@@ -59,6 +61,8 @@ public:
 		this->HostFrameEstimate.Resize(this->Resolution);
 		this->HostDepthBuffer.Resize(this->Resolution);
 		this->CudaRunningStats.Resize(this->Resolution);
+		this->BenchmarkEstimateRgbLdr.Resize(this->Resolution);
+		this->RmsError.Resize(this->Resolution);
 	}
 
 	void Reset(void)
@@ -72,6 +76,8 @@ public:
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
 //		this->CudaRunningStats.Reset();
+//		this->BenchmarkEstimateRgbLdr.Reset();
+//		this->RmsError.Reset();
 	}
 
 	void Free(void)
@@ -87,6 +93,8 @@ public:
 		this->HostFrameEstimate.Free();
 		this->HostDepthBuffer.Free();
 		this->CudaRunningStats.Free();
+		this->BenchmarkEstimateRgbLdr.Free();
+		this->RmsError.Free();
 
 		this->Resolution.Set(Vec2i(0, 0));
 	}
@@ -124,4 +132,7 @@ public:
 
 	// Variance
 	CCudaBuffer2D<RunningStats, false>		CudaRunningStats;
+
+	CCudaBuffer2D<ColorRGBAuc, false>		BenchmarkEstimateRgbLdr;
+	CCudaBuffer2D<float, false>				RmsError;
 };
