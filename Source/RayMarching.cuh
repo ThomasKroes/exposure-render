@@ -28,7 +28,7 @@ DEV inline void SampleVolume(Ray R, CRNG& RNG, RaySample& RS)
 	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB));
+	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB));
 
 	if (!Int.Valid)
 		return;
@@ -36,13 +36,13 @@ DEV inline void SampleVolume(Ray R, CRNG& RNG, RaySample& RS)
 	MinT[TID] = max(Int.NearT, R.MinT);
 	MaxT[TID] = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
+	const float S	= -log(RNG.Get1()) / gVolume.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
 	Vec3f Ps;
 
-	MinT[TID] += RNG.Get1() * gVolume.m_StepSize;
+	MinT[TID] += RNG.Get1() * gVolume.StepSize;
 
 	while (Sum < S)
 	{
@@ -51,10 +51,10 @@ DEV inline void SampleVolume(Ray R, CRNG& RNG, RaySample& RS)
 		if (MinT[TID] >= MaxT[TID])
 			return;
 		
-		SigmaT	= gVolume.m_DensityScale * GetOpacity(Ps);
+		SigmaT	= gVolume.DensityScale * GetOpacity(Ps);
 
-		Sum			+= SigmaT * gVolume.m_StepSize;
-		MinT[TID]	+= gVolume.m_StepSize;
+		Sum			+= SigmaT * gVolume.StepSize;
+		MinT[TID]	+= gVolume.StepSize;
 	}
 
 	RS.SetValid(MinT[TID], Ps, NormalizedGradient(Ps), -R.D, ColorXYZf());
@@ -68,7 +68,7 @@ DEV inline bool FreePathRM(Ray R, CRNG& RNG)
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ Vec3f Ps[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.m_MinAABB), ToVec3f(gVolume.m_MaxAABB));
+	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB));
 	
 	if (!Int.Valid)
 		return false;
@@ -76,11 +76,11 @@ DEV inline bool FreePathRM(Ray R, CRNG& RNG)
 	MinT[TID] = max(Int.NearT, R.MinT);
 	MaxT[TID] = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gVolume.m_DensityScale;
+	const float S	= -log(RNG.Get1()) / gVolume.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT[TID] += RNG.Get1() * gVolume.m_StepSizeShadow;
+	MinT[TID] += RNG.Get1() * gVolume.StepSizeShadow;
 
 	while (Sum < S)
 	{
@@ -89,10 +89,10 @@ DEV inline bool FreePathRM(Ray R, CRNG& RNG)
 		if (MinT[TID] > MaxT[TID])
 			return false;
 		
-		SigmaT	= gVolume.m_DensityScale * GetOpacity(Ps[TID]);
+		SigmaT	= gVolume.DensityScale * GetOpacity(Ps[TID]);
 
-		Sum			+= SigmaT * gVolume.m_StepSizeShadow;
-		MinT[TID]	+= gVolume.m_StepSizeShadow;
+		Sum			+= SigmaT * gVolume.StepSizeShadow;
+		MinT[TID]	+= gVolume.StepSizeShadow;
 	}
 
 	return true;

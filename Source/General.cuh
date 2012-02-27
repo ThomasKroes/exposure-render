@@ -19,19 +19,19 @@
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
 
-struct EXPOSURE_RENDER_DLL ErInterval
+struct EXPOSURE_RENDER_DLL ErRange
 {
-	float	m_Min;
-	float	m_Max;
-	float	m_Range;
-	float	m_InvRange;
-
+	float	Min;
+	float	Max;
+	float	Range;
+	float	Inv;
+	
 	void Set(float Range[2])
 	{
-		m_Min		= Range[0];
-		m_Max		= Range[1];
-		m_Range		= m_Max- m_Min;
-		m_InvRange	= m_Range != 0.0f ? 1.0f / m_Range : 0.0f;
+		this->Min		= Range[0];
+		this->Max		= Range[1];
+		this->Range		= this->Max - this->Min;
+		this->Inv		= this->Range != 0.0f ? 1.0f / this->Range : 0.0f;
 	}
 };
 
@@ -42,36 +42,29 @@ struct EXPOSURE_RENDER_DLL ErMatrix44
 
 struct EXPOSURE_RENDER_DLL ErVolume
 {
-	int					m_Extent[3];
-	float				m_InvExtent[3];
-	float				m_MinAABB[3];
-	float				m_MaxAABB[3];
-	float				m_InvMinAABB[3];
-	float				m_InvMaxAABB[3];
-	float				m_Size[3];
-	float				m_InvSize[3];
-	float				m_IntensityMin;
-	float				m_IntensityMax;
-	float				m_IntensityRange;
-	float				m_IntensityInvRange;
-	float				m_GradientMagnitudeMin;
-	float				m_GradientMagnitudeMax;
-	float				m_GradientMagnitudeRange;
-	float				m_GradientMagnitudeInvRange;
+	int					Extent[3];
+	float				InvExtent[3];
+	float				MinAABB[3];
+	float				MaxAABB[3];
+	float				InvMinAABB[3];
+	float				InvMaxAABB[3];
+	float				Size[3];
+	float				InvSize[3];
+	ErRange				IntensityRange;
+	ErRange				GradientMagnitudeRange;
 	float				GradientThreshold;
-	float				m_StepSize;
-	float				m_StepSizeShadow;
-	float				m_DensityScale;
-	float				m_GradientDelta;
-	float				m_InvGradientDelta;
-	float				m_GradientDeltaX[3];
-	float				m_GradientDeltaY[3];
-	float				m_GradientDeltaZ[3];
-	float				m_Spacing[3];
-	float				m_InvSpacing[3];
-	float				m_GradientFactor;
-	int					m_ShadingType;
-	float				m_MacroCellSize[3];
+	float				StepSize;
+	float				StepSizeShadow;
+	float				DensityScale;
+	float				GradientDelta;
+	float				InvGradientDelta;
+	float				GradientDeltaX[3];
+	float				GradientDeltaY[3];
+	float				GradientDeltaZ[3];
+	float				Spacing[3];
+	float				InvSpacing[3];
+	float				GradientFactor;
+	int					ShadingType;
 };
 
 struct EXPOSURE_RENDER_DLL ErCamera

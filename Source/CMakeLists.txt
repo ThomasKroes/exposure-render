@@ -151,6 +151,12 @@ SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 # Make the library
 CUDA_ADD_LIBRARY(ErCore ${vtkErCoreSources} ${ErCudaSources})
 
+# This is hack, we need a more elegant solution for this!
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.lib C:/Workspaces/Voreen/voreen/modules/er/ext/er/lib)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/General.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Core.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+                      
 # Link with the necessary VTK libraries
 #TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering vtkWidgets QVTK)
 

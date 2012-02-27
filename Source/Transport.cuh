@@ -111,7 +111,7 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 {
 	const float I = GetIntensity(RS.P);
 
-	switch (gVolume.m_ShadingType)
+	switch (gVolume.ShadingType)
 	{
 		case 0:
 		{
@@ -127,8 +127,8 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 		case 2:
 		{
-			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
-			const float PdfBrdf = GetOpacity(RS.P) * (1.0f - __expf(-gVolume.m_GradientFactor * NormalizedGradientMagnitude));
+			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
+			const float PdfBrdf = GetOpacity(RS.P) * (1.0f - __expf(-gVolume.GradientFactor * NormalizedGradientMagnitude));
 
 			if (RNG.Get1() < PdfBrdf)
 			{
@@ -144,7 +144,7 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 		case 3:
 		{
-			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
+			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
 			const float PdfBrdf = NormalizedGradientMagnitude;
 
 			if (RNG.Get1() < PdfBrdf)
@@ -161,7 +161,7 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 		case 4:
 		{
-			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.m_GradientMagnitudeInvRange;
+			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
 
 			return NormalizedGradientMagnitude > 0.0f && NormalizedGradientMagnitude <= 1.0f ? ColorXYZf(10.0f, 0.0f, 0.0f) : ColorXYZf(0.0f, 10.0f, 0.0f);
 

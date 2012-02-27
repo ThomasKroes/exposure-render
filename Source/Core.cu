@@ -48,12 +48,12 @@ CD ErDenoise		gDenoise;
 CD ErScattering		gScattering;
 CD ErBlur			gBlur;
 
-CD ErInterval		gOpacityRange;
-CD ErInterval		gDiffuseRange;
-CD ErInterval		gSpecularRange;
-CD ErInterval		gGlossinessRange;
-CD ErInterval		gIorRange;
-CD ErInterval		gEmissionRange;
+CD ErRange			gOpacityRange;
+CD ErRange			gDiffuseRange;
+CD ErRange			gSpecularRange;
+CD ErRange			gGlossinessRange;
+CD ErRange			gIorRange;
+CD ErRange			gEmissionRange;
 
 #include "Blur.cuh"
 #include "Denoise.cuh"
@@ -179,10 +179,10 @@ void ErUnbindEnvironmentGradient(void)
 
 void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
 {
-	ErInterval Int;
+	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gOpacityRange", &Int, sizeof(ErInterval)));
+	HandleCudaError(cudaMemcpyToSymbol("gOpacityRange", &Int, sizeof(ErRange)));
 
 	gTexOpacity.normalized		= true;
 	gTexOpacity.filterMode		= cudaFilterModeLinear;
@@ -197,10 +197,10 @@ void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
 
 void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2])
 {
-	ErInterval Int;
+	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gDiffuseRange", &Int, sizeof(ErInterval)));
+	HandleCudaError(cudaMemcpyToSymbol("gDiffuseRange", &Int, sizeof(ErRange)));
 
 	gTexDiffuse.normalized		= true;
 	gTexDiffuse.filterMode		= cudaFilterModeLinear;
@@ -222,10 +222,10 @@ void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2])
 
 void ErBindSpecular1D(float Specular[3][NO_GRADIENT_STEPS], float Range[2])
 {
-	ErInterval Int;
+	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gSpecularRange", &Int, sizeof(ErInterval)));
+	HandleCudaError(cudaMemcpyToSymbol("gSpecularRange", &Int, sizeof(ErRange)));
 
 	gTexSpecular.normalized		= true;
 	gTexSpecular.filterMode		= cudaFilterModeLinear;
@@ -247,10 +247,10 @@ void ErBindSpecular1D(float Specular[3][NO_GRADIENT_STEPS], float Range[2])
 
 void ErBindGlossiness1D(float Glossiness[NO_GRADIENT_STEPS], float Range[2])
 {
-	ErInterval Int;
+	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gGlossinessRange", &Int, sizeof(ErInterval)));
+	HandleCudaError(cudaMemcpyToSymbol("gGlossinessRange", &Int, sizeof(ErRange)));
 
 	gTexGlossiness.normalized		= true;
 	gTexGlossiness.filterMode		= cudaFilterModeLinear;
@@ -265,10 +265,10 @@ void ErBindGlossiness1D(float Glossiness[NO_GRADIENT_STEPS], float Range[2])
 
 void ErBindIor1D(float Ior[NO_GRADIENT_STEPS], float Range[2])
 {
-	ErInterval Int;
+	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gIorRange", &Int, sizeof(ErInterval)));
+	HandleCudaError(cudaMemcpyToSymbol("gIorRange", &Int, sizeof(ErRange)));
 
 	gTexIor.normalized		= true;
 	gTexIor.filterMode		= cudaFilterModeLinear;
@@ -283,10 +283,10 @@ void ErBindIor1D(float Ior[NO_GRADIENT_STEPS], float Range[2])
 
 void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2])
 {
-	ErInterval Int;
+	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gEmissionRange", &Int, sizeof(ErInterval)));
+	HandleCudaError(cudaMemcpyToSymbol("gEmissionRange", &Int, sizeof(ErRange)));
 
 	gTexEmission.normalized		= true;
 	gTexEmission.filterMode		= cudaFilterModeLinear;

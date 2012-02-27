@@ -98,12 +98,12 @@ HOD inline float3 FromVec3f(const Vec3f& V)
 
 DEV float GetIntensity(Vec3f P)
 {
-	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolume.m_MinAABB[0]) * gVolume.m_InvSize[0], (P[1] - gVolume.m_MinAABB[1]) * gVolume.m_InvSize[1], (P[2] - gVolume.m_MinAABB[2]) * gVolume.m_InvSize[2]));
+	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolume.MinAABB[0]) * gVolume.InvSize[0], (P[1] - gVolume.MinAABB[1]) * gVolume.InvSize[1], (P[2] - gVolume.MinAABB[2]) * gVolume.InvSize[2]));
 }
 
 DEV float GetNormalizedIntensity(Vec3f P)
 {
-	return (GetIntensity(P) - gVolume.m_IntensityMin) * gVolume.m_IntensityInvRange;
+	return (GetIntensity(P) - gVolume.IntensityRange.Min) * gVolume.IntensityRange.Inv;
 }
 
 DEV float GetOpacity(float NormalizedIntensity)
@@ -164,7 +164,7 @@ DEV float GetOpacity(Vec3f P)
 {
 	const float Intensity = GetIntensity(P);
 	
-	const float NormalizedIntensity = (Intensity - gOpacityRange.m_Min) * gOpacityRange.m_InvRange;
+	const float NormalizedIntensity = (Intensity - gOpacityRange.Min) * gOpacityRange.Inv;
 
 	const float Opacity = GetOpacity(NormalizedIntensity);
 
@@ -183,7 +183,7 @@ DEV float GetOpacity(Vec3f P)
 
 DEV ColorXYZf GetDiffuse(float Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gDiffuseRange.m_Min) * gDiffuseRange.m_InvRange;
+	const float NormalizedIntensity = (Intensity - gDiffuseRange.Min) * gDiffuseRange.Inv;
 
 	float4 Diffuse = tex1D(gTexDiffuse, NormalizedIntensity);
 	return ColorXYZf(Diffuse.x, Diffuse.y, Diffuse.z);
@@ -191,7 +191,7 @@ DEV ColorXYZf GetDiffuse(float Intensity)
 
 DEV ColorXYZf GetSpecular(float Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gSpecularRange.m_Min) * gSpecularRange.m_InvRange;
+	const float NormalizedIntensity = (Intensity - gSpecularRange.Min) * gSpecularRange.Inv;
 
 	float4 Specular = tex1D(gTexSpecular, NormalizedIntensity);
 	return ColorXYZf(Specular.x, Specular.y, Specular.z);
@@ -199,21 +199,21 @@ DEV ColorXYZf GetSpecular(float Intensity)
 
 DEV float GetGlossiness(float Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gGlossinessRange.m_Min) * gGlossinessRange.m_InvRange;
+	const float NormalizedIntensity = (Intensity - gGlossinessRange.Min) * gGlossinessRange.Inv;
 
 	return tex1D(gTexGlossiness, NormalizedIntensity);
 }
 
 DEV float GetIor(float Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gIorRange.m_Min) * gIorRange.m_InvRange;
+	const float NormalizedIntensity = (Intensity - gIorRange.Min) * gIorRange.Inv;
 
 	return tex1D(gTexIor, NormalizedIntensity);
 }
 
 DEV ColorXYZf GetEmission(float Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gEmissionRange.m_Min) * gEmissionRange.m_InvRange;
+	const float NormalizedIntensity = (Intensity - gEmissionRange.Min) * gEmissionRange.Inv;
 
 	float4 Emission = tex1D(gTexEmission, NormalizedIntensity);
 	return ColorXYZf(Emission.x, Emission.y, Emission.z);
@@ -225,12 +225,12 @@ DEV inline Vec3f Gradient(Vec3f P)
 
 	Vec3f Pts[3][2];
 
-	Pts[0][0] = P + ToVec3f(gVolume.m_GradientDeltaX);
-	Pts[0][1] = P - ToVec3f(gVolume.m_GradientDeltaX);
-	Pts[1][0] = P + ToVec3f(gVolume.m_GradientDeltaY);
-	Pts[1][1] = P - ToVec3f(gVolume.m_GradientDeltaY);
-	Pts[2][0] = P + ToVec3f(gVolume.m_GradientDeltaZ);
-	Pts[2][1] = P - ToVec3f(gVolume.m_GradientDeltaZ);
+	Pts[0][0] = P + ToVec3f(gVolume.GradientDeltaX);
+	Pts[0][1] = P - ToVec3f(gVolume.GradientDeltaX);
+	Pts[1][0] = P + ToVec3f(gVolume.GradientDeltaY);
+	Pts[1][1] = P - ToVec3f(gVolume.GradientDeltaY);
+	Pts[2][0] = P + ToVec3f(gVolume.GradientDeltaZ);
+	Pts[2][1] = P - ToVec3f(gVolume.GradientDeltaZ);
 
 	float Ints[3][2];
 
@@ -241,9 +241,9 @@ DEV inline Vec3f Gradient(Vec3f P)
 	Ints[2][0] = GetIntensity(Pts[2][0]);
 	Ints[2][1] = GetIntensity(Pts[2][1]);
 
-	Gradient[0] = (Ints[0][1] - Ints[0][0]) * gVolume.m_InvGradientDelta;
-	Gradient[1] = (Ints[1][1] - Ints[1][0]) * gVolume.m_InvGradientDelta;
-	Gradient[2] = (Ints[2][1] - Ints[2][0]) * gVolume.m_InvGradientDelta;
+	Gradient[0] = (Ints[0][1] - Ints[0][0]) * gVolume.InvGradientDelta;
+	Gradient[1] = (Ints[1][1] - Ints[1][0]) * gVolume.InvGradientDelta;
+	Gradient[2] = (Ints[2][1] - Ints[2][0]) * gVolume.InvGradientDelta;
 
 	return Gradient;
 }
@@ -255,7 +255,7 @@ DEV inline Vec3f NormalizedGradient(Vec3f P)
 
 DEV inline float GradientMagnitude(Vec3f P)
 {
-//	return (float)(USHRT_MAX * tex3D(gTexGradientMagnitude, (P[0] - gVolume.m_MinAABB[0]) * gVolume.m_InvSize[0], (P[1] - gVolume.m_MinAABB[1]) * gVolume.m_InvSize[1], (P[2] - gVolume.m_MinAABB[2]) * gVolume.m_InvSize[2]));
+//	return (float)(USHRT_MAX * tex3D(gTexGradientMagnitude, (P[0] - gVolume.MinAABB[0]) * gVolume.InvSize[0], (P[1] - gVolume.MinAABB[1]) * gVolume.InvSize[1], (P[2] - gVolume.MinAABB[2]) * gVolume.InvSize[2]));
 	return Gradient(P).Length();
 }
 

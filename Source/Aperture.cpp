@@ -17,7 +17,7 @@
 
 QAperture::QAperture(QObject* pParent /*= NULL*/) :
 	QPresetXML(pParent),
-	m_Size(0.05f)
+	Size(0.05f)
 {
 }
 
@@ -30,7 +30,7 @@ QAperture& QAperture::operator=(const QAperture& Other)
 {
 	QPresetXML::operator=(Other);
 
-	m_Size = Other.m_Size;
+	Size = Other.Size;
 
 	emit Changed(*this);
 
@@ -39,26 +39,26 @@ QAperture& QAperture::operator=(const QAperture& Other)
 
 float QAperture::GetSize(void) const
 {
-	return m_Size;
+	return Size;
 }
 
 void QAperture::SetSize(const float& Size)
 {
-	m_Size = Size;
+	Size = Size;
 
 	emit Changed(*this);
 }
 
 void QAperture::Reset(void)
 {
-	m_Size = 0.05f;
+	Size = 0.05f;
 
 	emit Changed(*this);
 }
 
 void QAperture::ReadXML(QDomElement& Parent)
 {
-	m_Size = Parent.firstChildElement("Size").attribute("Value").toFloat();
+	Size = Parent.firstChildElement("Size").attribute("Value").toFloat();
 }
 
 QDomElement QAperture::WriteXML(QDomDocument& DOM, QDomElement& Parent)
@@ -69,7 +69,7 @@ QDomElement QAperture::WriteXML(QDomDocument& DOM, QDomElement& Parent)
 
 	// Size
 	QDomElement Size = DOM.createElement("Size");
-	Size.setAttribute("Value", m_Size);
+	Size.setAttribute("Value", Size);
 	Aperture.appendChild(Size);
 
 	return Aperture;

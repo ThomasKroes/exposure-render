@@ -34,5 +34,5 @@ signals:
 	void Changed(const QAperture& Aperture);
 
 private:
-	float			m_Size;
+	float			Size;
 };

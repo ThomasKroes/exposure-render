@@ -165,7 +165,7 @@ void QNodePropertiesWidget::OnNodeSelectionChanged(QNode* pNode)
 void QNodePropertiesWidget::OnIntensityChanged(const double& Position)
 {
 //	if (gTransferFunction.GetSelectedNode())
-//		gTransferFunction.GetSelectedNode()->SetIntensity((Position - gScene.m_IntensityRange.GetMin()) / gScene.m_IntensityRange.GetRange());
+//		gTransferFunction.GetSelectedNode()->SetIntensity((Position - gScene.IntensityRange.GetMin()) / gScene.IntensityRange.GetRange());
 }
 
 void QNodePropertiesWidget::OnOpacityChanged(const double& Opacity)
@@ -211,11 +211,11 @@ void QNodePropertiesWidget::OnNodeIntensityChanged(QNode* pNode)
 
 		Enable = NodeIndex != 0 && NodeIndex != gTransferFunction.GetNodes().size() - 1;
 
-//		m_IntensitySlider.setRange(gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetRange() * pNode->GetMinX(), gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetRange() * pNode->GetMaxX());
-//		m_IntensitySpinBox.setRange(gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetRange() * pNode->GetMinX(), gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetRange() * pNode->GetMaxX());
+//		m_IntensitySlider.setRange(gScene.IntensityRange.GetMin() + gScene.IntensityRange.GetRange() * pNode->GetMinX(), gScene.IntensityRange.GetMin() + gScene.IntensityRange.GetRange() * pNode->GetMaxX());
+//		m_IntensitySpinBox.setRange(gScene.IntensityRange.GetMin() + gScene.IntensityRange.GetRange() * pNode->GetMinX(), gScene.IntensityRange.GetMin() + gScene.IntensityRange.GetRange() * pNode->GetMaxX());
 
-//		m_IntensitySlider.setValue(gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetRange() * pNode->GetIntensity(), true);
-//		m_IntensitySpinBox.setValue(gScene.m_IntensityRange.GetMin() + gScene.m_IntensityRange.GetRange() * pNode->GetIntensity(), true);
+//		m_IntensitySlider.setValue(gScene.IntensityRange.GetMin() + gScene.IntensityRange.GetRange() * pNode->GetIntensity(), true);
+//		m_IntensitySpinBox.setValue(gScene.IntensityRange.GetMin() + gScene.IntensityRange.GetRange() * pNode->GetIntensity(), true);
 	}
 
 	m_IntensityLabel.setEnabled(Enable);

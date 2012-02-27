@@ -79,12 +79,12 @@ void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
 
 	const float DX = 500.0f;
 
-	const int NumNegX = fabs(gScene.m_IntensityRange.GetMin()) / DX;
+	const int NumNegX = fabs(gScene.IntensityRange.GetMin()) / DX;
 
 	for (int i = 1; i < NumNegX; i++)
 	{
 		const float Intensity = i * -DX;
-		const float NormalizedIntensity = ((Intensity) - gScene.m_IntensityRange.GetMin()) / gScene.m_IntensityRange.GetRange();
+		const float NormalizedIntensity = ((Intensity) - gScene.IntensityRange.GetMin()) / gScene.IntensityRange.GetRange();
 
 		float X = NormalizedIntensity * rect().width();
 
@@ -92,12 +92,12 @@ void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
 		pPainter->drawText(QRectF(X - (0.5f * Width), rect().height(), Width, Height), Qt::AlignCenter, QString::number(Intensity));
 	}
 
-	const int NumPosX = fabs(gScene.m_IntensityRange.GetMax()) / DX;
+	const int NumPosX = fabs(gScene.IntensityRange.GetMax()) / DX;
 
 	for (int i = 0; i < NumPosX; i++)
 	{
 		const float Intensity = i * DX;
-		const float NormalizedIntensity = ((Intensity) - gScene.m_IntensityRange.GetMin()) / gScene.m_IntensityRange.GetRange();
+		const float NormalizedIntensity = ((Intensity) - gScene.IntensityRange.GetMin()) / gScene.IntensityRange.GetRange();
 
 		float X = NormalizedIntensity * rect().width();
 
@@ -107,7 +107,7 @@ void QGridItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOptio
 
 	pPainter->drawLine(QPointF(0, rect().height()), QPointF(0, rect().height() + 2.0f));
 	pPainter->drawLine(QPointF(rect().width(), rect().height()), QPointF(QPointF(rect().width(), rect().height() + 2.0f)));
-	pPainter->drawText(QRectF(0 - (0.5f * Width), rect().height(), Width, Height), Qt::AlignCenter, QString::number(gScene.m_IntensityRange.GetMin()));
-	pPainter->drawText(QRectF(rect().width() - (0.5f * Width), rect().height(), Width, Height), Qt::AlignCenter, QString::number(gScene.m_IntensityRange.GetMax()));
+	pPainter->drawText(QRectF(0 - (0.5f * Width), rect().height(), Width, Height), Qt::AlignCenter, QString::number(gScene.IntensityRange.GetMin()));
+	pPainter->drawText(QRectF(rect().width() - (0.5f * Width), rect().height(), Width, Height), Qt::AlignCenter, QString::number(gScene.IntensityRange.GetMax()));
 	*/
 }

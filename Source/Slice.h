@@ -27,6 +27,6 @@ public slots:
 private:
 	Vec3f	m_P;
 	Vec3f	m_N;
-	CRange	m_IntensityRange;
+	CRange	IntensityRange;
 	bool	m_Reversed;
 };

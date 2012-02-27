@@ -70,7 +70,7 @@ DEV void IntersectAreaLight(ErLight& Light, Ray R, RaySample& RS)
 
 DEV inline void IntersectAreaLights(Ray R, RaySample& RS, bool RespectVisibility = false)
 {
-	float T = FLT_MAX;
+	float T = FLT_MAX; 
 
 	for (int i = 0; i < gLights.NoLights; i++)
 	{
