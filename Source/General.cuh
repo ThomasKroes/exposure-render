@@ -170,3 +170,8 @@ struct EXPOSURE_RENDER_DLL ErBlur
 	int					FilterWidth;
 	float				FilterWeights[10];
 };
+
+struct EXPOSURE_RENDER_DLL ErGradientMagnitudes
+{
+	float*				Data;
+};

@@ -33,8 +33,6 @@ cudaArray* gpSpecular			= NULL;
 cudaArray* gpGlossiness			= NULL;
 cudaArray* gpEmission			= NULL;
 
-float* gpGradientMagnitude = NULL;
-
 CD ErVolume			gVolume;
 CD ErCamera			gCamera;
 CD ErLights			gLights;
@@ -43,7 +41,7 @@ CD ErReflectors		gReflectors;
 CD ErDenoise		gDenoise;
 CD ErScattering		gScattering;
 CD ErBlur			gBlur;
-
+//CD ErGradientMagnitudes	GradientMagnitudes;
 CD ErRange			gOpacityRange;
 CD ErRange			gDiffuseRange;
 CD ErRange			gSpecularRange;
@@ -82,6 +80,8 @@ void ErResetFrameBuffer()
 
 void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 {
+	ErUnbindDensityBuffer();
+
 	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<unsigned short>();
 
 	cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
@@ -104,10 +104,19 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
   	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc));
+	
+	float* pGradientMagnitude = NULL;
 
-//	cudaMalloc((void**)&gpGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(float));
+	// Allocate device memory for gradient magnitude volume
+	cudaMalloc((void**)&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(float));
+//	cudaMemset(pGradientMagnitude, 0, Extent[0] * Extent[1] * Extent[2] * sizeof(float));
 
-//	ComputeGradientMagnitudeVolume(Extent);
+	// Compute the gradient magnitude volume
+	ComputeGradientMagnitudeVolume(pGradientMagnitude, Extent);
+
+	// Free gradient magnitude volume
+	cudaFree(pGradientMagnitude);
+	pGradientMagnitude = NULL;
 }
 
 void ErUnbindDensityBuffer(void)
@@ -115,9 +124,6 @@ void ErUnbindDensityBuffer(void)
 	HandleCudaError(cudaFreeArray(gpIntensity));
 	gpIntensity = NULL;
 	HandleCudaError(cudaUnbindTexture(gTexIntensity));
-
-//	cudaFree(gpGradientMagnitude);
-//	gpGradientMagnitude = NULL;
 }
 
 void ErBindGradientMagnitude(unsigned short* pGradientMagnitude, int Extent[3])
