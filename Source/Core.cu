@@ -17,27 +17,23 @@
 #include "Benchmark.cuh"
 
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
-texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexGradientMagnitude;
-texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexEnvironmentGradient;
 texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexOpacity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexDiffuse;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexSpecular;
 texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexGlossiness;
-texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexIor;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexEmission;
 
 cudaChannelFormatDesc gFloatChannelDesc = cudaCreateChannelDesc<float>();
 cudaChannelFormatDesc gFloat4ChannelDesc = cudaCreateChannelDesc<float4>();
 
 cudaArray* gpIntensity			= NULL;
-cudaArray* gpGradientMagnitude	= NULL;
-cudaArray* gEnvironmentGradient	= NULL;
 cudaArray* gpOpacity			= NULL;
 cudaArray* gpDiffuse			= NULL;
 cudaArray* gpSpecular			= NULL;
 cudaArray* gpGlossiness			= NULL;
-cudaArray* gpIor				= NULL;
 cudaArray* gpEmission			= NULL;
+
+float* gpGradientMagnitude = NULL;
 
 CD ErVolume			gVolume;
 CD ErCamera			gCamera;
@@ -52,7 +48,6 @@ CD ErRange			gOpacityRange;
 CD ErRange			gDiffuseRange;
 CD ErRange			gSpecularRange;
 CD ErRange			gGlossinessRange;
-CD ErRange			gIorRange;
 CD ErRange			gEmissionRange;
 
 #include "Blur.cuh"
@@ -63,6 +58,7 @@ CD ErRange			gEmissionRange;
 #include "NearestIntersection.cuh"
 #include "SpecularBloom.cuh"
 #include "ToneMap.cuh"
+#include "GradientMagnitude.cuh"
 
 FrameBuffer FB;
 
@@ -108,6 +104,10 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
   	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc));
+
+//	cudaMalloc((void**)&gpGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(float));
+
+//	ComputeGradientMagnitudeVolume(Extent);
 }
 
 void ErUnbindDensityBuffer(void)
@@ -115,6 +115,9 @@ void ErUnbindDensityBuffer(void)
 	HandleCudaError(cudaFreeArray(gpIntensity));
 	gpIntensity = NULL;
 	HandleCudaError(cudaUnbindTexture(gTexIntensity));
+
+//	cudaFree(gpGradientMagnitude);
+//	gpGradientMagnitude = NULL;
 }
 
 void ErBindGradientMagnitude(unsigned short* pGradientMagnitude, int Extent[3])
@@ -148,33 +151,6 @@ void ErUnbindGradientMagnitude(void)
 	HandleCudaError(cudaFreeArray(gpIntensity));
 	gpIntensity = NULL;
 	HandleCudaError(cudaUnbindTexture(gTexIntensity));
-}
-
-void ErBindEnvironmentGradient(float EnvironmentGradient[3][NO_GRADIENT_STEPS])
-{
-	gTexEnvironmentGradient.normalized		= true;
-	gTexEnvironmentGradient.filterMode		= cudaFilterModeLinear;
-	gTexEnvironmentGradient.addressMode[0]	= cudaAddressModeClamp;
-
-	if (gEnvironmentGradient == NULL)
-		HandleCudaError(cudaMallocArray(&gEnvironmentGradient, &gFloat4ChannelDesc, NO_GRADIENT_STEPS, 1));
-
-	ColorXYZAf* pEnvironmentGradientXYZA = new ColorXYZAf[NO_GRADIENT_STEPS];
-
-	for (int i = 0; i < NO_GRADIENT_STEPS; i++)
-		pEnvironmentGradientXYZA[i].FromRGB(EnvironmentGradient[0][i], EnvironmentGradient[1][i], EnvironmentGradient[2][i]);
-
-	HandleCudaError(cudaMemcpyToArray(gEnvironmentGradient, 0, 0, pEnvironmentGradientXYZA, NO_GRADIENT_STEPS * sizeof(float4), cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexEnvironmentGradient, gEnvironmentGradient, gFloat4ChannelDesc));
-
-	delete[] pEnvironmentGradientXYZA;
-}
-
-void ErUnbindEnvironmentGradient(void)
-{
-	HandleCudaError(cudaFreeArray(gEnvironmentGradient));
-	gEnvironmentGradient = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexEnvironmentGradient));
 }
 
 void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
@@ -263,24 +239,6 @@ void ErBindGlossiness1D(float Glossiness[NO_GRADIENT_STEPS], float Range[2])
 	HandleCudaError(cudaBindTextureToArray(gTexGlossiness, gpGlossiness, gFloatChannelDesc));
 }
 
-void ErBindIor1D(float Ior[NO_GRADIENT_STEPS], float Range[2])
-{
-	ErRange Int;
-	Int.Set(Range);
-
-	HandleCudaError(cudaMemcpyToSymbol("gIorRange", &Int, sizeof(ErRange)));
-
-	gTexIor.normalized		= true;
-	gTexIor.filterMode		= cudaFilterModeLinear;
-	gTexIor.addressMode[0]	= cudaAddressModeClamp;
-
-	if (gpIor == NULL)
-		HandleCudaError(cudaMallocArray(&gpIor, &gFloatChannelDesc, NO_GRADIENT_STEPS, 1));
-
-	HandleCudaError(cudaMemcpyToArray(gpIor, 0, 0, Ior, NO_GRADIENT_STEPS * sizeof(float),  cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexIor, gpIor, gFloatChannelDesc));
-}
-
 void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2])
 {
 	ErRange Int;
@@ -332,13 +290,6 @@ void ErUnbindGlossiness1D(void)
 	HandleCudaError(cudaFreeArray(gpGlossiness));
 	gpGlossiness = NULL;
 	HandleCudaError(cudaUnbindTexture(gTexGlossiness));
-}
-
-void ErUnbindIor1D(void)
-{
-	HandleCudaError(cudaFreeArray(gpIor));
-	gpIor = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexIor));
 }
 
 void ErUnbindEmission1D(void)

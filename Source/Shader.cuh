@@ -77,7 +77,7 @@ public:
 
 	  DEV ColorXYZf Evaluate(float cosi)
 	  {
-		  return 1.0f;
+		  // return 1.0f;
 
 		  // Compute Fresnel reflectance for dielectric
 		  cosi = Clamp(cosi, -1.0f, 1.0f);

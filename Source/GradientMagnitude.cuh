@@ -15,54 +15,30 @@
 
 #include "Geometry.cuh"
 
-#include <thrust/reduce.h>
-
-#define KRNL_BENCHMARK_BLOCK_W		16 
-#define KRNL_BENCHMARK_BLOCK_H		8
-#define KRNL_BENCHMARK_BLOCK_SIZE	KRNL_BENCHMARK_BLOCK_W * KRNL_BENCHMARK_BLOCK_H
-
-KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
+KERNEL void KrnlComputeGradientMagnitudeVolume(int Extent[3])
 {
-	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	const int X = blockIdx.x * blockDim.x + threadIdx.x;
+	const int Y	= blockIdx.y * blockDim.y + threadIdx.y;
+	const int Z	= blockIdx.z * blockDim.z + threadIdx.z;
 
-	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
+	if (X >= Extent[0] || Y >= Extent[1] || Z >= Extent[2])
 		return;
-
-	ColorRGBAuc& RunningEstimate	= *pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y);
-	ColorRGBAuc& ReferenceEstimate	= *pFrameBuffer->BenchmarkEstimateRgbaLdr.GetPtr(X, Y);
-
-	const float ErrorRGB[] = 
-	{
-		RunningEstimate.GetR() - ReferenceEstimate.GetR(),
-		RunningEstimate.GetG() - ReferenceEstimate.GetG(),
-		RunningEstimate.GetB() - ReferenceEstimate.GetB()
-	};
-
-	const float ErrorSquaredRGB[] = 
-	{
-		ErrorRGB[0] * ErrorRGB[0],
-		ErrorRGB[1] * ErrorRGB[1],
-		ErrorRGB[2] * ErrorRGB[2]
-	};
-
-	const float NrmsError = (sqrtf(ErrorSquaredRGB[0]) + sqrtf(ErrorSquaredRGB[1]) + sqrtf(ErrorSquaredRGB[2])) / 3.0f;
-
-	*pFrameBuffer->RmsError.GetPtr(X, Y) = NrmsError;
 }
 
-void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Width, int Height, float& AverageNrmsError)
+void ComputeGradientMagnitudeVolume(int Extent[3])
 {
-	const dim3 BlockDim(KRNL_BENCHMARK_BLOCK_W, KRNL_BENCHMARK_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+	const dim3 BlockDim(8, 8, 8);
+	const dim3 GridDim((int)ceilf((float)Extent[0] / (float)BlockDim.x), (int)ceilf((float)Extent[1] / (float)BlockDim.y), (int)ceilf((float)Extent[2] / (float)BlockDim.z));
 
-	KrnlComputeNrmsError<<<GridDim, BlockDim>>>(pFrameBuffer);
+	KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(Extent);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Benchmark");
+	HandleCudaKernelError(cudaGetLastError(), "ComputeGradientMagnitudeVolume");
 
+	/*
 	thrust::device_ptr<float> dev_ptr(FB.RmsError.GetPtr()); 
 
 	float result = thrust::reduce(dev_ptr, dev_ptr + Width * Height);
 	
 	AverageNrmsError = (result / (float)(Width * Height)) / 255.0f;
+	*/
 }

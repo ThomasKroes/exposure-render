@@ -93,6 +93,7 @@ SET(ErCudaSources
 	Light.cuh
 	Reflector.cuh
 	Benchmark.cuh
+	GradientMagnitude.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

@@ -50,6 +50,7 @@ struct EXPOSURE_RENDER_DLL ErVolume
 	float				InvMaxAABB[3];
 	float				Size[3];
 	float				InvSize[3];
+	float				Scale;
 	ErRange				IntensityRange;
 	ErRange				GradientMagnitudeRange;
 	float				GradientThreshold;
@@ -161,6 +162,7 @@ struct EXPOSURE_RENDER_DLL ErScattering
 	float				NoIterations;
 	float				InvNoIterations;
 	int					SamplingStrategy;
+	float				IndexOfReflection;
 };
 
 struct EXPOSURE_RENDER_DLL ErBlur

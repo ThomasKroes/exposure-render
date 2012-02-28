@@ -204,13 +204,6 @@ DEV float GetGlossiness(float Intensity)
 	return tex1D(gTexGlossiness, NormalizedIntensity);
 }
 
-DEV float GetIor(float Intensity)
-{
-	const float NormalizedIntensity = (Intensity - gIorRange.Min) * gIorRange.Inv;
-
-	return tex1D(gTexIor, NormalizedIntensity);
-}
-
 DEV ColorXYZf GetEmission(float Intensity)
 {
 	const float NormalizedIntensity = (Intensity - gEmissionRange.Min) * gEmissionRange.Inv;
@@ -241,11 +234,11 @@ DEV inline Vec3f Gradient(Vec3f P)
 	Ints[2][0] = GetIntensity(Pts[2][0]);
 	Ints[2][1] = GetIntensity(Pts[2][1]);
 
-	Gradient[0] = (Ints[0][1] - Ints[0][0]) * gVolume.InvGradientDelta;
-	Gradient[1] = (Ints[1][1] - Ints[1][0]) * gVolume.InvGradientDelta;
-	Gradient[2] = (Ints[2][1] - Ints[2][0]) * gVolume.InvGradientDelta;
+	Gradient[0] = Ints[0][1] - Ints[0][0];
+	Gradient[1] = Ints[1][1] - Ints[1][0];
+	Gradient[2] = Ints[2][1] - Ints[2][0];
 
-	return Gradient;
+	return Gradient / (2.0f * ToVec3f(gVolume.Spacing));
 }
 
 DEV inline Vec3f NormalizedGradient(Vec3f P)
