@@ -238,7 +238,7 @@ DEV inline Vec3f Gradient(Vec3f P)
 	Gradient[1] = Ints[1][1] - Ints[1][0];
 	Gradient[2] = Ints[2][1] - Ints[2][0];
 
-	return Gradient / (2.0f * ToVec3f(gVolume.Spacing));
+	return ToVec3f(gVolume.Spacing) * Gradient;// / (2.0f * Vec3f(gVolume.GradientDeltaX[0], gVolume.GradientDeltaY[1], gVolume.GradientDeltaZ[2])));
 }
 
 DEV inline Vec3f NormalizedGradient(Vec3f P)
@@ -248,8 +248,25 @@ DEV inline Vec3f NormalizedGradient(Vec3f P)
 
 DEV inline float GradientMagnitude(Vec3f P)
 {
-//	return (float)(USHRT_MAX * tex3D(gTexGradientMagnitude, (P[0] - gVolume.MinAABB[0]) * gVolume.InvSize[0], (P[1] - gVolume.MinAABB[1]) * gVolume.InvSize[1], (P[2] - gVolume.MinAABB[2]) * gVolume.InvSize[2]));
-	return Gradient(P).Length();
+	Vec3f Pts[3][2];
+
+	Pts[0][0] = P + ToVec3f(gVolume.GradientDeltaX);
+	Pts[0][1] = P - ToVec3f(gVolume.GradientDeltaX);
+	Pts[1][0] = P + ToVec3f(gVolume.GradientDeltaY);
+	Pts[1][1] = P - ToVec3f(gVolume.GradientDeltaY);
+	Pts[2][0] = P + ToVec3f(gVolume.GradientDeltaZ);
+	Pts[2][1] = P - ToVec3f(gVolume.GradientDeltaZ);
+
+	float Ints[3][2], D, Sum = 0.0f;
+
+	for (int i = 0; i < 3; i++)
+	{
+		D = GetIntensity(Pts[i][1]) - GetIntensity(Pts[i][0]);
+		D *= 0.5f / gVolume.Spacing[i];
+		Sum += D * D;
+	}
+
+	return sqrtf(Sum);
 }
 
 DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)

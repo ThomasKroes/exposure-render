@@ -15,47 +15,42 @@
 
 #include "Geometry.cuh"
 
-KERNEL void KrnlComputeGradientMagnitudeVolume(float* pGradientMagnitude, int Extent[3], int Z)
+#include <thrust/reduce.h>
+
+KERNEL void KrnlComputeGradientMagnitudeVolume(float* pGradientMagnitude, int Width, int Height, int Depth)
 {
 	const int X = blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y	= blockIdx.y * blockDim.y + threadIdx.y;
+	const int Z	= blockIdx.z * blockDim.z + threadIdx.z;
 	
-	if (X >= Extent[0] || Y >= Extent[1])
+	if (X >= Width || Y >= Height || Z >= Depth)
 		return;
 	
-//	pGradientMagnitude[0] = 100.0f;
-	return;
+	const Vec3f P = ToVec3f(gVolume.MinAABB) + ToVec3f(gVolume.Size) * (Vec3f((float)X + 0.5f, (float)Y + 0.5f, (float)Z + 0.5f) * ToVec3f(gVolume.InvExtent));
 
-	const Vec3f P = ToVec3f(gVolume.MinAABB) + ToVec3f(gVolume.Size) * (Vec3f(X, Y, Z) * ToVec3f(gVolume.InvExtent));
+	int ID = X + Y * Width + Z * (Width * Height);
 
-	int ID = X + Y * Extent[1] + Z * (Extent[0] * Extent[1]);
-
-	pGradientMagnitude[0] = 100.0f;
-return;
-	
-
-	if (ID < Extent[0] * Extent[1] * Extent[2])
-		pGradientMagnitude[ID] = 100.0f;//Gradient(P).Length();
+	pGradientMagnitude[ID] = GradientMagnitude(P);
 }
 
-void ComputeGradientMagnitudeVolume(float* pGradientMagnitude, int Extent[3])
+void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitude)
 {
-	const dim3 BlockDim(8, 8, 1);
-	const dim3 GridDim((int)ceilf((float)Extent[0] / (float)BlockDim.x), (int)ceilf((float)Extent[1] / (float)BlockDim.y), 1);
+	const dim3 BlockDim(8, 8, 8);
+	const dim3 GridDim((int)ceilf((float)Extent[0] / (float)BlockDim.x), (int)ceilf((float)Extent[1] / (float)BlockDim.y), (int)ceilf((float)Extent[2] / (float)BlockDim.z));
 
-	for (int z = 0; z < 5; z++)
-	{
-		KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(pGradientMagnitude, Extent, z);
-		cudaThreadSynchronize();
-	}
+	float* pGradientMagnitude = NULL;
 
-//	HandleCudaKernelError(cudaGetLastError(), "ComputeGradientMagnitudeVolume");
+	HandleCudaError(cudaMalloc(&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(float)));
 
-	/*
-	thrust::device_ptr<float> dev_ptr(FB.RmsError.GetPtr()); 
-
-	float result = thrust::reduce(dev_ptr, dev_ptr + Width * Height);
+	KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(pGradientMagnitude, Extent[0], Extent[1], Extent[2]);
+	cudaThreadSynchronize();
 	
-	AverageNrmsError = (result / (float)(Width * Height)) / 255.0f;
-	*/
+	thrust::device_ptr<float> DevicePtr(pGradientMagnitude); 
+
+	float Result = 0.0f;
+	Result = thrust::reduce(DevicePtr, DevicePtr + Extent[0] * Extent[1] * Extent[2], Result, thrust::maximum<float>());
+	
+	cudaFree(pGradientMagnitude);
+
+	MaximumGradientMagnitude = Result;
 }

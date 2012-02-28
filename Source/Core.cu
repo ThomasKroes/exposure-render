@@ -41,7 +41,6 @@ CD ErReflectors		gReflectors;
 CD ErDenoise		gDenoise;
 CD ErScattering		gScattering;
 CD ErBlur			gBlur;
-//CD ErGradientMagnitudes	GradientMagnitudes;
 CD ErRange			gOpacityRange;
 CD ErRange			gDiffuseRange;
 CD ErRange			gSpecularRange;
@@ -104,19 +103,6 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
   	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
 
 	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc));
-	
-	float* pGradientMagnitude = NULL;
-
-	// Allocate device memory for gradient magnitude volume
-	cudaMalloc((void**)&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(float));
-//	cudaMemset(pGradientMagnitude, 0, Extent[0] * Extent[1] * Extent[2] * sizeof(float));
-
-	// Compute the gradient magnitude volume
-	ComputeGradientMagnitudeVolume(pGradientMagnitude, Extent);
-
-	// Free gradient magnitude volume
-	cudaFree(pGradientMagnitude);
-	pGradientMagnitude = NULL;
 }
 
 void ErUnbindDensityBuffer(void)
@@ -432,4 +418,9 @@ void ErGetAverageNrmsError(float& AverageNrmsError)
 	ComputeAverageNrmsError(FB, pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1], AverageNrmsError);
 
 	HandleCudaError(cudaFree(pDevFrameBuffer));
+}
+
+void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3])
+{
+	ComputeGradientMagnitudeVolume(Extent, MaximumGradientMagnitude);
 }
