@@ -257,7 +257,7 @@ DEV inline float GradientMagnitude(Vec3f P)
 	Pts[2][0] = P + ToVec3f(gVolume.GradientDeltaZ);
 	Pts[2][1] = P - ToVec3f(gVolume.GradientDeltaZ);
 
-	float Ints[3][2], D, Sum = 0.0f;
+	float D = 0.0f, Sum = 0.0f;
 
 	for (int i = 0; i < 3; i++)
 	{

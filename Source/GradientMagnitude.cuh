@@ -17,7 +17,7 @@
 
 #include <thrust/reduce.h>
 
-KERNEL void KrnlComputeGradientMagnitudeVolume(float* pGradientMagnitude, int Width, int Height, int Depth)
+KERNEL void KrnlComputeGradientMagnitudeVolume(unsigned short* pGradientMagnitude, int Width, int Height, int Depth)
 {
 	const int X = blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y	= blockIdx.y * blockDim.y + threadIdx.y;
@@ -38,19 +38,25 @@ void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitu
 	const dim3 BlockDim(8, 8, 8);
 	const dim3 GridDim((int)ceilf((float)Extent[0] / (float)BlockDim.x), (int)ceilf((float)Extent[1] / (float)BlockDim.y), (int)ceilf((float)Extent[2] / (float)BlockDim.z));
 
-	float* pGradientMagnitude = NULL;
+	unsigned short* pGradientMagnitude = NULL;
 
-	HandleCudaError(cudaMalloc(&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(float)));
+	// Allocate temporary linear memory for computation
+	HandleCudaError(cudaMalloc(&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(unsigned short)));
 
+	// Execute gradient computation kernel
 	KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(pGradientMagnitude, Extent[0], Extent[1], Extent[2]);
 	cudaThreadSynchronize();
 	
-	thrust::device_ptr<float> DevicePtr(pGradientMagnitude); 
+	// Create thrust device pointer
+	thrust::device_ptr<unsigned short> DevicePtr(pGradientMagnitude); 
 
+	// Reduce the volume to a maximum gradient magnitude
 	float Result = 0.0f;
-	Result = thrust::reduce(DevicePtr, DevicePtr + Extent[0] * Extent[1] * Extent[2], Result, thrust::maximum<float>());
+	Result = thrust::reduce(DevicePtr, DevicePtr + Extent[0] * Extent[1] * Extent[2], Result, thrust::maximum<unsigned short>());
 	
+	// Free temporary memory
 	cudaFree(pGradientMagnitude);
 
+	// Set result
 	MaximumGradientMagnitude = Result;
 }
