@@ -24,7 +24,7 @@ struct ErDenoise;
 struct ErScattering;
 struct ErBlur;
 
-#define NO_GRADIENT_STEPS 128
+#define NO_GRADIENT_STEPS 256
 
 __declspec(dllexport) void ErInitialize();
 __declspec(dllexport) void ErDeinitialize();

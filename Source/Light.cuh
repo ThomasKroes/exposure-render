@@ -32,7 +32,7 @@ DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int Lig
 		case 4:	SampleSphere(SS, RNG.Get2(), Light.Shape.OuterRadius);								break;
 	}
 	
-	LSS.Le	= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
+	LSS.Le	= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]) / Light.Shape.Area;
 	LSS.P	= TransformPoint(Light.Shape.TM, SS.P);
 	LSS.N	= TransformVector(Light.Shape.TM, SS.N);
 	LSS.Wi	= Normalize(P - LSS.P);
@@ -81,7 +81,7 @@ DEV inline void IntersectAreaLights(Ray R, RaySample& RS, bool RespectVisibility
 		LocalRS.LightID = i;
 
 		if (RespectVisibility && !Light.Visible)
-			return;
+			continue;
 
 		IntersectAreaLight(Light, R, LocalRS);
 
