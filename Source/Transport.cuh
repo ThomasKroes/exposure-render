@@ -128,7 +128,10 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 		case 2:
 		{
 			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
-			const float PdfBrdf = GetOpacity(RS.P) * (1.0f - __expf(-gVolume.GradientFactor * NormalizedGradientMagnitude));
+
+			const float Exponent = 40.0f * powf(gVolume.GradientFactor, 2.0f) * NormalizedGradientMagnitude;
+
+			const float PdfBrdf = /*GetOpacity(RS.P) * */(1.0f - __expf(-Exponent));
 
 			if (RNG.Get1() < PdfBrdf)
 			{
