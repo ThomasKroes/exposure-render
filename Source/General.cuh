@@ -163,6 +163,7 @@ struct EXPOSURE_RENDER_DLL ErScattering
 	float				InvNoIterations;
 	int					SamplingStrategy;
 	float				IndexOfReflection;
+	bool				OpacityModulated;
 };
 
 struct EXPOSURE_RENDER_DLL ErBlur

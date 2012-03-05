@@ -16,87 +16,122 @@
 #include "Light.cuh"
 #include "Reflector.cuh"
 
-DEV ColorXYZf SampleLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader, int LightID)
+#define EPS1 0.0001f
+#define EPS2 0.0002f
+
+DEV inline bool Intersect(Ray R, CRNG& RNG)
 {
-	LightSurfaceSample LSS;
+	ScatterEvent SE(ScatterEvent::Light);
 
-	SampleLightSurface(LSS, RNG, RS.P, LightID);
+	if (IntersectsLight(R))
+		return true;
 
-	if (LSS.Le.IsBlack() || LSS.Pdf <= 0.0f)
-		return SPEC_BLACK;
+	if (IntersectsReflector(R))
+		return true;
 
-	ColorXYZf F = Shader.F(RS.Wo, -LSS.Wi); 
+	if (ScatterEventInVolume(R, RNG))
+		return true;
 
-	if (F.IsBlack())
-		return SPEC_BLACK;
-
-	float ShaderPdf = Shader.Pdf(RS.Wo, -LSS.Wi);
-
-	if (ShaderPdf <= 0.0f)
-		return SPEC_BLACK;
-
-	if (!FreePathRM(Ray(LSS.P, LSS.Wi, 0.0f, (RS.P - LSS.P).Length()), RNG))
-	{
-		const float WeightMIS = PowerHeuristic(1.0f, LSS.Pdf, 1.0f, ShaderPdf);
-		
-		if (Type == CVolumeShader::Brdf)
-			return F * LSS.Le * AbsDot(LSS.Wi, RS.N) * WeightMIS / LSS.Pdf;
-
-		if (Type == CVolumeShader::Phase)
-			return F * LSS.Le * WeightMIS / LSS.Pdf;
-	}
-
-	return SPEC_BLACK;
+	return false;
 }
 
-DEV ColorXYZf SampleShader(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader, int LightID)
+DEV bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
 {
-	ColorXYZf Ld;
+	Vec3f W = Normalize(P2 - P1);
 
-	float ShaderPdf = 1.0f;
+	Ray R(P1 + W * EPS1, W, 0.0f, (P2 - P1).Length() - EPS2);
 
+	return !Intersect(R, RNG);
+}
+
+DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS, ScatterEvent& SE, CRNG& RNG, CVolumeShader& Shader, int LightID)
+{
+	// Get light
+	ErLight& Light = gLights.LightList[LightID];
+
+	//float LightPdf; 
 	Vec3f Wi;
 
-	ColorXYZf F = Shader.SampleF(RS.Wo, Wi, ShaderPdf, LS.m_BsdfSample);
+	// Incident radiance (Li), direct light (Ld)
+	ColorXYZf Li = SPEC_BLACK, Ld = SPEC_BLACK;
 
-	if (F.IsBlack() || ShaderPdf <= 0.0f)
-		return SPEC_BLACK;
+	SampleLight(Light, LS.m_LightSample, SE, Wi, Li);
+
+	ColorXYZf F = Shader.F(SE.Wo, Wi); 
 	
-	RaySample HitRS(RaySample::Light);
+	float Ps = Shader.Pdf(SE.Wo, Wi);
 
-	IntersectAreaLights(Ray(RS.P, Wi), HitRS);
+	if (Li.IsBlack() || F.IsBlack() || Ps <= 0.0f)
+		return Ld;
 
-	if (!HitRS.Valid || HitRS.LightID != LightID || HitRS.Pdf <= 0.0f)
-		return SPEC_BLACK;
-
-	if (!FreePathRM(Ray(HitRS.P, Normalize(RS.P - HitRS.P), 0.0f, (RS.P - HitRS.P).Length()), RNG)) 
+	if (Visible(LS.m_LightSample.SS.P, SE.P, RNG))
 	{
-		float Weight = PowerHeuristic(1.0f, ShaderPdf, 1.0f, HitRS.Pdf);
+		const float d2 = DistanceSquared(SE.P, LS.m_LightSample.SS.P);
 
+		float Pl = 1.0f / Light.Shape.Area;
+
+		Li *= F;
+		Li /= d2;
+
+		//if (mis)
+		//{
+		Li *= PowerHeuristic(1, Pl * d2 / AbsDot(Wi, SE.N), 1, Ps);
+		//}
+
+		// Add to direct light
+		Ld += Li;
+/*
+//		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
+		const float Pmz = 1.0f / Light.Shape.Area;
+
+		float g = G(SE.P, SE.N, LS.m_LightSample.SS.P, LS.m_LightSample.SS.N);
+		
+		const float We = powf(Pmz, 2.0f) / (powf(Pmz, 2.0f) + powf(Pf * AbsDot(Wi, SE.N) * g, 2.0f));
+
+		return We * F * AbsDot(Wi, SE.N) * g * (Le / Light.Shape.Area);
+
+		
 		if (Type == CVolumeShader::Brdf)
-			return F * HitRS.Le * AbsDot(Normalize(HitRS.P - RS.P), RS.N) * Weight / ShaderPdf;
-
+			return F * Le * AbsDot(Wi, SE.N) / LightPdf;
+		
 		if (Type == CVolumeShader::Phase)
-			return F * HitRS.Le * Weight / ShaderPdf;
+			return F * Le * WeightMIS / LightPdf;
+		*/
 	}
 
-	return SPEC_BLACK;
-}
+	// Sample new ray direction
+	F = Shader.SampleF(SE.Wo, Wi, Ps, LS.m_BsdfSample);
 
-DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS, RaySample RS, CRNG& RNG, CVolumeShader& Shader, int LightID)
-{
-	ColorXYZf Ld;
+	if (F.IsBlack() || Ps <= 0.0f)
+		return Ld;
 	
-	if (gScattering.SamplingStrategy == 0 || gScattering.SamplingStrategy == 2)
-		Ld += SampleLight(Type, LS, RS, RNG, Shader, LightID);
+	ScatterEvent SE2(ScatterEvent::Light);
 
-	if (gScattering.SamplingStrategy == 1 || gScattering.SamplingStrategy == 2)
-		Ld += SampleShader(Type, LS, RS, RNG, Shader, LightID);
+	IntersectLights(Ray(SE.P, Wi), SE2);
 
-	return (float)gLights.NoLights * Ld;
+	if (!SE2.Valid)
+		return Ld;
+
+	if (Visible(LS.m_LightSample.SS.P, SE.P, RNG))
+	{
+		Li = SE2.Le;
+
+		float Pl = 1.0f / gLights.LightList[SE2.LightID].Shape.Area;
+
+		// Compute distance squared
+		const float d2 = DistanceSquared(SE.P, SE2.P);
+		
+		const float lightPdf2 = Pl * d2 / AbsDot(Wi, SE.N);
+
+		const float weight = PowerHeuristic(1, Ps, 1, lightPdf2);
+
+//		Ld += Li * weight;
+	}
+
+	return Ld;
 }
 
-DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, RaySample RS, CRNG& RNG, CVolumeShader& Shader)
+DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, ScatterEvent RS, CRNG& RNG, CVolumeShader& Shader)
 {
 	LightingSample LS;
 
@@ -104,10 +139,10 @@ DEV ColorXYZf UniformSampleOneLight(CVolumeShader::EType Type, RaySample RS, CRN
 
 	const int LightID = floorf(RNG.Get1() * gLights.NoLights);
 
-	return EstimateDirectLight(Type, LS, RS, RNG, Shader, LightID);
+	return (float)gLights.NoLights * EstimateDirectLight(Type, LS, RS, RNG, Shader, LightID);
 }
 
-DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
+DEV ColorXYZf UniformSampleOneLightVolume(ScatterEvent RS, CRNG& RNG)
 {
 	const float I = GetIntensity(RS.P);
 
@@ -127,11 +162,14 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 		case 2:
 		{
-			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
+			const float NGM = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
 
-			const float Exponent = 40.0f * powf(gVolume.GradientFactor, 2.0f) * NormalizedGradientMagnitude;
+			const float Sensitivity = 25;
+			const float ExpGF = 3;
 
-			const float PdfBrdf = /*GetOpacity(RS.P) * */(1.0f - __expf(-Exponent));
+			const float Exponent = Sensitivity * powf(gVolume.GradientFactor, ExpGF) * NGM;
+
+			const float PdfBrdf = gScattering.OpacityModulated ? GetOpacity(RS.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
 
 			if (RNG.Get1() < PdfBrdf)
 			{
@@ -147,9 +185,11 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 
 		case 3:
 		{
-			const float NormalizedGradientMagnitude = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
+			const float NGM = GradientMagnitude(RS.P) * gVolume.GradientMagnitudeRange.Inv;
 
-			if (RNG.Get1() < NormalizedGradientMagnitude)
+			const float PdfBrdf = 1.0f - powf(1.0f - NGM, 2.0f);
+
+			if (RNG.Get1() < PdfBrdf)
 			{
 				CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
 				return GetEmission(I) + UniformSampleOneLight(CVolumeShader::Brdf, RS, RNG, Shader);
@@ -184,7 +224,7 @@ DEV ColorXYZf UniformSampleOneLightVolume(RaySample RS, CRNG& RNG)
 	return ColorXYZf(0.0f);
 }
 
-DEV ColorXYZf UniformSampleOneLightReflector(RaySample RS, CRNG& RNG)
+DEV ColorXYZf UniformSampleOneLightReflector(ScatterEvent RS, CRNG& RNG)
 {
 	CVolumeShader Shader(CVolumeShader::Brdf, RS.N, RS.Wo, ColorXYZf(gReflectors.ReflectorList[RS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.ReflectorList[RS.ReflectorID].SpecularColor), gReflectors.ReflectorList[RS.ReflectorID].Ior, gReflectors.ReflectorList[RS.ReflectorID].Glossiness);
 	

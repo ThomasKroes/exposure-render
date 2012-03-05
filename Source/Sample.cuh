@@ -17,29 +17,50 @@
 
 #include "RNG.cuh"
 
+struct SurfaceSample
+{
+	Vec3f		P;
+	Vec3f		N;
+	Vec2f		UV;
+
+	HOD SurfaceSample(void)
+	{
+		this->P		= Vec3f(0.0f);
+		this->N		= Vec3f(0.0f, 0.0f, 1.0f);
+		this->UV	= Vec2f(0.0f);
+	}
+
+	HOD SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
+	{
+		this->P			= Other.P;
+		this->N			= Other.N;
+		this->UV		= Other.UV;
+
+		return *this;
+	}
+};
+
 struct LightSample
 {
-	Vec2f m_Pos;
-	float m_Component;
+	Vec2f 			RndP;
+	SurfaceSample	SS;
 
 	HOD LightSample(void)
 	{
-		m_Pos	 	= Vec2f(0.0f);
-		m_Component	= 0.0f;
+		this->RndP	 	= Vec2f(0.0f);
 	}
 
 	HOD LightSample& LightSample::operator=(const LightSample& Other)
 	{
-		m_Pos	 	= Other.m_Pos;
-		m_Component = Other.m_Component;
+		this->RndP		= Other.RndP;
+		this->SS		= Other.SS;
 
 		return *this;
 	}
 
 	DEV void LargeStep(CRNG& Rnd)
 	{
-		m_Pos		= Rnd.Get2();
-		m_Component	= Rnd.Get1();
+		RndP = Rnd.Get2();
 	}
 };
 

@@ -17,29 +17,40 @@
 #include "RayMarching.cuh"
 #include "General.cuh"
 
-DEV void SampleLightSurface(LightSurfaceSample& LSS, CRNG& RNG, Vec3f P, int LightID)
+DEV void SampleLightSurface(ErLight& Light, LightSample& LS)
 {
-	ErLight& Light = gLights.LightList[LightID];
-
-	SurfaceSample SS;
-
+	// Sample the light surface
 	switch (Light.Shape.Type)
 	{
-		case 0:	SamplePlane(SS, RNG.Get2(), Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));		break;
-		case 1:	SampleDisk(SS, RNG.Get2(), Light.Shape.OuterRadius);								break;
-		case 2:	SampleRing(SS, RNG.Get2(), Light.Shape.InnerRadius, Light.Shape.OuterRadius);		break;
-		case 3:	SampleBox(SS, RNG.Get3(), ToVec3f(Light.Shape.Size));								break;
-		case 4:	SampleSphere(SS, RNG.Get2(), Light.Shape.OuterRadius);								break;
+		case 0:	SamplePlane(LS.SS, LS.RndP, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));		break;
+		case 1:	SampleDisk(LS.SS, LS.RndP, Light.Shape.OuterRadius);								break;
+		case 2:	SampleRing(LS.SS, LS.RndP, Light.Shape.InnerRadius, Light.Shape.OuterRadius);		break;
+//		case 3:	SampleBox(LS.SS, LS.RndP, ToVec3f(Light.Shape.Size));								break;
+		case 4:	SampleSphere(LS.SS, LS.RndP, Light.Shape.OuterRadius);								break;
 	}
-	
-	LSS.Le	= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]) / Light.Shape.Area;
-	LSS.P	= TransformPoint(Light.Shape.TM, SS.P);
-	LSS.N	= TransformVector(Light.Shape.TM, SS.N);
-	LSS.Wi	= Normalize(P - LSS.P);
-	LSS.Pdf	= DistanceSquared(P, LSS.P) / SS.Area;
+
+	// Transform surface position and normal back to world space
+	LS.SS.P	= TransformPoint(Light.Shape.TM, LS.SS.P);
+	LS.SS.N	= TransformVector(Light.Shape.TM, LS.SS.N);
 }
 
-DEV void IntersectAreaLight(ErLight& Light, Ray R, RaySample& RS)
+DEV void SampleLight(ErLight& Light, LightSample& LS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
+{
+	// First sample the light surface
+	SampleLightSurface(Light, LS);
+
+	// Compute Wi, the normalized vector from the sampled light position to the ray sample position
+	Wi = Normalize(LS.SS.P - SE.P);
+
+	// Compute the probability of sampling the light per unit area
+//	LightPdf = G(SE.P, SE.N, LS.SS.P, LS.SS.N) * Light.Shape.Area;
+
+	// Compute exitant radiance
+	Le = ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
+}
+
+// Intersects a light with a ray
+DEV inline void IntersectLight(ErLight& Light, Ray R, ScatterEvent& RS)
 {
 	Ray TR = TransformRay(R, Light.Shape.InvTM);
 
@@ -68,7 +79,8 @@ DEV void IntersectAreaLight(ErLight& Light, Ray R, RaySample& RS)
 	}
 }
 
-DEV inline void IntersectAreaLights(Ray R, RaySample& RS, bool RespectVisibility = false)
+// Finds the nearest intersection with any of the scene's lights
+DEV inline void IntersectLights(Ray R, ScatterEvent& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX; 
 
@@ -76,14 +88,14 @@ DEV inline void IntersectAreaLights(Ray R, RaySample& RS, bool RespectVisibility
 	{
 		ErLight& Light = gLights.LightList[i];
 		
-		RaySample LocalRS(RaySample::Light);
+		ScatterEvent LocalRS(ScatterEvent::Light);
 
 		LocalRS.LightID = i;
 
 		if (RespectVisibility && !Light.Visible)
 			continue;
 
-		IntersectAreaLight(Light, R, LocalRS);
+		IntersectLight(Light, R, LocalRS);
 
 		if (LocalRS.Valid && LocalRS.T < T)
 		{
@@ -91,4 +103,36 @@ DEV inline void IntersectAreaLights(Ray R, RaySample& RS, bool RespectVisibility
 			T = LocalRS.T;
 		}
 	}
+}
+
+// Determine if the ray intersects the light
+DEV inline bool IntersectsLight(ErLight& Light, Ray R)
+{
+	Ray TR = TransformRay(R, Light.Shape.InvTM);
+
+	Intersection Int;
+
+	switch (Light.Shape.Type)
+	{
+		case 0:	Int = IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));	break;
+		case 1:	Int = IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius);								break;
+		case 2:	Int = IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius);	break;
+		case 3:	Int = IntersectBox(TR, ToVec3f(Light.Shape.Size), NULL);											break;
+		case 4:	Int = IntersectSphere(TR, Light.Shape.OuterRadius);													break;
+		case 5:	Int = IntersectCylinder(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);							break;
+	}
+
+	return Int.Valid;
+}
+
+// Determines if there's an intersection between the ray and any of the scene's lights
+DEV inline bool IntersectsLight(Ray R)
+{
+	for (int i = 0; i < gLights.NoLights; i++)
+	{
+		if (IntersectsLight(gLights.LightList[i], R))
+			return true;
+	}
+
+	return false;
 }

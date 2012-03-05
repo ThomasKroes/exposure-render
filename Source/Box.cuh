@@ -162,7 +162,6 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 	}
 
 	SS.UV	= Vec2f(UVW[1], UVW[2]);
-	SS.Area	= 6.0f;
 }
 
 HOD inline void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
@@ -170,5 +169,4 @@ HOD inline void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
 	SampleUnitBox(SS, UVW);
 
 	SS.P *= Size;
-	SS.Area = 2.0f * ((Size[0] * Size[1]) + (Size[0] * Size[2]) + (Size[1] * Size[2]));
 }

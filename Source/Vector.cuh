@@ -437,10 +437,17 @@ template <class T> inline HOD Vec3<T> operator / (const Vec3<T>& A, const Vec3<T
 template <class T> HOD inline Vec2<T> Normalize(Vec2<T> V)									{ Vec2<T> R = V; R.Normalize(); return R; 							};
 template <class T> HOD inline Vec3<T> Normalize(Vec3<T> V)									{ Vec3<T> R = V; R.Normalize(); return R; 							};
 
+HOD inline float clamp(float x, float a, float b)
+{
+    return x < a ? a : (x > b ? b : x);
+}
+
 HOD inline float Length(Vec3f V)											{ return V.Length();						};
 HOD inline Vec3f Cross(Vec3f A, Vec3f B)									{ return A.Cross(B);						};
 HOD inline float Dot(Vec3f A, Vec3f B)										{ return A.Dot(B);							};
 HOD inline float AbsDot(Vec3f A, Vec3f B)									{ return fabs(A.Dot(B));					};
+HOD inline float ClampedAbsDot(Vec3f A, Vec3f B)							{ return clamp(fabs(A.Dot(B)), 0.0f, 1.0f);	};
+HOD inline float ClampedDot(Vec3f A, Vec3f B)								{ return clamp(Dot(A, B), 0.0f, 1.0f);		};
 HOD inline float Distance(Vec3f A, Vec3f B)									{ return (A - B).Length();					};
 HOD inline float DistanceSquared(Vec3f A, Vec3f B)							{ return (A - B).LengthSquared();			};
 

@@ -785,7 +785,7 @@ public:
 
 	HOD ColorRGBf Pow(const float& E)
 	{
-		return ColorRGBf(powf(m_D[0], E), powf(m_D[1], E), powf(m_D[1], E));
+		return ColorRGBf(powf(m_D[0], E), powf(m_D[1], E), powf(m_D[2], E));
 	}
 
 	HOD void FromXYZ(const float& X, const float& Y, const float& Z)

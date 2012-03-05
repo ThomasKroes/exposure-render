@@ -45,7 +45,6 @@ HOD inline void SampleUnitRing(SurfaceSample& SS, Vec2f UV, float InnerRadius)
 
 	SS.P 	= Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
-	SS.Area	= 1.0f / (DiskArea(1.0f) - DiskArea(InnerRadius));
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
 }
 
@@ -54,7 +53,6 @@ HOD inline void SampleRing(SurfaceSample& SS, Vec2f UV, float InnerRadius, float
 	SampleUnitRing(SS, UV, InnerRadius / OuterRadius);
 
 	SS.P *= OuterRadius;
-	SS.Area	= DiskArea(OuterRadius) - DiskArea(InnerRadius);
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
 
 }

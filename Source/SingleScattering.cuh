@@ -15,17 +15,17 @@
 
 #include "Transport.cuh"
 
-DEV RaySample SampleRay(Ray R, CRNG& RNG)
+DEV ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
-	RaySample RS[3] = { RaySample(RaySample::ErVolume), RaySample(RaySample::Light), RaySample(RaySample::Reflector) };
+	ScatterEvent RS[3] = { ScatterEvent(ScatterEvent::ErVolume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
 
 	SampleVolume(R, RNG, RS[0]);
-	IntersectAreaLights(R, RS[1], true);
+	IntersectLights(R, RS[1], true);
 	IntersectReflectors(R, RS[2]);
 
 	float T = FLT_MAX;
 
-	RaySample NearestRS(RaySample::ErVolume);
+	ScatterEvent NearestRS(ScatterEvent::ErVolume);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -73,49 +73,27 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
-	const RaySample NearestRS = SampleRay(Re, RNG);
+	const ScatterEvent NearestRS = SampleRay(Re, RNG);
 	
 	if (NearestRS.Valid)
 	{
 		switch (NearestRS.Type)
 		{
-			case RaySample::ErVolume:
+			case ScatterEvent::ErVolume:
 			{
 				Lv += UniformSampleOneLightVolume(NearestRS, RNG);
 				break;
 			}
 			
-			case RaySample::Light:
+			case ScatterEvent::Light:
 			{
 				Lv += NearestRS.Le;
 				break;
 			}
 
-			case RaySample::Reflector:
+			case ScatterEvent::Reflector:
 			{
 				Lv += UniformSampleOneLightReflector(NearestRS, RNG);
-				
-				/*
-				CVolumeShader Shader(CVolumeShader::Brdf, NearestRS.N, NearestRS.Wo, ColorXYZf(gReflectors.ReflectorList[NearestRS.ReflectorID].DiffuseColor), ColorXYZf(gReflectors.ReflectorList[NearestRS.ReflectorID].SpecularColor), gReflectors.ReflectorList[NearestRS.ReflectorID].Ior, gReflectors.ReflectorList[NearestRS.ReflectorID].Glossiness);
-				
-				BrdfSample S;
-
-				S.LargeStep(RNG);
-				
-				Vec3f Wi;
-
-				float Pdf;
-
-				const ColorXYZf F = Shader.SampleF(-Re.D, Wi, Pdf, S);
-
-				const RaySample ReflectorRS = SampleRay(Ray(NearestRS.P, Wi, 0.0f), RNG);
-
-				if (ReflectorRS.Valid && ReflectorRS.Type == RaySample::ErVolume)
-				{
-					Lv += F * UniformSampleOneLightVolume(ReflectorRS, RNG) / Pdf;
-				}
-				*/
-
 				break;
 			}
 		}
@@ -125,9 +103,9 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
 
-	float Lf = pFrameBuffer->CudaFrameEstimateXyza.GetPtr(X, Y)->Y(), Lr = pFrameBuffer->CudaRunningEstimateXyza.GetPtr(X, Y)->Y();
+//	float Lf = pFrameBuffer->CudaFrameEstimateXyza.GetPtr(X, Y)->Y(), Lr = pFrameBuffer->CudaRunningEstimateXyza.GetPtr(X, Y)->Y();
 
-	pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Push(fabs(Lf - Lr), gScattering.NoIterations);
+//	pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Push(fabs(Lf - Lr), gScattering.NoIterations);
 }
 
 void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)

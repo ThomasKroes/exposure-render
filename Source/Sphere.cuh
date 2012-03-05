@@ -105,8 +105,7 @@ HOD inline void SampleUnitSphere(SurfaceSample& SS, Vec2f UV)
 	float y		= r * sinf(phi);
 
 	SS.P	= Vec3f(x, y, z);
-	SS.N	= SS.N;
-	SS.Area	= SphereArea(1.0f);
+	SS.N	= -SS.P;
 	SS.UV	= Vec2f(SphericalTheta(SS.P), SphericalPhi(SS.P));
 }
 
@@ -115,5 +114,4 @@ HOD inline void SampleSphere(SurfaceSample& SS, Vec2f UV, float Radius)
 	SampleUnitSphere(SS, UV);
 
 	SS.P *= Radius;
-	SS.Area	= SphereArea(Radius);
 }

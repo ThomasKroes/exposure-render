@@ -60,7 +60,6 @@ HOD inline void SampleUnitDisk(SurfaceSample& SS, Vec2f UV)
 
 	SS.P 	= Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
-	SS.Area	= DiskArea();
 	SS.UV	= UV;
 }
 
@@ -69,5 +68,4 @@ HOD inline void SampleDisk(SurfaceSample& SS, Vec2f UV, float Radius)
 	SampleUnitDisk(SS, UV);
 	
 	SS.P *= Radius;
-	SS.Area	= DiskArea(Radius);
 }

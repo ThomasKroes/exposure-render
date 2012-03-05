@@ -297,3 +297,9 @@ HOD ColorRGBuc ToneMap(ColorXYZAf XYZA)
 
 	return Result;
 }
+
+HOD float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
+{
+	const Vec3f W = Normalize(P2 - P1);
+	return (ClampedDot(W, N1) * ClampedDot(-W, N2)) / DistanceSquared(P1, P2);
+}

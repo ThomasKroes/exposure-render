@@ -16,6 +16,7 @@
 #include "CudaUtilities.h"
 
 #include "Geometry.cuh"
+#include "Sample.cuh"
 
 #define INTERSECTION_EPSILON 0.0001f
 
@@ -72,12 +73,10 @@ HOD inline void SampleUnitPlane(SurfaceSample& SS, Vec2f UV)
 {
 	SS.P 	= Vec3f(-0.5f + UV[0], -0.5f + UV[1], 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
-	SS.Area	= 1.0f;
 	SS.UV	= UV;
 }
 
 HOD inline void SamplePlane(SurfaceSample& SS, Vec2f UV, Vec2f Size)
 {
 	SS.P *= Vec3f(Size[0], Size[1], 0.0f);
-	SS.Area = Size[0] * Size[1];
 }

@@ -172,7 +172,7 @@ inline float RandomFloat(void)
 	return (float)rand() / RAND_MAX;
 }
 
-struct RaySample
+struct ScatterEvent
 {
 	enum SampleType
 	{
@@ -193,7 +193,7 @@ struct RaySample
 	int			ReflectorID;
 	int			LightID;
 
-	HOD RaySample(SampleType Type)
+	HOD ScatterEvent(SampleType Type)
 	{
 		this->Type = Type;
 		this->SetInvalid();
@@ -223,7 +223,7 @@ struct RaySample
 		this->Pdf		= 0.0f;
 	}
 
-	HOD RaySample& RaySample::operator = (const RaySample& Other)
+	HOD ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
 	{
 		this->Type			= Other.Type;
 		this->Valid			= Other.Valid;	
@@ -236,42 +236,6 @@ struct RaySample
 		this->Pdf			= Other.Pdf;
 		this->ReflectorID	= Other.ReflectorID;
 		this->LightID		= Other.LightID;
-
-		return *this;
-	}
-};
-
-struct SurfaceSample
-{
-	Vec3f		P;
-	Vec3f		N;
-	float		Area;
-	Vec2f		UV;
-
-	HOD SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
-	{
-		this->P		= Other.P;
-		this->N		= Other.N;
-		this->Area	= Other.Area;
-		this->UV	= Other.UV;
-
-		return *this;
-	}
-};
-
-struct LightSurfaceSample : public SurfaceSample
-{
-	Vec3f		Wo;
-	Vec3f		Wi;
-	ColorXYZf	Le;
-	float		Pdf;
-
-	HOD LightSurfaceSample& LightSurfaceSample::operator = (const LightSurfaceSample& Other)
-	{
-		this->Wo	= Other.Wo;
-		this->Wi	= Other.Wi;
-		this->Le	= Other.Le;
-		this->Pdf	= Other.Pdf;
 
 		return *this;
 	}
