@@ -25,8 +25,9 @@ DEV void SampleLightSurface(ErLight& Light, LightSample& LS)
 		case 0:	SamplePlane(LS.SS, LS.RndP, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));		break;
 		case 1:	SampleDisk(LS.SS, LS.RndP, Light.Shape.OuterRadius);								break;
 		case 2:	SampleRing(LS.SS, LS.RndP, Light.Shape.InnerRadius, Light.Shape.OuterRadius);		break;
-//		case 3:	SampleBox(LS.SS, LS.RndP, ToVec3f(Light.Shape.Size));								break;
+		case 3:	SampleBox(LS.SS, LS.RndP, ToVec3f(Light.Shape.Size));								break;
 		case 4:	SampleSphere(LS.SS, LS.RndP, Light.Shape.OuterRadius);								break;
+//		case 5:	SampleCylinder(LS.SS, LS.RndP, Light.Shape.OuterRadius, Light.Shape.Size[2]);		break;
 	}
 
 	// Transform surface position and normal back to world space
@@ -61,9 +62,9 @@ DEV inline void IntersectLight(ErLight& Light, Ray R, ScatterEvent& SE)
 		case 0:	Int = IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));	break;
 		case 1:	Int = IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius);								break;
 		case 2:	Int = IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius);	break;
-		case 3:	Int = IntersectBox(TR, ToVec3f(Light.Shape.Size), NULL);											break;
+		case 3:	Int = IntersectBox(TR, ToVec3f(Light.Shape.Size));													break;
 		case 4:	Int = IntersectSphere(TR, Light.Shape.OuterRadius);													break;
-		case 5:	Int = IntersectCylinder(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);							break;
+//		case 5:	Int = IntersectCylinder(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);							break;
 	}
 
 	if (Int.Valid)
@@ -109,19 +110,17 @@ DEV inline bool IntersectsLight(ErLight& Light, Ray R)
 {
 	Ray TR = TransformRay(R, Light.Shape.InvTM);
 
-	Intersection Int;
-
 	switch (Light.Shape.Type)
 	{
-		case 0:	Int = IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));	break;
-		case 1:	Int = IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius);								break;
-		case 2:	Int = IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius);	break;
-		case 3:	Int = IntersectBox(TR, ToVec3f(Light.Shape.Size), NULL);											break;
-		case 4:	Int = IntersectSphere(TR, Light.Shape.OuterRadius);													break;
-		case 5:	Int = IntersectCylinder(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);							break;
+		case 0: return IntersectPlaneP(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));
+		case 1: return IntersectDiskP(TR, Light.Shape.OneSided, Light.Shape.OuterRadius);
+		case 2: return IntersectRingP(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius);
+		case 3: return IntersectBoxP(TR, ToVec3f(Light.Shape.Size));
+		case 4: return IntersectSphereP(TR, Light.Shape.OuterRadius);
+//		case 5: return IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);
 	}
 
-	return Int.Valid;
+	return false;
 }
 
 // Determines if there's an intersection between the ray and any of the scene's lights

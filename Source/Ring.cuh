@@ -28,6 +28,16 @@ DEV Intersection IntersectUnitRing(Ray R, bool OneSided, float InnerRadius)
 	return Int;
 }
 
+DEV bool IntersectRingP(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
+{
+	Intersection Int = IntersectPlaneP(R, OneSided);
+
+	if (Int.Valid && (Int.UV.Length() < InnerRadius || Int.UV.Length() > OuterRadius))
+		return false;
+
+	return Int.Valid;
+}
+
 DEV Intersection IntersectRing(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
@@ -38,19 +48,19 @@ DEV Intersection IntersectRing(Ray R, bool OneSided, float InnerRadius, float Ou
 	return Int;
 }
 
-HOD inline void SampleUnitRing(SurfaceSample& SS, Vec2f UV, float InnerRadius)
+HOD inline void SampleUnitRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius)
 {
-	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(UV[0]);
-	float theta = 2.0f * PI_F * UV[1];
+	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(UVW[0]);
+	float theta = 2.0f * PI_F * UVW[1];
 
 	SS.P 	= Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
 }
 
-HOD inline void SampleRing(SurfaceSample& SS, Vec2f UV, float InnerRadius, float OuterRadius)
+HOD inline void SampleRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius, float OuterRadius)
 {
-	SampleUnitRing(SS, UV, InnerRadius / OuterRadius);
+	SampleUnitRing(SS, UVW, InnerRadius / OuterRadius);
 
 	SS.P *= OuterRadius;
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);

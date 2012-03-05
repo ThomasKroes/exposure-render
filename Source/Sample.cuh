@@ -42,25 +42,25 @@ struct SurfaceSample
 
 struct LightSample
 {
-	Vec2f 			RndP;
+	Vec3f 			RndP;
 	SurfaceSample	SS;
 
 	HOD LightSample(void)
 	{
-		this->RndP	 	= Vec2f(0.0f);
+		this->RndP	= Vec3f(0.0f);
 	}
 
 	HOD LightSample& LightSample::operator=(const LightSample& Other)
 	{
-		this->RndP		= Other.RndP;
-		this->SS		= Other.SS;
+		this->RndP	= Other.RndP;
+		this->SS	= Other.SS;
 
 		return *this;
 	}
 
 	DEV void LargeStep(CRNG& Rnd)
 	{
-		RndP = Rnd.Get2();
+		RndP = Rnd.Get3();
 	}
 };
 

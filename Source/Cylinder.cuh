@@ -93,3 +93,30 @@ DEV bool InsideCylinder(Vec3f P, float Radius, float Height)
 {
 	return sqrtf((P[0] * P[0]) + (P[2] * P[2])) < Radius && fabs(P[1]) < (0.5f * Height);
 }
+
+HOD inline void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
+{
+	int Side = floorf(UVW[2] * 3.0f);
+
+	if (Side == 0 || Side == 1)
+	{
+		const Vec2f S = ConcentricSampleDisk(Vec2f(UVW[0], UVW[1]));
+		
+		SS.P[0]	= S[0];
+		SS.P[1]	= S[1];
+		SS.P[2]	= -0.5f * Height + Side * Height;
+		SS.N	= Vec3f(0.0f, 0.0f, -1.0f);
+	}
+
+	if (Side == 2)
+	{
+		const float Theta = UVW[1] * TWO_PI_F;
+
+		SS.P[0]	= cos(Theta);
+		SS.P[1]	= sin(Theta);
+		SS.P[2]	= -0.5f * Height + UVW[0] * Height;
+		SS.N	= Vec3f(0.0f, 0.0f, 1.0f);
+	}
+	
+	SS.UV = Vec2f(0.0f);
+}

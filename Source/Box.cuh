@@ -74,7 +74,7 @@ DEV Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 
 	for (int i = 0; i < 3; i++)
 	{
-		if (Int.P[i] >= Min[i] - 0.0001f)
+		if (Int.P[i] <= Min[i] + 0.0001f)
 			Int.N[i] == -1.0f;
 
 		if (Int.P[i] >= Max[i] - 0.0001f)
@@ -87,6 +87,32 @@ DEV Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 DEV Intersection IntersectBox(Ray R, Vec3f Size)
 {
 	return IntersectBox(R, -0.5f * Size, 0.5f * Size);
+}
+
+DEV bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
+{
+	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
+	const Vec3f BottomT		= InvR * (Min - R.O);
+	const Vec3f TopT		= InvR * (Max - R.O);
+	const Vec3f MinT		= MinVec3f(TopT, BottomT);
+	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
+	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
+
+	if (LargestMaxT < LargestMinT)
+		return false;
+
+	const float NearT = LargestMinT > 0.0f ? LargestMinT : 0.0f;
+
+	if (NearT < R.MinT || NearT > R.MaxT)
+		return false;
+
+	return true;
+}
+
+DEV bool IntersectBoxP(Ray R, Vec3f Size)
+{
+	return IntersectBoxP(R, -0.5f * Size, 0.5f * Size);
 }
 
 DEV bool InsideBox(Vec3f P, Vec3f Size)
@@ -119,7 +145,7 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 		{
 			SS.P[0] = 0.5f;
 			SS.P[1] = -0.5f + UVW[2];
-			SS.P[1] = -0.5f + UVW[1];
+			SS.P[2] = -0.5f + UVW[1];
 			SS.N	= Vec3f(1.0f, 0.0f, 0.0f);
 			break;
 		}
@@ -128,7 +154,7 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 		{
 			SS.P[0] = -0.5f;
 			SS.P[1] = -0.5f + UVW[2];
-			SS.P[1] = -0.5f + UVW[1];
+			SS.P[2] = -0.5f + UVW[1];
 			SS.N	= Vec3f(-1.0f, 0.0f, 0.0f);
 			break;
 		}
@@ -137,7 +163,7 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 		{
 			SS.P[0] = -0.5f + UVW[1];
 			SS.P[1] = 0.5f;
-			SS.P[1] = -0.5f + UVW[2];
+			SS.P[2] = -0.5f + UVW[2];
 			SS.N	= Vec3f(0.0f, 1.0f, 0.0f);
 			break;
 		}
@@ -146,7 +172,7 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 		{
 			SS.P[0] = -0.5f + UVW[1];
 			SS.P[1] = -0.5f;
-			SS.P[1] = -0.5f + UVW[2];
+			SS.P[2] = -0.5f + UVW[2];
 			SS.N	= Vec3f(0.0f, -1.0f, 0.0f);
 			break;
 		}
@@ -155,7 +181,7 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 		{
 			SS.P[0] = -0.5f + UVW[1];
 			SS.P[1] = -0.5f + UVW[2];
-			SS.P[1] = 0.5f;
+			SS.P[2] = 0.5f;
 			SS.N	= Vec3f(0.0f, 0.0f, 1.0f);
 			break;
 		}
@@ -164,13 +190,13 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 		{
 			SS.P[0] = -0.5f + UVW[1];
 			SS.P[1] = -0.5f + UVW[2];
-			SS.P[1] = -0.5f;
+			SS.P[2] = -0.5f;
 			SS.N	= Vec3f(0.0f, 0.0f, -1.0f);
 			break;
 		}
 	}
 
-	SS.UV	= Vec2f(UVW[1], UVW[2]);
+	SS.UV = Vec2f(UVW[1], UVW[2]);
 }
 
 HOD inline void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)

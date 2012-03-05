@@ -31,7 +31,7 @@ DEV inline void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& 
 		case 2:	Int = IntersectRing(TR, Reflector.Shape.OneSided, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius);		break;
 		case 3:	Int = IntersectBox(TR, ToVec3f(Reflector.Shape.Size), NULL);														break;
 		case 4:	Int = IntersectSphere(TR, Reflector.Shape.OuterRadius);																break;
-		case 5:	Int = IntersectCylinder(TR, Reflector.Shape.OuterRadius, Reflector.Shape.Size[1]);									break;
+//		case 5:	Int = IntersectCylinder(TR, Reflector.Shape.OuterRadius, Reflector.Shape.Size[1]);									break;
 	}
 
 	if (Int.Valid)
@@ -69,41 +69,22 @@ DEV inline void IntersectReflectors(Ray R, ScatterEvent& RS)
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Determine if the ray intersects the reflector
 DEV inline bool IntersectsReflector(ErReflector& Reflector, Ray R)
 {
 	Ray TR = TransformRay(R, Reflector.Shape.InvTM);
 
-	Intersection Int;
-
 	switch (Reflector.Shape.Type)
 	{
-		case 0:	Int = IntersectPlane(TR, Reflector.Shape.OneSided, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]));		break;
-		case 1:	Int = IntersectDisk(TR, Reflector.Shape.OneSided, Reflector.Shape.OuterRadius);										break;
-		case 2:	Int = IntersectRing(TR, Reflector.Shape.OneSided, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius);		break;
-		case 3:	Int = IntersectBox(TR, ToVec3f(Reflector.Shape.Size), NULL);														break;
-		case 4:	Int = IntersectSphere(TR, Reflector.Shape.OuterRadius);																break;
-		case 5:	Int = IntersectCylinder(TR, Reflector.Shape.OuterRadius, Reflector.Shape.Size[1]);									break;
+		case 0: return IntersectPlaneP(TR, false, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]));
+		case 1: return IntersectDiskP(TR, false, Reflector.Shape.OuterRadius);
+		case 2: return IntersectRingP(TR, false, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius);
+		case 3: return IntersectBoxP(TR, ToVec3f(Reflector.Shape.Size));
+		case 4: return IntersectSphereP(TR, Reflector.Shape.OuterRadius);
+//		case 5: return IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);
 	}
 
-	return Int.Valid;
+	return false;
 }
 
 // Determines if there's an intersection between the ray and any of the scene's reflectors

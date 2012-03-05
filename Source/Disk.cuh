@@ -28,6 +28,16 @@ DEV Intersection IntersectUnitDisk(Ray R, bool OneSided)
 	return Int;
 }
 
+DEV bool IntersectDiskP(Ray R, bool OneSided, float Radius)
+{
+	Intersection Int = IntersectPlaneP(R, OneSided);
+
+	if (Int.Valid && Int.UV.Length() > Radius)
+		return false;
+
+	return Int.Valid;
+}
+
 DEV Intersection IntersectDisk(Ray R, bool OneSided, float Radius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
@@ -53,19 +63,19 @@ HOD inline float DiskArea(float Radius = 1.0f)
 	return PI_F * (Radius * Radius);
 }
 
-HOD inline void SampleUnitDisk(SurfaceSample& SS, Vec2f UV)
+HOD inline void SampleUnitDisk(SurfaceSample& SS, Vec3f UVW)
 {
-	float r = sqrtf(UV[0]);
-	float theta = 2.0f * PI_F * UV[1];
+	float r = sqrtf(UVW[0]);
+	float theta = 2.0f * PI_F * UVW[1];
 
 	SS.P 	= Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
-	SS.UV	= UV;
+	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-HOD inline void SampleDisk(SurfaceSample& SS, Vec2f UV, float Radius)
+HOD inline void SampleDisk(SurfaceSample& SS, Vec3f UVW, float Radius)
 {
-	SampleUnitDisk(SS, UV);
+	SampleUnitDisk(SS, UVW);
 	
 	SS.P *= Radius;
 }

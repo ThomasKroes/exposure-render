@@ -19,6 +19,62 @@
 
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
 
+DEV bool IntersectSphereP(Ray R, float Radius)
+{
+	// Compute A, B and C coefficients
+    float a = Dot(R.D, R.D);
+	float b = 2 * Dot(R.D, R.O);
+    float c = Dot(R.O, R.O) - (Radius * Radius);
+
+    //Find discriminant
+    const float disc = b * b - 4 * a * c;
+    
+    // if discriminant is negative there are no real roots, so return false, as ray misses sphere
+    if (disc < 0)
+        return false;
+
+    // compute q as described above
+    float distSqrt = sqrtf(disc);
+    float q;
+
+    if (b < 0)
+        q = (-b - distSqrt) / 2.0;
+    else
+        q = (-b + distSqrt) / 2.0;
+
+    // compute t0 and t1
+    float t0 = q / a;
+    float t1 = c / q;
+
+    // make sure t0 is smaller than t1
+    if (t0 > t1)
+    {
+        // if t0 is bigger than t1 swap them around
+        float temp = t0;
+        t0 = t1;
+        t1 = temp;
+    }
+
+	float NearT;
+
+	if (t0 >= R.MinT && t0 < R.MaxT)
+	{
+		NearT = t0;
+	}
+	else
+	{
+		if (t1 >= R.MinT && t1 < R.MaxT)
+			NearT = t1;
+		else
+			return false;
+	}
+
+	if (NearT < R.MinT || NearT > R.MaxT)
+		return false;
+
+	return true;
+}
+
 DEV Intersection IntersectSphere(Ray R, float Radius)
 {
 	Intersection Int;
@@ -96,11 +152,11 @@ HOD inline float SphereArea(float Radius)
 	return 4.0f * PI_F * (Radius * Radius);
 }
 
-HOD inline void SampleUnitSphere(SurfaceSample& SS, Vec2f UV)
+HOD inline void SampleUnitSphere(SurfaceSample& SS, Vec3f UVW)
 {
-	float z		= 1.0f - 2.0f * UV[0];
+	float z		= 1.0f - 2.0f * UVW[0];
 	float r		= sqrtf(max(0.0f, 1.0f - z * z));
-	float phi	= 2.0f * PI_F * UV[1];
+	float phi	= 2.0f * PI_F * UVW[1];
 	float x		= r * cosf(phi);
 	float y		= r * sinf(phi);
 
@@ -109,9 +165,9 @@ HOD inline void SampleUnitSphere(SurfaceSample& SS, Vec2f UV)
 	SS.UV	= Vec2f(SphericalTheta(SS.P), SphericalPhi(SS.P));
 }
 
-HOD inline void SampleSphere(SurfaceSample& SS, Vec2f UV, float Radius)
+HOD inline void SampleSphere(SurfaceSample& SS, Vec3f UVW, float Radius)
 {
-	SampleUnitSphere(SS, UV);
+	SampleUnitSphere(SS, UVW);
 
 	SS.P *= Radius;
 }
