@@ -57,8 +57,6 @@ struct EXPOSURE_RENDER_DLL ErVolume
 	float				StepSize;
 	float				StepSizeShadow;
 	float				DensityScale;
-	float				GradientDelta;
-	float				InvGradientDelta;
 	float				GradientDeltaX[3];
 	float				GradientDeltaY[3];
 	float				GradientDeltaZ[3];
@@ -70,26 +68,26 @@ struct EXPOSURE_RENDER_DLL ErVolume
 
 struct EXPOSURE_RENDER_DLL ErCamera
 {
-	int					m_FilmWidth;
-	int					m_FilmHeight;
-	int					m_FilmNoPixels;
-	float				m_Pos[3];
-	float				m_Target[3];
-	float				m_Up[3];
-	float				m_N[3];
-	float				m_U[3];
-	float				m_V[3];
-	float				m_FocalDistance;
-	float				m_ApertureSize;
-	float				m_ClipNear;
-	float				m_ClipFar;
-	float				m_Screen[2][2];
-	float				m_InvScreen[2];
-	float				m_Exposure;
-	float				m_InvExposure;
-	float				m_Gamma;
-	float				m_InvGamma;
-	float				m_FOV;
+	int					FilmWidth;
+	int					FilmHeight;
+	int					FilmNoPixels;
+	float				Pos[3];
+	float				Target[3];
+	float				Up[3];
+	float				N[3];
+	float				U[3];
+	float				V[3];
+	float				FocalDistance;
+	float				ApertureSize;
+	float				ClipNear;
+	float				ClipFar;
+	float				Screen[2][2];
+	float				InvScreen[2];
+	float				Exposure;
+	float				InvExposure;
+	float				Gamma;
+	float				InvGamma;
+	float				FOV;
 };
 
 struct EXPOSURE_RENDER_DLL ErShape

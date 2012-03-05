@@ -29,7 +29,7 @@ KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 		return;
 
 	const int X0 = max((int)ceilf(X - gBlur.FilterWidth), 0);
-	const int X1 = min((int)floorf(X + gBlur.FilterWidth), (int)gCamera.m_FilmWidth - 1);
+	const int X1 = min((int)floorf(X + gBlur.FilterWidth), (int)gCamera.FilmWidth - 1);
 
 	ColorXYZAf Sum;
 
@@ -65,7 +65,7 @@ KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 		return;
 
 	const int Y0 = max((int)ceilf (Y - gBlur.FilterWidth), 0);
-	const int Y1 = min((int)floorf(Y + gBlur.FilterWidth), gCamera.m_FilmHeight - 1);
+	const int Y1 = min((int)floorf(Y + gBlur.FilterWidth), gCamera.FilmHeight - 1);
 
 	ColorXYZAf Sum;
 

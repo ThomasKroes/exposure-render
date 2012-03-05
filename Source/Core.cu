@@ -271,45 +271,43 @@ void ErBindVolume(ErVolume* pVolume)
 
 void ErBindCamera(ErCamera* pCamera)
 {
-	const Vec3f N = Normalize(ToVec3f(pCamera->m_Target) - ToVec3f(pCamera->m_Pos));
-	const Vec3f U = Normalize(Cross(N, ToVec3f(pCamera->m_Up)));
+	const Vec3f N = Normalize(ToVec3f(pCamera->Target) - ToVec3f(pCamera->Pos));
+	const Vec3f U = Normalize(Cross(N, ToVec3f(pCamera->Up)));
 	const Vec3f V = Normalize(Cross(N, U));
 
-	pCamera->m_N[0] = N[0];
-	pCamera->m_N[1] = N[1];
-	pCamera->m_N[2] = N[2];
-
-	pCamera->m_U[0] = U[0];
-	pCamera->m_U[1] = U[1];
-	pCamera->m_U[2] = U[2];
-
-	pCamera->m_V[0] = V[0];
-	pCamera->m_V[1] = V[1];
-	pCamera->m_V[2] = V[2];
+	pCamera->N[0] = N[0];
+	pCamera->N[1] = N[1];
+	pCamera->N[2] = N[2];
+	pCamera->U[0] = U[0];
+	pCamera->U[1] = U[1];
+	pCamera->U[2] = U[2];
+	pCamera->V[0] = V[0];
+	pCamera->V[1] = V[1];
+	pCamera->V[2] = V[2];
 
 	float Scale = 0.0f;
 
-	Scale = tanf((0.5f * pCamera->m_FOV / RAD_F));
+	Scale = tanf((0.5f * pCamera->FOV / RAD_F));
 
-	const float AspectRatio = (float)pCamera->m_FilmHeight / (float)pCamera->m_FilmWidth;
+	const float AspectRatio = (float)pCamera->FilmHeight / (float)pCamera->FilmWidth;
 
 	if (AspectRatio > 1.0f)
 	{
-		pCamera->m_Screen[0][0] = -Scale;
-		pCamera->m_Screen[0][1] = Scale;
-		pCamera->m_Screen[1][0] = -Scale * AspectRatio;
-		pCamera->m_Screen[1][1] = Scale * AspectRatio;
+		pCamera->Screen[0][0] = -Scale;
+		pCamera->Screen[0][1] = Scale;
+		pCamera->Screen[1][0] = -Scale * AspectRatio;
+		pCamera->Screen[1][1] = Scale * AspectRatio;
 	}
 	else
 	{
-		pCamera->m_Screen[0][0] = -Scale / AspectRatio;
-		pCamera->m_Screen[0][1] = Scale / AspectRatio;
-		pCamera->m_Screen[1][0] = -Scale;
-		pCamera->m_Screen[1][1] = Scale;
+		pCamera->Screen[0][0] = -Scale / AspectRatio;
+		pCamera->Screen[0][1] = Scale / AspectRatio;
+		pCamera->Screen[1][0] = -Scale;
+		pCamera->Screen[1][1] = Scale;
 	}
 
-	pCamera->m_InvScreen[0] = (pCamera->m_Screen[0][1] - pCamera->m_Screen[0][0]) / (float)pCamera->m_FilmWidth;
-	pCamera->m_InvScreen[1] = (pCamera->m_Screen[1][1] - pCamera->m_Screen[1][0]) / (float)pCamera->m_FilmHeight;
+	pCamera->InvScreen[0] = (pCamera->Screen[0][1] - pCamera->Screen[0][0]) / (float)pCamera->FilmWidth;
+	pCamera->InvScreen[1] = (pCamera->Screen[1][1] - pCamera->Screen[1][0]) / (float)pCamera->FilmHeight;
 
 	HandleCudaError(cudaMemcpyToSymbol("gCamera", pCamera, sizeof(ErCamera)));
 }

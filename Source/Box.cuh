@@ -69,8 +69,17 @@ DEV Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 
 	Int.Valid	= true;
 	Int.P		= R(Int.NearT);
-	Int.N		= Vec3f(0.0f, 0.0f, 1.0f);
+	Int.N		= Vec3f(0.0f);
 	Int.UV		= Vec2f(0.0f, 0.0f);
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (Int.P[i] >= Min[i] - 0.0001f)
+			Int.N[i] == -1.0f;
+
+		if (Int.P[i] >= Max[i] - 0.0001f)
+			Int.N[i] == 1.0f;
+	}
 
 	return Int;
 }

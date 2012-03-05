@@ -283,15 +283,15 @@ HOD ColorRGBuc ToneMap(ColorXYZAf XYZA)
 
 	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gCamera.m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gCamera.m_InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gCamera.m_InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gCamera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gCamera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gCamera.InvExposure)), 0.0, 1.0f));
 	
 	ColorRGBuc Result;
 
-	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gCamera.m_InvGamma)), 0.0f, 255.0f));
-	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), gCamera.m_InvGamma)), 0.0f, 255.0f));
-	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gCamera.m_InvGamma)), 0.0f, 255.0f));
+	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gCamera.InvGamma)), 0.0f, 255.0f));
+	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), gCamera.InvGamma)), 0.0f, 255.0f));
+	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gCamera.InvGamma)), 0.0f, 255.0f));
 
 	return Result;
 }
