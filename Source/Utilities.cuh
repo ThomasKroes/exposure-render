@@ -61,24 +61,22 @@ DEV Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
 //		return Vec3f(xp, yp, zp) * (1.0f / wp);
 }
 
-DEV Ray TransformRay(Ray R, ErMatrix44 TM)
+// Transform ray with transformation matrix
+DEV Ray TransformRay(Ray R, ErMatrix44& TM)
 {
-	Ray TR;
+	Ray Rt;
 
-	Vec3f O		= TransformPoint(TM, R.O);
-	Vec3f D		= TransformVector(TM, R.D);
-	Vec3f MinP 	= R(R.MinT);
-	Vec3f MaxP 	= R(R.MaxT);
+	Vec3f P		= TransformPoint(TM, R.O);
+	Vec3f MinP	= TransformPoint(TM, R(R.MinT));
+	Vec3f MaxP	= TransformPoint(TM, R(R.MaxT));
 
-	float MinT = Length(MinP - O);
-	float MaxT = Length(MaxP - O);
+	// Construct new ray
+	Rt.O		= P;
+	Rt.D		= Normalize(MaxP - Rt.O);
+	Rt.MinT		= (MinP - Rt.O).Length();
+	Rt.MaxT		= (MaxP - Rt.O).Length();
 
-	TR.O		= O;
-	TR.D		= D;
-	TR.MinT		= R.MinT;
-	TR.MaxT		= R.MaxT;
-
-	return TR;
+	return Rt;
 }
 
 HOD inline Vec3f ToVec3f(const float3& V)

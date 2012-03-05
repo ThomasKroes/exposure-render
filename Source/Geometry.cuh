@@ -188,7 +188,6 @@ struct ScatterEvent
 	Vec3f		N;
 	Vec3f		Wo;
 	ColorXYZf	Le;
-	float		Pdf;
 	Vec2f		UV;
 	int			ReflectorID;
 	int			LightID;
@@ -199,7 +198,7 @@ struct ScatterEvent
 		this->SetInvalid();
 	}
 
-	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, Vec2f UV = Vec2f(0.0f), float Pdf = 1.0f)
+	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, Vec2f UV = Vec2f(0.0f))
 	{
 		this->Valid		= true;
 		this->T			= T;
@@ -208,7 +207,6 @@ struct ScatterEvent
 		this->Wo		= Wo;
 		this->Le		= Le;
 		this->UV		= UV;
-		this->Pdf		= Pdf;
 	}
 
 	HOD void SetInvalid()
@@ -220,7 +218,6 @@ struct ScatterEvent
 		this->Wo		= Vec3f(0.0f);
 		this->Le		= ColorXYZf(0.0f);
 		this->UV		= Vec2f(0.0f);
-		this->Pdf		= 0.0f;
 	}
 
 	HOD ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
@@ -233,7 +230,6 @@ struct ScatterEvent
 		this->Wo			= Other.Wo;
 		this->Le			= Other.Le;
 		this->UV			= Other.UV;
-		this->Pdf			= Other.Pdf;
 		this->ReflectorID	= Other.ReflectorID;
 		this->LightID		= Other.LightID;
 

@@ -50,7 +50,7 @@ DEV void SampleLight(ErLight& Light, LightSample& LS, ScatterEvent& SE, Vec3f& W
 }
 
 // Intersects a light with a ray
-DEV inline void IntersectLight(ErLight& Light, Ray R, ScatterEvent& RS)
+DEV inline void IntersectLight(ErLight& Light, Ray R, ScatterEvent& SE)
 {
 	Ray TR = TransformRay(R, Light.Shape.InvTM);
 
@@ -68,14 +68,13 @@ DEV inline void IntersectLight(ErLight& Light, Ray R, ScatterEvent& RS)
 
 	if (Int.Valid)
 	{
-		RS.Valid	= true;
-		RS.P 		= TransformPoint(Light.Shape.TM, Int.P);
-		RS.N 		= TransformVector(Light.Shape.TM, Int.N);
-		RS.T 		= Length(RS.P - R.O);
-		RS.Wo		= -R.D;
-		RS.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
-		RS.Pdf		= DistanceSquared(R.O, RS.P) / (AbsDot(Normalize(R.O - RS.P), RS.N) * Light.Shape.Area);
-		RS.UV		= Int.UV;
+		SE.Valid	= true;
+		SE.P 		= TransformPoint(Light.Shape.TM, Int.P);
+		SE.N 		= TransformVector(Light.Shape.TM, Int.N);
+		SE.T 		= Length(SE.P - R.O);
+		SE.Wo		= -R.D;
+		SE.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
+		SE.UV		= Int.UV;
 	}
 }
 

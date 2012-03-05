@@ -42,7 +42,6 @@ DEV inline void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& 
 		RS.T 		= Length(RS.P - R.O);
 		RS.Wo		= -R.D;
 		RS.Le		= ColorXYZf(0.0f);
-		RS.Pdf		= 1.0f;
 		RS.UV		= Int.UV;
 	}
 }

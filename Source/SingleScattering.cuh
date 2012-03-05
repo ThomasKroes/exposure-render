@@ -73,33 +73,33 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
 
-	const ScatterEvent NearestRS = SampleRay(Re, RNG);
+	const ScatterEvent SE = SampleRay(Re, RNG);
 	
-	if (NearestRS.Valid)
+	if (SE.Valid)
 	{
-		switch (NearestRS.Type)
+		switch (SE.Type)
 		{
 			case ScatterEvent::ErVolume:
 			{
-				Lv += UniformSampleOneLightVolume(NearestRS, RNG);
+				Lv += UniformSampleOneLightVolume(SE, RNG);
 				break;
 			}
 			
 			case ScatterEvent::Light:
 			{
-				Lv += NearestRS.Le;
+				Lv += SE.Le / DistanceSquared(Re.O, SE.P);
 				break;
 			}
 
 			case ScatterEvent::Reflector:
 			{
-				Lv += UniformSampleOneLightReflector(NearestRS, RNG);
+				Lv += UniformSampleOneLightReflector(SE, RNG);
 				break;
 			}
 		}
 	}
 
-	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), NearestRS.Valid ? 1.0f : 0.0f);
+	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid ? 1.0f : 0.0f);
 
 	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
 
