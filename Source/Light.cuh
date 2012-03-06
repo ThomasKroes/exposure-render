@@ -108,16 +108,18 @@ DEV inline void IntersectLights(Ray R, ScatterEvent& RS, bool RespectVisibility 
 // Determine if the ray intersects the light
 DEV inline bool IntersectsLight(ErLight& Light, Ray R)
 {
-	Ray TR = TransformRay(R, Light.Shape.InvTM);
+	// Transform ray into local shape coordinates
+	const Ray TR = TransformRay(R, Light.Shape.InvTM);
 
+	// Intersect shape
 	switch (Light.Shape.Type)
 	{
-		case 0: return IntersectPlaneP(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));
-		case 1: return IntersectDiskP(TR, Light.Shape.OneSided, Light.Shape.OuterRadius);
-		case 2: return IntersectRingP(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius);
-		case 3: return IntersectBoxP(TR, ToVec3f(Light.Shape.Size));
-		case 4: return IntersectSphereP(TR, Light.Shape.OuterRadius);
-//		case 5: return IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);
+		case 0: return IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1])).Valid;
+		case 1: return IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius).Valid;
+		case 2: return IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius).Valid;
+		case 3: return IntersectBox(TR, ToVec3f(Light.Shape.Size)).Valid;
+		case 4: return IntersectSphere(TR, Light.Shape.OuterRadius).Valid;
+//		case 5: return IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]).Valid;
 	}
 
 	return false;

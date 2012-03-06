@@ -37,6 +37,9 @@ DEV inline bool Intersect(Ray R, CRNG& RNG)
 
 DEV bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
 {
+	if (!gScattering.Shadows)
+		return true;
+
 	Vec3f W = Normalize(P2 - P1);
 
 	Ray R(P1 + W * EPS1, W, 0.0f, (P2 - P1).Length() - EPS2);
@@ -57,7 +60,7 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 
 	SampleLight(Light, LS.m_LightSample, SE, Wi, Li);
 
-	ColorXYZf F = Shader.F(SE.Wo, Wi); 
+	ColorXYZf F = Shader.F(SE.Wo, Wi);
 	
 	float Ps = Shader.Pdf(SE.Wo, Wi);
 
@@ -75,11 +78,11 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 
 		//if (mis)
 		//{
-		Li *= PowerHeuristic(1, Pl * d2 / AbsDot(Wi, SE.N), 1, Ps);
+		// Li *= PowerHeuristic(1, Pl * d2 / AbsDot(Wi, SE.N), 1, Ps);
 		//}
 
 		// Add to direct light
-		Ld += Li;
+		Ld += AbsDot(Wi, SE.N) * Li;
 /*
 //		const float WeightMIS = PowerHeuristic(1.0f, LightPdf, 1.0f, ShaderPdf);
 		const float Pmz = 1.0f / Light.Shape.Area;
@@ -123,9 +126,11 @@ DEV ColorXYZf EstimateDirectLight(CVolumeShader::EType Type, LightingSample& LS,
 		
 		const float lightPdf2 = Pl * d2 / AbsDot(Wi, SE.N);
 
-		const float weight = PowerHeuristic(1, Ps, 1, lightPdf2);
+		const float weight = 1.0f;//PowerHeuristic(1, Ps, 1, lightPdf2);
 
-//		Ld += Li * weight;
+		Li *= F;
+		Li /= d2;
+		Ld += Li * AbsDot(Wi, SE.N) * weight;
 	}
 
 	return Ld;

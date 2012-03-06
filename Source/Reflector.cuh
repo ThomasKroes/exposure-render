@@ -72,16 +72,18 @@ DEV inline void IntersectReflectors(Ray R, ScatterEvent& RS)
 // Determine if the ray intersects the reflector
 DEV inline bool IntersectsReflector(ErReflector& Reflector, Ray R)
 {
-	Ray TR = TransformRay(R, Reflector.Shape.InvTM);
+	// Transform ray into local shape coordinates
+	const Ray TR = TransformRay(R, Reflector.Shape.InvTM);
 
+	// Intersect shape
 	switch (Reflector.Shape.Type)
 	{
-		case 0: return IntersectPlaneP(TR, false, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]));
-		case 1: return IntersectDiskP(TR, false, Reflector.Shape.OuterRadius);
-		case 2: return IntersectRingP(TR, false, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius);
-		case 3: return IntersectBoxP(TR, ToVec3f(Reflector.Shape.Size));
-		case 4: return IntersectSphereP(TR, Reflector.Shape.OuterRadius);
-//		case 5: return IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]);
+		case 0: return IntersectPlane(TR, false, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1])).Valid;
+		case 1: return IntersectDisk(TR, false, Reflector.Shape.OuterRadius).Valid;
+		case 2: return IntersectRing(TR, false, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius).Valid;
+		case 3: return IntersectBox(TR, ToVec3f(Reflector.Shape.Size)).Valid;
+		case 4: return IntersectSphere(TR, Reflector.Shape.OuterRadius).Valid;
+//		case 5: return IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]).Valid;
 	}
 
 	return false;
