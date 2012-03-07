@@ -21,7 +21,7 @@
 #define KRNL_SINGLE_SCATTERING_BLOCK_H		8
 #define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
 
-DEV inline void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& RS)
+DNI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& RS)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
@@ -61,7 +61,7 @@ DEV inline void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& RS)
 }
 
 // Determines if there is a scatter event along the ray
-DEV inline bool ScatterEventInVolume(Ray R, CRNG& RNG)
+DNI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 

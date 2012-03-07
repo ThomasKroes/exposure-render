@@ -18,7 +18,7 @@
 #include "General.cuh"
 
 // Intersect a reflector with a ray
-DEV inline void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& RS)
+DNI void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& RS)
 {
 	Ray TR = TransformRay(R, Reflector.Shape.InvTM);
 
@@ -37,8 +37,8 @@ DEV inline void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& 
 	if (Int.Valid)
 	{
 		RS.Valid	= true;
-		RS.P 		= TransformPoint(Reflector.Shape.TM, Int.P);
 		RS.N 		= TransformVector(Reflector.Shape.TM, Int.N);
+		RS.P 		= TransformPoint(Reflector.Shape.TM, Int.P);
 		RS.T 		= Length(RS.P - R.O);
 		RS.Wo		= -R.D;
 		RS.Le		= ColorXYZf(0.0f);
@@ -47,7 +47,7 @@ DEV inline void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& 
 }
 
 // Finds the nearest intersection with any of the scene's reflectors
-DEV inline void IntersectReflectors(Ray R, ScatterEvent& RS)
+DNI void IntersectReflectors(Ray R, ScatterEvent& RS)
 {
 	float T = FLT_MAX;
 
@@ -70,7 +70,7 @@ DEV inline void IntersectReflectors(Ray R, ScatterEvent& RS)
 }
 
 // Determine if the ray intersects the reflector
-DEV inline bool IntersectsReflector(ErReflector& Reflector, Ray R)
+DNI bool IntersectsReflector(ErReflector& Reflector, Ray R)
 {
 	// Transform ray into local shape coordinates
 	const Ray TR = TransformRay(R, Reflector.Shape.InvTM);
@@ -90,7 +90,7 @@ DEV inline bool IntersectsReflector(ErReflector& Reflector, Ray R)
 }
 
 // Determines if there's an intersection between the ray and any of the scene's reflectors
-DEV inline bool IntersectsReflector(Ray R)
+DNI bool IntersectsReflector(Ray R)
 {
 	for (int i = 0; i < gReflectors.NoReflectors; i++)
 	{

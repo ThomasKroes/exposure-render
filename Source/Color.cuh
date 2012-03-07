@@ -15,7 +15,7 @@
 
 #include "Vector.cuh"
 
-HOD inline void XYZToRGB(const float xyz[3], float rgb[3])
+HD inline void XYZToRGB(const float xyz[3], float rgb[3])
 {
 	rgb[0] =  3.240479f*xyz[0] - 1.537150f*xyz[1] - 0.498535f*xyz[2];
 	rgb[1] = -0.969256f*xyz[0] + 1.875991f*xyz[1] + 0.041556f*xyz[2];
@@ -23,7 +23,7 @@ HOD inline void XYZToRGB(const float xyz[3], float rgb[3])
 }
 
 
-HOD inline void RGBToXYZ(const float rgb[3], float xyz[3])
+HD inline void RGBToXYZ(const float rgb[3], float xyz[3])
 {
 	xyz[0] = 0.412453f*rgb[0] + 0.357580f*rgb[1] + 0.180423f*rgb[2];
 	xyz[1] = 0.212671f*rgb[0] + 0.715160f*rgb[1] + 0.072169f*rgb[2];
@@ -39,59 +39,59 @@ template <class T, int Size>
 class ColorRGB : public Vec<T, Size>
 {
 public:
-	HOD ColorRGB(void)
+	HD ColorRGB(void)
 	{
 		this->SetBlack();
 	}
 
-	HOD ColorRGB(T RGB)
+	HD ColorRGB(T RGB)
 	{
 		this->Set(RGB, RGB, RGB);
 	}
 
-	HOD ColorRGB(T R, T G, T B)
+	HD ColorRGB(T R, T G, T B)
 	{
 		this->Set(R, G, B);
 	}
 
-	HOD void Set(T R, T G, T B)
+	HD void Set(T R, T G, T B)
 	{
 		this->SetR(R);
 		this->SetG(G);
 		this->SetB(B);
 	}
 
-	HOD T GetR(void) const
+	HD T GetR(void) const
 	{
 		return this->m_D[0];
 	}
 
-	HOD void SetR(const T& R)
+	HD void SetR(const T& R)
 	{
 		this->m_D[0] = R;
 	}
 
-	HOD T GetG(void) const
+	HD T GetG(void) const
 	{
 		return this->m_D[1];
 	}
 
-	HOD void SetG(const T& G)
+	HD void SetG(const T& G)
 	{
 		this->m_D[1] = G;
 	}
 
-	HOD T GetB(void) const
+	HD T GetB(void) const
 	{
 		return this->m_D[2];
 	}
 
-	HOD void SetB(const T& B)
+	HD void SetB(const T& B)
 	{
 		this->m_D[2] = B;
 	}
 
-	HOD void SetBlack(void)
+	HD void SetBlack(void)
 	{
 		this->Set(T(), T(), T());
 	}
@@ -101,17 +101,17 @@ template <class T>
 class ColorRGBA : public ColorRGB<T, 4>
 {
 public:
-	HOD ColorRGBA(void)
+	HD ColorRGBA(void)
 	{
 		this->SetBlack();
 	}
 
-	HOD ColorRGBA(T RGBA)
+	HD ColorRGBA(T RGBA)
 	{
 		this->Set(RGBA, RGBA, RGBA, RGBA);
 	}
 
-	HOD void Set(T R, T G, T B, T A)
+	HD void Set(T R, T G, T B, T A)
 	{
 		this->SetR(R);
 		this->SetG(G);
@@ -119,12 +119,12 @@ public:
 		this->SetA(A);
 	}
 
-	HOD T GetA(void) const
+	HD T GetA(void) const
 	{
 		return this->m_D[3];
 	}
 
-	HOD void SetA(const T& A)
+	HD void SetA(const T& A)
 	{
 		this->m_D[3] = A;
 	}
@@ -133,24 +133,24 @@ public:
 class ColorRGBuc : public ColorRGB<unsigned char, 3>
 {
 public:
-	HOD ColorRGBuc(unsigned char RGB)
+	HD ColorRGBuc(unsigned char RGB)
 	{
 		this->Set(RGB, RGB, RGB);
 	}
 
-	HOD ColorRGBuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0)
+	HD ColorRGBuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0)
 	{
 		this->Set(R, G, B);
 	}
 
-	HOD void FromRGBf(const float& R, const float& G, const float& B)
+	HD void FromRGBf(const float& R, const float& G, const float& B)
 	{
 		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
 		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
 		this->SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
 	}
 
-	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
+	HD void FromXYZ(const float& X, const float& Y, const float& Z)
 	{
 		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
 		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
@@ -171,12 +171,12 @@ public:
 		this->SetB((unsigned char)(B * 255.0f));
 	}
 
-	HOD void SetBlack(void)
+	HD void SetBlack(void)
 	{
 		this->Set(0, 0, 0);
 	}
 
-	HOD void SetWhite(void)
+	HD void SetWhite(void)
 	{
 		this->Set(255, 255, 255);
 	}
@@ -185,24 +185,24 @@ public:
 class ColorRGBAuc : public ColorRGBA<unsigned char>
 {
 public:
-	HOD ColorRGBAuc(unsigned char RGBA)
+	HD ColorRGBAuc(unsigned char RGBA)
 	{
 		this->Set(RGBA, RGBA, RGBA, RGBA);
 	}
 
-	HOD ColorRGBAuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0, const unsigned char& A = 0)
+	HD ColorRGBAuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0, const unsigned char& A = 0)
 	{
 		this->Set(R, G, B, A);
 	}
 
-	HOD ColorRGBAuc(const ColorRGBuc& RGB)
+	HD ColorRGBAuc(const ColorRGBuc& RGB)
 	{
 		this->SetR(RGB.GetR());
 		this->SetG(RGB.GetG());
 		this->SetB(RGB.GetB());
 	}
 
-	HOD void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
+	HD void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
 	{
 		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
 		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
@@ -210,7 +210,7 @@ public:
 		this->SetA(clamp2(A, 0.0f, 1.0f) * 255.0f);
 	}
 
-	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
+	HD void FromXYZ(const float& X, const float& Y, const float& Z)
 	{
 		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
 		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
@@ -231,12 +231,12 @@ public:
 		this->SetB((unsigned char)(B * 255.0f));
 	}
 
-	HOD void SetBlack(void)
+	HD void SetBlack(void)
 	{
 		this->Set(0, 0, 0, 0);
 	}
 
-	HOD void SetWhite(void)
+	HD void SetWhite(void)
 	{
 		this->Set(255, 255, 255, 0);
 	}
@@ -245,59 +245,59 @@ public:
 class ColorXYZf : public Vec3f
 {
 public:
-	HOD ColorXYZf(float V = 0.0f)
+	HD ColorXYZf(float V = 0.0f)
 	{
 		this->Set(V, V, V);
 	}
 
-	HOD ColorXYZf(float X, float Y, float Z)
+	HD ColorXYZf(float X, float Y, float Z)
 	{
 		this->Set(X, Y, Z);
 	}
 
-	HOD void Set(float X, float Y, float Z)
+	HD void Set(float X, float Y, float Z)
 	{
 		this->SetX(X);
 		this->SetY(Y);
 		this->SetZ(Z);
 	}
 
-	HOD ColorXYZf(float V[3])
+	HD ColorXYZf(float V[3])
 	{
 		this->Set(V[0], V[1], V[2]);
 	}
 
-	HOD float GetX(void) const
+	HD float GetX(void) const
 	{
 		return this->m_D[0];
 	}
 
-	HOD void SetX(float X)
+	HD void SetX(float X)
 	{
 		this->m_D[0] = X;
 	}
 
-	HOD float GetY(void) const
+	HD float GetY(void) const
 	{
 		return this->m_D[1];
 	}
 
-	HOD void SetY(float Y)
+	HD void SetY(float Y)
 	{
 		this->m_D[1] = Y;
 	}
 
-	HOD float GetZ(void) const
+	HD float GetZ(void) const
 	{
 		return this->m_D[2];
 	}
 
-	HOD void SetZ(float Z)
+	HD void SetZ(float Z)
 	{
 		this->m_D[2] = Z;
 	}
 
-	HOD ColorXYZf operator + (const ColorXYZf& XYZ) const
+	HD ColorXYZf operator + (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -307,7 +307,7 @@ public:
 		return Result;
 	}
 	
-	HOD ColorXYZf operator - (const ColorXYZf& XYZ) const
+	HD ColorXYZf operator - (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -317,7 +317,7 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZf operator / (const ColorXYZf& XYZ) const
+	HD ColorXYZf operator / (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -327,7 +327,7 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZf operator * (const ColorXYZf& XYZ) const
+	HD ColorXYZf operator * (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -337,7 +337,7 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZf& operator *= (const ColorXYZf& XYZ)
+	HD ColorXYZf& operator *= (const ColorXYZf& XYZ)
 	{
 		for (int i = 0; i < 3; i++)
 			this->m_D[i] *= XYZ[i];
@@ -345,7 +345,7 @@ public:
 		return *this;
 	}
 
-	HOD ColorXYZf operator * (const float& F) const
+	HD ColorXYZf operator * (const float& F) const
 	{
 		ColorXYZf Result = *this;
 
@@ -355,7 +355,7 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZf& operator *= (const float& F)
+	HD ColorXYZf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; ++i)
 			this->m_D[i] *= F;
@@ -363,7 +363,7 @@ public:
 		return *this;
 	}
 
-	HOD ColorXYZf operator / (const float& F) const
+	HD ColorXYZf operator / (const float& F) const
 	{
 		ColorXYZf Result = *this;
 
@@ -373,7 +373,7 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZf& operator /= (float a)
+	HD ColorXYZf& operator /= (float a)
 	{
 		for (int i = 0; i < 3; ++i)
 			this->m_D[i] /= a;
@@ -381,7 +381,7 @@ public:
 		return *this;
 	}
 
-	HOD ColorXYZf& ColorXYZf::operator = (const ColorXYZf& Other)
+	HD ColorXYZf& ColorXYZf::operator = (const ColorXYZf& Other)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] = Other[i];
@@ -389,7 +389,7 @@ public:
 		return *this;
 	}
 
-	HOD bool IsBlack() const
+	HD bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)
 			if (m_D[i] != 0.0f)
@@ -398,7 +398,7 @@ public:
 		return true;
 	}
 
-	HOD float Y() const
+	HD float Y() const
 	{
 		float v = 0.0f;
 
@@ -408,7 +408,7 @@ public:
 		return v;
 	}
 
-	HOD void FromRGB(const float& R, const float& G, const float& B)
+	HD void FromRGB(const float& R, const float& G, const float& B)
 	{
 		const float CoeffX[3] = { 0.4124f, 0.3576f, 0.1805f };
 		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
@@ -420,12 +420,12 @@ public:
 	}
 };
 
-HOD inline ColorXYZf operator * (const float& F, const ColorXYZf& XYZ)
+HD inline ColorXYZf operator * (const float& F, const ColorXYZf& XYZ)
 {
 	return XYZ * F;
 }
 
-HOD inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& C2)
+HD inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& C2)
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorXYZf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ());
@@ -434,34 +434,34 @@ HOD inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& 
 class ColorXYZAf : public Vec4f
 {
 public:
-	HOD ColorXYZAf(float V = 0.0f)
+	HD ColorXYZAf(float V = 0.0f)
 	{
 		Set(V, V, V, V);
 	}
 
-	HOD ColorXYZAf(ColorXYZf XYZ)
+	HD ColorXYZAf(ColorXYZf XYZ)
 	{
 		Set(XYZ.GetX(), XYZ.GetY(), XYZ.GetZ());
 	}
 
-	HOD ColorXYZAf(float X, float Y, float Z)
+	HD ColorXYZAf(float X, float Y, float Z)
 	{
 		Set(X, Y, Z);
 	}
 
-	HOD ColorXYZAf(float X, float Y, float Z, float A)
+	HD ColorXYZAf(float X, float Y, float Z, float A)
 	{
 		Set(X, Y, Z, A);
 	}
 	
-	HOD void Set(float X, float Y, float Z)
+	HD void Set(float X, float Y, float Z)
 	{
 		SetX(X);
 		SetY(Y);
 		SetZ(Z);
 	}
 
-	HOD void Set(float X, float Y, float Z, float A)
+	HD void Set(float X, float Y, float Z, float A)
 	{
 		SetX(X);
 		SetY(Y);
@@ -469,47 +469,47 @@ public:
 		SetA(A);
 	}
 
-	HOD float GetX(void) const
+	HD float GetX(void) const
 	{
 		return m_D[0];
 	}
 
-	HOD void SetX(float X)
+	HD void SetX(float X)
 	{
 		m_D[0] = X;
 	}
 
-	HOD float GetY(void) const
+	HD float GetY(void) const
 	{
 		return m_D[1];
 	}
 
-	HOD void SetY(float Y)
+	HD void SetY(float Y)
 	{
 		m_D[1] = Y;
 	}
 
-	HOD float GetZ(void) const
+	HD float GetZ(void) const
 	{
 		return m_D[2];
 	}
 
-	HOD void SetZ(float Z)
+	HD void SetZ(float Z)
 	{
 		m_D[2] = Z;
 	}
 
-	HOD float GetA(void) const
+	HD float GetA(void) const
 	{
 		return m_D[3];
 	}
 
-	HOD void SetA(float A)
+	HD void SetA(float A)
 	{
 		m_D[3] = A;
 	}
 
-	HOD ColorXYZAf& operator += (const ColorXYZAf& XYZ)
+	HD ColorXYZAf& operator += (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 4; ++i)
 			m_D[i] += XYZ[i];
@@ -517,7 +517,7 @@ public:
 		return *this;
 	}
 
-	HOD ColorXYZAf operator + (const ColorXYZAf& XYZ) const
+	HD ColorXYZAf operator + (const ColorXYZAf& XYZ) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -527,7 +527,7 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZAf operator - (const ColorXYZAf& XYZ) const
+	HD ColorXYZAf operator - (const ColorXYZAf& XYZ) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -538,7 +538,7 @@ public:
 	}
 
 	
-	HOD ColorXYZAf operator / (const ColorXYZAf& XYZA) const
+	HD ColorXYZAf operator / (const ColorXYZAf& XYZA) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -549,7 +549,7 @@ public:
 	}
 	/**/
 
-	HOD ColorXYZAf operator * (const ColorXYZAf& XYZA) const
+	HD ColorXYZAf operator * (const ColorXYZAf& XYZA) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -559,7 +559,7 @@ public:
 		return Result;
 	}
 /*
-	HOD ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
+	HD ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] *= XYZ[i];
@@ -567,7 +567,7 @@ public:
 		return *this;
 	}
 
-	HOD ColorXYZAf operator * (const float& F) const
+	HD ColorXYZAf operator * (const float& F) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -577,7 +577,7 @@ public:
 		return Result;
 	}
 
-	HOD ColorXYZAf& operator *= (const float& F)
+	HD ColorXYZAf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] *= F;
@@ -585,7 +585,7 @@ public:
 		return *this;
 	}
 
-	HOD ColorXYZAf operator / (const float& F) const
+	HD ColorXYZAf operator / (const float& F) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -596,7 +596,7 @@ public:
 	}
 
 	
-	HOD ColorXYZAf& operator /= (float a)
+	HD ColorXYZAf& operator /= (float a)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] /= a;
@@ -605,7 +605,7 @@ public:
 	}
 	
 
-	HOD ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
+	HD ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
 	{
 		for (int i = 0; i < 4; ++i)
 			m_D[i] = Other[i];
@@ -613,7 +613,7 @@ public:
 		return *this;
 	}
 */
-	HOD bool IsBlack() const
+	HD bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)
 			if (m_D[i] != 0.0f)
@@ -622,7 +622,7 @@ public:
 		return true;
 	}
 
-	HOD float Y() const
+	HD float Y() const
 	{
 		float v = 0.0f;
 
@@ -632,7 +632,7 @@ public:
 		return v;
 	}
 
-	HOD void FromRGB(const float& R, const float& G, const float& B)
+	HD void FromRGB(const float& R, const float& G, const float& B)
 	{
 		const float CoeffX[3] = { 0.4124f, 0.3576f, 0.1805f };
 		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
@@ -644,12 +644,12 @@ public:
 	}
 };
 
-HOD inline ColorXYZAf operator * (const float& F, const ColorXYZAf& XYZA)
+HD inline ColorXYZAf operator * (const float& F, const ColorXYZAf& XYZA)
 {
 	return XYZA * F;
 }
 
-HOD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZAf& C2)
+HD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZAf& C2)
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorXYZAf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ(), OneMinusT * C1.GetA() + T * C2.GetA());
@@ -658,68 +658,68 @@ HOD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZA
 class ColorRGBf : public Vec3<float>
 {
 public:
-	HOD ColorRGBf(void)
+	HD ColorRGBf(void)
 	{
 	}
 
-	HOD ColorRGBf(const float& R, const float& G, const float& B)
+	HD ColorRGBf(const float& R, const float& G, const float& B)
 	{
 		Set(R, G, B);
 	}
 
-	HOD ColorRGBf(const float& RGB)
+	HD ColorRGBf(const float& RGB)
 	{
 		Set(RGB, RGB, RGB);
 	}
 
-	HOD void Set(const float& R, const float& G, const float& B)
+	HD void Set(const float& R, const float& G, const float& B)
 	{
 		SetR(R);
 		SetG(G);
 		SetB(B);
 	}
 
-	HOD float GetR(void) const
+	HD float GetR(void) const
 	{
 		return m_D[0];
 	}
 
-	HOD void SetR(const float& R)
+	HD void SetR(const float& R)
 	{
 		m_D[0] = R;
 	}
 
-	HOD float GetG(void) const
+	HD float GetG(void) const
 	{
 		return m_D[1];
 	}
 
-	HOD void SetG(const float& G)
+	HD void SetG(const float& G)
 	{
 		m_D[1] = G;
 	}
 
-	HOD float GetB(void) const
+	HD float GetB(void) const
 	{
 		return m_D[2];
 	}
 
-	HOD void SetB(const float& B)
+	HD void SetB(const float& B)
 	{
 		m_D[2] = B;
 	}
 
-	HOD void SetBlack(void)
+	HD void SetBlack(void)
 	{
 		Set(0.0f, 0.0f, 0.0f);
 	}
 
-	HOD void SetWhite(void)
+	HD void SetWhite(void)
 	{
 		Set(1.0f, 1.0f, 1.0f);
 	}
 
-	HOD ColorRGBf& operator = (const ColorRGBf& Other)			
+	HD ColorRGBf& operator = (const ColorRGBf& Other)			
 	{
 		for (int i = 0; i < 3; i++)
 			m_D[i] = Other[i];
@@ -727,7 +727,7 @@ public:
 		return *this;
 	}
 
-	HOD ColorRGBf& operator += (ColorRGBf& Other)		
+	HD ColorRGBf& operator += (ColorRGBf& Other)		
 	{
 		for (int i = 0; i < 3; i++)
 			m_D[i] += Other[i];
@@ -735,12 +735,12 @@ public:
 		return *this;
 	}
 
-	HOD ColorRGBf operator * (const float& F) const
+	HD ColorRGBf operator * (const float& F) const
 	{
 		return ColorRGBf(m_D[0] * F, m_D[1] * F, m_D[2] * F);
 	}
 
-	HOD ColorRGBf& operator *= (const float& F)
+	HD ColorRGBf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; i++)
 			m_D[i] *= F;
@@ -748,13 +748,13 @@ public:
 		return *this;
 	}
 
-	HOD ColorRGBf operator / (const float& F) const
+	HD ColorRGBf operator / (const float& F) const
 	{
 		const float Inv = 1.0f / F;
 		return ColorRGBf(m_D[0] * Inv, m_D[1] * Inv, m_D[2] * Inv);
 	}
 
-	HOD ColorRGBf& operator /= (const float& F)
+	HD ColorRGBf& operator /= (const float& F)
 	{
 		const float Inv = 1.0f / F;
 		
@@ -764,17 +764,17 @@ public:
 		return *this;
 	}
 
-	HOD float operator[](int i) const
+	HD float operator[](int i) const
 	{
 		return m_D[i];
 	}
 
-	HOD float operator[](int i)
+	HD float operator[](int i)
 	{
 		return m_D[i];
 	}
 
-	HOD bool Black(void)
+	HD bool Black(void)
 	{
 		for (int i = 0; i < 3; i++)
 			if (m_D[i] != 0.0f)
@@ -783,12 +783,12 @@ public:
 		return true;
 	}
 
-	HOD ColorRGBf Pow(const float& E)
+	HD ColorRGBf Pow(const float& E)
 	{
 		return ColorRGBf(powf(m_D[0], E), powf(m_D[1], E), powf(m_D[2], E));
 	}
 
-	HOD void FromXYZ(const float& X, const float& Y, const float& Z)
+	HD void FromXYZ(const float& X, const float& Y, const float& Z)
 	{
 		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
 		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
@@ -797,7 +797,7 @@ public:
 		Set(rWeight[0] * X + rWeight[1] * Y + rWeight[2] * Z, gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z, bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z);
 	}
 
-	HOD void ToneMap(float InvExposure)
+	HD void ToneMap(float InvExposure)
 	{
 		this->m_D[0] = 1.0f - expf(-(this->m_D[0] * InvExposure));
 		this->m_D[1] = 1.0f - expf(-(this->m_D[1] * InvExposure));
@@ -807,7 +807,7 @@ public:
 	}
 };
 
-HOD inline ColorRGBf Lerp(const float& T, const ColorRGBf& C1, const ColorRGBf& C2)
+HD inline ColorRGBf Lerp(const float& T, const ColorRGBf& C1, const ColorRGBf& C2)
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorRGBf(OneMinusT * C1.GetR() + T * C2.GetR(), OneMinusT * C1.GetG() + T * C2.GetG(), OneMinusT * C1.GetB() + T * C2.GetB());

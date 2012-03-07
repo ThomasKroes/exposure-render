@@ -304,7 +304,7 @@ public:
 		ColorXYZf R;
 
 		R += m_Lambertian.F(Wol, Wil);
-//		R += m_Microfacet.F(Wol, Wil);
+		R += m_Microfacet.F(Wol, Wil);
 
 		return R;
 	}
@@ -316,20 +316,20 @@ public:
 
 		ColorXYZf R;
 
-		//if (S.m_Component <= 0.5f)
-		//{
+		if (S.m_Component <= 0.5f)
+		{
 			m_Lambertian.SampleF(Wol, Wil, Pdf, S.m_Dir);
-		//}
-		//else
-		//{
-		//	m_Microfacet.SampleF(Wol, Wil, Pdf, S.m_Dir);
-		//}
+		}
+		else
+		{
+			m_Microfacet.SampleF(Wol, Wil, Pdf, S.m_Dir);
+		}
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
-//		Pdf += m_Microfacet.Pdf(Wol, Wil);
+		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
 		R += m_Lambertian.F(Wol, Wil);
-//		R += m_Microfacet.F(Wol, Wil);
+		R += m_Microfacet.F(Wol, Wil);
 
 		Wi = LocalToWorld(Wil);
 
@@ -344,7 +344,7 @@ public:
 		float Pdf = 0.0f;
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
-//		Pdf += m_Microfacet.Pdf(Wol, Wil);
+		Pdf += m_Microfacet.Pdf(Wol, Wil);
 
 		return Pdf;
 	}

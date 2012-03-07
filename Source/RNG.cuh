@@ -18,13 +18,13 @@
 class CRNG
 {
 public:
-	HOD CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
+	DO CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
 	{
 		this->m_pSeed0 = pSeed0;
 		this->m_pSeed1 = pSeed1;
 	}
 
-	HOD float Get1(void)
+	HD float Get1(void)
 	{
 		*this->m_pSeed0 = 36969 * ((*m_pSeed0) & 65535) + ((*m_pSeed0) >> 16);
 		*this->m_pSeed1 = 18000 * ((*m_pSeed1) & 65535) + ((*m_pSeed1) >> 16);
@@ -42,12 +42,12 @@ public:
 		return (res.f - 2.f) / 2.f;
 	}
 
-	HOD Vec2f Get2(void)
+	HD Vec2f Get2(void)
 	{
 		return Vec2f(Get1(), Get1());
 	}
 
-	HOD Vec3f Get3(void)
+	HD Vec3f Get3(void)
 	{
 		return Vec3f(Get1(), Get1(), Get1());
 	}

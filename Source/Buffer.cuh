@@ -71,12 +71,12 @@ public:
 		m_Resolution.Set(Vec2i(0, 0));
 	}
 
-	HOD int GetNoElements(void) const
+	HD int GetNoElements(void) const
 	{
 		return m_Resolution.GetNoElements();
 	}
 
-	HOD int GetSize(void) const
+	HD int GetSize(void) const
 	{
 		if (Pitched)
 			return m_Resolution.GetResY() * m_Pitch;
@@ -106,7 +106,7 @@ public:
 			return m_pData[Y * GetWidth() + X];
 	}
 
-	HOD T* GetPtr(const int& X = 0, const int& Y = 0)
+	HD T* GetPtr(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return NULL;
@@ -128,17 +128,17 @@ public:
 			m_pData[Y * GetWidth() + X] = Value;
 	}
 
-	HOD int GetWidth(void) const
+	HD int GetWidth(void) const
 	{
 		return m_Resolution.GetResX();
 	}
 
-	HOD int GetHeight(void) const
+	HD int GetHeight(void) const
 	{
 		return m_Resolution.GetResY();
 	}
 
-	HOD int GetPitch(void) const
+	HD int GetPitch(void) const
 	{
 		if (Pitched)
 			return m_Pitch;
@@ -204,12 +204,12 @@ public:
 		m_Resolution.Set(Vec2i(0, 0));
 	}
 
-	HOD int GetNoElements(void) const
+	HD int GetNoElements(void) const
 	{
 		return m_Resolution.GetNoElements();
 	}
 
-	HOD int GetSize(void) const
+	HD int GetSize(void) const
 	{
 		return GetNoElements() * sizeof(T);
 	}
@@ -230,7 +230,7 @@ public:
 		return m_pData[Y * GetWidth() + X];
 	}
 
-	HOD T* GetPtr(const int& X = 0, const int& Y = 0)
+	HD T* GetPtr(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return NULL;
@@ -246,12 +246,12 @@ public:
 		m_pData[Y * GetWidth() + X] = Value;
 	}
 
-	HOD int GetWidth(void) const
+	HD int GetWidth(void) const
 	{
 		return m_Resolution.GetResX();
 	}
 
-	HOD int GetHeight(void) const
+	HD int GetHeight(void) const
 	{
 		return m_Resolution.GetResY();
 	}

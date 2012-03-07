@@ -17,7 +17,7 @@
 
 #include "Geometry.cuh"
 
-DEV Intersection IntersectUnitBox(Ray R)
+DNI Intersection IntersectUnitBox(Ray R)
 {
 	Intersection Int;
 
@@ -46,7 +46,7 @@ DEV Intersection IntersectUnitBox(Ray R)
 	return Int;
 }
 
-DEV Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
+DNI Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 {
 	Intersection Int;
 
@@ -84,12 +84,12 @@ DEV Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 	return Int;
 }
 
-DEV Intersection IntersectBox(Ray R, Vec3f Size)
+DNI Intersection IntersectBox(Ray R, Vec3f Size)
 {
 	return IntersectBox(R, -0.5f * Size, 0.5f * Size);
 }
 
-DEV bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
+DNI bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Min - R.O);
@@ -110,18 +110,18 @@ DEV bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
 	return true;
 }
 
-DEV bool IntersectBoxP(Ray R, Vec3f Size)
+DNI bool IntersectBoxP(Ray R, Vec3f Size)
 {
 	return IntersectBoxP(R, -0.5f * Size, 0.5f * Size);
 }
 
-DEV bool InsideBox(Vec3f P, Vec3f Size)
+DNI bool InsideBox(Vec3f P, Vec3f Size)
 {
 	const float HalfSize[3] = { 0.5f * Size[0], 0.5f * Size[1], 0.5f * Size[2] };
 	return P[0] > -HalfSize[0] && P[0] < HalfSize[0] && P[1] > -HalfSize[1] && P[1] < HalfSize[1] && P[2] > -HalfSize[2] && P[2] < HalfSize[2];
 }
 
-DEV bool InsideAABB(Vec3f P)
+DNI bool InsideAABB(Vec3f P)
 {
 	if (P[0] < gVolume.MinAABB[0] || P[0] > gVolume.MaxAABB[0])
 		return false;
@@ -135,7 +135,7 @@ DEV bool InsideAABB(Vec3f P)
 	return true;
 }
 
-HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
+HD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 {
 	int Side = floorf(UVW[0] * 6.0f);
 
@@ -199,7 +199,7 @@ HOD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 	SS.UV = Vec2f(UVW[1], UVW[2]);
 }
 
-HOD inline void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
+HD inline void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
 {
 	SampleUnitBox(SS, UVW);
 

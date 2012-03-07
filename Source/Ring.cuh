@@ -18,7 +18,7 @@
 #include "Geometry.cuh"
 #include "Disk.cuh"
 
-DEV Intersection IntersectUnitRing(Ray R, bool OneSided, float InnerRadius)
+DNI Intersection IntersectUnitRing(Ray R, bool OneSided, float InnerRadius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -28,7 +28,7 @@ DEV Intersection IntersectUnitRing(Ray R, bool OneSided, float InnerRadius)
 	return Int;
 }
 
-DEV bool IntersectRingP(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
+DNI bool IntersectRingP(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
 {
 	Intersection Int = IntersectPlaneP(R, OneSided);
 
@@ -38,7 +38,7 @@ DEV bool IntersectRingP(Ray R, bool OneSided, float InnerRadius, float OuterRadi
 	return Int.Valid;
 }
 
-DEV Intersection IntersectRing(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
+DNI Intersection IntersectRing(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -48,7 +48,7 @@ DEV Intersection IntersectRing(Ray R, bool OneSided, float InnerRadius, float Ou
 	return Int;
 }
 
-HOD inline void SampleUnitRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius)
+HD inline void SampleUnitRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius)
 {
 	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(UVW[0]);
 	float theta = 2.0f * PI_F * UVW[1];
@@ -58,7 +58,7 @@ HOD inline void SampleUnitRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius)
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
 }
 
-HOD inline void SampleRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius, float OuterRadius)
+HD inline void SampleRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius, float OuterRadius)
 {
 	SampleUnitRing(SS, UVW, InnerRadius / OuterRadius);
 

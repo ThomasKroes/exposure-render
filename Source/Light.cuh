@@ -17,7 +17,7 @@
 #include "RayMarching.cuh"
 #include "General.cuh"
 
-DEV void SampleLightSurface(ErLight& Light, LightSample& LS)
+DNI void SampleLightSurface(ErLight& Light, LightSample& LS)
 {
 	// Sample the light surface
 	switch (Light.Shape.Type)
@@ -35,7 +35,7 @@ DEV void SampleLightSurface(ErLight& Light, LightSample& LS)
 	LS.SS.N	= TransformVector(Light.Shape.TM, LS.SS.N);
 }
 
-DEV void SampleLight(ErLight& Light, LightSample& LS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
+DNI void SampleLight(ErLight& Light, LightSample& LS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
 {
 	// First sample the light surface
 	SampleLightSurface(Light, LS);
@@ -51,7 +51,7 @@ DEV void SampleLight(ErLight& Light, LightSample& LS, ScatterEvent& SE, Vec3f& W
 }
 
 // Intersects a light with a ray
-DEV inline void IntersectLight(ErLight& Light, Ray R, ScatterEvent& SE)
+DNI void IntersectLight(ErLight& Light, Ray R, ScatterEvent& SE)
 {
 	Ray TR = TransformRay(R, Light.Shape.InvTM);
 
@@ -80,7 +80,7 @@ DEV inline void IntersectLight(ErLight& Light, Ray R, ScatterEvent& SE)
 }
 
 // Finds the nearest intersection with any of the scene's lights
-DEV inline void IntersectLights(Ray R, ScatterEvent& RS, bool RespectVisibility = false)
+DNI void IntersectLights(Ray R, ScatterEvent& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX; 
 
@@ -106,7 +106,7 @@ DEV inline void IntersectLights(Ray R, ScatterEvent& RS, bool RespectVisibility 
 }
 
 // Determine if the ray intersects the light
-DEV inline bool IntersectsLight(ErLight& Light, Ray R)
+DNI bool IntersectsLight(ErLight& Light, Ray R)
 {
 	// Transform ray into local shape coordinates
 	const Ray TR = TransformRay(R, Light.Shape.InvTM);
@@ -126,7 +126,7 @@ DEV inline bool IntersectsLight(ErLight& Light, Ray R)
 }
 
 // Determines if there's an intersection between the ray and any of the scene's lights
-DEV inline bool IntersectsLight(Ray R)
+DNI bool IntersectsLight(Ray R)
 {
 	for (int i = 0; i < gLights.NoLights; i++)
 	{

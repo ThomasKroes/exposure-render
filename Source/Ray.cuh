@@ -19,7 +19,7 @@
 
 struct Ray
 {	
-	HOD Ray(Vec3f O = Vec3f(0.0f), Vec3f D = Vec3f(0.0f, 0.0f, 1.0f), float MinT = 0.0f, float MaxT = 1000000.0f)
+	HD Ray(Vec3f O = Vec3f(0.0f), Vec3f D = Vec3f(0.0f, 0.0f, 1.0f), float MinT = 0.0f, float MaxT = 1000000.0f)
 	{
 		this->O		= O;
 		this->D		= D;
@@ -27,7 +27,7 @@ struct Ray
 		this->MaxT	= MaxT;
 	}
 
-	HOD Ray& operator=(const Ray& Other)
+	HD Ray& operator=(const Ray& Other)
 	{
 		this->O		= Other.O;
 		this->D		= Other.D;
@@ -37,7 +37,7 @@ struct Ray
 		return *this;
 	}
 
-	HOD Vec3f operator()(float T) const
+	HD Vec3f operator()(float T) const
 	{
 		return this->O + Normalize(this->D) * T;
 	}

@@ -20,7 +20,7 @@
 
 #define INTERSECTION_EPSILON 0.0001f
 
-DEV Intersection IntersectPlaneP(Ray R, bool OneSided, float Offset = 0.0f)
+DEV inline Intersection IntersectPlaneP(Ray R, bool OneSided, float Offset = 0.0f)
 {
 	Intersection Int;
 
@@ -39,7 +39,7 @@ DEV Intersection IntersectPlaneP(Ray R, bool OneSided, float Offset = 0.0f)
 	return Int;
 }
 
-DEV Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
+DEV inline Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
 {
 	Intersection Int;
 
@@ -56,14 +56,17 @@ DEV Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
 	Int.N	= Vec3f(0.0f, 0.0f, 1.0f);
 
 	if (OneSided && R.D[2] <= 0.0f)
-		Int.Front = false;
+	{
+		Int.Front	= false;
+		Int.N		= Vec3f(0.0f, 0.0f, -1.0f);
+	}
 
 	Int.Valid = true;
 
 	return Int;
 }
 
-DEV Intersection IntersectUnitPlane(Ray R, bool OneSided)
+DEV inline Intersection IntersectUnitPlane(Ray R, bool OneSided)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -73,7 +76,7 @@ DEV Intersection IntersectUnitPlane(Ray R, bool OneSided)
 	return Int;
 }
 
-DEV bool IntersectPlaneP(Ray R, bool OneSided, Vec2f Size)
+DEV inline bool IntersectPlaneP(Ray R, bool OneSided, Vec2f Size)
 {
 	Intersection Int = IntersectPlaneP(R, OneSided);
 
@@ -83,7 +86,7 @@ DEV bool IntersectPlaneP(Ray R, bool OneSided, Vec2f Size)
 	return Int.Valid;
 }
 
-DEV Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
+DEV inline Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -93,19 +96,19 @@ DEV Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
 	return Int;
 }
 
-DEV bool InsidePlane(Vec3f P)
+DEV inline bool InsidePlane(Vec3f P)
 {
 	return P[2] > 0.0f;
 }
 
-HOD inline void SampleUnitPlane(SurfaceSample& SS, Vec3f UVW)
+HD inline void SampleUnitPlane(SurfaceSample& SS, Vec3f UVW)
 {
 	SS.P 	= Vec3f(-0.5f + UVW[0], -0.5f + UVW[1], 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
 	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-HOD inline void SamplePlane(SurfaceSample& SS, Vec3f UVW, Vec2f Size)
+HD inline void SamplePlane(SurfaceSample& SS, Vec3f UVW, Vec2f Size)
 {
 	SampleUnitPlane(SS, UVW);
 

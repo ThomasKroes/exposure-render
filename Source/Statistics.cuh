@@ -17,7 +17,7 @@
 
 struct RunningStats
 {
-	HOD void Push(float Value, int N)
+	HD void Push(float Value, int N)
 	{
 //		m_n++;
 
@@ -38,17 +38,17 @@ struct RunningStats
 		}
 	}
 
-	HOD double Mean(int N) const
+	HD double Mean(int N) const
 	{
 		return (N > 0) ? m_newM : 0.0f;
 	}
 
-	HOD double Variance(int N) const
+	HD double Variance(int N) const
 	{
 		return ((N > 1) ? m_newS / (float)(N - 1) : 0.0f);
 	}
 
-	HOD double StandardDeviation(int N) const
+	HD double StandardDeviation(int N) const
 	{
 		return sqrtf(Variance(N));
 	}

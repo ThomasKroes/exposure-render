@@ -20,7 +20,7 @@
 
 using namespace std;
 
-HOD inline float clamp2(float v, float a, float b)
+HD inline float clamp2(float v, float a, float b)
 {
 	return max(a, min(v, b));
 }
@@ -31,30 +31,30 @@ template <class T, int Size>
 class Vec
 {
 public:
-	HOD Vec()
+	HD Vec()
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] = T();
 	}
 
-	HOD Vec(T V)
+	HD Vec(T V)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] = V;
 	}
 
-	HOD Vec(const Vec<T, Size>& D)
+	HD Vec(const Vec<T, Size>& D)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] = D[i];
 	}
 
-	HOD Vec(const T& Other)
+	HD Vec(const T& Other)
 	{
 		*this = Other;
 	}
 
-	HOD Vec<T, Size>& operator = (const Vec<T, Size>& Other)
+	HD Vec<T, Size>& operator = (const Vec<T, Size>& Other)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] = Other[i];
@@ -62,17 +62,17 @@ public:
 		return *this;
 	}
 
-	HOD T operator[](const int& i) const
+	HD T operator[](const int& i) const
 	{
 		return this->m_D[i];
 	}
 
-	HOD T& operator[](const int& i)
+	HD T& operator[](const int& i)
 	{
 		return this->m_D[i];
 	}
 
-	HOD Vec<T, Size> operator + (Vec<T, Size> V) const
+	HD Vec<T, Size> operator + (Vec<T, Size> V) const
 	{
 		Vec<T, Size> Result;
 
@@ -82,7 +82,7 @@ public:
 		return Result;
 	}
 
-	HOD Vec<T, Size>& operator += (const Vec<T, Size>& V)
+	HD Vec<T, Size>& operator += (const Vec<T, Size>& V)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] += V[i];
@@ -90,7 +90,7 @@ public:
 		return *this;
 	}
 
-	HOD Vec<T, Size> operator -(Vec<T, Size> V) const
+	HD Vec<T, Size> operator -(Vec<T, Size> V) const
 	{
 		Vec<T, Size> Result;
 
@@ -100,7 +100,7 @@ public:
 		return Result;
 	}
 
-	HOD Vec<T, Size>& operator -= (const Vec<T, Size>& V)
+	HD Vec<T, Size>& operator -= (const Vec<T, Size>& V)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] -= V[i];
@@ -108,7 +108,7 @@ public:
 		return *this;
 	}
 
-	HOD Vec<T, Size> operator * (const float& f) const
+	HD Vec<T, Size> operator * (const float& f) const
 	{
 		Vec<T, Size> Result;
 
@@ -118,7 +118,7 @@ public:
 		return Result;
 	}
 
-	HOD Vec<T, Size>& operator *= (const float& f)
+	HD Vec<T, Size>& operator *= (const float& f)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] *= f;
@@ -126,7 +126,7 @@ public:
 		return *this;
 	}
 
-	HOD Vec<T, Size>& operator *= (const Vec<T, Size>& V)
+	HD Vec<T, Size>& operator *= (const Vec<T, Size>& V)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] *= V[i];
@@ -134,7 +134,7 @@ public:
 		return *this;
 	}
 
-	HOD Vec<T, Size> operator / (const float& f) const
+	HD Vec<T, Size> operator / (const float& f) const
 	{
 		const float Inv = 1.0f / f;
 
@@ -146,7 +146,7 @@ public:
 		return Result;
 	}
 
-	HOD Vec<T, Size>& operator /= (float f)
+	HD Vec<T, Size>& operator /= (float f)
 	{
 		const float Inv = 1.0f / f;
 
@@ -156,7 +156,7 @@ public:
 		return *this;
 	}
 
-	HOD Vec<T, Size>& operator /= (Vec<T, Size> V)
+	HD Vec<T, Size>& operator /= (Vec<T, Size> V)
 	{
 		for (int i = 0; i < Size; i++)
 			this->m_D[i] / V[i];
@@ -164,7 +164,7 @@ public:
 		return *this;
 	}
 
-	HOD bool operator < (const T& V) const
+	HD bool operator < (const T& V) const
 	{
 		for (int i = 0; i < Size; i++)
 		{
@@ -175,7 +175,7 @@ public:
 		return true;
 	}
 
-	HOD bool operator <= (const T& V) const
+	HD bool operator <= (const T& V) const
 	{
 		for (int i = 0; i < Size; i++)
 		{
@@ -186,7 +186,7 @@ public:
 		return true;
 	}
 
-	HOD bool operator > (const T& V) const
+	HD bool operator > (const T& V) const
 	{
 		for (int i = 0; i < Size; i++)
 		{
@@ -197,7 +197,7 @@ public:
 		return true;
 	}
 
-	HOD bool operator >= (const T& V) const
+	HD bool operator >= (const T& V) const
 	{
 		for (int i = 0; i < Size; i++)
 		{
@@ -208,7 +208,7 @@ public:
 		return true;
 	}
 
-	HOD bool operator == (const T& V) const
+	HD bool operator == (const T& V) const
 	{
 		for (int i = 0; i < Size; i++)
 		{
@@ -219,7 +219,7 @@ public:
 		return true;
 	}
 
-	HOD bool operator != (const T& V) const
+	HD bool operator != (const T& V) const
 	{
 		for (int i = 0; i < Size; i++)
 		{
@@ -230,7 +230,7 @@ public:
 		return false;
 	}
 
-	HOD int Max(void)
+	HD int Max(void)
 	{
 		T Max;
 
@@ -243,7 +243,7 @@ public:
 		return Max;
 	}
 
-	HOD int Min(void)
+	HD int Min(void)
 	{
 		T Min;
 
@@ -256,7 +256,7 @@ public:
 		return Min;
 	}
 
-	HOD void Clamp(T Min, T Max)
+	HD void Clamp(T Min, T Max)
 	{
 		for (int i = 0; i < Size; ++i)
 			this->m_D[i] = max(Min, min(this->m_D[i], Max));
@@ -270,35 +270,35 @@ template <class T>
 class Vec2 : public Vec<T, 2>
 {
 public:
-	HOD Vec2()
+	HD Vec2()
 	{
 		for (int i = 0; i < 2; i++)
 			this->m_D[i] = T();
 	}
 
-	HOD Vec2(T V)
+	HD Vec2(T V)
 	{
 		for (int i = 0; i < 2; i++)
 			this->m_D[i] = V;
 	}
 
-	HOD Vec2(T V1, T V2)
+	HD Vec2(T V1, T V2)
 	{
 		this->m_D[0] = V1;
 		this->m_D[1] = V2;
 	}
 
-	HOD float LengthSquared(void) const
+	HD float LengthSquared(void) const
 	{
 		return this->m_D[0] * this->m_D[0] + this->m_D[1] * this->m_D[1];
 	}
 
-	HOD float Length(void) const
+	HD float Length(void) const
 	{
 		return sqrtf(this->LengthSquared());
 	}
 
-	HOD void Normalize(void)
+	HD void Normalize(void)
 	{
 		const float L = this->Length();
 		this->m_D[0] /= L;
@@ -310,36 +310,36 @@ template <class T>
 class Vec3 : public Vec<T, 3>
 {
 public:
-	HOD Vec3()
+	HD Vec3()
 	{
 		for (int i = 0; i < 3; i++)
 			this->m_D[i] = T();
 	}
 
-	HOD Vec3(T V)
+	HD Vec3(T V)
 	{
 		for (int i = 0; i < 3; i++)
 			this->m_D[i] = V;
 	}
 
-	HOD Vec3(T V1, T V2, T V3)
+	HD Vec3(T V1, T V2, T V3)
 	{
 		m_D[0] = V1;
 		m_D[1] = V2;
 		m_D[2] = V3;
 	}
 
-	HOD float LengthSquared(void) const
+	HD float LengthSquared(void) const
 	{
 		return this->m_D[0] * this->m_D[0] + this->m_D[1] * this->m_D[1] + this->m_D[2] * this->m_D[2];
 	}
 
-	HOD float Length(void) const
+	HD float Length(void) const
 	{
 		return sqrtf(this->LengthSquared());
 	}
 
-	HOD void Normalize(void)
+	HD void Normalize(void)
 	{
 		const float L = this->Length();
 		this->m_D[0] /= L;
@@ -347,24 +347,24 @@ public:
 		this->m_D[2] /= L;
 	}
 
-	HOD float Dot(Vec3 V) const
+	HD float Dot(Vec3 V) const
 	{
 		return (this->m_D[0] * V[0] + this->m_D[1] * V[1] + this->m_D[2] * V[2]);
 	}
 
-	HOD Vec3 Cross(Vec3 V) const
+	HD Vec3 Cross(Vec3 V) const
 	{
 		return Vec3( (this->m_D[1] * V[2]) - (this->m_D[2] * V[1]), (this->m_D[2] * V[0]) - (this->m_D[0] * V[2]), (this->m_D[0] * V[1]) - (this->m_D[1] * V[0]) );
 	}
 
-	HOD void ScaleBy(float F)
+	HD void ScaleBy(float F)
 	{
 		this->m_D[0] *= F;
 		this->m_D[1] *= F;
 		this->m_D[2] *= F;
 	}
 
-	HOD Vec3 operator-() const
+	HD Vec3 operator-() const
 	{
 		Vec3 Result;
 
@@ -379,19 +379,19 @@ template <class T>
 class Vec4 : public Vec<T, 4>
 {
 public:
-	HOD Vec4()
+	HD Vec4()
 	{
 		for (int i = 0; i < 4; i++)
 			this->m_D[i] = T();
 	}
 
-	HOD Vec4(T V)
+	HD Vec4(T V)
 	{
 		for (int i = 0; i < 4; i++)
 			this->m_D[i] = V;
 	}
 
-	HOD Vec4(T V1, T V2, T V3, T V4)
+	HD Vec4(T V1, T V2, T V3, T V4)
 	{
 		m_D[0] = V1;
 		m_D[1] = V2;
@@ -418,38 +418,38 @@ typedef Vec4<int>				Vec4i;
 typedef Vec4<float>				Vec4f;
 typedef Vec4<double>			Vec4d;
 
-template <class T> inline HOD Vec2<T> operator + (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] + B[0], A[1] + B[1]);							};
-template <class T> inline HOD Vec2<T> operator - (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] - B[0], A[1] - B[1]);							};
-template <class T> inline HOD Vec2<T> operator * (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] * F, V[1] * F);								};
-template <class T> inline HOD Vec2<T> operator * (T F, Vec2<T> V)							{ return Vec2<T>(V[0] * F, V[1] * F);								};
-template <class T> inline HOD Vec2<T> operator * (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] * B[0], A[1] * B[1]);							};
-template <class T> inline HOD Vec2<T> operator / (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] / F, V[1] / F);								};
-template <class T> inline HOD Vec2<T> operator / (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] / B[0], A[1] / B[1]);							};
+template <class T> inline HD Vec2<T> operator + (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] + B[0], A[1] + B[1]);							};
+template <class T> inline HD Vec2<T> operator - (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] - B[0], A[1] - B[1]);							};
+template <class T> inline HD Vec2<T> operator * (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] * F, V[1] * F);								};
+template <class T> inline HD Vec2<T> operator * (T F, Vec2<T> V)							{ return Vec2<T>(V[0] * F, V[1] * F);								};
+template <class T> inline HD Vec2<T> operator * (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] * B[0], A[1] * B[1]);							};
+template <class T> inline HD Vec2<T> operator / (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] / F, V[1] / F);								};
+template <class T> inline HD Vec2<T> operator / (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] / B[0], A[1] / B[1]);							};
 
-template <class T> inline HOD Vec3<T> operator + (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] + V3[0], V1[1] + V3[1], V1[2] + V3[2]);		};
-template <class T> inline HOD Vec3<T> operator - (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] - V3[0], V1[1] - V3[1], V1[2] - V3[2]);		};
-template <class T> inline HOD Vec3<T> operator * (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
-template <class T> inline HOD Vec3<T> operator * (T F, Vec3<T> V)							{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
-template <class T> inline HOD Vec3<T> operator * (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] * B[0], A[1] * B[1], A[2] * B[2]);			};
-template <class T> inline HOD Vec3<T> operator / (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] / F, V[1] / F, V[2] / F);						};
-template <class T> inline HOD Vec3<T> operator / (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] / B[0], A[1] / B[1], A[2] / B[2]);			};
+template <class T> inline HD Vec3<T> operator + (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] + V3[0], V1[1] + V3[1], V1[2] + V3[2]);		};
+template <class T> inline HD Vec3<T> operator - (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] - V3[0], V1[1] - V3[1], V1[2] - V3[2]);		};
+template <class T> inline HD Vec3<T> operator * (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
+template <class T> inline HD Vec3<T> operator * (T F, Vec3<T> V)							{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
+template <class T> inline HD Vec3<T> operator * (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] * B[0], A[1] * B[1], A[2] * B[2]);			};
+template <class T> inline HD Vec3<T> operator / (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] / F, V[1] / F, V[2] / F);						};
+template <class T> inline HD Vec3<T> operator / (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] / B[0], A[1] / B[1], A[2] / B[2]);			};
 
-template <class T> HOD inline Vec2<T> Normalize(Vec2<T> V)									{ Vec2<T> R = V; R.Normalize(); return R; 							};
-template <class T> HOD inline Vec3<T> Normalize(Vec3<T> V)									{ Vec3<T> R = V; R.Normalize(); return R; 							};
+template <class T> HD inline Vec2<T> Normalize(Vec2<T> V)									{ Vec2<T> R = V; R.Normalize(); return R; 							};
+template <class T> HD inline Vec3<T> Normalize(Vec3<T> V)									{ Vec3<T> R = V; R.Normalize(); return R; 							};
 
-HOD inline float clamp(float x, float a, float b)
+HD inline float clamp(float x, float a, float b)
 {
     return x < a ? a : (x > b ? b : x);
 }
 
-HOD inline float Length(Vec3f V)											{ return V.Length();						};
-HOD inline Vec3f Cross(Vec3f A, Vec3f B)									{ return A.Cross(B);						};
-HOD inline float Dot(Vec3f A, Vec3f B)										{ return A.Dot(B);							};
-HOD inline float AbsDot(Vec3f A, Vec3f B)									{ return fabs(A.Dot(B));					};
-HOD inline float ClampedAbsDot(Vec3f A, Vec3f B)							{ return clamp(fabs(A.Dot(B)), 0.0f, 1.0f);	};
-HOD inline float ClampedDot(Vec3f A, Vec3f B)								{ return clamp(Dot(A, B), 0.0f, 1.0f);		};
-HOD inline float Distance(Vec3f A, Vec3f B)									{ return (A - B).Length();					};
-HOD inline float DistanceSquared(Vec3f A, Vec3f B)							{ return (A - B).LengthSquared();			};
+HD inline float Length(Vec3f V)											{ return V.Length();						};
+HD inline Vec3f Cross(Vec3f A, Vec3f B)									{ return A.Cross(B);						};
+HD inline float Dot(Vec3f A, Vec3f B)										{ return A.Dot(B);							};
+HD inline float AbsDot(Vec3f A, Vec3f B)									{ return fabs(A.Dot(B));					};
+HD inline float ClampedAbsDot(Vec3f A, Vec3f B)							{ return clamp(fabs(A.Dot(B)), 0.0f, 1.0f);	};
+HD inline float ClampedDot(Vec3f A, Vec3f B)								{ return clamp(Dot(A, B), 0.0f, 1.0f);		};
+HD inline float Distance(Vec3f A, Vec3f B)									{ return (A - B).Length();					};
+HD inline float DistanceSquared(Vec3f A, Vec3f B)							{ return (A - B).LengthSquared();			};
 
 
 
@@ -459,49 +459,49 @@ HOD inline float DistanceSquared(Vec3f A, Vec3f B)							{ return (A - B).Length
 
 
 
-inline HOD float Fmaxf(float a, float b)
+inline HD float Fmaxf(float a, float b)
 {
 	return a > b ? a : b;
 }
 
-inline HOD float Fminf(float a, float b)
+inline HD float Fminf(float a, float b)
 {
 	return a < b ? a : b;
 }
 
-inline HOD float Clamp(float f, float a, float b)
+inline HD float Clamp(float f, float a, float b)
 {
 	return Fmaxf(a, Fminf(f, b));
 }
 
 // clamp
-inline HOD Vec3f Clamp(Vec3f v, float a, float b)
+inline HD Vec3f Clamp(Vec3f v, float a, float b)
 {
 	return Vec3f(Clamp(v[0], a, b), Clamp(v[1], a, b), Clamp(v[2], a, b));
 }
 
-inline HOD Vec3f Clamp(Vec3f v, Vec3f a, Vec3f b)
+inline HD Vec3f Clamp(Vec3f v, Vec3f a, Vec3f b)
 {
 	return Vec3f(Clamp(v[0], a[0], b[0]), Clamp(v[1], a[1], b[1]), Clamp(v[2], a[2], b[2]));
 }
 
 // floor
-HOD inline Vec3f Floor(const Vec3f v)
+HD inline Vec3f Floor(const Vec3f v)
 {
 	return Vec3f(floor(v[0]), floor(v[1]), floor(v[2]));
 }
 
-HOD inline Vec3f Reflect(Vec3f& i, Vec3f& n)
+HD inline Vec3f Reflect(Vec3f& i, Vec3f& n)
 {
 	return i - 2.0f * n * Dot(n, i);
 }
 
-inline HOD Vec3f MinVec3f(Vec3f a, Vec3f b)
+inline HD Vec3f MinVec3f(Vec3f a, Vec3f b)
 {
 	return Vec3f(min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]));
 }
 
-inline HOD Vec3f MaxVec3f(Vec3f a, Vec3f b)
+inline HD Vec3f MaxVec3f(Vec3f a, Vec3f b)
 {
 	return Vec3f(max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]));
 }

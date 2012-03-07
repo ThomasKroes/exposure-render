@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "Defines.h"
-
 #include <algorithm>
 #include <math.h>
 
@@ -24,22 +22,22 @@
 
 using namespace std;
 
-HOD inline float Lerp(float t, float v1, float v2)
+DNI float Lerp(float t, float v1, float v2)
 {
 	return (1.f - t) * v1 + t * v2;
 }
 
-HOD  inline void swap(int& a, int& b)
+DNI void swap(int& a, int& b)
 {
 	int t = a; a = b; b = t;
 }
 
-HOD  inline void swap(float& a, float& b)
+DNI void swap(float& a, float& b)
 {
 	float t = a; a = b; b = t;
 }
 
-HOD inline void Swap(float* pF1, float* pF2)
+DNI void Swap(float* pF1, float* pF2)
 {
 	const float TempFloat = *pF1;
 
@@ -47,7 +45,7 @@ HOD inline void Swap(float* pF1, float* pF2)
 	*pF2 = TempFloat;
 }
 
-HOD inline void Swap(float& F1, float& F2)
+DNI void Swap(float& F1, float& F2)
 {
 	const float TempFloat = F1;
 
@@ -55,7 +53,7 @@ HOD inline void Swap(float& F1, float& F2)
 	F2 = TempFloat;
 }
 
-HOD inline void Swap(int* pI1, int* pI2)
+DNI void Swap(int* pI1, int* pI2)
 {
 	const int TempInt = *pI1;
 
@@ -63,7 +61,7 @@ HOD inline void Swap(int* pI1, int* pI2)
 	*pI2 = TempInt;
 }
 
-HOD inline void Swap(int& I1, int& I2)
+DNI void Swap(int& I1, int& I2)
 {
 	const int TempInt = I1;
 
@@ -84,7 +82,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD CResolution2D(void)
+	HD CResolution2D(void)
 	{
 		m_XY		= Vec2i(640, 480);
 
@@ -92,12 +90,12 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD ~CResolution2D(void)
+	HD ~CResolution2D(void)
 	{
 	}
 
 	// ToDo: Add description
-	HOD CResolution2D& CResolution2D::operator=(const CResolution2D& Other)
+	HD CResolution2D& CResolution2D::operator=(const CResolution2D& Other)
 	{
 		m_XY				= Other.m_XY;
 		m_InvXY				= Other.m_InvXY;
@@ -108,28 +106,28 @@ public:
 		return *this;
 	}
 
-	HOD int operator[](int i) const
+	HD int operator[](int i) const
 	{
 		return m_XY[i];
 	}
 
-	HOD int& operator[](int i)
+	HD int& operator[](int i)
 	{
 		return m_XY[i];
 	}
 
-	HOD bool operator == (const CResolution2D& Other) const
+	HD bool operator == (const CResolution2D& Other) const
 	{
 		return GetResX() == Other.GetResX() && GetResY() == Other.GetResY();
 	}
 
-	HOD bool operator != (const CResolution2D& Other) const
+	HD bool operator != (const CResolution2D& Other) const
 	{
 		return GetResX() != Other.GetResX() || GetResY() != Other.GetResY();
 	}
 
 	// ToDo: Add description
-	HOD void Update(void)
+	HD void Update(void)
 	{
 		m_InvXY				= Vec2f(m_XY[0] != 0.0f ? 1.0f / m_XY[0] : 0.0f, m_XY[1] != 0.0f ? 1.0f / m_XY[1] : 0.0f);
 		m_NoElements		= m_XY[0] * m_XY[1];
@@ -138,7 +136,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HOD Vec2i ToVector(void) const
+	HD Vec2i ToVector(void) const
 	{
 		return Vec2i(m_XY[0], m_XY[1]);
 	}
@@ -150,13 +148,13 @@ public:
 		Update();
 	}
 
-	HOD int		GetResX(void) const				{ return m_XY[0]; }
-	HOD void	SetResX(const int& Width)		{ m_XY[0] = Width; Update(); }
-	HOD int		GetResY(void) const				{ return m_XY[1]; }
-	HOD void	SetResY(const int& Height)		{ m_XY[1] = Height; Update(); }
-	HOD Vec2f	GetInv(void) const				{ return m_InvXY; }
-	HOD int		GetNoElements(void) const		{ return m_NoElements; }
-	HOD float	GetAspectRatio(void) const		{ return m_AspectRatio; }
+	HD int		GetResX(void) const				{ return m_XY[0]; }
+	HD void	SetResX(const int& Width)		{ m_XY[0] = Width; Update(); }
+	HD int		GetResY(void) const				{ return m_XY[1]; }
+	HD void	SetResY(const int& Height)		{ m_XY[1] = Height; Update(); }
+	HD Vec2f	GetInv(void) const				{ return m_InvXY; }
+	HD int		GetNoElements(void) const		{ return m_NoElements; }
+	HD float	GetAspectRatio(void) const		{ return m_AspectRatio; }
 
 
 private:
@@ -192,13 +190,13 @@ struct ScatterEvent
 	int			ReflectorID;
 	int			LightID;
 
-	HOD ScatterEvent(SampleType Type)
+	HD ScatterEvent(SampleType Type)
 	{
 		this->Type = Type;
 		this->SetInvalid();
 	}
 
-	HOD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, Vec2f UV = Vec2f(0.0f))
+	HD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, Vec2f UV = Vec2f(0.0f))
 	{
 		this->Valid		= true;
 		this->T			= T;
@@ -209,7 +207,7 @@ struct ScatterEvent
 		this->UV		= UV;
 	}
 
-	HOD void SetInvalid()
+	HD void SetInvalid()
 	{
 		this->Valid		= false;
 		this->T			= 0.0f;
@@ -220,7 +218,7 @@ struct ScatterEvent
 		this->UV		= Vec2f(0.0f);
 	}
 
-	HOD ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
+	HD ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
 	{
 		this->Type			= Other.Type;
 		this->Valid			= Other.Valid;	
@@ -247,12 +245,12 @@ struct Intersection
 	Vec3f		N;
 	Vec2f		UV;
 	
-	HOD Intersection()
+	HD Intersection()
 	{
 		this->SetInvalid();
 	}
 
-	HOD void SetValid(float NearT, Vec3f P, Vec3f N, Vec2f UV = Vec2f(0.0f))
+	HD void SetValid(float NearT, Vec3f P, Vec3f N, Vec2f UV = Vec2f(0.0f))
 	{
 		this->Valid		= true;
 		this->NearT		= NearT;
@@ -261,7 +259,7 @@ struct Intersection
 		this->UV		= UV;
 	}
 
-	HOD void SetInvalid()
+	HD void SetInvalid()
 	{
 		this->Valid		= false;
 		this->Front		= true;
@@ -272,7 +270,7 @@ struct Intersection
 		this->UV		= Vec2f(0.0f);
 	}
 
-	HOD Intersection& Intersection::operator = (const Intersection& Other)
+	HD Intersection& Intersection::operator = (const Intersection& Other)
 	{
 		this->Valid			= Other.Valid;	
 		this->Front			= Other.Front;

@@ -24,7 +24,7 @@
 #include "Sphere.cuh"
 #include "Cylinder.cuh"
 
-DEV Vec3f TransformVector(ErMatrix44 TM, Vec3f v)
+DNI Vec3f TransformVector(ErMatrix44 TM, Vec3f v)
 {
 	Vec3f r;
 
@@ -37,7 +37,7 @@ DEV Vec3f TransformVector(ErMatrix44 TM, Vec3f v)
 	return r;
 }
 
-DEV Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
+DNI Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
 {
 	/*
 	float x = pt.x, y = pt.y, z = pt.z;
@@ -62,7 +62,7 @@ DEV Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
 }
 
 // Transform ray with transformation matrix
-DEV Ray TransformRay(Ray R, ErMatrix44& TM)
+DNI Ray TransformRay(Ray R, ErMatrix44& TM)
 {
 	Ray Rt;
 
@@ -79,37 +79,37 @@ DEV Ray TransformRay(Ray R, ErMatrix44& TM)
 	return Rt;
 }
 
-HOD inline Vec3f ToVec3f(const float3& V)
+HODNI Vec3f ToVec3f(const float3& V)
 {
 	return Vec3f(V.x, V.y, V.z);
 }
 
-HOD inline Vec3f ToVec3f(float V[3])
+HODNI Vec3f ToVec3f(float V[3])
 {
 	return Vec3f(V[0], V[1], V[2]);
 }
 
-HOD inline float3 FromVec3f(const Vec3f& V)
+HODNI float3 FromVec3f(const Vec3f& V)
 {
 	return make_float3(V[0], V[1], V[2]);
 }
 
-DEV float GetIntensity(Vec3f P)
+DNI float GetIntensity(Vec3f P)
 {
 	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolume.MinAABB[0]) * gVolume.InvSize[0], (P[1] - gVolume.MinAABB[1]) * gVolume.InvSize[1], (P[2] - gVolume.MinAABB[2]) * gVolume.InvSize[2]));
 }
 
-DEV float GetNormalizedIntensity(Vec3f P)
+DNI float GetNormalizedIntensity(Vec3f P)
 {
 	return (GetIntensity(P) - gVolume.IntensityRange.Min) * gVolume.IntensityRange.Inv;
 }
 
-DEV float GetOpacity(float NormalizedIntensity)
+DNI float GetOpacity(float NormalizedIntensity)
 {
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEV bool Inside(ErClipper& C, Vec3f P)
+DNI bool Inside(ErClipper& C, Vec3f P)
 {
 	bool Inside = false;
 
@@ -143,7 +143,7 @@ DEV bool Inside(ErClipper& C, Vec3f P)
 	return C.Invert ? !Inside : Inside;
 }
 
-DEV bool Inside(Vec3f P)
+DNI bool Inside(Vec3f P)
 {
 	for (int i = 0; i < gClippers.NoClippers; i++)
 	{
@@ -158,7 +158,7 @@ DEV bool Inside(Vec3f P)
 	return false;
 }
 
-DEV float GetOpacity(Vec3f P)
+DNI float GetOpacity(Vec3f P)
 {
 	const float Intensity = GetIntensity(P);
 	
@@ -179,7 +179,7 @@ DEV float GetOpacity(Vec3f P)
 	return Opacity;
 }
 
-DEV ColorXYZf GetDiffuse(float Intensity)
+DNI ColorXYZf GetDiffuse(float Intensity)
 {
 	const float NormalizedIntensity = (Intensity - gDiffuseRange.Min) * gDiffuseRange.Inv;
 
@@ -187,7 +187,7 @@ DEV ColorXYZf GetDiffuse(float Intensity)
 	return ColorXYZf(Diffuse.x, Diffuse.y, Diffuse.z);
 }
 
-DEV ColorXYZf GetSpecular(float Intensity)
+DNI ColorXYZf GetSpecular(float Intensity)
 {
 	const float NormalizedIntensity = (Intensity - gSpecularRange.Min) * gSpecularRange.Inv;
 
@@ -195,14 +195,14 @@ DEV ColorXYZf GetSpecular(float Intensity)
 	return ColorXYZf(Specular.x, Specular.y, Specular.z);
 }
 
-DEV float GetGlossiness(float Intensity)
+DNI float GetGlossiness(float Intensity)
 {
 	const float NormalizedIntensity = (Intensity - gGlossinessRange.Min) * gGlossinessRange.Inv;
 
 	return tex1D(gTexGlossiness, NormalizedIntensity);
 }
 
-DEV ColorXYZf GetEmission(float Intensity)
+DNI ColorXYZf GetEmission(float Intensity)
 {
 	const float NormalizedIntensity = (Intensity - gEmissionRange.Min) * gEmissionRange.Inv;
 
@@ -210,7 +210,7 @@ DEV ColorXYZf GetEmission(float Intensity)
 	return ColorXYZf(Emission.x, Emission.y, Emission.z);
 }
 
-DEV inline Vec3f Gradient(Vec3f P)
+DNI inline Vec3f Gradient(Vec3f P)
 {
 	Vec3f Gradient;
 
@@ -239,12 +239,12 @@ DEV inline Vec3f Gradient(Vec3f P)
 	return ToVec3f(gVolume.Spacing) * Gradient;// / (2.0f * Vec3f(gVolume.GradientDeltaX[0], gVolume.GradientDeltaY[1], gVolume.GradientDeltaZ[2])));
 }
 
-DEV inline Vec3f NormalizedGradient(Vec3f P)
+DNI inline Vec3f NormalizedGradient(Vec3f P)
 {
 	return Normalize(Gradient(P));
 }
 
-DEV inline float GradientMagnitude(Vec3f P)
+DNI inline float GradientMagnitude(Vec3f P)
 {
 	Vec3f Pts[3][2];
 
@@ -267,17 +267,17 @@ DEV inline float GradientMagnitude(Vec3f P)
 	return sqrtf(Sum);
 }
 
-DEV ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
+DNI ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
 {
 	return A + (Ax - A) / max((float)N, 1.0f);
 }
 
-DEV ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
+DNI ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
 {
 	 return A + ((Ax - A) / max((float)N, 1.0f));
 }
 
-HOD ColorRGBuc ToneMap(ColorXYZAf XYZA)
+HD ColorRGBuc ToneMap(ColorXYZAf XYZA)
 {
 	ColorRGBf RgbHdr;
 
@@ -296,7 +296,7 @@ HOD ColorRGBuc ToneMap(ColorXYZAf XYZA)
 	return Result;
 }
 
-HOD float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
+HD float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
 {
 	const Vec3f W = Normalize(P2 - P1);
 	return (ClampedDot(W, N1) * ClampedDot(-W, N2)) / DistanceSquared(P1, P2);

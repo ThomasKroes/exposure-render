@@ -19,7 +19,7 @@
 
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
 
-DEV bool IntersectSphereP(Ray R, float Radius)
+DNI bool IntersectSphereP(Ray R, float Radius)
 {
 	// Compute A, B and C coefficients
     float a = Dot(R.D, R.D);
@@ -75,7 +75,7 @@ DEV bool IntersectSphereP(Ray R, float Radius)
 	return true;
 }
 
-DEV Intersection IntersectSphere(Ray R, float Radius)
+DNI Intersection IntersectSphere(Ray R, float Radius)
 {
 	Intersection Int;
 
@@ -137,22 +137,22 @@ DEV Intersection IntersectSphere(Ray R, float Radius)
 	return Int;
 }
 
-DEV Intersection IntersectUnitSphere(Ray R)
+DNI Intersection IntersectUnitSphere(Ray R)
 {
 	return IntersectSphere(R, 1.0f);
 }
 
-DEV bool InsideSphere(Vec3f P, float Radius)
+DNI bool InsideSphere(Vec3f P, float Radius)
 {
 	return Length(P) < Radius;
 }
 
-HOD inline float SphereArea(float Radius)
+DNI float SphereArea(float Radius)
 {
 	return 4.0f * PI_F * (Radius * Radius);
 }
 
-HOD inline void SampleUnitSphere(SurfaceSample& SS, Vec3f UVW)
+DNI void SampleUnitSphere(SurfaceSample& SS, Vec3f UVW)
 {
 	float z		= 1.0f - 2.0f * UVW[0];
 	float r		= sqrtf(max(0.0f, 1.0f - z * z));
@@ -165,7 +165,7 @@ HOD inline void SampleUnitSphere(SurfaceSample& SS, Vec3f UVW)
 	SS.UV	= Vec2f(SphericalTheta(SS.P), SphericalPhi(SS.P));
 }
 
-HOD inline void SampleSphere(SurfaceSample& SS, Vec3f UVW, float Radius)
+DNI void SampleSphere(SurfaceSample& SS, Vec3f UVW, float Radius)
 {
 	SampleUnitSphere(SS, UVW);
 

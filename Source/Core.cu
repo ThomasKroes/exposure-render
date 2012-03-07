@@ -52,8 +52,6 @@ CD ErRange			gEmissionRange;
 #include "Estimate.cuh"
 #include "Utilities.cuh"
 #include "SingleScattering.cuh"
-#include "NearestIntersection.cuh"
-#include "SpecularBloom.cuh"
 #include "ToneMap.cuh"
 #include "GradientMagnitude.cuh"
 
@@ -352,7 +350,6 @@ void ErRenderEstimate()
 	BlurEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	ComputeEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	ToneMap(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
-//	ReduceNoise(pDevRenderInfo, pDevFrameBuffer, gCamera.m_FilmWidth, gCamera.m_FilmHeight);
 
 	HandleCudaError(cudaFree(pDevFrameBuffer));
 }

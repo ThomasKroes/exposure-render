@@ -32,14 +32,14 @@ KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
 	ColorRGBAuc& RunningEstimate	= *pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y);
 	ColorRGBAuc& ReferenceEstimate	= *pFrameBuffer->BenchmarkEstimateRgbaLdr.GetPtr(X, Y);
 
-	const float ErrorRGB[] = 
+	const float ErrorRGB[3] = 
 	{
 		RunningEstimate.GetR() - ReferenceEstimate.GetR(),
 		RunningEstimate.GetG() - ReferenceEstimate.GetG(),
 		RunningEstimate.GetB() - ReferenceEstimate.GetB()
 	};
 
-	const float ErrorSquaredRGB[] = 
+	const float ErrorSquaredRGB[3] = 
 	{
 		ErrorRGB[0] * ErrorRGB[0],
 		ErrorRGB[1] * ErrorRGB[1],

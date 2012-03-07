@@ -15,13 +15,13 @@
 
 #include "Transport.cuh"
 
-DEV ScatterEvent SampleRay(Ray R, CRNG& RNG)
+DNI ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
-	ScatterEvent RS[3] = { ScatterEvent(ScatterEvent::ErVolume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
+	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::ErVolume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
 
-	SampleVolume(R, RNG, RS[0]);
-	IntersectLights(R, RS[1], true);
-	IntersectReflectors(R, RS[2]);
+	SampleVolume(R, RNG, SE[0]);
+	IntersectLights(R, SE[1], true);
+	IntersectReflectors(R, SE[2]);
 
 	float T = FLT_MAX;
 
@@ -29,10 +29,10 @@ DEV ScatterEvent SampleRay(Ray R, CRNG& RNG)
 
 	for (int i = 0; i < 3; i++)
 	{
-		if (RS[i].Valid && RS[i].T < T)
+		if (SE[i].Valid && SE[i].T < T)
 		{
-			NearestRS = RS[i];
-			T = RS[i].T;
+			NearestRS = SE[i];
+			T = SE[i].T;
 		}
 	}
 
@@ -71,38 +71,73 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 		Re.D = Normalize(Re.D * gCamera.FocalDistance - LI);
 	}
 
-	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK;
+	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK, Throughput = ColorXYZf(1.0f);
 
 	const ScatterEvent SE = SampleRay(Re, RNG);
-	
-	if (SE.Valid)
-	{
+
+	LightingSample LS;
+
+	LS.LargeStep(RNG);
+
+	if (SE.Valid && SE.Type == ScatterEvent::ErVolume)
+		Lv += UniformSampleOneLightVolume(SE, RNG, LS);
+
 		switch (SE.Type)
 		{
 			case ScatterEvent::ErVolume:
-			{
-				Lv += UniformSampleOneLightVolume(SE, RNG);
-				break;
-			}
+			
+			
 			
 			case ScatterEvent::Light:
 			{
-				Lv += SE.Le / DistanceSquared(Re.O, SE.P);
+				CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 5.0f, 100.0f);
+
+				Vec3f Wi; float BsdfPdf;
+
+				ColorXYZf F = Shader.SampleF(-Re.D, Wi, BsdfPdf, LS.m_BsdfSample);
+
+				Lv += UniformSampleOneLight(SE, RNG, Shader, LS);//SE.Le / DistanceSquared(Re.O, SE.P, Shader);
+
+				Re.O = SE.P;
+				Re.D = Wi;
+
+				// Throughput *= F;
+				// Throughput /= BsdfPdf;
 				break;
 			}
 
 			case ScatterEvent::Reflector:
 			{
-				Lv += UniformSampleOneLightReflector(SE, RNG);
+				CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 5.0f, 100.0f);
+
+				Vec3f Wi; float BsdfPdf;
+
+				ColorXYZf F = Shader.SampleF(-Re.D, Wi, BsdfPdf, LS.m_BsdfSample);
+
+				ColorXYZf Li = UniformSampleOneLight(SE, RNG, Shader, LS);
+				
+				Li *= F;
+				Li /= BsdfPdf;
+
+				if (!F.IsBlack() && BsdfPdf > 0.0f)
+				{
+					Lv += Throughput * Li;//SE.Le / DistanceSquared(Re.O, SE.P, Shader);
+
+
+					Re.O = SE.P;
+					Re.D = Wi;
+				}
+
 				break;
 			}
+			
 		}
-	}
 
-	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid ? 1.0f : 0.0f);
+	
+	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 
 	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
-
+/**/
 //	float Lf = pFrameBuffer->CudaFrameEstimateXyza.GetPtr(X, Y)->Y(), Lr = pFrameBuffer->CudaRunningEstimateXyza.GetPtr(X, Y)->Y();
 
 //	pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Push(fabs(Lf - Lr), gScattering.NoIterations);

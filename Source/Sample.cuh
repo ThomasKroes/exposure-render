@@ -23,14 +23,14 @@ struct SurfaceSample
 	Vec3f		N;
 	Vec2f		UV;
 
-	HOD SurfaceSample(void)
+	DNI SurfaceSample(void)
 	{
 		this->P		= Vec3f(0.0f);
 		this->N		= Vec3f(0.0f, 0.0f, 1.0f);
 		this->UV	= Vec2f(0.0f);
 	}
 
-	HOD SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
+	DNI SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
 	{
 		this->P			= Other.P;
 		this->N			= Other.N;
@@ -45,12 +45,12 @@ struct LightSample
 	Vec3f 			RndP;
 	SurfaceSample	SS;
 
-	HOD LightSample(void)
+	DNI LightSample(void)
 	{
 		this->RndP	= Vec3f(0.0f);
 	}
 
-	HOD LightSample& LightSample::operator=(const LightSample& Other)
+	DNI LightSample& LightSample::operator=(const LightSample& Other)
 	{
 		this->RndP	= Other.RndP;
 		this->SS	= Other.SS;
@@ -69,19 +69,19 @@ struct BrdfSample
 	float	m_Component;
 	Vec2f	m_Dir;
 
-	HOD BrdfSample(void)
+	DNI BrdfSample(void)
 	{
 		m_Component = 0.0f;
 		m_Dir 		= Vec2f(0.0f);
 	}
 
-	HOD BrdfSample(const float& Component, const Vec2f& Dir)
+	DNI BrdfSample(const float& Component, const Vec2f& Dir)
 	{
 		m_Component = Component;
 		m_Dir 		= Dir;
 	}
 
-	HOD BrdfSample& BrdfSample::operator=(const BrdfSample& Other)
+	DNI BrdfSample& BrdfSample::operator=(const BrdfSample& Other)
 	{
 		m_Component = Other.m_Component;
 		m_Dir 		= Other.m_Dir;
@@ -102,12 +102,12 @@ struct LightingSample
 	LightSample 	m_LightSample;
 	float			m_LightNum;
 
-	HOD LightingSample(void)
+	DNI LightingSample(void)
 	{
 		m_LightNum = 0.0f;
 	}
 
-	HOD LightingSample& LightingSample::operator=(const LightingSample& Other)
+	DNI LightingSample& LightingSample::operator=(const LightingSample& Other)
 	{
 		m_BsdfSample	= Other.m_BsdfSample;
 		m_LightNum		= Other.m_LightNum;
