@@ -33,7 +33,7 @@ public:
 		Free();
 	}
 
-	void Resize(const CResolution2D& Resolution)
+	HOST void Resize(const CResolution2D& Resolution)
 	{
 		if (m_Resolution != Resolution)
 			Free();
@@ -44,26 +44,26 @@ public:
 			return;
 
 		if (Pitched)
-			HandleCudaError(cudaMallocPitch((void**)&m_pData, &m_Pitch, GetWidth() * sizeof(T), GetHeight()));
+			cudaMallocPitch((void**)&m_pData, &m_Pitch, GetWidth() * sizeof(T), GetHeight());
 		else
-			HandleCudaError(cudaMalloc((void**)&m_pData, GetSize()));
+			cudaMalloc((void**)&m_pData, GetSize());
 
 		Reset();
 	}
 
-	void Reset(void)
+	HOST void Reset(void)
 	{
 		if (GetSize() <= 0)
 			return;
 
-		HandleCudaError(cudaMemset(m_pData, 0, GetSize()));
+		cudaMemset(m_pData, 0, GetSize());
 	}
 
-	void Free(void)
+	HOST void Free(void)
 	{
 		if (m_pData)
 		{
-			HandleCudaError(cudaFree(m_pData));
+			cudaFree(m_pData);
 			m_pData = NULL;
 		}
 		
@@ -71,12 +71,12 @@ public:
 		m_Resolution.Set(Vec2i(0, 0));
 	}
 
-	HD int GetNoElements(void) const
+	HOST_DEVICE int GetNoElements(void) const
 	{
 		return m_Resolution.GetNoElements();
 	}
 
-	HD int GetSize(void) const
+	HOST_DEVICE int GetSize(void) const
 	{
 		if (Pitched)
 			return m_Resolution.GetResY() * m_Pitch;
@@ -84,7 +84,7 @@ public:
 			return GetNoElements() * sizeof(T);
 	}
 
-	DEV T Get(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T Get(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -95,7 +95,7 @@ public:
 			return m_pData[Y * GetWidth() + X];
 	}
 
-	DEV T& GetRef(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T& GetRef(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -106,7 +106,7 @@ public:
 			return m_pData[Y * GetWidth() + X];
 	}
 
-	HD T* GetPtr(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T* GetPtr(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return NULL;
@@ -117,7 +117,7 @@ public:
 			return &m_pData[Y * GetWidth() + X];
 	}
 
-	DEV void Set(T Value, int X = 0, int Y = 0)
+	HOST_DEVICE void Set(T Value, int X = 0, int Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return;
@@ -128,17 +128,17 @@ public:
 			m_pData[Y * GetWidth() + X] = Value;
 	}
 
-	HD int GetWidth(void) const
+	HOST_DEVICE int GetWidth(void) const
 	{
 		return m_Resolution.GetResX();
 	}
 
-	HD int GetHeight(void) const
+	HOST_DEVICE int GetHeight(void) const
 	{
 		return m_Resolution.GetResY();
 	}
 
-	HD int GetPitch(void) const
+	HOST_DEVICE int GetPitch(void) const
 	{
 		if (Pitched)
 			return m_Pitch;
@@ -204,17 +204,17 @@ public:
 		m_Resolution.Set(Vec2i(0, 0));
 	}
 
-	HD int GetNoElements(void) const
+	HOST_DEVICE int GetNoElements(void) const
 	{
 		return m_Resolution.GetNoElements();
 	}
 
-	HD int GetSize(void) const
+	HOST_DEVICE int GetSize(void) const
 	{
 		return GetNoElements() * sizeof(T);
 	}
 
-	DEV T Get(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T Get(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -222,7 +222,7 @@ public:
 		return m_pData[Y * GetWidth() + X];
 	}
 
-	DEV T& GetRef(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T& GetRef(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return T();
@@ -230,7 +230,7 @@ public:
 		return m_pData[Y * GetWidth() + X];
 	}
 
-	HD T* GetPtr(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T* GetPtr(const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return NULL;
@@ -238,7 +238,7 @@ public:
 		return &m_pData[Y * GetWidth() + X];
 	}
 
-	DEV void Set(T& Value, const int& X = 0, const int& Y = 0)
+	HOST_DEVICE void Set(T& Value, const int& X = 0, const int& Y = 0)
 	{
 		if (X > GetWidth() || Y > GetHeight())
 			return;
@@ -246,12 +246,12 @@ public:
 		m_pData[Y * GetWidth() + X] = Value;
 	}
 
-	HD int GetWidth(void) const
+	HOST_DEVICE int GetWidth(void) const
 	{
 		return m_Resolution.GetResX();
 	}
 
-	HD int GetHeight(void) const
+	HOST_DEVICE int GetHeight(void) const
 	{
 		return m_Resolution.GetResY();
 	}
@@ -275,7 +275,7 @@ public:
 		for (int i = 0; i < GetNoElements(); i++)
 			pSeeds[i] = rand();
 
-		HandleCudaError(cudaMemcpy(m_pData, pSeeds, GetSize(), cudaMemcpyHostToDevice));
+		cudaMemcpy(m_pData, pSeeds, GetSize(), cudaMemcpyHostToDevice);
 
 		free(pSeeds);
 	}

@@ -37,5 +37,4 @@ void ComputeEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)
 
 	KrnlComputeEstimate<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Compute Estimate");
 }

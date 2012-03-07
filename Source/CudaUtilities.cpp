@@ -85,26 +85,6 @@ inline void GetCudaAttribute(T *attribute, CUdevice_attribute device_attribute, 
 	}
 }
 
-void HandleCudaError(const cudaError_t CudaError, const char* pDescription /*= ""*/)
-{
-	if (CudaError == cudaSuccess)
-		return;
-
-//	Log(QString("Encountered a critical CUDA error: " + QString::fromAscii(pDescription) + " " + QString(cudaGetErrorString(CudaError))));
-
-//	throw new QString("Encountered a critical CUDA error: " + QString::fromAscii(pDescription) + " " + QString(cudaGetErrorString(CudaError)));
-}
-
-void HandleCudaKernelError(const cudaError_t CudaError, const char* pName /*= ""*/)
-{
-	if (CudaError == cudaSuccess)
-		return;
-
-//	Log(QString("The '" + QString::fromAscii(pName) + "' kernel caused the following CUDA runtime error: " + QString(cudaGetErrorString(CudaError))));
-
-//	throw new QString("The '" + QString::fromAscii(pName) + "' kernel caused the following CUDA runtime error: " + QString(cudaGetErrorString(CudaError)));
-}
-
 int GetTotalCudaMemory(void)
 {
 	size_t Available = 0, Total = 0;
@@ -204,13 +184,10 @@ int GetMaxGigaFlopsDeviceID(void)
 bool SetCudaDevice(const int& CudaDeviceID)
 {
 	const cudaError_t CudaError = cudaSetDevice(CudaDeviceID);
-
-	HandleCudaError(CudaError, "set Cuda device");
-
 	return CudaError == cudaSuccess;
 }
 
 void ResetDevice(void)
 {
-	HandleCudaError(cudaDeviceReset(), "reset device");
+	cudaDeviceReset();
 }

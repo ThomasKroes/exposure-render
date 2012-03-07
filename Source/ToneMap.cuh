@@ -46,5 +46,4 @@ void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)
 
 	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Tone Map");
 }

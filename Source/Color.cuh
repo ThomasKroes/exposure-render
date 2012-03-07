@@ -15,7 +15,7 @@
 
 #include "Vector.cuh"
 
-HD inline void XYZToRGB(const float xyz[3], float rgb[3])
+HOST_DEVICE inline void XYZToRGB(const float xyz[3], float rgb[3])
 {
 	rgb[0] =  3.240479f*xyz[0] - 1.537150f*xyz[1] - 0.498535f*xyz[2];
 	rgb[1] = -0.969256f*xyz[0] + 1.875991f*xyz[1] + 0.041556f*xyz[2];
@@ -23,7 +23,7 @@ HD inline void XYZToRGB(const float xyz[3], float rgb[3])
 }
 
 
-HD inline void RGBToXYZ(const float rgb[3], float xyz[3])
+HOST_DEVICE inline void RGBToXYZ(const float rgb[3], float xyz[3])
 {
 	xyz[0] = 0.412453f*rgb[0] + 0.357580f*rgb[1] + 0.180423f*rgb[2];
 	xyz[1] = 0.212671f*rgb[0] + 0.715160f*rgb[1] + 0.072169f*rgb[2];
@@ -39,59 +39,59 @@ template <class T, int Size>
 class ColorRGB : public Vec<T, Size>
 {
 public:
-	HD ColorRGB(void)
+	HOST_DEVICE ColorRGB(void)
 	{
 		this->SetBlack();
 	}
 
-	HD ColorRGB(T RGB)
+	HOST_DEVICE ColorRGB(T RGB)
 	{
 		this->Set(RGB, RGB, RGB);
 	}
 
-	HD ColorRGB(T R, T G, T B)
+	HOST_DEVICE ColorRGB(T R, T G, T B)
 	{
 		this->Set(R, G, B);
 	}
 
-	HD void Set(T R, T G, T B)
+	HOST_DEVICE void Set(T R, T G, T B)
 	{
 		this->SetR(R);
 		this->SetG(G);
 		this->SetB(B);
 	}
 
-	HD T GetR(void) const
+	HOST_DEVICE T GetR(void) const
 	{
 		return this->m_D[0];
 	}
 
-	HD void SetR(const T& R)
+	HOST_DEVICE void SetR(const T& R)
 	{
 		this->m_D[0] = R;
 	}
 
-	HD T GetG(void) const
+	HOST_DEVICE T GetG(void) const
 	{
 		return this->m_D[1];
 	}
 
-	HD void SetG(const T& G)
+	HOST_DEVICE void SetG(const T& G)
 	{
 		this->m_D[1] = G;
 	}
 
-	HD T GetB(void) const
+	HOST_DEVICE T GetB(void) const
 	{
 		return this->m_D[2];
 	}
 
-	HD void SetB(const T& B)
+	HOST_DEVICE void SetB(const T& B)
 	{
 		this->m_D[2] = B;
 	}
 
-	HD void SetBlack(void)
+	HOST_DEVICE void SetBlack(void)
 	{
 		this->Set(T(), T(), T());
 	}
@@ -101,17 +101,17 @@ template <class T>
 class ColorRGBA : public ColorRGB<T, 4>
 {
 public:
-	HD ColorRGBA(void)
+	HOST_DEVICE ColorRGBA(void)
 	{
 		this->SetBlack();
 	}
 
-	HD ColorRGBA(T RGBA)
+	HOST_DEVICE ColorRGBA(T RGBA)
 	{
 		this->Set(RGBA, RGBA, RGBA, RGBA);
 	}
 
-	HD void Set(T R, T G, T B, T A)
+	HOST_DEVICE void Set(T R, T G, T B, T A)
 	{
 		this->SetR(R);
 		this->SetG(G);
@@ -119,12 +119,12 @@ public:
 		this->SetA(A);
 	}
 
-	HD T GetA(void) const
+	HOST_DEVICE T GetA(void) const
 	{
 		return this->m_D[3];
 	}
 
-	HD void SetA(const T& A)
+	HOST_DEVICE void SetA(const T& A)
 	{
 		this->m_D[3] = A;
 	}
@@ -133,24 +133,24 @@ public:
 class ColorRGBuc : public ColorRGB<unsigned char, 3>
 {
 public:
-	HD ColorRGBuc(unsigned char RGB)
+	HOST_DEVICE ColorRGBuc(unsigned char RGB)
 	{
 		this->Set(RGB, RGB, RGB);
 	}
 
-	HD ColorRGBuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0)
+	HOST_DEVICE ColorRGBuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0)
 	{
 		this->Set(R, G, B);
 	}
 
-	HD void FromRGBf(const float& R, const float& G, const float& B)
+	HOST_DEVICE void FromRGBf(const float& R, const float& G, const float& B)
 	{
 		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
 		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
 		this->SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
 	}
 
-	HD void FromXYZ(const float& X, const float& Y, const float& Z)
+	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
 	{
 		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
 		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
@@ -171,12 +171,12 @@ public:
 		this->SetB((unsigned char)(B * 255.0f));
 	}
 
-	HD void SetBlack(void)
+	HOST_DEVICE void SetBlack(void)
 	{
 		this->Set(0, 0, 0);
 	}
 
-	HD void SetWhite(void)
+	HOST_DEVICE void SetWhite(void)
 	{
 		this->Set(255, 255, 255);
 	}
@@ -185,24 +185,24 @@ public:
 class ColorRGBAuc : public ColorRGBA<unsigned char>
 {
 public:
-	HD ColorRGBAuc(unsigned char RGBA)
+	HOST_DEVICE ColorRGBAuc(unsigned char RGBA)
 	{
 		this->Set(RGBA, RGBA, RGBA, RGBA);
 	}
 
-	HD ColorRGBAuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0, const unsigned char& A = 0)
+	HOST_DEVICE ColorRGBAuc(const unsigned char& R = 0, const unsigned char& G = 0, const unsigned char& B = 0, const unsigned char& A = 0)
 	{
 		this->Set(R, G, B, A);
 	}
 
-	HD ColorRGBAuc(const ColorRGBuc& RGB)
+	HOST_DEVICE ColorRGBAuc(const ColorRGBuc& RGB)
 	{
 		this->SetR(RGB.GetR());
 		this->SetG(RGB.GetG());
 		this->SetB(RGB.GetB());
 	}
 
-	HD void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
+	HOST_DEVICE void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
 	{
 		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
 		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
@@ -210,7 +210,7 @@ public:
 		this->SetA(clamp2(A, 0.0f, 1.0f) * 255.0f);
 	}
 
-	HD void FromXYZ(const float& X, const float& Y, const float& Z)
+	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
 	{
 		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
 		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
@@ -231,12 +231,12 @@ public:
 		this->SetB((unsigned char)(B * 255.0f));
 	}
 
-	HD void SetBlack(void)
+	HOST_DEVICE void SetBlack(void)
 	{
 		this->Set(0, 0, 0, 0);
 	}
 
-	HD void SetWhite(void)
+	HOST_DEVICE void SetWhite(void)
 	{
 		this->Set(255, 255, 255, 0);
 	}
@@ -245,59 +245,59 @@ public:
 class ColorXYZf : public Vec3f
 {
 public:
-	HD ColorXYZf(float V = 0.0f)
+	HOST_DEVICE ColorXYZf(float V = 0.0f)
 	{
 		this->Set(V, V, V);
 	}
 
-	HD ColorXYZf(float X, float Y, float Z)
+	HOST_DEVICE ColorXYZf(float X, float Y, float Z)
 	{
 		this->Set(X, Y, Z);
 	}
 
-	HD void Set(float X, float Y, float Z)
+	HOST_DEVICE void Set(float X, float Y, float Z)
 	{
 		this->SetX(X);
 		this->SetY(Y);
 		this->SetZ(Z);
 	}
 
-	HD ColorXYZf(float V[3])
+	HOST_DEVICE ColorXYZf(float V[3])
 	{
 		this->Set(V[0], V[1], V[2]);
 	}
 
-	HD float GetX(void) const
+	HOST_DEVICE float GetX(void) const
 	{
 		return this->m_D[0];
 	}
 
-	HD void SetX(float X)
+	HOST_DEVICE void SetX(float X)
 	{
 		this->m_D[0] = X;
 	}
 
-	HD float GetY(void) const
+	HOST_DEVICE float GetY(void) const
 	{
 		return this->m_D[1];
 	}
 
-	HD void SetY(float Y)
+	HOST_DEVICE void SetY(float Y)
 	{
 		this->m_D[1] = Y;
 	}
 
-	HD float GetZ(void) const
+	HOST_DEVICE float GetZ(void) const
 	{
 		return this->m_D[2];
 	}
 
-	HD void SetZ(float Z)
+	HOST_DEVICE void SetZ(float Z)
 	{
 		this->m_D[2] = Z;
 	}
 
-	HD ColorXYZf operator + (const ColorXYZf& XYZ) const
+	HOST_DEVICE ColorXYZf operator + (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -307,7 +307,7 @@ public:
 		return Result;
 	}
 	
-	HD ColorXYZf operator - (const ColorXYZf& XYZ) const
+	HOST_DEVICE ColorXYZf operator - (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -317,7 +317,7 @@ public:
 		return Result;
 	}
 
-	HD ColorXYZf operator / (const ColorXYZf& XYZ) const
+	HOST_DEVICE ColorXYZf operator / (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -327,7 +327,7 @@ public:
 		return Result;
 	}
 
-	HD ColorXYZf operator * (const ColorXYZf& XYZ) const
+	HOST_DEVICE ColorXYZf operator * (const ColorXYZf& XYZ) const
 	{
 		ColorXYZf Result = *this;
 
@@ -337,7 +337,7 @@ public:
 		return Result;
 	}
 
-	HD ColorXYZf& operator *= (const ColorXYZf& XYZ)
+	HOST_DEVICE ColorXYZf& operator *= (const ColorXYZf& XYZ)
 	{
 		for (int i = 0; i < 3; i++)
 			this->m_D[i] *= XYZ[i];
@@ -345,7 +345,7 @@ public:
 		return *this;
 	}
 
-	HD ColorXYZf operator * (const float& F) const
+	HOST_DEVICE ColorXYZf operator * (const float& F) const
 	{
 		ColorXYZf Result = *this;
 
@@ -355,7 +355,7 @@ public:
 		return Result;
 	}
 
-	HD ColorXYZf& operator *= (const float& F)
+	HOST_DEVICE ColorXYZf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; ++i)
 			this->m_D[i] *= F;
@@ -363,7 +363,7 @@ public:
 		return *this;
 	}
 
-	HD ColorXYZf operator / (const float& F) const
+	HOST_DEVICE ColorXYZf operator / (const float& F) const
 	{
 		ColorXYZf Result = *this;
 
@@ -373,7 +373,7 @@ public:
 		return Result;
 	}
 
-	HD ColorXYZf& operator /= (float a)
+	HOST_DEVICE ColorXYZf& operator /= (float a)
 	{
 		for (int i = 0; i < 3; ++i)
 			this->m_D[i] /= a;
@@ -381,7 +381,7 @@ public:
 		return *this;
 	}
 
-	HD ColorXYZf& ColorXYZf::operator = (const ColorXYZf& Other)
+	HOST_DEVICE ColorXYZf& ColorXYZf::operator = (const ColorXYZf& Other)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] = Other[i];
@@ -389,7 +389,7 @@ public:
 		return *this;
 	}
 
-	HD bool IsBlack() const
+	HOST_DEVICE bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)
 			if (m_D[i] != 0.0f)
@@ -398,7 +398,7 @@ public:
 		return true;
 	}
 
-	HD float Y() const
+	HOST_DEVICE float Y() const
 	{
 		float v = 0.0f;
 
@@ -408,7 +408,7 @@ public:
 		return v;
 	}
 
-	HD void FromRGB(const float& R, const float& G, const float& B)
+	HOST_DEVICE void FromRGB(const float& R, const float& G, const float& B)
 	{
 		const float CoeffX[3] = { 0.4124f, 0.3576f, 0.1805f };
 		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
@@ -420,12 +420,12 @@ public:
 	}
 };
 
-HD inline ColorXYZf operator * (const float& F, const ColorXYZf& XYZ)
+HOST_DEVICE inline ColorXYZf operator * (const float& F, const ColorXYZf& XYZ)
 {
 	return XYZ * F;
 }
 
-HD inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& C2)
+HOST_DEVICE inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& C2)
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorXYZf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ());
@@ -434,34 +434,34 @@ HD inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& C
 class ColorXYZAf : public Vec4f
 {
 public:
-	HD ColorXYZAf(float V = 0.0f)
+	HOST_DEVICE ColorXYZAf(float V = 0.0f)
 	{
 		Set(V, V, V, V);
 	}
 
-	HD ColorXYZAf(ColorXYZf XYZ)
+	HOST_DEVICE ColorXYZAf(ColorXYZf XYZ)
 	{
 		Set(XYZ.GetX(), XYZ.GetY(), XYZ.GetZ());
 	}
 
-	HD ColorXYZAf(float X, float Y, float Z)
+	HOST_DEVICE ColorXYZAf(float X, float Y, float Z)
 	{
 		Set(X, Y, Z);
 	}
 
-	HD ColorXYZAf(float X, float Y, float Z, float A)
+	HOST_DEVICE ColorXYZAf(float X, float Y, float Z, float A)
 	{
 		Set(X, Y, Z, A);
 	}
 	
-	HD void Set(float X, float Y, float Z)
+	HOST_DEVICE void Set(float X, float Y, float Z)
 	{
 		SetX(X);
 		SetY(Y);
 		SetZ(Z);
 	}
 
-	HD void Set(float X, float Y, float Z, float A)
+	HOST_DEVICE void Set(float X, float Y, float Z, float A)
 	{
 		SetX(X);
 		SetY(Y);
@@ -469,47 +469,47 @@ public:
 		SetA(A);
 	}
 
-	HD float GetX(void) const
+	HOST_DEVICE float GetX(void) const
 	{
 		return m_D[0];
 	}
 
-	HD void SetX(float X)
+	HOST_DEVICE void SetX(float X)
 	{
 		m_D[0] = X;
 	}
 
-	HD float GetY(void) const
+	HOST_DEVICE float GetY(void) const
 	{
 		return m_D[1];
 	}
 
-	HD void SetY(float Y)
+	HOST_DEVICE void SetY(float Y)
 	{
 		m_D[1] = Y;
 	}
 
-	HD float GetZ(void) const
+	HOST_DEVICE float GetZ(void) const
 	{
 		return m_D[2];
 	}
 
-	HD void SetZ(float Z)
+	HOST_DEVICE void SetZ(float Z)
 	{
 		m_D[2] = Z;
 	}
 
-	HD float GetA(void) const
+	HOST_DEVICE float GetA(void) const
 	{
 		return m_D[3];
 	}
 
-	HD void SetA(float A)
+	HOST_DEVICE void SetA(float A)
 	{
 		m_D[3] = A;
 	}
 
-	HD ColorXYZAf& operator += (const ColorXYZAf& XYZ)
+	HOST_DEVICE ColorXYZAf& operator += (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 4; ++i)
 			m_D[i] += XYZ[i];
@@ -517,7 +517,7 @@ public:
 		return *this;
 	}
 
-	HD ColorXYZAf operator + (const ColorXYZAf& XYZ) const
+	HOST_DEVICE ColorXYZAf operator + (const ColorXYZAf& XYZ) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -527,7 +527,7 @@ public:
 		return Result;
 	}
 
-	HD ColorXYZAf operator - (const ColorXYZAf& XYZ) const
+	HOST_DEVICE ColorXYZAf operator - (const ColorXYZAf& XYZ) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -538,7 +538,7 @@ public:
 	}
 
 	
-	HD ColorXYZAf operator / (const ColorXYZAf& XYZA) const
+	HOST_DEVICE ColorXYZAf operator / (const ColorXYZAf& XYZA) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -549,7 +549,7 @@ public:
 	}
 	/**/
 
-	HD ColorXYZAf operator * (const ColorXYZAf& XYZA) const
+	HOST_DEVICE ColorXYZAf operator * (const ColorXYZAf& XYZA) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -559,7 +559,7 @@ public:
 		return Result;
 	}
 /*
-	HD ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
+	HOST_DEVICE ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] *= XYZ[i];
@@ -567,7 +567,7 @@ public:
 		return *this;
 	}
 
-	HD ColorXYZAf operator * (const float& F) const
+	HOST_DEVICE ColorXYZAf operator * (const float& F) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -577,7 +577,7 @@ public:
 		return Result;
 	}
 
-	HD ColorXYZAf& operator *= (const float& F)
+	HOST_DEVICE ColorXYZAf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] *= F;
@@ -585,7 +585,7 @@ public:
 		return *this;
 	}
 
-	HD ColorXYZAf operator / (const float& F) const
+	HOST_DEVICE ColorXYZAf operator / (const float& F) const
 	{
 		ColorXYZAf Result = *this;
 
@@ -596,7 +596,7 @@ public:
 	}
 
 	
-	HD ColorXYZAf& operator /= (float a)
+	HOST_DEVICE ColorXYZAf& operator /= (float a)
 	{
 		for (int i = 0; i < 3; ++i)
 			m_D[i] /= a;
@@ -605,7 +605,7 @@ public:
 	}
 	
 
-	HD ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
+	HOST_DEVICE ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
 	{
 		for (int i = 0; i < 4; ++i)
 			m_D[i] = Other[i];
@@ -613,7 +613,7 @@ public:
 		return *this;
 	}
 */
-	HD bool IsBlack() const
+	HOST_DEVICE bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)
 			if (m_D[i] != 0.0f)
@@ -622,7 +622,7 @@ public:
 		return true;
 	}
 
-	HD float Y() const
+	HOST_DEVICE float Y() const
 	{
 		float v = 0.0f;
 
@@ -632,7 +632,7 @@ public:
 		return v;
 	}
 
-	HD void FromRGB(const float& R, const float& G, const float& B)
+	HOST_DEVICE void FromRGB(const float& R, const float& G, const float& B)
 	{
 		const float CoeffX[3] = { 0.4124f, 0.3576f, 0.1805f };
 		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
@@ -644,12 +644,12 @@ public:
 	}
 };
 
-HD inline ColorXYZAf operator * (const float& F, const ColorXYZAf& XYZA)
+HOST_DEVICE inline ColorXYZAf operator * (const float& F, const ColorXYZAf& XYZA)
 {
 	return XYZA * F;
 }
 
-HD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZAf& C2)
+HOST_DEVICE inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZAf& C2)
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorXYZAf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ(), OneMinusT * C1.GetA() + T * C2.GetA());
@@ -658,68 +658,68 @@ HD inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZAf
 class ColorRGBf : public Vec3<float>
 {
 public:
-	HD ColorRGBf(void)
+	HOST_DEVICE ColorRGBf(void)
 	{
 	}
 
-	HD ColorRGBf(const float& R, const float& G, const float& B)
+	HOST_DEVICE ColorRGBf(const float& R, const float& G, const float& B)
 	{
 		Set(R, G, B);
 	}
 
-	HD ColorRGBf(const float& RGB)
+	HOST_DEVICE ColorRGBf(const float& RGB)
 	{
 		Set(RGB, RGB, RGB);
 	}
 
-	HD void Set(const float& R, const float& G, const float& B)
+	HOST_DEVICE void Set(const float& R, const float& G, const float& B)
 	{
 		SetR(R);
 		SetG(G);
 		SetB(B);
 	}
 
-	HD float GetR(void) const
+	HOST_DEVICE float GetR(void) const
 	{
 		return m_D[0];
 	}
 
-	HD void SetR(const float& R)
+	HOST_DEVICE void SetR(const float& R)
 	{
 		m_D[0] = R;
 	}
 
-	HD float GetG(void) const
+	HOST_DEVICE float GetG(void) const
 	{
 		return m_D[1];
 	}
 
-	HD void SetG(const float& G)
+	HOST_DEVICE void SetG(const float& G)
 	{
 		m_D[1] = G;
 	}
 
-	HD float GetB(void) const
+	HOST_DEVICE float GetB(void) const
 	{
 		return m_D[2];
 	}
 
-	HD void SetB(const float& B)
+	HOST_DEVICE void SetB(const float& B)
 	{
 		m_D[2] = B;
 	}
 
-	HD void SetBlack(void)
+	HOST_DEVICE void SetBlack(void)
 	{
 		Set(0.0f, 0.0f, 0.0f);
 	}
 
-	HD void SetWhite(void)
+	HOST_DEVICE void SetWhite(void)
 	{
 		Set(1.0f, 1.0f, 1.0f);
 	}
 
-	HD ColorRGBf& operator = (const ColorRGBf& Other)			
+	HOST_DEVICE ColorRGBf& operator = (const ColorRGBf& Other)			
 	{
 		for (int i = 0; i < 3; i++)
 			m_D[i] = Other[i];
@@ -727,7 +727,7 @@ public:
 		return *this;
 	}
 
-	HD ColorRGBf& operator += (ColorRGBf& Other)		
+	HOST_DEVICE ColorRGBf& operator += (ColorRGBf& Other)		
 	{
 		for (int i = 0; i < 3; i++)
 			m_D[i] += Other[i];
@@ -735,12 +735,12 @@ public:
 		return *this;
 	}
 
-	HD ColorRGBf operator * (const float& F) const
+	HOST_DEVICE ColorRGBf operator * (const float& F) const
 	{
 		return ColorRGBf(m_D[0] * F, m_D[1] * F, m_D[2] * F);
 	}
 
-	HD ColorRGBf& operator *= (const float& F)
+	HOST_DEVICE ColorRGBf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; i++)
 			m_D[i] *= F;
@@ -748,13 +748,13 @@ public:
 		return *this;
 	}
 
-	HD ColorRGBf operator / (const float& F) const
+	HOST_DEVICE ColorRGBf operator / (const float& F) const
 	{
 		const float Inv = 1.0f / F;
 		return ColorRGBf(m_D[0] * Inv, m_D[1] * Inv, m_D[2] * Inv);
 	}
 
-	HD ColorRGBf& operator /= (const float& F)
+	HOST_DEVICE ColorRGBf& operator /= (const float& F)
 	{
 		const float Inv = 1.0f / F;
 		
@@ -764,17 +764,17 @@ public:
 		return *this;
 	}
 
-	HD float operator[](int i) const
+	HOST_DEVICE float operator[](int i) const
 	{
 		return m_D[i];
 	}
 
-	HD float operator[](int i)
+	HOST_DEVICE float operator[](int i)
 	{
 		return m_D[i];
 	}
 
-	HD bool Black(void)
+	HOST_DEVICE bool Black(void)
 	{
 		for (int i = 0; i < 3; i++)
 			if (m_D[i] != 0.0f)
@@ -783,12 +783,12 @@ public:
 		return true;
 	}
 
-	HD ColorRGBf Pow(const float& E)
+	HOST_DEVICE ColorRGBf Pow(const float& E)
 	{
 		return ColorRGBf(powf(m_D[0], E), powf(m_D[1], E), powf(m_D[2], E));
 	}
 
-	HD void FromXYZ(const float& X, const float& Y, const float& Z)
+	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
 	{
 		const float rWeight[3] = { 3.240479f, -1.537150f, -0.498535f };
 		const float gWeight[3] = {-0.969256f,  1.875991f,  0.041556f };
@@ -797,7 +797,7 @@ public:
 		Set(rWeight[0] * X + rWeight[1] * Y + rWeight[2] * Z, gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z, bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z);
 	}
 
-	HD void ToneMap(float InvExposure)
+	HOST_DEVICE void ToneMap(float InvExposure)
 	{
 		this->m_D[0] = 1.0f - expf(-(this->m_D[0] * InvExposure));
 		this->m_D[1] = 1.0f - expf(-(this->m_D[1] * InvExposure));
@@ -807,7 +807,7 @@ public:
 	}
 };
 
-HD inline ColorRGBf Lerp(const float& T, const ColorRGBf& C1, const ColorRGBf& C2)
+HOST_DEVICE inline ColorRGBf Lerp(const float& T, const ColorRGBf& C1, const ColorRGBf& C2)
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorRGBf(OneMinusT * C1.GetR() + T * C2.GetR(), OneMinusT * C1.GetG() + T * C2.GetG(), OneMinusT * C1.GetB() + T * C2.GetB());

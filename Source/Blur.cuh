@@ -98,9 +98,7 @@ void BlurEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)
 
 	KrnlBlurEstimateH<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate H");
 	
 	KrnlBlurEstimateV<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Blur Estimate V");
 }

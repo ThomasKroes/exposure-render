@@ -58,7 +58,6 @@ void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Wid
 
 	KrnlComputeNrmsError<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Benchmark");
 
 	thrust::device_ptr<float> dev_ptr(FB.RmsError.GetPtr()); 
 

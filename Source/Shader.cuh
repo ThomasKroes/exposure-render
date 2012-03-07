@@ -21,21 +21,21 @@
 class CLambertian
 {
 public:
-	DEV CLambertian(const ColorXYZf& Kd)
+	DEVICE CLambertian(const ColorXYZf& Kd)
 	{
 		m_Kd = Kd;
 	}
 
-	DEV ~CLambertian(void)
+	DEVICE ~CLambertian(void)
 	{
 	}
 
-	DEV ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return m_Kd * INV_PI_F;
 	}
 
-	DEV ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		Wi = CosineWeightedHemisphere(U);
 
@@ -47,7 +47,7 @@ public:
 		return this->F(Wo, Wi);
 	}
 
-	DEV float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return SameHemisphere(Wo, Wi) ? AbsCosTheta(Wi) * INV_PI_F : 0.0f;
 	}
@@ -55,7 +55,7 @@ public:
 	ColorXYZf	m_Kd;
 };
 
-DEV inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, const ColorXYZf &etat)
+DEVICE inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, const ColorXYZf &etat)
 {
 	ColorXYZf Rparl = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
 	ColorXYZf Rperp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
@@ -65,17 +65,17 @@ DEV inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, const
 class CFresnel
 {
 public:
-	DEV CFresnel(float ei, float et) :
+	DEVICE CFresnel(float ei, float et) :
 	  eta_i(ei),
 		  eta_t(et)
 	  {
 	  }
 
-	  DEV  ~CFresnel(void)
+	  DEVICE  ~CFresnel(void)
 	  {
 	  }
 
-	  DEV ColorXYZf Evaluate(float cosi)
+	  DEVICE ColorXYZf Evaluate(float cosi)
 	  {
 		  // return 1.0f;
 
@@ -110,16 +110,16 @@ public:
 class CBlinn
 {
 public:
-	DEV CBlinn(const float& Exponent) :
+	DEVICE CBlinn(const float& Exponent) :
 	  m_Exponent(Exponent)
 	  {
 	  }
 
-	  DEV ~CBlinn(void)
+	  DEVICE ~CBlinn(void)
 	  {
 	  }
 
-	  DEV void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	  DEVICE void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	  {
 		  // Compute sampled half-angle vector $\wh$ for Blinn distribution
 		  float costheta = powf(U[0], 1.f / (m_Exponent+1));
@@ -143,7 +143,7 @@ public:
 		  Pdf = blinn_pdf;
 	  }
 
-	  DEV float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	  DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	  {
 		  Vec3f wh = Normalize(Wo + Wi);
 
@@ -157,7 +157,7 @@ public:
 		  return blinn_pdf;
 	  }
 
-	  DEV float D(const Vec3f& wh)
+	  DEVICE float D(const Vec3f& wh)
 	  {
 		  float costhetah = AbsCosTheta(wh);
 		  return (m_Exponent+2) * INV_TWO_PI_F * powf(costhetah, m_Exponent);
@@ -169,18 +169,18 @@ public:
 class CMicrofacet
 {
 public:
-	DEV CMicrofacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
+	DEVICE CMicrofacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
 	  m_R(Reflectance),
 		  m_Fresnel(1.0f, Ior),
 		  m_Blinn(Exponent)
 	  {
 	  }
 
-	  DEV ~CMicrofacet(void)
+	  DEVICE ~CMicrofacet(void)
 	  {
 	  }
 
-	  DEV ColorXYZf F(const Vec3f& wo, const Vec3f& wi)
+	  DEVICE ColorXYZf F(const Vec3f& wo, const Vec3f& wi)
 	  {
 		  float cosThetaO = AbsCosTheta(wo);
 		  float cosThetaI = AbsCosTheta(wi);
@@ -201,7 +201,7 @@ public:
 		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.0f * cosThetaI * cosThetaO);
 	  }
 
-	  DEV ColorXYZf SampleF(const Vec3f& wo, Vec3f& wi, float& Pdf, const Vec2f& U)
+	  DEVICE ColorXYZf SampleF(const Vec3f& wo, Vec3f& wi, float& Pdf, const Vec2f& U)
 	  {
 		  m_Blinn.SampleF(wo, wi, Pdf, U);
 
@@ -211,7 +211,7 @@ public:
 		  return this->F(wo, wi);
 	  }
 
-	  DEV float Pdf(const Vec3f& wo, const Vec3f& wi)
+	  DEVICE float Pdf(const Vec3f& wo, const Vec3f& wi)
 	  {
 		  if (!SameHemisphere(wo, wi))
 			  return 0.0f;
@@ -219,7 +219,7 @@ public:
 		  return m_Blinn.Pdf(wo, wi);
 	  }
 
-	  DEV float G(const Vec3f& wo, const Vec3f& wi, const Vec3f& wh)
+	  DEVICE float G(const Vec3f& wo, const Vec3f& wi, const Vec3f& wh)
 	  {
 		  float NdotWh = AbsCosTheta(wh);
 		  float NdotWo = AbsCosTheta(wo);
@@ -238,21 +238,21 @@ public:
 class CIsotropicPhase
 {
 public:
-	DEV CIsotropicPhase(const ColorXYZf& Kd) :
+	DEVICE CIsotropicPhase(const ColorXYZf& Kd) :
 		m_Kd(Kd)
 	{
 	}
 
-	DEV ~CIsotropicPhase(void)
+	DEVICE ~CIsotropicPhase(void)
 	{
 	}
 
-	DEV ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return m_Kd * INV_PI_F;
 	}
 
-	DEV ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		Wi	= UniformSampleSphereSurface(U);
 		Pdf	= this->Pdf(Wo, Wi);
@@ -260,7 +260,7 @@ public:
 		return F(Wo, Wi);
 	}
 
-	DEV float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return INV_4_PI_F;
 	}
@@ -271,7 +271,7 @@ public:
 class CBRDF
 {
 public:
-	DEV CBRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
+	DEVICE CBRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		m_Lambertian(Kd),
 		m_Microfacet(Ks, Ior, Exponent),
 		m_Nn(Normalize(N)),
@@ -280,23 +280,23 @@ public:
 	{
 	}
 
-	DEV ~CBRDF(void)
+	DEVICE ~CBRDF(void)
 	{
 	}
 
-	DEV Vec3f WorldToLocal(const Vec3f& W)
+	DEVICE Vec3f WorldToLocal(const Vec3f& W)
 	{
 		return Vec3f(Dot(W, m_Nu), Dot(W, m_Nv), Dot(W, m_Nn));
 	}
 
-	DEV Vec3f LocalToWorld(const Vec3f& W)
+	DEVICE Vec3f LocalToWorld(const Vec3f& W)
 	{
 		return Vec3f(	m_Nu[0] * W[0] + m_Nv[0] * W[1] + m_Nn[0] * W[2],
 						m_Nu[1] * W[0] + m_Nv[1] * W[1] + m_Nn[1] * W[2],
 						m_Nu[2] * W[0] + m_Nv[2] * W[1] + m_Nn[2] * W[2]);
 	}
 
-	DEV ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		const Vec3f Wil = WorldToLocal(Wi);
@@ -309,7 +309,7 @@ public:
 		return R;
 	}
 
-	DEV ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
+	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		Vec3f Wil;
@@ -336,7 +336,7 @@ public:
 		return R;
 	}
 
-	DEV float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		const Vec3f Wil = WorldToLocal(Wi);
@@ -365,18 +365,18 @@ public:
 		Phase
 	};
 
-	DEV CVolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
+	DEVICE CVolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		m_Type(Type),
 		m_Brdf(N, Wo, Kd, Ks, Ior, Exponent),
 		m_IsotropicPhase(Kd)
 	{
 	}
 
-	DEV ~CVolumeShader(void)
+	DEVICE ~CVolumeShader(void)
 	{
 	}
 
-	DEV ColorXYZf F(Vec3f Wo, Vec3f Wi)
+	DEVICE ColorXYZf F(Vec3f Wo, Vec3f Wi)
 	{
 		switch (m_Type)
 		{
@@ -390,7 +390,7 @@ public:
 		return 1.0f;
 	}
 
-	DEV ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
+	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
 	{
 		switch (m_Type)
 		{
@@ -404,7 +404,7 @@ public:
 		return ColorXYZf(0.0f);
 	}
 
-	DEV float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		switch (m_Type)
 		{

@@ -21,7 +21,7 @@
 // http://www.cl.cam.ac.uk/teaching/1999/AGraphHCI/SMAG/node2.html
 // http://mrl.nyu.edu/~dzorin/intro-graphics/lectures/lecture11/index.htm
 
-DNI Intersection IntersectCylinder(Ray R, float Radius, float Height)
+DEVICE Intersection IntersectCylinder(Ray R, float Radius, float Height)
 {
 	Intersection Int;
 
@@ -89,12 +89,12 @@ DNI Intersection IntersectCylinder(Ray R, float Radius, float Height)
 	return Int;
 }
 
-DNI bool InsideCylinder(Vec3f P, float Radius, float Height)
+DEVICE bool InsideCylinder(Vec3f P, float Radius, float Height)
 {
 	return sqrtf((P[0] * P[0]) + (P[2] * P[2])) < Radius && fabs(P[1]) < (0.5f * Height);
 }
 
-DNI void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
+DEVICE void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
 {
 	int Side = floorf(UVW[2] * 3.0f);
 

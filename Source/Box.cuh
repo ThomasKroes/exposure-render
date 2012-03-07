@@ -17,7 +17,7 @@
 
 #include "Geometry.cuh"
 
-DNI Intersection IntersectUnitBox(Ray R)
+DEVICE Intersection IntersectUnitBox(Ray R)
 {
 	Intersection Int;
 
@@ -46,7 +46,7 @@ DNI Intersection IntersectUnitBox(Ray R)
 	return Int;
 }
 
-DNI Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
+DEVICE Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 {
 	Intersection Int;
 
@@ -84,12 +84,12 @@ DNI Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 	return Int;
 }
 
-DNI Intersection IntersectBox(Ray R, Vec3f Size)
+DEVICE Intersection IntersectBox(Ray R, Vec3f Size)
 {
 	return IntersectBox(R, -0.5f * Size, 0.5f * Size);
 }
 
-DNI bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
+DEVICE bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Min - R.O);
@@ -110,18 +110,18 @@ DNI bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
 	return true;
 }
 
-DNI bool IntersectBoxP(Ray R, Vec3f Size)
+DEVICE bool IntersectBoxP(Ray R, Vec3f Size)
 {
 	return IntersectBoxP(R, -0.5f * Size, 0.5f * Size);
 }
 
-DNI bool InsideBox(Vec3f P, Vec3f Size)
+DEVICE bool InsideBox(Vec3f P, Vec3f Size)
 {
 	const float HalfSize[3] = { 0.5f * Size[0], 0.5f * Size[1], 0.5f * Size[2] };
 	return P[0] > -HalfSize[0] && P[0] < HalfSize[0] && P[1] > -HalfSize[1] && P[1] < HalfSize[1] && P[2] > -HalfSize[2] && P[2] < HalfSize[2];
 }
 
-DNI bool InsideAABB(Vec3f P)
+DEVICE bool InsideAABB(Vec3f P)
 {
 	if (P[0] < gVolume.MinAABB[0] || P[0] > gVolume.MaxAABB[0])
 		return false;
@@ -135,7 +135,7 @@ DNI bool InsideAABB(Vec3f P)
 	return true;
 }
 
-HD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
+DEVICE void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 {
 	int Side = floorf(UVW[0] * 6.0f);
 
@@ -199,7 +199,7 @@ HD inline void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 	SS.UV = Vec2f(UVW[1], UVW[2]);
 }
 
-HD inline void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
+DEVICE void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
 {
 	SampleUnitBox(SS, UVW);
 

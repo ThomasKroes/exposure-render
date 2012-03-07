@@ -41,7 +41,7 @@ void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitu
 	unsigned short* pGradientMagnitude = NULL;
 
 	// Allocate temporary linear memory for computation
-	HandleCudaError(cudaMalloc(&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(unsigned short)));
+	cudaMalloc(&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(unsigned short));
 
 	// Execute gradient computation kernel
 	KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(pGradientMagnitude, Extent[0], Extent[1], Extent[2]);

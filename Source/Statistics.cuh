@@ -13,11 +13,11 @@
 
 // http://www.johndcook.com/standard_deviation.html
 
-#include "Defines.h"
+#include "Defines.cuh"
 
 struct RunningStats
 {
-	HD void Push(float Value, int N)
+	DEVICE void Push(float Value, int N)
 	{
 //		m_n++;
 
@@ -38,17 +38,17 @@ struct RunningStats
 		}
 	}
 
-	HD double Mean(int N) const
+	DEVICE double Mean(int N) const
 	{
 		return (N > 0) ? m_newM : 0.0f;
 	}
 
-	HD double Variance(int N) const
+	DEVICE double Variance(int N) const
 	{
 		return ((N > 1) ? m_newS / (float)(N - 1) : 0.0f);
 	}
 
-	HD double StandardDeviation(int N) const
+	DEVICE double StandardDeviation(int N) const
 	{
 		return sqrtf(Variance(N));
 	}

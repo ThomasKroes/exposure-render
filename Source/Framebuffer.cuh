@@ -99,12 +99,12 @@ public:
 		this->Resolution.Set(Vec2i(0, 0));
 	}
 
-	DEV int GetWidth(void) const
+	HOST_DEVICE int GetWidth(void) const
 	{
 		return this->Resolution.GetResX();
 	}
 
-	DEV int GetHeight(void) const
+	HOST_DEVICE int GetHeight(void) const
 	{
 		return this->Resolution.GetResY();
 	}

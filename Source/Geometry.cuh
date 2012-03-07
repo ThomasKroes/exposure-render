@@ -13,31 +13,28 @@
 
 #pragma once
 
-#include <algorithm>
-#include <math.h>
-
 #include "Vector.cuh"
 #include "Color.cuh"
 #include "Ray.cuh"
 
 using namespace std;
 
-DNI float Lerp(float t, float v1, float v2)
+HOST_DEVICE float Lerp(float t, float v1, float v2)
 {
 	return (1.f - t) * v1 + t * v2;
 }
 
-DNI void swap(int& a, int& b)
+HOST_DEVICE void swap(int& a, int& b)
 {
 	int t = a; a = b; b = t;
 }
 
-DNI void swap(float& a, float& b)
+HOST_DEVICE void swap(float& a, float& b)
 {
 	float t = a; a = b; b = t;
 }
 
-DNI void Swap(float* pF1, float* pF2)
+HOST_DEVICE void Swap(float* pF1, float* pF2)
 {
 	const float TempFloat = *pF1;
 
@@ -45,7 +42,7 @@ DNI void Swap(float* pF1, float* pF2)
 	*pF2 = TempFloat;
 }
 
-DNI void Swap(float& F1, float& F2)
+HOST_DEVICE void Swap(float& F1, float& F2)
 {
 	const float TempFloat = F1;
 
@@ -53,7 +50,7 @@ DNI void Swap(float& F1, float& F2)
 	F2 = TempFloat;
 }
 
-DNI void Swap(int* pI1, int* pI2)
+HOST_DEVICE void Swap(int* pI1, int* pI2)
 {
 	const int TempInt = *pI1;
 
@@ -61,7 +58,7 @@ DNI void Swap(int* pI1, int* pI2)
 	*pI2 = TempInt;
 }
 
-DNI void Swap(int& I1, int& I2)
+HOST_DEVICE void Swap(int& I1, int& I2)
 {
 	const int TempInt = I1;
 
@@ -74,7 +71,7 @@ class CResolution2D
 {
 public:
 	// ToDo: Add description
-	CResolution2D(const float& Width, const float& Height)
+	HOST_DEVICE CResolution2D(const float& Width, const float& Height)
 	{
 		m_XY		= Vec2i(Width, Height);
 
@@ -82,7 +79,7 @@ public:
 	}
 
 	// ToDo: Add description
-	HD CResolution2D(void)
+	HOST_DEVICE CResolution2D(void)
 	{
 		m_XY		= Vec2i(640, 480);
 
@@ -90,12 +87,12 @@ public:
 	}
 
 	// ToDo: Add description
-	HD ~CResolution2D(void)
+	HOST_DEVICE ~CResolution2D(void)
 	{
 	}
 
 	// ToDo: Add description
-	HD CResolution2D& CResolution2D::operator=(const CResolution2D& Other)
+	HOST_DEVICE CResolution2D& CResolution2D::operator=(const CResolution2D& Other)
 	{
 		m_XY				= Other.m_XY;
 		m_InvXY				= Other.m_InvXY;
@@ -106,28 +103,28 @@ public:
 		return *this;
 	}
 
-	HD int operator[](int i) const
+	HOST_DEVICE int operator[](int i) const
 	{
 		return m_XY[i];
 	}
 
-	HD int& operator[](int i)
+	HOST_DEVICE int& operator[](int i)
 	{
 		return m_XY[i];
 	}
 
-	HD bool operator == (const CResolution2D& Other) const
+	HOST_DEVICE bool operator == (const CResolution2D& Other) const
 	{
 		return GetResX() == Other.GetResX() && GetResY() == Other.GetResY();
 	}
 
-	HD bool operator != (const CResolution2D& Other) const
+	HOST_DEVICE bool operator != (const CResolution2D& Other) const
 	{
 		return GetResX() != Other.GetResX() || GetResY() != Other.GetResY();
 	}
 
 	// ToDo: Add description
-	HD void Update(void)
+	HOST_DEVICE void Update(void)
 	{
 		m_InvXY				= Vec2f(m_XY[0] != 0.0f ? 1.0f / m_XY[0] : 0.0f, m_XY[1] != 0.0f ? 1.0f / m_XY[1] : 0.0f);
 		m_NoElements		= m_XY[0] * m_XY[1];
@@ -136,26 +133,25 @@ public:
 	}
 
 	// ToDo: Add description
-	HD Vec2i ToVector(void) const
+	HOST_DEVICE Vec2i ToVector(void) const
 	{
 		return Vec2i(m_XY[0], m_XY[1]);
 	}
 
-	void Set(const Vec2i& Resolution)
+	HOST_DEVICE void Set(const Vec2i& Resolution)
 	{
 		m_XY = Resolution;
 
 		Update();
 	}
 
-	HD int		GetResX(void) const				{ return m_XY[0]; }
-	HD void	SetResX(const int& Width)		{ m_XY[0] = Width; Update(); }
-	HD int		GetResY(void) const				{ return m_XY[1]; }
-	HD void	SetResY(const int& Height)		{ m_XY[1] = Height; Update(); }
-	HD Vec2f	GetInv(void) const				{ return m_InvXY; }
-	HD int		GetNoElements(void) const		{ return m_NoElements; }
-	HD float	GetAspectRatio(void) const		{ return m_AspectRatio; }
-
+	HOST_DEVICE int GetResX(void) const				{ return m_XY[0];				}
+	HOST_DEVICE void	SetResX(const int& Width)		{ m_XY[0] = Width; Update();	}
+	HOST_DEVICE int GetResY(void) const				{ return m_XY[1];				}
+	HOST_DEVICE void	SetResY(const int& Height)		{ m_XY[1] = Height; Update();	}
+	HOST_DEVICE Vec2f GetInv(void) const				{ return m_InvXY;				}
+	HOST_DEVICE int GetNoElements(void) const		{ return m_NoElements;			}
+	HOST_DEVICE float GetAspectRatio(void) const		{ return m_AspectRatio;			}
 
 private:
 	Vec2i	m_XY;					/*!< Resolution width and height */
@@ -190,13 +186,13 @@ struct ScatterEvent
 	int			ReflectorID;
 	int			LightID;
 
-	HD ScatterEvent(SampleType Type)
+	HOST_DEVICE ScatterEvent(SampleType Type)
 	{
 		this->Type = Type;
 		this->SetInvalid();
 	}
 
-	HD void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, Vec2f UV = Vec2f(0.0f))
+	HOST_DEVICE void SetValid(float T, Vec3f P, Vec3f N, Vec3f Wo, ColorXYZf Le, Vec2f UV = Vec2f(0.0f))
 	{
 		this->Valid		= true;
 		this->T			= T;
@@ -207,7 +203,7 @@ struct ScatterEvent
 		this->UV		= UV;
 	}
 
-	HD void SetInvalid()
+	HOST_DEVICE void SetInvalid()
 	{
 		this->Valid		= false;
 		this->T			= 0.0f;
@@ -218,7 +214,7 @@ struct ScatterEvent
 		this->UV		= Vec2f(0.0f);
 	}
 
-	HD ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
+	HOST_DEVICE ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
 	{
 		this->Type			= Other.Type;
 		this->Valid			= Other.Valid;	
@@ -245,12 +241,12 @@ struct Intersection
 	Vec3f		N;
 	Vec2f		UV;
 	
-	HD Intersection()
+	HOST_DEVICE Intersection()
 	{
 		this->SetInvalid();
 	}
 
-	HD void SetValid(float NearT, Vec3f P, Vec3f N, Vec2f UV = Vec2f(0.0f))
+	HOST_DEVICE void SetValid(float NearT, Vec3f P, Vec3f N, Vec2f UV = Vec2f(0.0f))
 	{
 		this->Valid		= true;
 		this->NearT		= NearT;
@@ -259,7 +255,7 @@ struct Intersection
 		this->UV		= UV;
 	}
 
-	HD void SetInvalid()
+	HOST_DEVICE void SetInvalid()
 	{
 		this->Valid		= false;
 		this->Front		= true;
@@ -270,7 +266,7 @@ struct Intersection
 		this->UV		= Vec2f(0.0f);
 	}
 
-	HD Intersection& Intersection::operator = (const Intersection& Other)
+	HOST_DEVICE Intersection& Intersection::operator = (const Intersection& Other)
 	{
 		this->Valid			= Other.Valid;	
 		this->Front			= Other.Front;

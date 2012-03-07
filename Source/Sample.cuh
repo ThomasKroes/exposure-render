@@ -23,14 +23,14 @@ struct SurfaceSample
 	Vec3f		N;
 	Vec2f		UV;
 
-	DNI SurfaceSample(void)
+	DEVICE SurfaceSample(void)
 	{
 		this->P		= Vec3f(0.0f);
 		this->N		= Vec3f(0.0f, 0.0f, 1.0f);
 		this->UV	= Vec2f(0.0f);
 	}
 
-	DNI SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
+	DEVICE SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
 	{
 		this->P			= Other.P;
 		this->N			= Other.N;
@@ -45,12 +45,12 @@ struct LightSample
 	Vec3f 			RndP;
 	SurfaceSample	SS;
 
-	DNI LightSample(void)
+	DEVICE LightSample(void)
 	{
 		this->RndP	= Vec3f(0.0f);
 	}
 
-	DNI LightSample& LightSample::operator=(const LightSample& Other)
+	DEVICE LightSample& LightSample::operator=(const LightSample& Other)
 	{
 		this->RndP	= Other.RndP;
 		this->SS	= Other.SS;
@@ -58,7 +58,7 @@ struct LightSample
 		return *this;
 	}
 
-	DEV void LargeStep(CRNG& Rnd)
+	DEVICE void LargeStep(CRNG& Rnd)
 	{
 		RndP = Rnd.Get3();
 	}
@@ -69,19 +69,19 @@ struct BrdfSample
 	float	m_Component;
 	Vec2f	m_Dir;
 
-	DNI BrdfSample(void)
+	DEVICE BrdfSample(void)
 	{
 		m_Component = 0.0f;
 		m_Dir 		= Vec2f(0.0f);
 	}
 
-	DNI BrdfSample(const float& Component, const Vec2f& Dir)
+	DEVICE BrdfSample(const float& Component, const Vec2f& Dir)
 	{
 		m_Component = Component;
 		m_Dir 		= Dir;
 	}
 
-	DNI BrdfSample& BrdfSample::operator=(const BrdfSample& Other)
+	DEVICE BrdfSample& BrdfSample::operator=(const BrdfSample& Other)
 	{
 		m_Component = Other.m_Component;
 		m_Dir 		= Other.m_Dir;
@@ -89,7 +89,7 @@ struct BrdfSample
 		return *this;
 	}
 
-	DEV void LargeStep(CRNG& Rnd)
+	DEVICE void LargeStep(CRNG& Rnd)
 	{
 		m_Component	= Rnd.Get1();
 		m_Dir		= Rnd.Get2();
@@ -102,12 +102,12 @@ struct LightingSample
 	LightSample 	m_LightSample;
 	float			m_LightNum;
 
-	DNI LightingSample(void)
+	DEVICE LightingSample(void)
 	{
 		m_LightNum = 0.0f;
 	}
 
-	DNI LightingSample& LightingSample::operator=(const LightingSample& Other)
+	DEVICE LightingSample& LightingSample::operator=(const LightingSample& Other)
 	{
 		m_BsdfSample	= Other.m_BsdfSample;
 		m_LightNum		= Other.m_LightNum;
@@ -116,7 +116,7 @@ struct LightingSample
 		return *this;
 	}
 
-	DEV void LargeStep(CRNG& Rnd)
+	DEVICE void LargeStep(CRNG& Rnd)
 	{
 		m_BsdfSample.LargeStep(Rnd);
 		m_LightSample.LargeStep(Rnd);

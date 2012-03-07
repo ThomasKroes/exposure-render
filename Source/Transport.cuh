@@ -19,7 +19,7 @@
 #define EPS1 0.0001f
 #define EPS2 0.0002f
 
-DNI bool Intersect(Ray R, CRNG& RNG)
+DEVICE bool Intersect(Ray R, CRNG& RNG)
 {
 	ScatterEvent SE(ScatterEvent::Light);
 
@@ -35,7 +35,7 @@ DNI bool Intersect(Ray R, CRNG& RNG)
 	return false;
 }
 
-DNI bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
+DEVICE bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
 {
 	if (!gScattering.Shadows)
 		return true;
@@ -47,7 +47,7 @@ DNI bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
 	return !Intersect(R, RNG);
 }
 
-DNI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, CVolumeShader& Shader, int LightID)
+DEVICE ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, CVolumeShader& Shader, int LightID)
 {
 	
 	// Get light
@@ -128,14 +128,14 @@ DNI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RN
 	return Ld;*/
 }
 
-DNI ColorXYZf UniformSampleOneLight(ScatterEvent SE, CRNG& RNG, CVolumeShader& Shader, LightingSample& LS)
+DEVICE ColorXYZf UniformSampleOneLight(ScatterEvent SE, CRNG& RNG, CVolumeShader& Shader, LightingSample& LS)
 {
 	const int LightID = floorf(RNG.Get1() * gLights.NoLights);
 
 	return (float)gLights.NoLights * EstimateDirectLight(LS, SE, RNG, Shader, LightID);
 }
 
-DNI ColorXYZf UniformSampleOneLightVolume(ScatterEvent SE, CRNG& RNG, LightingSample& LS)
+DEVICE ColorXYZf UniformSampleOneLightVolume(ScatterEvent SE, CRNG& RNG, LightingSample& LS)
 {
 	const float I = GetIntensity(SE.P);
 

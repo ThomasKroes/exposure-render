@@ -18,7 +18,7 @@
 #include "Geometry.cuh"
 #include "Plane.cuh"
 
-DNI Intersection IntersectUnitDisk(Ray R, bool OneSided)
+DEVICE Intersection IntersectUnitDisk(Ray R, bool OneSided)
 {
 	Intersection Int = IntersectUnitPlane(R, OneSided);
 
@@ -28,7 +28,7 @@ DNI Intersection IntersectUnitDisk(Ray R, bool OneSided)
 	return Int;
 }
 
-DNI bool IntersectDiskP(Ray R, bool OneSided, float Radius)
+DEVICE bool IntersectDiskP(Ray R, bool OneSided, float Radius)
 {
 	Intersection Int = IntersectPlaneP(R, OneSided);
 
@@ -38,7 +38,7 @@ DNI bool IntersectDiskP(Ray R, bool OneSided, float Radius)
 	return Int.Valid;
 }
 
-DNI Intersection IntersectDisk(Ray R, bool OneSided, float Radius)
+DEVICE Intersection IntersectDisk(Ray R, bool OneSided, float Radius)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -48,7 +48,7 @@ DNI Intersection IntersectDisk(Ray R, bool OneSided, float Radius)
 	return Int;
 }
 
-DNI Intersection IntersectDisk(Ray R, bool OneSided, float Radius, float Offset)
+DEVICE Intersection IntersectDisk(Ray R, bool OneSided, float Radius, float Offset)
 {
 	Intersection Int = IntersectPlane(R, OneSided, Offset);
 
@@ -58,12 +58,7 @@ DNI Intersection IntersectDisk(Ray R, bool OneSided, float Radius, float Offset)
 	return Int;
 }
 
-HD inline float DiskArea(float Radius = 1.0f)
-{
-	return PI_F * (Radius * Radius);
-}
-
-HD inline void SampleUnitDisk(SurfaceSample& SS, Vec3f UVW)
+DEVICE void SampleUnitDisk(SurfaceSample& SS, Vec3f UVW)
 {
 	float r = sqrtf(UVW[0]);
 	float theta = 2.0f * PI_F * UVW[1];
@@ -73,7 +68,7 @@ HD inline void SampleUnitDisk(SurfaceSample& SS, Vec3f UVW)
 	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-HD inline void SampleDisk(SurfaceSample& SS, Vec3f UVW, float Radius)
+DEVICE void SampleDisk(SurfaceSample& SS, Vec3f UVW, float Radius)
 {
 	SampleUnitDisk(SS, UVW);
 	

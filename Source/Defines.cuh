@@ -1,10 +1,16 @@
 
 #include <host_defines.h>
 #include <float.h>
+#include <algorithm>
+#include <math.h>
 
-#define H						__host__
-#define D						__device__
-#define HD						__host__ __device__
+using namespace std;
+
+#define KERNEL					__global__
+#define HOST					__host__
+#define DEVICE					__device__
+#define HOST_DEVICE				HOST DEVICE
+#define HOD						__host__ __device__
 #define CD						__device__ __constant__
 #define	DNI						__device__ __noinline__
 #define	HODNI					__host__ __device__ __noinline__
@@ -20,3 +26,25 @@
 #define RAD_F					57.29577951308232f
 #define TWO_RAD_F				2.0f * RAD_F
 #define DEG_TO_RAD				1.0f / RAD_F
+
+/*
+HOST_DEVICE inline void HandleCudaError(const cudaError_t CudaError, const char* pDescription = "")
+{
+	if (CudaError == cudaSuccess)
+		return;
+
+//	Log(QString("Encountered a critical CUDA error: " + QString::fromAscii(pDescription) + " " + QString(cudaGetErrorString(CudaError))));
+
+//	throw new QString("Encountered a critical CUDA error: " + QString::fromAscii(pDescription) + " " + QString(cudaGetErrorString(CudaError)));
+}
+
+HOST_DEVICE inline void HandleCudaKernelError(const cudaError_t CudaError, const char* pName = "")
+{
+	if (CudaError == cudaSuccess)
+		return;
+
+//	Log(QString("The '" + QString::fromAscii(pName) + "' kernel caused the following CUDA runtime error: " + QString(cudaGetErrorString(CudaError))));
+
+//	throw new QString("The '" + QString::fromAscii(pName) + "' kernel caused the following CUDA runtime error: " + QString(cudaGetErrorString(CudaError)));
+}
+*/

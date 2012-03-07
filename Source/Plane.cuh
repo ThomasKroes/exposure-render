@@ -20,7 +20,7 @@
 
 #define INTERSECTION_EPSILON 0.0001f
 
-DEV inline Intersection IntersectPlaneP(Ray R, bool OneSided, float Offset = 0.0f)
+DEVICE Intersection IntersectPlaneP(Ray R, bool OneSided, float Offset = 0.0f)
 {
 	Intersection Int;
 
@@ -39,7 +39,7 @@ DEV inline Intersection IntersectPlaneP(Ray R, bool OneSided, float Offset = 0.0
 	return Int;
 }
 
-DEV inline Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
+DEVICE Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
 {
 	Intersection Int;
 
@@ -66,7 +66,7 @@ DEV inline Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f
 	return Int;
 }
 
-DEV inline Intersection IntersectUnitPlane(Ray R, bool OneSided)
+DEVICE Intersection IntersectUnitPlane(Ray R, bool OneSided)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -76,7 +76,7 @@ DEV inline Intersection IntersectUnitPlane(Ray R, bool OneSided)
 	return Int;
 }
 
-DEV inline bool IntersectPlaneP(Ray R, bool OneSided, Vec2f Size)
+DEVICE bool IntersectPlaneP(Ray R, bool OneSided, Vec2f Size)
 {
 	Intersection Int = IntersectPlaneP(R, OneSided);
 
@@ -86,7 +86,7 @@ DEV inline bool IntersectPlaneP(Ray R, bool OneSided, Vec2f Size)
 	return Int.Valid;
 }
 
-DEV inline Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
+DEVICE Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
 {
 	Intersection Int = IntersectPlane(R, OneSided);
 
@@ -96,19 +96,19 @@ DEV inline Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
 	return Int;
 }
 
-DEV inline bool InsidePlane(Vec3f P)
+DEVICE bool InsidePlane(Vec3f P)
 {
 	return P[2] > 0.0f;
 }
 
-HD inline void SampleUnitPlane(SurfaceSample& SS, Vec3f UVW)
+DEVICE void SampleUnitPlane(SurfaceSample& SS, Vec3f UVW)
 {
 	SS.P 	= Vec3f(-0.5f + UVW[0], -0.5f + UVW[1], 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
 	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-HD inline void SamplePlane(SurfaceSample& SS, Vec3f UVW, Vec2f Size)
+DEVICE void SamplePlane(SurfaceSample& SS, Vec3f UVW, Vec2f Size)
 {
 	SampleUnitPlane(SS, UVW);
 

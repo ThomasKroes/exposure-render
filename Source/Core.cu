@@ -89,7 +89,7 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 
 	cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
 
-	HandleCudaError(cudaMalloc3DArray(&gpIntensity, &ChannelDesc, CudaExtent));
+	cudaMalloc3DArray(&gpIntensity, &ChannelDesc, CudaExtent);
 
 	cudaMemcpy3DParms CopyParams = {0};
 
@@ -98,7 +98,7 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 	CopyParams.extent		= CudaExtent;
 	CopyParams.kind			= cudaMemcpyHostToDevice;
 	
-	HandleCudaError(cudaMemcpy3D(&CopyParams));
+	cudaMemcpy3D(&CopyParams);
 
 	gTexIntensity.normalized		= true;
 	gTexIntensity.filterMode		= cudaFilterModeLinear;      
@@ -106,14 +106,14 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 	gTexIntensity.addressMode[1]	= cudaAddressModeClamp;
   	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
 
-	HandleCudaError(cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc));
+	cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc);
 }
 
 void ErUnbindDensityBuffer(void)
 {
-	HandleCudaError(cudaFreeArray(gpIntensity));
+	cudaFreeArray(gpIntensity);
 	gpIntensity = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexIntensity));
+	cudaUnbindTexture(gTexIntensity);
 }
 
 void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
@@ -121,17 +121,17 @@ void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gOpacityRange", &Int, sizeof(ErRange)));
+	cudaMemcpyToSymbol("gOpacityRange", &Int, sizeof(ErRange));
 
 	gTexOpacity.normalized		= true;
 	gTexOpacity.filterMode		= cudaFilterModeLinear;
 	gTexOpacity.addressMode[0]	= cudaAddressModeClamp;
 
 	if (gpOpacity == NULL)
-		HandleCudaError(cudaMallocArray(&gpOpacity, &gFloatChannelDesc, NO_GRADIENT_STEPS, 1));
+		cudaMallocArray(&gpOpacity, &gFloatChannelDesc, NO_GRADIENT_STEPS, 1);
 
-	HandleCudaError(cudaMemcpyToArray(gpOpacity, 0, 0, Opacity, NO_GRADIENT_STEPS * sizeof(float), cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexOpacity, gpOpacity, gFloatChannelDesc));
+	cudaMemcpyToArray(gpOpacity, 0, 0, Opacity, NO_GRADIENT_STEPS * sizeof(float), cudaMemcpyHostToDevice);
+	cudaBindTextureToArray(gTexOpacity, gpOpacity, gFloatChannelDesc);
 }
 
 void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2])
@@ -139,22 +139,22 @@ void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gDiffuseRange", &Int, sizeof(ErRange)));
+	cudaMemcpyToSymbol("gDiffuseRange", &Int, sizeof(ErRange));
 
 	gTexDiffuse.normalized		= true;
 	gTexDiffuse.filterMode		= cudaFilterModeLinear;
 	gTexDiffuse.addressMode[0]	= cudaAddressModeClamp;
 
 	if (gpDiffuse == NULL)
-		HandleCudaError(cudaMallocArray(&gpDiffuse, &gFloat4ChannelDesc, NO_GRADIENT_STEPS, 1));
+		cudaMallocArray(&gpDiffuse, &gFloat4ChannelDesc, NO_GRADIENT_STEPS, 1);
 
 	ColorXYZAf* pDiffuseXYZA = new ColorXYZAf[NO_GRADIENT_STEPS];
 
 	for (int i = 0; i < NO_GRADIENT_STEPS; i++)
 		pDiffuseXYZA[i].FromRGB(Diffuse[0][i], Diffuse[1][i], Diffuse[2][i]);
 
-	HandleCudaError(cudaMemcpyToArray(gpDiffuse, 0, 0, pDiffuseXYZA, NO_GRADIENT_STEPS * sizeof(float4), cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexDiffuse, gpDiffuse, gFloat4ChannelDesc));
+	cudaMemcpyToArray(gpDiffuse, 0, 0, pDiffuseXYZA, NO_GRADIENT_STEPS * sizeof(float4), cudaMemcpyHostToDevice);
+	cudaBindTextureToArray(gTexDiffuse, gpDiffuse, gFloat4ChannelDesc);
 
 	delete[] pDiffuseXYZA;
 }
@@ -164,22 +164,22 @@ void ErBindSpecular1D(float Specular[3][NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gSpecularRange", &Int, sizeof(ErRange)));
+	cudaMemcpyToSymbol("gSpecularRange", &Int, sizeof(ErRange));
 
 	gTexSpecular.normalized		= true;
 	gTexSpecular.filterMode		= cudaFilterModeLinear;
 	gTexSpecular.addressMode[0]	= cudaAddressModeClamp;
 
 	if (gpSpecular == NULL)
-		HandleCudaError(cudaMallocArray(&gpSpecular, &gFloat4ChannelDesc, NO_GRADIENT_STEPS, 1));
+		cudaMallocArray(&gpSpecular, &gFloat4ChannelDesc, NO_GRADIENT_STEPS, 1);
 
 	ColorXYZAf* pSpecularXYZA = new ColorXYZAf[NO_GRADIENT_STEPS];
 
 	for (int i = 0; i < NO_GRADIENT_STEPS; i++)
 		pSpecularXYZA[i].FromRGB(Specular[0][i], Specular[1][i], Specular[2][i]);
 
-	HandleCudaError(cudaMemcpyToArray(gpSpecular, 0, 0, pSpecularXYZA, NO_GRADIENT_STEPS * sizeof(float4), cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexSpecular, gpSpecular, gFloat4ChannelDesc));
+	cudaMemcpyToArray(gpSpecular, 0, 0, pSpecularXYZA, NO_GRADIENT_STEPS * sizeof(float4), cudaMemcpyHostToDevice);
+	cudaBindTextureToArray(gTexSpecular, gpSpecular, gFloat4ChannelDesc);
 
 	delete[] pSpecularXYZA;
 }
@@ -189,17 +189,17 @@ void ErBindGlossiness1D(float Glossiness[NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gGlossinessRange", &Int, sizeof(ErRange)));
+	cudaMemcpyToSymbol("gGlossinessRange", &Int, sizeof(ErRange));
 
 	gTexGlossiness.normalized		= true;
 	gTexGlossiness.filterMode		= cudaFilterModeLinear;
 	gTexGlossiness.addressMode[0]	= cudaAddressModeClamp;
 
 	if (gpGlossiness == NULL)
-		HandleCudaError(cudaMallocArray(&gpGlossiness, &gFloatChannelDesc, NO_GRADIENT_STEPS, 1));
+		cudaMallocArray(&gpGlossiness, &gFloatChannelDesc, NO_GRADIENT_STEPS, 1);
 
-	HandleCudaError(cudaMemcpyToArray(gpGlossiness, 0, 0, Glossiness, NO_GRADIENT_STEPS * sizeof(float),  cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexGlossiness, gpGlossiness, gFloatChannelDesc));
+	cudaMemcpyToArray(gpGlossiness, 0, 0, Glossiness, NO_GRADIENT_STEPS * sizeof(float),  cudaMemcpyHostToDevice);
+	cudaBindTextureToArray(gTexGlossiness, gpGlossiness, gFloatChannelDesc);
 }
 
 void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2])
@@ -207,64 +207,64 @@ void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	HandleCudaError(cudaMemcpyToSymbol("gEmissionRange", &Int, sizeof(ErRange)));
+	cudaMemcpyToSymbol("gEmissionRange", &Int, sizeof(ErRange));
 
 	gTexEmission.normalized		= true;
 	gTexEmission.filterMode		= cudaFilterModeLinear;
 	gTexEmission.addressMode[0]	= cudaAddressModeClamp;
 
 	if (gpEmission == NULL)
-		HandleCudaError(cudaMallocArray(&gpEmission, &gFloat4ChannelDesc, NO_GRADIENT_STEPS, 1));
+		cudaMallocArray(&gpEmission, &gFloat4ChannelDesc, NO_GRADIENT_STEPS, 1);
 
 	ColorXYZAf* pEmissionXYZA = new ColorXYZAf[NO_GRADIENT_STEPS];
 
 	for (int i = 0; i < NO_GRADIENT_STEPS; i++)
 		pEmissionXYZA[i].FromRGB(Emission[0][i], Emission[1][i], Emission[2][i]);
 
-	HandleCudaError(cudaMemcpyToArray(gpEmission, 0, 0, pEmissionXYZA, NO_GRADIENT_STEPS * sizeof(float4),  cudaMemcpyHostToDevice));
-	HandleCudaError(cudaBindTextureToArray(gTexEmission, gpEmission, gFloat4ChannelDesc));
+	cudaMemcpyToArray(gpEmission, 0, 0, pEmissionXYZA, NO_GRADIENT_STEPS * sizeof(float4),  cudaMemcpyHostToDevice);
+	cudaBindTextureToArray(gTexEmission, gpEmission, gFloat4ChannelDesc);
 
 	delete[] pEmissionXYZA;
 }
 
 void ErUnbindOpacity1D(void)
 {
-	HandleCudaError(cudaFreeArray(gpOpacity));
+	cudaFreeArray(gpOpacity);
 	gpOpacity = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexOpacity));
+	cudaUnbindTexture(gTexOpacity);
 }
 
 void ErUnbindDiffuse1D(void)
 {
-	HandleCudaError(cudaFreeArray(gpDiffuse));
+	cudaFreeArray(gpDiffuse);
 	gpDiffuse = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexDiffuse));
+	cudaUnbindTexture(gTexDiffuse);
 }
 
 void ErUnbindSpecular1D(void)
 {
-	HandleCudaError(cudaFreeArray(gpSpecular));
+	cudaFreeArray(gpSpecular);
 	gpSpecular	= NULL;
-	HandleCudaError(cudaUnbindTexture(gTexSpecular));
+	cudaUnbindTexture(gTexSpecular);
 }
 
 void ErUnbindGlossiness1D(void)
 {
-	HandleCudaError(cudaFreeArray(gpGlossiness));
+	cudaFreeArray(gpGlossiness);
 	gpGlossiness = NULL;
-	HandleCudaError(cudaUnbindTexture(gTexGlossiness));
+	cudaUnbindTexture(gTexGlossiness);
 }
 
 void ErUnbindEmission1D(void)
 {
-	HandleCudaError(cudaFreeArray(gpEmission));
+	cudaFreeArray(gpEmission);
 	gpEmission	= NULL;
-	HandleCudaError(cudaUnbindTexture(gTexEmission));
+	cudaUnbindTexture(gTexEmission);
 }
 
 void ErBindVolume(ErVolume* pVolume)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gVolume", pVolume, sizeof(ErVolume)));
+	cudaMemcpyToSymbol("gVolume", pVolume, sizeof(ErVolume));
 }
 
 void ErBindCamera(ErCamera* pCamera)
@@ -307,51 +307,51 @@ void ErBindCamera(ErCamera* pCamera)
 	pCamera->InvScreen[0] = (pCamera->Screen[0][1] - pCamera->Screen[0][0]) / (float)pCamera->FilmWidth;
 	pCamera->InvScreen[1] = (pCamera->Screen[1][1] - pCamera->Screen[1][0]) / (float)pCamera->FilmHeight;
 
-	HandleCudaError(cudaMemcpyToSymbol("gCamera", pCamera, sizeof(ErCamera)));
+	cudaMemcpyToSymbol("gCamera", pCamera, sizeof(ErCamera));
 }
 
 void ErBindLights(ErLights* pLights)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gLights", pLights, sizeof(ErLights)));
+	cudaMemcpyToSymbol("gLights", pLights, sizeof(ErLights));
 }
 
 void ErBindClippers(ErClippers* pClippers)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gClippers", pClippers, sizeof(ErClippers)));
+	cudaMemcpyToSymbol("gClippers", pClippers, sizeof(ErClippers));
 }
 
 void ErBindReflectors(ErReflectors* pReflectors)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gReflectors", pReflectors, sizeof(ErReflectors)));
+	cudaMemcpyToSymbol("gReflectors", pReflectors, sizeof(ErReflectors));
 }
 
 void ErBindDenoise(ErDenoise* pDenoise)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gDenoise", pDenoise, sizeof(ErDenoise)));
+	cudaMemcpyToSymbol("gDenoise", pDenoise, sizeof(ErDenoise));
 }
 
 void ErBindScattering(ErScattering* pScattering)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gScattering", pScattering, sizeof(ErScattering)));
+	cudaMemcpyToSymbol("gScattering", pScattering, sizeof(ErScattering));
 }
 
 void ErBindBlur(ErBlur* pBlur)
 {
-	HandleCudaError(cudaMemcpyToSymbol("gBlur", pBlur, sizeof(ErBlur)));
+	cudaMemcpyToSymbol("gBlur", pBlur, sizeof(ErBlur));
 }
 
 void ErRenderEstimate()
 {
 	FrameBuffer* pDevFrameBuffer = NULL;
-	HandleCudaError(cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer)));
-	HandleCudaError(cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
+	cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer));
+	cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice);
 
 	SingleScattering(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	BlurEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	ComputeEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	ToneMap(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 
-	HandleCudaError(cudaFree(pDevFrameBuffer));
+	cudaFree(pDevFrameBuffer);
 }
 
 void ErGetEstimate(unsigned char* pData)
@@ -380,12 +380,12 @@ void ErRecordBenchmarkImage()
 void ErGetAverageNrmsError(float& AverageNrmsError)
 {
 	FrameBuffer* pDevFrameBuffer = NULL;
-	HandleCudaError(cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer)));
-	HandleCudaError(cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice));
+	cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer));
+	cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice);
 
 	ComputeAverageNrmsError(FB, pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1], AverageNrmsError);
 
-	HandleCudaError(cudaFree(pDevFrameBuffer));
+	cudaFree(pDevFrameBuffer);
 }
 
 void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3])

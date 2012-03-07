@@ -18,11 +18,11 @@
 #define KRNL_DENOISE_BLOCK_H		8
 #define KRNL_DENOISE_BLOCK_SIZE		KRNL_DENOISE_BLOCK_W * KRNL_DENOISE_BLOCK_H
 
-DEV float lerpf(float a, float b, float c){
+HOST_DEVICE float lerpf(float a, float b, float c){
 	return a + (b - a) * c;
 }
 
-DEV float vecLen(float4 a, float4 b)
+HOST_DEVICE float vecLen(float4 a, float4 b)
 {
     return ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z));
 }
@@ -99,5 +99,4 @@ void ReduceNoise(FrameBuffer* pFrameBuffer, int Width, int Height)
 
 	KrnlDenoise<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Noise Reduction");
 }

@@ -15,7 +15,7 @@
 
 #include "Transport.cuh"
 
-DNI ScatterEvent SampleRay(Ray R, CRNG& RNG)
+DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::ErVolume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
 
@@ -150,5 +150,4 @@ void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)
 
 	KrnlSingleScattering<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
-	HandleCudaKernelError(cudaGetLastError(), "Single Scattering");
 }
