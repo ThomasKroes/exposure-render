@@ -82,57 +82,11 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	if (SE.Valid && SE.Type == ScatterEvent::ErVolume)
 		Lv += UniformSampleOneLightVolume(SE, RNG, LS);
 
-		switch (SE.Type)
-		{
-			case ScatterEvent::ErVolume:
-			
-			
-			
-			case ScatterEvent::Light:
-			{
-				CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 5.0f, 100.0f);
-
-				Vec3f Wi; float BsdfPdf;
-
-				ColorXYZf F = Shader.SampleF(-Re.D, Wi, BsdfPdf, LS.m_BsdfSample);
-
-				Lv += UniformSampleOneLight(SE, RNG, Shader, LS);//SE.Le / DistanceSquared(Re.O, SE.P, Shader);
-
-				Re.O = SE.P;
-				Re.D = Wi;
-
-				// Throughput *= F;
-				// Throughput /= BsdfPdf;
-				break;
-			}
-
-			case ScatterEvent::Reflector:
-			{
-				CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 5.0f, 100.0f);
-
-				Vec3f Wi; float BsdfPdf;
-
-				ColorXYZf F = Shader.SampleF(-Re.D, Wi, BsdfPdf, LS.m_BsdfSample);
-
-				ColorXYZf Li = UniformSampleOneLight(SE, RNG, Shader, LS);
-				
-				Li *= F;
-				Li /= BsdfPdf;
-
-				if (!F.IsBlack() && BsdfPdf > 0.0f)
-				{
-					Lv += Throughput * Li;//SE.Le / DistanceSquared(Re.O, SE.P, Shader);
-
-
-					Re.O = SE.P;
-					Re.D = Wi;
-				}
-
-				break;
-			}
-			
-		}
-
+	if (SE.Valid && SE.Type == ScatterEvent::Reflector)
+	{
+		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 5.0f, 100.0f);
+		Lv += UniformSampleOneLight(SE, RNG, Shader, LS);
+	}
 	
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 

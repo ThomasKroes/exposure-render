@@ -42,90 +42,61 @@ DEVICE bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
 
 	Vec3f W = Normalize(P2 - P1);
 
-	Ray R(P1 + W * EPS1, W, 0.0f, (P2 - P1).Length() - EPS2);
+	Ray R(P1 + W * EPS1, W, 0.0f, min((P2 - P1).Length() - EPS2, gScattering.MaxShadowDistance));
 
 	return !Intersect(R, RNG);
 }
 
 DEVICE ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, CVolumeShader& Shader, int LightID)
 {
-	
-	// Get light
 	ErLight& Light = gLights.LightList[LightID];
 
-	//float LightPdf; 
 	Vec3f Wi;
 
 	// Incident radiance (Li), direct light (Ld)
 	ColorXYZf Li = SPEC_BLACK, Ld = SPEC_BLACK;
 
-	SampleLight(Light, LS.m_LightSample, SE, Wi, Li);
+	SampleLight(Light, LS.LightSample, SE, Wi, Li);
 
 	ColorXYZf F = Shader.F(SE.Wo, Wi);
 	
-	float Ps = Shader.Pdf(SE.Wo, Wi);
+	float BsdfPdf = Shader.Pdf(SE.Wo, Wi);
 
-	if (Li.IsBlack() || F.IsBlack() || Ps <= 0.0f)
-		return Ld;
-	
-	/**/
-	if (Visible(LS.m_LightSample.SS.P, SE.P, RNG))
+	if (!Li.IsBlack() && !F.IsBlack() && BsdfPdf > 0.0f && Visible(SE.P, LS.LightSample.SS.P, RNG))
 	{
-		const float d2 = DistanceSquared(SE.P, LS.m_LightSample.SS.P);
+		const float LightPdf = DistanceSquared(SE.P, LS.LightSample.SS.P) / (AbsDot(LS.LightSample.SS.N, -Wi) * Light.Shape.Area);
 
-		// float Pl = 1.0f / Light.Shape.Area;
+		const float Weight = PowerHeuristic(1, LightPdf, 1, BsdfPdf);
 
-		Li *= F;
-		Li /= d2;
-
-		//if (mis)
-		//{
-		// Li *= PowerHeuristic(1, Pl * d2 / AbsDot(Wi, SE.N), 1, Ps);
-		//}
-
-		// Add to direct light
-		Ld += AbsDot(Wi, SE.N) * Li;
+		Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / LightPdf);
 	}
-	
 
-	return Ld;
-/*
-	return Ld;
+	F = Shader.SampleF(SE.Wo, Wi, BsdfPdf, LS.BsdfSample);
 
-	
-	// Sample new ray direction
-	F = Shader.SampleF(SE.Wo, Wi, Ps, LS.m_BsdfSample);
-
-	if (F.IsBlack() || Ps <= 0.0f)
+	if (F.IsBlack() || BsdfPdf <= 0.0f)
 		return Ld;
 	
 	ScatterEvent SE2(ScatterEvent::Light);
 
 	IntersectLights(Ray(SE.P, Wi), SE2);
 
-	if (!SE2.Valid)
+	if (!SE2.Valid || SE2.LightID != LightID)
 		return Ld;
 
-	if (Visible(LS.m_LightSample.SS.P, SE.P, RNG))
+	Li = SE2.Le;
+
+	if (!Li.IsBlack() && Visible(SE.P, SE2.P, RNG))
 	{
-		Li = SE2.Le;
+		Wi = Normalize(SE2.P - SE.P);
 
-		float Pl = 1.0f / gLights.LightList[SE2.LightID].Shape.Area;
+		const float LightPdf = DistanceSquared(SE.P, SE2.P) / (AbsDot(SE.N, -Wi) * Light.Shape.Area);
 
-		// Compute distance squared
-		const float d2 = DistanceSquared(SE.P, SE2.P);
-		
-		const float lightPdf2 = Pl * d2 / AbsDot(Wi, SE.N);
+		const float Weight = PowerHeuristic(1, BsdfPdf, 1, LightPdf);
 
-		const float weight = 1.0f;//PowerHeuristic(1, Ps, 1, lightPdf2);
-
-		Li *= F;
-		Li /= d2;
-		Ld += Li * AbsDot(Wi, SE.N) * weight;
+		Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / BsdfPdf);
 	}
 	
-
-	return Ld;*/
+	return Ld;
 }
 
 DEVICE ColorXYZf UniformSampleOneLight(ScatterEvent SE, CRNG& RNG, CVolumeShader& Shader, LightingSample& LS)

@@ -60,67 +60,66 @@ struct LightSample
 
 	DEVICE void LargeStep(CRNG& Rnd)
 	{
-		RndP = Rnd.Get3();
+		this->RndP = Rnd.Get3();
 	}
 };
 
 struct BrdfSample
 {
-	float	m_Component;
-	Vec2f	m_Dir;
+	float	Component;
+	Vec2f	Dir;
 
 	DEVICE BrdfSample(void)
 	{
-		m_Component = 0.0f;
-		m_Dir 		= Vec2f(0.0f);
+		Component	= 0.0f;
+		Dir 		= Vec2f(0.0f);
 	}
 
 	DEVICE BrdfSample(const float& Component, const Vec2f& Dir)
 	{
-		m_Component = Component;
-		m_Dir 		= Dir;
+		this->Component	= Component;
+		this->Dir 		= Dir;
 	}
 
 	DEVICE BrdfSample& BrdfSample::operator=(const BrdfSample& Other)
 	{
-		m_Component = Other.m_Component;
-		m_Dir 		= Other.m_Dir;
+		this->Component	= Other.Component;
+		this->Dir 		= Other.Dir;
 
 		return *this;
 	}
 
 	DEVICE void LargeStep(CRNG& Rnd)
 	{
-		m_Component	= Rnd.Get1();
-		m_Dir		= Rnd.Get2();
+		this->Component	= Rnd.Get1();
+		this->Dir		= Rnd.Get2();
 	}
 };
 
 struct LightingSample
 {
-	BrdfSample		m_BsdfSample;
-	LightSample 	m_LightSample;
-	float			m_LightNum;
+	BrdfSample		BsdfSample;
+	LightSample 	LightSample;
+	float			LightNum;
 
 	DEVICE LightingSample(void)
 	{
-		m_LightNum = 0.0f;
+		this->LightNum = 0.0f;
 	}
 
 	DEVICE LightingSample& LightingSample::operator=(const LightingSample& Other)
 	{
-		m_BsdfSample	= Other.m_BsdfSample;
-		m_LightNum		= Other.m_LightNum;
-		m_LightSample	= Other.m_LightSample;
+		this->BsdfSample	= Other.BsdfSample;
+		this->LightNum		= Other.LightNum;
+		this->LightSample	= Other.LightSample;
 
 		return *this;
 	}
 
 	DEVICE void LargeStep(CRNG& Rnd)
 	{
-		m_BsdfSample.LargeStep(Rnd);
-		m_LightSample.LargeStep(Rnd);
-
-		m_LightNum = Rnd.Get1();
+		this->BsdfSample.LargeStep(Rnd);
+		this->LightSample.LargeStep(Rnd);
+		this->LightNum = Rnd.Get1();
 	}
 };

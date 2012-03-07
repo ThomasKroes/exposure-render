@@ -163,6 +163,7 @@ struct EXPOSURE_RENDER_DLL ErScattering
 	float				IndexOfReflection;
 	bool				OpacityModulated;
 	bool				Shadows;
+	float				MaxShadowDistance;
 };
 
 struct EXPOSURE_RENDER_DLL ErBlur

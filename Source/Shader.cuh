@@ -23,7 +23,7 @@ class CLambertian
 public:
 	DEVICE CLambertian(const ColorXYZf& Kd)
 	{
-		m_Kd = Kd;
+		this->Kd = Kd;
 	}
 
 	DEVICE ~CLambertian(void)
@@ -32,7 +32,7 @@ public:
 
 	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
-		return m_Kd * INV_PI_F;
+		return Kd * INV_PI_F;
 	}
 
 	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
@@ -52,7 +52,7 @@ public:
 		return SameHemisphere(Wo, Wi) ? AbsCosTheta(Wi) * INV_PI_F : 0.0f;
 	}
 
-	ColorXYZf	m_Kd;
+	ColorXYZf	Kd;
 };
 
 DEVICE inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, const ColorXYZf &etat)
@@ -239,7 +239,7 @@ class CIsotropicPhase
 {
 public:
 	DEVICE CIsotropicPhase(const ColorXYZf& Kd) :
-		m_Kd(Kd)
+		Kd(Kd)
 	{
 	}
 
@@ -249,7 +249,7 @@ public:
 
 	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
-		return m_Kd * INV_PI_F;
+		return Kd * INV_PI_F;
 	}
 
 	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
@@ -265,7 +265,7 @@ public:
 		return INV_4_PI_F;
 	}
 
-	ColorXYZf	m_Kd;
+	ColorXYZf	Kd;
 };
 
 class CBRDF
@@ -316,13 +316,13 @@ public:
 
 		ColorXYZf R;
 
-		if (S.m_Component <= 0.5f)
+		if (S.Component <= 0.5f)
 		{
-			m_Lambertian.SampleF(Wol, Wil, Pdf, S.m_Dir);
+			m_Lambertian.SampleF(Wol, Wil, Pdf, S.Dir);
 		}
 		else
 		{
-			m_Microfacet.SampleF(Wol, Wil, Pdf, S.m_Dir);
+			m_Microfacet.SampleF(Wol, Wil, Pdf, S.Dir);
 		}
 
 		Pdf += m_Lambertian.Pdf(Wol, Wil);
@@ -398,7 +398,7 @@ public:
 				return m_Brdf.SampleF(Wo, Wi, Pdf, S);
 
 			case Phase:
-				return m_IsotropicPhase.SampleF(Wo, Wi, Pdf, S.m_Dir);
+				return m_IsotropicPhase.SampleF(Wo, Wi, Pdf, S.Dir);
 		}
 
 		return ColorXYZf(0.0f);
