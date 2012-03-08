@@ -83,6 +83,7 @@ SET(ErCudaSources
 	Shader.cuh
 	Sample.cuh
 	RNG.cuh
+	Metropolis.cuh
 	Defines.cuh
 	MonteCarlo.cuh
 	Buffer.cuh

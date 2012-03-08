@@ -56,15 +56,17 @@ DEVICE ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG&
 	// Incident radiance (Li), direct light (Ld)
 	ColorXYZf Li = SPEC_BLACK, Ld = SPEC_BLACK;
 
-	SampleLight(Light, LS.LightSample, SE, Wi, Li);
+	SurfaceSample SS;
+
+	SampleLight(Light, LS.LightSample, SS, SE, Wi, Li);
 
 	ColorXYZf F = Shader.F(SE.Wo, Wi);
 	
 	float BsdfPdf = Shader.Pdf(SE.Wo, Wi);
 
-	if (!Li.IsBlack() && !F.IsBlack() && BsdfPdf > 0.0f && Visible(SE.P, LS.LightSample.SS.P, RNG))
+	if (!Li.IsBlack() && !F.IsBlack() && BsdfPdf > 0.0f && Visible(SE.P, SS.P, RNG))
 	{
-		const float LightPdf = DistanceSquared(SE.P, LS.LightSample.SS.P) / (AbsDot(LS.LightSample.SS.N, -Wi) * Light.Shape.Area);
+		const float LightPdf = DistanceSquared(SE.P, SS.P) / (AbsDot(SS.N, -Wi) * Light.Shape.Area);
 
 		const float Weight = PowerHeuristic(1, LightPdf, 1, BsdfPdf);
 

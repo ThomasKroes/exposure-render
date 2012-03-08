@@ -17,6 +17,37 @@
 
 #include "RNG.cuh"
 
+DEVICE void Mutate1(float& X, CRNG& RNG)
+{
+	float s1 = 1.0f / 1024.0f, s2 = 1.0f / 16.0f;
+
+	float dx = s2 * exp(-log(s2 / s1) * RNG.Get1());
+
+	if (RNG.Get1() < 0.5f)
+	{
+		float x1 = X + dx;
+		X = (x1 > 1) ? x1 - 1 : x1;
+	}
+	else
+	{
+		float x1 = X - dx;
+		X = (x1 < 0) ? x1 + 1 : x1;
+	}
+}
+
+DEVICE void Mutate2(Vec2f& V, CRNG& RNG)
+{
+	Mutate1(V[0], RNG);
+	Mutate1(V[1], RNG);
+}
+
+DEVICE void Mutate3(Vec3f& V, CRNG& RNG)
+{
+	Mutate1(V[0], RNG);
+	Mutate1(V[1], RNG);
+	Mutate1(V[2], RNG);
+}
+
 struct SurfaceSample
 {
 	Vec3f		P;
@@ -32,9 +63,9 @@ struct SurfaceSample
 
 	DEVICE SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
 	{
-		this->P			= Other.P;
-		this->N			= Other.N;
-		this->UV		= Other.UV;
+		this->P		= Other.P;
+		this->N		= Other.N;
+		this->UV	= Other.UV;
 
 		return *this;
 	}
@@ -43,7 +74,7 @@ struct SurfaceSample
 struct LightSample
 {
 	Vec3f 			RndP;
-	SurfaceSample	SS;
+//	SurfaceSample	SS;
 
 	DEVICE LightSample(void)
 	{
@@ -53,14 +84,19 @@ struct LightSample
 	DEVICE LightSample& LightSample::operator=(const LightSample& Other)
 	{
 		this->RndP	= Other.RndP;
-		this->SS	= Other.SS;
+//		this->SS	= Other.SS;
 
 		return *this;
 	}
 
-	DEVICE void LargeStep(CRNG& Rnd)
+	DEVICE void LargeStep(CRNG& RNG)
 	{
-		this->RndP = Rnd.Get3();
+		this->RndP = RNG.Get3();
+	}
+
+	DEVICE void Mutate(CRNG& RNG)
+	{
+		Mutate3(this->RndP, RNG);
 	}
 };
 
@@ -71,8 +107,8 @@ struct BrdfSample
 
 	DEVICE BrdfSample(void)
 	{
-		Component	= 0.0f;
-		Dir 		= Vec2f(0.0f);
+		this->Component	= 0.0f;
+		this->Dir 		= Vec2f(0.0f);
 	}
 
 	DEVICE BrdfSample(const float& Component, const Vec2f& Dir)
@@ -89,10 +125,16 @@ struct BrdfSample
 		return *this;
 	}
 
-	DEVICE void LargeStep(CRNG& Rnd)
+	DEVICE void LargeStep(CRNG& RNG)
 	{
-		this->Component	= Rnd.Get1();
-		this->Dir		= Rnd.Get2();
+		this->Component	= RNG.Get1();
+		this->Dir		= RNG.Get2();
+	}
+
+	DEVICE void Mutate(CRNG& RNG)
+	{
+		Mutate1(this->Component, RNG);
+		Mutate2(this->Dir, RNG);
 	}
 };
 
@@ -110,16 +152,49 @@ struct LightingSample
 	DEVICE LightingSample& LightingSample::operator=(const LightingSample& Other)
 	{
 		this->BsdfSample	= Other.BsdfSample;
-		this->LightNum		= Other.LightNum;
 		this->LightSample	= Other.LightSample;
+		this->LightNum		= Other.LightNum;
+		
+		return *this;
+	}
+
+	DEVICE void LargeStep(CRNG& RNG)
+	{
+		this->BsdfSample.LargeStep(RNG);
+		this->LightSample.LargeStep(RNG);
+		this->LightNum = RNG.Get1();
+	}
+
+	DEVICE void Mutate(CRNG& RNG)
+	{
+		this->BsdfSample.Mutate(RNG);
+		this->LightSample.Mutate(RNG);
+		Mutate1(this->LightNum, RNG);
+	}
+};
+
+struct MetroSample
+{
+	LightingSample	LightingSample;
+
+	DEVICE MetroSample(void)
+	{
+	}
+
+	DEVICE MetroSample& MetroSample::operator=(const MetroSample& Other)
+	{
+		this->LightingSample = Other.LightingSample;
 
 		return *this;
 	}
 
 	DEVICE void LargeStep(CRNG& Rnd)
 	{
-		this->BsdfSample.LargeStep(Rnd);
-		this->LightSample.LargeStep(Rnd);
-		this->LightNum = Rnd.Get1();
+		this->LightingSample.LargeStep(Rnd);
+	}
+
+	DEVICE void Mutate(CRNG& Rnd)
+	{
+		this->LightingSample.Mutate(Rnd);
 	}
 };

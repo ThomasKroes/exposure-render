@@ -73,7 +73,7 @@ void ErDeinitialize()
 
 void ErResize(int Size[2])
 {
-	FB.Resize(CResolution2D(Size[0], Size[1]));
+	FB.Resize(Resolution2i(Size));
 }
 
 void ErResetFrameBuffer()

@@ -67,99 +67,71 @@ HOST_DEVICE void Swap(int& I1, int& I2)
 
 }
 
-class CResolution2D
+
+template <class T, int NoDimensions>
+class Resolution : public Vec<T, NoDimensions>
 {
 public:
-	// ToDo: Add description
-	HOST_DEVICE CResolution2D(const float& Width, const float& Height)
+	HOST_DEVICE Resolution()
 	{
-		m_XY		= Vec2i(Width, Height);
-
-		Update();
+		for (int i = 0; i < NoDimensions; i++)
+			this->m_D[i] = T();
 	}
 
-	// ToDo: Add description
-	HOST_DEVICE CResolution2D(void)
+	HOST_DEVICE Resolution(T Res)
 	{
-		m_XY		= Vec2i(640, 480);
-
-		Update();
+		for (int i = 0; i < NoDimensions; i++)
+			this->m_D[i] = Res;
 	}
 
-	// ToDo: Add description
-	HOST_DEVICE ~CResolution2D(void)
+	HOST_DEVICE Resolution(T Resolution[NoDimensions])
 	{
+		for (int i = 0; i < NoDimensions; i++)
+			this->m_D[i] = Resolution[i];
 	}
 
-	// ToDo: Add description
-	HOST_DEVICE CResolution2D& CResolution2D::operator=(const CResolution2D& Other)
+	HOST_DEVICE Vec<T, NoDimensions> Inv(void) const
 	{
-		m_XY				= Other.m_XY;
-		m_InvXY				= Other.m_InvXY;
-		m_NoElements		= Other.m_NoElements;
-		m_AspectRatio		= Other.m_AspectRatio;
-		m_DiagonalLength	= Other.m_DiagonalLength;
-
-		return *this;
+		return 1.0f / *this;
 	}
 
-	HOST_DEVICE int operator[](int i) const
+	HOST_DEVICE int GetNoElements(void) const
 	{
-		return m_XY[i];
+		T NoElements = this->m_D[0];
+
+		for (int i = 1; i < NoDimensions; i++)
+			NoElements *= this->m_D[i];
+
+		return NoElements;			
 	}
 
-	HOST_DEVICE int& operator[](int i)
+	HOST_DEVICE bool operator == (const Resolution& R) const
 	{
-		return m_XY[i];
+		for (int i = 0; i < NoDimensions; i++)
+		{
+			if (this->m_D[i] != R[i])
+				return false;
+		}
+
+		return true;
 	}
 
-	HOST_DEVICE bool operator == (const CResolution2D& Other) const
+	HOST_DEVICE bool operator != (const Resolution& R) const
 	{
-		return GetResX() == Other.GetResX() && GetResY() == Other.GetResY();
+		for (int i = 0; i < NoDimensions; i++)
+		{
+			if (this->m_D[i] != R[i])
+				return true;
+		}
+
+		return false;
 	}
-
-	HOST_DEVICE bool operator != (const CResolution2D& Other) const
-	{
-		return GetResX() != Other.GetResX() || GetResY() != Other.GetResY();
-	}
-
-	// ToDo: Add description
-	HOST_DEVICE void Update(void)
-	{
-		m_InvXY				= Vec2f(m_XY[0] != 0.0f ? 1.0f / m_XY[0] : 0.0f, m_XY[1] != 0.0f ? 1.0f / m_XY[1] : 0.0f);
-		m_NoElements		= m_XY[0] * m_XY[1];
-		m_AspectRatio		= (float)m_XY[1] / (float)m_XY[0];
-		m_DiagonalLength	= sqrtf(powf(m_XY[0], 2.0f) + powf(m_XY[1], 2.0f));
-	}
-
-	// ToDo: Add description
-	HOST_DEVICE Vec2i ToVector(void) const
-	{
-		return Vec2i(m_XY[0], m_XY[1]);
-	}
-
-	HOST_DEVICE void Set(const Vec2i& Resolution)
-	{
-		m_XY = Resolution;
-
-		Update();
-	}
-
-	HOST_DEVICE int GetResX(void) const				{ return m_XY[0];				}
-	HOST_DEVICE void	SetResX(const int& Width)		{ m_XY[0] = Width; Update();	}
-	HOST_DEVICE int GetResY(void) const				{ return m_XY[1];				}
-	HOST_DEVICE void	SetResY(const int& Height)		{ m_XY[1] = Height; Update();	}
-	HOST_DEVICE Vec2f GetInv(void) const				{ return m_InvXY;				}
-	HOST_DEVICE int GetNoElements(void) const		{ return m_NoElements;			}
-	HOST_DEVICE float GetAspectRatio(void) const		{ return m_AspectRatio;			}
-
-private:
-	Vec2i	m_XY;					/*!< Resolution width and height */
-	Vec2f	m_InvXY;				/*!< Resolution width and height reciprocal */
-	int		m_NoElements;			/*!< No. elements */
-	float	m_AspectRatio;			/*!< Aspect ratio of image plane */
-	float	m_DiagonalLength;		/*!< Diagonal length */
 };
+
+typedef Resolution<int, 2>				Resolution2i;
+typedef Resolution<int, 3>				Resolution3i;
+typedef Resolution<float, 2>			Resolution2f;
+typedef Resolution<float, 3>			Resolution3f;
 
 inline float RandomFloat(void)
 {

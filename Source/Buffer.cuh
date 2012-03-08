@@ -22,7 +22,7 @@ class CCudaBuffer2D
 {
 public:
 	CCudaBuffer2D(void) :
-		m_Resolution(0, 0),
+		m_Resolution(),
 		m_pData(NULL),
 		m_Pitch(0)
 	{
@@ -33,7 +33,7 @@ public:
 		Free();
 	}
 
-	HOST void Resize(const CResolution2D& Resolution)
+	HOST void Resize(Resolution2i Resolution)
 	{
 		if (m_Resolution != Resolution)
 			Free();
@@ -68,7 +68,7 @@ public:
 		}
 		
 		m_Pitch	= 0;
-		m_Resolution.Set(Vec2i(0, 0));
+		m_Resolution = Resolution2i();
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
@@ -79,7 +79,7 @@ public:
 	HOST_DEVICE int GetSize(void) const
 	{
 		if (Pitched)
-			return m_Resolution.GetResY() * m_Pitch;
+			return m_Resolution[1] * m_Pitch;
 		else
 			return GetNoElements() * sizeof(T);
 	}
@@ -130,12 +130,12 @@ public:
 
 	HOST_DEVICE int GetWidth(void) const
 	{
-		return m_Resolution.GetResX();
+		return m_Resolution[0];
 	}
 
 	HOST_DEVICE int GetHeight(void) const
 	{
-		return m_Resolution.GetResY();
+		return m_Resolution[1];
 	}
 
 	HOST_DEVICE int GetPitch(void) const
@@ -147,9 +147,9 @@ public:
 	}
 
 protected:
-	CResolution2D	m_Resolution;
-	T*				m_pData;
-	size_t			m_Pitch;
+	Resolution2i		m_Resolution;
+	T*					m_pData;
+	size_t				m_Pitch;
 };
 
 template<class T>
@@ -157,7 +157,7 @@ class CHostBuffer2D
 {
 public:
 	CHostBuffer2D(void) :
-		m_Resolution(0, 0),
+		m_Resolution(),
 		m_pData(NULL)
 	{
 	}
@@ -167,7 +167,7 @@ public:
 		Free();
 	}
 
-	void Resize(const CResolution2D& Resolution)
+	void Resize(Resolution2i Resolution)
 	{
 		if (m_Resolution == Resolution)
 			return;
@@ -201,7 +201,7 @@ public:
 			m_pData = NULL;
 		}
 		
-		m_Resolution.Set(Vec2i(0, 0));
+		m_Resolution = Resolution2i();
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
@@ -248,23 +248,23 @@ public:
 
 	HOST_DEVICE int GetWidth(void) const
 	{
-		return m_Resolution.GetResX();
+		return m_Resolution[0];
 	}
 
 	HOST_DEVICE int GetHeight(void) const
 	{
-		return m_Resolution.GetResY();
+		return m_Resolution[1];
 	}
 
 protected:
-	CResolution2D	m_Resolution;
+	Resolution2i	m_Resolution;
 	T*				m_pData;
 };
 
 class CCudaRandomBuffer2D : public CCudaBuffer2D<unsigned int, false>
 {
 public:
-	void Resize(const CResolution2D& Resolution)
+	void Resize(const Resolution<int, 2>& Resolution)
 	{
 		CCudaBuffer2D::Resize(Resolution);
 

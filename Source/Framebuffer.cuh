@@ -17,12 +17,13 @@
 
 #include "Buffer.cuh"
 #include "Statistics.cuh"
+#include "Sample.cuh"
 
 class FrameBuffer
 {
 public:
 	FrameBuffer(void) :
-		Resolution(0, 0),
+		Resolution(),
 		CudaRunningEstimateXyza(),
 		CudaFrameEstimateXyza(),
 		CudaFrameBlurXyza(),
@@ -34,7 +35,9 @@ public:
 		HostFrameEstimate(),
 		HostDepthBuffer(),
 		BenchmarkEstimateRgbaLdr(),
-		RmsError()
+		RmsError(),
+		CudaMetroSamples(),
+		CudaNoIterations()
 	{
 	}
 
@@ -43,7 +46,7 @@ public:
 		Free();
 	}
 	
-	void Resize(const CResolution2D& Resolution)
+	void Resize(Resolution2i Resolution)
 	{
 		if (this->Resolution == Resolution)
 			return;
@@ -63,6 +66,11 @@ public:
 		this->CudaRunningStats.Resize(this->Resolution);
 		this->BenchmarkEstimateRgbaLdr.Resize(this->Resolution);
 		this->RmsError.Resize(this->Resolution);
+
+		int MetroSize[] = { 256, 256 };
+
+		this->CudaMetroSamples.Resize(Resolution2i(MetroSize));
+		this->CudaNoIterations.Resize(Resolution2i(MetroSize));
 	}
 
 	void Reset(void)
@@ -78,6 +86,8 @@ public:
 //		this->CudaRunningStats.Reset();
 //		this->BenchmarkEstimateRgbaLdr.Reset();
 //		this->RmsError.Reset();
+		this->CudaMetroSamples.Reset();
+		this->CudaNoIterations.Reset();
 	}
 
 	void Free(void)
@@ -95,21 +105,23 @@ public:
 		this->CudaRunningStats.Free();
 		this->BenchmarkEstimateRgbaLdr.Free();
 		this->RmsError.Free();
+		this->CudaMetroSamples.Free();
+		this->CudaNoIterations.Free();
 
-		this->Resolution.Set(Vec2i(0, 0));
+		this->Resolution = Resolution2i();
 	}
 
 	HOST_DEVICE int GetWidth(void) const
 	{
-		return this->Resolution.GetResX();
+		return this->Resolution[0];
 	}
 
 	HOST_DEVICE int GetHeight(void) const
 	{
-		return this->Resolution.GetResY();
+		return this->Resolution[1];
 	}
 
-	CResolution2D							Resolution;
+	Resolution2i							Resolution;
 	
 	// Running estimate
 	CCudaBuffer2D<ColorXYZAf, false>		CudaRunningEstimateXyza;
@@ -135,4 +147,7 @@ public:
 
 	CCudaBuffer2D<ColorRGBAuc, false>		BenchmarkEstimateRgbaLdr;
 	CCudaBuffer2D<float, false>				RmsError;
+
+	CCudaBuffer2D<MetroSample, false>		CudaMetroSamples;
+	CCudaBuffer2D<int, false>				CudaNoIterations;
 };
