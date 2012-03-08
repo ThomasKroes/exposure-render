@@ -75,19 +75,19 @@ public:
 	HOST_DEVICE Resolution()
 	{
 		for (int i = 0; i < NoDimensions; i++)
-			this->m_D[i] = T();
+			this->D[i] = T();
 	}
 
 	HOST_DEVICE Resolution(T Res)
 	{
 		for (int i = 0; i < NoDimensions; i++)
-			this->m_D[i] = Res;
+			this->D[i] = Res;
 	}
 
 	HOST_DEVICE Resolution(T Resolution[NoDimensions])
 	{
 		for (int i = 0; i < NoDimensions; i++)
-			this->m_D[i] = Resolution[i];
+			this->D[i] = Resolution[i];
 	}
 
 	HOST_DEVICE Vec<T, NoDimensions> Inv(void) const
@@ -97,10 +97,10 @@ public:
 
 	HOST_DEVICE int GetNoElements(void) const
 	{
-		T NoElements = this->m_D[0];
+		T NoElements = this->D[0];
 
 		for (int i = 1; i < NoDimensions; i++)
-			NoElements *= this->m_D[i];
+			NoElements *= this->D[i];
 
 		return NoElements;			
 	}
@@ -109,7 +109,7 @@ public:
 	{
 		for (int i = 0; i < NoDimensions; i++)
 		{
-			if (this->m_D[i] != R[i])
+			if (this->D[i] != R[i])
 				return false;
 		}
 
@@ -120,7 +120,7 @@ public:
 	{
 		for (int i = 0; i < NoDimensions; i++)
 		{
-			if (this->m_D[i] != R[i])
+			if (this->D[i] != R[i])
 				return true;
 		}
 

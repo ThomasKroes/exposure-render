@@ -29,19 +29,19 @@ public:
 	HOST_DEVICE Vec()
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] = T();
+			this->D[i] = T();
 	}
 
 	HOST_DEVICE Vec(T V)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] = V;
+			this->D[i] = V;
 	}
 
 	HOST_DEVICE Vec(const Vec<T, Size>& D)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] = D[i];
+			this->D[i] = D[i];
 	}
 
 	HOST_DEVICE Vec(const T& Other)
@@ -52,19 +52,19 @@ public:
 	HOST_DEVICE Vec<T, Size>& operator = (const Vec<T, Size>& Other)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] = Other[i];
+			this->D[i] = Other[i];
 
 		return *this;
 	}
 
 	HOST_DEVICE T operator[](const int& i) const
 	{
-		return this->m_D[i];
+		return this->D[i];
 	}
 
 	HOST_DEVICE T& operator[](const int& i)
 	{
-		return this->m_D[i];
+		return this->D[i];
 	}
 
 	HOST_DEVICE Vec<T, Size> operator + (Vec<T, Size> V) const
@@ -72,7 +72,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = this->m_D[i] + V[i];
+			Result[i] = this->D[i] + V[i];
 
 		return Result;
 	}
@@ -80,7 +80,7 @@ public:
 	HOST_DEVICE Vec<T, Size>& operator += (const Vec<T, Size>& V)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] += V[i];
+			this->D[i] += V[i];
 
 		return *this;
 	}
@@ -90,7 +90,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = this->m_D[i] - V[i];
+			Result[i] = this->D[i] - V[i];
 
 		return Result;
 	}
@@ -98,7 +98,7 @@ public:
 	HOST_DEVICE Vec<T, Size>& operator -= (const Vec<T, Size>& V)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] -= V[i];
+			this->D[i] -= V[i];
 
 		return *this;
 	}
@@ -108,7 +108,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = this->m_D[i] * f;
+			Result[i] = this->D[i] * f;
 
 		return Result;
 	}
@@ -116,7 +116,7 @@ public:
 	HOST_DEVICE Vec<T, Size>& operator *= (const float& f)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] *= f;
+			this->D[i] *= f;
 
 		return *this;
 	}
@@ -124,7 +124,7 @@ public:
 	HOST_DEVICE Vec<T, Size>& operator *= (const Vec<T, Size>& V)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] *= V[i];
+			this->D[i] *= V[i];
 
 		return *this;
 	}
@@ -136,7 +136,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = this->m_D[i] * Inv;
+			Result[i] = this->D[i] * Inv;
 
 		return Result;
 	}
@@ -146,7 +146,7 @@ public:
 		const float Inv = 1.0f / f;
 
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] *= Inv;
+			this->D[i] *= Inv;
 
 		return *this;
 	}
@@ -154,7 +154,7 @@ public:
 	HOST_DEVICE Vec<T, Size>& operator /= (Vec<T, Size> V)
 	{
 		for (int i = 0; i < Size; i++)
-			this->m_D[i] / V[i];
+			this->D[i] / V[i];
 
 		return *this;
 	}
@@ -163,7 +163,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (this->m_D[i] > V[i])
+			if (this->D[i] > V[i])
 				return false;
 		}
 
@@ -174,7 +174,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (this->m_D[i] > V[i])
+			if (this->D[i] > V[i])
 				return false;
 		}
 
@@ -185,7 +185,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (this->m_D[i] < V[i])
+			if (this->D[i] < V[i])
 				return false;
 		}
 
@@ -196,7 +196,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (this->m_D[i] < V[i])
+			if (this->D[i] < V[i])
 				return false;
 		}
 
@@ -207,7 +207,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (this->m_D[i] != V[i])
+			if (this->D[i] != V[i])
 				return false;
 		}
 
@@ -218,7 +218,7 @@ public:
 	{
 		for (int i = 0; i < Size; i++)
 		{
-			if (this->m_D[i] != V[i])
+			if (this->D[i] != V[i])
 				return true;
 		}
 
@@ -231,8 +231,8 @@ public:
 
 		for (int i = 1; i < Size; i++)
 		{
-			if (m_D[i] > this->m_D[i - 1])
-				Max = this->m_D[i];
+			if (D[i] > this->D[i - 1])
+				Max = this->D[i];
 		}
 
 		return Max;
@@ -244,8 +244,8 @@ public:
 
 		for (int i = 1; i < Size; i++)
 		{
-			if (this->m_D[i] < m_D[i - 1])
-				Min = this->m_D[i];
+			if (this->D[i] < D[i - 1])
+				Min = this->D[i];
 		}
 
 		return Min;
@@ -254,11 +254,11 @@ public:
 	HOST_DEVICE void Clamp(T Min, T Max)
 	{
 		for (int i = 0; i < Size; ++i)
-			this->m_D[i] = max(Min, min(this->m_D[i], Max));
+			this->D[i] = max(Min, min(this->D[i], Max));
 	}
 
 protected:
-	T	m_D[Size];
+	T	D[Size];
 };
 
 template <class T>
@@ -268,24 +268,24 @@ public:
 	HOST_DEVICE Vec2()
 	{
 		for (int i = 0; i < 2; i++)
-			this->m_D[i] = T();
+			this->D[i] = T();
 	}
 
 	HOST_DEVICE Vec2(T V)
 	{
 		for (int i = 0; i < 2; i++)
-			this->m_D[i] = V;
+			this->D[i] = V;
 	}
 
 	HOST_DEVICE Vec2(T V1, T V2)
 	{
-		this->m_D[0] = V1;
-		this->m_D[1] = V2;
+		this->D[0] = V1;
+		this->D[1] = V2;
 	}
 
 	HOST_DEVICE float LengthSquared(void) const
 	{
-		return this->m_D[0] * this->m_D[0] + this->m_D[1] * this->m_D[1];
+		return this->D[0] * this->D[0] + this->D[1] * this->D[1];
 	}
 
 	HOST_DEVICE float Length(void) const
@@ -296,8 +296,8 @@ public:
 	HOST_DEVICE void Normalize(void)
 	{
 		const float L = this->Length();
-		this->m_D[0] /= L;
-		this->m_D[1] /= L;
+		this->D[0] /= L;
+		this->D[1] /= L;
 	}
 };
 
@@ -308,25 +308,25 @@ public:
 	HOST_DEVICE Vec3()
 	{
 		for (int i = 0; i < 3; i++)
-			this->m_D[i] = T();
+			this->D[i] = T();
 	}
 
 	HOST_DEVICE Vec3(T V)
 	{
 		for (int i = 0; i < 3; i++)
-			this->m_D[i] = V;
+			this->D[i] = V;
 	}
 
 	HOST_DEVICE Vec3(T V1, T V2, T V3)
 	{
-		m_D[0] = V1;
-		m_D[1] = V2;
-		m_D[2] = V3;
+		D[0] = V1;
+		D[1] = V2;
+		D[2] = V3;
 	}
 
 	HOST_DEVICE float LengthSquared(void) const
 	{
-		return this->m_D[0] * this->m_D[0] + this->m_D[1] * this->m_D[1] + this->m_D[2] * this->m_D[2];
+		return this->D[0] * this->D[0] + this->D[1] * this->D[1] + this->D[2] * this->D[2];
 	}
 
 	HOST_DEVICE float Length(void) const
@@ -337,26 +337,26 @@ public:
 	HOST_DEVICE void Normalize(void)
 	{
 		const float L = this->Length();
-		this->m_D[0] /= L;
-		this->m_D[1] /= L;
-		this->m_D[2] /= L;
+		this->D[0] /= L;
+		this->D[1] /= L;
+		this->D[2] /= L;
 	}
 
 	HOST_DEVICE float Dot(Vec3 V) const
 	{
-		return (this->m_D[0] * V[0] + this->m_D[1] * V[1] + this->m_D[2] * V[2]);
+		return (this->D[0] * V[0] + this->D[1] * V[1] + this->D[2] * V[2]);
 	}
 
 	HOST_DEVICE Vec3 Cross(Vec3 V) const
 	{
-		return Vec3( (this->m_D[1] * V[2]) - (this->m_D[2] * V[1]), (this->m_D[2] * V[0]) - (this->m_D[0] * V[2]), (this->m_D[0] * V[1]) - (this->m_D[1] * V[0]) );
+		return Vec3( (this->D[1] * V[2]) - (this->D[2] * V[1]), (this->D[2] * V[0]) - (this->D[0] * V[2]), (this->D[0] * V[1]) - (this->D[1] * V[0]) );
 	}
 
 	HOST_DEVICE void ScaleBy(float F)
 	{
-		this->m_D[0] *= F;
-		this->m_D[1] *= F;
-		this->m_D[2] *= F;
+		this->D[0] *= F;
+		this->D[1] *= F;
+		this->D[2] *= F;
 	}
 
 	HOST_DEVICE Vec3 operator-() const
@@ -364,7 +364,7 @@ public:
 		Vec3 Result;
 
 		for (int i = 0; i < 3; i++)
-			Result[i] = -(this->m_D[i]);
+			Result[i] = -(this->D[i]);
 
 		return Result;
 	}
@@ -377,21 +377,21 @@ public:
 	HOST_DEVICE Vec4()
 	{
 		for (int i = 0; i < 4; i++)
-			this->m_D[i] = T();
+			this->D[i] = T();
 	}
 
 	HOST_DEVICE Vec4(T V)
 	{
 		for (int i = 0; i < 4; i++)
-			this->m_D[i] = V;
+			this->D[i] = V;
 	}
 
 	HOST_DEVICE Vec4(T V1, T V2, T V3, T V4)
 	{
-		m_D[0] = V1;
-		m_D[1] = V2;
-		m_D[2] = V3;
-		m_D[3] = V4;
+		D[0] = V1;
+		D[1] = V2;
+		D[2] = V3;
+		D[3] = V4;
 	}
 };
 

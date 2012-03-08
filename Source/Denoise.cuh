@@ -45,20 +45,20 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 
 	const float4 clr00 = tex2D(gTexRunningEstimateRgba, x, y);
 	
-	if (gRenderInfo.m_Denoise.m_Enabled && gRenderInfo.m_Denoise.m_LerpC > 0.0f && gRenderInfo.m_Denoise.m_LerpC < 1.0f)
+	if (gRenderInfo.Denoise.m_Enabled && gRenderInfo.Denoise.m_LerpC > 0.0f && gRenderInfo.Denoise.m_LerpC < 1.0f)
 	{
         float			fCount		= 0;
         float			SumWeights	= 0;
         float3			clr			= { 0, 0, 0 };
         		
-        for (float i = -gRenderInfo.m_Denoise.m_WindowRadius; i <= gRenderInfo.m_Denoise.m_WindowRadius; i++)
+        for (float i = -gRenderInfo.Denoise.m_WindowRadius; i <= gRenderInfo.Denoise.m_WindowRadius; i++)
 		{
-            for (float j = -gRenderInfo.m_Denoise.m_WindowRadius; j <= gRenderInfo.m_Denoise.m_WindowRadius; j++)
+            for (float j = -gRenderInfo.Denoise.m_WindowRadius; j <= gRenderInfo.Denoise.m_WindowRadius; j++)
             {
                 const float4 clrIJ = tex2D(gTexRunningEstimateRgba, x + j, y + i);
                 const float distanceIJ = vecLen(clr00, clrIJ);
 
-                const float weightIJ = __expf(-(distanceIJ * gRenderInfo.m_Denoise.m_Noise + (i * i + j * j) * gRenderInfo.m_Denoise.m_InvWindowArea));
+                const float weightIJ = __expf(-(distanceIJ * gRenderInfo.Denoise.m_Noise + (i * i + j * j) * gRenderInfo.Denoise.m_InvWindowArea));
 
                 clr.x += clrIJ.x * weightIJ;
                 clr.y += clrIJ.y * weightIJ;
@@ -66,7 +66,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 
                 SumWeights += weightIJ;
 
-                fCount += (weightIJ > gRenderInfo.m_Denoise.m_WeightThreshold) ? gRenderInfo.m_Denoise.m_InvWindowArea : 0;
+                fCount += (weightIJ > gRenderInfo.Denoise.m_WeightThreshold) ? gRenderInfo.Denoise.m_InvWindowArea : 0;
             }
 		}
 		
@@ -76,7 +76,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 		clr.y *= SumWeights;
 		clr.z *= SumWeights;
 
-		const float LerpQ = (fCount > gRenderInfo.m_Denoise.m_LerpThreshold) ? gRenderInfo.m_Denoise.m_LerpC : 1.0f - gRenderInfo.m_Denoise.m_LerpC;
+		const float LerpQ = (fCount > gRenderInfo.Denoise.m_LerpThreshold) ? gRenderInfo.Denoise.m_LerpC : 1.0f - gRenderInfo.Denoise.m_LerpC;
 
 		clr.x = lerpf(clr.x, clr00.x, LerpQ);
 		clr.y = lerpf(clr.y, clr00.y, LerpQ);

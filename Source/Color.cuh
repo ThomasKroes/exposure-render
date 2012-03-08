@@ -63,32 +63,32 @@ public:
 
 	HOST_DEVICE T GetR(void) const
 	{
-		return this->m_D[0];
+		return this->D[0];
 	}
 
 	HOST_DEVICE void SetR(const T& R)
 	{
-		this->m_D[0] = R;
+		this->D[0] = R;
 	}
 
 	HOST_DEVICE T GetG(void) const
 	{
-		return this->m_D[1];
+		return this->D[1];
 	}
 
 	HOST_DEVICE void SetG(const T& G)
 	{
-		this->m_D[1] = G;
+		this->D[1] = G;
 	}
 
 	HOST_DEVICE T GetB(void) const
 	{
-		return this->m_D[2];
+		return this->D[2];
 	}
 
 	HOST_DEVICE void SetB(const T& B)
 	{
-		this->m_D[2] = B;
+		this->D[2] = B;
 	}
 
 	HOST_DEVICE void SetBlack(void)
@@ -121,12 +121,12 @@ public:
 
 	HOST_DEVICE T GetA(void) const
 	{
-		return this->m_D[3];
+		return this->D[3];
 	}
 
 	HOST_DEVICE void SetA(const T& A)
 	{
-		this->m_D[3] = A;
+		this->D[3] = A;
 	}
 };
 
@@ -269,32 +269,32 @@ public:
 
 	HOST_DEVICE float GetX(void) const
 	{
-		return this->m_D[0];
+		return this->D[0];
 	}
 
 	HOST_DEVICE void SetX(float X)
 	{
-		this->m_D[0] = X;
+		this->D[0] = X;
 	}
 
 	HOST_DEVICE float GetY(void) const
 	{
-		return this->m_D[1];
+		return this->D[1];
 	}
 
 	HOST_DEVICE void SetY(float Y)
 	{
-		this->m_D[1] = Y;
+		this->D[1] = Y;
 	}
 
 	HOST_DEVICE float GetZ(void) const
 	{
-		return this->m_D[2];
+		return this->D[2];
 	}
 
 	HOST_DEVICE void SetZ(float Z)
 	{
-		this->m_D[2] = Z;
+		this->D[2] = Z;
 	}
 
 	HOST_DEVICE ColorXYZf operator + (const ColorXYZf& XYZ) const
@@ -302,7 +302,7 @@ public:
 		ColorXYZf Result = *this;
 
 		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] += XYZ[i];
+			Result.D[i] += XYZ[i];
 
 		return Result;
 	}
@@ -312,7 +312,7 @@ public:
 		ColorXYZf Result = *this;
 
 		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] -= XYZ[i];
+			Result.D[i] -= XYZ[i];
 
 		return Result;
 	}
@@ -322,7 +322,7 @@ public:
 		ColorXYZf Result = *this;
 
 		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] /= XYZ[i];
+			Result.D[i] /= XYZ[i];
 
 		return Result;
 	}
@@ -332,7 +332,7 @@ public:
 		ColorXYZf Result = *this;
 
 		for (int i = 0; i < 3; i++)
-			Result.m_D[i] *= XYZ[i];
+			Result.D[i] *= XYZ[i];
 
 		return Result;
 	}
@@ -340,7 +340,7 @@ public:
 	HOST_DEVICE ColorXYZf& operator *= (const ColorXYZf& XYZ)
 	{
 		for (int i = 0; i < 3; i++)
-			this->m_D[i] *= XYZ[i];
+			this->D[i] *= XYZ[i];
 
 		return *this;
 	}
@@ -350,7 +350,7 @@ public:
 		ColorXYZf Result = *this;
 
 		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] *= F;
+			Result.D[i] *= F;
 
 		return Result;
 	}
@@ -358,7 +358,7 @@ public:
 	HOST_DEVICE ColorXYZf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; ++i)
-			this->m_D[i] *= F;
+			this->D[i] *= F;
 
 		return *this;
 	}
@@ -368,7 +368,7 @@ public:
 		ColorXYZf Result = *this;
 
 		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] /= F;
+			Result.D[i] /= F;
 
 		return Result;
 	}
@@ -376,7 +376,7 @@ public:
 	HOST_DEVICE ColorXYZf& operator /= (float a)
 	{
 		for (int i = 0; i < 3; ++i)
-			this->m_D[i] /= a;
+			this->D[i] /= a;
 
 		return *this;
 	}
@@ -384,7 +384,7 @@ public:
 	HOST_DEVICE ColorXYZf& ColorXYZf::operator = (const ColorXYZf& Other)
 	{
 		for (int i = 0; i < 3; ++i)
-			m_D[i] = Other[i];
+			D[i] = Other[i];
 
 		return *this;
 	}
@@ -392,7 +392,7 @@ public:
 	HOST_DEVICE bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)
-			if (m_D[i] != 0.0f)
+			if (D[i] != 0.0f)
 				return false;
 
 		return true;
@@ -403,7 +403,7 @@ public:
 		float v = 0.0f;
 
 		for (int i = 0; i < 3; i++)
-			v += YWeight[i] * m_D[i];
+			v += YWeight[i] * D[i];
 
 		return v;
 	}
@@ -414,9 +414,9 @@ public:
 		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
 		const float CoeffZ[3] = { 0.0193f, 0.1192f, 0.9505f };
 
-		m_D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
-		m_D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
-		m_D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
+		D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
+		D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
+		D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
 	}
 };
 
@@ -471,48 +471,48 @@ public:
 
 	HOST_DEVICE float GetX(void) const
 	{
-		return m_D[0];
+		return D[0];
 	}
 
 	HOST_DEVICE void SetX(float X)
 	{
-		m_D[0] = X;
+		D[0] = X;
 	}
 
 	HOST_DEVICE float GetY(void) const
 	{
-		return m_D[1];
+		return D[1];
 	}
 
 	HOST_DEVICE void SetY(float Y)
 	{
-		m_D[1] = Y;
+		D[1] = Y;
 	}
 
 	HOST_DEVICE float GetZ(void) const
 	{
-		return m_D[2];
+		return D[2];
 	}
 
 	HOST_DEVICE void SetZ(float Z)
 	{
-		m_D[2] = Z;
+		D[2] = Z;
 	}
 
 	HOST_DEVICE float GetA(void) const
 	{
-		return m_D[3];
+		return D[3];
 	}
 
 	HOST_DEVICE void SetA(float A)
 	{
-		m_D[3] = A;
+		D[3] = A;
 	}
 
 	HOST_DEVICE ColorXYZAf& operator += (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 4; ++i)
-			m_D[i] += XYZ[i];
+			D[i] += XYZ[i];
 
 		return *this;
 	}
@@ -522,7 +522,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.m_D[i] += XYZ[i];
+			Result.D[i] += XYZ[i];
 
 		return Result;
 	}
@@ -532,7 +532,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.m_D[i] -= XYZ[i];
+			Result.D[i] -= XYZ[i];
 
 		return Result;
 	}
@@ -543,7 +543,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.m_D[i] /= XYZA[i];
+			Result.D[i] /= XYZA[i];
 
 		return Result;
 	}
@@ -554,7 +554,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.m_D[i] *= XYZA[i];
+			Result.D[i] *= XYZA[i];
 
 		return Result;
 	}
@@ -562,7 +562,7 @@ public:
 	HOST_DEVICE ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 3; ++i)
-			m_D[i] *= XYZ[i];
+			D[i] *= XYZ[i];
 
 		return *this;
 	}
@@ -572,7 +572,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] *= F;
+			Result.D[i] *= F;
 
 		return Result;
 	}
@@ -580,7 +580,7 @@ public:
 	HOST_DEVICE ColorXYZAf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; ++i)
-			m_D[i] *= F;
+			D[i] *= F;
 
 		return *this;
 	}
@@ -590,7 +590,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 3; ++i)
-			Result.m_D[i] /= F;
+			Result.D[i] /= F;
 
 		return Result;
 	}
@@ -599,7 +599,7 @@ public:
 	HOST_DEVICE ColorXYZAf& operator /= (float a)
 	{
 		for (int i = 0; i < 3; ++i)
-			m_D[i] /= a;
+			D[i] /= a;
 
 		return *this;
 	}
@@ -608,7 +608,7 @@ public:
 	HOST_DEVICE ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
 	{
 		for (int i = 0; i < 4; ++i)
-			m_D[i] = Other[i];
+			D[i] = Other[i];
 
 		return *this;
 	}
@@ -616,7 +616,7 @@ public:
 	HOST_DEVICE bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)
-			if (m_D[i] != 0.0f)
+			if (D[i] != 0.0f)
 				return false;
 
 		return true;
@@ -627,7 +627,7 @@ public:
 		float v = 0.0f;
 
 		for (int i = 0; i < 3; i++)
-			v += YWeight[i] * m_D[i];
+			v += YWeight[i] * D[i];
 
 		return v;
 	}
@@ -638,9 +638,9 @@ public:
 		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
 		const float CoeffZ[3] = { 0.0193f, 0.1192f, 0.9505f };
 
-		m_D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
-		m_D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
-		m_D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
+		D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
+		D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
+		D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
 	}
 };
 
@@ -681,32 +681,32 @@ public:
 
 	HOST_DEVICE float GetR(void) const
 	{
-		return m_D[0];
+		return D[0];
 	}
 
 	HOST_DEVICE void SetR(const float& R)
 	{
-		m_D[0] = R;
+		D[0] = R;
 	}
 
 	HOST_DEVICE float GetG(void) const
 	{
-		return m_D[1];
+		return D[1];
 	}
 
 	HOST_DEVICE void SetG(const float& G)
 	{
-		m_D[1] = G;
+		D[1] = G;
 	}
 
 	HOST_DEVICE float GetB(void) const
 	{
-		return m_D[2];
+		return D[2];
 	}
 
 	HOST_DEVICE void SetB(const float& B)
 	{
-		m_D[2] = B;
+		D[2] = B;
 	}
 
 	HOST_DEVICE void SetBlack(void)
@@ -722,7 +722,7 @@ public:
 	HOST_DEVICE ColorRGBf& operator = (const ColorRGBf& Other)			
 	{
 		for (int i = 0; i < 3; i++)
-			m_D[i] = Other[i];
+			D[i] = Other[i];
 
 		return *this;
 	}
@@ -730,20 +730,20 @@ public:
 	HOST_DEVICE ColorRGBf& operator += (ColorRGBf& Other)		
 	{
 		for (int i = 0; i < 3; i++)
-			m_D[i] += Other[i];
+			D[i] += Other[i];
 
 		return *this;
 	}
 
 	HOST_DEVICE ColorRGBf operator * (const float& F) const
 	{
-		return ColorRGBf(m_D[0] * F, m_D[1] * F, m_D[2] * F);
+		return ColorRGBf(D[0] * F, D[1] * F, D[2] * F);
 	}
 
 	HOST_DEVICE ColorRGBf& operator *= (const float& F)
 	{
 		for (int i = 0; i < 3; i++)
-			m_D[i] *= F;
+			D[i] *= F;
 
 		return *this;
 	}
@@ -751,7 +751,7 @@ public:
 	HOST_DEVICE ColorRGBf operator / (const float& F) const
 	{
 		const float Inv = 1.0f / F;
-		return ColorRGBf(m_D[0] * Inv, m_D[1] * Inv, m_D[2] * Inv);
+		return ColorRGBf(D[0] * Inv, D[1] * Inv, D[2] * Inv);
 	}
 
 	HOST_DEVICE ColorRGBf& operator /= (const float& F)
@@ -759,25 +759,25 @@ public:
 		const float Inv = 1.0f / F;
 		
 		for (int i = 0; i < 3; i++)
-			m_D[i] *= Inv;
+			D[i] *= Inv;
 
 		return *this;
 	}
 
 	HOST_DEVICE float operator[](int i) const
 	{
-		return m_D[i];
+		return D[i];
 	}
 
 	HOST_DEVICE float operator[](int i)
 	{
-		return m_D[i];
+		return D[i];
 	}
 
 	HOST_DEVICE bool Black(void)
 	{
 		for (int i = 0; i < 3; i++)
-			if (m_D[i] != 0.0f)
+			if (D[i] != 0.0f)
 				return false;
 
 		return true;
@@ -785,7 +785,7 @@ public:
 
 	HOST_DEVICE ColorRGBf Pow(const float& E)
 	{
-		return ColorRGBf(powf(m_D[0], E), powf(m_D[1], E), powf(m_D[2], E));
+		return ColorRGBf(powf(D[0], E), powf(D[1], E), powf(D[2], E));
 	}
 
 	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
@@ -799,9 +799,9 @@ public:
 
 	HOST_DEVICE void ToneMap(float InvExposure)
 	{
-		this->m_D[0] = 1.0f - expf(-(this->m_D[0] * InvExposure));
-		this->m_D[1] = 1.0f - expf(-(this->m_D[1] * InvExposure));
-		this->m_D[2] = 1.0f - expf(-(this->m_D[2] * InvExposure));
+		this->D[0] = 1.0f - expf(-(this->D[0] * InvExposure));
+		this->D[1] = 1.0f - expf(-(this->D[1] * InvExposure));
+		this->D[2] = 1.0f - expf(-(this->D[2] * InvExposure));
 
 		this->Clamp(0.0f, 1.0f);
 	}

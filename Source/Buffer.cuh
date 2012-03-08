@@ -22,134 +22,134 @@ class CCudaBuffer2D
 {
 public:
 	CCudaBuffer2D(void) :
-		m_Resolution(),
-		m_pData(NULL),
-		m_Pitch(0)
+		Resolution(),
+		pData(NULL),
+		Pitch(0)
 	{
 	}
 
 	~CCudaBuffer2D(void)
 	{
-		Free();
+		this->Free();
 	}
 
 	HOST void Resize(Resolution2i Resolution)
 	{
-		if (m_Resolution != Resolution)
-			Free();
+		if (this->Resolution != Resolution)
+			this->Free();
 
-		m_Resolution = Resolution;
+		this->Resolution = Resolution;
 
-		if (GetNoElements() <= 0)
+		if (this->GetNoElements() <= 0)
 			return;
 
 		if (Pitched)
-			cudaMallocPitch((void**)&m_pData, &m_Pitch, GetWidth() * sizeof(T), GetHeight());
+			cudaMallocPitch((void**)&this->pData, &this->Pitch, this->GetWidth() * sizeof(T), this->GetHeight());
 		else
-			cudaMalloc((void**)&m_pData, GetSize());
+			cudaMalloc((void**)&this->pData, this->GetSize());
 
-		Reset();
+		this->Reset();
 	}
 
 	HOST void Reset(void)
 	{
-		if (GetSize() <= 0)
+		if (this->GetSize() <= 0)
 			return;
 
-		cudaMemset(m_pData, 0, GetSize());
+		cudaMemset(this->pData, 0, this->GetSize());
 	}
 
 	HOST void Free(void)
 	{
-		if (m_pData)
+		if (this->pData)
 		{
-			cudaFree(m_pData);
-			m_pData = NULL;
+			cudaFree(this->pData);
+			this->pData = NULL;
 		}
 		
-		m_Pitch	= 0;
-		m_Resolution = Resolution2i();
+		this->Pitch			= 0;
+		this->Resolution	= Resolution2i();
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
 	{
-		return m_Resolution.GetNoElements();
+		return this->Resolution.GetNoElements();
 	}
 
 	HOST_DEVICE int GetSize(void) const
 	{
 		if (Pitched)
-			return m_Resolution[1] * m_Pitch;
+			return this->Resolution[1] * this->Pitch;
 		else
-			return GetNoElements() * sizeof(T);
+			return this->GetNoElements() * sizeof(T);
 	}
 
 	HOST_DEVICE T Get(const int& X = 0, const int& Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return T();
 
 		if (Pitched)
-			return m_pData[Y * (GetPitch() / sizeof(T)) + X];
+			return this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
 		else
-			return m_pData[Y * GetWidth() + X];
+			return this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE T& GetRef(const int& X = 0, const int& Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return T();
 
 		if (Pitched)
-			return m_pData[Y * (GetPitch() / sizeof(T)) + X];
+			return this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
 		else
-			return m_pData[Y * GetWidth() + X];
+			return this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE T* GetPtr(const int& X = 0, const int& Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return NULL;
 
 		if (Pitched)
-			return &m_pData[Y * (GetPitch() / sizeof(T)) + X];
+			return &this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
 		else
-			return &m_pData[Y * GetWidth() + X];
+			return &this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE void Set(T Value, int X = 0, int Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return;
 
 		if (Pitched)
-			m_pData[Y * (GetPitch() / sizeof(T)) + X] = Value;
+			this->pData[Y * (this->GetPitch() / sizeof(T)) + X] = Value;
 		else
-			m_pData[Y * GetWidth() + X] = Value;
+			this->pData[Y * this->GetWidth() + X] = Value;
 	}
 
 	HOST_DEVICE int GetWidth(void) const
 	{
-		return m_Resolution[0];
+		return this->Resolution[0];
 	}
 
 	HOST_DEVICE int GetHeight(void) const
 	{
-		return m_Resolution[1];
+		return this->Resolution[1];
 	}
 
 	HOST_DEVICE int GetPitch(void) const
 	{
 		if (Pitched)
-			return m_Pitch;
+			return this->Pitch;
 		else
-			return GetWidth() * sizeof(T);
+			return this->GetWidth() * sizeof(T);
 	}
 
 protected:
-	Resolution2i		m_Resolution;
-	T*					m_pData;
-	size_t				m_Pitch;
+	Resolution2i		Resolution;
+	T*					pData;
+	size_t				Pitch;
 };
 
 template<class T>
@@ -157,125 +157,125 @@ class CHostBuffer2D
 {
 public:
 	CHostBuffer2D(void) :
-		m_Resolution(),
-		m_pData(NULL)
+		Resolution(),
+		pData(NULL)
 	{
 	}
 
 	virtual ~CHostBuffer2D(void)
 	{
-		Free();
+		this->Free();
 	}
 
 	void Resize(Resolution2i Resolution)
 	{
-		if (m_Resolution == Resolution)
+		if (this->Resolution == Resolution)
 			return;
 
-		if (m_Resolution != Resolution)
-			Free();
+		if (this->Resolution != Resolution)
+			this->Free();
 
-		m_Resolution = Resolution;
+		this->Resolution = Resolution;
 
-		if (GetNoElements() <= 0)
+		if (this->GetNoElements() <= 0)
 			return;
 
-		m_pData = (T*)malloc(GetSize());
+		this->pData = (T*)malloc(this->GetSize());
 
-		Reset();
+		this->Reset();
 	}
 
 	void Reset(void)
 	{
-		if (GetSize() <= 0)
+		if (this->GetSize() <= 0)
 			return;
 
-		memset(m_pData, 0, GetSize());
+		memset(this->pData, 0, this->GetSize());
 	}
 
 	void Free(void)
 	{
-		if (m_pData)
+		if (this->pData)
 		{
-			free(m_pData);
-			m_pData = NULL;
+			free(this->pData);
+			this->pData = NULL;
 		}
 		
-		m_Resolution = Resolution2i();
+		this->Resolution = Resolution2i();
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
 	{
-		return m_Resolution.GetNoElements();
+		return this->Resolution.GetNoElements();
 	}
 
 	HOST_DEVICE int GetSize(void) const
 	{
-		return GetNoElements() * sizeof(T);
+		return this->GetNoElements() * sizeof(T);
 	}
 
 	HOST_DEVICE T Get(const int& X = 0, const int& Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return T();
 
-		return m_pData[Y * GetWidth() + X];
+		return this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE T& GetRef(const int& X = 0, const int& Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return T();
 
-		return m_pData[Y * GetWidth() + X];
+		return this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE T* GetPtr(const int& X = 0, const int& Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return NULL;
 
-		return &m_pData[Y * GetWidth() + X];
+		return &this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE void Set(T& Value, const int& X = 0, const int& Y = 0)
 	{
-		if (X > GetWidth() || Y > GetHeight())
+		if (X > this->GetWidth() || Y > this->GetHeight())
 			return;
 
-		m_pData[Y * GetWidth() + X] = Value;
+		this->pData[Y * this->GetWidth() + X] = Value;
 	}
 
 	HOST_DEVICE int GetWidth(void) const
 	{
-		return m_Resolution[0];
+		return this->Resolution[0];
 	}
 
 	HOST_DEVICE int GetHeight(void) const
 	{
-		return m_Resolution[1];
+		return this->Resolution[1];
 	}
 
 protected:
-	Resolution2i	m_Resolution;
-	T*				m_pData;
+	Resolution2i	Resolution;
+	T*				pData;
 };
 
 class CCudaRandomBuffer2D : public CCudaBuffer2D<unsigned int, false>
 {
 public:
-	void Resize(const Resolution<int, 2>& Resolution)
+	void Resize(Resolution2i Resolution)
 	{
 		CCudaBuffer2D::Resize(Resolution);
 
-		unsigned int* pSeeds = (unsigned int*)malloc(GetSize());
+		unsigned int* pSeeds = (unsigned int*)malloc(this->GetSize());
 
-		memset(pSeeds, 0, GetSize());
+		memset(pSeeds, 0, this->GetSize());
 
-		for (int i = 0; i < GetNoElements(); i++)
+		for (int i = 0; i < this->GetNoElements(); i++)
 			pSeeds[i] = rand();
 
-		cudaMemcpy(m_pData, pSeeds, GetSize(), cudaMemcpyHostToDevice);
+		cudaMemcpy(this->pData, pSeeds, this->GetSize(), cudaMemcpyHostToDevice);
 
 		free(pSeeds);
 	}

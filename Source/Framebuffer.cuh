@@ -43,7 +43,7 @@ public:
 
 	~FrameBuffer(void)
 	{
-		Free();
+		this->Free();
 	}
 	
 	void Resize(Resolution2i Resolution)
