@@ -71,6 +71,14 @@ public:
 		this->Resolution	= Resolution2i();
 	}
 
+	HOST_DEVICE T& operator()(const int X, const int Y)
+	{
+		if (Pitched)
+			return this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
+		else
+			return this->pData[Y * this->GetWidth() + X];
+	}
+
 	HOST_DEVICE int GetNoElements(void) const
 	{
 		return this->Resolution.GetNoElements();

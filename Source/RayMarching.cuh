@@ -21,14 +21,16 @@
 #define KRNL_SINGLE_SCATTERING_BLOCK_H		8
 #define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
 
-DEVICE void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& RS)
+DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& RS)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
 	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
+	
+	Intersection Int;
 
-	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB));
+	IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB), Int);
 
 	if (!Int.Valid)
 		return;
@@ -61,7 +63,7 @@ DEVICE void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& RS)
 }
 
 // Determines if there is a scatter event along the ray
-DEVICE bool ScatterEventInVolume(Ray R, CRNG& RNG)
+DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 {
 	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
 
@@ -69,7 +71,9 @@ DEVICE bool ScatterEventInVolume(Ray R, CRNG& RNG)
 	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 	__shared__ Vec3f Ps[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
 
-	const Intersection Int = IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB));
+	Intersection Int;
+		
+	IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB), Int);
 	
 	if (!Int.Valid)
 		return false;

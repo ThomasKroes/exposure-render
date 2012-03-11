@@ -20,16 +20,16 @@ class CRNG
 public:
 	DEVICE CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
 	{
-		this->m_pSeed0 = pSeed0;
-		this->m_pSeed1 = pSeed1;
+		this->pSeed0 = pSeed0;
+		this->pSeed1 = pSeed1;
 	}
 
 	DEVICE float Get1(void)
 	{
-		*this->m_pSeed0 = 36969 * ((*m_pSeed0) & 65535) + ((*m_pSeed0) >> 16);
-		*this->m_pSeed1 = 18000 * ((*m_pSeed1) & 65535) + ((*m_pSeed1) >> 16);
+		*this->pSeed0 = 36969 * ((*pSeed0) & 65535) + ((*pSeed0) >> 16);
+		*this->pSeed1 = 18000 * ((*pSeed1) & 65535) + ((*pSeed1) >> 16);
 
-		unsigned int ires = ((*m_pSeed0) << 16) + (*m_pSeed1);
+		unsigned int ires = ((*pSeed0) << 16) + (*pSeed1);
 
 		union
 		{
@@ -53,6 +53,6 @@ public:
 	}
 
 private:
-	unsigned int*	m_pSeed0;
-	unsigned int*	m_pSeed1;
+	unsigned int*	pSeed0;
+	unsigned int*	pSeed1;
 };

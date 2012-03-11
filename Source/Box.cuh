@@ -17,10 +17,8 @@
 
 #include "Geometry.cuh"
 
-DEVICE Intersection IntersectUnitBox(Ray R)
+DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)
 {
-	Intersection Int;
-
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.O);
 	const Vec3f TopT		= InvR * (Vec3f(0.5f) - R.O);
@@ -30,26 +28,22 @@ DEVICE Intersection IntersectUnitBox(Ray R)
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 
 	if (LargestMaxT < LargestMinT)
-		return Int;
+		return;
 
 	Int.NearT	= LargestMinT > 0.0f ? LargestMinT : 0.0f;
 	Int.FarT	= LargestMaxT;
 
 	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
-		return Int;
+		return;
 
 	Int.Valid	= true;
 	Int.P		= R(Int.NearT);
 	Int.N		= Vec3f(0.0f, 0.0f, 1.0f);
 	Int.UV		= Vec2f(0.0f, 0.0f);
-
-	return Int;
 }
 
-DEVICE Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
+DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& Min, const Vec3f& Max, Intersection& Int)
 {
-	Intersection Int;
-
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Min - R.O);
 	const Vec3f TopT		= InvR * (Max - R.O);
@@ -59,13 +53,13 @@ DEVICE Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 
 	if (LargestMaxT < LargestMinT)
-		return Int;
+		return;
 
 	Int.NearT	= LargestMinT > 0.0f ? LargestMinT : 0.0f;
 	Int.FarT	= LargestMaxT;
 
 	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
-		return Int;
+		return;
 
 	Int.Valid	= true;
 	Int.P		= R(Int.NearT);
@@ -80,16 +74,14 @@ DEVICE Intersection IntersectBox(Ray R, Vec3f Min, Vec3f Max)
 		if (Int.P[i] >= Max[i] - 0.0001f)
 			Int.N[i] == 1.0f;
 	}
-
-	return Int;
 }
 
-DEVICE Intersection IntersectBox(Ray R, Vec3f Size)
+DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& Size, Intersection& Int)
 {
-	return IntersectBox(R, -0.5f * Size, 0.5f * Size);
+	IntersectBox(R, -0.5f * Size, 0.5f * Size, Int);
 }
 
-DEVICE bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
+DEVICE_NI bool IntersectBoxP(const Ray& R, const Vec3f& Min, const Vec3f& Max)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Min - R.O);
@@ -110,18 +102,18 @@ DEVICE bool IntersectBoxP(Ray R, Vec3f Min, Vec3f Max)
 	return true;
 }
 
-DEVICE bool IntersectBoxP(Ray R, Vec3f Size)
+DEVICE_NI bool IntersectBoxP(Ray R, Vec3f Size)
 {
 	return IntersectBoxP(R, -0.5f * Size, 0.5f * Size);
 }
 
-DEVICE bool InsideBox(Vec3f P, Vec3f Size)
+DEVICE_NI bool InsideBox(Vec3f P, Vec3f Size)
 {
 	const float HalfSize[3] = { 0.5f * Size[0], 0.5f * Size[1], 0.5f * Size[2] };
 	return P[0] > -HalfSize[0] && P[0] < HalfSize[0] && P[1] > -HalfSize[1] && P[1] < HalfSize[1] && P[2] > -HalfSize[2] && P[2] < HalfSize[2];
 }
 
-DEVICE bool InsideAABB(Vec3f P)
+DEVICE_NI bool InsideAABB(Vec3f P)
 {
 	if (P[0] < gVolume.MinAABB[0] || P[0] > gVolume.MaxAABB[0])
 		return false;
@@ -135,7 +127,7 @@ DEVICE bool InsideAABB(Vec3f P)
 	return true;
 }
 
-DEVICE void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
+DEVICE_NI void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 {
 	int Side = floorf(UVW[0] * 6.0f);
 
@@ -199,7 +191,7 @@ DEVICE void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 	SS.UV = Vec2f(UVW[1], UVW[2]);
 }
 
-DEVICE void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
+DEVICE_NI void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
 {
 	SampleUnitBox(SS, UVW);
 

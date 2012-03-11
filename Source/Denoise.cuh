@@ -30,14 +30,14 @@ HOST_DEVICE float vecLen(float4 a, float4 b)
 KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 {
 
-//	const ColorRGBuc RGBA = pFrameBuffer->m_EstimateRgbLdr.Get(X, Y);
+//	const ColorRGBuc RGBA = pFrameBuffer->EstimateRgbLdr.Get(X, Y);
 //	pFrameBuffer->CudaDisplayEstimateRgbLdr.Set(ColorRGBuc(RGBA.GetR(), RGBA.GetG(), RGBA.GetB()), X, Y);
 
 	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gRenderInfo.m_FilmWidth || Y >= gRenderInfo.m_FilmHeight)
+	if (X >= gRenderInfo.FilmWidth || Y >= gRenderInfo.FilmHeight)
 		return;
 
     const float x = (float)X + 0.5f;
@@ -45,7 +45,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 
 	const float4 clr00 = tex2D(gTexRunningEstimateRgba, x, y);
 	
-	if (gRenderInfo.Denoise.m_Enabled && gRenderInfo.Denoise.m_LerpC > 0.0f && gRenderInfo.Denoise.m_LerpC < 1.0f)
+	if (gRenderInfo.Denoise.Enabled && gRenderInfo.Denoise.LerpC > 0.0f && gRenderInfo.Denoise.m_LerpC < 1.0f)
 	{
         float			fCount		= 0;
         float			SumWeights	= 0;
@@ -58,7 +58,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
                 const float4 clrIJ = tex2D(gTexRunningEstimateRgba, x + j, y + i);
                 const float distanceIJ = vecLen(clr00, clrIJ);
 
-                const float weightIJ = __expf(-(distanceIJ * gRenderInfo.Denoise.m_Noise + (i * i + j * j) * gRenderInfo.Denoise.m_InvWindowArea));
+                const float weightIJ = __expf(-(distanceIJ * gRenderInfo.Denoise.m_Noise + (i * i + j * j) * gRenderInfo.Denoise.DInvWindowArea));
 
                 clr.x += clrIJ.x * weightIJ;
                 clr.y += clrIJ.y * weightIJ;
@@ -66,7 +66,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 
                 SumWeights += weightIJ;
 
-                fCount += (weightIJ > gRenderInfo.Denoise.m_WeightThreshold) ? gRenderInfo.Denoise.m_InvWindowArea : 0;
+                fCount += (weightIJ > gRenderInfo.Denoise.DWeightThreshold) ? gRenderInfo.Denoise.m_InvWindowArea : 0;
             }
 		}
 		
@@ -76,7 +76,7 @@ KERNEL void KrnlDenoise(FrameBuffer* pFrameBuffer)
 		clr.y *= SumWeights;
 		clr.z *= SumWeights;
 
-		const float LerpQ = (fCount > gRenderInfo.Denoise.m_LerpThreshold) ? gRenderInfo.Denoise.m_LerpC : 1.0f - gRenderInfo.Denoise.m_LerpC;
+		const float LerpQ = (fCount > gRenderInfo.Denoise.m_LerpThreshold) ? gRenderInfo.Denoise.m_LerpC : 1.0f - gRenderInfo.Denoise.LerpC;
 
 		clr.x = lerpf(clr.x, clr00.x, LerpQ);
 		clr.y = lerpf(clr.y, clr00.y, LerpQ);

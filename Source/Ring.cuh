@@ -18,19 +18,17 @@
 #include "Geometry.cuh"
 #include "Disk.cuh"
 
-DEVICE Intersection IntersectUnitRing(Ray R, bool OneSided, float InnerRadius)
+DEVICE_NI void IntersectUnitRing(const Ray& R, const bool& OneSided, const float& InnerRadius, Intersection& Int)
 {
-	Intersection Int = IntersectPlane(R, OneSided);
+	IntersectPlane(R, OneSided, Int);
 
 	if (Int.Valid && (Int.UV.Length() < InnerRadius || Int.UV.Length() >= 1.0f))
 		Int.Valid = false;
-
-	return Int;
 }
 
-DEVICE bool IntersectRingP(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
+DEVICE_NI bool IntersectRingP(const Ray& R, const bool& OneSided, const float& InnerRadius, const float& OuterRadius, Intersection& Int)
 {
-	Intersection Int = IntersectPlaneP(R, OneSided);
+	IntersectPlaneP(R, OneSided, Int);
 
 	if (Int.Valid && (Int.UV.Length() < InnerRadius || Int.UV.Length() > OuterRadius))
 		return false;
@@ -38,17 +36,15 @@ DEVICE bool IntersectRingP(Ray R, bool OneSided, float InnerRadius, float OuterR
 	return Int.Valid;
 }
 
-DEVICE Intersection IntersectRing(Ray R, bool OneSided, float InnerRadius, float OuterRadius)
+DEVICE_NI void IntersectRing(const Ray& R, const bool& OneSided, const float& InnerRadius, const float& OuterRadius, Intersection& Int)
 {
-	Intersection Int = IntersectPlane(R, OneSided);
+	IntersectPlane(R, OneSided, Int);
 
 	if (Int.Valid && (Int.UV.Length() < InnerRadius || Int.UV.Length() > OuterRadius))
 		Int.Valid = false;
-
-	return Int;
 }
 
-DEVICE void SampleUnitRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius)
+DEVICE_NI void SampleUnitRing(SurfaceSample& SS, const Vec3f& UVW, const float& InnerRadius)
 {
 	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(UVW[0]);
 	float theta = 2.0f * PI_F * UVW[1];
@@ -58,7 +54,7 @@ DEVICE void SampleUnitRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius)
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
 }
 
-DEVICE void SampleRing(SurfaceSample& SS, Vec3f UVW, float InnerRadius, float OuterRadius)
+DEVICE_NI void SampleRing(SurfaceSample& SS, const Vec3f& UVW, const float& InnerRadius, const float& OuterRadius)
 {
 	SampleUnitRing(SS, UVW, InnerRadius / OuterRadius);
 

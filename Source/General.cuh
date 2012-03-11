@@ -157,7 +157,7 @@ struct EXPOSURE_RENDER_DLL ErDenoise
 
 struct EXPOSURE_RENDER_DLL ErScattering
 {
-	float				NoIterations;
+	int					NoIterations;
 	float				InvNoIterations;
 	int					SamplingStrategy;
 	float				IndexOfReflection;

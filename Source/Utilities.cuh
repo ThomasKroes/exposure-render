@@ -79,17 +79,17 @@ DEVICE Ray TransformRay(Ray R, ErMatrix44& TM)
 	return Rt;
 }
 
-HODNI Vec3f ToVec3f(const float3& V)
+HOST_DEVICE_NI Vec3f ToVec3f(float3 V)
 {
 	return Vec3f(V.x, V.y, V.z);
 }
 
-HODNI Vec3f ToVec3f(float V[3])
+HOST_DEVICE_NI Vec3f ToVec3f(float V[3])
 {
 	return Vec3f(V[0], V[1], V[2]);
 }
 
-HODNI float3 FromVec3f(const Vec3f& V)
+HOST_DEVICE_NI float3 FromVec3f(Vec3f V)
 {
 	return make_float3(V[0], V[1], V[2]);
 }
@@ -300,4 +300,27 @@ DEVICE float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
 {
 	const Vec3f W = Normalize(P2 - P1);
 	return (ClampedDot(W, N1) * ClampedDot(-W, N2)) / DistanceSquared(P1, P2);
+}
+
+DEVICE void SampleCamera(Ray& Rc, CameraSample& CS)
+{
+	Vec2f ScreenPoint;
+
+	ScreenPoint[0] = gCamera.Screen[0][0] + (gCamera.InvScreen[0] * (float)(CS.FilmUV[0] * (float)gCamera.FilmWidth));
+	ScreenPoint[1] = gCamera.Screen[1][0] + (gCamera.InvScreen[1] * (float)(CS.FilmUV[1] * (float)gCamera.FilmHeight));
+
+	Rc.O	= ToVec3f(gCamera.Pos);
+	Rc.D	= Normalize(ToVec3f(gCamera.N) + (ScreenPoint[0] * ToVec3f(gCamera.U)) - (ScreenPoint[1] * ToVec3f(gCamera.V)));
+	Rc.MinT	= gCamera.ClipNear;
+	Rc.MaxT	= gCamera.ClipFar;
+
+	if (gCamera.ApertureSize != 0.0f)
+	{
+		const Vec2f LensUV = gCamera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
+
+		const Vec3f LI = ToVec3f(gCamera.U) * LensUV[0] + ToVec3f(gCamera.V) * LensUV[1];
+
+		Rc.O += LI;
+		Rc.D = Normalize(Rc.D * gCamera.FocalDistance - LI);
+	}
 }

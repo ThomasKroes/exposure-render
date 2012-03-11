@@ -21,10 +21,9 @@
 // http://www.cl.cam.ac.uk/teaching/1999/AGraphHCI/SMAG/node2.html
 // http://mrl.nyu.edu/~dzorin/intro-graphics/lectures/lecture11/index.htm
 
-DEVICE Intersection IntersectCylinder(Ray R, float Radius, float Height)
+DEVICE_NI void IntersectCylinder(const Ray& R, const float& Radius, const float& Height, Intersection& Int)
 {
-	Intersection Int;
-
+	/*
 	const float HalfHeight = 0.5f * Height;
 
 	const float A = (R.D[0] * R.D[0]) + (R.D[1] * R.D[1]);
@@ -33,7 +32,7 @@ DEVICE Intersection IntersectCylinder(Ray R, float Radius, float Height)
     const float D = (B * B) - 4.0f * A * C;
     
     if (D < 0)
-		return Int;
+		return;
 
 	float T0 = (-B + sqrtf(D)) / 2.0f;
 	float T1 = (-B - sqrtf(D)) / 2.0f;
@@ -51,7 +50,7 @@ DEVICE Intersection IntersectCylinder(Ray R, float Radius, float Height)
 	Int.NearT	= T0;
 
 	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
-		return Int;
+		return;
 
 	Int.FarT	= T1;
 	Int.P		= R(Int.NearT);
@@ -64,18 +63,18 @@ DEVICE Intersection IntersectCylinder(Ray R, float Radius, float Height)
 		if (Int1.Valid && Int2.Valid)
 		{
 			if (Int1.NearT < Int2.NearT)
-				return Int1;
+				return;
 
 			if (Int2.NearT < Int1.NearT)
-				return Int2;
+				return;
 		}
 		else
 		{
 			if (Int1.Valid)
-				return Int1;
+				return;
 
 			if (Int2.Valid)
-				return Int2;
+				return;
 		}
 	}
 
@@ -85,16 +84,15 @@ DEVICE Intersection IntersectCylinder(Ray R, float Radius, float Height)
 		Int.UV		= Vec2f(0.0f, 0.0f);
 		Int.Valid	= true;
 	}
-
-	return Int;
+	*/
 }
 
-DEVICE bool InsideCylinder(Vec3f P, float Radius, float Height)
+DEVICE_NI bool InsideCylinder(Vec3f P, float Radius, float Height)
 {
 	return sqrtf((P[0] * P[0]) + (P[2] * P[2])) < Radius && fabs(P[1]) < (0.5f * Height);
 }
 
-DEVICE void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
+DEVICE_NI void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
 {
 	int Side = floorf(UVW[2] * 3.0f);
 

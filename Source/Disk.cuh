@@ -18,19 +18,9 @@
 #include "Geometry.cuh"
 #include "Plane.cuh"
 
-DEVICE Intersection IntersectUnitDisk(Ray R, bool OneSided)
+DEVICE_NI bool IntersectDiskP(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
 {
-	Intersection Int = IntersectUnitPlane(R, OneSided);
-
-	if (Int.Valid && Int.UV.Length() > 0.5f)
-		Int.Valid = false;
-
-	return Int;
-}
-
-DEVICE bool IntersectDiskP(Ray R, bool OneSided, float Radius)
-{
-	Intersection Int = IntersectPlaneP(R, OneSided);
+	IntersectPlaneP(R, OneSided, Int);
 
 	if (Int.Valid && Int.UV.Length() > Radius)
 		return false;
@@ -38,27 +28,23 @@ DEVICE bool IntersectDiskP(Ray R, bool OneSided, float Radius)
 	return Int.Valid;
 }
 
-DEVICE Intersection IntersectDisk(Ray R, bool OneSided, float Radius)
+DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
 {
-	Intersection Int = IntersectPlane(R, OneSided);
+	IntersectPlane(R, OneSided, Int);
 
 	if (Int.Valid && Int.UV.Length() > Radius)
 		Int.Valid = false;
-
-	return Int;
 }
 
-DEVICE Intersection IntersectDisk(Ray R, bool OneSided, float Radius, float Offset)
+DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, const float& Offset, Intersection& Int)
 {
-	Intersection Int = IntersectPlane(R, OneSided, Offset);
+	IntersectPlane(R, OneSided, Offset, Int);
 
 	if (Int.Valid && Int.UV.Length() > Radius)
 		Int.Valid = false;
-
-	return Int;
 }
 
-DEVICE void SampleUnitDisk(SurfaceSample& SS, Vec3f UVW)
+DEVICE_NI void SampleUnitDisk(SurfaceSample& SS, const Vec3f& UVW)
 {
 	float r = sqrtf(UVW[0]);
 	float theta = 2.0f * PI_F * UVW[1];
@@ -68,7 +54,7 @@ DEVICE void SampleUnitDisk(SurfaceSample& SS, Vec3f UVW)
 	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-DEVICE void SampleDisk(SurfaceSample& SS, Vec3f UVW, float Radius)
+DEVICE_NI void SampleDisk(SurfaceSample& SS, const Vec3f& UVW, const float& Radius)
 {
 	SampleUnitDisk(SS, UVW);
 	

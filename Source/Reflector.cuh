@@ -18,7 +18,7 @@
 #include "General.cuh"
 
 // Intersect a reflector with a ray
-DEVICE void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& RS)
+DEVICE_NI void IntersectReflector(ErReflector& Reflector, const Ray& R, ScatterEvent& RS)
 {
 	Ray TR = TransformRay(R, Reflector.Shape.InvTM);
 
@@ -26,12 +26,12 @@ DEVICE void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& RS)
 
 	switch (Reflector.Shape.Type)
 	{
-		case 0:	Int = IntersectPlane(TR, Reflector.Shape.OneSided, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]));		break;
-		case 1:	Int = IntersectDisk(TR, Reflector.Shape.OneSided, Reflector.Shape.OuterRadius);										break;
-		case 2:	Int = IntersectRing(TR, Reflector.Shape.OneSided, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius);		break;
-		case 3:	Int = IntersectBox(TR, ToVec3f(Reflector.Shape.Size), NULL);														break;
-		case 4:	Int = IntersectSphere(TR, Reflector.Shape.OuterRadius);																break;
-//		case 5:	Int = IntersectCylinder(TR, Reflector.Shape.OuterRadius, Reflector.Shape.Size[1]);									break;
+		case 0:	IntersectPlane(TR, Reflector.Shape.OneSided, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]), Int);		break;
+		case 1:	IntersectDisk(TR, Reflector.Shape.OneSided, Reflector.Shape.OuterRadius, Int);									break;
+		case 2:	IntersectRing(TR, Reflector.Shape.OneSided, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius, Int);		break;
+		case 3:	IntersectBox(TR, ToVec3f(Reflector.Shape.Size), Int);																break;
+		case 4:	IntersectSphere(TR, Reflector.Shape.OuterRadius, Int);															break;
+//		case 5:	IntersectCylinder(TR, Reflector.Shape.OuterRadius, Reflector.Shape.Size[1], Int);									break;
 	}
 
 	if (Int.Valid)
@@ -47,7 +47,7 @@ DEVICE void IntersectReflector(ErReflector& Reflector, Ray R, ScatterEvent& RS)
 }
 
 // Finds the nearest intersection with any of the scene's reflectors
-DEVICE void IntersectReflectors(Ray R, ScatterEvent& RS)
+DEVICE_NI void IntersectReflectors(const Ray& R, ScatterEvent& RS)
 {
 	float T = FLT_MAX;
 
@@ -70,27 +70,29 @@ DEVICE void IntersectReflectors(Ray R, ScatterEvent& RS)
 }
 
 // Determine if the ray intersects the reflector
-DEVICE bool IntersectsReflector(ErReflector& Reflector, Ray R)
+DEVICE_NI bool IntersectsReflector(ErReflector& Reflector, const Ray& R)
 {
 	// Transform ray into local shape coordinates
 	const Ray TR = TransformRay(R, Reflector.Shape.InvTM);
 
+	Intersection Int;
+
 	// Intersect shape
 	switch (Reflector.Shape.Type)
 	{
-		case 0: return IntersectPlane(TR, false, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1])).Valid;
-		case 1: return IntersectDisk(TR, false, Reflector.Shape.OuterRadius).Valid;
-		case 2: return IntersectRing(TR, false, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius).Valid;
-		case 3: return IntersectBox(TR, ToVec3f(Reflector.Shape.Size)).Valid;
-		case 4: return IntersectSphere(TR, Reflector.Shape.OuterRadius).Valid;
-//		case 5: return IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1]).Valid;
+		case 0: IntersectPlane(TR, false, Vec2f(Reflector.Shape.Size[0], Reflector.Shape.Size[1]), Int);		break;
+		case 1: IntersectDisk(TR, false, Reflector.Shape.OuterRadius, Int);										break;
+		case 2: IntersectRing(TR, false, Reflector.Shape.InnerRadius, Reflector.Shape.OuterRadius, Int);		break;
+		case 3: IntersectBox(TR, ToVec3f(Reflector.Shape.Size), Int);											break;
+		case 4: IntersectSphere(TR, Reflector.Shape.OuterRadius, Int);											break;
+//		case 5: IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1], Int);						break;
 	}
 
-	return false;
+	return Int.Valid;
 }
 
 // Determines if there's an intersection between the ray and any of the scene's reflectors
-DEVICE bool IntersectsReflector(Ray R)
+DEVICE_NI bool IntersectsReflector(const Ray& R)
 {
 	for (int i = 0; i < gReflectors.NoReflectors; i++)
 	{

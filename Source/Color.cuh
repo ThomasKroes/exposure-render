@@ -30,11 +30,6 @@ HOST_DEVICE inline void RGBToXYZ(const float rgb[3], float xyz[3])
 	xyz[2] = 0.019334f*rgb[0] + 0.119193f*rgb[1] + 0.950227f*rgb[2];
 }
 
-CD static float YWeight[3] =
-{
-	0.212671f, 0.715160f, 0.072169f
-};
-
 template <class T, int Size>
 class ColorRGB : public Vec<T, Size>
 {
@@ -145,9 +140,9 @@ public:
 
 	HOST_DEVICE void FromRGBf(const float& R, const float& G, const float& B)
 	{
-		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
-		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
-		this->SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
+		this->SetR((unsigned char)(clamp2(R, 0.0f, 1.0f) * 255.0f));
+		this->SetG((unsigned char)(clamp2(G, 0.0f, 1.0f) * 255.0f));
+		this->SetB((unsigned char)(clamp2(B, 0.0f, 1.0f) * 255.0f));
 	}
 
 	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
@@ -204,10 +199,10 @@ public:
 
 	HOST_DEVICE void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
 	{
-		this->SetR(clamp2(R, 0.0f, 1.0f) * 255.0f);
-		this->SetG(clamp2(G, 0.0f, 1.0f) * 255.0f);
-		this->SetB(clamp2(B, 0.0f, 1.0f) * 255.0f);
-		this->SetA(clamp2(A, 0.0f, 1.0f) * 255.0f);
+		this->SetR((unsigned char)(clamp2(R, 0.0f, 1.0f) * 255.0f));
+		this->SetG((unsigned char)(clamp2(G, 0.0f, 1.0f) * 255.0f));
+		this->SetB((unsigned char)(clamp2(B, 0.0f, 1.0f) * 255.0f));
+		this->SetA((unsigned char)(clamp2(A, 0.0f, 1.0f) * 255.0f));
 	}
 
 	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
@@ -400,6 +395,8 @@ public:
 
 	HOST_DEVICE float Y() const
 	{
+		const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
+
 		float v = 0.0f;
 
 		for (int i = 0; i < 3; i++)
@@ -624,6 +621,8 @@ public:
 
 	HOST_DEVICE float Y() const
 	{
+		const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
+
 		float v = 0.0f;
 
 		for (int i = 0; i < 3; i++)

@@ -26,12 +26,12 @@ texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexEmission;
 cudaChannelFormatDesc gFloatChannelDesc = cudaCreateChannelDesc<float>();
 cudaChannelFormatDesc gFloat4ChannelDesc = cudaCreateChannelDesc<float4>();
 
-cudaArray* gpIntensity			= NULL;
-cudaArray* gpOpacity			= NULL;
-cudaArray* gpDiffuse			= NULL;
-cudaArray* gpSpecular			= NULL;
-cudaArray* gpGlossiness			= NULL;
-cudaArray* gpEmission			= NULL;
+cudaArray* gpIntensity	= NULL;
+cudaArray* gpOpacity	= NULL;
+cudaArray* gpDiffuse	= NULL;
+cudaArray* gpSpecular	= NULL;
+cudaArray* gpGlossiness	= NULL;
+cudaArray* gpEmission	= NULL;
 
 CD ErVolume			gVolume;
 CD ErCamera			gCamera;
@@ -47,15 +47,16 @@ CD ErRange			gSpecularRange;
 CD ErRange			gGlossinessRange;
 CD ErRange			gEmissionRange;
 
+FrameBuffer FB;
+
 #include "Blur.cuh"
 #include "Denoise.cuh"
 #include "Estimate.cuh"
 #include "Utilities.cuh"
 #include "SingleScattering.cuh"
+#include "Metropolis.cuh"
 #include "ToneMap.cuh"
 #include "GradientMagnitude.cuh"
-
-FrameBuffer FB;
 
 void ErInitialize()
 {
@@ -346,11 +347,13 @@ void ErRenderEstimate()
 	cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer));
 	cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice);
 
-	SingleScattering(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+//	SingleScattering(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+	AdvanceMetropolis(pDevFrameBuffer);
 	BlurEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
-	ComputeEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+//	ComputeEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+	ComputeEstimateMetropolis(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	ToneMap(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
-
+ 
 	cudaFree(pDevFrameBuffer);
 }
 

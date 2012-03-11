@@ -20,36 +20,29 @@
 
 #define INTERSECTION_EPSILON 0.0001f
 
-DEVICE Intersection IntersectPlaneP(Ray R, bool OneSided, float Offset = 0.0f)
+DEVICE_NI void IntersectPlaneP(const Ray& R, const bool& OneSided, Intersection& Int)
 {
-	Intersection Int;
-
 	if (fabs(R.O[2] - R.D[2]) < INTERSECTION_EPSILON)
-		return Int;
+		return;
 
-	Int.NearT = (Offset - R.O[2]) / R.D[2];
+	Int.NearT = (0.0f - R.O[2]) / R.D[2];
 	
 	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
-		return Int;
+		return;
 
-	Int.UV	= Vec2f(Int.P[0], Int.P[1]);
-
-	Int.Valid = true;
-
-	return Int;
+	Int.UV		= Vec2f(Int.P[0], Int.P[1]);
+	Int.Valid	= true;
 }
 
-DEVICE Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
+DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, Intersection& Int)
 {
-	Intersection Int;
-
 	if (fabs(R.O[2] - R.D[2]) < INTERSECTION_EPSILON)
-		return Int;
+		return;
 
-	Int.NearT = (Offset - R.O[2]) / R.D[2];
+	Int.NearT = (0.0f - R.O[2]) / R.D[2];
 	
 	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
-		return Int;
+		return;
 
 	Int.P 	= R(Int.NearT);
 	Int.UV	= Vec2f(Int.P[0], Int.P[1]);
@@ -62,53 +55,41 @@ DEVICE Intersection IntersectPlane(Ray R, bool OneSided, float Offset = 0.0f)
 	}
 
 	Int.Valid = true;
-
-	return Int;
 }
 
-DEVICE Intersection IntersectUnitPlane(Ray R, bool OneSided)
+DEVICE_NI bool IntersectPlaneP(const Ray& R, const bool& OneSided, const Vec2f& Size)
 {
-	Intersection Int = IntersectPlane(R, OneSided);
-
-	if (Int.Valid && (Int.UV[0] < -0.5f || Int.UV[0] > 0.5f || Int.UV[1] < -0.5f || Int.UV[1] > 0.5f))
-		Int.Valid = false;
-
-	return Int;
-}
-
-DEVICE bool IntersectPlaneP(Ray R, bool OneSided, Vec2f Size)
-{
-	Intersection Int = IntersectPlaneP(R, OneSided);
+	Intersection Int;
+	
+	IntersectPlaneP(R, OneSided, Int);
 
 	if (Int.Valid && (Int.UV[0] < -0.5f * Size[0] || Int.UV[0] > 0.5f * Size[0] || Int.UV[1] < -0.5f * Size[1] || Int.UV[1] > 0.5f * Size[1]))
 		return false;
-
-	return Int.Valid;
+	else
+		return true;
 }
 
-DEVICE Intersection IntersectPlane(Ray R, bool OneSided, Vec2f Size)
+DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, const Vec2f& Size, Intersection& Int)
 {
-	Intersection Int = IntersectPlane(R, OneSided);
+	IntersectPlane(R, OneSided, Int);
 
 	if (Int.Valid && (Int.UV[0] < -0.5f * Size[0] || Int.UV[0] > 0.5f * Size[0] || Int.UV[1] < -0.5f * Size[1] || Int.UV[1] > 0.5f * Size[1]))
 		Int.Valid = false;
-
-	return Int;
 }
 
-DEVICE bool InsidePlane(Vec3f P)
+DEVICE_NI bool InsidePlane(Vec3f P)
 {
 	return P[2] > 0.0f;
 }
 
-DEVICE void SampleUnitPlane(SurfaceSample& SS, Vec3f UVW)
+DEVICE_NI void SampleUnitPlane(SurfaceSample& SS, const Vec3f& UVW)
 {
 	SS.P 	= Vec3f(-0.5f + UVW[0], -0.5f + UVW[1], 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
 	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-DEVICE void SamplePlane(SurfaceSample& SS, Vec3f UVW, Vec2f Size)
+DEVICE_NI void SamplePlane(SurfaceSample& SS, const Vec3f& UVW, const Vec2f& Size)
 {
 	SampleUnitPlane(SS, UVW);
 

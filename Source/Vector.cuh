@@ -257,6 +257,12 @@ public:
 			this->D[i] = max(Min, min(this->D[i], Max));
 	}
 
+	HOST_DEVICE void Set(T V)
+	{
+		for (int i = 0; i < Size; ++i)
+			this->D[i] = V;
+	}
+
 protected:
 	T	D[Size];
 };

@@ -19,7 +19,7 @@
 
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
 
-DEVICE bool IntersectSphereP(Ray R, float Radius)
+DEVICE_NI bool IntersectSphereP(const Ray& R, const float& Radius)
 {
 	// Compute A, B and C coefficients
     float a = Dot(R.D, R.D);
@@ -75,10 +75,8 @@ DEVICE bool IntersectSphereP(Ray R, float Radius)
 	return true;
 }
 
-DEVICE Intersection IntersectSphere(Ray R, float Radius)
+DEVICE_NI void IntersectSphere(const Ray& R, const float& Radius, Intersection& Int)
 {
-	Intersection Int;
-
 	// Compute A, B and C coefficients
     float a = Dot(R.D, R.D);
 	float b = 2 * Dot(R.D, R.O);
@@ -89,7 +87,7 @@ DEVICE Intersection IntersectSphere(Ray R, float Radius)
     
     // if discriminant is negative there are no real roots, so return false, as ray misses sphere
     if (disc < 0)
-        return Int;
+        return;
 
     // compute q as described above
     float distSqrt = sqrtf(disc);
@@ -123,36 +121,29 @@ DEVICE Intersection IntersectSphere(Ray R, float Radius)
 		if (t1 >= R.MinT && t1 < R.MaxT)
 			Int.NearT = t1;
 		else
-			return Int;
+			return;
 	}
 
 	if (Int.NearT < R.MinT || Int.NearT > R.MaxT)
-		return Int;
+		return;
 
 	Int.Valid	= true;
 	Int.P		= R(Int.NearT);
 	Int.N		= Normalize(Int.P);
 	Int.UV		= Vec2f(0.0f, 0.0f);
-
-	return Int;
 }
 
-DEVICE Intersection IntersectUnitSphere(Ray R)
+DEVICE_NI void IntersectUnitSphere(const Ray& R, Intersection& Int)
 {
-	return IntersectSphere(R, 1.0f);
+	IntersectSphere(R, 1.0f, Int);
 }
 
-DEVICE bool InsideSphere(Vec3f P, float Radius)
+DEVICE_NI bool InsideSphere(const Vec3f& P, const float& Radius)
 {
 	return Length(P) < Radius;
 }
 
-DEVICE float SphereArea(float Radius)
-{
-	return 4.0f * PI_F * (Radius * Radius);
-}
-
-DEVICE void SampleUnitSphere(SurfaceSample& SS, Vec3f UVW)
+DEVICE_NI void SampleUnitSphere(SurfaceSample& SS, const Vec3f& UVW)
 {
 	float z		= 1.0f - 2.0f * UVW[0];
 	float r		= sqrtf(max(0.0f, 1.0f - z * z));
@@ -165,7 +156,7 @@ DEVICE void SampleUnitSphere(SurfaceSample& SS, Vec3f UVW)
 	SS.UV	= Vec2f(SphericalTheta(SS.P), SphericalPhi(SS.P));
 }
 
-DEVICE void SampleSphere(SurfaceSample& SS, Vec3f UVW, float Radius)
+DEVICE_NI void SampleSphere(SurfaceSample& SS, const Vec3f& UVW, const float& Radius)
 {
 	SampleUnitSphere(SS, UVW);
 

@@ -8,12 +8,11 @@ using namespace std;
 
 #define KERNEL					__global__
 #define HOST					__host__
-#define DEVICE					__device__
-#define HOST_DEVICE				HOST DEVICE
-#define HOD						__host__ __device__
+#define DEVICE					__device__ 
+#define DEVICE_NI				DEVICE __noinline__
+#define HOST_DEVICE				HOST DEVICE 
+#define HOST_DEVICE_NI			HOST_DEVICE __noinline__
 #define CD						__device__ __constant__
-#define	DNI						__device__ __noinline__
-#define	HODNI					__host__ __device__ __noinline__
 #define PI_F					3.141592654f	
 #define HALF_PI_F				0.5f * PI_F
 #define QUARTER_PI_F			0.25f * PI_F
@@ -26,6 +25,7 @@ using namespace std;
 #define RAD_F					57.29577951308232f
 #define TWO_RAD_F				2.0f * RAD_F
 #define DEG_TO_RAD				1.0f / RAD_F
+#define METRO_SIZE				256
 
 /*
 HOST_DEVICE inline void HandleCudaError(const cudaError_t CudaError, const char* pDescription = "")

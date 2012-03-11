@@ -14,12 +14,12 @@
 #pragma once
 
 #include "Geometry.cuh"
-
+#include "Color.cuh"
 #include "RNG.cuh"
 
 DEVICE void Mutate1(float& X, CRNG& RNG)
 {
-	float s1 = 1.0f / 1024.0f, s2 = 1.0f / 16.0f;
+	float s1 = 1.0f / 1024.0f, s2 = 1.0f / 64.0f;
 
 	float dx = s2 * exp(-log(s2 / s1) * RNG.Get1());
 
@@ -73,30 +73,28 @@ struct SurfaceSample
 
 struct LightSample
 {
-	Vec3f 			RndP;
-//	SurfaceSample	SS;
+	Vec3f 	SurfaceUVW;
 
 	DEVICE LightSample(void)
 	{
-		this->RndP	= Vec3f(0.0f);
+		this->SurfaceUVW = Vec3f(0.0f);
 	}
 
 	DEVICE LightSample& LightSample::operator=(const LightSample& Other)
 	{
-		this->RndP	= Other.RndP;
-//		this->SS	= Other.SS;
+		this->SurfaceUVW = Other.SurfaceUVW;
 
 		return *this;
 	}
 
 	DEVICE void LargeStep(CRNG& RNG)
 	{
-		this->RndP = RNG.Get3();
+		this->SurfaceUVW = RNG.Get3();
 	}
 
 	DEVICE void Mutate(CRNG& RNG)
 	{
-		Mutate3(this->RndP, RNG);
+		Mutate3(this->SurfaceUVW, RNG);
 	}
 };
 
@@ -140,7 +138,7 @@ struct BrdfSample
 
 struct LightingSample
 {
-	BrdfSample		BsdfSample;
+	BrdfSample		BrdfSample;
 	LightSample 	LightSample;
 	float			LightNum;
 
@@ -151,7 +149,7 @@ struct LightingSample
 
 	DEVICE LightingSample& LightingSample::operator=(const LightingSample& Other)
 	{
-		this->BsdfSample	= Other.BsdfSample;
+		this->BrdfSample	= Other.BrdfSample;
 		this->LightSample	= Other.LightSample;
 		this->LightNum		= Other.LightNum;
 		
@@ -160,41 +158,89 @@ struct LightingSample
 
 	DEVICE void LargeStep(CRNG& RNG)
 	{
-		this->BsdfSample.LargeStep(RNG);
+		this->BrdfSample.LargeStep(RNG);
 		this->LightSample.LargeStep(RNG);
 		this->LightNum = RNG.Get1();
 	}
 
 	DEVICE void Mutate(CRNG& RNG)
 	{
-		this->BsdfSample.Mutate(RNG);
+		this->BrdfSample.Mutate(RNG);
 		this->LightSample.Mutate(RNG);
 		Mutate1(this->LightNum, RNG);
+	}
+};
+
+struct CameraSample
+{
+	Vec2f	FilmUV;
+	Vec2f	LensUV;
+
+	DEVICE CameraSample(void)
+	{
+		this->FilmUV	= Vec2f();
+		this->LensUV	= Vec2f();
+	}
+
+	DEVICE CameraSample& CameraSample::operator=(const CameraSample& Other)
+	{
+		this->FilmUV	= Other.FilmUV;
+		this->LensUV	= Other.LensUV;
+
+		return *this;
+	}
+
+	DEVICE void LargeStep(CRNG& RNG)
+	{
+		this->FilmUV	= RNG.Get2();
+		this->LensUV	= RNG.Get2();
+	}
+
+	DEVICE void Mutate(CRNG& RNG)
+	{
+		Mutate2(this->FilmUV, RNG);
+		Mutate2(this->LensUV, RNG);
 	}
 };
 
 struct MetroSample
 {
 	LightingSample	LightingSample;
+	CameraSample	CameraSample;
+	ColorXYZAf		OldL;
 
 	DEVICE MetroSample(void)
 	{
 	}
 
+	DEVICE MetroSample(CRNG& RNG)
+	{
+		this->LargeStep(RNG);
+	}
+
 	DEVICE MetroSample& MetroSample::operator=(const MetroSample& Other)
 	{
-		this->LightingSample = Other.LightingSample;
+		this->LightingSample 	= Other.LightingSample;
+		this->CameraSample		= Other.CameraSample;
+		this->OldL				= Other.OldL;
 
 		return *this;
 	}
 
-	DEVICE void LargeStep(CRNG& Rnd)
+	DEVICE void LargeStep(CRNG& RNG)
 	{
-		this->LightingSample.LargeStep(Rnd);
+		this->LightingSample.LargeStep(RNG);
+		this->CameraSample.LargeStep(RNG);
+		this->OldL.Set(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
-	DEVICE void Mutate(CRNG& Rnd)
+	DEVICE MetroSample Mutate(CRNG& RNG)
 	{
-		this->LightingSample.Mutate(Rnd);
+		MetroSample Result = *this;
+
+		Result.LightingSample.Mutate(RNG);
+		Result.CameraSample.Mutate(RNG);
+
+		return Result;
 	}
 };

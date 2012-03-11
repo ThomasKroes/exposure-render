@@ -45,7 +45,7 @@ KERNEL void KrnlBlurEstimateH(FrameBuffer* pFrameBuffer)
 	{
 		FW[TID] = gBlur.FilterWeights[(int)fabs((float)x - X)];
 
-		Sum			+= pFrameBuffer->CudaFrameEstimateXyza.Get(x, Y) * FW[TID];
+		Sum			+= pFrameBuffer->CudaFrameEstimateTestXyza.Get(x, Y) * FW[TID];
 		SumW[TID]	+= FW[TID];
 	}
 
@@ -86,9 +86,9 @@ KERNEL void KrnlBlurEstimateV(FrameBuffer* pFrameBuffer)
 	}
 
 	if (SumW[TID] > 0.0f)
-		pFrameBuffer->CudaFrameEstimateXyza.Set(Sum / SumW[TID], X, Y);
+		pFrameBuffer->CudaFrameEstimateTestXyza.Set(Sum / SumW[TID], X, Y);
 	else
-		pFrameBuffer->CudaFrameEstimateXyza.Set(ColorXYZAf(0.0f), X, Y);
+		pFrameBuffer->CudaFrameEstimateTestXyza.Set(ColorXYZAf(0.0f), X, Y);
 }
 
 void BlurEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)

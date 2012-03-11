@@ -15,6 +15,7 @@
 
 #include "Transport.cuh"
 
+
 DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::ErVolume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
@@ -38,7 +39,7 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 
 	return NearestRS;
 }
-
+/*
 KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 {
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
@@ -91,7 +92,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 
 	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
-/**/
+
 //	float Lf = pFrameBuffer->CudaFrameEstimateXyza.GetPtr(X, Y)->Y(), Lr = pFrameBuffer->CudaRunningEstimateXyza.GetPtr(X, Y)->Y();
 
 //	pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Push(fabs(Lf - Lr), gScattering.NoIterations);
@@ -105,3 +106,4 @@ void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)
 	KrnlSingleScattering<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
 }
+*/

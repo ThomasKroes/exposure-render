@@ -62,14 +62,8 @@ SET(vtkErCoreSources
 # Make the "Core" source group
 SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 
-# Exposure Render CUDA sources
-SET(ErCudaSources
-	Plane.cuh
-	Box.cuh
-	Disk.cuh
-	Ring.cuh
-	Sphere.cuh
-	Cylinder.cuh
+# General
+SET(ErCudaGeneral
 	SingleScattering.cuh
 	Blur.cuh
 	Utilities.cuh
@@ -102,8 +96,35 @@ SET(ErCudaSources
 	CudaUtilities.cpp
 )
 
-# Make the "CUDA" source group
-SOURCE_GROUP("Cuda" FILES ${ErCudaSources})
+# General group
+SOURCE_GROUP("General" FILES ${ErCudaGeneral})
+
+# Shapes
+SET(ErCudaShapes
+	Plane.cuh
+	Box.cuh
+	Disk.cuh
+	Ring.cuh
+	Sphere.cuh
+	Cylinder.cuh
+)
+
+# Shapes group
+SOURCE_GROUP("Shapes" FILES ${ErCudaShapes})
+
+# Make the library
+CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} SHARED)
+
+# This is hack, we need a more elegant solution for this!
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.lib C:/Workspaces/Voreen/voreen/modules/er/ext/er/lib)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/General.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Core.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+
+
+
+
+
 
 # VTK Exposure Render sources
 SET(ErVtkSources
@@ -152,14 +173,7 @@ SET(ErVtkWrapPythonSources
 # Make the "Vtk" source group
 SOURCE_GROUP("Vtk" FILES ${ErVtkSources})
 
-# Make the library
-CUDA_ADD_LIBRARY(ErCore ${vtkErCoreSources} ${ErCudaSources} SHARED)
 
-# This is hack, we need a more elegant solution for this!
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.lib C:/Workspaces/Voreen/voreen/modules/er/ext/er/lib)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/General.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Core.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
                       
 # # Link with the necessary VTK libraries
 # #TARGET_LINK_LIBRARIES(vtkErCore vtkCommon vtkRendering vtkGraphics vtkVolumeRendering vtkWidgets QVTK)
