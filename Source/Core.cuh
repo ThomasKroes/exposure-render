@@ -59,3 +59,5 @@ __declspec(dllexport) void ErGetDepthBuffer(unsigned char* pData);
 __declspec(dllexport) void ErRecordBenchmarkImage();
 __declspec(dllexport) void ErGetAverageNrmsError(float& AverageNrmsError);
 __declspec(dllexport) void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3]);
+__declspec(dllexport) void ErGetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance);
+__declspec(dllexport) void ErPrintDeviceInfo();

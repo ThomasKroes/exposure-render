@@ -8,7 +8,7 @@ using namespace std;
 
 #define KERNEL					__global__
 #define HOST					__host__
-#define DEVICE					__device__ 
+#define DEVICE					__device__ __inline__
 #define DEVICE_NI				DEVICE __noinline__
 #define HOST_DEVICE				HOST DEVICE 
 #define HOST_DEVICE_NI			HOST_DEVICE __noinline__

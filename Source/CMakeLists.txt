@@ -91,6 +91,7 @@ SET(ErCudaGeneral
 	Reflector.cuh
 	Benchmark.cuh
 	GradientMagnitude.cuh
+	AutoFocus.cuh
 	Core.cu
 	CudaUtilities.h
 	CudaUtilities.cpp

@@ -26,7 +26,6 @@ public:
 		Resolution(),
 		CudaRunningEstimateXyza(),
 		CudaFrameEstimateXyza(),
-		CudaFrameEstimateTestXyza(),
 		CudaFrameBlurXyza(),
 		CudaRunningEstimateRgbaLdr(),
 		CudaDisplayEstimateRgbLdr(),
@@ -36,10 +35,10 @@ public:
 		HostFrameEstimate(),
 		HostDepthBuffer(),
 		BenchmarkEstimateRgbaLdr(),
-		RmsError(),
-		CudaMetroSamples(),
-		CudaNoIterations(),
-		CudaPixelLuminance()
+		RmsError()//,
+//		CudaMetroSamples(),
+//		CudaNoIterations(),
+//		CudaPixelLuminance()
 	{
 	}
 
@@ -59,28 +58,26 @@ public:
 
 		this->CudaRunningEstimateXyza.Resize(this->Resolution);
 		this->CudaFrameEstimateXyza.Resize(this->Resolution);
-		this->CudaFrameEstimateTestXyza.Resize(this->Resolution);
 		this->CudaFrameBlurXyza.Resize(this->Resolution);
 		this->CudaRunningEstimateRgbaLdr.Resize(this->Resolution);
 		this->CudaDisplayEstimateRgbLdr.Resize(this->Resolution);
-		this->CudaRandomSeeds1.Resize(Resolution2i(MetroSize));
-		this->CudaRandomSeeds2.Resize(Resolution2i(MetroSize));
+		this->CudaRandomSeeds1.Resize(this->Resolution);
+		this->CudaRandomSeeds2.Resize(this->Resolution);
 		this->HostDisplayEstimateRgbaLdr.Resize(this->Resolution);
 		this->HostFrameEstimate.Resize(this->Resolution);
 		this->HostDepthBuffer.Resize(this->Resolution);
 		this->CudaRunningStats.Resize(this->Resolution);
 		this->BenchmarkEstimateRgbaLdr.Resize(this->Resolution);
 		this->RmsError.Resize(this->Resolution);
-		this->CudaMetroSamples.Resize(Resolution2i(MetroSize));
-		this->CudaNoIterations.Resize(this->Resolution);
-		this->CudaPixelLuminance.Resize(this->Resolution);
+//		this->CudaMetroSamples.Resize(Resolution2i(MetroSize));
+//		this->CudaNoIterations.Resize(this->Resolution);
+//		this->CudaPixelLuminance.Resize(this->Resolution);
 	}
 
 	void Reset(void)
 	{
 //		this->CudaRunningEstimateXyza.Reset();
 		this->CudaFrameEstimateXyza.Reset();
-//		this->CudaFrameEstimateTestXyza.Reset();
 //		this->CudaFrameBlurXyza.Reset();
 //		this->CudaRunningEstimateRgbaLdr.Reset();
 //		this->CudaDisplayEstimateRgbLdr.Reset();
@@ -91,15 +88,14 @@ public:
 //		this->BenchmarkEstimateRgbaLdr.Reset();
 //		this->RmsError.Reset();
 //		this->CudaMetroSamples.Reset();
-		this->CudaNoIterations.Reset();
-		this->CudaPixelLuminance.Reset();
+//		this->CudaNoIterations.Reset();
+//		this->CudaPixelLuminance.Reset();
 	}
 
 	void Free(void)
 	{
 		this->CudaRunningEstimateXyza.Free();
 		this->CudaFrameEstimateXyza.Free();
-		this->CudaFrameEstimateTestXyza.Free();
 		this->CudaFrameBlurXyza.Free();
 		this->CudaRunningEstimateRgbaLdr.Free();
 		this->CudaDisplayEstimateRgbLdr.Free();
@@ -136,7 +132,6 @@ public:
 
 	// Frame estimate
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateXyza;
-	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateTestXyza;
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameBlurXyza;
 	
 	CCudaBuffer2D<ColorRGBuc, false>		CudaDisplayEstimateRgbLdr;

@@ -18,11 +18,11 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 	
 	CRNG RNG(pFrameBuffer->CudaRandomSeeds1.GetPtr(X, Y), pFrameBuffer->CudaRandomSeeds2.GetPtr(X, Y));
 
-	const float pLarge = 0.5f;
+	const float pLarge = 1.0f;
 	
 	bool Large = RNG.Get1() < pLarge;
 
-	MetroSample& Sample = pFrameBuffer->CudaMetroSamples(X, Y);
+	MetroSample Sample = pFrameBuffer->CudaMetroSamples(X, Y);
 
 	if (gScattering.NoIterations == 0)
 		Sample.LargeStep(RNG);
@@ -33,7 +33,7 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 
 	SampleCamera(Rc, NewSample.CameraSample);
 
-	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK, Throughput = ColorXYZf(1.0f);
+	ColorXYZf Lv = SPEC_BLACK;
 
 	const ScatterEvent SE = SampleRay(Rc, RNG);
 	
@@ -53,7 +53,7 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.2f), ColorXYZf(0.5f), 5.0f, 10.0f);
 		Lv += UniformSampleOneLight(SE, RNG, Shader, Sample.LightingSample);
 	}
-	*/
+	
 
 	ColorXYZAf NewL;
 
@@ -65,13 +65,17 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 	const int OldXY[] = { Sample.CameraSample.FilmUV[0] * (float)pFrameBuffer->Resolution[0], Sample.CameraSample.FilmUV[1] * (float)pFrameBuffer->Resolution[1] };
 	const int NewXY[] = { NewSample.CameraSample.FilmUV[0] * (float)pFrameBuffer->Resolution[0], NewSample.CameraSample.FilmUV[1] * (float)pFrameBuffer->Resolution[1] };
 
+	pFrameBuffer->CudaPixelLuminance(NewXY[0], NewXY[1]) += NewL.Y();
+		pFrameBuffer->CudaNoIterations(NewXY[0], NewXY[1])++;
+	pFrameBuffer->CudaFrameEstimateTestXyza(NewXY[0], NewXY[1]) = NewL;
+	return;
 	if (Large)
 	{
 		pFrameBuffer->CudaPixelLuminance(NewXY[0], NewXY[1]) += NewL.Y();
 		pFrameBuffer->CudaNoIterations(NewXY[0], NewXY[1])++;
 	}
 
-	const float AccProb = 0.5f;//gScattering.NoIterations == 0 ? 1.0f : __min(1, NewL.Y() / Sample.OldL.Y());
+	const float AccProb = __min(1, NewL.Y() / Sample.OldL.Y());
 
 	if (Sample.OldL.Y() > 0)
 	{
@@ -85,9 +89,10 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 
 	if (RNG.Get1() < AccProb)
 	{
+		NewSample.OldL = NewL;
 		Sample = NewSample;
-		Sample.OldL = NewL;
 	}
+	*/
 }
 
 void AdvanceMetropolis(FrameBuffer* pFrameBuffer)
@@ -95,7 +100,7 @@ void AdvanceMetropolis(FrameBuffer* pFrameBuffer)
 	const dim3 BlockDim(KRNL_ADV_MLT_BLOCK_W, KRNL_ADV_MLT_BLOCK_H);
 	const dim3 GridDim((float)METRO_SIZE / (float)BlockDim.x, (float)METRO_SIZE / (float)BlockDim.y);
 
-	FB.CudaFrameEstimateTestXyza.Reset();
+//	FB.CudaFrameEstimateTestXyza.Reset();
 
 	KrnlAdvanceMetropolis<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
@@ -113,9 +118,9 @@ KERNEL void KrnlComputeEstimateMetropolis(FrameBuffer* pFrameBuffer, float Avera
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-	pFrameBuffer->CudaFrameEstimateXyza(X, Y) += pFrameBuffer->CudaFrameEstimateTestXyza(X, Y);
+//	pFrameBuffer->CudaFrameEstimateXyza(X, Y) += pFrameBuffer->CudaFrameEstimateTestXyza(X, Y);
 
-	pFrameBuffer->CudaRunningEstimateXyza(X, Y) = pFrameBuffer->CudaFrameEstimateXyza(X, Y) * AverageLuminance / SPP / 4.0f;
+//	pFrameBuffer->CudaRunningEstimateXyza(X, Y) = pFrameBuffer->CudaFrameEstimateXyza(X, Y) * AverageLuminance / SPP / 4.0f;
 }
 
 void ComputeEstimateMetropolis(FrameBuffer* pFrameBuffer, int Width, int Height)

@@ -21,8 +21,8 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::ErVolume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
 
 	SampleVolume(R, RNG, SE[0]);
-	IntersectLights(R, SE[1], true);
-	IntersectReflectors(R, SE[2]);
+//	IntersectLights(R, SE[1], true);
+//	IntersectReflectors(R, SE[2]);
 
 	float T = FLT_MAX;
 
@@ -39,63 +39,39 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 
 	return NearestRS;
 }
-/*
+
 KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 {
-	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	const int X = blockIdx.x * blockDim.x + threadIdx.x;
+	const int Y = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 	
 	CRNG RNG(pFrameBuffer->CudaRandomSeeds1.GetPtr(X, Y), pFrameBuffer->CudaRandomSeeds2.GetPtr(X, Y));
 
-	Vec2f ScreenPoint;
+	MetroSample Sample(RNG);
 
-	ScreenPoint[0] = gCamera.Screen[0][0] + (gCamera.InvScreen[0] * (float)X);
-	ScreenPoint[1] = gCamera.Screen[1][0] + (gCamera.InvScreen[1] * (float)Y);
-	
-	Ray Re;
+	Ray Rc;
 
-	Re.O	= ToVec3f(gCamera.Pos);
-	Re.D	= Normalize(ToVec3f(gCamera.N) + (ScreenPoint[0] * ToVec3f(gCamera.U)) - (ScreenPoint[1] * ToVec3f(gCamera.V)));
-	Re.MinT	= gCamera.ClipNear;
-	Re.MaxT	= gCamera.ClipFar;
+	SampleCamera(Rc, Sample.CameraSample, X, Y);
 
-	if (gCamera.ApertureSize != 0.0f)
-	{
-		const Vec2f LensUV = gCamera.ApertureSize * ConcentricSampleDisk(RNG.Get2());
+	ColorXYZf Lv = SPEC_BLACK;
 
-		const Vec3f LI = ToVec3f(gCamera.U) * LensUV[0] + ToVec3f(gCamera.V) * LensUV[1];
-
-		Re.O += LI;
-		Re.D = Normalize(Re.D * gCamera.FocalDistance - LI);
-	}
-
-	ColorXYZf Lv = SPEC_BLACK, Li = SPEC_BLACK, Throughput = ColorXYZf(1.0f);
-
-	const ScatterEvent SE = SampleRay(Re, RNG);
-
-	LightingSample LS;
-
-	LS.LargeStep(RNG);
+	const ScatterEvent SE = SampleRay(Rc, RNG);
 
 	if (SE.Valid && SE.Type == ScatterEvent::ErVolume)
-		Lv += UniformSampleOneLightVolume(SE, RNG, LS);
+		Lv += UniformSampleOneLightVolume(SE, RNG, Sample.LightingSample);
 
 	if (SE.Valid && SE.Type == ScatterEvent::Reflector)
 	{
 		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 5.0f, 100.0f);
-		Lv += UniformSampleOneLight(SE, RNG, Shader, LS);
+		Lv += UniformSampleOneLight(SE, RNG, Shader, Sample.LightingSample);
 	}
 	
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 
 	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
-
-//	float Lf = pFrameBuffer->CudaFrameEstimateXyza.GetPtr(X, Y)->Y(), Lr = pFrameBuffer->CudaRunningEstimateXyza.GetPtr(X, Y)->Y();
-
-//	pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Push(fabs(Lf - Lr), gScattering.NoIterations);
 }
 
 void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)
@@ -106,4 +82,3 @@ void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)
 	KrnlSingleScattering<<<GridDim, BlockDim>>>(pFrameBuffer);
 	cudaThreadSynchronize();
 }
-*/

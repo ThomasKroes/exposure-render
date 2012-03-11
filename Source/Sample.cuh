@@ -17,11 +17,9 @@
 #include "Color.cuh"
 #include "RNG.cuh"
 
-DEVICE void Mutate1(float& X, CRNG& RNG)
+DEVICE void Mutate1(float& X, CRNG& RNG, const float& S1 = 0.0009765625f, const float& S2 = 0.015625f)
 {
-	float s1 = 1.0f / 1024.0f, s2 = 1.0f / 64.0f;
-
-	float dx = s2 * exp(-log(s2 / s1) * RNG.Get1());
+	float dx = S2 * exp(-log(S2 / S1) * RNG.Get1());
 
 	if (RNG.Get1() < 0.5f)
 	{
@@ -35,17 +33,17 @@ DEVICE void Mutate1(float& X, CRNG& RNG)
 	}
 }
 
-DEVICE void Mutate2(Vec2f& V, CRNG& RNG)
+DEVICE void Mutate2(Vec2f& V, CRNG& RNG, const float& S1 = 0.0009765625f, const float& S2 = 0.015625f)
 {
-	Mutate1(V[0], RNG);
-	Mutate1(V[1], RNG);
+	Mutate1(V[0], RNG, S1, S2);
+	Mutate1(V[1], RNG, S1, S2);
 }
 
-DEVICE void Mutate3(Vec3f& V, CRNG& RNG)
+DEVICE void Mutate3(Vec3f& V, CRNG& RNG, const float& S1 = 0.0009765625f, const float& S2 = 0.015625f)
 {
-	Mutate1(V[0], RNG);
-	Mutate1(V[1], RNG);
-	Mutate1(V[2], RNG);
+	Mutate1(V[0], RNG, S1, S2);
+	Mutate1(V[1], RNG, S1, S2);
+	Mutate1(V[2], RNG, S1, S2);
 }
 
 struct SurfaceSample
@@ -80,6 +78,11 @@ struct LightSample
 		this->SurfaceUVW = Vec3f(0.0f);
 	}
 
+	DEVICE LightSample(CRNG& RNG)
+	{
+		this->LargeStep(RNG);
+	}
+
 	DEVICE LightSample& LightSample::operator=(const LightSample& Other)
 	{
 		this->SurfaceUVW = Other.SurfaceUVW;
@@ -107,6 +110,11 @@ struct BrdfSample
 	{
 		this->Component	= 0.0f;
 		this->Dir 		= Vec2f(0.0f);
+	}
+
+	DEVICE BrdfSample(CRNG& RNG)
+	{
+		this->LargeStep(RNG);
 	}
 
 	DEVICE BrdfSample(const float& Component, const Vec2f& Dir)
@@ -147,6 +155,11 @@ struct LightingSample
 		this->LightNum = 0.0f;
 	}
 
+	DEVICE LightingSample(CRNG& RNG)
+	{
+		this->LargeStep(RNG);
+	}
+
 	DEVICE LightingSample& LightingSample::operator=(const LightingSample& Other)
 	{
 		this->BrdfSample	= Other.BrdfSample;
@@ -182,6 +195,11 @@ struct CameraSample
 		this->LensUV	= Vec2f();
 	}
 
+	DEVICE CameraSample(CRNG& RNG)
+	{
+		this->LargeStep(RNG);
+	}
+
 	DEVICE CameraSample& CameraSample::operator=(const CameraSample& Other)
 	{
 		this->FilmUV	= Other.FilmUV;
@@ -198,7 +216,7 @@ struct CameraSample
 
 	DEVICE void Mutate(CRNG& RNG)
 	{
-		Mutate2(this->FilmUV, RNG);
+		Mutate2(this->FilmUV, RNG, 0.001953125f, 0.0625f);
 		Mutate2(this->LensUV, RNG);
 	}
 };
