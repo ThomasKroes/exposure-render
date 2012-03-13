@@ -53,6 +53,5 @@ struct RunningStats
 		return sqrtf(Variance(N));
 	}
 
-//	int m_n;
 	float m_oldM, m_newM, m_oldS, m_newS;
 };

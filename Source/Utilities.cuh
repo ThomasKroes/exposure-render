@@ -227,33 +227,61 @@ DEVICE ColorXYZf GetEmission(float Intensity)
 	return ColorXYZf(Emission.x, Emission.y, Emission.z);
 }
 
+DEVICE Vec3f GradientCD(Vec3f P)
+{
+	float Intensity[3][2] = 
+	{
+		{ GetIntensity(P + ToVec3f(gVolume.GradientDeltaX)), GetIntensity(P - ToVec3f(gVolume.GradientDeltaX)) },
+		{ GetIntensity(P + ToVec3f(gVolume.GradientDeltaY)), GetIntensity(P - ToVec3f(gVolume.GradientDeltaY)) },
+		{ GetIntensity(P + ToVec3f(gVolume.GradientDeltaZ)), GetIntensity(P - ToVec3f(gVolume.GradientDeltaZ)) }
+	};
+
+	return ToVec3f(gVolume.Spacing) * Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
+}
+
+DEVICE Vec3f GradientFD(Vec3f P)
+{
+	float Intensity[4] = 
+	{
+		GetIntensity(P),
+		GetIntensity(P + ToVec3f(gVolume.GradientDeltaX)),
+		GetIntensity(P + ToVec3f(gVolume.GradientDeltaY)),
+		GetIntensity(P + ToVec3f(gVolume.GradientDeltaZ))
+	};
+
+    return ToVec3f(gVolume.Spacing) * Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
+}
+
+DEVICE Vec3f GradientFiltered(Vec3f P)
+{
+	Vec3f Offset(gVolume.GradientDeltaX[0], gVolume.GradientDeltaY[1], gVolume.GradientDeltaZ[2]);
+
+    Vec3f G0 = GradientCD(P);
+    Vec3f G1 = GradientCD(P + Vec3f(-Offset[0], -Offset[1], -Offset[2]));
+    Vec3f G2 = GradientCD(P + Vec3f( Offset[0],  Offset[1],  Offset[2]));
+    Vec3f G3 = GradientCD(P + Vec3f(-Offset[0],  Offset[1], -Offset[2]));
+    Vec3f G4 = GradientCD(P + Vec3f( Offset[0], -Offset[1],  Offset[2]));
+    Vec3f G5 = GradientCD(P + Vec3f(-Offset[0], -Offset[1],  Offset[2]));
+    Vec3f G6 = GradientCD(P + Vec3f( Offset[0],  Offset[1], -Offset[2]));
+    Vec3f G7 = GradientCD(P + Vec3f(-Offset[0],  Offset[1],  Offset[2]));
+    Vec3f G8 = GradientCD(P + Vec3f( Offset[0], -Offset[1], -Offset[2]));
+    
+	Vec3f L0 = Lerp(Lerp(G1, G2, 0.5), Lerp(G3, G4, 0.5), 0.5);
+    Vec3f L1 = Lerp(Lerp(G5, G6, 0.5), Lerp(G7, G8, 0.5), 0.5);
+    
+	return ToVec3f(gVolume.Spacing) * Lerp(G0, Lerp(L0, L1, 0.5), 0.75);
+}
+
 DEVICE Vec3f Gradient(Vec3f P)
 {
-	Vec3f Gradient;
+	switch (gScattering.GradientComputation)
+	{
+		case 0:	return GradientFD(P);
+		case 1:	return GradientCD(P);
+		case 2:	return GradientFiltered(P);
+	}
 
-	Vec3f Pts[3][2];
-
-	Pts[0][0] = P + ToVec3f(gVolume.GradientDeltaX);
-	Pts[0][1] = P - ToVec3f(gVolume.GradientDeltaX);
-	Pts[1][0] = P + ToVec3f(gVolume.GradientDeltaY);
-	Pts[1][1] = P - ToVec3f(gVolume.GradientDeltaY);
-	Pts[2][0] = P + ToVec3f(gVolume.GradientDeltaZ);
-	Pts[2][1] = P - ToVec3f(gVolume.GradientDeltaZ);
-
-	float Ints[3][2];
-
-	Ints[0][0] = GetIntensity(Pts[0][0]);
-	Ints[0][1] = GetIntensity(Pts[0][1]);
-	Ints[1][0] = GetIntensity(Pts[1][0]);
-	Ints[1][1] = GetIntensity(Pts[1][1]);
-	Ints[2][0] = GetIntensity(Pts[2][0]);
-	Ints[2][1] = GetIntensity(Pts[2][1]);
-
-	Gradient[0] = Ints[0][1] - Ints[0][0];
-	Gradient[1] = Ints[1][1] - Ints[1][0];
-	Gradient[2] = Ints[2][1] - Ints[2][0];
-
-	return ToVec3f(gVolume.Spacing) * Gradient;// / (2.0f * Vec3f(gVolume.GradientDeltaX[0], gVolume.GradientDeltaY[1], gVolume.GradientDeltaZ[2])));
+	return GradientFD(P);
 }
 
 DEVICE Vec3f NormalizedGradient(Vec3f P)
@@ -344,8 +372,31 @@ DEVICE void SampleCamera(Ray& Rc, CameraSample& CS)
 
 DEVICE void SampleCamera(Ray& Rc, CameraSample& CS, const int& X, const int& Y)
 {
-	CS.FilmUV[0] = (float)X / (float)gCamera.FilmWidth;
-	CS.FilmUV[1] = (float)Y / (float)gCamera.FilmHeight;
+	Vec2f FilmUV;
 
-	SampleCamera(Rc, CS);
+	FilmUV[0] = (float)X / (float)gCamera.FilmWidth;
+	FilmUV[1] = (float)Y / (float)gCamera.FilmHeight;
+
+	FilmUV[0] += CS.FilmUV[0] * (1.0f / (float)gCamera.FilmWidth);
+	FilmUV[1] += CS.FilmUV[1] * (1.0f / (float)gCamera.FilmHeight);
+
+	Vec2f ScreenPoint;
+
+	ScreenPoint[0] = gCamera.Screen[0][0] + (gCamera.InvScreen[0] * (float)(FilmUV[0] * (float)gCamera.FilmWidth));
+	ScreenPoint[1] = gCamera.Screen[1][0] + (gCamera.InvScreen[1] * (float)(FilmUV[1] * (float)gCamera.FilmHeight));
+
+	Rc.O	= ToVec3f(gCamera.Pos);
+	Rc.D	= Normalize(ToVec3f(gCamera.N) + (ScreenPoint[0] * ToVec3f(gCamera.U)) - (ScreenPoint[1] * ToVec3f(gCamera.V)));
+	Rc.MinT	= gCamera.ClipNear;
+	Rc.MaxT	= gCamera.ClipFar;
+
+	if (gCamera.ApertureSize != 0.0f)
+	{
+		const Vec2f LensUV = gCamera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
+
+		const Vec3f LI = ToVec3f(gCamera.U) * LensUV[0] + ToVec3f(gCamera.V) * LensUV[1];
+
+		Rc.O += LI;
+		Rc.D = Normalize(Rc.D * gCamera.FocalDistance - LI);
+	}
 }

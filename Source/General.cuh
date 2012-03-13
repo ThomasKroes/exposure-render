@@ -164,6 +164,7 @@ struct EXPOSURE_RENDER_DLL ErScattering
 	bool				OpacityModulated;
 	bool				Shadows;
 	float				MaxShadowDistance;
+	int					GradientComputation;
 };
 
 struct EXPOSURE_RENDER_DLL ErBlur

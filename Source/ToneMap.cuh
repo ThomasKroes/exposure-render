@@ -27,15 +27,16 @@ KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-//	const float Variance = pFrameBuffer->CudaRunningStats.GetPtr(X, Y)->Variance(gScattering.NoIterations);
+	pFrameBuffer->CudaRunningStatistics(X, Y).Push(pFrameBuffer->CudaRunningEstimateXyza(X, Y).Y(), gScattering.NoIterations);
+	pFrameBuffer->CudaVariance(X, Y) = pFrameBuffer->CudaRunningStatistics(X, Y).Variance(gScattering.NoIterations);
 
-//	RgbHdr.Set(Variance, Variance, Variance);
+	ColorXYZAf C(pFrameBuffer->CudaVariance(X, Y), pFrameBuffer->CudaVariance(X, Y), pFrameBuffer->CudaVariance(X, Y));
 
-	ColorRGBuc Color = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
+	const ColorRGBuc Lr = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
 
-	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetR(Color.GetR());
-	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetG(Color.GetG());
-	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetB(Color.GetB());
+	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetR(Lr.GetR());
+	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetG(Lr.GetG());
+	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetB(Lr.GetB());
 	pFrameBuffer->CudaRunningEstimateRgbaLdr.GetPtr(X, Y)->SetA(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y).GetA() * 255.0f);
 }
 

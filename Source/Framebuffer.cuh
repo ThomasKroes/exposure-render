@@ -31,9 +31,8 @@ public:
 		CudaDisplayEstimateRgbLdr(),
 		CudaRandomSeeds1(),
 		CudaRandomSeeds2(),
-		HostDisplayEstimateRgbaLdr(),
-		HostFrameEstimate(),
-		HostDepthBuffer(),
+		CudaRunningStatistics(),
+		CudaVariance(),
 		BenchmarkEstimateRgbaLdr(),
 		RmsError()//,
 //		CudaMetroSamples(),
@@ -63,10 +62,8 @@ public:
 		this->CudaDisplayEstimateRgbLdr.Resize(this->Resolution);
 		this->CudaRandomSeeds1.Resize(this->Resolution);
 		this->CudaRandomSeeds2.Resize(this->Resolution);
-		this->HostDisplayEstimateRgbaLdr.Resize(this->Resolution);
-		this->HostFrameEstimate.Resize(this->Resolution);
-		this->HostDepthBuffer.Resize(this->Resolution);
-		this->CudaRunningStats.Resize(this->Resolution);
+		this->CudaRunningStatistics.Resize(this->Resolution);
+		this->CudaVariance.Resize(this->Resolution);
 		this->BenchmarkEstimateRgbaLdr.Resize(this->Resolution);
 		this->RmsError.Resize(this->Resolution);
 //		this->CudaMetroSamples.Resize(Resolution2i(MetroSize));
@@ -81,10 +78,10 @@ public:
 //		this->CudaFrameBlurXyza.Reset();
 //		this->CudaRunningEstimateRgbaLdr.Reset();
 //		this->CudaDisplayEstimateRgbLdr.Reset();
-//		this->HostDisplayEstimateRgbaLdr.Reset();
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
-//		this->CudaRunningStats.Reset();
+//		this->CudaRunningStatistics.Reset();
+//		this->CudaVariance.Reset();
 //		this->BenchmarkEstimateRgbaLdr.Reset();
 //		this->RmsError.Reset();
 //		this->CudaMetroSamples.Reset();
@@ -101,10 +98,8 @@ public:
 		this->CudaDisplayEstimateRgbLdr.Free();
 		this->CudaRandomSeeds1.Free();
 		this->CudaRandomSeeds2.Free();
-		this->HostDisplayEstimateRgbaLdr.Free();
-		this->HostFrameEstimate.Free();
-		this->HostDepthBuffer.Free();
-		this->CudaRunningStats.Free();
+		this->CudaRunningStatistics.Free();
+		this->CudaVariance.Free();
 		this->BenchmarkEstimateRgbaLdr.Free();
 		this->RmsError.Free();
 		this->CudaMetroSamples.Free();
@@ -140,13 +135,9 @@ public:
 	CCudaRandomBuffer2D						CudaRandomSeeds1;
 	CCudaRandomBuffer2D						CudaRandomSeeds2;
 
-	// Host buffers
-	CHostBuffer2D<ColorRGBAuc>				HostDisplayEstimateRgbaLdr;
-	CHostBuffer2D<ColorRGBAuc>				HostFrameEstimate;
-	CHostBuffer2D<ColorRGBAuc>				HostDepthBuffer;
-
 	// Variance
-	CCudaBuffer2D<RunningStats, false>		CudaRunningStats;
+	CCudaBuffer2D<RunningStats, false>		CudaRunningStatistics;
+	CCudaBuffer2D<float, false>				CudaVariance;
 
 	CCudaBuffer2D<ColorRGBAuc, false>		BenchmarkEstimateRgbaLdr;
 	CCudaBuffer2D<float, false>				RmsError;

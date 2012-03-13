@@ -263,6 +263,16 @@ public:
 			this->D[i] = V;
 	}
 
+	HOST_DEVICE T Sum()
+	{
+		T Sum;
+
+		for (int i = 0; i < Size; ++i)
+			Sum += this->D[i];
+
+		return Sum;
+	}
+
 protected:
 	T	D[Size];
 };
@@ -451,12 +461,7 @@ HOST_DEVICE inline float ClampedAbsDot(Vec3f A, Vec3f B)							{ return clamp(fa
 HOST_DEVICE inline float ClampedDot(Vec3f A, Vec3f B)								{ return clamp(Dot(A, B), 0.0f, 1.0f);		};
 HOST_DEVICE inline float Distance(Vec3f A, Vec3f B)									{ return (A - B).Length();					};
 HOST_DEVICE inline float DistanceSquared(Vec3f A, Vec3f B)							{ return (A - B).LengthSquared();			};
-
-
-
-
-
-
+HOST_DEVICE inline Vec3f Lerp(Vec3f A, Vec3f B, float T)							{ return A + T * (B - A);					};
 
 
 
