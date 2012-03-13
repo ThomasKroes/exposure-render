@@ -19,6 +19,7 @@
 #include "Benchmark.cuh"
 
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
+texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexExtinction;
 texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexOpacity;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexDiffuse;
 texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexSpecular;
@@ -29,6 +30,7 @@ cudaChannelFormatDesc gFloatChannelDesc		= cudaCreateChannelDesc<float>();
 cudaChannelFormatDesc gFloat4ChannelDesc	= cudaCreateChannelDesc<float4>();
 
 cudaArray* gpIntensity	= NULL;
+cudaArray* gpExtinction	= NULL;
 cudaArray* gpOpacity	= NULL;
 cudaArray* gpDiffuse	= NULL;
 cudaArray* gpSpecular	= NULL;
@@ -114,6 +116,21 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
   	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
 
 	cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc);
+
+	/*
+	int ExtinctionSize[3] =
+	{
+		floorf((float)Extent[0] / 8.0f),
+		floorf((float)Extent[1] / 8.0f),
+		floorf((float)Extent[2] / 8.0f),
+	};
+
+	const dim3 BlockDim(8, 8, 8);
+	const dim3 GridDim((int)ceilf((float)ExtinctionSize[0] / (float)BlockDim.x), (int)ceilf((float)ExtinctionSize[1] / (float)BlockDim.y), (int)ceilf((float)ExtinctionSize[2] / (float)BlockDim.z));
+
+	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
+	cudaThreadSynchronize();
+	*/
 }
 
 void ErUnbindDensityBuffer(void)
@@ -121,6 +138,32 @@ void ErUnbindDensityBuffer(void)
 	cudaFreeArray(gpIntensity);
 	gpIntensity = NULL;
 	cudaUnbindTexture(gTexIntensity);
+}
+
+void ErBindExtinctionBuffer(unsigned short* pBuffer, int Extent[3])
+{
+	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<unsigned short>();
+
+	cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
+
+	cudaMalloc3DArray(&gpExtinction, &ChannelDesc, CudaExtent);
+
+	cudaMemcpy3DParms CopyParams = {0};
+
+	CopyParams.srcPtr		= make_cudaPitchedPtr(pBuffer, CudaExtent.width * sizeof(unsigned short), CudaExtent.width, CudaExtent.height);
+	CopyParams.dstArray		= gpExtinction;
+	CopyParams.extent		= CudaExtent;
+	CopyParams.kind			= cudaMemcpyHostToDevice;
+	
+	cudaMemcpy3D(&CopyParams);
+
+	gTexExtinction.normalized		= true;
+	gTexExtinction.filterMode		= cudaFilterModeLinear;      
+	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
+	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
+  	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
+
+	cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc);
 }
 
 void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
@@ -357,24 +400,21 @@ void ErRenderEstimate()
 	cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice);
 
 	SingleScattering(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
-//	AdvanceMetropolis(pDevFrameBuffer);
 	BlurEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	ComputeEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
-//	ComputeEstimateMetropolis(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
-	ToneMap(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+	PostProcess(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
  
 	cudaFree(pDevFrameBuffer);
 }
 
 void ErGetEstimate(unsigned char* pData)
-{//CCudaBuffer2D<RunningStats, false>		CudaRunningStatistics;
-	cudaMemcpy(pData, FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToHost);
-//	memcpy(pData, FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize());
+{
+	cudaMemcpy(pData, FB.CudaDisplayEstimateA.GetPtr(), FB.CudaDisplayEstimateA.GetSize(), cudaMemcpyDeviceToHost);
 }
 
 void ErRecordBenchmarkImage()
 {
-	cudaMemcpy(FB.BenchmarkEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetPtr(), FB.CudaRunningEstimateRgbaLdr.GetSize(), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(FB.BenchmarkEstimateRgbaLdr.GetPtr(), FB.CudaDisplayEstimateA.GetPtr(), FB.CudaDisplayEstimateA.GetSize(), cudaMemcpyDeviceToDevice);
 }
 
 void ErGetRunningVariance(float& RunningVariance)

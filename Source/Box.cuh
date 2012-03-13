@@ -22,8 +22,8 @@ DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.O);
 	const Vec3f TopT		= InvR * (Vec3f(0.5f) - R.O);
-	const Vec3f MinT		= MinVec3f(TopT, BottomT);
-	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const Vec3f MinT		= Min(TopT, BottomT);
+	const Vec3f MaxT		= Max(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 
@@ -42,13 +42,13 @@ DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)
 	Int.UV		= Vec2f(0.0f, 0.0f);
 }
 
-DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& Min, const Vec3f& Max, Intersection& Int)
+DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& MinAABB, const Vec3f& MaxAABB, Intersection& Int)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
-	const Vec3f BottomT		= InvR * (Min - R.O);
-	const Vec3f TopT		= InvR * (Max - R.O);
-	const Vec3f MinT		= MinVec3f(TopT, BottomT);
-	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const Vec3f BottomT		= InvR * (MinAABB - R.O);
+	const Vec3f TopT		= InvR * (MaxAABB - R.O);
+	const Vec3f MinT		= Min(TopT, BottomT);
+	const Vec3f MaxT		= Max(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 
@@ -68,10 +68,10 @@ DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& Min, const Vec3f& Max, In
 
 	for (int i = 0; i < 3; i++)
 	{
-		if (Int.P[i] <= Min[i] + 0.0001f)
+		if (Int.P[i] <= MinAABB[i] + 0.0001f)
 			Int.N[i] == -1.0f;
 
-		if (Int.P[i] >= Max[i] - 0.0001f)
+		if (Int.P[i] >= MaxAABB[i] - 0.0001f)
 			Int.N[i] == 1.0f;
 	}
 }
@@ -81,13 +81,13 @@ DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& Size, Intersection& Int)
 	IntersectBox(R, -0.5f * Size, 0.5f * Size, Int);
 }
 
-DEVICE_NI bool IntersectBoxP(const Ray& R, const Vec3f& Min, const Vec3f& Max)
+DEVICE_NI bool IntersectBoxP(const Ray& R, const Vec3f& MinAABB, const Vec3f& MaxAABB)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
-	const Vec3f BottomT		= InvR * (Min - R.O);
-	const Vec3f TopT		= InvR * (Max - R.O);
-	const Vec3f MinT		= MinVec3f(TopT, BottomT);
-	const Vec3f MaxT		= MaxVec3f(TopT, BottomT);
+	const Vec3f BottomT		= InvR * (MinAABB - R.O);
+	const Vec3f TopT		= InvR * (MaxAABB - R.O);
+	const Vec3f MinT		= Min(TopT, BottomT);
+	const Vec3f MaxT		= Max(TopT, BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 

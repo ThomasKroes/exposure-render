@@ -111,6 +111,11 @@ HOST_DEVICE_NI float3 FromVec3f(Vec3f V)
 	return make_float3(V[0], V[1], V[2]);
 }
 
+HOST_DEVICE_NI ColorXYZf ToColorXYZf(float V[3])
+{
+	return ColorXYZf(V[0], V[1], V[2]);
+}
+
 DEVICE float GetIntensity(Vec3f P)
 {
 	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolume.MinAABB[0]) * gVolume.InvSize[0], (P[1] - gVolume.MinAABB[1]) * gVolume.InvSize[1], (P[2] - gVolume.MinAABB[2]) * gVolume.InvSize[2]));
@@ -312,16 +317,6 @@ DEVICE float GradientMagnitude(Vec3f P)
 	return sqrtf(Sum);
 }
 
-DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
-{
-	return A + (Ax - A) / max((float)N, 1.0f);
-}
-
-DEVICE ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
-{
-	 return A + ((Ax - A) / max((float)N, 1.0f));
-}
-
 DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
 {
 	ColorRGBf RgbHdr;
@@ -399,4 +394,14 @@ DEVICE void SampleCamera(Ray& Rc, CameraSample& CS, const int& X, const int& Y)
 		Rc.O += LI;
 		Rc.D = Normalize(Rc.D * gCamera.FocalDistance - LI);
 	}
+}
+
+DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
+{
+	return A + (Ax - A) / max((float)N, 1.0f);
+}
+
+DEVICE ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
+{
+	 return A + ((Ax - A) / max((float)N, 1.0f));
 }

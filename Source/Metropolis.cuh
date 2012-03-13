@@ -35,9 +35,9 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 
 	ColorXYZf Lv = SPEC_BLACK;
 
-	const ScatterEvent SE = SampleRay(Rc, RNG);
+	ScatterEvent SE = SampleRay(Rc, RNG);
 	
-	if (SE.Valid && SE.Type == ScatterEvent::ErVolume)
+	if (SE.Valid && SE.Type == ScatterEvent::Volume)
 	{
 		Lv += UniformSampleOneLightVolume(SE, RNG, Sample.LightingSample);
 	}

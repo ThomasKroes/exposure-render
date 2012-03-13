@@ -237,6 +237,18 @@ public:
 	}
 };
 
+template <class T> inline HOST_DEVICE ColorRGBAuc operator / (const ColorRGBAuc& V, const T& F)				{ return ColorRGBAuc((float)V[0] / F, (float)V[1] / F, (float)V[2] / F, V[3]);						};
+
+HOST_DEVICE inline ColorRGBAuc operator * (const float& F, const ColorRGBAuc& XYZ)
+{
+	return ColorRGBAuc(XYZ[0] * F, XYZ[1] * F, XYZ[2] * F);
+}
+
+HOST_DEVICE inline ColorRGBAuc operator + (const ColorRGBAuc& A, const ColorRGBAuc& B)
+{
+	return ColorRGBAuc(A[0] + B[0], A[1] + B[1], A[2] + B[2], A[3] + B[3]);
+}
+
 class ColorXYZf : public Vec3f
 {
 public:
@@ -810,6 +822,16 @@ HOST_DEVICE inline ColorRGBf Lerp(const float& T, const ColorRGBf& C1, const Col
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorRGBf(OneMinusT * C1.GetR() + T * C2.GetR(), OneMinusT * C1.GetG() + T * C2.GetG(), OneMinusT * C1.GetB() + T * C2.GetB());
+}
+
+HOST_DEVICE ColorRGBAuc Lerp(const ColorRGBAuc& A, const ColorRGBAuc& B, const float& T)
+{
+	ColorRGBAuc Result;
+
+	for (int i = 0; i < 3; i++)
+		Result[i] = (1.0f - T) * (float)A[i] + T * (float)B[i];
+
+	return Result;
 }
 
 #define SPEC_BLACK											ColorXYZf(0.0f)

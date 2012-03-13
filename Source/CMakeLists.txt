@@ -14,7 +14,6 @@ cmake_minimum_required(VERSION 2.8)
 # Exposure Render core project
 PROJECT(ExposureRender)
 
-
 # Find CUDA
 FIND_PACKAGE(CUDA)
 
@@ -26,8 +25,6 @@ FIND_PACKAGE(CUDA)
 #	ENDIF(NOT VTK_DIR)
 #	INCLUDE(${VTK_USE_FILE})
 #ENDIF(NOT VTK_BINARY_DIR)
-
-#INCLUDE(CMakeOptions.cmake)
 
 # Supported streaming architectures
 # SET(CUDA_NVCC_FLAGS "-gencode=arch=compute_10,code=sm_10;${CUDA_NVCC_FLAGS}")

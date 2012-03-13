@@ -27,8 +27,8 @@ public:
 		CudaRunningEstimateXyza(),
 		CudaFrameEstimateXyza(),
 		CudaFrameBlurXyza(),
-		CudaRunningEstimateRgbaLdr(),
-		CudaDisplayEstimateRgbLdr(),
+		CudaDisplayEstimateA(),
+		CudaDisplayEstimateB(),
 		CudaRandomSeeds1(),
 		CudaRandomSeeds2(),
 		CudaRunningStatistics(),
@@ -53,13 +53,11 @@ public:
 
 		this->Resolution = Resolution;
 
-		int MetroSize[] = { METRO_SIZE, METRO_SIZE };
-
 		this->CudaRunningEstimateXyza.Resize(this->Resolution);
 		this->CudaFrameEstimateXyza.Resize(this->Resolution);
 		this->CudaFrameBlurXyza.Resize(this->Resolution);
-		this->CudaRunningEstimateRgbaLdr.Resize(this->Resolution);
-		this->CudaDisplayEstimateRgbLdr.Resize(this->Resolution);
+		this->CudaDisplayEstimateA.Resize(this->Resolution);
+		this->CudaDisplayEstimateB.Resize(this->Resolution);
 		this->CudaRandomSeeds1.Resize(this->Resolution);
 		this->CudaRandomSeeds2.Resize(this->Resolution);
 		this->CudaRunningStatistics.Resize(this->Resolution);
@@ -76,8 +74,8 @@ public:
 //		this->CudaRunningEstimateXyza.Reset();
 		this->CudaFrameEstimateXyza.Reset();
 //		this->CudaFrameBlurXyza.Reset();
-//		this->CudaRunningEstimateRgbaLdr.Reset();
-//		this->CudaDisplayEstimateRgbLdr.Reset();
+//		this->CudaDisplayEstimateA.Reset();
+//		this->CudaDisplayEstimateB.Reset();
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
 //		this->CudaRunningStatistics.Reset();
@@ -94,8 +92,8 @@ public:
 		this->CudaRunningEstimateXyza.Free();
 		this->CudaFrameEstimateXyza.Free();
 		this->CudaFrameBlurXyza.Free();
-		this->CudaRunningEstimateRgbaLdr.Free();
-		this->CudaDisplayEstimateRgbLdr.Free();
+		this->CudaDisplayEstimateA.Free();
+		this->CudaDisplayEstimateB.Free();
 		this->CudaRandomSeeds1.Free();
 		this->CudaRandomSeeds2.Free();
 		this->CudaRunningStatistics.Free();
@@ -121,17 +119,13 @@ public:
 
 	Resolution2i							Resolution;
 	
-	// Running estimate
 	CCudaBuffer2D<ColorXYZAf, false>		CudaRunningEstimateXyza;
-	CCudaBuffer2D<ColorRGBAuc, false>		CudaRunningEstimateRgbaLdr;
+	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateA;
+	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateB;
 
-	// Frame estimate
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateXyza;
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameBlurXyza;
 	
-	CCudaBuffer2D<ColorRGBuc, false>		CudaDisplayEstimateRgbLdr;
-
-	// Random seeds
 	CCudaRandomBuffer2D						CudaRandomSeeds1;
 	CCudaRandomBuffer2D						CudaRandomSeeds2;
 

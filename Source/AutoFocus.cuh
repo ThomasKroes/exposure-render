@@ -21,7 +21,7 @@ KERNEL void KrnlComputeAutoFocusDistance(float* pAutoFocusDistance, int FilmU, i
 
 	Ray Rc;
 
-	ScatterEvent SE(ScatterEvent::ErVolume);
+	ScatterEvent SE(ScatterEvent::Volume);
 
 	float Sum = 0.0f, SumWeight = 0.0f;
 

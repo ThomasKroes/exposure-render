@@ -31,6 +31,7 @@ __declspec(dllexport) void ErDeinitialize();
 __declspec(dllexport) void ErResize(int Size[2]);
 __declspec(dllexport) void ErResetFrameBuffer();
 __declspec(dllexport) void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3]);
+__declspec(dllexport) void ErBindExtinctionBuffer(unsigned short* pBuffer, int Extent[3]);
 __declspec(dllexport) void ErUnbindDensityBuffer(void);
 __declspec(dllexport) void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2]);
 __declspec(dllexport) void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2]);

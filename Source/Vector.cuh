@@ -273,6 +273,11 @@ public:
 		return Sum;
 	}
 
+	HOST_DEVICE void Lerp(const Vec<T, Size>& B, const float& F)
+	{
+		*this = *this + F * (B - *this);
+	};
+
 protected:
 	T	D[Size];
 };
@@ -502,12 +507,12 @@ HOST_DEVICE inline Vec3f Reflect(Vec3f& i, Vec3f& n)
 	return i - 2.0f * n * Dot(n, i);
 }
 
-inline HOST_DEVICE Vec3f MinVec3f(Vec3f a, Vec3f b)
+inline HOST_DEVICE Vec3f Min(const Vec3f& a, const Vec3f& b)
 {
 	return Vec3f(min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]));
 }
 
-inline HOST_DEVICE Vec3f MaxVec3f(Vec3f a, Vec3f b)
+inline HOST_DEVICE Vec3f Max(const Vec3f& a, const Vec3f& b)
 {
 	return Vec3f(max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]));
 }

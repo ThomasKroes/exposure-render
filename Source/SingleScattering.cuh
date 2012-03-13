@@ -15,18 +15,17 @@
 
 #include "Transport.cuh"
 
-
 DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
-	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::ErVolume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
+	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
 
 	SampleVolume(R, RNG, SE[0]);
-//	IntersectLights(R, SE[1], true);
-//	IntersectReflectors(R, SE[2]);
+	IntersectLights(R, SE[1], true);
+	IntersectReflectors(R, SE[2]);
 
 	float T = FLT_MAX;
 
-	ScatterEvent NearestRS(ScatterEvent::ErVolume);
+	ScatterEvent NearestRS(ScatterEvent::Volume);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -58,14 +57,17 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 
 	ColorXYZf Lv = SPEC_BLACK;
 
-	const ScatterEvent SE = SampleRay(Rc, RNG);
+	ScatterEvent SE = SampleRay(Rc, RNG);
 
-	if (SE.Valid && SE.Type == ScatterEvent::ErVolume)
+	if (SE.Valid && SE.Type == ScatterEvent::Volume)
 		Lv += UniformSampleOneLightVolume(SE, RNG, Sample.LightingSample);
+
+	if (SE.Valid && SE.Type == ScatterEvent::Light)
+		Lv += SE.Le;
 
 	if (SE.Valid && SE.Type == ScatterEvent::Reflector)
 	{
-		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 5.0f, 100.0f);
+		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].DiffuseColor), ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].SpecularColor), 5.0f, gReflectors.ReflectorList[SE.ReflectorID].Glossiness);
 		Lv += UniformSampleOneLight(SE, RNG, Shader, Sample.LightingSample);
 	}
 	

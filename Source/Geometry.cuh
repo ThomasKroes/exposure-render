@@ -142,7 +142,7 @@ struct ScatterEvent
 {
 	enum SampleType
 	{
-		ErVolume,
+		Volume,
 		Light,
 		Reflector
 	};

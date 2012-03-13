@@ -101,14 +101,14 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 	return Ld;
 }
 
-DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent SE, CRNG& RNG, CVolumeShader& Shader, LightingSample& LS)
+DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, CVolumeShader& Shader, LightingSample& LS)
 {
 	const int LightID = floorf(LS.LightNum * gLights.NoLights);
 
 	return (float)gLights.NoLights * EstimateDirectLight(LS, SE, RNG, Shader, LightID);
 }
 
-DEVICE_NI ColorXYZf UniformSampleOneLightVolume(ScatterEvent SE, CRNG& RNG, LightingSample& LS)
+DEVICE_NI ColorXYZf UniformSampleOneLightVolume(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
 	const float I = GetIntensity(SE.P);
 
@@ -172,6 +172,6 @@ DEVICE_NI ColorXYZf UniformSampleOneLightVolume(ScatterEvent SE, CRNG& RNG, Ligh
 	else
 	{
 		CVolumeShader Shader(CVolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
-		return GetEmission(I) + 0.5f * UniformSampleOneLight(SE, RNG, Shader, LS);
+		return GetEmission(I) + UniformSampleOneLight(SE, RNG, Shader, LS) * 0.5f;
 	}
 }
