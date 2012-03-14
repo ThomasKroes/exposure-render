@@ -111,7 +111,6 @@ SOURCE_GROUP("Shapes" FILES ${ErCudaShapes})
 
 # Make the library
 CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} SHARED)
-TARGET_LINK_LIBRARIES(ErCore ${CUDA_SDK_ROOT_DIR}/common/lib/Win32/glew32.lib)
 
 # This is hack, we need a more elegant solution for this!
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)

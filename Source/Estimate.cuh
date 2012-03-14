@@ -27,19 +27,8 @@ KERNEL void KrnlComputeEstimate(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-	const ColorRGBuc L1 = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
-
-	float Avg1 = L1[0] + L1[1] + L1[2];
-	Avg1 /= 3.0f;
-
 	pFrameBuffer->CudaRunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y), pFrameBuffer->CudaFrameEstimateXyza.Get(X, Y), gScattering.NoIterations), X, Y);
-
-	const ColorRGBuc L2 = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
-
-	float Avg2 = L2[0] + L2[1] + L2[2];
-	Avg2 /= 3.0f;
-
-	pFrameBuffer->CudaVariance(X, Y) = fabs(Avg2 - Avg1);
+//	pFrameBuffer->CudaVariance(X, Y) = fabs(Avg2 - Avg1);
 }
 
 void ComputeEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)

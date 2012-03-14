@@ -33,15 +33,6 @@ KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 	pFrameBuffer->CudaDisplayEstimateA(X, Y)[1] = L1[1];
 	pFrameBuffer->CudaDisplayEstimateA(X, Y)[2] = L1[2];
 	pFrameBuffer->CudaDisplayEstimateA(X, Y)[3] = pFrameBuffer->CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
-
-	return;
-
-	/*
-	pFrameBuffer->CudaDisplayEstimateA.GetPtr(X, Y)->SetR(Lr.GetR());
-	pFrameBuffer->CudaDisplayEstimateA.GetPtr(X, Y)->SetG(Lr.GetG());
-	pFrameBuffer->CudaDisplayEstimateA.GetPtr(X, Y)->SetB(Lr.GetB());
-	pFrameBuffer->CudaDisplayEstimateA.GetPtr(X, Y)->SetA(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y).GetA() * 255.0f);
-	*/
 }
 
 KERNEL void KrnlFilter(FrameBuffer* pFrameBuffer)
@@ -103,7 +94,7 @@ KERNEL void KrnlBlend(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-	pFrameBuffer->CudaDisplayEstimateA(X, Y) = Lerp(pFrameBuffer->CudaDisplayEstimateA(X, Y), pFrameBuffer->CudaDisplayEstimateB(X, Y), expf(-(float)gScattering.NoIterations / 200.0f));
+	pFrameBuffer->CudaDisplayEstimateA(X, Y) = Lerp(pFrameBuffer->CudaDisplayEstimateA(X, Y), pFrameBuffer->CudaDisplayEstimateB(X, Y), 0.0f);//expf(-(float)gScattering.NoIterations / 200.0f));
 }
 
 void PostProcess(FrameBuffer* pFrameBuffer, int Width, int Height)
@@ -112,6 +103,6 @@ void PostProcess(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
 	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
-	KrnlFilter<<<GridDim, BlockDim>>>(pFrameBuffer);
-	KrnlBlend<<<GridDim, BlockDim>>>(pFrameBuffer);
+//	KrnlFilter<<<GridDim, BlockDim>>>(pFrameBuffer);
+//	KrnlBlend<<<GridDim, BlockDim>>>(pFrameBuffer);
 }
