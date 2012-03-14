@@ -18,6 +18,8 @@
 #define KRNL_DENOISE_BLOCK_H		8
 #define KRNL_DENOISE_BLOCK_SIZE		KRNL_DENOISE_BLOCK_W * KRNL_DENOISE_BLOCK_H
 
+// http://people.csail.mit.edu/sparis/bf_course/
+
 HOST_DEVICE float lerpf(float a, float b, float c){
 	return a + (b - a) * c;
 }

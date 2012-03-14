@@ -19,6 +19,9 @@
 #define KRNL_TONE_MAP_BLOCK_H		8
 #define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
 
+// http://code.google.com/p/bilateralfilter/source/browse/trunk/BilateralFilter.cpp?r=3
+// http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
+
 KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
@@ -86,6 +89,105 @@ KERNEL void KrnlFilter(FrameBuffer* pFrameBuffer)
 	pFrameBuffer->CudaDisplayEstimateB(X, Y)[3] = pFrameBuffer->CudaDisplayEstimateA(X, Y)[3];
 }
 
+CD int gKernelRadius;
+CD float gKernelD[9][9];
+CD float gGaussSimilarity[256];
+
+HOST_DEVICE inline float GetSpatialWeight(int m, int n,int i,int j)
+{
+	return gKernelD[(int)(i-m + gKernelRadius)][(int)(j-n + gKernelRadius)];
+}
+
+HOST_DEVICE inline float Gauss(float sigma, int x, int y)
+{
+	return expf(-((x * x + y * y) / (2 * sigma * sigma)));
+}
+
+HOST_DEVICE inline float GaussianSimilarity(int p, int s)
+{
+	return gGaussSimilarity[abs(p-s)];
+}
+
+KERNEL void KrnlBilateralFilter(FrameBuffer* pFrameBuffer)
+{
+	const int X = blockIdx.x * blockDim.x + threadIdx.x;
+	const int Y = blockIdx.y * blockDim.y + threadIdx.y;
+
+	int Range[2][2] =
+	{
+		{ max(0, X - gKernelRadius), min(X + gKernelRadius, pFrameBuffer->Resolution[0] - 1) },
+		{ max(0, Y - gKernelRadius), min(Y + gKernelRadius, pFrameBuffer->Resolution[1] - 1) },
+	};
+
+    float weight = 0.0f, totalWeight = 0.0f;
+
+	ColorXYZAf sum;
+
+	ColorXYZAf intensityCenter;
+
+	intensityCenter[0] = pFrameBuffer->CudaDisplayEstimateA(X, Y)[0];
+	intensityCenter[1] = pFrameBuffer->CudaDisplayEstimateA(X, Y)[1];
+	intensityCenter[2] = pFrameBuffer->CudaDisplayEstimateA(X, Y)[2];
+	intensityCenter[3] = pFrameBuffer->CudaDisplayEstimateA(X, Y)[3];
+
+	for (int m = Range[0][0]; m < Range[0][1]; m++)
+	{
+		for (int n = Range[1][0]; n < Range[1][1]; n++)
+		{
+			ColorXYZAf intensityKernelPos;
+
+			intensityKernelPos[0] = pFrameBuffer->CudaDisplayEstimateA(m, n)[0];
+			intensityKernelPos[1] = pFrameBuffer->CudaDisplayEstimateA(m, n)[1];
+			intensityKernelPos[2] = pFrameBuffer->CudaDisplayEstimateA(m, n)[2];
+			intensityKernelPos[3] = pFrameBuffer->CudaDisplayEstimateA(m, n)[3];
+
+			weight = GetSpatialWeight(m,n,X,Y) * GaussianSimilarity(intensityKernelPos[0], intensityCenter[0]);
+			totalWeight += weight;
+			sum += (weight * intensityKernelPos);
+		}
+    }
+    pFrameBuffer->CudaDisplayEstimateB(X, Y)[0] = sum[0] / totalWeight;
+	pFrameBuffer->CudaDisplayEstimateB(X, Y)[1] = sum[1] / totalWeight;
+	pFrameBuffer->CudaDisplayEstimateB(X, Y)[2] = sum[2] / totalWeight;
+	pFrameBuffer->CudaDisplayEstimateB(X, Y)[3] = sum[3] / totalWeight;
+}
+
+void BilaterialFilter(FrameBuffer* pFrameBuffer, int Width, int Height)
+{
+	float sigmaD = 10.0f, float sigmaR = 6.0f;
+	float twoSigmaRSquared = 2 * sigmaR * sigmaR;
+	int kernelRadius = 4;
+	int kernelSize = kernelRadius * 2 + 1;
+
+	int center = (kernelSize - 1) / 2;
+	
+	float kernelD[9][9];
+
+	for (int x = -center; x < -center + kernelSize; x++)
+	{
+		for (int y = -center; y < -center + kernelSize; y++)
+		{
+			kernelD[x + center][y + center] = Gauss(sigmaD, x, y);
+		}
+	}
+
+	float gaussSimilarity[256];
+	
+	for (int i = 0; i < 256; i++)
+	{
+		gaussSimilarity[i] = expf((double)-((i) / twoSigmaRSquared));
+	}
+
+	cudaMemcpyToSymbol("gKernelRadius", &kernelRadius, sizeof(int));
+	cudaMemcpyToSymbol("gKernelD", kernelD, kernelSize * sizeof(float));
+	cudaMemcpyToSymbol("gaussSimilarity", gaussSimilarity, 256 * sizeof(float));
+
+	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
+	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+
+	KrnlBilateralFilter<<<GridDim, BlockDim>>>(pFrameBuffer);
+}
+
 KERNEL void KrnlBlend(FrameBuffer* pFrameBuffer)
 {
 	const int X = blockIdx.x * blockDim.x + threadIdx.x;
@@ -94,7 +196,7 @@ KERNEL void KrnlBlend(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-	pFrameBuffer->CudaDisplayEstimateA(X, Y) = Lerp(pFrameBuffer->CudaDisplayEstimateA(X, Y), pFrameBuffer->CudaDisplayEstimateB(X, Y), 0.0f);//expf(-(float)gScattering.NoIterations / 200.0f));
+	pFrameBuffer->CudaDisplayEstimateA(X, Y) = Lerp(pFrameBuffer->CudaDisplayEstimateA(X, Y), pFrameBuffer->CudaDisplayEstimateB(X, Y), expf(-(float)gScattering.NoIterations / 10.0f));
 }
 
 void PostProcess(FrameBuffer* pFrameBuffer, int Width, int Height)
@@ -103,6 +205,7 @@ void PostProcess(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
 	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
+	BilaterialFilter(pFrameBuffer, Width, Height);
 //	KrnlFilter<<<GridDim, BlockDim>>>(pFrameBuffer);
-//	KrnlBlend<<<GridDim, BlockDim>>>(pFrameBuffer);
+	KrnlBlend<<<GridDim, BlockDim>>>(pFrameBuffer);
 }
