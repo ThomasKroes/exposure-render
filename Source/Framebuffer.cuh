@@ -29,6 +29,7 @@ public:
 		CudaFrameBlurXyza(),
 		CudaDisplayEstimateA(),
 		CudaDisplayEstimateB(),
+		CudaDisplayFilterTemp(),
 		CudaRandomSeeds1(),
 		CudaRandomSeeds2(),
 		CudaRunningStatistics(),
@@ -58,6 +59,7 @@ public:
 		this->CudaFrameBlurXyza.Resize(this->Resolution);
 		this->CudaDisplayEstimateA.Resize(this->Resolution);
 		this->CudaDisplayEstimateB.Resize(this->Resolution);
+		this->CudaDisplayFilterTemp.Resize(this->Resolution);
 		this->CudaRandomSeeds1.Resize(this->Resolution);
 		this->CudaRandomSeeds2.Resize(this->Resolution);
 		this->CudaRunningStatistics.Resize(this->Resolution);
@@ -76,6 +78,7 @@ public:
 //		this->CudaFrameBlurXyza.Reset();
 //		this->CudaDisplayEstimateA.Reset();
 //		this->CudaDisplayEstimateB.Reset();
+		this->CudaDisplayFilterTemp.Reset();
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
 //		this->CudaRunningStatistics.Reset();
@@ -94,6 +97,7 @@ public:
 		this->CudaFrameBlurXyza.Free();
 		this->CudaDisplayEstimateA.Free();
 		this->CudaDisplayEstimateB.Free();
+		this->CudaDisplayFilterTemp.Free();
 		this->CudaRandomSeeds1.Free();
 		this->CudaRandomSeeds2.Free();
 		this->CudaRunningStatistics.Free();
@@ -122,6 +126,7 @@ public:
 	CCudaBuffer2D<ColorXYZAf, false>		CudaRunningEstimateXyza;
 	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateA;
 	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateB;
+	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayFilterTemp;
 
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateXyza;
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameBlurXyza;
