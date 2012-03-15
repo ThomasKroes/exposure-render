@@ -421,7 +421,7 @@ void ErBindFiltering(ErFiltering* pFiltering)
 		Bilateral.KernelD[x + center] = Gauss2D(pFiltering->PostProcessingFilter.SigmaD, x, 0.0f);
 
 	for (int i = 0; i < 256; i++)
-		Bilateral.GaussSimilarity[i] = expf((double)-((i) / TwoSigmaRSquared));
+		Bilateral.GaussSimilarity[i] = 1.0f;//expf(-((float)i / TwoSigmaRSquared));
 
 	CUDA_SAFE_CALL(cudaMemcpyToSymbol("gPostProcessingFilter", &Bilateral, sizeof(BilateralFilter)));
 }

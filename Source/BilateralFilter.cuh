@@ -31,7 +31,7 @@ HOST_DEVICE inline float GetSpatialWeight(const int& X, const int& KernelX)
 
 HOST_DEVICE inline float GaussianSimilarity(const ColorRGBf& A, const ColorRGBf& B)
 {
-	return gPostProcessingFilter.GaussSimilarity[(int)floorf((A - B).Length())];
+	return gPostProcessingFilter.GaussSimilarity[(int)floorf((Vec3f(A[0], A[1], A[2]) - Vec3f(B[0], B[1], B[2])).Length())];
 }
 
 HOST_DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
