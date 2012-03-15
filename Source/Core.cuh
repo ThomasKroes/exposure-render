@@ -22,7 +22,7 @@ struct ErClippers;
 struct ErReflectors;
 struct ErDenoise;
 struct ErScattering;
-struct ErBlur;
+struct ErFiltering;
 
 #define NO_GRADIENT_STEPS 256
 
@@ -52,7 +52,7 @@ __declspec(dllexport) void ErBindClippers(ErClippers* pClippers);
 __declspec(dllexport) void ErBindReflectors(ErReflectors* pReflectors);
 __declspec(dllexport) void ErBindDenoise(ErDenoise* pDenoise);
 __declspec(dllexport) void ErBindScattering(ErScattering* pScattering);
-__declspec(dllexport) void ErBindBlur(ErBlur* pBlur);
+__declspec(dllexport) void ErBindFiltering(ErFiltering* pFiltering);
 __declspec(dllexport) void ErRenderEstimate();
 __declspec(dllexport) void ErGetEstimate(unsigned char* pData);
 __declspec(dllexport) void ErRecordBenchmarkImage();

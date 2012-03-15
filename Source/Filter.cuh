@@ -13,28 +13,23 @@
 
 #pragma once
 
-#include "Geometry.cuh"
+#define MAX_GAUSSIAN_FILTER_KERNEL_SIZE		64
+#define MAX_BILATERAL_FILTER_KERNEL_SIZE	64
 
-#define KRNL_ESTIMATE_BLOCK_W		16
-#define KRNL_ESTIMATE_BLOCK_H		8
-#define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
-
-KERNEL void KrnlComputeEstimate(FrameBuffer* pFrameBuffer)
+struct GaussianFilter
 {
-	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	int		KernelRadius;
+	float	KernelD[MAX_BILATERAL_FILTER_KERNEL_SIZE];
+};
 
-	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
-		return;
-
-	pFrameBuffer->CudaRunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y), pFrameBuffer->CudaFrameEstimate.Get(X, Y), gScattering.NoIterations), X, Y);
-}
-
-void ComputeEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)
+struct BilateralFilter
 {
-	const dim3 BlockDim(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+	int		KernelRadius;
+	float	KernelD[MAX_BILATERAL_FILTER_KERNEL_SIZE];
+	float	GaussSimilarity[256];
+};
 
-	KrnlComputeEstimate<<<GridDim, BlockDim>>>(pFrameBuffer);
-	cudaThreadSynchronize();
+HOST_DEVICE float Gauss2D(const float& Sigma, const int& X, const int& Y)
+{
+	return expf(-((X * X + Y * Y) / (2 * Sigma * Sigma)));
 }

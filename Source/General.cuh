@@ -167,8 +167,20 @@ struct EXPOSURE_RENDER_DLL ErScattering
 	int					GradientComputation;
 };
 
-struct EXPOSURE_RENDER_DLL ErBlur
+struct EXPOSURE_RENDER_DLL ErFiltering
 {
-	int					FilterWidth;
-	float				FilterWeights[10];
+	struct GaussianFilterParameters
+	{
+		int		KernelRadius;
+		float	Sigma;
+	};
+
+	struct BilateralFilterParameters
+	{
+		float	SigmaD;
+		float	SigmaR;
+	};
+
+	GaussianFilterParameters	FrameEstimateFilter;
+	BilateralFilterParameters	PostProcessingFilter;
 };

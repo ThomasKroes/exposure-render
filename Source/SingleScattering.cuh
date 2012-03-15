@@ -73,7 +73,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 
-	pFrameBuffer->CudaFrameEstimateXyza.Set(L, X, Y);
+	pFrameBuffer->CudaFrameEstimate.Set(L, X, Y);
 }
 
 void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)

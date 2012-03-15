@@ -17,6 +17,7 @@
 #include "General.cuh"
 #include "Framebuffer.cuh"
 #include "Benchmark.cuh"
+#include "Filter.cuh"
 
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexExtinction;
@@ -44,16 +45,18 @@ CD ErClippers		gClippers;
 CD ErReflectors		gReflectors;
 CD ErDenoise		gDenoise;
 CD ErScattering		gScattering;
-CD ErBlur			gBlur;
 CD ErRange			gOpacityRange;
 CD ErRange			gDiffuseRange;
 CD ErRange			gSpecularRange;
 CD ErRange			gGlossinessRange;
 CD ErRange			gEmissionRange;
+CD GaussianFilter	gFrameEstimateFilter;
+CD BilateralFilter	gPostProcessingFilter;
 
 FrameBuffer FB;
 
-#include "Blur.cuh"
+#include "GaussianFilter.cuh"
+#include "BilateralFilter.cuh"
 #include "Denoise.cuh"
 #include "Estimate.cuh"
 #include "Utilities.cuh"
@@ -388,9 +391,39 @@ void ErBindScattering(ErScattering* pScattering)
 	cudaMemcpyToSymbol("gScattering", pScattering, sizeof(ErScattering));
 }
 
-void ErBindBlur(ErBlur* pBlur)
+void ErBindFiltering(ErFiltering* pFiltering)
 {
-	cudaMemcpyToSymbol("gBlur", pBlur, sizeof(ErBlur));
+	// Frame estimate filter
+	GaussianFilter Gaussian;
+	
+	Gaussian.KernelRadius = pFiltering->FrameEstimateFilter.KernelRadius;
+
+	const int KernelSize = (2 * Gaussian.KernelRadius) + 1;
+
+	for (int i = 0; i < KernelSize; i++)
+		Gaussian.KernelD[i] = Gauss2D(pFiltering->FrameEstimateFilter.Sigma, Gaussian.KernelRadius - i, 0);
+
+	CUDA_SAFE_CALL(cudaMemcpyToSymbol("gFrameEstimateFilter", &Gaussian, sizeof(GaussianFilter)));
+
+	// Post processing filter
+	BilateralFilter Bilateral;
+
+	const int SigmaMax = max(pFiltering->PostProcessingFilter.SigmaD, pFiltering->PostProcessingFilter.SigmaR);
+	
+	Bilateral.KernelRadius = ceilf(2.0f * (float)SigmaMax);  
+
+	const float TwoSigmaRSquared = 2 * pFiltering->PostProcessingFilter.SigmaR * pFiltering->PostProcessingFilter.SigmaR;
+
+	const int kernelSize = Bilateral.KernelRadius * 2 + 1;
+	const int center = (kernelSize - 1) / 2;
+
+	for (int x = -center; x < -center + kernelSize; x++)
+		Bilateral.KernelD[x + center] = Gauss2D(pFiltering->PostProcessingFilter.SigmaD, x, 0.0f);
+
+	for (int i = 0; i < 256; i++)
+		Bilateral.GaussSimilarity[i] = expf((double)-((i) / TwoSigmaRSquared));
+
+	CUDA_SAFE_CALL(cudaMemcpyToSymbol("gPostProcessingFilter", &Bilateral, sizeof(BilateralFilter)));
 }
 
 void ErRenderEstimate()
@@ -400,21 +433,22 @@ void ErRenderEstimate()
 	cudaMemcpy(pDevFrameBuffer, &FB, sizeof(FrameBuffer), cudaMemcpyHostToDevice);
 
 	SingleScattering(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
-	BlurEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
+	FilterGaussian(FB.CudaFrameEstimate.GetPtr(), FB.CudaFrameEstimateTemp.GetPtr(), FB.Resolution[0], FB.Resolution[1]);
 	ComputeEstimate(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
 	PostProcess(pDevFrameBuffer, FB.Resolution[0], FB.Resolution[1]);
- 
+	FilterBilateral(FB.CudaDisplayEstimate.GetPtr(), FB.CudaDisplayEstimateTemp.GetPtr(), FB.Resolution[0], FB.Resolution[1]);
+
 	cudaFree(pDevFrameBuffer);
 }
 
 void ErGetEstimate(unsigned char* pData)
 {
-	cudaMemcpy(pData, FB.CudaDisplayEstimateA.GetPtr(), FB.CudaDisplayEstimateA.GetSize(), cudaMemcpyDeviceToHost);
+	cudaMemcpy(pData, FB.CudaDisplayEstimate.GetPtr(), FB.CudaDisplayEstimate.GetSize(), cudaMemcpyDeviceToHost);
 }
 
 void ErRecordBenchmarkImage()
 {
-	cudaMemcpy(FB.BenchmarkEstimateRgbaLdr.GetPtr(), FB.CudaDisplayEstimateA.GetPtr(), FB.CudaDisplayEstimateA.GetSize(), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(FB.BenchmarkEstimateRgbaLdr.GetPtr(), FB.CudaDisplayEstimate.GetPtr(), FB.CudaDisplayEstimate.GetSize(), cudaMemcpyDeviceToDevice);
 }
 
 void ErGetRunningVariance(float& RunningVariance)

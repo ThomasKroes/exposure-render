@@ -118,9 +118,9 @@ KERNEL void KrnlComputeEstimateMetropolis(FrameBuffer* pFrameBuffer, float Avera
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-//	pFrameBuffer->CudaFrameEstimateXyza(X, Y) += pFrameBuffer->CudaFrameEstimateTestXyza(X, Y);
+//	pFrameBuffer->CudaFrameEstimate(X, Y) += pFrameBuffer->CudaFrameEstimateTestXyza(X, Y);
 
-//	pFrameBuffer->CudaRunningEstimateXyza(X, Y) = pFrameBuffer->CudaFrameEstimateXyza(X, Y) * AverageLuminance / SPP / 4.0f;
+//	pFrameBuffer->CudaRunningEstimateXyza(X, Y) = pFrameBuffer->CudaFrameEstimate(X, Y) * AverageLuminance / SPP / 4.0f;
 }
 
 void ComputeEstimateMetropolis(FrameBuffer* pFrameBuffer, int Width, int Height)

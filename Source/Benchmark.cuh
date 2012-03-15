@@ -29,7 +29,7 @@ KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-	ColorRGBAuc& RunningEstimate	= *pFrameBuffer->CudaDisplayEstimateA.GetPtr(X, Y);
+	ColorRGBAuc& RunningEstimate	= *pFrameBuffer->CudaDisplayEstimate.GetPtr(X, Y);
 	ColorRGBAuc& ReferenceEstimate	= *pFrameBuffer->BenchmarkEstimateRgbaLdr.GetPtr(X, Y);
 
 	const float ErrorRGB[3] = 

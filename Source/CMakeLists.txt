@@ -61,7 +61,6 @@ SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 # General
 SET(ErCudaGeneral
 	SingleScattering.cuh
-	Blur.cuh
 	Utilities.cuh
 	Geometry.cuh
 	Core.cuh
@@ -109,8 +108,18 @@ SET(ErCudaShapes
 # Shapes group
 SOURCE_GROUP("Shapes" FILES ${ErCudaShapes})
 
+# Filters
+SET(ErCudaFilters
+	Filter.cuh
+	BilateralFilter.cuh
+	GaussianFilter.cuh
+)
+
+# Filters group
+SOURCE_GROUP("Filters" FILES ${ErCudaFilters})
+
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} SHARED)
+CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErCudaFilters} SHARED)
 
 # This is hack, we need a more elegant solution for this!
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)

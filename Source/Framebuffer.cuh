@@ -25,13 +25,15 @@ public:
 	FrameBuffer(void) :
 		Resolution(),
 		CudaRunningEstimateXyza(),
-		CudaFrameEstimateXyza(),
-		CudaFrameBlurXyza(),
-		CudaDisplayEstimateA(),
-		CudaDisplayEstimateB(),
+		CudaFrameEstimate(),
+		CudaFrameEstimateTemp(),
+		CudaDisplayEstimate(),
+		CudaDisplayEstimateTemp(),
 		CudaDisplayFilterTemp(),
 		CudaRandomSeeds1(),
 		CudaRandomSeeds2(),
+		CudaRandomSeedsCopy1(),
+		CudaRandomSeedsCopy2(),
 		CudaRunningStatistics(),
 		CudaVariance(),
 		BenchmarkEstimateRgbaLdr(),
@@ -55,13 +57,15 @@ public:
 		this->Resolution = Resolution;
 
 		this->CudaRunningEstimateXyza.Resize(this->Resolution);
-		this->CudaFrameEstimateXyza.Resize(this->Resolution);
-		this->CudaFrameBlurXyza.Resize(this->Resolution);
-		this->CudaDisplayEstimateA.Resize(this->Resolution);
-		this->CudaDisplayEstimateB.Resize(this->Resolution);
+		this->CudaFrameEstimate.Resize(this->Resolution);
+		this->CudaFrameEstimateTemp.Resize(this->Resolution);
+		this->CudaDisplayEstimate.Resize(this->Resolution);
+		this->CudaDisplayEstimateTemp.Resize(this->Resolution);
 		this->CudaDisplayFilterTemp.Resize(this->Resolution);
 		this->CudaRandomSeeds1.Resize(this->Resolution);
 		this->CudaRandomSeeds2.Resize(this->Resolution);
+		this->CudaRandomSeedsCopy1.Resize(this->Resolution);
+		this->CudaRandomSeedsCopy2.Resize(this->Resolution);
 		this->CudaRunningStatistics.Resize(this->Resolution);
 		this->CudaVariance.Resize(this->Resolution);
 		this->BenchmarkEstimateRgbaLdr.Resize(this->Resolution);
@@ -69,18 +73,25 @@ public:
 //		this->CudaMetroSamples.Resize(Resolution2i(MetroSize));
 //		this->CudaNoIterations.Resize(this->Resolution);
 //		this->CudaPixelLuminance.Resize(this->Resolution);
+
+		cudaMemcpy(CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetSize(), cudaMemcpyDeviceToDevice);
+		cudaMemcpy(CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetSize(), cudaMemcpyDeviceToDevice);
+
+		this->Reset();
 	}
 
 	void Reset(void)
 	{
 //		this->CudaRunningEstimateXyza.Reset();
-		this->CudaFrameEstimateXyza.Reset();
-//		this->CudaFrameBlurXyza.Reset();
-//		this->CudaDisplayEstimateA.Reset();
-//		this->CudaDisplayEstimateB.Reset();
+		this->CudaFrameEstimate.Reset();
+//		this->CudaFrameEstimateTemp.Reset();
+//		this->CudaDisplayEstimate.Reset();
+//		this->CudaDisplayEstimateTemp.Reset();
 		this->CudaDisplayFilterTemp.Reset();
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
+//		this->CudaRandomSeedsCopy1.Reset();
+//		this->CudaRandomSeedsCopy2.Reset();
 //		this->CudaRunningStatistics.Reset();
 //		this->CudaVariance.Reset();
 //		this->BenchmarkEstimateRgbaLdr.Reset();
@@ -88,18 +99,23 @@ public:
 //		this->CudaMetroSamples.Reset();
 //		this->CudaNoIterations.Reset();
 //		this->CudaPixelLuminance.Reset();
+
+		cudaMemcpy(CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeedsCopy1.GetSize(), cudaMemcpyDeviceToDevice);
+		cudaMemcpy(CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeedsCopy2.GetSize(), cudaMemcpyDeviceToDevice);
 	}
 
 	void Free(void)
 	{
 		this->CudaRunningEstimateXyza.Free();
-		this->CudaFrameEstimateXyza.Free();
-		this->CudaFrameBlurXyza.Free();
-		this->CudaDisplayEstimateA.Free();
-		this->CudaDisplayEstimateB.Free();
+		this->CudaFrameEstimate.Free();
+		this->CudaFrameEstimateTemp.Free();
+		this->CudaDisplayEstimate.Free();
+		this->CudaDisplayEstimateTemp.Free();
 		this->CudaDisplayFilterTemp.Free();
 		this->CudaRandomSeeds1.Free();
 		this->CudaRandomSeeds2.Free();
+		this->CudaRandomSeedsCopy1.Free();
+		this->CudaRandomSeedsCopy2.Free();
 		this->CudaRunningStatistics.Free();
 		this->CudaVariance.Free();
 		this->BenchmarkEstimateRgbaLdr.Free();
@@ -124,15 +140,17 @@ public:
 	Resolution2i							Resolution;
 	
 	CCudaBuffer2D<ColorXYZAf, false>		CudaRunningEstimateXyza;
-	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateA;
-	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateB;
+	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimate;
+	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateTemp;
 	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayFilterTemp;
 
-	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateXyza;
-	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameBlurXyza;
+	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimate;
+	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateTemp;
 	
 	CCudaRandomBuffer2D						CudaRandomSeeds1;
 	CCudaRandomBuffer2D						CudaRandomSeeds2;
+	CCudaRandomBuffer2D						CudaRandomSeedsCopy1;
+	CCudaRandomBuffer2D						CudaRandomSeedsCopy2;
 
 	// Variance
 	CCudaBuffer2D<RunningStats, false>		CudaRunningStatistics;
