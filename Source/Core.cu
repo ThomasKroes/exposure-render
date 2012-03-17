@@ -143,8 +143,7 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 void ErUnbindDensityBuffer(void)
 {
 	CUDA::FreeArray(gpIntensity);
-	gpIntensity = NULL;
-	cudaUnbindTexture(gTexIntensity);
+	CUDA::UnbindTexture(gTexIntensity);
 }
 
 void ErBindExtinctionBuffer(unsigned short* pBuffer, int Extent[3])
@@ -287,36 +286,31 @@ void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2])
 void ErUnbindOpacity1D(void)
 {
 	CUDA::FreeArray(gpOpacity);
-	gpOpacity = NULL;
-	cudaUnbindTexture(gTexOpacity);
+	CUDA::UnbindTexture(gTexOpacity);
 }
 
 void ErUnbindDiffuse1D(void)
 {
 	CUDA::FreeArray(gpDiffuse);
-	gpDiffuse = NULL;
-	cudaUnbindTexture(gTexDiffuse);
+	CUDA::UnbindTexture(gTexDiffuse);
 }
 
 void ErUnbindSpecular1D(void)
 {
 	CUDA::FreeArray(gpSpecular);
-	gpSpecular	= NULL;
-	cudaUnbindTexture(gTexSpecular);
+	CUDA::UnbindTexture(gTexSpecular);
 }
 
 void ErUnbindGlossiness1D(void)
 {
 	CUDA::FreeArray(gpGlossiness);
-	gpGlossiness = NULL;
-	cudaUnbindTexture(gTexGlossiness);
+	CUDA::UnbindTexture(gTexGlossiness);
 }
 
 void ErUnbindEmission1D(void)
 {
 	CUDA::FreeArray(gpEmission);
-	gpEmission	= NULL;
-	cudaUnbindTexture(gTexEmission);
+	CUDA::UnbindTexture(gTexEmission);
 }
 
 void ErBindVolume(ErVolume* pVolume)

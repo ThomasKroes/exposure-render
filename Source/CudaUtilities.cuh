@@ -152,8 +152,15 @@ public:
 		HandleCudaError(cudaMemcpy(pDeviceDestination, pDeviceSource, Num * sizeof(T), cudaMemcpyDeviceToDevice));
 	}
 
-	static void FreeArray(cudaArray* pCudaArray)
+	static void FreeArray(cudaArray*& pCudaArray)
 	{
 		HandleCudaError(cudaFreeArray(pCudaArray));
+		pCudaArray = NULL;
 	}
+
+	static void UnbindTexture(textureReference& pTextureReference)
+	{
+		HandleCudaError(cudaUnbindTexture(&pTextureReference));
+	}
+
 };
