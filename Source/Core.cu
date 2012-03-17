@@ -142,7 +142,7 @@ void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 
 void ErUnbindDensityBuffer(void)
 {
-	cudaFreeArray(gpIntensity);
+	CUDA::FreeArray(gpIntensity);
 	gpIntensity = NULL;
 	cudaUnbindTexture(gTexIntensity);
 }
@@ -178,7 +178,7 @@ void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	Cuda::HostToConstantDevice(&Int, "gOpacityRange");
+	CUDA::HostToConstantDevice(&Int, "gOpacityRange");
 
 	gTexOpacity.normalized		= true;
 	gTexOpacity.filterMode		= cudaFilterModeLinear;
@@ -196,7 +196,7 @@ void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	Cuda::HostToConstantDevice(&Int, "gDiffuseRange");
+	CUDA::HostToConstantDevice(&Int, "gDiffuseRange");
 
 	gTexDiffuse.normalized		= true;
 	gTexDiffuse.filterMode		= cudaFilterModeLinear;
@@ -221,7 +221,7 @@ void ErBindSpecular1D(float Specular[3][NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	Cuda::HostToConstantDevice(&Int, "gSpecularRange");
+	CUDA::HostToConstantDevice(&Int, "gSpecularRange");
 
 	gTexSpecular.normalized		= true;
 	gTexSpecular.filterMode		= cudaFilterModeLinear;
@@ -246,7 +246,7 @@ void ErBindGlossiness1D(float Glossiness[NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	Cuda::HostToConstantDevice(&Int, "gGlossinessRange");
+	CUDA::HostToConstantDevice(&Int, "gGlossinessRange");
 
 	gTexGlossiness.normalized		= true;
 	gTexGlossiness.filterMode		= cudaFilterModeLinear;
@@ -264,7 +264,7 @@ void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2])
 	ErRange Int;
 	Int.Set(Range);
 
-	Cuda::HostToConstantDevice(&Int, "gEmissionRange");
+	CUDA::HostToConstantDevice(&Int, "gEmissionRange");
 
 	gTexEmission.normalized		= true;
 	gTexEmission.filterMode		= cudaFilterModeLinear;
@@ -286,42 +286,42 @@ void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2])
 
 void ErUnbindOpacity1D(void)
 {
-	cudaFreeArray(gpOpacity);
+	CUDA::FreeArray(gpOpacity);
 	gpOpacity = NULL;
 	cudaUnbindTexture(gTexOpacity);
 }
 
 void ErUnbindDiffuse1D(void)
 {
-	cudaFreeArray(gpDiffuse);
+	CUDA::FreeArray(gpDiffuse);
 	gpDiffuse = NULL;
 	cudaUnbindTexture(gTexDiffuse);
 }
 
 void ErUnbindSpecular1D(void)
 {
-	cudaFreeArray(gpSpecular);
+	CUDA::FreeArray(gpSpecular);
 	gpSpecular	= NULL;
 	cudaUnbindTexture(gTexSpecular);
 }
 
 void ErUnbindGlossiness1D(void)
 {
-	cudaFreeArray(gpGlossiness);
+	CUDA::FreeArray(gpGlossiness);
 	gpGlossiness = NULL;
 	cudaUnbindTexture(gTexGlossiness);
 }
 
 void ErUnbindEmission1D(void)
 {
-	cudaFreeArray(gpEmission);
+	CUDA::FreeArray(gpEmission);
 	gpEmission	= NULL;
 	cudaUnbindTexture(gTexEmission);
 }
 
 void ErBindVolume(ErVolume* pVolume)
 {
-	Cuda::HostToConstantDevice(pVolume, "gVolume");
+	CUDA::HostToConstantDevice(pVolume, "gVolume");
 }
 
 void ErBindCamera(ErCamera* pCamera)
@@ -367,32 +367,32 @@ void ErBindCamera(ErCamera* pCamera)
 	pCamera->InvScreen[0] = (pCamera->Screen[0][1] - pCamera->Screen[0][0]) / (float)pCamera->FilmWidth;
 	pCamera->InvScreen[1] = (pCamera->Screen[1][1] - pCamera->Screen[1][0]) / (float)pCamera->FilmHeight;
 
-	Cuda::HostToConstantDevice(pCamera, "gCamera");
+	CUDA::HostToConstantDevice(pCamera, "gCamera");
 }
 
 void ErBindLights(ErLights* pLights)
 {
-	Cuda::HostToConstantDevice(pLights, "gLights");
+	CUDA::HostToConstantDevice(pLights, "gLights");
 }
 
 void ErBindClippers(ErClippers* pClippers)
 {
-	Cuda::HostToConstantDevice(pClippers, "gClippers");
+	CUDA::HostToConstantDevice(pClippers, "gClippers");
 }
 
 void ErBindReflectors(ErReflectors* pReflectors)
 {
-	Cuda::HostToConstantDevice(pReflectors, "gReflectors");
+	CUDA::HostToConstantDevice(pReflectors, "gReflectors");
 }
 
 void ErBindDenoise(ErDenoise* pDenoise)
 {
-	Cuda::HostToConstantDevice(pDenoise, "gDenoise");
+	CUDA::HostToConstantDevice(pDenoise, "gDenoise");
 }
 
 void ErBindScattering(ErScattering* pScattering)
 {
-	Cuda::HostToConstantDevice(pScattering, "gScattering");
+	CUDA::HostToConstantDevice(pScattering, "gScattering");
 }
 
 void ErBindFiltering(ErFiltering* pFiltering)
@@ -407,7 +407,7 @@ void ErBindFiltering(ErFiltering* pFiltering)
 	for (int i = 0; i < KernelSize; i++)
 		Gaussian.KernelD[i] = Gauss2D(pFiltering->FrameEstimateFilter.Sigma, Gaussian.KernelRadius - i, 0);
 
-	Cuda::HostToConstantDevice(&Gaussian, "gFrameEstimateFilter");
+	CUDA::HostToConstantDevice(&Gaussian, "gFrameEstimateFilter");
 
 	// Post processing filter
 	BilateralFilter Bilateral;
@@ -427,14 +427,14 @@ void ErBindFiltering(ErFiltering* pFiltering)
 	for (int i = 0; i < 256; i++)
 		Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
 
-	Cuda::HostToConstantDevice(&Bilateral, "gPostProcessingFilter");
+	CUDA::HostToConstantDevice(&Bilateral, "gPostProcessingFilter");
 }
 
 void ErRenderEstimate()
 {
 	FrameBuffer* pDevFrameBuffer = NULL;
 	cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer));
-	cudaMemcpy(pDevFrameBuffer, &gFrameBuffer, sizeof(FrameBuffer), cudaMemcpyHostToDevice);
+	CUDA::MemCopyHostToDevice(&gFrameBuffer, pDevFrameBuffer);
 
 	SingleScattering(pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 	FilterGaussian(gFrameBuffer.CudaFrameEstimate.GetPtr(), gFrameBuffer.CudaFrameEstimateTemp.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
@@ -448,12 +448,12 @@ void ErRenderEstimate()
 
 void ErGetEstimate(unsigned char* pData)
 {
-	cudaMemcpy(pData, gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetSize(), cudaMemcpyDeviceToHost);
+	CUDA::MemCopyDeviceToHost(gFrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
 void ErRecordBenchmarkImage()
 {
-	cudaMemcpy(gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetSize(), cudaMemcpyDeviceToDevice);
+	CUDA::MemCopyDeviceToDevice(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
 void ErGetRunningVariance(float& RunningVariance)
@@ -475,7 +475,7 @@ void ErGetAverageNrmsError(float& AverageNrmsError)
 {
 	FrameBuffer* pDevFrameBuffer = NULL;
 	cudaMalloc(&pDevFrameBuffer, sizeof(FrameBuffer));
-	cudaMemcpy(pDevFrameBuffer, &gFrameBuffer, sizeof(FrameBuffer), cudaMemcpyHostToDevice);
+	CUDA::MemCopyHostToDevice(&gFrameBuffer, pDevFrameBuffer);
 
 	ComputeAverageNrmsError(gFrameBuffer, pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1], AverageNrmsError);
 

@@ -123,7 +123,7 @@ void GetCudaErrorString(const cudaError_t& CudaError, char* pErrorString)
 }
 */
 
-class Cuda
+class CUDA
 {
 public:
 	static void HandleCudaError(const cudaError_t& CudaError)
@@ -132,8 +132,28 @@ public:
 			throw("CUDA Error", cudaGetErrorString(CudaError));
 	}
 
-	template<class T> static void HostToConstantDevice(T* pHost, char* pSymbol, int Size = 1)
+	template<class T> static void HostToConstantDevice(T* pHost, char* pSymbol, int Num = 1)
 	{
-		HandleCudaError(cudaMemcpyToSymbol(pSymbol, pHost, Size * sizeof(T)));
+		HandleCudaError(cudaMemcpyToSymbol(pSymbol, pHost, Num * sizeof(T)));
+	}
+
+	template<class T> static void MemCopyHostToDevice(T* pHost, T* pDevice, int Num = 1)
+	{
+		HandleCudaError(cudaMemcpy(pDevice, pHost, Num * sizeof(T), cudaMemcpyHostToDevice));
+	}
+
+	template<class T> static void MemCopyDeviceToHost(T* pDevice, T* pHost, int Num = 1)
+	{
+		HandleCudaError(cudaMemcpy(pHost, pDevice, Num * sizeof(T), cudaMemcpyDeviceToHost));
+	}
+
+	template<class T> static void MemCopyDeviceToDevice(T* pDeviceSource, T* pDeviceDestination, int Num = 1)
+	{
+		HandleCudaError(cudaMemcpy(pDeviceDestination, pDeviceSource, Num * sizeof(T), cudaMemcpyDeviceToDevice));
+	}
+
+	static void FreeArray(cudaArray* pCudaArray)
+	{
+		HandleCudaError(cudaFreeArray(pCudaArray));
 	}
 };
