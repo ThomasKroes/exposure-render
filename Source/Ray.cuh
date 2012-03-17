@@ -25,7 +25,7 @@ struct Ray
 		this->MaxT	= MaxT;
 	}
 
-	DEVICE Ray& operator=(const Ray& Other)
+	DEVICE Ray& operator = (const Ray& Other)
 	{
 		this->O		= Other.O;
 		this->D		= Other.D;

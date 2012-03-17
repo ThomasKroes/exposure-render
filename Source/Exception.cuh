@@ -12,32 +12,3 @@
 */
 
 #pragma once
-
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-
-#define KRNL_BLOCK_SIZE 8
-
-class CCudaTimer
-{
-public:
-	CCudaTimer(void);
-	virtual ~CCudaTimer(void);
-
-	void	StartTimer(void);
-	float	StopTimer(void);
-	float	ElapsedTime(void);
-
-private:
-	bool			m_Started;
-	cudaEvent_t 	m_EventStart;
-	cudaEvent_t 	m_EventStop;
-};
-
-bool InitializeCuda(void);
-int GetTotalCudaMemory(void);
-int GetAvailableCudaMemory(void);
-int GetUsedCudaMemory(void);
-int GetMaxGigaFlopsDeviceID(void);
-bool SetCudaDevice(const int& CudaDeviceID);
-void ResetDevice(void);

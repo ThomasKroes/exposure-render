@@ -15,7 +15,6 @@
 #pragma once
 
 #include "Geometry.cuh"
-#include "CudaUtilities.h"
 
 #define KRNL_SINGLE_SCATTERING_BLOCK_W		16
 #define KRNL_SINGLE_SCATTERING_BLOCK_H		8

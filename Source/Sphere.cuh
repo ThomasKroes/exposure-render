@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "CudaUtilities.h"
-
 #include "MonteCarlo.cuh"
 
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code

@@ -50,11 +50,6 @@ INCLUDE_DIRECTORIES(
 # Export symbols
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
 
-# Exposure Render core sources
-SET(vtkErCoreSources
-	CudaUtilities.cpp
-)
-
 # Make the "Core" source group
 SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 
@@ -62,13 +57,13 @@ SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 SET(ErCudaGeneral
 	SingleScattering.cuh
 	Utilities.cuh
+	CudaUtilities.cuh
 	Geometry.cuh
 	Core.cuh
 	Estimate.cuh
 	Transport.cuh
 	RayMarching.cuh
 	Denoise.cuh
-	ToneMap.cuh
 	Shader.cuh
 	Sample.cuh
 	RNG.cuh
@@ -87,9 +82,8 @@ SET(ErCudaGeneral
 	Benchmark.cuh
 	GradientMagnitude.cuh
 	AutoFocus.cuh
+	Exception.cuh
 	Core.cu
-	CudaUtilities.h
-	CudaUtilities.cpp
 )
 
 # General group
@@ -113,6 +107,8 @@ SET(ErCudaFilters
 	Filter.cuh
 	BilateralFilter.cuh
 	GaussianFilter.cuh
+	Blend.cuh
+	ToneMap.cuh
 )
 
 # Filters group

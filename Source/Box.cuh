@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "CudaUtilities.h"
-
 #include "Geometry.cuh"
 
 DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)

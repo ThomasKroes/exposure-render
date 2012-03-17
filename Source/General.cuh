@@ -13,11 +13,40 @@
 
 #pragma once
 
+#include <cstdio>
+
 #ifdef _EXPORTING
 	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
 #else
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
+
+#define	MAX_NO_TIMINGS	64
+#define	MAX_CHAR_SIZE	256
+
+struct EXPOSURE_RENDER_DLL ErException
+{
+	char	Title[MAX_CHAR_SIZE];
+	char	Description[MAX_CHAR_SIZE];
+	
+	ErException(const char* pTitle, const char* pDescription)
+	{
+		sprintf_s(Title, MAX_CHAR_SIZE, "%s", pTitle);
+		sprintf_s(Description, MAX_CHAR_SIZE, "%s", pDescription);
+	}
+};
+
+struct EXPOSURE_RENDER_DLL ErTiming
+{
+	char	Title;
+	char	Description;
+	float	ElapsedTime;
+};
+
+struct EXPOSURE_RENDER_DLL ErTimings
+{
+	ErTiming	Timings[MAX_NO_TIMINGS];
+};
 
 struct EXPOSURE_RENDER_DLL ErRange
 {

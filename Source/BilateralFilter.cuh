@@ -31,7 +31,7 @@ HOST_DEVICE inline float GetSpatialWeight(const int& X, const int& KernelX)
 
 HOST_DEVICE inline float GaussianSimilarity(const ColorRGBf& A, const ColorRGBf& B)
 {
-	return gPostProcessingFilter.GaussSimilarity[(int)floorf((Vec3f(A[0], A[1], A[2]) - Vec3f(B[0], B[1], B[2])).Length())];
+	return gPostProcessingFilter.GaussSimilarity[(int)fabs(LuminanceFromRGB(A[0], A[1], A[2]) - LuminanceFromRGB(B[0], B[1], B[2]))];//(int)floorf(A[0] - B[0])];
 }
 
 HOST_DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
@@ -189,11 +189,11 @@ KERNEL void KrnlBilateralFilterVertical(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int
 	}
 }
 
-void FilterBilateral(ColorRGBAuc* pImage, ColorRGBAuc* pTemp, int Width, int Height)
+void FilterBilateral(ColorRGBAuc* pImage, ColorRGBAuc* pTemp, ColorRGBAuc* pOut, int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_BILATERAL_FILTER_BLOCK_W, KRNL_BILATERAL_FILTER_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
 	KrnlBilateralFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height);
-	KrnlBilateralFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage, Width, Height);
+	KrnlBilateralFilterVertical<<<GridDim, BlockDim>>>(pTemp, pOut, Width, Height);
 }

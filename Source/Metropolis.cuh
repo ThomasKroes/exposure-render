@@ -128,10 +128,10 @@ void ComputeEstimateMetropolis(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 BlockDim(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	thrust::device_ptr<int> DevPtrSumNoMetro(FB.CudaNoIterations.GetPtr()); 
+	thrust::device_ptr<int> DevPtrSumNoMetro(gFrameBuffer.CudaNoIterations.GetPtr()); 
 	int SumNoMetro = thrust::reduce(DevPtrSumNoMetro, DevPtrSumNoMetro + Width * Height);
 
-	thrust::device_ptr<float> DevPtrSumPixelLuminance(FB.CudaPixelLuminance.GetPtr()); 
+	thrust::device_ptr<float> DevPtrSumPixelLuminance(gFrameBuffer.CudaPixelLuminance.GetPtr()); 
 	float SumLuminance = thrust::reduce(DevPtrSumPixelLuminance, DevPtrSumPixelLuminance + Width * Height);
 	
 	float AverageLuminance = SumLuminance / (float)SumNoMetro;

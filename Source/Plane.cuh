@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "CudaUtilities.h"
-
 #include "Geometry.cuh"
 #include "Sample.cuh"
 

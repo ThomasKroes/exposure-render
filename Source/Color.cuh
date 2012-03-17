@@ -15,13 +15,17 @@
 
 #include "Vector.cuh"
 
+HOST_DEVICE inline float LuminanceFromRGB(const float& R, const float& G, const float& B)
+{
+	return Clamp(0.3f * R + 0.59f * G + 0.11f * B, 0.0f, 255.0f);
+}
+
 HOST_DEVICE inline void XYZToRGB(const float xyz[3], float rgb[3])
 {
 	rgb[0] =  3.240479f*xyz[0] - 1.537150f*xyz[1] - 0.498535f*xyz[2];
 	rgb[1] = -0.969256f*xyz[0] + 1.875991f*xyz[1] + 0.041556f*xyz[2];
 	rgb[2] =  0.055648f*xyz[0] - 0.204043f*xyz[1] + 1.057311f*xyz[2];
 }
-
 
 HOST_DEVICE inline void RGBToXYZ(const float rgb[3], float xyz[3])
 {

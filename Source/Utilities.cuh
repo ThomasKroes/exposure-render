@@ -387,13 +387,43 @@ DEVICE void SampleCamera(Ray& Rc, CameraSample& CS, const int& X, const int& Y)
 
 	if (gCamera.ApertureSize != 0.0f)
 	{
-		const Vec2f LensUV = gCamera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
+		// sample N-gon
+        // FIXME: this could use concentric sampling
+		float lensSides = 6.0f;
+		float lensRotationRadians = 0.0f;
+        float lensY = CS.LensUV[0] * lensSides;
+        float side = (int)lensY;
+        float offs = (float) lensY - side;
+        float dist = (float) sqrtf(CS.LensUV[1]);
+        float a0 = (float) (side * PI_F * 2.0f / lensSides + lensRotationRadians);
+        float a1 = (float) ((side + 1.0f) * PI_F * 2.0f / lensSides + lensRotationRadians);
+        float eyeX = (float) ((cos(a0) * (1.0f - offs) + cos(a1) * offs) * dist);
+        float eyeY = (float) ((sin(a0) * (1.0f - offs) + sin(a1) * offs) * dist);
+        eyeX *= gCamera.ApertureSize;
+        eyeY *= gCamera.ApertureSize;
+
+		const Vec2f LensUV(eyeX, eyeY);// = gCamera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
 
 		const Vec3f LI = ToVec3f(gCamera.U) * LensUV[0] + ToVec3f(gCamera.V) * LensUV[1];
 
 		Rc.O += LI;
 		Rc.D = Normalize(Rc.D * gCamera.FocalDistance - LI);
 	}
+
+	/*
+	// sample N-gon
+            // FIXME: this could use concentric sampling
+            lensY *= lensSides;
+            float side = (int) lensY;
+            float offs = (float) lensY - side;
+            float dist = (float) Math.sqrt(lensX);
+            float a0 = (float) (side * Math.PI * 2.0f / lensSides + lensRotationRadians);
+            float a1 = (float) ((side + 1.0f) * Math.PI * 2.0f / lensSides + lensRotationRadians);
+            eyeX = (float) ((Math.cos(a0) * (1.0f - offs) + Math.cos(a1) * offs) * dist);
+            eyeY = (float) ((Math.sin(a0) * (1.0f - offs) + Math.sin(a1) * offs) * dist);
+            eyeX *= lensRadius;
+            eyeY *= lensRadius;
+			*/
 }
 
 DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)

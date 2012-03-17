@@ -12,7 +12,6 @@
 */
 
 #include "Utilities.cuh"
-#include "CudaUtilities.h"
 
 #define KRNL_DENOISE_BLOCK_W		16
 #define KRNL_DENOISE_BLOCK_H		8

@@ -15,33 +15,26 @@
 
 #include "Geometry.cuh"
 
-#define KRNL_TONE_MAP_BLOCK_W		16 
-#define KRNL_TONE_MAP_BLOCK_H		8
-#define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
+#define KRNL_BLEND_BLOCK_W		8 
+#define KRNL_BLEND_BLOCK_H		8
+#define KRNL_BLEND_BLOCK_SIZE	KRNL_BLEND_BLOCK_W * KRNL_BLEND_BLOCK_H
 
-// http://code.google.com/p/bilateralfilter/source/browse/trunk/BilateralFilter.cpp?r=3
-// http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
-
-KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
+KERNEL void KrnlBlend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Width, int Height)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	const int PID	= Y * Width + X;
 
-	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
+	if (X >= Width || Y >= Height)
 		return;
 
-	const ColorRGBuc L1 = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
-
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[0] = L1[0];
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[1] = L1[1];
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[2] = L1[2];
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[3] = pFrameBuffer->CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
+	pImage[PID] = Lerp(pImage[PID], pImageFiltered[PID], gScattering.NoIterations <= 1000 ? powf(1.0f / (float)gScattering.NoIterations, 2.0f): 0.0f);
 }
 
-void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)
+void Blend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Width, int Height)
 {
-	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
+	const dim3 BlockDim(KRNL_BLEND_BLOCK_W, KRNL_BLEND_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
+	KrnlBlend<<<GridDim, BlockDim>>>(pImage, pImageFiltered, Width, Height);
 }

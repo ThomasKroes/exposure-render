@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "CudaUtilities.h"
-
 #include "Buffer.cuh"
 #include "Statistics.cuh"
 #include "Sample.cuh"
@@ -29,7 +27,7 @@ public:
 		CudaFrameEstimateTemp(),
 		CudaDisplayEstimate(),
 		CudaDisplayEstimateTemp(),
-		CudaDisplayFilterTemp(),
+		CudaDisplayEstimateFiltered(),
 		CudaRandomSeeds1(),
 		CudaRandomSeeds2(),
 		CudaRandomSeedsCopy1(),
@@ -61,7 +59,7 @@ public:
 		this->CudaFrameEstimateTemp.Resize(this->Resolution);
 		this->CudaDisplayEstimate.Resize(this->Resolution);
 		this->CudaDisplayEstimateTemp.Resize(this->Resolution);
-		this->CudaDisplayFilterTemp.Resize(this->Resolution);
+		this->CudaDisplayEstimateFiltered.Resize(this->Resolution);
 		this->CudaRandomSeeds1.Resize(this->Resolution);
 		this->CudaRandomSeeds2.Resize(this->Resolution);
 		this->CudaRandomSeedsCopy1.Resize(this->Resolution);
@@ -87,7 +85,7 @@ public:
 //		this->CudaFrameEstimateTemp.Reset();
 //		this->CudaDisplayEstimate.Reset();
 //		this->CudaDisplayEstimateTemp.Reset();
-		this->CudaDisplayFilterTemp.Reset();
+		this->CudaDisplayEstimateFiltered.Reset();
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
 //		this->CudaRandomSeedsCopy1.Reset();
@@ -111,7 +109,7 @@ public:
 		this->CudaFrameEstimateTemp.Free();
 		this->CudaDisplayEstimate.Free();
 		this->CudaDisplayEstimateTemp.Free();
-		this->CudaDisplayFilterTemp.Free();
+		this->CudaDisplayEstimateFiltered.Free();
 		this->CudaRandomSeeds1.Free();
 		this->CudaRandomSeeds2.Free();
 		this->CudaRandomSeedsCopy1.Free();
@@ -142,7 +140,7 @@ public:
 	CCudaBuffer2D<ColorXYZAf, false>		CudaRunningEstimateXyza;
 	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimate;
 	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateTemp;
-	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayFilterTemp;
+	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateFiltered;
 
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimate;
 	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateTemp;
