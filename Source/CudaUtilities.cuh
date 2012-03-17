@@ -163,4 +163,30 @@ public:
 		HandleCudaError(cudaUnbindTexture(&pTextureReference));
 	}
 
+
+	template<class T> static void BindTexture3D(textureReference& TextureReference, int Extent[3], const T* pBuffer, cudaArray*& pCudaArray, cudaTextureFilterMode TextureFilterMode = cudaFilterModeLinear, cudaTextureAddressMode TextureAddressMode = cudaAddressModeClamp, bool Normalized = true)
+	{
+		cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
+
+		const cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
+
+		HandleCudaError(cudaMalloc3DArray(&pCudaArray, &ChannelDescription, CudaExtent));
+
+		cudaMemcpy3DParms CopyParams = {0};
+
+		CopyParams.srcPtr		= make_cudaPitchedPtr((void*)pBuffer, CudaExtent.width * sizeof(unsigned short), CudaExtent.width, CudaExtent.height);
+		CopyParams.dstArray		= pCudaArray;
+		CopyParams.extent		= CudaExtent;
+		CopyParams.kind			= cudaMemcpyHostToDevice;
+		
+		HandleCudaError(cudaMemcpy3D(&CopyParams));
+
+		TextureReference.normalized		= Normalized;
+		TextureReference.filterMode		= TextureFilterMode;      
+		TextureReference.addressMode[0]	= TextureAddressMode;  
+		TextureReference.addressMode[1]	= TextureAddressMode;
+  		TextureReference.addressMode[2]	= TextureAddressMode;
+
+		HandleCudaError(cudaBindTextureToArray(&TextureReference, pCudaArray, &ChannelDescription));
+	}
 };

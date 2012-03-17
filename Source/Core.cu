@@ -68,25 +68,6 @@ FrameBuffer gFrameBuffer;
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
 
-void ErDeinitialize();
-
-void ErInitialize()
-{
-	ErDeinitialize();
-
-	throw(ErException("Exposure Render", "Unable to initialize Exposure Render"));
-}
-
-void ErDeinitialize()
-{
-	ErUnbindDensityBuffer();
-	ErUnbindOpacity1D();
-	ErUnbindDiffuse1D();
-	ErUnbindSpecular1D();
-	ErUnbindGlossiness1D();
-	ErUnbindEmission1D();
-}
-
 void ErResize(int Size[2])
 {
 	gFrameBuffer.Resize(Resolution2i(Size));
@@ -97,79 +78,16 @@ void ErResetFrameBuffer()
 	gFrameBuffer.Reset();
 }
 
-void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
-{
-	ErUnbindDensityBuffer();
-
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<unsigned short>();
-
-	cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
-
-	cudaMalloc3DArray(&gpIntensity, &ChannelDesc, CudaExtent);
-
-	cudaMemcpy3DParms CopyParams = {0};
-
-	CopyParams.srcPtr		= make_cudaPitchedPtr(pBuffer, CudaExtent.width * sizeof(unsigned short), CudaExtent.width, CudaExtent.height);
-	CopyParams.dstArray		= gpIntensity;
-	CopyParams.extent		= CudaExtent;
-	CopyParams.kind			= cudaMemcpyHostToDevice;
-	
-	cudaMemcpy3D(&CopyParams);
-
-	gTexIntensity.normalized		= true;
-	gTexIntensity.filterMode		= cudaFilterModeLinear;      
-	gTexIntensity.addressMode[0]	= cudaAddressModeClamp;  
-	gTexIntensity.addressMode[1]	= cudaAddressModeClamp;
-  	gTexIntensity.addressMode[2]	= cudaAddressModeClamp;
-
-	cudaBindTextureToArray(gTexIntensity, gpIntensity, ChannelDesc);
-
-	/*
-	int ExtinctionSize[3] =
-	{
-		floorf((float)Extent[0] / 8.0f),
-		floorf((float)Extent[1] / 8.0f),
-		floorf((float)Extent[2] / 8.0f),
-	};
-
-	const dim3 BlockDim(8, 8, 8);
-	const dim3 GridDim((int)ceilf((float)ExtinctionSize[0] / (float)BlockDim.x), (int)ceilf((float)ExtinctionSize[1] / (float)BlockDim.y), (int)ceilf((float)ExtinctionSize[2] / (float)BlockDim.z));
-
-	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
-	cudaThreadSynchronize();
-	*/
-}
-
 void ErUnbindDensityBuffer(void)
 {
 	CUDA::FreeArray(gpIntensity);
 	CUDA::UnbindTexture(gTexIntensity);
 }
 
-void ErBindExtinctionBuffer(unsigned short* pBuffer, int Extent[3])
+void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 {
-	cudaChannelFormatDesc ChannelDesc = cudaCreateChannelDesc<unsigned short>();
-
-	cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
-
-	cudaMalloc3DArray(&gpExtinction, &ChannelDesc, CudaExtent);
-
-	cudaMemcpy3DParms CopyParams = {0};
-
-	CopyParams.srcPtr		= make_cudaPitchedPtr(pBuffer, CudaExtent.width * sizeof(unsigned short), CudaExtent.width, CudaExtent.height);
-	CopyParams.dstArray		= gpExtinction;
-	CopyParams.extent		= CudaExtent;
-	CopyParams.kind			= cudaMemcpyHostToDevice;
-	
-	cudaMemcpy3D(&CopyParams);
-
-	gTexExtinction.normalized		= true;
-	gTexExtinction.filterMode		= cudaFilterModeLinear;      
-	gTexExtinction.addressMode[0]	= cudaAddressModeClamp;  
-	gTexExtinction.addressMode[1]	= cudaAddressModeClamp;
-  	gTexExtinction.addressMode[2]	= cudaAddressModeClamp;
-
-	cudaBindTextureToArray(gTexExtinction, gpExtinction, ChannelDesc);
+	ErUnbindDensityBuffer();
+	CUDA::BindTexture3D(gTexIntensity, Extent, pBuffer, gpIntensity);
 }
 
 void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2])
@@ -484,4 +402,21 @@ void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3
 void ErGetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance)
 {
 	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
+}
+
+void ErDeinitialize();
+
+void ErInitialize()
+{
+	ErDeinitialize();
+}
+
+void ErDeinitialize()
+{
+	ErUnbindDensityBuffer();
+	ErUnbindOpacity1D();
+	ErUnbindDiffuse1D();
+	ErUnbindSpecular1D();
+	ErUnbindGlossiness1D();
+	ErUnbindEmission1D();
 }
