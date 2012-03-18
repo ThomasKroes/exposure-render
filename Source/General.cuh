@@ -36,16 +36,58 @@ struct EXPOSURE_RENDER_DLL ErException
 	}
 };
 
-struct EXPOSURE_RENDER_DLL ErTiming
+struct EXPOSURE_RENDER_DLL ErKernelTiming
 {
-	char	Title;
-	char	Description;
-	float	ElapsedTime;
+	char	Event[MAX_CHAR_SIZE];
+	float	Duration;
+
+	ErKernelTiming()
+	{
+		sprintf_s(this->Event, MAX_CHAR_SIZE, "Undefined");
+		this->Duration = 0.0f;
+	}
+
+	ErKernelTiming(const char* pEvent, const float& Duration)
+	{
+		sprintf_s(this->Event, MAX_CHAR_SIZE, pEvent);
+		this->Duration = Duration;
+	}
+
+	ErKernelTiming& operator = (const ErKernelTiming& Other)
+	{
+		sprintf_s(this->Event, MAX_CHAR_SIZE, Other.Event);
+		this->Duration = Other.Duration;
+
+		return *this;
+	}
 };
 
-struct EXPOSURE_RENDER_DLL ErTimings
+struct EXPOSURE_RENDER_DLL ErKernelTimings
 {
-	ErTiming	Timings[MAX_NO_TIMINGS];
+	ErKernelTiming	Timings[MAX_NO_TIMINGS];
+	int				NoTimings;
+
+	ErKernelTimings& operator = (const ErKernelTimings& Other)
+	{
+		for (int i = 0; i < MAX_NO_TIMINGS; i++)
+		{
+			this->Timings[i] = Other.Timings[i];
+		}
+
+		this->NoTimings = Other.NoTimings;
+
+		return *this;
+	}
+
+	void Add(const ErKernelTiming& KernelTiming)
+	{
+		this->Timings[this->NoTimings] = KernelTiming;
+	}
+
+	void Reset()
+	{
+		this->NoTimings = 0;
+	}
 };
 
 struct EXPOSURE_RENDER_DLL ErRange

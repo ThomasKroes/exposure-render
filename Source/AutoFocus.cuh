@@ -58,11 +58,10 @@ void ComputeAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance)
 {
 	float* pAutoFocusDistance = NULL;
 
-	CUDA_SAFE_CALL(cudaMalloc(&pAutoFocusDistance, sizeof(float)));
+	CUDA::Allocate(pAutoFocusDistance);
 
-	KrnlComputeAutoFocusDistance<<<1, 1>>>(pAutoFocusDistance, FilmU, FilmV, rand(), rand());
+	LAUNCH_CUDA_KERNEL((KrnlComputeAutoFocusDistance<<<1, 1>>>(pAutoFocusDistance, FilmU, FilmV, rand(), rand())));
 	
-	CUDA_SAFE_CALL(cudaMemcpy(&AutoFocusDistance, pAutoFocusDistance, sizeof(float), cudaMemcpyDeviceToHost));
-
-	CUDA_SAFE_CALL(cudaFree(pAutoFocusDistance));
+	CUDA::MemCopyDeviceToHost(pAutoFocusDistance, &AutoFocusDistance);
+	CUDA::Free(pAutoFocusDistance);
 }

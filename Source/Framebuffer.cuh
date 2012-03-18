@@ -72,8 +72,8 @@ public:
 //		this->CudaNoIterations.Resize(this->Resolution);
 //		this->CudaPixelLuminance.Resize(this->Resolution);
 
-		CUDA::MemCopyDeviceToDevice(CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetNoElements());
-		CUDA::MemCopyDeviceToDevice(CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetNoElements());
+		CUDA::MemCopyDeviceToDevice(CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeedsCopy1.GetNoElements());
+		CUDA::MemCopyDeviceToDevice(CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeedsCopy2.GetNoElements());
 
 		this->Reset();
 	}
@@ -98,8 +98,8 @@ public:
 //		this->CudaNoIterations.Reset();
 //		this->CudaPixelLuminance.Reset();
 
-		CUDA::MemCopyDeviceToDevice(CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeedsCopy1.GetNoElements());
-		CUDA::MemCopyDeviceToDevice(CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeedsCopy2.GetNoElements());
+		CUDA::MemCopyDeviceToDevice(CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetNoElements());
+		CUDA::MemCopyDeviceToDevice(CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetNoElements());
 	}
 
 	void Free(void)

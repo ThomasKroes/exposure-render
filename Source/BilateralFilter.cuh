@@ -194,6 +194,6 @@ void FilterBilateral(ColorRGBAuc* pImage, ColorRGBAuc* pTemp, ColorRGBAuc* pOut,
 	const dim3 BlockDim(KRNL_BILATERAL_FILTER_BLOCK_W, KRNL_BILATERAL_FILTER_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlBilateralFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height);
-	KrnlBilateralFilterVertical<<<GridDim, BlockDim>>>(pTemp, pOut, Width, Height);
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlBilateralFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height)), "Bilateral filter (Horizontal)");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlBilateralFilterVertical<<<GridDim, BlockDim>>>(pTemp, pOut, Width, Height)), "Bilateral filter (Vertical)");
 }

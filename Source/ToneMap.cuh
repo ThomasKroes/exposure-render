@@ -43,5 +43,5 @@ void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer);
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer)), "Tone map");
 }

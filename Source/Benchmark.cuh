@@ -51,13 +51,14 @@ KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
 	*pFrameBuffer->RmsError.GetPtr(X, Y) = NrmsError;
 }
 
+#define doit(call) call
+
 void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Width, int Height, float& AverageNrmsError)
 {
 	const dim3 BlockDim(KRNL_BENCHMARK_BLOCK_W, KRNL_BENCHMARK_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlComputeNrmsError<<<GridDim, BlockDim>>>(pFrameBuffer);
-	cudaThreadSynchronize();
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlComputeNrmsError<<<GridDim, BlockDim>>>(pFrameBuffer)), "Compute NRMS error");
 
 	thrust::device_ptr<float> dev_ptr(FB.RmsError.GetPtr()); 
 

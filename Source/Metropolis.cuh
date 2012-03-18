@@ -95,6 +95,7 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 	*/
 }
 
+/*
 void AdvanceMetropolis(FrameBuffer* pFrameBuffer)
 {
 	const dim3 BlockDim(KRNL_ADV_MLT_BLOCK_W, KRNL_ADV_MLT_BLOCK_H);
@@ -140,3 +141,4 @@ void ComputeEstimateMetropolis(FrameBuffer* pFrameBuffer, int Width, int Height)
 	KrnlComputeEstimateMetropolis<<<GridDim, BlockDim>>>(pFrameBuffer, AverageLuminance, SPP);
 	cudaThreadSynchronize();
 }
+*/

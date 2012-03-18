@@ -36,5 +36,5 @@ void Blend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Width, int Heig
 	const dim3 BlockDim(KRNL_BLEND_BLOCK_W, KRNL_BLEND_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlBlend<<<GridDim, BlockDim>>>(pImage, pImageFiltered, Width, Height);
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlBlend<<<GridDim, BlockDim>>>(pImage, pImageFiltered, Width, Height)), "Blend");
 }

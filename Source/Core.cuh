@@ -23,20 +23,21 @@ struct ErReflectors;
 struct ErDenoise;
 struct ErScattering;
 struct ErFiltering;
+struct ErKernelTimings;
 
-#define NO_GRADIENT_STEPS 256
+#define NO_TF_STEPS 256
 
 __declspec(dllexport) void ErInitialize();
 __declspec(dllexport) void ErDeinitialize();
 __declspec(dllexport) void ErResize(int Size[2]);
 __declspec(dllexport) void ErResetFrameBuffer();
 __declspec(dllexport) void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3]);
-__declspec(dllexport) void ErBindOpacity1D(float Opacity[NO_GRADIENT_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindDiffuse1D(float Diffuse[3][NO_GRADIENT_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindSpecular1D(float Specular[3][NO_GRADIENT_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindGlossiness1D(float Glossiness[NO_GRADIENT_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindIor1D(float IOR[NO_GRADIENT_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindEmission1D(float Emission[3][NO_GRADIENT_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindOpacity1D(float Opacity[NO_TF_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindSpecular1D(float Specular[3][NO_TF_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindGlossiness1D(float Glossiness[NO_TF_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindIor1D(float IOR[NO_TF_STEPS], float Range[2]);
+__declspec(dllexport) void ErBindEmission1D(float Emission[3][NO_TF_STEPS], float Range[2]);
 __declspec(dllexport) void ErUnbindOpacity1D(void);
 __declspec(dllexport) void ErUnbindDiffuse1D(void);
 __declspec(dllexport) void ErUnbindSpecular1D(void);
@@ -58,3 +59,4 @@ __declspec(dllexport) void ErGetAverageNrmsError(float& AverageNrmsError);
 __declspec(dllexport) void ErGetRunningVariance(float& RunningVariance);
 __declspec(dllexport) void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3]);
 __declspec(dllexport) void ErGetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance);
+__declspec(dllexport) void ErGetKernelTimings(ErKernelTimings* pKernelTimings);

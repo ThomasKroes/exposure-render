@@ -245,7 +245,7 @@ template <class T> inline HOST_DEVICE ColorRGBAuc operator / (const ColorRGBAuc&
 
 HOST_DEVICE inline ColorRGBAuc operator * (const float& F, const ColorRGBAuc& XYZ)
 {
-	return ColorRGBAuc(XYZ[0] * F, XYZ[1] * F, XYZ[2] * F);
+	return ColorRGBAuc((unsigned char)(XYZ[0] * F), (unsigned char)(XYZ[1] * F), (unsigned char)(XYZ[2] * F));
 }
 
 HOST_DEVICE inline ColorRGBAuc operator + (const ColorRGBAuc& A, const ColorRGBAuc& B)
@@ -833,7 +833,7 @@ HOST_DEVICE ColorRGBAuc Lerp(const ColorRGBAuc& A, const ColorRGBAuc& B, const f
 	ColorRGBAuc Result;
 
 	for (int i = 0; i < 3; i++)
-		Result[i] = (1.0f - T) * (float)A[i] + T * (float)B[i];
+		Result[i] = (unsigned char)((1.0f - T) * (float)A[i] + T * (float)B[i]);
 
 	return Result;
 }

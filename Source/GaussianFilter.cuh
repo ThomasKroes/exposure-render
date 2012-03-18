@@ -127,6 +127,6 @@ void FilterGaussian(ColorXYZAf* pImage, ColorXYZAf* pTemp, int Width, int Height
 	const dim3 BlockDim(KRNL_GAUSSIAN_FILTER_BLOCK_W, KRNL_GAUSSIAN_FILTER_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlGaussianFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height);
-	KrnlGaussianFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage, Width, Height);
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height)), "Gaussian filter (Horizontal)");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage, Width, Height)), "Gaussian filter (Vertical)");
 }

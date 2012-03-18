@@ -35,6 +35,5 @@ void ComputeEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 BlockDim(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	KrnlComputeEstimate<<<GridDim, BlockDim>>>(pFrameBuffer);
-	cudaThreadSynchronize();
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlComputeEstimate<<<GridDim, BlockDim>>>(pFrameBuffer)), "Compute running estimate");
 }

@@ -123,13 +123,29 @@ void GetCudaErrorString(const cudaError_t& CudaError, char* pErrorString)
 }
 */
 
+
 class CUDA
 {
 public:
 	static void HandleCudaError(const cudaError_t& CudaError)
 	{
 		if (CudaError != cudaSuccess)
-			throw("CUDA Error", cudaGetErrorString(CudaError));
+			throw(ErException("CUDA Error", cudaGetErrorString(CudaError)));
+	}
+
+	template<class T> static void Allocate(T*& pDevicePointer, int Num = 1)
+	{
+		HandleCudaError(cudaMalloc(&pDevicePointer, Num * sizeof(T)));
+	}
+
+	template<class T> static void AllocatePiched(T*& pDevicePointer, const int Pitch, const int Width, const int Height)
+	{
+		HandleCudaError(cudaMallocPitch((void**)&pDevicePointer, (size_t*)&Pitch, Width * sizeof(T), Height));
+	}
+	
+	template<class T> static void MemSet(T*& pDevicePointer, const int Value, int Num = 1)
+	{
+		HandleCudaError(cudaMemset((void*)pDevicePointer, Value, (size_t)(Num * sizeof(T))));
 	}
 
 	template<class T> static void HostToConstantDevice(T* pHost, char* pSymbol, int Num = 1)
@@ -158,15 +174,35 @@ public:
 		pCudaArray = NULL;
 	}
 
+	template<class T> static void Free(T*& pBuffer)
+	{
+		HandleCudaError(cudaFree(pBuffer));
+		pBuffer = NULL;
+	}
+
 	static void UnbindTexture(textureReference& pTextureReference)
 	{
 		HandleCudaError(cudaUnbindTexture(&pTextureReference));
 	}
 
+	template<class T> static void BindTexture1D(textureReference& TextureReference, int Num, const T* pBuffer, cudaArray*& pCudaArray, cudaTextureFilterMode TextureFilterMode = cudaFilterModeLinear, cudaTextureAddressMode TextureAddressMode = cudaAddressModeClamp, bool Normalized = true)
+	{
+		const cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
+
+		TextureReference.normalized		= Normalized;
+		TextureReference.filterMode		= TextureFilterMode;
+		TextureReference.addressMode[0]	= TextureAddressMode;
+
+		CUDA::FreeArray(pCudaArray);
+
+		HandleCudaError(cudaMallocArray(&pCudaArray, &ChannelDescription, Num, 1));
+		HandleCudaError(cudaMemcpyToArray(pCudaArray, 0, 0, pBuffer, Num * sizeof(T), cudaMemcpyHostToDevice));
+		HandleCudaError(cudaBindTextureToArray(&TextureReference, pCudaArray, &ChannelDescription));
+	}
 
 	template<class T> static void BindTexture3D(textureReference& TextureReference, int Extent[3], const T* pBuffer, cudaArray*& pCudaArray, cudaTextureFilterMode TextureFilterMode = cudaFilterModeLinear, cudaTextureAddressMode TextureAddressMode = cudaAddressModeClamp, bool Normalized = true)
 	{
-		cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
+		const cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
 
 		const cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
 
@@ -190,3 +226,37 @@ public:
 		HandleCudaError(cudaBindTextureToArray(&TextureReference, pCudaArray, &ChannelDescription));
 	}
 };
+
+#define LAUNCH_CUDA_KERNEL_TIMED(cudakernelcall, title)									\
+{																						\
+	cudaEvent_t EventStart, EventStop;													\
+																						\
+	CUDA::HandleCudaError(cudaEventCreate(&EventStart));								\
+	CUDA::HandleCudaError(cudaEventCreate(&EventStop));									\
+	CUDA::HandleCudaError(cudaEventRecord(EventStart, 0));								\
+																						\
+	cudakernelcall;																		\
+																						\
+	CUDA::HandleCudaError(cudaGetLastError());											\
+	CUDA::HandleCudaError(cudaThreadSynchronize());										\
+																						\
+	CUDA::HandleCudaError(cudaEventRecord(EventStop, 0));								\
+	CUDA::HandleCudaError(cudaEventSynchronize(EventStop));								\
+																						\
+	float TimeDelta = 0.0f;																\
+																						\
+	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop));		\
+																						\
+	gKernelTimings.Add(ErKernelTiming(title, TimeDelta));								\
+																						\
+	CUDA::HandleCudaError(cudaEventDestroy(EventStart));								\
+	CUDA::HandleCudaError(cudaEventDestroy(EventStop));									\
+}
+
+#define LAUNCH_CUDA_KERNEL(cudakernelcall)												\
+{																						\
+	cudakernelcall;																		\
+																						\
+	CUDA::HandleCudaError(cudaGetLastError());											\
+	CUDA::HandleCudaError(cudaThreadSynchronize());										\
+}

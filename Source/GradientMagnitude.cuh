@@ -41,11 +41,10 @@ void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitu
 	unsigned short* pGradientMagnitude = NULL;
 
 	// Allocate temporary linear memory for computation
-	cudaMalloc(&pGradientMagnitude, Extent[0] * Extent[1] * Extent[2] * sizeof(unsigned short));
+	CUDA::Allocate(pGradientMagnitude, Extent[0] * Extent[1] * Extent[2]);
 
 	// Execute gradient computation kernel
-	KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(pGradientMagnitude, Extent[0], Extent[1], Extent[2]);
-	cudaThreadSynchronize();
+	LAUNCH_CUDA_KERNEL((KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(pGradientMagnitude, Extent[0], Extent[1], Extent[2])));
 	
 	// Create thrust device pointer
 	thrust::device_ptr<unsigned short> DevicePtr(pGradientMagnitude); 
@@ -55,7 +54,7 @@ void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitu
 	Result = thrust::reduce(DevicePtr, DevicePtr + Extent[0] * Extent[1] * Extent[2], Result, thrust::maximum<unsigned short>());
 	
 	// Free temporary memory
-	cudaFree(pGradientMagnitude);
+	CUDA::Free(pGradientMagnitude);
 
 	// Set result
 	MaximumGradientMagnitude = Result;

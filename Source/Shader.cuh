@@ -66,172 +66,172 @@ class CFresnel
 {
 public:
 	DEVICE CFresnel(float ei, float et) :
-	  eta_i(ei),
-		  eta_t(et)
-	  {
-	  }
+		EtaI(ei),
+		EtaT(et)
+	{
+	}
 
-	  DEVICE  ~CFresnel(void)
-	  {
-	  }
+	DEVICE  ~CFresnel(void)
+	{
+	}
 
-	  DEVICE ColorXYZf Evaluate(float cosi)
-	  {
-		  // return 1.0f;
+	DEVICE ColorXYZf Evaluate(float cosi)
+	{
+		// Compute Fresnel reflectance for dielectric
+		cosi = Clamp(cosi, -1.0f, 1.0f);
 
-		  // Compute Fresnel reflectance for dielectric
-		  cosi = Clamp(cosi, -1.0f, 1.0f);
+		// Compute indices of refraction for dielectric
+		bool entering = cosi > 0.0f;
+		float ei = EtaI, et = EtaT;
 
-		  // Compute indices of refraction for dielectric
-		  bool entering = cosi > 0.0f;
-		  float ei = eta_i, et = eta_t;
+		if (!entering)
+		swap(ei, et);
 
-		  if (!entering)
-			  swap(ei, et);
+		// Compute _sint_ using Snell's law
+		float sint = ei/et * sqrtf(max(0.f, 1.f - cosi*cosi));
 
-		  // Compute _sint_ using Snell's law
-		  float sint = ei/et * sqrtf(max(0.f, 1.f - cosi*cosi));
+		if (sint >= 1.0f)
+		{
+			// Handle total internal reflection
+			return 1.0f;
+		}
+		else
+		{
+			float cost = sqrtf(max(0.f, 1.0f - sint * sint));
+			return FrDiel(fabsf(cosi), cost, ei, et);
+		}
+	}
 
-		  if (sint >= 1.0f)
-		  {
-			  // Handle total internal reflection
-			  return 1.0f;
-		  }
-		  else
-		  {
-			  float cost = sqrtf(max(0.f, 1.0f - sint * sint));
-			  return FrDiel(fabsf(cosi), cost, ei, et);
-		  }
-	  }
-
-	  float eta_i, eta_t;
+	float EtaI, EtaT;
 };
 
 class CBlinn
 {
 public:
 	DEVICE CBlinn(const float& Exponent) :
-	  m_Exponent(Exponent)
-	  {
-	  }
+		Exponent(Exponent)
+	{
+	}
 
-	  DEVICE ~CBlinn(void)
-	  {
-	  }
+	DEVICE ~CBlinn(void)
+	{
+	}
 
-	  DEVICE void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
-	  {
-		  // Compute sampled half-angle vector $\wh$ for Blinn distribution
-		  float costheta = powf(U[0], 1.f / (m_Exponent+1));
-		  float sintheta = sqrtf(max(0.f, 1.f - costheta*costheta));
-		  float phi = U[1] * 2.f * PI_F;
+	DEVICE void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	{
+		// Compute sampled half-angle vector $\wh$ for Blinn distribution
+		float costheta = powf(U[0], 1.f / (this->Exponent+1));
+		float sintheta = sqrtf(max(0.f, 1.f - costheta*costheta));
+		float phi = U[1] * 2.f * PI_F;
 
-		  Vec3f wh = SphericalDirection(sintheta, costheta, phi);
+		Vec3f wh = SphericalDirection(sintheta, costheta, phi);
 
-		  if (!SameHemisphere(Wo, wh))
-			  wh = -wh;
+		if (!SameHemisphere(Wo, wh))
+			wh = -wh;
 
-		  // Compute incident direction by reflecting about $\wh$
-		  Wi = -Wo + 2.f * Dot(Wo, wh) * wh;
+		// Compute incident direction by reflecting about $\wh$
+		Wi = -Wo + 2.f * Dot(Wo, wh) * wh;
 
-		  // Compute PDF for $\wi$ from Blinn distribution
-		  float blinn_pdf = ((m_Exponent + 1.f) * powf(costheta, m_Exponent)) / (2.f * PI_F * 4.f * Dot(Wo, wh));
+		// Compute PDF for $\wi$ from Blinn distribution
+		float blinn_pdf = ((Exponent + 1.f) * powf(costheta, this->Exponent)) / (2.f * PI_F * 4.f * Dot(Wo, wh));
 
-		  if (Dot(Wo, wh) <= 0.f)
-			  blinn_pdf = 0.f;
+		if (Dot(Wo, wh) <= 0.f)
+			blinn_pdf = 0.f;
 
-		  Pdf = blinn_pdf;
-	  }
+		Pdf = blinn_pdf;
+	}
 
-	  DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
-	  {
-		  Vec3f wh = Normalize(Wo + Wi);
+	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		// Compute half angle vector
+		const Vec3f Wh = Normalize(Wo + Wi);
 
-		  float costheta = AbsCosTheta(wh);
-		  // Compute PDF for $\wi$ from Blinn distribution
-		  float blinn_pdf = ((m_Exponent + 1.f) * powf(costheta, m_Exponent)) / (2.f * PI_F * 4.f * Dot(Wo, wh));
+		const float CosTheta = AbsCosTheta(Wh);
 
-		  if (Dot(Wo, wh) <= 0.0f)
-			  blinn_pdf = 0.0f;
+		// Compute PDF for $\wi$ from Blinn distribution
+		float Pdf = ((this->Exponent + 1.0f) * powf(CosTheta, this->Exponent)) / (2.0f * PI_F * 4.0f * Dot(Wo, Wh));
 
-		  return blinn_pdf;
-	  }
+		if (Dot(Wo, Wh) <= 0.0f)
+			Pdf = 0.0f;
 
-	  DEVICE float D(const Vec3f& wh)
-	  {
-		  float costhetah = AbsCosTheta(wh);
-		  return (m_Exponent+2) * INV_TWO_PI_F * powf(costhetah, m_Exponent);
-	  }
+		return Pdf;
+	}
 
-	  float	m_Exponent;
+	DEVICE float D(const Vec3f& Wh)
+	{
+		float CosThetaH = AbsCosTheta(Wh);
+		return (this->Exponent + 2) * INV_TWO_PI_F * powf(CosThetaH, this->Exponent);
+	}
+
+	float	Exponent;
 };
 
 class CMicrofacet
 {
 public:
 	DEVICE CMicrofacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
-	  m_R(Reflectance),
-		  m_Fresnel(1.0f, Ior),
-		  m_Blinn(Exponent)
-	  {
-	  }
+		R(Reflectance),
+		Fresnel(1.0f, Ior),
+		Blinn(Exponent)
+	{
+	}
 
-	  DEVICE ~CMicrofacet(void)
-	  {
-	  }
+	DEVICE ~CMicrofacet(void)
+	{
+	}
 
-	  DEVICE ColorXYZf F(const Vec3f& wo, const Vec3f& wi)
-	  {
-		  float cosThetaO = AbsCosTheta(wo);
-		  float cosThetaI = AbsCosTheta(wi);
+	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		float cosThetaO = AbsCosTheta(Wo);
+		float cosThetaI = AbsCosTheta(Wi);
 
-		  if (cosThetaI == 0.f || cosThetaO == 0.f)
-			  return ColorXYZf(0.0f);
+		if (cosThetaI == 0.f || cosThetaO == 0.f)
+			return ColorXYZf(0.0f);
 
-		  Vec3f wh = wi + wo;
+		Vec3f Wh = Wi + Wo;
 
-		  if (wh[0] == 0. && wh[1] == 0. && wh[2] == 0.)
-			  return ColorXYZf(0.0f);
+		if (Wh[0] == 0. && Wh[1] == 0. && Wh[2] == 0.)
+		return ColorXYZf(0.0f);
 
-		  wh = Normalize(wh);
-		  float cosThetaH = Dot(wi, wh);
+		Wh = Normalize(Wh);
+		float cosThetaH = Dot(Wi, Wh);
 
-		  ColorXYZf F = m_Fresnel.Evaluate(cosThetaH);
+		ColorXYZf F = this->Fresnel.Evaluate(cosThetaH);
 
-		  return m_R * m_Blinn.D(wh) * G(wo, wi, wh) * F / (4.0f * cosThetaI * cosThetaO);
-	  }
+		return this->R * this->Blinn.D(Wh) * G(Wo, Wi, Wh) * F / (4.0f * cosThetaI * cosThetaO);
+	}
 
-	  DEVICE ColorXYZf SampleF(const Vec3f& wo, Vec3f& wi, float& Pdf, const Vec2f& U)
-	  {
-		  m_Blinn.SampleF(wo, wi, Pdf, U);
+	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	{
+		this->Blinn.SampleF(Wo, Wi, Pdf, U);
 
-		  if (!SameHemisphere(wo, wi))
-			  return SPEC_BLACK;
+		if (!SameHemisphere(Wo, Wi))
+			return SPEC_BLACK;
 
-		  return this->F(wo, wi);
-	  }
+		return this->F(Wo, Wi);
+	}
 
-	  DEVICE float Pdf(const Vec3f& wo, const Vec3f& wi)
-	  {
-		  if (!SameHemisphere(wo, wi))
-			  return 0.0f;
+	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	{
+		if (!SameHemisphere(Wo, Wi))
+			return 0.0f;
 
-		  return m_Blinn.Pdf(wo, wi);
-	  }
+		return Blinn.Pdf(Wo, Wi);
+	}
 
-	  DEVICE float G(const Vec3f& wo, const Vec3f& wi, const Vec3f& wh)
-	  {
-		  float NdotWh = AbsCosTheta(wh);
-		  float NdotWo = AbsCosTheta(wo);
-		  float NdotWi = AbsCosTheta(wi);
-		  float WOdotWh = AbsDot(wo, wh);
+	DEVICE float G(const Vec3f& Wo, const Vec3f& Wi, const Vec3f& Wh)
+	{
+		const float NdotWh 	= AbsCosTheta(Wh);
+		const float NdotWo 	= AbsCosTheta(Wo);
+		const float NdotWi 	= AbsCosTheta(Wi);
+		const float WOdotWh = AbsDot(Wo, Wh);
 
-		  return min(1.f, min((2.f * NdotWh * NdotWo / WOdotWh), (2.f * NdotWh * NdotWi / WOdotWh)));
-	  }
+		return min(1.0f, min((2.0f * NdotWh * NdotWo / WOdotWh), (2.0f * NdotWh * NdotWi / WOdotWh)));
+	}
 
-	  ColorXYZf		m_R;
-	  CFresnel		m_Fresnel;
-	  CBlinn		m_Blinn;
+	ColorXYZf	R;
+	CFresnel	Fresnel;
+	CBlinn		Blinn;
 
 };
 
@@ -272,11 +272,11 @@ class CBRDF
 {
 public:
 	DEVICE CBRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
-		m_Lambertian(Kd),
-		m_Microfacet(Ks, Ior, Exponent),
-		m_Nn(Normalize(N)),
-		m_Nu(Normalize(Cross(N, Wo))),
-		m_Nv(Normalize(Cross(N, m_Nu)))
+		Lambertian(Kd),
+		Microfacet(Ks, Ior, Exponent),
+		Nn(Normalize(N)),
+		Nu(Normalize(Cross(N, Wo))),
+		Nv(Normalize(Cross(N, Nu)))
 	{
 	}
 
@@ -286,14 +286,14 @@ public:
 
 	DEVICE Vec3f WorldToLocal(const Vec3f& W)
 	{
-		return Vec3f(Dot(W, m_Nu), Dot(W, m_Nv), Dot(W, m_Nn));
+		return Vec3f(Dot(W, this->Nu), Dot(W, this->Nv), Dot(W, this->Nn));
 	}
 
 	DEVICE Vec3f LocalToWorld(const Vec3f& W)
 	{
-		return Vec3f(	m_Nu[0] * W[0] + m_Nv[0] * W[1] + m_Nn[0] * W[2],
-						m_Nu[1] * W[0] + m_Nv[1] * W[1] + m_Nn[1] * W[2],
-						m_Nu[2] * W[0] + m_Nv[2] * W[1] + m_Nn[2] * W[2]);
+		return Vec3f(	this->Nu[0] * W[0] + this->Nv[0] * W[1] + this->Nn[0] * W[2],
+						this->Nu[1] * W[0] + this->Nv[1] * W[1] + this->Nn[1] * W[2],
+						this->Nu[2] * W[0] + this->Nv[2] * W[1] + this->Nn[2] * W[2]);
 	}
 
 	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
@@ -303,8 +303,8 @@ public:
 
 		ColorXYZf R;
 
-		R += m_Lambertian.F(Wol, Wil);
-		R += m_Microfacet.F(Wol, Wil);
+		R += this->Lambertian.F(Wol, Wil);
+		R += this->Microfacet.F(Wol, Wil);
 
 		return R;
 	}
@@ -318,18 +318,18 @@ public:
 
 		if (S.Component <= 0.5f)
 		{
-			m_Lambertian.SampleF(Wol, Wil, Pdf, S.Dir);
+			this->Lambertian.SampleF(Wol, Wil, Pdf, S.Dir);
 		}
 		else
 		{
-			m_Microfacet.SampleF(Wol, Wil, Pdf, S.Dir);
+			this->Microfacet.SampleF(Wol, Wil, Pdf, S.Dir);
 		}
 
-		Pdf += m_Lambertian.Pdf(Wol, Wil);
-		Pdf += m_Microfacet.Pdf(Wol, Wil);
+		Pdf += this->Lambertian.Pdf(Wol, Wil);
+		Pdf += this->Microfacet.Pdf(Wol, Wil);
 
-		R += m_Lambertian.F(Wol, Wil);
-		R += m_Microfacet.F(Wol, Wil);
+		R += this->Lambertian.F(Wol, Wil);
+		R += this->Microfacet.F(Wol, Wil);
 
 		Wi = LocalToWorld(Wil);
 
@@ -343,17 +343,17 @@ public:
 
 		float Pdf = 0.0f;
 
-		Pdf += m_Lambertian.Pdf(Wol, Wil);
-		Pdf += m_Microfacet.Pdf(Wol, Wil);
+		Pdf += this->Lambertian.Pdf(Wol, Wil);
+		Pdf += this->Microfacet.Pdf(Wol, Wil);
 
 		return Pdf;
 	}
 
-	Vec3f			m_Nn;
-	Vec3f			m_Nu;
-	Vec3f			m_Nv;
-	CLambertian		m_Lambertian;
-	CMicrofacet		m_Microfacet;
+	Vec3f			Nn;
+	Vec3f			Nu;
+	Vec3f			Nv;
+	CLambertian		Lambertian;
+	CMicrofacet		Microfacet;
 };
 
 class CVolumeShader
@@ -366,9 +366,9 @@ public:
 	};
 
 	DEVICE CVolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
-		m_Type(Type),
-		m_Brdf(N, Wo, Kd, Ks, Ior, Exponent),
-		m_IsotropicPhase(Kd)
+		Type(Type),
+		BRDF(N, Wo, Kd, Ks, Ior, Exponent),
+		IsotropicPhase(Kd)
 	{
 	}
 
@@ -378,13 +378,13 @@ public:
 
 	DEVICE ColorXYZf F(Vec3f Wo, Vec3f Wi)
 	{
-		switch (m_Type)
+		switch (this->Type)
 		{
 			case Brdf:
-				return m_Brdf.F(Wo, Wi);
+				return this->BRDF.F(Wo, Wi);
 
 			case Phase:
-				return m_IsotropicPhase.F(Wo, Wi);
+				return this->IsotropicPhase.F(Wo, Wi);
 		}
 
 		return 1.0f;
@@ -392,13 +392,13 @@ public:
 
 	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
 	{
-		switch (m_Type)
+		switch (this->Type)
 		{
 			case Brdf:
-				return m_Brdf.SampleF(Wo, Wi, Pdf, S);
+				return this->BRDF.SampleF(Wo, Wi, Pdf, S);
 
 			case Phase:
-				return m_IsotropicPhase.SampleF(Wo, Wi, Pdf, S.Dir);
+				return this->IsotropicPhase.SampleF(Wo, Wi, Pdf, S.Dir);
 		}
 
 		return ColorXYZf(0.0f);
@@ -406,19 +406,19 @@ public:
 
 	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
-		switch (m_Type)
+		switch (this->Type)
 		{
 			case Brdf:
-				return m_Brdf.Pdf(Wo, Wi);
+				return this->BRDF.Pdf(Wo, Wi);
 
 			case Phase:
-				return m_IsotropicPhase.Pdf(Wo, Wi);
+				return this->IsotropicPhase.Pdf(Wo, Wi);
 		}
 
 		return 1.0f;
 	}
 
-	EType				m_Type;
-	CBRDF				m_Brdf;
-	CIsotropicPhase		m_IsotropicPhase;
+	EType				Type;
+	CBRDF				BRDF;
+	CIsotropicPhase		IsotropicPhase;
 };
