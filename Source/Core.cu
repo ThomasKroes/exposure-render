@@ -399,6 +399,8 @@ EXPOSURE_RENDER_DLL void Deinitialize()
 	UnbindSpecular1D();
 	UnbindGlossiness1D();
 	UnbindEmission1D();
+
+	gFrameBuffer.Free();
 }
 
 EXPOSURE_RENDER_DLL void Initialize()

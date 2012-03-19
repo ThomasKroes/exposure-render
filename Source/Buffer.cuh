@@ -29,11 +29,6 @@ public:
 	{
 	}
 
-	~CCudaBuffer2D(void)
-	{
-		this->Free();
-	}
-
 	HOST void Resize(Resolution2i Resolution)
 	{
 		if (this->Resolution != Resolution)

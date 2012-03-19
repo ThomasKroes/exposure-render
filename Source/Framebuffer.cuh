@@ -45,11 +45,6 @@ public:
 	{
 	}
 
-	~FrameBuffer(void)
-	{
-//		this->Free();
-	}
-	
 	void Resize(Resolution2i Resolution)
 	{
 		if (this->Resolution == Resolution)
