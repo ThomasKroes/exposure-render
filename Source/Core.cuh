@@ -13,7 +13,14 @@
 
 #pragma once
 
-class FrameBuffer;
+namespace ExposureRender
+{
+
+#ifdef _EXPORTING
+	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
+#else
+	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
+#endif
 
 struct ErVolume;
 struct ErCamera;
@@ -27,36 +34,39 @@ struct ErKernelTimings;
 
 #define NO_TF_STEPS 256
 
-__declspec(dllexport) void ErInitialize();
-__declspec(dllexport) void ErDeinitialize();
-__declspec(dllexport) void ErResize(int Size[2]);
-__declspec(dllexport) void ErResetFrameBuffer();
-__declspec(dllexport) void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3]);
-__declspec(dllexport) void ErBindOpacity1D(float Opacity[NO_TF_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindSpecular1D(float Specular[3][NO_TF_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindGlossiness1D(float Glossiness[NO_TF_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindIor1D(float IOR[NO_TF_STEPS], float Range[2]);
-__declspec(dllexport) void ErBindEmission1D(float Emission[3][NO_TF_STEPS], float Range[2]);
-__declspec(dllexport) void ErUnbindOpacity1D(void);
-__declspec(dllexport) void ErUnbindDiffuse1D(void);
-__declspec(dllexport) void ErUnbindSpecular1D(void);
-__declspec(dllexport) void ErUnbindGlossiness1D(void);
-__declspec(dllexport) void ErUnbindIor1D(void);
-__declspec(dllexport) void ErUnbindEmission1D(void);
-__declspec(dllexport) void ErBindVolume(ErVolume* pVolume);
-__declspec(dllexport) void ErBindCamera(ErCamera* pCamera);
-__declspec(dllexport) void ErBindLights(ErLights* pLights);
-__declspec(dllexport) void ErBindClippers(ErClippers* pClippers);
-__declspec(dllexport) void ErBindReflectors(ErReflectors* pReflectors);
-__declspec(dllexport) void ErBindDenoise(ErDenoise* pDenoise);
-__declspec(dllexport) void ErBindScattering(ErScattering* pScattering);
-__declspec(dllexport) void ErBindFiltering(ErFiltering* pFiltering);
-__declspec(dllexport) void ErRenderEstimate();
-__declspec(dllexport) void ErGetEstimate(unsigned char* pData);
-__declspec(dllexport) void ErRecordBenchmarkImage();
-__declspec(dllexport) void ErGetAverageNrmsError(float& AverageNrmsError);
-__declspec(dllexport) void ErGetRunningVariance(float& RunningVariance);
-__declspec(dllexport) void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3]);
-__declspec(dllexport) void ErGetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance);
-__declspec(dllexport) void ErGetKernelTimings(ErKernelTimings* pKernelTimings);
+EXPOSURE_RENDER_DLL void ErInitialize();
+EXPOSURE_RENDER_DLL void ErDeinitialize();
+EXPOSURE_RENDER_DLL void ErResize(int Size[2]);
+EXPOSURE_RENDER_DLL void ErReset();
+EXPOSURE_RENDER_DLL void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3]);
+EXPOSURE_RENDER_DLL void ErBindOpacity1D(float Opacity[NO_TF_STEPS], float Range[2]);
+EXPOSURE_RENDER_DLL void ErBindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float Range[2]);
+EXPOSURE_RENDER_DLL void ErBindSpecular1D(float Specular[3][NO_TF_STEPS], float Range[2]);
+EXPOSURE_RENDER_DLL void ErBindGlossiness1D(float Glossiness[NO_TF_STEPS], float Range[2]);
+EXPOSURE_RENDER_DLL void ErBindIor1D(float IOR[NO_TF_STEPS], float Range[2]);
+EXPOSURE_RENDER_DLL void ErBindEmission1D(float Emission[3][NO_TF_STEPS], float Range[2]);
+EXPOSURE_RENDER_DLL void ErUnbindOpacity1D(void);
+EXPOSURE_RENDER_DLL void ErUnbindDiffuse1D(void);
+EXPOSURE_RENDER_DLL void ErUnbindSpecular1D(void);
+EXPOSURE_RENDER_DLL void ErUnbindGlossiness1D(void);
+EXPOSURE_RENDER_DLL void ErUnbindIor1D(void);
+EXPOSURE_RENDER_DLL void ErUnbindEmission1D(void);
+EXPOSURE_RENDER_DLL void ErBindVolume(ErVolume* pVolume);
+EXPOSURE_RENDER_DLL void ErBindCamera(ErCamera* pCamera);
+EXPOSURE_RENDER_DLL void ErBindLights(ErLights* pLights);
+EXPOSURE_RENDER_DLL void ErBindClippers(ErClippers* pClippers);
+EXPOSURE_RENDER_DLL void ErBindReflectors(ErReflectors* pReflectors);
+EXPOSURE_RENDER_DLL void ErBindScattering(ErScattering* pScattering);
+EXPOSURE_RENDER_DLL void ErBindFiltering(ErFiltering* pFiltering);
+EXPOSURE_RENDER_DLL void ErRenderEstimate();
+EXPOSURE_RENDER_DLL void ErGetEstimate(unsigned char* pData);
+EXPOSURE_RENDER_DLL void ErRecordBenchmarkImage();
+EXPOSURE_RENDER_DLL void ErGetAverageNrmsError(float& AverageNrmsError);
+EXPOSURE_RENDER_DLL void ErGetRunningVariance(float& RunningVariance);
+EXPOSURE_RENDER_DLL void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3]);
+EXPOSURE_RENDER_DLL void ErGetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance);
+EXPOSURE_RENDER_DLL void ErGetKernelTimings(ErKernelTimings* pKernelTimings);
+EXPOSURE_RENDER_DLL void ErGetMemoryUsed(float& MemoryUsed);
+EXPOSURE_RENDER_DLL void ErGetNoIterations(int& NoIterations);
+
+}

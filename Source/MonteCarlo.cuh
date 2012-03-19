@@ -17,6 +17,9 @@
 
 #include "RNG.cuh"
 
+namespace ExposureRender
+{
+
 DEVICE float SphericalTheta(const Vec3f& Wl)
 {
 	return acosf(Clamp(Wl[1], -1.0f, 1.0f));
@@ -228,4 +231,6 @@ DEVICE float PowerHeuristic(int nf, float fPdf, int ng, float gPdf)
 {
 	float f = nf * fPdf, g = ng * gPdf;
 	return (f * f) / (f * f + g * g); 
+}
+
 }

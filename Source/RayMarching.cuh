@@ -16,6 +16,9 @@
 
 #include "Geometry.cuh"
 
+namespace ExposureRender
+{
+
 #define KRNL_SINGLE_SCATTERING_BLOCK_W		16
 #define KRNL_SINGLE_SCATTERING_BLOCK_H		8
 #define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
@@ -121,6 +124,7 @@ float sign(float num){
   return(0.0f);
 }
 
+/*
 DEVICE_NI void lightShootDDAWoodcock(const Ray& R, CRNG& RNG, ScatterEvent& SE)
 {
 	Intersection Int;
@@ -257,4 +261,7 @@ DEVICE_NI void lightShootDDAWoodcock(const Ray& R, CRNG& RNG, ScatterEvent& SE)
 //  photon.origin = samplePos;
 
 	SE.SetValid((samplePos - R.O).Length(), samplePos, NormalizedGradient(samplePos), -R.D, ColorXYZf());
+}
+*/
+
 }

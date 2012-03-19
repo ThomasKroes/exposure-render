@@ -15,6 +15,9 @@
 
 #include "Defines.cuh"
 
+namespace ExposureRender
+{
+
 struct RunningStats
 {
 	DEVICE void Push(float Value, int N)
@@ -55,3 +58,5 @@ struct RunningStats
 
 	float m_oldM, m_newM, m_oldS, m_newS;
 };
+
+}

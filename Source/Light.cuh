@@ -17,6 +17,9 @@
 #include "RayMarching.cuh"
 #include "General.cuh"
 
+namespace ExposureRender
+{
+
 DEVICE_NI void SampleLightSurface(ErLight& Light, LightSample& LS, SurfaceSample& SS)
 {
 	// Sample the light surface
@@ -137,4 +140,6 @@ DEVICE_NI bool IntersectsLight(const Ray& R)
 	}
 
 	return false;
+}
+
 }

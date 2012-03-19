@@ -15,6 +15,9 @@
 
 #include "MonteCarlo.cuh"
 
+namespace ExposureRender
+{
+
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
 
 DEVICE_NI bool IntersectSphereP(const Ray& R, const float& Radius)
@@ -159,4 +162,6 @@ DEVICE_NI void SampleSphere(SurfaceSample& SS, const Vec3f& UVW, const float& Ra
 	SampleUnitSphere(SS, UVW);
 
 	SS.P *= Radius;
+}
+
 }

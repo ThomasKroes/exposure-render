@@ -15,9 +15,11 @@
 
 #include "Geometry.cuh"
 
-class CRNG
+namespace ExposureRender
 {
-public:
+
+struct CRNG
+{
 	DEVICE CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
 	{
 		this->pSeed0 = pSeed0;
@@ -56,3 +58,5 @@ private:
 	unsigned int*	pSeed0;
 	unsigned int*	pSeed1;
 };
+
+}

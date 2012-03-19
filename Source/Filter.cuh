@@ -13,6 +13,9 @@
 
 #pragma once
 
+namespace ExposureRender
+{
+
 #define MAX_GAUSSIAN_FILTER_KERNEL_SIZE		256
 #define MAX_BILATERAL_FILTER_KERNEL_SIZE	256
 
@@ -32,4 +35,6 @@ struct BilateralFilter
 HOST_DEVICE float Gauss2D(const float& Sigma, const int& X, const int& Y)
 {
 	return expf(-((X * X + Y * Y) / (2 * Sigma * Sigma)));
+}
+
 }

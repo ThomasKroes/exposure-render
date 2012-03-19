@@ -13,13 +13,18 @@
 
 #pragma once
 
+#include "CudaUtilities.cuh"
 #include "Geometry.cuh"
+#include "Utilities.cuh"
+
+namespace ExposureRender
+{
 
 #define KRNL_ESTIMATE_BLOCK_W		16
 #define KRNL_ESTIMATE_BLOCK_H		8
 #define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
 
-KERNEL void KrnlComputeEstimate(FrameBuffer* pFrameBuffer)
+KERNEL void KrnlComputeEstimate(FrameBuffer* pFrameBuffer, int NoIterations)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -27,7 +32,7 @@ KERNEL void KrnlComputeEstimate(FrameBuffer* pFrameBuffer)
 	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
 		return;
 
-	pFrameBuffer->CudaRunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y), pFrameBuffer->CudaFrameEstimate.Get(X, Y), gScattering.NoIterations), X, Y);
+	pFrameBuffer->CudaRunningEstimateXyza.Set(CumulativeMovingAverage(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y), pFrameBuffer->CudaFrameEstimate.Get(X, Y), NoIterations), X, Y);
 }
 
 void ComputeEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)
@@ -35,5 +40,7 @@ void ComputeEstimate(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 BlockDim(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlComputeEstimate<<<GridDim, BlockDim>>>(pFrameBuffer)), "Compute running estimate");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlComputeEstimate<<<GridDim, BlockDim>>>(pFrameBuffer, max(gNoIterations, 1))), "Compute running estimate");
+}
+
 }

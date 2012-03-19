@@ -16,7 +16,10 @@
 #include "Color.cuh"
 #include "Filter.cuh"
 
-#define KRNL_GAUSSIAN_FILTER_BLOCK_W		8
+namespace ExposureRender
+{
+
+#define KRNL_GAUSSIAN_FILTER_BLOCK_W		16
 #define KRNL_GAUSSIAN_FILTER_BLOCK_H		8
 #define KRNL_GAUSSIAN_FILTER_BLOCK_SIZE		KRNL_GAUSSIAN_FILTER_BLOCK_W * KRNL_GAUSSIAN_FILTER_BLOCK_H
 
@@ -129,4 +132,6 @@ void FilterGaussian(ColorXYZAf* pImage, ColorXYZAf* pTemp, int Width, int Height
 
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height)), "Gaussian filter (Horizontal)");
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage, Width, Height)), "Gaussian filter (Vertical)");
+}
+
 }

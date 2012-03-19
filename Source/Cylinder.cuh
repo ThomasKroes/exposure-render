@@ -19,6 +19,9 @@
 // http://www.cl.cam.ac.uk/teaching/1999/AGraphHCI/SMAG/node2.html
 // http://mrl.nyu.edu/~dzorin/intro-graphics/lectures/lecture11/index.htm
 
+namespace ExposureRender
+{
+
 DEVICE_NI void IntersectCylinder(const Ray& R, const float& Radius, const float& Height, Intersection& Int)
 {
 	/*
@@ -115,4 +118,6 @@ DEVICE_NI void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float 
 	}
 	
 	SS.UV = Vec2f(0.0f);
+}
+
 }

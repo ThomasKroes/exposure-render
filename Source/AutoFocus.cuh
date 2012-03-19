@@ -15,6 +15,9 @@
 
 #include "MonteCarlo.cuh"
 
+namespace ExposureRender
+{
+
 KERNEL void KrnlComputeAutoFocusDistance(float* pAutoFocusDistance, int FilmU, int FilmV, unsigned int Seed1, unsigned int Seed2)
 {
 	CRNG RNG(&Seed1, &Seed2);
@@ -64,4 +67,6 @@ void ComputeAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance)
 	
 	CUDA::MemCopyDeviceToHost(pAutoFocusDistance, &AutoFocusDistance);
 	CUDA::Free(pAutoFocusDistance);
+}
+
 }

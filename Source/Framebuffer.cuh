@@ -17,6 +17,9 @@
 #include "Statistics.cuh"
 #include "Sample.cuh"
 
+namespace ExposureRender
+{
+
 class FrameBuffer
 {
 public:
@@ -81,11 +84,11 @@ public:
 	void Reset(void)
 	{
 //		this->CudaRunningEstimateXyza.Reset();
-		this->CudaFrameEstimate.Reset();
+//		this->CudaFrameEstimate.Reset();
 //		this->CudaFrameEstimateTemp.Reset();
 //		this->CudaDisplayEstimate.Reset();
 //		this->CudaDisplayEstimateTemp.Reset();
-		this->CudaDisplayEstimateFiltered.Reset();
+//		this->CudaDisplayEstimateFiltered.Reset();
 //		this->CudaRandomSeeds1.Reset();
 //		this->CudaRandomSeeds2.Reset();
 //		this->CudaRandomSeedsCopy1.Reset();
@@ -161,3 +164,5 @@ public:
 	CCudaBuffer2D<int, false>				CudaNoIterations;
 	CCudaBuffer2D<float, false>				CudaPixelLuminance;
 };
+
+}

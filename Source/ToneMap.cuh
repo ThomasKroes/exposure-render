@@ -15,6 +15,9 @@
 
 #include "Geometry.cuh"
 
+namespace ExposureRender
+{
+
 #define KRNL_TONE_MAP_BLOCK_W		16 
 #define KRNL_TONE_MAP_BLOCK_H		8
 #define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
@@ -44,4 +47,6 @@ void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer)), "Tone map");
+}
+
 }

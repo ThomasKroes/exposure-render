@@ -15,6 +15,9 @@
 
 #include "Transport.cuh"
 
+namespace ExposureRender
+{
+
 DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
@@ -49,28 +52,27 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	
 	CRNG RNG(pFrameBuffer->CudaRandomSeeds1.GetPtr(X, Y), pFrameBuffer->CudaRandomSeeds2.GetPtr(X, Y));
 
+	ColorXYZf Lv = SPEC_BLACK;
+
+	ScatterEvent SE;
+
 	MetroSample Sample(RNG);
 
 	Ray Rc;
 
 	SampleCamera(Rc, Sample.CameraSample, X, Y);
 
-	ColorXYZf Lv = SPEC_BLACK;
-
-	ScatterEvent SE = SampleRay(Rc, RNG);
+	SE = SampleRay(Rc, RNG);
 
 	if (SE.Valid && SE.Type == ScatterEvent::Volume)
-		Lv += UniformSampleOneLightVolume(SE, RNG, Sample.LightingSample);
+		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
 	if (SE.Valid && SE.Type == ScatterEvent::Light)
 		Lv += SE.Le;
 
 	if (SE.Valid && SE.Type == ScatterEvent::Reflector)
-	{
-		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].DiffuseColor), ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].SpecularColor), 5.0f, gReflectors.ReflectorList[SE.ReflectorID].Glossiness);
-		Lv += UniformSampleOneLight(SE, RNG, Shader, Sample.LightingSample);
-	}
-	
+		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
+
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 
 	pFrameBuffer->CudaFrameEstimate.Set(L, X, Y);
@@ -82,4 +84,6 @@ void SingleScattering(FrameBuffer* pFrameBuffer, int Width, int Height)
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlSingleScattering<<<GridDim, BlockDim>>>(pFrameBuffer)), "Single Scattering");
+}
+
 }

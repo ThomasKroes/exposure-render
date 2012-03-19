@@ -6,6 +6,9 @@
 
 using namespace std;
 
+namespace ExposureRender
+{
+
 #define KERNEL					__global__
 #define HOST					__host__
 #define DEVICE					__device__ __inline__
@@ -27,24 +30,4 @@ using namespace std;
 #define DEG_TO_RAD				1.0f / RAD_F
 #define METRO_SIZE				256
 
-/*
-HOST_DEVICE inline void HandleCudaError(const cudaError_t CudaError, const char* pDescription = "")
-{
-	if (CudaError == cudaSuccess)
-		return;
-
-//	Log(QString("Encountered a critical CUDA error: " + QString::fromAscii(pDescription) + " " + QString(cudaGetErrorString(CudaError))));
-
-//	throw new QString("Encountered a critical CUDA error: " + QString::fromAscii(pDescription) + " " + QString(cudaGetErrorString(CudaError)));
 }
-
-HOST_DEVICE inline void HandleCudaKernelError(const cudaError_t CudaError, const char* pName = "")
-{
-	if (CudaError == cudaSuccess)
-		return;
-
-//	Log(QString("The '" + QString::fromAscii(pName) + "' kernel caused the following CUDA runtime error: " + QString(cudaGetErrorString(CudaError))));
-
-//	throw new QString("The '" + QString::fromAscii(pName) + "' kernel caused the following CUDA runtime error: " + QString(cudaGetErrorString(CudaError)));
-}
-*/

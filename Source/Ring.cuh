@@ -16,6 +16,9 @@
 #include "Geometry.cuh"
 #include "Disk.cuh"
 
+namespace ExposureRender
+{
+
 DEVICE_NI void IntersectUnitRing(const Ray& R, const bool& OneSided, const float& InnerRadius, Intersection& Int)
 {
 	IntersectPlane(R, OneSided, Int);
@@ -58,5 +61,6 @@ DEVICE_NI void SampleRing(SurfaceSample& SS, const Vec3f& UVW, const float& Inne
 
 	SS.P *= OuterRadius;
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
+}
 
 }

@@ -17,6 +17,9 @@
 
 #include <thrust/reduce.h>
 
+namespace ExposureRender
+{
+
 KERNEL void KrnlComputeGradientMagnitudeVolume(unsigned short* pGradientMagnitude, int Width, int Height, int Depth)
 {
 	const int X = blockIdx.x * blockDim.x + threadIdx.x;
@@ -58,4 +61,6 @@ void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitu
 
 	// Set result
 	MaximumGradientMagnitude = Result;
+}
+
 }

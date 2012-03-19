@@ -15,6 +15,9 @@
 
 #include "Vector.cuh"
 
+namespace ExposureRender
+{
+
 HOST_DEVICE inline float LuminanceFromRGB(const float& R, const float& G, const float& B)
 {
 	return Clamp(0.3f * R + 0.59f * G + 0.11f * B, 0.0f, 255.0f);
@@ -789,7 +792,7 @@ public:
 		return D[i];
 	}
 
-	HOST_DEVICE bool Black(void)
+	HOST_DEVICE bool Black(void) const
 	{
 		for (int i = 0; i < 3; i++)
 			if (D[i] != 0.0f)
@@ -851,3 +854,5 @@ HOST_DEVICE ColorRGBAuc Lerp(const ColorRGBAuc& A, const ColorRGBAuc& B, const f
 #define SPEC_WHITE											ColorXYZf(1.0f)
 #define SPEC_CYAN											ColorXYZf(1.0f)
 #define SPEC_RED											ColorXYZf(1.0f, 0.0f, 0.0f)
+
+}

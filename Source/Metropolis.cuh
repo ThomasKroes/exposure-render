@@ -7,7 +7,7 @@
 #define KRNL_ADV_MLT_BLOCK_H		8
 #define KRNL_ADV_MLT_BLOCK_SIZE		KRNL_ADV_MLT_BLOCK_W * KRNL_ADV_MLT_BLOCK_H
 
-/**/
+/*
 KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 {
 	const int X		= blockIdx.x * blockDim.x + threadIdx.x;
@@ -50,7 +50,7 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 
 	if (SE.Valid && SE.Type == ScatterEvent::Reflector)
 	{
-		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.2f), ColorXYZf(0.5f), 5.0f, 10.0f);
+		VolumeShader Shader(VolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.2f), ColorXYZf(0.5f), 5.0f, 10.0f);
 		Lv += UniformSampleOneLight(SE, RNG, Shader, Sample.LightingSample);
 	}
 	
@@ -92,7 +92,7 @@ KERNEL void KrnlAdvanceMetropolis(FrameBuffer* pFrameBuffer)
 		NewSample.OldL = NewL;
 		Sample = NewSample;
 	}
-	*/
+	
 }
 
 /*

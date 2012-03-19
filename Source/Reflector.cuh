@@ -17,6 +17,9 @@
 #include "RayMarching.cuh"
 #include "General.cuh"
 
+namespace ExposureRender
+{
+
 // Intersect a reflector with a ray
 DEVICE_NI void IntersectReflector(ErReflector& Reflector, const Ray& R, ScatterEvent& RS)
 {
@@ -101,4 +104,6 @@ DEVICE_NI bool IntersectsReflector(const Ray& R)
 	}
 
 	return false;
+}
+
 }

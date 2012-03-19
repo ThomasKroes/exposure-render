@@ -16,6 +16,9 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 
+namespace ExposureRender
+{
+
 class CCudaTimer
 {
 public:
@@ -259,4 +262,6 @@ public:
 																						\
 	CUDA::HandleCudaError(cudaGetLastError());											\
 	CUDA::HandleCudaError(cudaThreadSynchronize());										\
+}
+
 }

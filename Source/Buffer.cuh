@@ -15,6 +15,9 @@
 
 #include "Geometry.cuh"
 
+namespace ExposureRender
+{
+
 template<class T, bool Pitched>
 class CCudaBuffer2D
 {
@@ -285,3 +288,5 @@ public:
 		free(pSeeds);
 	}
 };
+
+}

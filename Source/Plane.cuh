@@ -16,6 +16,9 @@
 #include "Geometry.cuh"
 #include "Sample.cuh"
 
+namespace ExposureRender
+{
+
 #define INTERSECTION_EPSILON 0.0001f
 
 DEVICE_NI void IntersectPlaneP(const Ray& R, const bool& OneSided, Intersection& Int)
@@ -92,4 +95,6 @@ DEVICE_NI void SamplePlane(SurfaceSample& SS, const Vec3f& UVW, const Vec2f& Siz
 	SampleUnitPlane(SS, UVW);
 
 	SS.P *= Vec3f(Size[0], Size[1], 0.0f);
+}
+
 }

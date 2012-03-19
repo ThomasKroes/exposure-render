@@ -17,6 +17,9 @@
 
 #include <thrust/reduce.h>
 
+namespace ExposureRender
+{
+
 #define KRNL_BENCHMARK_BLOCK_W		16 
 #define KRNL_BENCHMARK_BLOCK_H		8
 #define KRNL_BENCHMARK_BLOCK_SIZE	KRNL_BENCHMARK_BLOCK_W * KRNL_BENCHMARK_BLOCK_H
@@ -51,8 +54,6 @@ KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
 	*pFrameBuffer->RmsError.GetPtr(X, Y) = NrmsError;
 }
 
-#define doit(call) call
-
 void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Width, int Height, float& AverageNrmsError)
 {
 	const dim3 BlockDim(KRNL_BENCHMARK_BLOCK_W, KRNL_BENCHMARK_BLOCK_H);
@@ -65,4 +66,6 @@ void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Wid
 	float result = thrust::reduce(dev_ptr, dev_ptr + Width * Height);
 	
 	AverageNrmsError = (result / (float)(Width * Height)) / 255.0f;
+}
+
 }

@@ -17,6 +17,9 @@
 #include "Color.cuh"
 #include "RNG.cuh"
 
+namespace ExposureRender
+{
+
 DEVICE void Mutate1(float& X, CRNG& RNG, const float& S1 = 0.0009765625f, const float& S2 = 0.015625f)
 {
 	float dx = S2 * exp(-log(S2 / S1) * RNG.Get1());
@@ -262,3 +265,5 @@ struct MetroSample
 		return Result;
 	}
 };
+
+}

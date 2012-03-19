@@ -15,6 +15,9 @@
 
 #include "Defines.cuh"
 
+namespace ExposureRender
+{
+
 HOST_DEVICE inline float clamp2(float v, float a, float b)
 {
 	return max(a, min(v, b));
@@ -515,4 +518,6 @@ inline HOST_DEVICE Vec3f Min(const Vec3f& a, const Vec3f& b)
 inline HOST_DEVICE Vec3f Max(const Vec3f& a, const Vec3f& b)
 {
 	return Vec3f(max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]));
+}
+
 }

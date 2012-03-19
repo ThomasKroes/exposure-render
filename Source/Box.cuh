@@ -15,6 +15,9 @@
 
 #include "Geometry.cuh"
 
+namespace ExposureRender
+{
+
 DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
@@ -194,4 +197,6 @@ DEVICE_NI void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
 	SampleUnitBox(SS, UVW);
 
 	SS.P *= Size;
+}
+
 }

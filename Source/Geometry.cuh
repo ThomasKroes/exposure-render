@@ -19,6 +19,9 @@
 
 using namespace std;
 
+namespace ExposureRender
+{
+
 HOST_DEVICE float Lerp(float t, float v1, float v2)
 {
 	return (1.f - t) * v1 + t * v2;
@@ -158,6 +161,10 @@ struct ScatterEvent
 	int			ReflectorID;
 	int			LightID;
 
+	HOST_DEVICE ScatterEvent()
+	{
+	}
+
 	HOST_DEVICE ScatterEvent(SampleType Type)
 	{
 		this->Type = Type;
@@ -251,3 +258,5 @@ struct Intersection
 		return *this;
 	}
 };
+
+}

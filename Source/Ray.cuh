@@ -15,6 +15,9 @@
 
 #include "Vector.cuh"
 
+namespace ExposureRender
+{
+
 struct Ray
 {	
 	DEVICE Ray(Vec3f O = Vec3f(0.0f), Vec3f D = Vec3f(0.0f, 0.0f, 1.0f), float MinT = 0.0f, float MaxT = 1000000.0f)
@@ -45,3 +48,5 @@ struct Ray
 	float	MinT;
 	float	MaxT;		
 };
+
+}

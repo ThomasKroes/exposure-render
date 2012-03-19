@@ -16,8 +16,11 @@
 #include "Light.cuh"
 #include "Reflector.cuh"
 
+namespace ExposureRender
+{
+
 #define EPS1 0.0001f
-#define EPS2 0.0002f
+#define EPS2 EPS1 * 2.0f
 
 DEVICE_NI bool Intersect(Ray R, CRNG& RNG)
 {
@@ -47,7 +50,7 @@ DEVICE_NI bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
 	return !Intersect(R, RNG);
 }
 
-DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, CVolumeShader& Shader, int LightID)
+DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
 {
 	ErLight& Light = gLights.LightList[LightID];
 
@@ -70,7 +73,10 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 		const float Weight = PowerHeuristic(1, LightPdf, 1, BsdfPdf);
 
-		Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / LightPdf);
+		if (Shader.Type == VolumeShader::Brdf)
+			Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / LightPdf);
+		else
+			Ld += F * Li / LightPdf;
 	}
 
 	F = Shader.SampleF(SE.Wo, Wi, BsdfPdf, LS.BrdfSample);
@@ -95,83 +101,44 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 		const float Weight = PowerHeuristic(1, BsdfPdf, 1, LightPdf);
 
-		Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / BsdfPdf);
+		if (Shader.Type == VolumeShader::Brdf)
+			Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / BsdfPdf);
+		else
+			Ld += F * Li * BsdfPdf;
 	}
-	
+
 	return Ld;
 }
 
-DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, CVolumeShader& Shader, LightingSample& LS)
+DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
+	VolumeShader Shader;
+	
+	switch (SE.Type)
+	{
+		case ScatterEvent::Volume:	
+			Shader = GetVolumeShader(SE, RNG);		
+			break;
+
+		case ScatterEvent::Light:
+			Shader = GetLightShader(SE, RNG);
+			break;
+
+		case ScatterEvent::Reflector:
+			Shader = GetReflectorShader(SE, RNG);
+			break;
+	}
+
 	const int LightID = floorf(LS.LightNum * gLights.NoLights);
 
-	return (float)gLights.NoLights * EstimateDirectLight(LS, SE, RNG, Shader, LightID);
+	ColorXYZf Ld;
+	
+	int NoSamples = 1;
+
+	for (int i = 0; i < NoSamples; i++)
+		Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID) / (float)NoSamples;
+
+	return (float)gLights.NoLights * Ld;
 }
 
-DEVICE_NI ColorXYZf UniformSampleOneLightVolume(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
-{
-	const float I = GetIntensity(SE.P);
-
-	float PdfBrdf = 1.0f;
-
-	switch (gVolume.ShadingType)
-	{
-		case 0:
-		{
-			PdfBrdf = 1.0f;
-			break;
-		}
-	
-		case 1:
-		{
-			PdfBrdf = 0.0f;
-			break;
-		}
-
-		case 2:
-		{
-			const float NGM			= GradientMagnitude(SE.P) * gVolume.GradientMagnitudeRange.Inv;
-			const float Sensitivity	= 25;
-			const float ExpGF		= 3;
-			const float Exponent	= Sensitivity * powf(gVolume.GradientFactor, ExpGF) * NGM;
-			
-			PdfBrdf = gScattering.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
-			break;
-		}
-
-		case 3:
-		{
-			const float NGM = GradientMagnitude(SE.P) * gVolume.GradientMagnitudeRange.Inv;
-			
-			PdfBrdf = 1.0f - powf(1.0f - NGM, 2.0f);
-			break;
-		}
-
-		case 4:
-		{
-			const float NGM = GradientMagnitude(SE.P) * gVolume.GradientMagnitudeRange.Inv;
-
-			if (NGM > gVolume.GradientThreshold)
-			{
-				CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
-				return GetEmission(I) + UniformSampleOneLight(SE, RNG, Shader, LS);
-			}
-			else
-			{
-				CVolumeShader Shader(CVolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
-				return GetEmission(I) + 0.5f * UniformSampleOneLight(SE, RNG, Shader, LS);
-			}
-		}
-	}
-
-	if (RNG.Get1() < PdfBrdf)
-	{
-		CVolumeShader Shader(CVolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
-		return GetEmission(I) + UniformSampleOneLight(SE, RNG, Shader, LS);
-	}
-	else
-	{
-		CVolumeShader Shader(CVolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
-		return GetEmission(I) + UniformSampleOneLight(SE, RNG, Shader, LS) * 0.5f;
-	}
 }

@@ -17,7 +17,10 @@
 #include "Geometry.cuh"
 #include "Filter.cuh"
 
-#define KRNL_BILATERAL_FILTER_BLOCK_W		8 
+namespace ExposureRender
+{
+
+#define KRNL_BILATERAL_FILTER_BLOCK_W		16
 #define KRNL_BILATERAL_FILTER_BLOCK_H		8
 #define KRNL_BILATERAL_FILTER_BLOCK_SIZE	KRNL_BILATERAL_FILTER_BLOCK_W * KRNL_BILATERAL_FILTER_BLOCK_H
 
@@ -37,6 +40,11 @@ HOST_DEVICE inline float GaussianSimilarity(const ColorRGBf& A, const ColorRGBf&
 HOST_DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
 {
 	return ColorRGBf(Color[0], Color[1], Color[2]);
+}
+
+HOST_DEVICE inline float FilterWeight(const int& X, const int& KernelX, const ColorRGBf& KernelPosColor, const ColorRGBf& CenterColor)
+{
+	return KernelPosColor.Black() ? 0.0f : GetSpatialWeight(X, KernelX) * GaussianSimilarity(KernelPosColor, CenterColor);
 }
 
 KERNEL void KrnlBilateralFilterHorizontal(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int Width, int Height)
@@ -84,7 +92,7 @@ KERNEL void KrnlBilateralFilterHorizontal(ColorRGBAuc* pIn, ColorRGBAuc* pOut, i
 		ColorRGBf KernelPosColor = ToColorRGBf(pIn[Y * Width + x]);
 
 		// Compute composite weight
-		Weight[TID] = GetSpatialWeight(X, x) * GaussianSimilarity(KernelPosColor, CenterColor);
+		Weight[TID] = FilterWeight(X, x, KernelPosColor, CenterColor);
 
 		// Compute total weight for normalization
 		TotalWeight[TID] += Weight[TID];
@@ -159,7 +167,7 @@ KERNEL void KrnlBilateralFilterVertical(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int
 		ColorRGBf KernelPosColor = ToColorRGBf(pIn[y * Width + X]);
 
 		// Compute composite weight
-		Weight[TID] = GetSpatialWeight(Y, y) * GaussianSimilarity(KernelPosColor, CenterColor);
+		Weight[TID] = FilterWeight(Y, y, KernelPosColor, CenterColor);
 
 		// Compute total weight for normalization
 		TotalWeight[TID] += Weight[TID];
@@ -196,4 +204,6 @@ void FilterBilateral(ColorRGBAuc* pImage, ColorRGBAuc* pTemp, ColorRGBAuc* pOut,
 
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlBilateralFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height)), "Bilateral filter (Horizontal)");
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlBilateralFilterVertical<<<GridDim, BlockDim>>>(pTemp, pOut, Width, Height)), "Bilateral filter (Vertical)");
+}
+
 }

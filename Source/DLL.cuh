@@ -13,53 +13,8 @@
 
 #pragma once
 
-#include "Geometry.cuh"
-#include "Plane.cuh"
-
-namespace ExposureRender
-{
-
-DEVICE_NI bool IntersectDiskP(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
-{
-	IntersectPlaneP(R, OneSided, Int);
-
-	if (Int.Valid && Int.UV.Length() > Radius)
-		return false;
-
-	return Int.Valid;
-}
-
-DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
-{
-	IntersectPlane(R, OneSided, Int);
-
-	if (Int.Valid && Int.UV.Length() > Radius)
-		Int.Valid = false;
-}
-
-DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, const float& Offset, Intersection& Int)
-{
-	IntersectPlane(R, OneSided, Offset, Int);
-
-	if (Int.Valid && Int.UV.Length() > Radius)
-		Int.Valid = false;
-}
-
-DEVICE_NI void SampleUnitDisk(SurfaceSample& SS, const Vec3f& UVW)
-{
-	float r = sqrtf(UVW[0]);
-	float theta = 2.0f * PI_F * UVW[1];
-
-	SS.P 	= Vec3f(r * cosf(theta), r * sinf(theta), 0.0f);
-	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
-	SS.UV	= Vec2f(UVW[0], UVW[1]);
-}
-
-DEVICE_NI void SampleDisk(SurfaceSample& SS, const Vec3f& UVW, const float& Radius)
-{
-	SampleUnitDisk(SS, UVW);
-	
-	SS.P *= Radius;
-}
-
-}
+#ifdef _EXPORTING
+	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
+#else
+	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
+#endif

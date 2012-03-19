@@ -15,11 +15,14 @@
 
 #include "Geometry.cuh"
 
+namespace ExposureRender
+{
+
 #define KRNL_BLEND_BLOCK_W		8 
 #define KRNL_BLEND_BLOCK_H		8
 #define KRNL_BLEND_BLOCK_SIZE	KRNL_BLEND_BLOCK_W * KRNL_BLEND_BLOCK_H
 
-KERNEL void KrnlBlend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Width, int Height)
+KERNEL void KrnlBlend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Width, int Height, int NoIterations)
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
@@ -28,7 +31,9 @@ KERNEL void KrnlBlend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Widt
 	if (X >= Width || Y >= Height)
 		return;
 
-	pImage[PID] = Lerp(pImage[PID], pImageFiltered[PID], gScattering.NoIterations <= 1000 ? powf(1.0f / (float)gScattering.NoIterations, 2.0f): 0.0f);
+	const float BlendFactor = 0.0f;//exp(-powf((float)NoIterations / 100.0f, 1.7f));
+
+	pImage[PID] = Lerp(pImage[PID], pImageFiltered[PID], BlendFactor);
 }
 
 void Blend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Width, int Height)
@@ -36,5 +41,7 @@ void Blend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Width, int Heig
 	const dim3 BlockDim(KRNL_BLEND_BLOCK_W, KRNL_BLEND_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlBlend<<<GridDim, BlockDim>>>(pImage, pImageFiltered, Width, Height)), "Blend");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlBlend<<<GridDim, BlockDim>>>(pImage, pImageFiltered, Width, Height, max(gNoIterations, 1))), "Blend");
+}
+
 }

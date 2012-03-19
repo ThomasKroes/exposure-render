@@ -14,20 +14,21 @@
 #pragma once
 
 #include "Geometry.cuh"
-
 #include "MonteCarlo.cuh"
 #include "Sample.cuh"
 
-class CLambertian
+namespace ExposureRender
 {
-public:
-	DEVICE CLambertian(const ColorXYZf& Kd)
+
+struct Lambertian
+{
+	DEVICE Lambertian(void)
 	{
-		this->Kd = Kd;
 	}
 
-	DEVICE ~CLambertian(void)
+	DEVICE Lambertian(const ColorXYZf& Kd)
 	{
+		this->Kd = Kd;
 	}
 
 	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
@@ -52,6 +53,12 @@ public:
 		return SameHemisphere(Wo, Wi) ? AbsCosTheta(Wi) * INV_PI_F : 0.0f;
 	}
 
+	DEVICE Lambertian& operator = (const Lambertian& Other)
+	{
+		this->Kd = Other.Kd;
+		return *this;
+	}
+
 	ColorXYZf	Kd;
 };
 
@@ -62,16 +69,15 @@ DEVICE inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, co
 	return (Rparl*Rparl + Rperp*Rperp) / 2.f;
 }
 
-class CFresnel
+struct Fresnel
 {
-public:
-	DEVICE CFresnel(float ei, float et) :
-		EtaI(ei),
-		EtaT(et)
+	DEVICE Fresnel(void)
 	{
 	}
 
-	DEVICE  ~CFresnel(void)
+	DEVICE Fresnel(float ei, float et) :
+		EtaI(ei),
+		EtaT(et)
 	{
 	}
 
@@ -102,18 +108,25 @@ public:
 		}
 	}
 
+	DEVICE Fresnel& operator = (const Fresnel& Other)
+	{
+		this->EtaI = Other.EtaI;
+		this->EtaT = Other.EtaT;
+
+		return *this;
+	}
+
 	float EtaI, EtaT;
 };
 
-class CBlinn
+struct Blinn
 {
-public:
-	DEVICE CBlinn(const float& Exponent) :
-		Exponent(Exponent)
+	DEVICE Blinn(void)
 	{
 	}
 
-	DEVICE ~CBlinn(void)
+	DEVICE Blinn(const float& Exponent) :
+		Exponent(Exponent)
 	{
 	}
 
@@ -163,20 +176,26 @@ public:
 		return (this->Exponent + 2) * INV_TWO_PI_F * powf(CosThetaH, this->Exponent);
 	}
 
+	DEVICE Blinn& operator = (const Blinn& Other)
+	{
+		this->Exponent = Other.Exponent;
+
+		return *this;
+	}
+
 	float	Exponent;
 };
 
-class CMicrofacet
+struct Microfacet
 {
-public:
-	DEVICE CMicrofacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
-		R(Reflectance),
-		Fresnel(1.0f, Ior),
-		Blinn(Exponent)
+	DEVICE Microfacet(void)
 	{
 	}
 
-	DEVICE ~CMicrofacet(void)
+	DEVICE Microfacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
+		R(Reflectance),
+		Fresnel(1.0f, Ior),
+		Blinn(Exponent)
 	{
 	}
 
@@ -229,21 +248,29 @@ public:
 		return min(1.0f, min((2.0f * NdotWh * NdotWo / WOdotWh), (2.0f * NdotWh * NdotWi / WOdotWh)));
 	}
 
+	DEVICE Microfacet& operator = (const Microfacet& Other)
+	{
+		this->R			= Other.R;
+		this->Fresnel	= Other.Fresnel;
+		this->Blinn		= Other.Blinn;
+
+		return *this;
+	}
+
 	ColorXYZf	R;
-	CFresnel	Fresnel;
-	CBlinn		Blinn;
+	Fresnel	Fresnel;
+	Blinn		Blinn;
 
 };
 
-class CIsotropicPhase
+struct IsotropicPhase
 {
-public:
-	DEVICE CIsotropicPhase(const ColorXYZf& Kd) :
-		Kd(Kd)
+	DEVICE IsotropicPhase(void)
 	{
 	}
 
-	DEVICE ~CIsotropicPhase(void)
+	DEVICE IsotropicPhase(const ColorXYZf& Kd) :
+		Kd(Kd)
 	{
 	}
 
@@ -265,22 +292,28 @@ public:
 		return INV_4_PI_F;
 	}
 
+	DEVICE IsotropicPhase& operator = (const IsotropicPhase& Other)
+	{
+		this->Kd = Other.Kd;
+
+		return *this;
+	}
+
 	ColorXYZf	Kd;
 };
 
-class CBRDF
+struct BRDF
 {
-public:
-	DEVICE CBRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
+	DEVICE BRDF(void)
+	{
+	}
+
+	DEVICE BRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		Lambertian(Kd),
 		Microfacet(Ks, Ior, Exponent),
 		Nn(Normalize(N)),
 		Nu(Normalize(Cross(N, Wo))),
 		Nv(Normalize(Cross(N, Nu)))
-	{
-	}
-
-	DEVICE ~CBRDF(void)
 	{
 	}
 
@@ -349,30 +382,40 @@ public:
 		return Pdf;
 	}
 
+	DEVICE BRDF& operator = (const BRDF& Other)
+	{
+		this->Nn 			= Other.Nn;
+		this->Nu 			= Other.Nu;
+		this->Nv 			= Other.Nv;
+		this->Lambertian 	= Other.Lambertian;
+		this->Microfacet 	= Other.Microfacet;
+
+		return *this;
+	}
+
 	Vec3f			Nn;
 	Vec3f			Nu;
 	Vec3f			Nv;
-	CLambertian		Lambertian;
-	CMicrofacet		Microfacet;
+	Lambertian		Lambertian;
+	Microfacet		Microfacet;
 };
 
-class CVolumeShader
+struct VolumeShader
 {
-public:
 	enum EType
 	{
 		Brdf,
 		Phase
 	};
 
-	DEVICE CVolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
-		Type(Type),
-		BRDF(N, Wo, Kd, Ks, Ior, Exponent),
-		IsotropicPhase(Kd)
+	DEVICE VolumeShader(void)
 	{
 	}
 
-	DEVICE ~CVolumeShader(void)
+	DEVICE VolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
+		Type(Type),
+		BRDF(N, Wo, Kd, Ks, Ior, Exponent),
+		IsotropicPhase(Kd)
 	{
 	}
 
@@ -418,7 +461,88 @@ public:
 		return 1.0f;
 	}
 
+	DEVICE VolumeShader& operator = (const VolumeShader& Other)
+	{
+		this->Type 				= Other.Type;
+		this->BRDF 				= Other.BRDF;
+		this->IsotropicPhase	= Other.IsotropicPhase;
+
+		return *this;
+	}
+
 	EType				Type;
-	CBRDF				BRDF;
-	CIsotropicPhase		IsotropicPhase;
+	BRDF				BRDF;
+	IsotropicPhase		IsotropicPhase;
 };
+
+DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
+{
+	const float I = GetIntensity(SE.P);
+
+	bool BRDF = false;
+
+	float PdfBrdf = 1.0f;
+
+	switch (gVolume.ShadingType)
+	{
+		case 0:
+		{
+			BRDF = true;
+			break;
+		}
+	
+		case 1:
+		{
+			BRDF = false;
+			break;
+		}
+
+		case 2:
+		{
+			const float NGM			= GradientMagnitude(SE.P) * gVolume.GradientMagnitudeRange.Inv;
+			const float Sensitivity	= 25;
+			const float ExpGF		= 3;
+			const float Exponent	= Sensitivity * powf(gVolume.GradientFactor, ExpGF) * NGM;
+			
+			PdfBrdf = gScattering.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
+			BRDF = RNG.Get1() < PdfBrdf;
+			break;
+		}
+
+		case 3:
+		{
+			const float NGM = GradientMagnitude(SE.P) * gVolume.GradientMagnitudeRange.Inv;
+			
+			PdfBrdf = 1.0f - powf(1.0f - NGM, 2.0f);
+			BRDF = RNG.Get1() < PdfBrdf;
+			break;
+		}
+
+		case 4:
+		{
+			const float NGM = GradientMagnitude(SE.P) * gVolume.GradientMagnitudeRange.Inv;
+
+			if (NGM > gVolume.GradientThreshold)
+				BRDF = true;
+			else
+				BRDF = false;
+		}
+	}
+
+	if (BRDF)
+		return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
+	else
+		return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gScattering.IndexOfReflection, GetGlossiness(I));
+}
+
+DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
+{
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].DiffuseColor), ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].SpecularColor), 5.0f, gReflectors.ReflectorList[SE.ReflectorID].Glossiness);
+}
+
+DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
+{
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].DiffuseColor), ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].SpecularColor), 5.0f, gReflectors.ReflectorList[SE.ReflectorID].Glossiness);
+}
+
+}

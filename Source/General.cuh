@@ -15,6 +15,9 @@
 
 #include <cstdio>
 
+namespace ExposureRender
+{
+
 #ifdef _EXPORTING
 	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
 #else
@@ -214,22 +217,8 @@ struct EXPOSURE_RENDER_DLL ErReflectors
 	ErReflector			ReflectorList[32];
 };
 
-struct EXPOSURE_RENDER_DLL ErDenoise
-{
-	float				Enabled;
-	float				WindowRadius;
-	float				WindowArea;
-	float				InvWindowArea;
-	float				Noise;
-	float				WeightThreshold;
-	float				LerpThreshold;
-	float				LerpC;
-};
-
 struct EXPOSURE_RENDER_DLL ErScattering
 {
-	int					NoIterations;
-	float				InvNoIterations;
 	int					SamplingStrategy;
 	float				IndexOfReflection;
 	bool				OpacityModulated;
@@ -255,3 +244,5 @@ struct EXPOSURE_RENDER_DLL ErFiltering
 	GaussianFilterParameters	FrameEstimateFilter;
 	BilateralFilterParameters	PostProcessingFilter;
 };
+
+}
