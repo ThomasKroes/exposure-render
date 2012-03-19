@@ -29,7 +29,7 @@ KERNEL void KrnlComputeGradientMagnitudeVolume(unsigned short* pGradientMagnitud
 	if (X >= Width || Y >= Height || Z >= Depth)
 		return;
 	
-	const Vec3f P = ToVec3f(gVolume.MinAABB) + ToVec3f(gVolume.Size) * (Vec3f((float)X + 0.5f, (float)Y + 0.5f, (float)Z + 0.5f) * ToVec3f(gVolume.InvExtent));
+	const Vec3f P = ToVec3f(gVolumeProperties.MinAABB) + ToVec3f(gVolumeProperties.Size) * (Vec3f((float)X + 0.5f, (float)Y + 0.5f, (float)Z + 0.5f) * ToVec3f(gVolumeProperties.InvExtent));
 
 	int ID = X + Y * Width + Z * (Width * Height);
 

@@ -116,13 +116,13 @@ DEVICE_NI bool InsideBox(Vec3f P, Vec3f Size)
 
 DEVICE_NI bool InsideAABB(Vec3f P)
 {
-	if (P[0] < gVolume.MinAABB[0] || P[0] > gVolume.MaxAABB[0])
+	if (P[0] < gVolumeProperties.MinAABB[0] || P[0] > gVolumeProperties.MaxAABB[0])
 		return false;
 
-	if (P[1] < gVolume.MinAABB[1] || P[1] > gVolume.MaxAABB[1])
+	if (P[1] < gVolumeProperties.MinAABB[1] || P[1] > gVolumeProperties.MaxAABB[1])
 		return false;
 
-	if (P[2] < gVolume.MinAABB[2] || P[2] > gVolume.MaxAABB[2])
+	if (P[2] < gVolumeProperties.MinAABB[2] || P[2] > gVolumeProperties.MaxAABB[2])
 		return false;
 
 	return true;

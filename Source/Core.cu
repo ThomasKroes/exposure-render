@@ -15,7 +15,7 @@
 
 #include "General.cuh"
 
-ExposureRender::ErKernelTimings gKernelTimings;
+ExposureRender::KernelTimings gKernelTimings;
 
 #include "Core.cuh"
 #include "CudaUtilities.cuh"
@@ -37,19 +37,19 @@ cudaArray* gpSpecular	= NULL;
 cudaArray* gpGlossiness	= NULL;
 cudaArray* gpEmission	= NULL;
 
-CD ExposureRender::ErVolume			gVolume;
-CD ExposureRender::ErCamera			gCamera;
-CD ExposureRender::ErLights			gLights;
-CD ExposureRender::ErClippers		gClippers;
-CD ExposureRender::ErReflectors		gReflectors;
-CD ExposureRender::ErScattering		gScattering;
-CD ExposureRender::ErRange			gOpacityRange;
-CD ExposureRender::ErRange			gDiffuseRange;
-CD ExposureRender::ErRange			gSpecularRange;
-CD ExposureRender::ErRange			gGlossinessRange;
-CD ExposureRender::ErRange			gEmissionRange;
-CD ExposureRender::GaussianFilter	gFrameEstimateFilter;
-CD ExposureRender::BilateralFilter	gPostProcessingFilter;
+CD ExposureRender::VolumeProperties		gVolumeProperties;
+CD ExposureRender::Camera				gCamera;
+CD ExposureRender::Lights				gLights;
+CD ExposureRender::Clippers				gClippers;
+CD ExposureRender::Reflectors			gReflectors;
+CD ExposureRender::RenderSettings		gRenderSettings;
+CD ExposureRender::Range				gOpacityRange;
+CD ExposureRender::Range				gDiffuseRange;
+CD ExposureRender::Range				gSpecularRange;
+CD ExposureRender::Range				gGlossinessRange;
+CD ExposureRender::Range				gEmissionRange;
+CD ExposureRender::GaussianFilter		gFrameEstimateFilter;
+CD ExposureRender::BilateralFilter		gPostProcessingFilter;
 
 ExposureRender::FrameBuffer gFrameBuffer;
 
@@ -69,42 +69,76 @@ int	gNoIterations = 0;
 namespace ExposureRender
 {
 
-EXPOSURE_RENDER_DLL void ErResize(int Size[2])
+EXPOSURE_RENDER_DLL void Resize(int Size[2])
 {
 	gFrameBuffer.Resize(Resolution2i(Size));
 }
 
-EXPOSURE_RENDER_DLL void ErReset()
+EXPOSURE_RENDER_DLL void Reset()
 {
 	gFrameBuffer.Reset();
 	gNoIterations = 0;
 }
 
-EXPOSURE_RENDER_DLL void ErUnbindDensityBuffer(void)
+EXPOSURE_RENDER_DLL void UnbindDensityBuffer(void)
 {
 	CUDA::FreeArray(gpIntensity);
 	CUDA::UnbindTexture(gTexIntensity);
 }
 
-EXPOSURE_RENDER_DLL void ErBindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
+EXPOSURE_RENDER_DLL void BindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
 {
-	ErUnbindDensityBuffer();
+	UnbindDensityBuffer();
 	CUDA::BindTexture3D(gTexIntensity, Extent, pBuffer, gpIntensity);
 }
 
-EXPOSURE_RENDER_DLL void ErBindOpacity1D(float Opacity[NO_TF_STEPS], float Range[2])
+EXPOSURE_RENDER_DLL void UnbindOpacity1D(void)
 {
-	ErRange Int;
-	Int.Set(Range);
+	CUDA::FreeArray(gpOpacity);
+	CUDA::UnbindTexture(gTexOpacity);
+}
+
+EXPOSURE_RENDER_DLL void UnbindDiffuse1D(void)
+{
+	CUDA::FreeArray(gpDiffuse);
+	CUDA::UnbindTexture(gTexDiffuse);
+}
+
+EXPOSURE_RENDER_DLL void UnbindSpecular1D(void)
+{
+	CUDA::FreeArray(gpSpecular);
+	CUDA::UnbindTexture(gTexSpecular);
+}
+
+EXPOSURE_RENDER_DLL void UnbindGlossiness1D(void)
+{
+	CUDA::FreeArray(gpGlossiness);
+	CUDA::UnbindTexture(gTexGlossiness);
+}
+
+EXPOSURE_RENDER_DLL void UnbindEmission1D(void)
+{
+	CUDA::FreeArray(gpEmission);
+	CUDA::UnbindTexture(gTexEmission);
+}
+
+EXPOSURE_RENDER_DLL void BindOpacity1D(float Opacity[NO_TF_STEPS], float IntensityRange[2])
+{
+	UnbindOpacity1D();
+
+	Range Int;
+	Int.Set(IntensityRange);
 
 	CUDA::HostToConstantDevice(&Int, "gOpacityRange"); 
 	CUDA::BindTexture1D(gTexOpacity, NO_TF_STEPS, Opacity, gpOpacity);
 }
 
-EXPOSURE_RENDER_DLL void ErBindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float Range[2])
+EXPOSURE_RENDER_DLL void BindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float IntensityRange[2])
 {
-	ErRange Int;
-	Int.Set(Range);
+	UnbindDiffuse1D();
+
+	Range Int;
+	Int.Set(IntensityRange);
 
 	CUDA::HostToConstantDevice(&Int, "gDiffuseRange");
 
@@ -116,10 +150,12 @@ EXPOSURE_RENDER_DLL void ErBindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float Ra
 	CUDA::BindTexture1D(gTexDiffuse, NO_TF_STEPS, (float4*)DiffuseXYZA, gpDiffuse);
 }
 
-EXPOSURE_RENDER_DLL void ErBindSpecular1D(float Specular[3][NO_TF_STEPS], float Range[2])
+EXPOSURE_RENDER_DLL void BindSpecular1D(float Specular[3][NO_TF_STEPS], float IntensityRange[2])
 {
-	ErRange Int;
-	Int.Set(Range);
+	UnbindSpecular1D();
+
+	Range Int;
+	Int.Set(IntensityRange);
 
 	CUDA::HostToConstantDevice(&Int, "gSpecularRange");
 
@@ -131,19 +167,23 @@ EXPOSURE_RENDER_DLL void ErBindSpecular1D(float Specular[3][NO_TF_STEPS], float 
 	CUDA::BindTexture1D(gTexSpecular, NO_TF_STEPS, (float4*)SpecularXYZA, gpSpecular);
 }
 
-EXPOSURE_RENDER_DLL void ErBindGlossiness1D(float Glossiness[NO_TF_STEPS], float Range[2])
+EXPOSURE_RENDER_DLL void BindGlossiness1D(float Glossiness[NO_TF_STEPS], float IntensityRange[2])
 {
-	ErRange Int;
-	Int.Set(Range);
+	UnbindGlossiness1D();
+
+	Range Int;
+	Int.Set(IntensityRange);
 
 	CUDA::HostToConstantDevice(&Int, "gGlossinessRange");
 	CUDA::BindTexture1D(gTexGlossiness, NO_TF_STEPS, Glossiness, gpGlossiness);
 }
 
-EXPOSURE_RENDER_DLL void ErBindEmission1D(float Emission[3][NO_TF_STEPS], float Range[2])
+EXPOSURE_RENDER_DLL void BindEmission1D(float Emission[3][NO_TF_STEPS], float IntensityRange[2])
 {
-	ErRange Int;
-	Int.Set(Range);
+	UnbindEmission1D();
+
+	Range Int;
+	Int.Set(IntensityRange);
 
 	CUDA::HostToConstantDevice(&Int, "gEmissionRange");
 
@@ -155,42 +195,12 @@ EXPOSURE_RENDER_DLL void ErBindEmission1D(float Emission[3][NO_TF_STEPS], float 
 	CUDA::BindTexture1D(gTexEmission, NO_TF_STEPS, (float4*)EmissionXYZA, gpEmission);
 }
 
-EXPOSURE_RENDER_DLL void ErUnbindOpacity1D(void)
+EXPOSURE_RENDER_DLL void BindVolumeProperties(VolumeProperties* pVolumeProperties)
 {
-	CUDA::FreeArray(gpOpacity);
-	CUDA::UnbindTexture(gTexOpacity);
+	CUDA::HostToConstantDevice(pVolumeProperties, "gVolumeProperties");
 }
 
-EXPOSURE_RENDER_DLL void ErUnbindDiffuse1D(void)
-{
-	CUDA::FreeArray(gpDiffuse);
-	CUDA::UnbindTexture(gTexDiffuse);
-}
-
-EXPOSURE_RENDER_DLL void ErUnbindSpecular1D(void)
-{
-	CUDA::FreeArray(gpSpecular);
-	CUDA::UnbindTexture(gTexSpecular);
-}
-
-EXPOSURE_RENDER_DLL void ErUnbindGlossiness1D(void)
-{
-	CUDA::FreeArray(gpGlossiness);
-	CUDA::UnbindTexture(gTexGlossiness);
-}
-
-EXPOSURE_RENDER_DLL void ErUnbindEmission1D(void)
-{
-	CUDA::FreeArray(gpEmission);
-	CUDA::UnbindTexture(gTexEmission);
-}
-
-EXPOSURE_RENDER_DLL void ErBindVolume(ErVolume* pVolume)
-{
-	CUDA::HostToConstantDevice(pVolume, "gVolume");
-}
-
-EXPOSURE_RENDER_DLL void ErBindCamera(ErCamera* pCamera)
+EXPOSURE_RENDER_DLL void BindCamera(Camera* pCamera)
 {
 	const Vec3f N = Normalize(ToVec3f(pCamera->Target) - ToVec3f(pCamera->Pos));
 	const Vec3f U = Normalize(Cross(N, ToVec3f(pCamera->Up)));
@@ -236,27 +246,27 @@ EXPOSURE_RENDER_DLL void ErBindCamera(ErCamera* pCamera)
 	CUDA::HostToConstantDevice(pCamera, "gCamera");
 }
 
-EXPOSURE_RENDER_DLL void ErBindLights(ErLights* pLights)
+EXPOSURE_RENDER_DLL void BindLights(Lights* pLights)
 {
 	CUDA::HostToConstantDevice(pLights, "gLights");
 }
 
-EXPOSURE_RENDER_DLL void ErBindClippers(ErClippers* pClippers)
+EXPOSURE_RENDER_DLL void BindClippers(Clippers* pClippers)
 {
 	CUDA::HostToConstantDevice(pClippers, "gClippers");
 }
 
-EXPOSURE_RENDER_DLL void ErBindReflectors(ErReflectors* pReflectors)
+EXPOSURE_RENDER_DLL void BindReflectors(Reflectors* pReflectors)
 {
 	CUDA::HostToConstantDevice(pReflectors, "gReflectors");
 }
 
-EXPOSURE_RENDER_DLL void ErBindScattering(ErScattering* pScattering)
+EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings* pRenderSettings)
 {
-	CUDA::HostToConstantDevice(pScattering, "gScattering");
+	CUDA::HostToConstantDevice(pRenderSettings, "gRenderSettings");
 }
 
-EXPOSURE_RENDER_DLL void ErBindFiltering(ErFiltering* pFiltering)
+EXPOSURE_RENDER_DLL void BindFiltering(Filtering* pFiltering)
 {
 	// Frame estimate filter
 	GaussianFilter Gaussian;
@@ -291,7 +301,7 @@ EXPOSURE_RENDER_DLL void ErBindFiltering(ErFiltering* pFiltering)
 	CUDA::HostToConstantDevice(&Bilateral, "gPostProcessingFilter");
 }
 
-EXPOSURE_RENDER_DLL void ErRenderEstimate()
+EXPOSURE_RENDER_DLL void RenderEstimate()
 {
 	gKernelTimings.Reset();
 
@@ -312,17 +322,17 @@ EXPOSURE_RENDER_DLL void ErRenderEstimate()
 	gNoIterations++;
 }
 
-EXPOSURE_RENDER_DLL void ErGetEstimate(unsigned char* pData)
+EXPOSURE_RENDER_DLL void GetEstimate(unsigned char* pData)
 {
 	CUDA::MemCopyDeviceToHost(gFrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
-EXPOSURE_RENDER_DLL void ErRecordBenchmarkImage()
+EXPOSURE_RENDER_DLL void RecordBenchmarkImage()
 {
 	CUDA::MemCopyDeviceToDevice(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
-EXPOSURE_RENDER_DLL void ErGetRunningVariance(float& RunningVariance)
+EXPOSURE_RENDER_DLL void GetRunningVariance(float& RunningVariance)
 {
 	FrameBuffer* pDevFrameBuffer = NULL;
 	CUDA::Allocate(pDevFrameBuffer);
@@ -337,7 +347,7 @@ EXPOSURE_RENDER_DLL void ErGetRunningVariance(float& RunningVariance)
 	CUDA::Free(pDevFrameBuffer);
 }
 
-EXPOSURE_RENDER_DLL void ErGetAverageNrmsError(float& AverageNrmsError)
+EXPOSURE_RENDER_DLL void GetAverageNrmsError(float& AverageNrmsError)
 {
 	FrameBuffer* pDevFrameBuffer = NULL;
 	CUDA::Allocate(pDevFrameBuffer);
@@ -348,17 +358,17 @@ EXPOSURE_RENDER_DLL void ErGetAverageNrmsError(float& AverageNrmsError)
 	CUDA::Free(pDevFrameBuffer);
 }
 
-EXPOSURE_RENDER_DLL void ErGetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3])
+EXPOSURE_RENDER_DLL void GetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3])
 {
 	ComputeGradientMagnitudeVolume(Extent, MaximumGradientMagnitude);
 }
 
-EXPOSURE_RENDER_DLL void ErGetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance)
+EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance)
 {
 	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
 }
 
-EXPOSURE_RENDER_DLL void ErGetKernelTimings(ErKernelTimings* pKernelTimings)
+EXPOSURE_RENDER_DLL void GetKernelTimings(KernelTimings* pKernelTimings)
 {
 	if (!pKernelTimings)
 		return;
@@ -366,7 +376,7 @@ EXPOSURE_RENDER_DLL void ErGetKernelTimings(ErKernelTimings* pKernelTimings)
 	*pKernelTimings = gKernelTimings;
 }
 
-EXPOSURE_RENDER_DLL void ErGetMemoryUsed(float& MemoryUsed)
+EXPOSURE_RENDER_DLL void GetMemoryUsed(float& MemoryUsed)
 {
 	/*
 	CUsize_t free = 0;
@@ -376,24 +386,24 @@ EXPOSURE_RENDER_DLL void ErGetMemoryUsed(float& MemoryUsed)
 	*/ 
 }
 
-EXPOSURE_RENDER_DLL void ErGetNoIterations(int& NoIterations)
+EXPOSURE_RENDER_DLL void GetNoIterations(int& NoIterations)
 {
 	NoIterations = gNoIterations; 
 }
 
-EXPOSURE_RENDER_DLL void ErDeinitialize()
+EXPOSURE_RENDER_DLL void Deinitialize()
 {
-	ErUnbindDensityBuffer();
-	ErUnbindOpacity1D();
-	ErUnbindDiffuse1D();
-	ErUnbindSpecular1D();
-	ErUnbindGlossiness1D();
-	ErUnbindEmission1D();
+	UnbindDensityBuffer();
+	UnbindOpacity1D();
+	UnbindDiffuse1D();
+	UnbindSpecular1D();
+	UnbindGlossiness1D();
+	UnbindEmission1D();
 }
 
-EXPOSURE_RENDER_DLL void ErInitialize()
+EXPOSURE_RENDER_DLL void Initialize()
 {
-	ErDeinitialize();
+	Deinitialize();
 }
 
 }

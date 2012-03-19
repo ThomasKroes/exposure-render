@@ -27,45 +27,32 @@
 namespace ExposureRender
 {
 
-DEVICE Vec3f TransformVector(ErMatrix44 TM, Vec3f v)
+DEVICE Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
 {
-	Vec3f r;
+	Vec3f Vt;
 
-	float x = v[0], y = v[1], z = v[2];
+	const float x = V[0], y = V[1], z = V[2];
 
-	r[0] = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
-	r[1] = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
-	r[2] = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
+	Vt[0] = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
+	Vt[1] = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
+	Vt[2] = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
 
-	return r;
+	return Vt;
 }
 
-DEVICE Vec3f TransformPoint(ErMatrix44 TM, Vec3f pt)
+DEVICE Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
 {
-	/*
-	float x = pt.x, y = pt.y, z = pt.z;
-    ptrans->x = m.m[0][0]*x + m.m[0][1]*y + m.m[0][2]*z + m.m[0][3];
-    ptrans->y = m.m[1][0]*x + m.m[1][1]*y + m.m[1][2]*z + m.m[1][3];
-    ptrans->z = m.m[2][0]*x + m.m[2][1]*y + m.m[2][2]*z + m.m[2][3];
-    float w   = m.m[3][0]*x + m.m[3][1]*y + m.m[3][2]*z + m.m[3][3];
-    if (w != 1.) *ptrans /= w;
-	*/
-    float x = pt[0], y = pt[1], z = pt[2];
-    float xp = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
-    float yp = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
-    float zp = TM.NN[2][0]*x + TM.NN[2][1]*y + TM.NN[2][2]*z + TM.NN[2][3];
-//    float wp = TM.NN[3][0]*x + TM.NN[3][1]*y + TM.NN[3][2]*z + TM.NN[3][3];
+	const float x = P[0], y = P[1], z = P[2];
     
-//	Assert(wp != 0);
-    
-//	if (wp == 1.)
-		return Vec3f(xp, yp, zp);
- //   else
-//		return Vec3f(xp, yp, zp) * (1.0f / wp);
+	const float Px = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
+    const float Py = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
+    const float Pz = TM.NN[2][0]*x + TM.NN[2][1]*y + TM.NN[2][2]*z + TM.NN[2][3];
+	
+	return Vec3f(Px, Py, Pz);
 }
 
 // Transform ray with transformation matrix
-DEVICE Ray TransformRay(Ray R, ErMatrix44& TM)
+DEVICE Ray TransformRay(const Matrix44& TM, const Ray& R)
 {
 	Ray Rt;
 
@@ -73,11 +60,10 @@ DEVICE Ray TransformRay(Ray R, ErMatrix44& TM)
 	Vec3f MinP	= TransformPoint(TM, R(R.MinT));
 	Vec3f MaxP	= TransformPoint(TM, R(R.MaxT));
 
-	// Construct new ray
-	Rt.O		= P;
-	Rt.D		= Normalize(MaxP - Rt.O);
-	Rt.MinT		= (MinP - Rt.O).Length();
-	Rt.MaxT		= (MaxP - Rt.O).Length();
+	Rt.O	= P;
+	Rt.D	= Normalize(MaxP - Rt.O);
+	Rt.MinT	= (MinP - Rt.O).Length();
+	Rt.MaxT	= (MaxP - Rt.O).Length();
 
 	return Rt;
 }
@@ -104,12 +90,12 @@ HOST_DEVICE_NI ColorXYZf ToColorXYZf(float V[3])
 
 DEVICE float GetIntensity(Vec3f P)
 {
-	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolume.MinAABB[0]) * gVolume.InvSize[0], (P[1] - gVolume.MinAABB[1]) * gVolume.InvSize[1], (P[2] - gVolume.MinAABB[2]) * gVolume.InvSize[2]));
+	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolumeProperties.MinAABB[0]) * gVolumeProperties.InvSize[0], (P[1] - gVolumeProperties.MinAABB[1]) * gVolumeProperties.InvSize[1], (P[2] - gVolumeProperties.MinAABB[2]) * gVolumeProperties.InvSize[2]));
 }
 
 DEVICE float GetNormalizedIntensity(Vec3f P)
 {
-	return (GetIntensity(P) - gVolume.IntensityRange.Min) * gVolume.IntensityRange.Inv;
+	return (GetIntensity(P) - gVolumeProperties.IntensityRange.Min) * gVolumeProperties.IntensityRange.Inv;
 }
 
 DEVICE float GetOpacity(float NormalizedIntensity)
@@ -117,7 +103,7 @@ DEVICE float GetOpacity(float NormalizedIntensity)
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEVICE bool Inside(ErClipper& C, Vec3f P)
+DEVICE bool Inside(Clipper& C, Vec3f P)
 {
 	bool Inside = false;
 
@@ -155,7 +141,7 @@ DEVICE bool Inside(Vec3f P)
 {
 	for (int i = 0; i < gClippers.NoClippers; i++)
 	{
-		ErClipper& C = gClippers.ClipperList[i];
+		Clipper& C = gClippers.ClipperList[i];
 
 		const Vec3f P2 = TransformPoint(C.Shape.InvTM, P);
 
@@ -176,7 +162,7 @@ DEVICE float GetOpacity(Vec3f P)
 
 	for (int i = 0; i < gClippers.NoClippers; i++)
 	{
-		ErClipper& C = gClippers.ClipperList[i];
+		Clipper& C = gClippers.ClipperList[i];
 
 		const Vec3f P2 = TransformPoint(C.Shape.InvTM, P);
 
@@ -222,12 +208,12 @@ DEVICE Vec3f GradientCD(Vec3f P)
 {
 	float Intensity[3][2] = 
 	{
-		{ GetIntensity(P + ToVec3f(gVolume.GradientDeltaX)), GetIntensity(P - ToVec3f(gVolume.GradientDeltaX)) },
-		{ GetIntensity(P + ToVec3f(gVolume.GradientDeltaY)), GetIntensity(P - ToVec3f(gVolume.GradientDeltaY)) },
-		{ GetIntensity(P + ToVec3f(gVolume.GradientDeltaZ)), GetIntensity(P - ToVec3f(gVolume.GradientDeltaZ)) }
+		{ GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaX)), GetIntensity(P - ToVec3f(gVolumeProperties.GradientDeltaX)) },
+		{ GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaY)), GetIntensity(P - ToVec3f(gVolumeProperties.GradientDeltaY)) },
+		{ GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaZ)), GetIntensity(P - ToVec3f(gVolumeProperties.GradientDeltaZ)) }
 	};
 
-	return ToVec3f(gVolume.Spacing) * Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
+	return ToVec3f(gVolumeProperties.Spacing) * Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
 }
 
 DEVICE Vec3f GradientFD(Vec3f P)
@@ -235,17 +221,17 @@ DEVICE Vec3f GradientFD(Vec3f P)
 	float Intensity[4] = 
 	{
 		GetIntensity(P),
-		GetIntensity(P + ToVec3f(gVolume.GradientDeltaX)),
-		GetIntensity(P + ToVec3f(gVolume.GradientDeltaY)),
-		GetIntensity(P + ToVec3f(gVolume.GradientDeltaZ))
+		GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaX)),
+		GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaY)),
+		GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaZ))
 	};
 
-    return ToVec3f(gVolume.Spacing) * Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
+    return ToVec3f(gVolumeProperties.Spacing) * Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
 }
 
 DEVICE Vec3f GradientFiltered(Vec3f P)
 {
-	Vec3f Offset(gVolume.GradientDeltaX[0], gVolume.GradientDeltaY[1], gVolume.GradientDeltaZ[2]);
+	Vec3f Offset(gVolumeProperties.GradientDeltaX[0], gVolumeProperties.GradientDeltaY[1], gVolumeProperties.GradientDeltaZ[2]);
 
     Vec3f G0 = GradientCD(P);
     Vec3f G1 = GradientCD(P + Vec3f(-Offset[0], -Offset[1], -Offset[2]));
@@ -260,12 +246,12 @@ DEVICE Vec3f GradientFiltered(Vec3f P)
 	Vec3f L0 = Lerp(Lerp(G1, G2, 0.5), Lerp(G3, G4, 0.5), 0.5);
     Vec3f L1 = Lerp(Lerp(G5, G6, 0.5), Lerp(G7, G8, 0.5), 0.5);
     
-	return ToVec3f(gVolume.Spacing) * Lerp(G0, Lerp(L0, L1, 0.5), 0.75);
+	return ToVec3f(gVolumeProperties.Spacing) * Lerp(G0, Lerp(L0, L1, 0.5), 0.75);
 }
 
 DEVICE Vec3f Gradient(Vec3f P)
 {
-	switch (gScattering.GradientComputation)
+	switch (gRenderSettings.Shading.GradientComputation)
 	{
 		case 0:	return GradientFD(P);
 		case 1:	return GradientCD(P);
@@ -284,19 +270,19 @@ DEVICE float GradientMagnitude(Vec3f P)
 {
 	Vec3f Pts[3][2];
 
-	Pts[0][0] = P + ToVec3f(gVolume.GradientDeltaX);
-	Pts[0][1] = P - ToVec3f(gVolume.GradientDeltaX);
-	Pts[1][0] = P + ToVec3f(gVolume.GradientDeltaY);
-	Pts[1][1] = P - ToVec3f(gVolume.GradientDeltaY);
-	Pts[2][0] = P + ToVec3f(gVolume.GradientDeltaZ);
-	Pts[2][1] = P - ToVec3f(gVolume.GradientDeltaZ);
+	Pts[0][0] = P + ToVec3f(gVolumeProperties.GradientDeltaX);
+	Pts[0][1] = P - ToVec3f(gVolumeProperties.GradientDeltaX);
+	Pts[1][0] = P + ToVec3f(gVolumeProperties.GradientDeltaY);
+	Pts[1][1] = P - ToVec3f(gVolumeProperties.GradientDeltaY);
+	Pts[2][0] = P + ToVec3f(gVolumeProperties.GradientDeltaZ);
+	Pts[2][1] = P - ToVec3f(gVolumeProperties.GradientDeltaZ);
 
 	float D = 0.0f, Sum = 0.0f;
 
 	for (int i = 0; i < 3; i++)
 	{
 		D = GetIntensity(Pts[i][1]) - GetIntensity(Pts[i][0]);
-		D *= 0.5f / gVolume.Spacing[i];
+		D *= 0.5f / gVolumeProperties.Spacing[i];
 		Sum += D * D;
 	}
 

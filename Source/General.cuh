@@ -27,36 +27,36 @@ namespace ExposureRender
 #define	MAX_NO_TIMINGS	64
 #define	MAX_CHAR_SIZE	256
 
-struct EXPOSURE_RENDER_DLL ErException
+struct EXPOSURE_RENDER_DLL Exception
 {
 	char	Title[MAX_CHAR_SIZE];
 	char	Description[MAX_CHAR_SIZE];
 	
-	ErException(const char* pTitle, const char* pDescription)
+	Exception(const char* pTitle, const char* pDescription)
 	{
 		sprintf_s(Title, MAX_CHAR_SIZE, "%s", pTitle);
 		sprintf_s(Description, MAX_CHAR_SIZE, "%s", pDescription);
 	}
 };
 
-struct EXPOSURE_RENDER_DLL ErKernelTiming
+struct EXPOSURE_RENDER_DLL KernelTiming
 {
 	char	Event[MAX_CHAR_SIZE];
 	float	Duration;
 
-	ErKernelTiming()
+	KernelTiming()
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, "Undefined");
 		this->Duration = 0.0f;
 	}
 
-	ErKernelTiming(const char* pEvent, const float& Duration)
+	KernelTiming(const char* pEvent, const float& Duration)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, pEvent);
 		this->Duration = Duration;
 	}
 
-	ErKernelTiming& operator = (const ErKernelTiming& Other)
+	KernelTiming& operator = (const KernelTiming& Other)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, Other.Event);
 		this->Duration = Other.Duration;
@@ -65,12 +65,12 @@ struct EXPOSURE_RENDER_DLL ErKernelTiming
 	}
 };
 
-struct EXPOSURE_RENDER_DLL ErKernelTimings
+struct EXPOSURE_RENDER_DLL KernelTimings
 {
-	ErKernelTiming	Timings[MAX_NO_TIMINGS];
+	KernelTiming	Timings[MAX_NO_TIMINGS];
 	int				NoTimings;
 
-	ErKernelTimings& operator = (const ErKernelTimings& Other)
+	KernelTimings& operator = (const KernelTimings& Other)
 	{
 		for (int i = 0; i < MAX_NO_TIMINGS; i++)
 		{
@@ -82,7 +82,7 @@ struct EXPOSURE_RENDER_DLL ErKernelTimings
 		return *this;
 	}
 
-	void Add(const ErKernelTiming& KernelTiming)
+	void Add(const KernelTiming& KernelTiming)
 	{
 		this->Timings[this->NoTimings] = KernelTiming;
 	}
@@ -93,28 +93,28 @@ struct EXPOSURE_RENDER_DLL ErKernelTimings
 	}
 };
 
-struct EXPOSURE_RENDER_DLL ErRange
+struct EXPOSURE_RENDER_DLL Range
 {
 	float	Min;
 	float	Max;
-	float	Range;
+	float	Extent;
 	float	Inv;
 	
 	void Set(float Range[2])
 	{
 		this->Min		= Range[0];
 		this->Max		= Range[1];
-		this->Range		= this->Max - this->Min;
-		this->Inv		= this->Range != 0.0f ? 1.0f / this->Range : 0.0f;
+		this->Extent	= this->Max - this->Min;
+		this->Inv		= this->Extent != 0.0f ? 1.0f / this->Extent : 0.0f;
 	}
 };
 
-struct EXPOSURE_RENDER_DLL ErMatrix44
+struct EXPOSURE_RENDER_DLL Matrix44
 {
 	float				NN[4][4];
 };
 
-struct EXPOSURE_RENDER_DLL ErVolume
+struct EXPOSURE_RENDER_DLL VolumeProperties
 {
 	int					Extent[3];
 	float				InvExtent[3];
@@ -125,22 +125,16 @@ struct EXPOSURE_RENDER_DLL ErVolume
 	float				Size[3];
 	float				InvSize[3];
 	float				Scale;
-	ErRange				IntensityRange;
-	ErRange				GradientMagnitudeRange;
-	float				GradientThreshold;
-	float				StepSize;
-	float				StepSizeShadow;
-	float				DensityScale;
+	Range				IntensityRange;
+	Range				GradientMagnitudeRange;
+	float				Spacing[3];
+	float				InvSpacing[3];
 	float				GradientDeltaX[3];
 	float				GradientDeltaY[3];
 	float				GradientDeltaZ[3];
-	float				Spacing[3];
-	float				InvSpacing[3];
-	float				GradientFactor;
-	int					ShadingType;
 };
 
-struct EXPOSURE_RENDER_DLL ErCamera
+struct EXPOSURE_RENDER_DLL Camera
 {
 	int					FilmWidth;
 	int					FilmHeight;
@@ -164,10 +158,10 @@ struct EXPOSURE_RENDER_DLL ErCamera
 	float				FOV;
 };
 
-struct EXPOSURE_RENDER_DLL ErShape
+struct EXPOSURE_RENDER_DLL Shape
 {
-	ErMatrix44			TM;
-	ErMatrix44			InvTM;
+	Matrix44			TM;
+	Matrix44			InvTM;
 	bool				OneSided;
 	int					Type;
 	float				Color[3];
@@ -177,57 +171,72 @@ struct EXPOSURE_RENDER_DLL ErShape
 	float				OuterRadius;
 };
 
-struct EXPOSURE_RENDER_DLL ErLight
+struct EXPOSURE_RENDER_DLL Light
 {
 	bool				Visible;
-	ErShape				Shape;
+	Shape				Shape;
 	float				Color[3];
 };
 
-struct EXPOSURE_RENDER_DLL ErLights
+struct EXPOSURE_RENDER_DLL Lights
 {
 	int					NoLights;
-	ErLight				LightList[32];
+	Light				LightList[32];
 };
 
-struct EXPOSURE_RENDER_DLL ErClipper
+struct EXPOSURE_RENDER_DLL Clipper
 {
-	ErShape				Shape;
+	Shape				Shape;
 	bool				Invert;
 };
 
-struct EXPOSURE_RENDER_DLL ErClippers
+struct EXPOSURE_RENDER_DLL Clippers
 {
 	int					NoClippers;
-	ErClipper			ClipperList[32];
+	Clipper				ClipperList[32];
 };
 
-struct EXPOSURE_RENDER_DLL ErReflector
+struct EXPOSURE_RENDER_DLL Reflector
 {
-	ErShape				Shape;
+	Shape				Shape;
 	float				DiffuseColor[3];
 	float				SpecularColor[3];
 	float				Glossiness;
 	float				Ior;
 };
 
-struct EXPOSURE_RENDER_DLL ErReflectors
+struct EXPOSURE_RENDER_DLL Reflectors
 {
 	int					NoReflectors;
-	ErReflector			ReflectorList[32];
+	Reflector			ReflectorList[32];
 };
 
-struct EXPOSURE_RENDER_DLL ErScattering
+struct EXPOSURE_RENDER_DLL RenderSettings
 {
-	int					SamplingStrategy;
-	float				IndexOfReflection;
-	bool				OpacityModulated;
-	bool				Shadows;
-	float				MaxShadowDistance;
-	int					GradientComputation;
+	struct TraversalSettings
+	{
+		float				StepSize;
+		float				StepSizeShadow;
+		bool				Shadows;
+		float				MaxShadowDistance;
+	};
+
+	struct ShadingSettings
+	{
+		int					Type;
+		float				DensityScale;
+		float				IndexOfReflection;
+		bool				OpacityModulated;
+		int					GradientComputation;
+		float				GradientThreshold;
+		float				GradientFactor;
+	};
+
+	TraversalSettings	Traversal;
+	ShadingSettings		Shading;
 };
 
-struct EXPOSURE_RENDER_DLL ErFiltering
+struct EXPOSURE_RENDER_DLL Filtering
 {
 	struct GaussianFilterParameters
 	{

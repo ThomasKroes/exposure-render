@@ -133,7 +133,7 @@ public:
 	static void HandleCudaError(const cudaError_t& CudaError)
 	{
 		if (CudaError != cudaSuccess)
-			throw(ErException("CUDA Error", cudaGetErrorString(CudaError)));
+			throw(Exception("CUDA Error", cudaGetErrorString(CudaError)));
 	}
 
 	template<class T> static void Allocate(T*& pDevicePointer, int Num = 1)
@@ -250,7 +250,7 @@ public:
 																						\
 	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop));		\
 																						\
-	gKernelTimings.Add(ErKernelTiming(title, TimeDelta));								\
+	gKernelTimings.Add(KernelTiming(title, TimeDelta));									\
 																						\
 	CUDA::HandleCudaError(cudaEventDestroy(EventStart));								\
 	CUDA::HandleCudaError(cudaEventDestroy(EventStop));									\

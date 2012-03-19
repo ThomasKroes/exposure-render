@@ -32,7 +32,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	
 	Intersection Int;
 
-	IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB), Int);
+	IntersectBox(R, ToVec3f(gVolumeProperties.MinAABB), ToVec3f(gVolumeProperties.MaxAABB), Int);
 
 	if (!Int.Valid)
 		return;
@@ -40,13 +40,13 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	MinT[TID] = max(Int.NearT, R.MinT);
 	MaxT[TID] = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gVolume.DensityScale;
+	const float S	= -log(RNG.Get1()) / gRenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
 	Vec3f Ps;
 
-	MinT[TID] += RNG.Get1() * gVolume.StepSize;
+	MinT[TID] += RNG.Get1() * gRenderSettings.Traversal.StepSize;
 
 	while (Sum < S)
 	{
@@ -55,10 +55,10 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 		if (MinT[TID] >= MaxT[TID])
 			return;
 		
-		SigmaT	= gVolume.DensityScale * GetOpacity(Ps);
+		SigmaT	= gRenderSettings.Shading.DensityScale * GetOpacity(Ps);
 
-		Sum			+= SigmaT * gVolume.StepSize;
-		MinT[TID]	+= gVolume.StepSize;
+		Sum			+= SigmaT * gRenderSettings.Traversal.StepSize;
+		MinT[TID]	+= gRenderSettings.Traversal.StepSize;
 	}
 
 	SE.SetValid(MinT[TID], Ps, NormalizedGradient(Ps), -R.D, ColorXYZf());
@@ -75,7 +75,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 	Intersection Int;
 		
-	IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB), Int);
+	IntersectBox(R, ToVec3f(gVolumeProperties.MinAABB), ToVec3f(gVolumeProperties.MaxAABB), Int);
 	
 	if (!Int.Valid)
 		return false;
@@ -83,11 +83,11 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 	MinT[TID] = max(Int.NearT, R.MinT);
 	MaxT[TID] = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gVolume.DensityScale;
+	const float S	= -log(RNG.Get1()) / gRenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT[TID] += RNG.Get1() * gVolume.StepSizeShadow;
+	MinT[TID] += RNG.Get1() * gRenderSettings.Traversal.StepSizeShadow;
 
 	while (Sum < S)
 	{
@@ -96,15 +96,16 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 		if (MinT[TID] > MaxT[TID])
 			return false;
 		
-		SigmaT	= gVolume.DensityScale * GetOpacity(Ps[TID]);
+		SigmaT	= gRenderSettings.Shading.DensityScale * GetOpacity(Ps[TID]);
 
-		Sum			+= SigmaT * gVolume.StepSizeShadow;
-		MinT[TID]	+= gVolume.StepSizeShadow;
+		Sum			+= SigmaT * gRenderSettings.Traversal.StepSizeShadow;
+		MinT[TID]	+= gRenderSettings.Traversal.StepSizeShadow;
 	}
 
 	return true;
 }
 
+/*
 struct Photon{
   Vec3f origin;
   Vec3f direction;
@@ -124,12 +125,12 @@ float sign(float num){
   return(0.0f);
 }
 
-/*
+
 DEVICE_NI void lightShootDDAWoodcock(const Ray& R, CRNG& RNG, ScatterEvent& SE)
 {
 	Intersection Int;
 
-	IntersectBox(R, ToVec3f(gVolume.MinAABB), ToVec3f(gVolume.MaxAABB), Int);
+	IntersectBox(R, ToVec3f(gVolumeProperties.MinAABB), ToVec3f(gVolumeProperties.MaxAABB), Int);
 
 	if (!Int.Valid)
 		return;
@@ -190,7 +191,7 @@ DEVICE_NI void lightShootDDAWoodcock(const Ray& R, CRNG& RNG, ScatterEvent& SE)
 
   int steps = 0;
   
-  float c_densityScale = gVolume.DensityScale;
+  float c_densityScale = gVolumeProperties.DensityScale;
 
   bool virtualHit = true;
   while(virtualHit) {

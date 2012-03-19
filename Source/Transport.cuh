@@ -40,19 +40,19 @@ DEVICE_NI bool Intersect(Ray R, CRNG& RNG)
 
 DEVICE_NI bool Visible(Vec3f P1, Vec3f P2, CRNG& RNG)
 {
-	if (!gScattering.Shadows)
+	if (!gRenderSettings.Traversal.Shadows)
 		return true;
 
 	Vec3f W = Normalize(P2 - P1);
 
-	Ray R(P1 + W * EPS1, W, 0.0f, min((P2 - P1).Length() - EPS2, gScattering.MaxShadowDistance));
+	Ray R(P1 + W * EPS1, W, 0.0f, min((P2 - P1).Length() - EPS2, gRenderSettings.Traversal.MaxShadowDistance));
 
 	return !Intersect(R, RNG);
 }
 
 DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
 {
-	ErLight& Light = gLights.LightList[LightID];
+	Light& Light = gLights.LightList[LightID];
 
 	Vec3f Wi;
 
