@@ -26,6 +26,7 @@ namespace ExposureRender
 
 KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
 {
+	/*
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -52,10 +53,12 @@ KERNEL void KrnlComputeNrmsError(FrameBuffer* pFrameBuffer)
 	const float NrmsError = (sqrtf(ErrorSquaredRGB[0]) + sqrtf(ErrorSquaredRGB[1]) + sqrtf(ErrorSquaredRGB[2])) / 3.0f;
 
 	*pFrameBuffer->RmsError.GetPtr(X, Y) = NrmsError;
+	*/
 }
 
 void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Width, int Height, float& AverageNrmsError)
 {
+	/*
 	const dim3 BlockDim(KRNL_BENCHMARK_BLOCK_W, KRNL_BENCHMARK_BLOCK_H);
 	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
@@ -66,6 +69,7 @@ void ComputeAverageNrmsError(FrameBuffer& FB, FrameBuffer* pFrameBuffer, int Wid
 	float result = thrust::reduce(dev_ptr, dev_ptr + Width * Height);
 	
 	AverageNrmsError = (result / (float)(Width * Height)) / 255.0f;
+	*/
 }
 
 }

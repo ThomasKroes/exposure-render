@@ -44,7 +44,7 @@ HOST_DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
 
 HOST_DEVICE inline float FilterWeight(const int& X, const int& KernelX, const ColorRGBf& KernelPosColor, const ColorRGBf& CenterColor)
 {
-	return KernelPosColor.Black() ? 0.0f : GetSpatialWeight(X, KernelX) * GaussianSimilarity(KernelPosColor, CenterColor);
+	return GetSpatialWeight(X, KernelX) * GaussianSimilarity(KernelPosColor, CenterColor);
 }
 
 KERNEL void KrnlBilateralFilterHorizontal(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int Width, int Height)

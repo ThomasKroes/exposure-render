@@ -57,7 +57,6 @@ EXPOSURE_RENDER_DLL void RenderEstimate();
 EXPOSURE_RENDER_DLL void GetEstimate(unsigned char* pData);
 EXPOSURE_RENDER_DLL void RecordBenchmarkImage();
 EXPOSURE_RENDER_DLL void GetAverageNrmsError(float& AverageNrmsError);
-EXPOSURE_RENDER_DLL void GetRunningVariance(float& RunningVariance);
 EXPOSURE_RENDER_DLL void GetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3]);
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance);
 EXPOSURE_RENDER_DLL void GetKernelTimings(KernelTimings* pKernelTimings);

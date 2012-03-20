@@ -34,14 +34,7 @@ public:
 		CudaRandomSeeds1(),
 		CudaRandomSeeds2(),
 		CudaRandomSeedsCopy1(),
-		CudaRandomSeedsCopy2(),
-		CudaRunningStatistics(),
-		CudaVariance(),
-		BenchmarkEstimateRgbaLdr(),
-		RmsError()//,
-//		CudaMetroSamples(),
-//		CudaNoIterations(),
-//		CudaPixelLuminance()
+		CudaRandomSeedsCopy2()
 	{
 	}
 
@@ -62,13 +55,6 @@ public:
 		this->CudaRandomSeeds2.Resize(this->Resolution);
 		this->CudaRandomSeedsCopy1.Resize(this->Resolution);
 		this->CudaRandomSeedsCopy2.Resize(this->Resolution);
-		this->CudaRunningStatistics.Resize(this->Resolution);
-		this->CudaVariance.Resize(this->Resolution);
-		this->BenchmarkEstimateRgbaLdr.Resize(this->Resolution);
-		this->RmsError.Resize(this->Resolution);
-//		this->CudaMetroSamples.Resize(Resolution2i(MetroSize));
-//		this->CudaNoIterations.Resize(this->Resolution);
-//		this->CudaPixelLuminance.Resize(this->Resolution);
 
 		CUDA::MemCopyDeviceToDevice(CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeedsCopy1.GetNoElements());
 		CUDA::MemCopyDeviceToDevice(CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeedsCopy2.GetNoElements());
@@ -78,24 +64,6 @@ public:
 
 	void Reset(void)
 	{
-//		this->CudaRunningEstimateXyza.Reset();
-//		this->CudaFrameEstimate.Reset();
-//		this->CudaFrameEstimateTemp.Reset();
-//		this->CudaDisplayEstimate.Reset();
-//		this->CudaDisplayEstimateTemp.Reset();
-//		this->CudaDisplayEstimateFiltered.Reset();
-//		this->CudaRandomSeeds1.Reset();
-//		this->CudaRandomSeeds2.Reset();
-//		this->CudaRandomSeedsCopy1.Reset();
-//		this->CudaRandomSeedsCopy2.Reset();
-//		this->CudaRunningStatistics.Reset();
-//		this->CudaVariance.Reset();
-//		this->BenchmarkEstimateRgbaLdr.Reset();
-//		this->RmsError.Reset();
-//		this->CudaMetroSamples.Reset();
-//		this->CudaNoIterations.Reset();
-//		this->CudaPixelLuminance.Reset();
-
 		CUDA::MemCopyDeviceToDevice(CudaRandomSeedsCopy1.GetPtr(), CudaRandomSeeds1.GetPtr(), CudaRandomSeedsCopy1.GetNoElements());
 		CUDA::MemCopyDeviceToDevice(CudaRandomSeedsCopy2.GetPtr(), CudaRandomSeeds2.GetPtr(), CudaRandomSeedsCopy2.GetNoElements());
 	}
@@ -112,13 +80,6 @@ public:
 		this->CudaRandomSeeds2.Free();
 		this->CudaRandomSeedsCopy1.Free();
 		this->CudaRandomSeedsCopy2.Free();
-		this->CudaRunningStatistics.Free();
-		this->CudaVariance.Free();
-		this->BenchmarkEstimateRgbaLdr.Free();
-		this->RmsError.Free();
-		this->CudaMetroSamples.Free();
-		this->CudaNoIterations.Free();
-		this->CudaPixelLuminance.Free();
 
 		this->Resolution = Resolution2i();
 	}
@@ -147,17 +108,6 @@ public:
 	CCudaRandomBuffer2D						CudaRandomSeeds2;
 	CCudaRandomBuffer2D						CudaRandomSeedsCopy1;
 	CCudaRandomBuffer2D						CudaRandomSeedsCopy2;
-
-	// Variance
-	CCudaBuffer2D<RunningStats, false>		CudaRunningStatistics;
-	CCudaBuffer2D<float, false>				CudaVariance;
-
-	CCudaBuffer2D<ColorRGBAuc, false>		BenchmarkEstimateRgbaLdr;
-	CCudaBuffer2D<float, false>				RmsError;
-
-	CCudaBuffer2D<MetroSample, false>		CudaMetroSamples;
-	CCudaBuffer2D<int, false>				CudaNoIterations;
-	CCudaBuffer2D<float, false>				CudaPixelLuminance;
 };
 
 }

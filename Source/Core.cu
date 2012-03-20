@@ -335,8 +335,9 @@ EXPOSURE_RENDER_DLL void RenderEstimate()
 	FilterGaussian(gFrameBuffer.CudaFrameEstimate.GetPtr(), gFrameBuffer.CudaFrameEstimateTemp.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 	ComputeEstimate(pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 	ToneMap(pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
-	FilterBilateral(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateTemp.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
-	Blend(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
+//	FilterBilateral(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateTemp.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
+//	FilterBilateral(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateTemp.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
+//	Blend(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 
 	CUDA::Free(pDevFrameBuffer);
 
@@ -350,22 +351,7 @@ EXPOSURE_RENDER_DLL void GetEstimate(unsigned char* pData)
 
 EXPOSURE_RENDER_DLL void RecordBenchmarkImage()
 {
-	CUDA::MemCopyDeviceToDevice(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetNoElements());
-}
-
-EXPOSURE_RENDER_DLL void GetRunningVariance(float& RunningVariance)
-{
-	FrameBuffer* pDevFrameBuffer = NULL;
-	CUDA::Allocate(pDevFrameBuffer);
-	CUDA::MemCopyHostToDevice(&gFrameBuffer, pDevFrameBuffer);
-
-	thrust::device_ptr<float> dev_ptr(gFrameBuffer.CudaVariance.GetPtr()); 
-
-	float Sum = thrust::reduce(dev_ptr, dev_ptr + gFrameBuffer.Resolution[0] * gFrameBuffer.Resolution[1]);
-	
-	RunningVariance = (Sum / (float)(gFrameBuffer.Resolution[0] * gFrameBuffer.Resolution[1]));
-
-	CUDA::Free(pDevFrameBuffer);
+//	CUDA::MemCopyDeviceToDevice(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
 EXPOSURE_RENDER_DLL void GetAverageNrmsError(float& AverageNrmsError)
