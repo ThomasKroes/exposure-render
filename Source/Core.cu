@@ -43,6 +43,7 @@ CD ExposureRender::Lights				gLights;
 CD ExposureRender::Clippers				gClippers;
 CD ExposureRender::Reflectors			gReflectors;
 CD ExposureRender::RenderSettings		gRenderSettings;
+CD ExposureRender::Textures				gTextures;
 CD ExposureRender::Range				gOpacityRange;
 CD ExposureRender::Range				gDiffuseRange;
 CD ExposureRender::Range				gSpecularRange;
@@ -51,7 +52,8 @@ CD ExposureRender::Range				gEmissionRange;
 CD ExposureRender::GaussianFilter		gFrameEstimateFilter;
 CD ExposureRender::BilateralFilter		gPostProcessingFilter;
 
-ExposureRender::FrameBuffer gFrameBuffer;
+ExposureRender::FrameBuffer				gFrameBuffer;
+CD ExposureRender::Textures				gTexturesHost;
 
 int	gNoIterations = 0;
 
@@ -299,6 +301,25 @@ EXPOSURE_RENDER_DLL void BindFiltering(Filtering* pFiltering)
 		Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
 
 	CUDA::HostToConstantDevice(&Bilateral, "gPostProcessingFilter");
+}
+
+EXPOSURE_RENDER_DLL void BindTextures(Textures* pTextures)
+{
+	if (gTexturesHost.NoTextures + 1 >= MAX_NO_TEXTURES)
+		throw(Exception("Texture Error", "Maximum no. textures reached"));
+	/*
+	Texture& T = gTexturesHost.TextureList[gTexturesHost.NoTextures];
+
+	T = *pTexture;
+
+	if (Type == 0)
+	{
+		CUDA::MemCopyHostToDevice(pTexture->Image.pData, T.Image.pData, pTexture.Image.Size[0] * pTexture.Image.Size[1] * 3);
+	}
+	*/
+
+
+	// Iterate over all textures and see 
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate()

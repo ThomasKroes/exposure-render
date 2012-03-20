@@ -151,9 +151,9 @@ public:
 		HandleCudaError(cudaMemset((void*)pDevicePointer, Value, (size_t)(Num * sizeof(T))));
 	}
 
-	template<class T> static void HostToConstantDevice(T* pHost, char* pSymbol, int Num = 1)
+	template<class T> static void HostToConstantDevice(T* pHost, char* pDeviceSymbol, int Num = 1)
 	{
-		HandleCudaError(cudaMemcpyToSymbol(pSymbol, pHost, Num * sizeof(T)));
+		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)));
 	}
 
 	template<class T> static void MemCopyHostToDevice(T* pHost, T* pDevice, int Num = 1)
