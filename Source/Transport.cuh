@@ -137,7 +137,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	for (int i = 0; i < NoSamples; i++)
 		Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID) / (float)NoSamples;
 
-	return (float)gLights.NoLights * Ld;
+	return (float)gLights.NoLights * (Ld / (float)NoSamples);
 }
 
 }

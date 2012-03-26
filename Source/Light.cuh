@@ -46,11 +46,11 @@ DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, Sca
 	// Compute Wi, the normalized vector from the sampled light position to the ray sample position
 	Wi = Normalize(SS.P - SE.P);
 
-	// Compute the probability of sampling the light per unit area
-//	LightPdf = G(SE.P, SE.N, LS.SS.P, LS.SS.N) * Light.Shape.Area;
-
 	// Compute exitant radiance
 	Le = ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
+
+	if (Light.Unit == 1)
+		Le /= Light.Shape.Area;
 }
 
 // Intersects a light with a ray
@@ -79,6 +79,9 @@ DEVICE_NI void IntersectLight(Light& Light, const Ray& R, ScatterEvent& SE)
 		SE.Wo		= -R.D;
 		SE.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
 		SE.UV		= Int.UV;
+
+		if (Light.Unit == 1)
+			SE.Le /= Light.Shape.Area;
 	}
 }
 

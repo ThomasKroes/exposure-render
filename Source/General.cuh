@@ -313,6 +313,7 @@ struct EXPOSURE_RENDER_DLL Light
 	bool	Visible;
 	Shape	Shape;
 	float	Color[3];
+	int		Unit;
 
 #ifndef __CUDA_ARCH__
 	Light()
@@ -321,6 +322,7 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Color[0]	= 1.0f;
 		this->Color[1]	= 1.0f;
 		this->Color[2]	= 1.0f;
+		this->Unit		= 0;
 	}
 #endif
 };

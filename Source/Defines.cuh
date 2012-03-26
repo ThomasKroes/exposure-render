@@ -31,5 +31,6 @@ namespace ExposureRender
 #define METRO_SIZE				256
 #define	RAY_EPS					0.001f
 #define RAY_EPS_2				2.0f * RAY_EPS
+#define ONE_OVER_6				1.0f / 2.0f
 
 }
