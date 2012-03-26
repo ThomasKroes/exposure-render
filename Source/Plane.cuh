@@ -19,11 +19,9 @@
 namespace ExposureRender
 {
 
-#define INTERSECTION_EPSILON 0.0001f
-
 DEVICE_NI void IntersectPlaneP(const Ray& R, const bool& OneSided, Intersection& Int)
 {
-	if (fabs(R.O[2] - R.D[2]) < INTERSECTION_EPSILON)
+	if (fabs(R.O[2] - R.D[2]) < RAY_EPS)
 		return;
 
 	Int.NearT = (0.0f - R.O[2]) / R.D[2];
@@ -37,7 +35,7 @@ DEVICE_NI void IntersectPlaneP(const Ray& R, const bool& OneSided, Intersection&
 
 DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, Intersection& Int)
 {
-	if (fabs(R.O[2] - R.D[2]) < INTERSECTION_EPSILON)
+	if (fabs(R.O[2] - R.D[2]) < RAY_EPS)
 		return;
 
 	Int.NearT = (0.0f - R.O[2]) / R.D[2];

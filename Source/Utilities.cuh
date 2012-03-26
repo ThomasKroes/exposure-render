@@ -213,7 +213,7 @@ DEVICE Vec3f GradientCD(Vec3f P)
 		{ GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaZ)), GetIntensity(P - ToVec3f(gVolumeProperties.GradientDeltaZ)) }
 	};
 
-	return ToVec3f(gVolumeProperties.Spacing) * Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
+	return Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
 }
 
 DEVICE Vec3f GradientFD(Vec3f P)
@@ -226,7 +226,7 @@ DEVICE Vec3f GradientFD(Vec3f P)
 		GetIntensity(P + ToVec3f(gVolumeProperties.GradientDeltaZ))
 	};
 
-    return ToVec3f(gVolumeProperties.Spacing) * Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
+    return Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
 }
 
 DEVICE Vec3f GradientFiltered(Vec3f P)
@@ -246,7 +246,7 @@ DEVICE Vec3f GradientFiltered(Vec3f P)
 	Vec3f L0 = Lerp(Lerp(G1, G2, 0.5), Lerp(G3, G4, 0.5), 0.5);
     Vec3f L1 = Lerp(Lerp(G5, G6, 0.5), Lerp(G7, G8, 0.5), 0.5);
     
-	return ToVec3f(gVolumeProperties.Spacing) * Lerp(G0, Lerp(L0, L1, 0.5), 0.75);
+	return Lerp(G0, Lerp(L0, L1, 0.5), 0.75);
 }
 
 DEVICE Vec3f Gradient(Vec3f P)

@@ -18,6 +18,10 @@
 namespace ExposureRender
 {
 
+#define KRNL_SINGLE_SCATTERING_BLOCK_W		16
+#define KRNL_SINGLE_SCATTERING_BLOCK_H		8
+#define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
+
 DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };

@@ -19,16 +19,10 @@
 namespace ExposureRender
 {
 
-#define KRNL_SINGLE_SCATTERING_BLOCK_W		16
-#define KRNL_SINGLE_SCATTERING_BLOCK_H		8
-#define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
-
 DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 {
-	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
-
-	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
-	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
+	float MinT;
+	float MaxT;
 	
 	Intersection Int;
 
@@ -37,8 +31,8 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	if (!Int.Valid)
 		return;
 
-	MinT[TID] = max(Int.NearT, R.MinT);
-	MaxT[TID] = min(Int.FarT, R.MaxT);
+	MinT = max(Int.NearT, R.MinT);
+	MaxT = min(Int.FarT, R.MaxT);
 
 	const float S	= -log(RNG.Get1()) / gRenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
@@ -46,32 +40,30 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 
 	Vec3f Ps;
 
-	MinT[TID] += RNG.Get1() * gRenderSettings.Traversal.StepSize;
+	MinT += RNG.Get1() * gRenderSettings.Traversal.StepSize;
 
 	while (Sum < S)
 	{
-		Ps = R.O + MinT[TID] * R.D;
+		Ps = R.O + MinT * R.D;
 
-		if (MinT[TID] >= MaxT[TID])
+		if (MinT >= MaxT)
 			return;
 		
 		SigmaT	= gRenderSettings.Shading.DensityScale * GetOpacity(Ps);
 
 		Sum			+= SigmaT * gRenderSettings.Traversal.StepSize;
-		MinT[TID]	+= gRenderSettings.Traversal.StepSize;
+		MinT	+= gRenderSettings.Traversal.StepSize;
 	}
 
-	SE.SetValid(MinT[TID], Ps, NormalizedGradient(Ps), -R.D, ColorXYZf());
+	SE.SetValid(MinT, Ps, NormalizedGradient(Ps), -R.D, ColorXYZf());
 }
 
 // Determines if there is a scatter event along the ray
 DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 {
-	const int TID = threadIdx.y * blockDim.x + threadIdx.x;
-
-	__shared__ float MinT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
-	__shared__ float MaxT[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
-	__shared__ Vec3f Ps[KRNL_SINGLE_SCATTERING_BLOCK_SIZE];
+	float MinT;
+	float MaxT;
+	Vec3f Ps;
 
 	Intersection Int;
 		
@@ -80,26 +72,26 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 	if (!Int.Valid)
 		return false;
 
-	MinT[TID] = max(Int.NearT, R.MinT);
-	MaxT[TID] = min(Int.FarT, R.MaxT);
+	MinT = max(Int.NearT, R.MinT);
+	MaxT = min(Int.FarT, R.MaxT);
 
 	const float S	= -log(RNG.Get1()) / gRenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT[TID] += RNG.Get1() * gRenderSettings.Traversal.StepSizeShadow;
+	MinT += RNG.Get1() * gRenderSettings.Traversal.StepSizeShadow;
 
 	while (Sum < S)
 	{
-		Ps[TID] = R.O + MinT[TID] * R.D;
+		Ps = R.O + MinT * R.D;
 
-		if (MinT[TID] > MaxT[TID])
+		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= gRenderSettings.Shading.DensityScale * GetOpacity(Ps[TID]);
+		SigmaT	= gRenderSettings.Shading.DensityScale * GetOpacity(Ps);
 
 		Sum			+= SigmaT * gRenderSettings.Traversal.StepSizeShadow;
-		MinT[TID]	+= gRenderSettings.Traversal.StepSizeShadow;
+		MinT	+= gRenderSettings.Traversal.StepSizeShadow;
 	}
 
 	return true;
