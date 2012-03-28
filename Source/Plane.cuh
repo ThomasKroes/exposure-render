@@ -47,7 +47,7 @@ DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, Intersection& 
 	Int.UV	= Vec2f(Int.P[0], Int.P[1]);
 	Int.N	= Vec3f(0.0f, 0.0f, 1.0f);
 
-	if (OneSided && R.D[2] <= 0.0f)
+	if (OneSided && R.D[2] >= 0.0f)
 	{
 		Int.Front	= false;
 		Int.N		= Vec3f(0.0f, 0.0f, -1.0f);

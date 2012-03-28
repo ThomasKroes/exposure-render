@@ -49,6 +49,9 @@ DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, Sca
 	// Compute exitant radiance
 	Le = ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
 
+	if (Light.Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
+		Le = ColorXYZf(0.0f);
+
 	if (Light.Unit == 1)
 		Le /= Light.Shape.Area;
 }
@@ -77,7 +80,7 @@ DEVICE_NI void IntersectLight(Light& Light, const Ray& R, ScatterEvent& SE)
 		SE.N 		= TransformVector(Light.Shape.TM, Int.N);
 		SE.T 		= Length(SE.P - R.O);
 		SE.Wo		= -R.D;
-		SE.Le		= ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
+		SE.Le		= Int.Front ? ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]) : ColorXYZf(0.0f);
 		SE.UV		= Int.UV;
 
 		if (Light.Unit == 1)

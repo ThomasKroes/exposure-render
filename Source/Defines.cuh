@@ -29,7 +29,7 @@ namespace ExposureRender
 #define TWO_RAD_F				2.0f * RAD_F
 #define DEG_TO_RAD				1.0f / RAD_F
 #define METRO_SIZE				256
-#define	RAY_EPS					0.001f
+#define	RAY_EPS					0.0001f
 #define RAY_EPS_2				2.0f * RAY_EPS
 #define ONE_OVER_6				1.0f / 2.0f
 

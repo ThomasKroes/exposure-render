@@ -52,7 +52,7 @@ KERNEL void KrnlComputeAutoFocusDistance(float* pAutoFocusDistance, int FilmU, i
 	}
 
 	if (Sum <= 0.0f)
-		*pAutoFocusDistance = -1.0f;
+		*pAutoFocusDistance = (SE.P - Rc.O).Length();
 	else
 		*pAutoFocusDistance = Sum / SumWeight;
 }

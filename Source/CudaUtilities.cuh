@@ -136,60 +136,97 @@ public:
 			throw(Exception("CUDA Error", cudaGetErrorString(CudaError)));
 	}
 
+	static void ThreadSynchronize()
+	{
+		CUDA::HandleCudaError(cudaThreadSynchronize());
+	}
+
 	template<class T> static void Allocate(T*& pDevicePointer, int Num = 1)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaMalloc(&pDevicePointer, Num * sizeof(T)));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void AllocatePiched(T*& pDevicePointer, const int Pitch, const int Width, const int Height)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaMallocPitch((void**)&pDevicePointer, (size_t*)&Pitch, Width * sizeof(T), Height));
+
+		CUDA::ThreadSynchronize();
 	}
 	
 	template<class T> static void MemSet(T*& pDevicePointer, const int Value, int Num = 1)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaMemset((void*)pDevicePointer, Value, (size_t)(Num * sizeof(T))));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void HostToConstantDevice(T* pHost, char* pDeviceSymbol, int Num = 1)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyHostToDevice(T* pHost, T* pDevice, int Num = 1)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaMemcpy(pDevice, pHost, Num * sizeof(T), cudaMemcpyHostToDevice));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyDeviceToHost(T* pDevice, T* pHost, int Num = 1)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaMemcpy(pHost, pDevice, Num * sizeof(T), cudaMemcpyDeviceToHost));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyDeviceToDevice(T* pDeviceSource, T* pDeviceDestination, int Num = 1)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaMemcpy(pDeviceDestination, pDeviceSource, Num * sizeof(T), cudaMemcpyDeviceToDevice));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	static void FreeArray(cudaArray*& pCudaArray)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaFreeArray(pCudaArray));
 		pCudaArray = NULL;
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void Free(T*& pBuffer)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaFree(pBuffer));
 		pBuffer = NULL;
+
+		CUDA::ThreadSynchronize();
 	}
 
 	static void UnbindTexture(textureReference& pTextureReference)
 	{
+		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaUnbindTexture(&pTextureReference));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void BindTexture1D(textureReference& TextureReference, int Num, const T* pBuffer, cudaArray*& pCudaArray, cudaTextureFilterMode TextureFilterMode = cudaFilterModeLinear, cudaTextureAddressMode TextureAddressMode = cudaAddressModeClamp, bool Normalized = true)
 	{
+		CUDA::ThreadSynchronize();
+
 		const cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
 
 		TextureReference.normalized		= Normalized;
@@ -201,10 +238,14 @@ public:
 		HandleCudaError(cudaMallocArray(&pCudaArray, &ChannelDescription, Num, 1));
 		HandleCudaError(cudaMemcpyToArray(pCudaArray, 0, 0, pBuffer, Num * sizeof(T), cudaMemcpyHostToDevice));
 		HandleCudaError(cudaBindTextureToArray(&TextureReference, pCudaArray, &ChannelDescription));
+
+		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void BindTexture3D(textureReference& TextureReference, int Extent[3], const T* pBuffer, cudaArray*& pCudaArray, cudaTextureFilterMode TextureFilterMode = cudaFilterModeLinear, cudaTextureAddressMode TextureAddressMode = cudaAddressModeClamp, bool Normalized = true)
 	{
+		CUDA::ThreadSynchronize();
+
 		const cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
 
 		const cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
@@ -227,6 +268,8 @@ public:
   		TextureReference.addressMode[2]	= TextureAddressMode;
 
 		HandleCudaError(cudaBindTextureToArray(&TextureReference, pCudaArray, &ChannelDescription));
+
+		CUDA::ThreadSynchronize();
 	}
 };
 

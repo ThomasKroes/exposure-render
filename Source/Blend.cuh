@@ -31,7 +31,7 @@ KERNEL void KrnlBlend(ColorRGBAuc* pImage, ColorRGBAuc* pImageFiltered, int Widt
 	if (X >= Width || Y >= Height)
 		return;
 
-	const float BlendFactor = 1.0f;//exp(-powf((float)NoIterations / 100.0f, 1.7f));
+	const float BlendFactor = 1.0f; //exp(-powf((float)NoIterations / 100.0f, 1.7f));
 
 	pImage[PID] = Lerp(pImage[PID], pImageFiltered[PID], BlendFactor);
 }

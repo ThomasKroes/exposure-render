@@ -259,7 +259,7 @@ struct EXPOSURE_RENDER_DLL Camera
 		this->V[0]				= 0.0f;
 		this->V[1]				= 0.0f;
 		this->V[2]				= 0.0f;
-		this->FocalDistance		= 0.0f;
+		this->FocalDistance		= 1.0f;
 		this->ApertureSize		= 0.0f;
 		this->ClipNear			= 0.0f;
 		this->ClipFar			= 0.0f;

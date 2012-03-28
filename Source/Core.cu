@@ -59,6 +59,7 @@ int	gNoIterations = 0;
 
 #include "GaussianFilter.cuh"
 #include "BilateralFilter.cuh"
+#include "MedianFilter.cuh"
 #include "Estimate.cuh"
 #include "Utilities.cuh"
 #include "SingleScattering.cuh"
@@ -331,15 +332,19 @@ EXPOSURE_RENDER_DLL void RenderEstimate()
 	CUDA::Allocate(pDevFrameBuffer);
 	CUDA::MemCopyHostToDevice(&gFrameBuffer, pDevFrameBuffer);
 
+	CUDA::ThreadSynchronize();
+
 	SingleScattering(pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 	FilterGaussian(gFrameBuffer.CudaFrameEstimate.GetPtr(), gFrameBuffer.CudaFrameEstimateTemp.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 	ComputeEstimate(pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 	ToneMap(pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 //	FilterBilateral(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateTemp.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
-//	FilterBilateral(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateTemp.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
+//	MedianFilter(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 //	Blend(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 
 	CUDA::Free(pDevFrameBuffer);
+
+	CUDA::ThreadSynchronize();
 
 	gNoIterations++;
 }
@@ -351,7 +356,7 @@ EXPOSURE_RENDER_DLL void GetEstimate(unsigned char* pData)
 
 EXPOSURE_RENDER_DLL void RecordBenchmarkImage()
 {
-//	CUDA::MemCopyDeviceToDevice(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetNoElements());
+//	CUDA::MemCopyDeviceToDevice(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetNoElements()); 
 }
 
 EXPOSURE_RENDER_DLL void GetAverageNrmsError(float& AverageNrmsError)

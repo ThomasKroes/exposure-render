@@ -153,7 +153,7 @@ DEVICE_NI void SampleUnitSphere(SurfaceSample& SS, const Vec3f& UVW)
 	float y		= r * sinf(phi);
 
 	SS.P	= Vec3f(x, y, z);
-	SS.N	= -SS.P;
+	SS.N	= SS.P;
 	SS.UV	= Vec2f(SphericalTheta(SS.P), SphericalPhi(SS.P));
 }
 

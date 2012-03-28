@@ -19,7 +19,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI bool Intersect(Ray R, CRNG& RNG)
+DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 {
 	ScatterEvent SE(ScatterEvent::Light);
 
@@ -42,7 +42,7 @@ DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 
 	Vec3f W = Normalize(P2 - P1);
 
-	Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, gRenderSettings.Traversal.MaxShadowDistance));
+	const Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, gRenderSettings.Traversal.MaxShadowDistance));
 
 	return !Intersect(R, RNG);
 }
@@ -76,7 +76,6 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 			Ld += F * Li / LightPdf;
 	}
 
-	/*
 	F = Shader.SampleF(SE.Wo, Wi, BsdfPdf, LS.BrdfSample);
 
 	if (F.IsBlack() || BsdfPdf <= 0.0f)
@@ -102,9 +101,9 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 		if (Shader.Type == VolumeShader::Brdf)
 			Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / BsdfPdf);
 		else
-			Ld += F * Li * BsdfPdf;
+			Ld += F * Li / BsdfPdf;
 	}
-	*/
+	/**/
 
 	return Ld;
 }
