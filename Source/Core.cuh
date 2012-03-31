@@ -24,7 +24,7 @@ namespace ExposureRender
 
 struct VolumeProperties;
 struct Camera;
-struct Lights;
+struct Light;
 struct Clippers;
 struct Reflectors;
 struct RenderSettings;
@@ -47,7 +47,8 @@ EXPOSURE_RENDER_DLL void BindIor1D(float IOR[NO_TF_STEPS], float Range[2]);
 EXPOSURE_RENDER_DLL void BindEmission1D(float Emission[3][NO_TF_STEPS], float Range[2]);
 EXPOSURE_RENDER_DLL void BindVolumeProperties(VolumeProperties* pVolumeProperties);
 EXPOSURE_RENDER_DLL void BindCamera(Camera* pCamera);
-EXPOSURE_RENDER_DLL void BindLights(Lights* pLights);
+EXPOSURE_RENDER_DLL void BindLight(Light* pLight);
+EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight);
 EXPOSURE_RENDER_DLL void BindClippers(Clippers* pClippers);
 EXPOSURE_RENDER_DLL void BindReflectors(Reflectors* pReflectors);
 EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings* pRenderSettings);

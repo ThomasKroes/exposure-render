@@ -107,6 +107,9 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
+	if (gLights.NoLights <= 0)
+		return ColorXYZf(0.0f);
+
 	VolumeShader Shader;
 	
 	switch (SE.Type)

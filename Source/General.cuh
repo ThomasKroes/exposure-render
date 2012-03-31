@@ -154,6 +154,15 @@ struct EXPOSURE_RENDER_DLL Matrix44
 				this->NN[i][j] = i == j ? 1.0f : 0.0f;
 	}
 #endif
+
+	Matrix44& operator = (const Matrix44& Other)
+	{
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				this->NN[i][j] = Other.NN[i][j];
+
+		return *this;
+	}
 };
 
 struct EXPOSURE_RENDER_DLL VolumeProperties
@@ -314,18 +323,59 @@ struct EXPOSURE_RENDER_DLL Shape
 		this->OuterRadius	= 0.0f;
 	}
 #endif
+	
+	Shape& operator = (const Shape& Other)
+	{
+		this->TM			= Other.TM;
+		this->InvTM			= Other.InvTM;		
+		this->OneSided		= Other.OneSided;
+		this->Type			= Other.Type;		
+		this->Color[0]		= Other.Color[0];	
+		this->Color[1]		= Other.Color[1];	
+		this->Color[2]		= Other.Color[2];	
+		this->Size[0]		= Other.Size[0];	
+		this->Size[1]		= Other.Size[1];	
+		this->Size[2]		= Other.Size[2];	
+		this->Area			= Other.Area;		
+		this->InnerRadius	= Other.InnerRadius;
+		this->OuterRadius	= Other.OuterRadius;
+
+		return *this;
+	}
+
+	bool operator == (const Shape& S) const
+	{
+		if (S.OneSided != this->OneSided ||
+			S.Type != this->Type ||
+			S.Color[0] != this->Color[0] ||
+			S.Color[1] != this->Color[1] ||
+			S.Color[2] != this->Color[2] ||
+			S.Size[0] != this->Size[0] ||
+			S.Size[1] != this->Size[1] ||
+			S.Size[2] != this->Size[2] ||
+			S.Area != this->Area ||
+			S.InnerRadius != this->InnerRadius ||
+			S.OuterRadius != this->OuterRadius)
+			return false;
+
+		return true;
+	}
 };
 
 struct EXPOSURE_RENDER_DLL Light
 {
+	int		ID;
+	bool	Enabled;
 	bool	Visible;
 	Shape	Shape;
 	float	Color[3];
 	int		Unit;
-
+	
 #ifndef __CUDA_ARCH__
 	Light()
 	{
+		this->ID		= 0;
+		this->Enabled	= true;
 		this->Visible	= true;
 		this->Color[0]	= 1.0f;
 		this->Color[1]	= 1.0f;
@@ -333,14 +383,36 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Unit		= 0;
 	}
 #endif
+	
+	Light& operator = (const Light& Other)
+	{
+		this->ID		= Other.ID;
+		this->Enabled	= Other.Enabled;
+		this->Visible	= Other.Visible;
+		this->Shape		= Other.Shape;
+		this->Color[0]	= Other.Color[0];
+		this->Color[1]	= Other.Color[1];
+		this->Color[2]	= Other.Color[2];
+		this->Unit		= Other.Unit;
+
+		return *this;
+	}
+
+	bool operator == (const Light& L) const
+	{
+		if (L.ID == this->ID && L.Enabled == this->Enabled && L.Visible == this->Visible && L.Shape == this->Shape && L.Color[0] == this->Color[0] && L.Color[1] == this->Color[1] && L.Color[2] == this->Color[2] && L.Unit == this->Unit)
+			return false;
+
+		return true;
+	}
 };
 
 #define MAX_NO_LIGHTS 32
 
 struct EXPOSURE_RENDER_DLL Lights
 {
-	int					NoLights;
-	Light				LightList[MAX_NO_LIGHTS];
+	int		NoLights;
+	Light	LightList[MAX_NO_LIGHTS];
 
 #ifndef __CUDA_ARCH__
 	Lights()
@@ -348,6 +420,16 @@ struct EXPOSURE_RENDER_DLL Lights
 		this->NoLights	= 0;
 	}
 #endif
+
+	Lights& operator = (const Lights& Other)
+	{
+		this->NoLights = Other.NoLights;
+		
+		for (int i = 0; i < MAX_NO_LIGHTS; i++)
+			this->LightList[i] = Other.LightList[i];
+
+		return *this;
+	}
 };
 
 #define MAX_NO_TEXTURES 64

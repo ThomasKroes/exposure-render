@@ -37,24 +37,27 @@ cudaArray* gpSpecular	= NULL;
 cudaArray* gpGlossiness	= NULL;
 cudaArray* gpEmission	= NULL;
 
-CD ExposureRender::VolumeProperties				gVolumeProperties;
-CD ExposureRender::Camera						gCamera;
-CD ExposureRender::Lights						gLights;
-CD ExposureRender::Clippers						gClippers;
-CD ExposureRender::Reflectors					gReflectors;
-CD ExposureRender::RenderSettings				gRenderSettings;
-CD ExposureRender::Textures						gTextures;
-CD ExposureRender::Range						gOpacityRange;
-CD ExposureRender::Range						gDiffuseRange;
-CD ExposureRender::Range						gSpecularRange;
-CD ExposureRender::Range						gGlossinessRange;
-CD ExposureRender::Range						gEmissionRange;
-CD ExposureRender::GaussianFilter				gFrameEstimateFilter;
-CD ExposureRender::BilateralFilter				gPostProcessingFilter;
+CD ExposureRender::VolumeProperties					gVolumeProperties;
+CD ExposureRender::Camera							gCamera;
+CD ExposureRender::Lights							gLights;
+CD ExposureRender::Clippers							gClippers;
+CD ExposureRender::Reflectors						gReflectors;
+CD ExposureRender::RenderSettings					gRenderSettings;
+CD ExposureRender::Textures							gTextures;
+CD ExposureRender::Range							gOpacityRange;
+CD ExposureRender::Range							gDiffuseRange;
+CD ExposureRender::Range							gSpecularRange;
+CD ExposureRender::Range							gGlossinessRange;
+CD ExposureRender::Range							gEmissionRange;
+CD ExposureRender::GaussianFilter					gFrameEstimateFilter;
+CD ExposureRender::BilateralFilter					gPostProcessingFilter;
 
-ExposureRender::FrameBuffer						gFrameBuffer;
+ExposureRender::FrameBuffer							gFrameBuffer;
 
-static std::map<int, ExposureRender::Texture>	gTextureMap;
+static std::map<int, ExposureRender::Texture>		gTextureMap;
+static std::map<int, ExposureRender::Light>			gLightsMap;
+static std::map<int, ExposureRender::Clipper>		gClippersMap;
+static std::map<int, ExposureRender::Reflector>		gReflectorsMap;
 
 int	gNoIterations = 0;
 
@@ -250,9 +253,60 @@ EXPOSURE_RENDER_DLL void BindCamera(Camera* pCamera)
 	CUDA::HostToConstantDevice(pCamera, "gCamera");
 }
 
-EXPOSURE_RENDER_DLL void BindLights(Lights* pLights)
+EXPOSURE_RENDER_DLL void BindLight(Light* pLight)
 {
-	CUDA::HostToConstantDevice(pLights, "gLights");
+	if (!pLight)
+		throw(Exception("Light", "Invalid light pointer!"));
+	
+	std::map<int, ExposureRender::Light>::iterator It;
+
+	It = gLightsMap.find(pLight->ID);
+
+//	if (*pLight == gLightsMap[pLight->ID])
+//		return;
+
+	gLightsMap[pLight->ID] = *pLight;
+
+	ExposureRender::Lights Lights;
+
+	for (It = gLightsMap.begin(); It != gLightsMap.end(); It++)
+	{
+		if (It->second.Enabled)
+		{
+			Lights.LightList[Lights.NoLights] = It->second;
+			Lights.NoLights++;
+		}
+	}
+
+	CUDA::HostToConstantDevice(&Lights, "gLights");
+}
+
+EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight)
+{
+	if (!pLight)
+		throw(Exception("Light", "Invalid light pointer!"));
+
+	std::map<int, ExposureRender::Light>::iterator It;
+
+	It = gLightsMap.find(pLight->ID);
+
+	if (It == gLightsMap.end())
+		return;
+
+	gLightsMap.erase(It);
+
+	ExposureRender::Lights Lights;
+
+	for (It = gLightsMap.begin(); It != gLightsMap.end(); It++)
+	{
+		if (It->second.Enabled)
+		{
+			Lights.LightList[Lights.NoLights] = It->second;
+			Lights.NoLights++;
+		}
+	}
+
+	CUDA::HostToConstantDevice(&Lights, "gLights");
 }
 
 EXPOSURE_RENDER_DLL void BindClippers(Clippers* pClippers)
@@ -477,6 +531,9 @@ EXPOSURE_RENDER_DLL void Deinitialize()
 EXPOSURE_RENDER_DLL void Initialize()
 {
 	Deinitialize();
+
+	ExposureRender::Lights Lights;
+	CUDA::HostToConstantDevice(&Lights, "gLights");
 }
 
 }
