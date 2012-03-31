@@ -27,18 +27,26 @@ namespace ExposureRender
 #define	MAX_NO_TIMINGS	64
 #define	MAX_CHAR_SIZE	256
 
-template<class T> inline void SetArray(T V[], const T& Value, const int& Size) { for (int i = 0; i < Size; i++) V[i] = Value; }
-template<class T> inline void SetArray3(T V[], const T& Value) { SetArray(V, Value, 3); }
-
 struct EXPOSURE_RENDER_DLL Exception
 {
-	char	Title[MAX_CHAR_SIZE];
+	char	Type[MAX_CHAR_SIZE];
+	char	Error[MAX_CHAR_SIZE];
 	char	Description[MAX_CHAR_SIZE];
 	
-	Exception(const char* pTitle, const char* pDescription)
+	Exception(const char* pType = "", const char* pError = "", const char* pDescription = "")
 	{
-		sprintf_s(Title, MAX_CHAR_SIZE, "%s", pTitle);
+		sprintf_s(Type, MAX_CHAR_SIZE, "%s", pType);
+		sprintf_s(Error, MAX_CHAR_SIZE, "%s", pError);
 		sprintf_s(Description, MAX_CHAR_SIZE, "%s", pDescription);
+	}
+
+	Exception& operator = (const Exception& Other)
+	{
+		sprintf_s(Type, MAX_CHAR_SIZE, "%s", Other.Type);
+		sprintf_s(Error, MAX_CHAR_SIZE, "%s", Other.Error);
+		sprintf_s(Description, MAX_CHAR_SIZE, "%s", Other.Description);
+
+		return *this;
 	}
 };
 
@@ -343,13 +351,36 @@ struct EXPOSURE_RENDER_DLL Lights
 };
 
 #define MAX_NO_TEXTURES 64
+#define NO_COLOR_COMPONENTS 4
 
 struct EXPOSURE_RENDER_DLL Texture
 {
 	struct EXPOSURE_RENDER_DLL Image
 	{
-		unsigned char*	pData;
-		int				Size[2];
+		struct EXPOSURE_RENDER_DLL RGBA
+		{
+			unsigned char Data[NO_COLOR_COMPONENTS];
+
+			RGBA& operator = (const RGBA& Other)
+			{
+				for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
+					this->Data[i] = Other.Data[i];
+
+				return *this;
+			}
+
+#ifndef __CUDA_ARCH__
+			RGBA()
+			{
+				for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
+					this->Data[i] = 0;
+			}
+#endif
+		};
+
+		RGBA*		pData;
+		int			Size[2];
+		bool		Dirty;
 
 		Image& operator = (const Image& Other)
 		{

@@ -37,23 +37,24 @@ cudaArray* gpSpecular	= NULL;
 cudaArray* gpGlossiness	= NULL;
 cudaArray* gpEmission	= NULL;
 
-CD ExposureRender::VolumeProperties		gVolumeProperties;
-CD ExposureRender::Camera				gCamera;
-CD ExposureRender::Lights				gLights;
-CD ExposureRender::Clippers				gClippers;
-CD ExposureRender::Reflectors			gReflectors;
-CD ExposureRender::RenderSettings		gRenderSettings;
-CD ExposureRender::Textures				gTextures;
-CD ExposureRender::Range				gOpacityRange;
-CD ExposureRender::Range				gDiffuseRange;
-CD ExposureRender::Range				gSpecularRange;
-CD ExposureRender::Range				gGlossinessRange;
-CD ExposureRender::Range				gEmissionRange;
-CD ExposureRender::GaussianFilter		gFrameEstimateFilter;
-CD ExposureRender::BilateralFilter		gPostProcessingFilter;
+CD ExposureRender::VolumeProperties				gVolumeProperties;
+CD ExposureRender::Camera						gCamera;
+CD ExposureRender::Lights						gLights;
+CD ExposureRender::Clippers						gClippers;
+CD ExposureRender::Reflectors					gReflectors;
+CD ExposureRender::RenderSettings				gRenderSettings;
+CD ExposureRender::Textures						gTextures;
+CD ExposureRender::Range						gOpacityRange;
+CD ExposureRender::Range						gDiffuseRange;
+CD ExposureRender::Range						gSpecularRange;
+CD ExposureRender::Range						gGlossinessRange;
+CD ExposureRender::Range						gEmissionRange;
+CD ExposureRender::GaussianFilter				gFrameEstimateFilter;
+CD ExposureRender::BilateralFilter				gPostProcessingFilter;
 
-ExposureRender::FrameBuffer				gFrameBuffer;
-CD ExposureRender::Textures				gTexturesHost;
+ExposureRender::FrameBuffer						gFrameBuffer;
+
+static std::map<int, ExposureRender::Texture>	gTextureMap;
 
 int	gNoIterations = 0;
 
@@ -304,23 +305,80 @@ EXPOSURE_RENDER_DLL void BindFiltering(Filtering* pFiltering)
 	CUDA::HostToConstantDevice(&Bilateral, "gPostProcessingFilter");
 }
 
-EXPOSURE_RENDER_DLL void BindTextures(Textures* pTextures)
+EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
 {
-	if (gTexturesHost.NoTextures + 1 >= MAX_NO_TEXTURES)
-		throw(Exception("Texture Error", "Maximum no. textures reached"));
-	/*
-	Texture& T = gTexturesHost.TextureList[gTexturesHost.NoTextures];
+	if (!pTexture)
+		throw(Exception("Texture", "Invalid texture pointer!"));
+	
+	std::map<int, ExposureRender::Texture>::iterator It;
 
-	T = *pTexture;
+	It = gTextureMap.find(pTexture->ID);
 
-	if (Type == 0)
+	gTextureMap[pTexture->ID] = *pTexture;
+
+	if (gTextureMap[pTexture->ID].Image.pData)
 	{
-		CUDA::MemCopyHostToDevice(pTexture->Image.pData, T.Image.pData, pTexture.Image.Size[0] * pTexture.Image.Size[1] * 3);
+		const int NoPixels = gTextureMap[pTexture->ID].Image.Size[0] * gTextureMap[pTexture->ID].Image.Size[1];
+
+		gTextureMap[pTexture->ID].Image.pData = NULL;
+
+		CUDA::Allocate(gTextureMap[pTexture->ID].Image.pData, NoPixels);
+		CUDA::MemCopyHostToDevice(pTexture->Image.pData, gTextureMap[pTexture->ID].Image.pData, NoPixels);
+	} 
+
+	ExposureRender::Textures Textures;
+
+	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
+	{
+		Textures.TextureList[Textures.NoTextures] = It->second;
+		Textures.NoTextures++;
 	}
-	*/
 
+	CUDA::HostToConstantDevice(&Textures, "gTextures");
+}
 
-	// Iterate over all textures and see 
+EXPOSURE_RENDER_DLL void UnbindTexture(Texture* pTexture)
+{
+	if (!pTexture)
+		throw(Exception("", "Invalid texture pointer!"));
+
+	std::map<int, ExposureRender::Texture>::iterator It;
+
+	It = gTextureMap.find(pTexture->ID);
+
+	if (It == gTextureMap.end())
+		return;
+
+	if (It->second.Image.pData)
+		CUDA::Free(It->second.Image.pData);
+
+	gTextureMap.erase(It);
+
+	ExposureRender::Textures Textures;
+
+	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
+	{
+		Textures.TextureList[Textures.NoTextures] = It->second;
+		Textures.NoTextures++;
+	}
+
+	CUDA::HostToConstantDevice(&Textures, "gTextures"); 
+}
+
+EXPOSURE_RENDER_DLL void UnbindAllTextures()
+{
+	std::map<int, ExposureRender::Texture>::iterator It;
+
+	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
+	{
+		if (It->second.Image.pData)
+		CUDA::Free(It->second.Image.pData);
+	}
+
+	gTextureMap.clear();
+
+	ExposureRender::Textures Textures;
+	CUDA::HostToConstantDevice(&Textures, "gTextures");
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate()
@@ -411,6 +469,7 @@ EXPOSURE_RENDER_DLL void Deinitialize()
 	UnbindSpecular1D();
 	UnbindGlossiness1D();
 	UnbindEmission1D();
+	UnbindAllTextures();
 
 	gFrameBuffer.Free();
 }

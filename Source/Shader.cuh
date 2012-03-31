@@ -505,7 +505,7 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 			const float Exponent	= Sensitivity * powf(gRenderSettings.Shading.GradientFactor, ExpGF) * NGM;
 			
 			PdfBrdf = gRenderSettings.Shading.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
-			BRDF = RNG.Get1() < PdfBrdf;
+			BRDF = RNG.Get1() <= PdfBrdf;
 			break;
 		}
 

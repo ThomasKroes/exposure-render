@@ -133,7 +133,7 @@ public:
 	static void HandleCudaError(const cudaError_t& CudaError)
 	{
 		if (CudaError != cudaSuccess)
-			throw(Exception("CUDA Error", cudaGetErrorString(CudaError)));
+			throw(Exception("CUDA", cudaGetErrorString(CudaError), ""));
 	}
 
 	static void ThreadSynchronize()
