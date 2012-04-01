@@ -80,6 +80,7 @@ SET(ErCudaGeneral
 	Benchmark.cuh
 	GradientMagnitude.cuh
 	AutoFocus.cuh
+	Texture.cuh
 	Core.cu
 )
 

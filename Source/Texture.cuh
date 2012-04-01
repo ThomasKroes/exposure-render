@@ -18,20 +18,28 @@ namespace ExposureRender
 
 DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec3f& UVW)
 {
-	/*
-	Texture& T = Texture();
+	ColorXYZf L;
+
+	int id = 0;
 
 	for (int i = 0; i < gTextures.NoTextures; i++)
 	{
 		if (gTextures.TextureList[i].ID == ID)
-			T = gTextures.TextureList[i];
+			id = i;
 	}
 
 	
-	switch (T.Type)
+	switch (gTextures.TextureList[id].Type)
 	{
 		case 0:
 		{
+			L.FromRGB(gTextures.TextureList[id].Procedural.UniformColor[0], gTextures.TextureList[id].Procedural.UniformColor[1], gTextures.TextureList[id].Procedural.UniformColor[2]);
+			break;
+		}
+
+		case 1:
+		{
+			/*
 			if (T.Image.pData != NULL)
 			{
 				const int ImageUV[2] = { (int)floorf(UVW[0] * T.Image.Size[0]), (int)floorf(UVW[1] * T.Image.Size[1]) };
@@ -44,15 +52,12 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec3f& UVW)
 
 				return L.FromRGB(Color.Data[0], Color.Data[1], Color.Data[2]);
 			}
-		}
-
-		case 1:
-		{
+			*/
+			break;
 		}
 	}
-	*/
 
-	return ColorXYZf(100.0f);
+	return L;
 }
 
 }

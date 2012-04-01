@@ -369,6 +369,7 @@ struct EXPOSURE_RENDER_DLL Light
 	bool	Visible;
 	Shape	Shape;
 	int		TextureID;
+	float	Multiplier;
 	int		Unit;
 	
 #ifndef __CUDA_ARCH__
@@ -378,6 +379,7 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Enabled		= true;
 		this->Visible		= true;
 		this->TextureID		= 0;
+		this->Multiplier	= 100.0f;
 		this->Unit			= 0;
 	}
 #endif
@@ -389,6 +391,7 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Visible		= Other.Visible;
 		this->Shape			= Other.Shape;
 		this->TextureID		= Other.TextureID;
+		this->Multiplier	= Other.Multiplier;
 		this->Unit			= Other.Unit;
 
 		return *this;
@@ -422,6 +425,37 @@ struct EXPOSURE_RENDER_DLL Lights
 
 #define MAX_NO_TEXTURES 64
 #define NO_COLOR_COMPONENTS 4
+
+struct EXPOSURE_RENDER_DLL Procedural
+{
+	int			Type;
+	float		UniformColor[3];
+	float		CheckerColor1[3];
+	float		CheckerColor2[3];
+
+#ifndef __CUDA_ARCH__
+	Procedural()
+	{
+		this->Type = 0;
+	}
+#endif
+
+	Procedural& operator = (const Procedural& Other)
+	{
+		this->Type				= Other.Type;
+		this->UniformColor[0]	= Other.UniformColor[0];
+		this->UniformColor[1]	= Other.UniformColor[1];
+		this->UniformColor[2]	= Other.UniformColor[2];
+		this->CheckerColor1[0]	= Other.CheckerColor1[0];
+		this->CheckerColor1[1]	= Other.CheckerColor1[1];
+		this->CheckerColor1[2]	= Other.CheckerColor1[2];
+		this->CheckerColor2[0]	= Other.CheckerColor2[0];
+		this->CheckerColor2[1]	= Other.CheckerColor2[1];
+		this->CheckerColor2[2]	= Other.CheckerColor2[2];
+
+		return *this;
+	}
+};
 
 struct EXPOSURE_RENDER_DLL Texture
 {
@@ -474,6 +508,7 @@ struct EXPOSURE_RENDER_DLL Texture
 	int			ID;
 	int			Type;
 	Image		Image;
+	Procedural	Procedural;
 
 #ifndef __CUDA_ARCH__
 	Texture()
@@ -485,9 +520,10 @@ struct EXPOSURE_RENDER_DLL Texture
 
 	Texture& operator = (const Texture& Other)
 	{
-		this->ID	= Other.ID;
-		this->Type	= Other.Type;
-		this->Image	= Other.Image;
+		this->ID			= Other.ID;
+		this->Type			= Other.Type;
+		this->Image			= Other.Image;
+		this->Procedural	= Other.Procedural;
 
 		return *this;
 	}
@@ -497,7 +533,7 @@ struct EXPOSURE_RENDER_DLL Textures
 {
 	int					NoTextures;
 	Texture				TextureList[MAX_NO_TEXTURES];
-
+	
 #ifndef __CUDA_ARCH__
 	Textures()
 	{
