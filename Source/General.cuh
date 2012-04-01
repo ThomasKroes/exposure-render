@@ -457,54 +457,54 @@ struct EXPOSURE_RENDER_DLL Procedural
 	}
 };
 
+struct EXPOSURE_RENDER_DLL RGBA
+{
+	unsigned char Data[NO_COLOR_COMPONENTS];
+
+	RGBA& operator = (const RGBA& Other)
+	{
+		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
+			this->Data[i] = Other.Data[i];
+
+		return *this;
+	}
+
+#ifndef __CUDA_ARCH__
+	RGBA()
+	{
+		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
+			this->Data[i] = 0;
+	}
+#endif
+};
+
+struct EXPOSURE_RENDER_DLL Image
+{
+	RGBA*		pData;
+	int			Size[2];
+	bool		Dirty;
+
+	Image& operator = (const Image& Other)
+	{
+		this->pData		= Other.pData;
+		this->Size[0]	= Other.Size[0];
+		this->Size[1]	= Other.Size[1];
+
+		return *this;
+	}
+
+#ifndef __CUDA_ARCH__
+	Image()
+	{
+		this->pData		= NULL;
+		this->Size[0]	= 0;
+		this->Size[1]	= 0;
+	}
+#endif
+};
+
 struct EXPOSURE_RENDER_DLL Texture
 {
-	struct EXPOSURE_RENDER_DLL Image
-	{
-		struct EXPOSURE_RENDER_DLL RGBA
-		{
-			unsigned char Data[NO_COLOR_COMPONENTS];
-
-			RGBA& operator = (const RGBA& Other)
-			{
-				for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
-					this->Data[i] = Other.Data[i];
-
-				return *this;
-			}
-
-#ifndef __CUDA_ARCH__
-			RGBA()
-			{
-				for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
-					this->Data[i] = 0;
-			}
-#endif
-		};
-
-		RGBA*		pData;
-		int			Size[2];
-		bool		Dirty;
-
-		Image& operator = (const Image& Other)
-		{
-			this->pData		= Other.pData;
-			this->Size[0]	= Other.Size[0];
-			this->Size[1]	= Other.Size[1];
-
-			return *this;
-		}
-
-#ifndef __CUDA_ARCH__
-		Image()
-		{
-			this->pData		= NULL;
-			this->Size[0]	= 0;
-			this->Size[1]	= 0;
-		}
-#endif
-	};
-
 	int			ID;
 	int			Type;
 	Image		Image;

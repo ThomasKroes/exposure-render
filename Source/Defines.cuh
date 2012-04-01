@@ -32,5 +32,6 @@ namespace ExposureRender
 #define	RAY_EPS					0.0001f
 #define RAY_EPS_2				2.0f * RAY_EPS
 #define ONE_OVER_6				1.0f / 2.0f
+#define ONE_OVER_255			1.0f / 255.0f
 
 }

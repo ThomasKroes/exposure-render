@@ -64,8 +64,8 @@ DEVICE_NI bool IntersectPlaneP(const Ray& R, const bool& OneSided, const Vec2f& 
 
 	if (Int.Valid && (Int.UV[0] < -0.5f * Size[0] || Int.UV[0] > 0.5f * Size[0] || Int.UV[1] < -0.5f * Size[1] || Int.UV[1] > 0.5f * Size[1]))
 		return false;
-	else
-		return true;
+	
+	return true;
 }
 
 DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, const Vec2f& Size, Intersection& Int)
@@ -74,6 +74,12 @@ DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, const Vec2f& S
 
 	if (Int.Valid && (Int.UV[0] < -0.5f * Size[0] || Int.UV[0] > 0.5f * Size[0] || Int.UV[1] < -0.5f * Size[1] || Int.UV[1] > 0.5f * Size[1]))
 		Int.Valid = false;
+
+	Int.UV[0] /= Size[0];
+	Int.UV[1] /= Size[1];
+
+	Int.UV += Vec2f(0.5f);
+	Int.UV[0] = 1.0f - Int.UV[0];
 }
 
 DEVICE_NI bool InsidePlane(Vec3f P)

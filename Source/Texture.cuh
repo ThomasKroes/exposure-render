@@ -12,11 +12,12 @@
 */
 
 #include "Defines.cuh"
+#include "General.cuh"
 
 namespace ExposureRender
 {
 
-DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec3f& UVW)
+DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, Vec3f& UVW)
 {
 	ColorXYZf L;
 
@@ -39,20 +40,25 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec3f& UVW)
 
 		case 1:
 		{
-			/*
-			if (T.Image.pData != NULL)
+			
+			if (gTextures.TextureList[id].Image.pData != NULL)
 			{
-				const int ImageUV[2] = { (int)floorf(UVW[0] * T.Image.Size[0]), (int)floorf(UVW[1] * T.Image.Size[1]) };
-				
-				const int PID = ImageUV[1] * T.Image.Size[0] + ImageUV[0];
-				
-				RGBA Color = T.Image.pData[PID];
+				UVW[0] = clamp(UVW[0], 0.0f, 1.0f);
+				UVW[1] = clamp(UVW[1], 0.0f, 1.0f);
 
-				ColorXYZf L;
+				const int ImageUV[2] =
+				{
+					(int)floorf(UVW[0] * (float)gTextures.TextureList[id].Image.Size[0]),
+					(int)floorf(UVW[1] * (float)gTextures.TextureList[id].Image.Size[1])
+				};
+				
+				const int PID = ImageUV[1] * gTextures.TextureList[id].Image.Size[0] + ImageUV[0];
+				
+				RGBA Color = gTextures.TextureList[id].Image.pData[PID];
 
-				return L.FromRGB(Color.Data[0], Color.Data[1], Color.Data[2]);
+				L.FromRGB(ONE_OVER_255 * (float)Color.Data[0], ONE_OVER_255 * (float)Color.Data[1], ONE_OVER_255 * (float)Color.Data[2]);
 			}
-			*/
+			/**/
 			break;
 		}
 	}

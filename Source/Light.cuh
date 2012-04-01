@@ -48,7 +48,7 @@ DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, Sca
 	Wi = Normalize(SS.P - SE.P);
 
 	// Compute exitant radiance
-	Le = Light.Multiplier * EvaluateTexture(Light.TextureID, Vec3f(0.0f));//ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
+	Le = Light.Multiplier * EvaluateTexture(Light.TextureID, Vec3f(SS.UV[0], SS.UV[1], 0.0f));
 
 	if (Light.Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
 		Le = ColorXYZf(0.0f);
@@ -81,8 +81,8 @@ DEVICE_NI void IntersectLight(Light& Light, const Ray& R, ScatterEvent& SE)
 		SE.N 		= TransformVector(Light.Shape.TM, Int.N);
 		SE.T 		= Length(SE.P - R.O);
 		SE.Wo		= -R.D;
-		SE.Le		= Int.Front ? Light.Multiplier * EvaluateTexture(Light.TextureID, Vec3f(0.0f)) : ColorXYZf(0.0f);
 		SE.UV		= Int.UV;
+		SE.Le		= Int.Front ? Light.Multiplier * EvaluateTexture(Light.TextureID, Vec3f(SE.UV[0], SE.UV[1], 0.0f)) : ColorXYZf(0.0f);
 
 		if (Light.Unit == 1)
 			SE.Le /= Light.Shape.Area;
