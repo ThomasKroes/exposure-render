@@ -368,42 +368,30 @@ struct EXPOSURE_RENDER_DLL Light
 	bool	Enabled;
 	bool	Visible;
 	Shape	Shape;
-	float	Color[3];
+	int		TextureID;
 	int		Unit;
 	
 #ifndef __CUDA_ARCH__
 	Light()
 	{
-		this->ID		= 0;
-		this->Enabled	= true;
-		this->Visible	= true;
-		this->Color[0]	= 1.0f;
-		this->Color[1]	= 1.0f;
-		this->Color[2]	= 1.0f;
-		this->Unit		= 0;
+		this->ID			= 0;
+		this->Enabled		= true;
+		this->Visible		= true;
+		this->TextureID		= 0;
+		this->Unit			= 0;
 	}
 #endif
 	
 	Light& operator = (const Light& Other)
 	{
-		this->ID		= Other.ID;
-		this->Enabled	= Other.Enabled;
-		this->Visible	= Other.Visible;
-		this->Shape		= Other.Shape;
-		this->Color[0]	= Other.Color[0];
-		this->Color[1]	= Other.Color[1];
-		this->Color[2]	= Other.Color[2];
-		this->Unit		= Other.Unit;
+		this->ID			= Other.ID;
+		this->Enabled		= Other.Enabled;
+		this->Visible		= Other.Visible;
+		this->Shape			= Other.Shape;
+		this->TextureID		= Other.TextureID;
+		this->Unit			= Other.Unit;
 
 		return *this;
-	}
-
-	bool operator == (const Light& L) const
-	{
-		if (L.ID == this->ID && L.Enabled == this->Enabled && L.Visible == this->Visible && L.Shape == this->Shape && L.Color[0] == this->Color[0] && L.Color[1] == this->Color[1] && L.Color[2] == this->Color[2] && L.Unit == this->Unit)
-			return false;
-
-		return true;
 	}
 };
 

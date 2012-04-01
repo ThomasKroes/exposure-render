@@ -18,6 +18,7 @@ namespace ExposureRender
 
 DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec3f& UVW)
 {
+	/*
 	Texture& T = Texture();
 
 	for (int i = 0; i < gTextures.NoTextures; i++)
@@ -26,6 +27,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec3f& UVW)
 			T = gTextures.TextureList[i];
 	}
 
+	
 	switch (T.Type)
 	{
 		case 0:
@@ -48,8 +50,9 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec3f& UVW)
 		{
 		}
 	}
+	*/
 
-	return ColorXYZf(0.0f);
+	return ColorXYZf(100.0f);
 }
 
 }
