@@ -509,12 +509,18 @@ struct EXPOSURE_RENDER_DLL Texture
 	int			Type;
 	Image		Image;
 	Procedural	Procedural;
+	float		Offset[2];
+	float		Repeat[2];
 
 #ifndef __CUDA_ARCH__
 	Texture()
 	{
-		this->ID	= 0;
-		this->Type	= 0;
+		this->ID			= 0;
+		this->Type			= 0;
+		this->Offset[0]		= 0.0f;	
+		this->Offset[1]		= 0.0f;	
+		this->Repeat[0]		= 0.0f;	
+		this->Repeat[1]		= 0.0f;	
 	}
 #endif
 
@@ -524,6 +530,10 @@ struct EXPOSURE_RENDER_DLL Texture
 		this->Type			= Other.Type;
 		this->Image			= Other.Image;
 		this->Procedural	= Other.Procedural;
+		this->Offset[0]		= Other.Offset[0];
+		this->Offset[1]		= Other.Offset[1];
+		this->Repeat[0]		= Other.Repeat[0];
+		this->Repeat[1]		= Other.Repeat[1];
 
 		return *this;
 	}

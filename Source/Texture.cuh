@@ -29,7 +29,18 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, Vec3f& UVW)
 			id = i;
 	}
 
+	UVW[0] *= gTextures.TextureList[id].Repeat[0];
+	UVW[1] *= gTextures.TextureList[id].Repeat[1];
 	
+	UVW[0] += gTextures.TextureList[id].Offset[0];
+	UVW[1] += gTextures.TextureList[id].Offset[1];
+	
+	UVW[0] = UVW[0] - floorf(UVW[0]);
+	UVW[1] = UVW[1] - floorf(UVW[1]);
+
+	UVW[0] = clamp(UVW[0], 0.0f, 1.0f);
+	UVW[1] = clamp(UVW[1], 0.0f, 1.0f);
+
 	switch (gTextures.TextureList[id].Type)
 	{
 		case 0:
@@ -58,7 +69,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, Vec3f& UVW)
 
 				L.FromRGB(ONE_OVER_255 * (float)Color.Data[0], ONE_OVER_255 * (float)Color.Data[1], ONE_OVER_255 * (float)Color.Data[2]);
 			}
-			/**/
+
 			break;
 		}
 	}

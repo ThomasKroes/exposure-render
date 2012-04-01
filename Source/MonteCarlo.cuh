@@ -20,17 +20,6 @@
 namespace ExposureRender
 {
 
-DEVICE float SphericalTheta(const Vec3f& Wl)
-{
-	return acosf(Clamp(Wl[1], -1.0f, 1.0f));
-}
-
-DEVICE float SphericalPhi(const Vec3f& Wl)
-{
-	float p = atan2f(Wl[2], Wl[0]);
-	return (p < 0.f) ? p + 2.f * PI_F : p;
-}
-
 DEVICE float CosTheta(const Vec3f& Ws)
 {
 	return Ws[2];
@@ -97,7 +86,7 @@ DEVICE Vec2f ConcentricSampleDisk(const Vec2f& U)
 	float sx = 2 * U[0] - 1;
 	float sy = 2 * U[1] - 1;
 	// Map square to $(r,\theta)$
-	// Handle degeneracy at the origin
+	// Handle degeneracy at the origi
 	
 	if (sx == 0.0 && sy == 0.0)
 	{

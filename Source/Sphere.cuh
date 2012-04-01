@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "MonteCarlo.cuh"
+#include "Geometry.cuh"
 
 namespace ExposureRender
 {
@@ -131,7 +131,7 @@ DEVICE_NI void IntersectSphere(const Ray& R, const float& Radius, Intersection& 
 	Int.Valid	= true;
 	Int.P		= R(Int.NearT);
 	Int.N		= Normalize(Int.P);
-	Int.UV		= Vec2f(0.0f, 0.0f);
+	Int.UV		= SphericalToUV(Int.P);
 }
 
 DEVICE_NI void IntersectUnitSphere(const Ray& R, Intersection& Int)

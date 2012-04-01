@@ -43,6 +43,12 @@ DEVICE_NI void IntersectRing(const Ray& R, const bool& OneSided, const float& In
 
 	if (Int.Valid && (Int.UV.Length() < InnerRadius || Int.UV.Length() > OuterRadius))
 		Int.Valid = false;
+
+	const float Diameter = 2.0f * OuterRadius;
+
+	Int.UV /= Diameter;
+	Int.UV += Vec2f(0.5f);
+	Int.UV[0] = 1.0f - Int.UV[0]; 
 }
 
 DEVICE_NI void SampleUnitRing(SurfaceSample& SS, const Vec3f& UVW, const float& InnerRadius)

@@ -262,9 +262,6 @@ EXPOSURE_RENDER_DLL void BindLight(Light* pLight)
 
 	It = gLightsMap.find(pLight->ID);
 
-//	if (*pLight == gLightsMap[pLight->ID])
-//		return;
-
 	gLightsMap[pLight->ID] = *pLight;
 
 	ExposureRender::Lights Lights;
@@ -368,14 +365,18 @@ EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
 
 	It = gTextureMap.find(pTexture->ID);
 
-	gTextureMap[pTexture->ID] = *pTexture;
-
 	if (gTextureMap[pTexture->ID].Image.pData)
 	{
-		const int NoPixels = gTextureMap[pTexture->ID].Image.Size[0] * gTextureMap[pTexture->ID].Image.Size[1];
-
+		CUDA::Free(gTextureMap[pTexture->ID].Image.pData);
 		gTextureMap[pTexture->ID].Image.pData = NULL;
+	}
 
+	gTextureMap[pTexture->ID] = *pTexture;
+
+	if (pTexture->Image.pData)
+	{
+		const int NoPixels = gTextureMap[pTexture->ID].Image.Size[0] * gTextureMap[pTexture->ID].Image.Size[1];
+		
 		CUDA::Allocate(gTextureMap[pTexture->ID].Image.pData, NoPixels);
 		CUDA::MemCopyHostToDevice(pTexture->Image.pData, gTextureMap[pTexture->ID].Image.pData, NoPixels);
 	} 

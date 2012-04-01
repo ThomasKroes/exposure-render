@@ -22,6 +22,23 @@ using namespace std;
 namespace ExposureRender
 {
 
+DEVICE float SphericalTheta(const Vec3f& W)
+{
+	return acosf(Clamp(W[1], -1.0f, 1.0f));
+}
+
+DEVICE float SphericalPhi(const Vec3f& W)
+{
+	float p = atan2f(W[2], W[0]);
+	return (p < 0.0f) ? p + 2.0f * PI_F : p;
+}
+
+DEVICE_NI Vec2f SphericalToUV(const Vec3f& W)
+{
+	const Vec3f V = Normalize(W);
+	return Vec2f(INV_TWO_PI_F * SphericalPhi(V), 1.0f - (INV_PI_F * SphericalTheta(V)));
+}
+
 HOST_DEVICE float Lerp(float t, float v1, float v2)
 {
 	return (1.f - t) * v1 + t * v2;

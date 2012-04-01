@@ -289,7 +289,7 @@ struct IsotropicPhase
 
 	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
-		return INV_4_PI_F;
+		return INV_FOUR_PI_F;
 	}
 
 	DEVICE IsotropicPhase& operator = (const IsotropicPhase& Other)

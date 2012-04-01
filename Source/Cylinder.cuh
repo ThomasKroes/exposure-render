@@ -95,6 +95,7 @@ DEVICE_NI bool InsideCylinder(Vec3f P, float Radius, float Height)
 
 DEVICE_NI void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
 {
+	/*
 	int Side = floorf(UVW[2] * 3.0f);
 
 	if (Side == 0 || Side == 1)
@@ -118,6 +119,8 @@ DEVICE_NI void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float 
 	}
 	
 	SS.UV = Vec2f(0.0f);
+	*/
+
 }
 
 }
