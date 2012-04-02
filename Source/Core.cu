@@ -365,16 +365,15 @@ EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
 
 	It = gTextureMap.find(pTexture->ID);
 
-	if (gTextureMap[pTexture->ID].Image.pData)
-	{
-		CUDA::Free(gTextureMap[pTexture->ID].Image.pData);
-		gTextureMap[pTexture->ID].Image.pData = NULL;
-	}
+	const bool Exists = It != gTextureMap.end();
 
 	gTextureMap[pTexture->ID] = *pTexture;
 
-	if (pTexture->Image.pData)
+	if (pTexture->Image.Dirty)
 	{
+		if (gTextureMap[pTexture->ID].Image.pData)
+			CUDA::Free(gTextureMap[pTexture->ID].Image.pData);
+
 		const int NoPixels = gTextureMap[pTexture->ID].Image.Size[0] * gTextureMap[pTexture->ID].Image.Size[1];
 		
 		CUDA::Allocate(gTextureMap[pTexture->ID].Image.pData, NoPixels);
@@ -386,6 +385,7 @@ EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
 	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
 	{
 		Textures.TextureList[Textures.NoTextures] = It->second;
+		Textures.TextureList[Textures.NoTextures].Image.pData = It->second.Image.pData;
 		Textures.NoTextures++;
 	}
 
@@ -395,7 +395,7 @@ EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
 EXPOSURE_RENDER_DLL void UnbindTexture(Texture* pTexture)
 {
 	if (!pTexture)
-		throw(Exception("", "Invalid texture pointer!"));
+		throw(Exception("Texture", "Invalid texture pointer!"));
 
 	std::map<int, ExposureRender::Texture>::iterator It;
 

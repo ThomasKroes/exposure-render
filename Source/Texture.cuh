@@ -17,6 +17,18 @@
 namespace ExposureRender
 {
 
+DEVICE_NI ColorXYZf EvaluateBitmap(const int& ID, const int& U, const int& V)
+{
+	if (gTextures.TextureList[ID].Image.pData == NULL)
+		return ColorXYZf(0.0f);
+
+	RGBA ColorRGBA = gTextures.TextureList[ID].Image.pData[V * gTextures.TextureList[ID].Image.Size[0] + U];
+	ColorXYZf L;
+	L.FromRGB(ONE_OVER_255 * (float)ColorRGBA.Data[0], ONE_OVER_255 * (float)ColorRGBA.Data[1], ONE_OVER_255 * (float)ColorRGBA.Data[2]);
+
+	return L;
+}
+
 DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, Vec3f& UVW)
 {
 	ColorXYZf L;
@@ -33,7 +45,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, Vec3f& UVW)
 	UVW[1] *= gTextures.TextureList[id].Repeat[1];
 	
 	UVW[0] += gTextures.TextureList[id].Offset[0];
-	UVW[1] += gTextures.TextureList[id].Offset[1];
+	UVW[1] += 1.0f - gTextures.TextureList[id].Offset[1];
 	
 	UVW[0] = UVW[0] - floorf(UVW[0]);
 	UVW[1] = UVW[1] - floorf(UVW[1]);
@@ -51,9 +63,33 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, Vec3f& UVW)
 
 		case 1:
 		{
-			
 			if (gTextures.TextureList[id].Image.pData != NULL)
 			{
+				const int Size[2] = { gTextures.TextureList[id].Image.Size[0], gTextures.TextureList[id].Image.Size[1] };
+
+				int umin = int(Size[0] * UVW[0]);
+				int vmin = int(Size[1] * UVW[1]);
+				int umax = int(Size[0] * UVW[0]) + 1;
+				int vmax = int(Size[1] * UVW[1]) + 1;
+				float ucoef = fabsf(Size[0] * UVW[0] - umin);
+				float vcoef = fabsf(Size[1] * UVW[1] - vmin);
+
+				umin = min(max(umin, 0), Size[0] - 1);
+				umax = min(max(umax, 0), Size[0] - 1);
+				vmin = min(max(vmin, 0), Size[1] - 1);
+				vmax = min(max(vmax, 0), Size[1] - 1);
+		
+				const ColorXYZf Color[4] = 
+				{
+					EvaluateBitmap(id, umin, vmin),
+					EvaluateBitmap(id, umax, vmin),
+					EvaluateBitmap(id, umin, vmax),
+					EvaluateBitmap(id, umax, vmax)
+				};
+
+				L = (1.0f - vcoef) * ((1.0f - ucoef) * Color[0] + ucoef * Color[1]) + vcoef * ((1.0f - ucoef) * Color[2] + ucoef * Color[3]);
+
+				/*
 				UVW[0] = clamp(UVW[0], 0.0f, 1.0f);
 				UVW[1] = clamp(UVW[1], 0.0f, 1.0f);
 
@@ -68,6 +104,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, Vec3f& UVW)
 				RGBA Color = gTextures.TextureList[id].Image.pData[PID];
 
 				L.FromRGB(ONE_OVER_255 * (float)Color.Data[0], ONE_OVER_255 * (float)Color.Data[1], ONE_OVER_255 * (float)Color.Data[2]);
+				*/
 			}
 
 			break;

@@ -486,9 +486,10 @@ struct EXPOSURE_RENDER_DLL Image
 
 	Image& operator = (const Image& Other)
 	{
-		this->pData		= Other.pData;
-		this->Size[0]	= Other.Size[0];
-		this->Size[1]	= Other.Size[1];
+//		this->pData			= Other.pData;
+		this->Size[0]		= Other.Size[0];
+		this->Size[1]		= Other.Size[1];
+		this->Dirty			= Other.Dirty;
 
 		return *this;
 	}
@@ -496,9 +497,10 @@ struct EXPOSURE_RENDER_DLL Image
 #ifndef __CUDA_ARCH__
 	Image()
 	{
-		this->pData		= NULL;
-		this->Size[0]	= 0;
-		this->Size[1]	= 0;
+		this->pData				= NULL;
+		this->Size[0]			= 0;
+		this->Size[1]			= 0;
+		this->Dirty				= false;
 	}
 #endif
 };
