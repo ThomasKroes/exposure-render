@@ -164,7 +164,7 @@ struct ScatterEvent
 	{
 		Volume,
 		Light,
-		Reflector
+		Object
 	};
 
 	SampleType	Type;
@@ -175,7 +175,7 @@ struct ScatterEvent
 	Vec3f		Wo;
 	ColorXYZf	Le;
 	Vec2f		UV;
-	int			ReflectorID;
+	int			ObjectID;
 	int			LightID;
 
 	HOST_DEVICE ScatterEvent()
@@ -220,7 +220,7 @@ struct ScatterEvent
 		this->Wo			= Other.Wo;
 		this->Le			= Other.Le;
 		this->UV			= Other.UV;
-		this->ReflectorID	= Other.ReflectorID;
+		this->ObjectID		= Other.ObjectID;
 		this->LightID		= Other.LightID;
 
 		return *this;

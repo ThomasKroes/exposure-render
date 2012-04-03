@@ -26,7 +26,7 @@ DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 	if (IntersectsLight(R))
 		return true;
 
-	if (IntersectsReflector(R))
+	if (IntersectsObject(R))
 		return true;
 
 	if (ScatterEventInVolume(R, RNG))
@@ -49,7 +49,7 @@ DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 
 DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
 {
-	Light& Light = gLights.LightList[LightID];
+	Light& Light = gLights.List[LightID];
 
 	Vec3f Wi;
 
@@ -107,7 +107,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
-	if (gLights.NoLights <= 0)
+	if (gLights.Count <= 0)
 		return ColorXYZf(0.0f);
 
 	VolumeShader Shader;
@@ -122,12 +122,12 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 			Shader = GetLightShader(SE, RNG);
 			break;
 
-		case ScatterEvent::Reflector:
+		case ScatterEvent::Object:
 			Shader = GetReflectorShader(SE, RNG);
 			break;
 	}
 
-	const int LightID = floorf(LS.LightNum * gLights.NoLights);
+	const int LightID = floorf(LS.LightNum * gLights.Count);
 
 	ColorXYZf Ld;
 	
@@ -136,7 +136,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	for (int i = 0; i < NoSamples; i++)
 		Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID) / (float)NoSamples;
 
-	return (float)gLights.NoLights * (Ld / (float)NoSamples);
+	return (float)gLights.Count * (Ld / (float)NoSamples);
 }
 
 }

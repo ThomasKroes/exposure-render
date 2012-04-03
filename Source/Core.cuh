@@ -25,12 +25,12 @@ namespace ExposureRender
 struct VolumeProperties;
 struct Camera;
 struct Light;
-struct Clippers;
-struct Reflectors;
+struct Object;
+struct ClippingObject;
+struct Texture;
 struct RenderSettings;
 struct Filtering;
 struct KernelTimings;
-struct Texture;
 
 #define NO_TF_STEPS 256
 
@@ -49,12 +49,14 @@ EXPOSURE_RENDER_DLL void BindVolumeProperties(VolumeProperties* pVolumePropertie
 EXPOSURE_RENDER_DLL void BindCamera(Camera* pCamera);
 EXPOSURE_RENDER_DLL void BindLight(Light* pLight);
 EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight);
-EXPOSURE_RENDER_DLL void BindClippers(Clippers* pClippers);
-EXPOSURE_RENDER_DLL void BindReflectors(Reflectors* pReflectors);
-EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings* pRenderSettings);
-EXPOSURE_RENDER_DLL void BindFiltering(Filtering* pFiltering);
+EXPOSURE_RENDER_DLL void BindObject(Object* pObject);
+EXPOSURE_RENDER_DLL void UnbindObject(Object* pObject);
+EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject* pClippingObject);
+EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject* pClippingObject);
 EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture);
 EXPOSURE_RENDER_DLL void UnbindTexture(Texture* pTexture);
+EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings* pRenderSettings);
+EXPOSURE_RENDER_DLL void BindFiltering(Filtering* pFiltering);
 EXPOSURE_RENDER_DLL void RenderEstimate();
 EXPOSURE_RENDER_DLL void GetEstimate(unsigned char* pData);
 EXPOSURE_RENDER_DLL void RecordBenchmarkImage();

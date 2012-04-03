@@ -48,7 +48,7 @@ DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, Sca
 	Wi = Normalize(SS.P - SE.P);
 
 	// Compute exitant radiance
-	Le = Light.Multiplier * EvaluateTexture(Light.TextureID, Vec3f(SS.UV[0], SS.UV[1], 0.0f));
+	Le = Light.Multiplier * EvaluateTexture2D(Light.TextureID, SS.UV);
 
 	if (Light.Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
 		Le = ColorXYZf(0.0f);
@@ -82,7 +82,7 @@ DEVICE_NI void IntersectLight(Light& Light, const Ray& R, ScatterEvent& SE)
 		SE.T 		= Length(SE.P - R.O);
 		SE.Wo		= -R.D;
 		SE.UV		= Int.UV;
-		SE.Le		= Int.Front ? Light.Multiplier * EvaluateTexture(Light.TextureID, Vec3f(SE.UV[0], SE.UV[1], 0.0f)) : ColorXYZf(0.0f);
+		SE.Le		= Int.Front ? Light.Multiplier * EvaluateTexture2D(Light.TextureID, SE.UV) : ColorXYZf(0.0f);
 
 		if (Light.Unit == 1)
 			SE.Le /= Light.Shape.Area;
@@ -94,9 +94,9 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 {
 	float T = FLT_MAX; 
 
-	for (int i = 0; i < gLights.NoLights; i++)
+	for (int i = 0; i < gLights.Count; i++)
 	{
-		Light& Light = gLights.LightList[i];
+		Light& Light = gLights.List[i];
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 
@@ -140,9 +140,9 @@ DEVICE_NI bool IntersectsLight(Light& Light, const Ray& R)
 // Determines if there's an intersection between the ray and any of the scene's lights
 DEVICE_NI bool IntersectsLight(const Ray& R)
 {
-	for (int i = 0; i < gLights.NoLights; i++)
+	for (int i = 0; i < gLights.Count; i++)
 	{
-		if (IntersectsLight(gLights.LightList[i], R))
+		if (IntersectsLight(gLights.List[i], R))
 			return true;
 	}
 

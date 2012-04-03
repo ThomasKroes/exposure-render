@@ -301,7 +301,6 @@ struct EXPOSURE_RENDER_DLL Shape
 	Matrix44			InvTM;
 	bool				OneSided;
 	int					Type;
-	float				Color[3];
 	float				Size[3];
 	float				Area;
 	float				InnerRadius;
@@ -312,9 +311,6 @@ struct EXPOSURE_RENDER_DLL Shape
 	{
 		this->OneSided		= false;
 		this->Type			= 0;
-		this->Color[0]		= 0.0f;
-		this->Color[1]		= 0.0f;
-		this->Color[2]		= 0.0f;
 		this->Size[0]		= 0.0f;
 		this->Size[1]		= 0.0f;
 		this->Size[2]		= 0.0f;
@@ -330,9 +326,6 @@ struct EXPOSURE_RENDER_DLL Shape
 		this->InvTM			= Other.InvTM;		
 		this->OneSided		= Other.OneSided;
 		this->Type			= Other.Type;		
-		this->Color[0]		= Other.Color[0];	
-		this->Color[1]		= Other.Color[1];	
-		this->Color[2]		= Other.Color[2];	
 		this->Size[0]		= Other.Size[0];	
 		this->Size[1]		= Other.Size[1];	
 		this->Size[2]		= Other.Size[2];	
@@ -341,24 +334,6 @@ struct EXPOSURE_RENDER_DLL Shape
 		this->OuterRadius	= Other.OuterRadius;
 
 		return *this;
-	}
-
-	bool operator == (const Shape& S) const
-	{
-		if (S.OneSided != this->OneSided ||
-			S.Type != this->Type ||
-			S.Color[0] != this->Color[0] ||
-			S.Color[1] != this->Color[1] ||
-			S.Color[2] != this->Color[2] ||
-			S.Size[0] != this->Size[0] ||
-			S.Size[1] != this->Size[1] ||
-			S.Size[2] != this->Size[2] ||
-			S.Area != this->Area ||
-			S.InnerRadius != this->InnerRadius ||
-			S.OuterRadius != this->OuterRadius)
-			return false;
-
-		return true;
 	}
 };
 
@@ -402,28 +377,27 @@ struct EXPOSURE_RENDER_DLL Light
 
 struct EXPOSURE_RENDER_DLL Lights
 {
-	int		NoLights;
-	Light	LightList[MAX_NO_LIGHTS];
+	int		Count;
+	Light	List[MAX_NO_LIGHTS];
 
 #ifndef __CUDA_ARCH__
 	Lights()
 	{
-		this->NoLights	= 0;
+		this->Count	= 0;
 	}
 #endif
 
 	Lights& operator = (const Lights& Other)
 	{
-		this->NoLights = Other.NoLights;
+		this->Count = Other.Count;
 		
 		for (int i = 0; i < MAX_NO_LIGHTS; i++)
-			this->LightList[i] = Other.LightList[i];
+			this->List[i] = Other.List[i];
 
 		return *this;
 	}
 };
 
-#define MAX_NO_TEXTURES 64
 #define NO_COLOR_COMPONENTS 4
 
 struct EXPOSURE_RENDER_DLL Procedural
@@ -541,83 +515,142 @@ struct EXPOSURE_RENDER_DLL Texture
 	}
 };
 
+#define MAX_NO_TEXTURES 64
+
 struct EXPOSURE_RENDER_DLL Textures
 {
-	int					NoTextures;
-	Texture				TextureList[MAX_NO_TEXTURES];
+	int			Count;
+	Texture		List[MAX_NO_TEXTURES];
 	
 #ifndef __CUDA_ARCH__
 	Textures()
 	{
-		this->NoTextures = 0;
+		this->Count = 0;
 	}
 #endif
+
+	Textures& operator = (const Textures& Other)
+	{
+		this->Count = Other.Count;
+		
+		for (int i = 0; i < MAX_NO_TEXTURES; i++)
+			this->List[i] = Other.List[i];
+
+		return *this;
+	}
 };
 
-struct EXPOSURE_RENDER_DLL Clipper
+struct EXPOSURE_RENDER_DLL Object
 {
-	Shape				Shape;
-	bool				Invert;
+	int			ID;
+	bool		Enabled;
+	Shape		Shape;
+	int			DiffuseTextureID;
+	int			SpecularTextureID;
+	int			GlossinessTextureID;
+	float		Ior;
 
 #ifndef __CUDA_ARCH__
-	Clipper()
+	Object()
 	{
-		this->Invert = false;
+		this->ID					= 0;
+		this->Enabled				= true;
+		this->DiffuseTextureID		= -1;
+		this->SpecularTextureID		= -1;
+		this->GlossinessTextureID	= -1;
+		this->Ior					= 0.0f;
 	}
 #endif
+
+	Object& operator = (const Object& Other)
+	{
+		this->ID					= Other.ID;
+		this->Enabled				= Other.Enabled;
+		this->Shape					= Other.Shape;
+		this->DiffuseTextureID		= Other.DiffuseTextureID;
+		this->SpecularTextureID		= Other.SpecularTextureID;
+		this->GlossinessTextureID	= Other.GlossinessTextureID;
+		this->Ior					= Other.Ior;
+
+		return *this;
+	}
 };
 
-#define MAX_NO_CLIPPERS 32
+#define MAX_NO_OBJECTS 32
 
-struct EXPOSURE_RENDER_DLL Clippers
+struct EXPOSURE_RENDER_DLL Objects
 {
-	int					NoClippers;
-	Clipper				ClipperList[MAX_NO_CLIPPERS];
+	int			Count;
+	Object		List[MAX_NO_OBJECTS];
 
 #ifndef __CUDA_ARCH__
-	Clippers()
+	Objects()
 	{
-		this->NoClippers = 0;
+		this->Count = 0;
 	}
 #endif
+
+	Objects& operator = (const Objects& Other)
+	{
+		this->Count = Other.Count;
+		
+		for (int i = 0; i < MAX_NO_OBJECTS; i++)
+			this->List[i] = Other.List[i];
+
+		return *this;
+	}
 };
 
-struct EXPOSURE_RENDER_DLL Reflector
+struct EXPOSURE_RENDER_DLL ClippingObject
 {
-	Shape				Shape;
-	float				DiffuseColor[3];
-	float				SpecularColor[3];
-	float				Glossiness;
-	float				Ior;
+	int		ID;
+	bool	Enabled;
+	Shape	Shape;
+	bool	Invert;
 
 #ifndef __CUDA_ARCH__
-	Reflector()
+	ClippingObject()
 	{
-		this->DiffuseColor[0]	= 0.0f;
-		this->DiffuseColor[1]	= 0.0f;
-		this->DiffuseColor[2]	= 0.0f;
-		this->SpecularColor[0]	= 0.0f;
-		this->SpecularColor[1]	= 0.0f;
-		this->SpecularColor[2]	= 0.0f;
-		this->Glossiness		= 0.0f;
-		this->Ior				= 0.0f;
+		this->ID		= 0;
+		this->Enabled	= true;
+		this->Invert	= false;
 	}
 #endif
+
+	ClippingObject& operator = (const ClippingObject& Other)
+	{
+		this->ID		= Other.ID;
+		this->Enabled	= Other.Enabled;
+		this->Shape		= Other.Shape;
+		this->Invert	= Other.Invert;
+
+		return *this;
+	}
 };
 
-#define MAX_NO_REFLECTORS 32
+#define MAX_NO_CLIPPING_OBJECTS 32
 
-struct EXPOSURE_RENDER_DLL Reflectors
+struct EXPOSURE_RENDER_DLL ClippingObjects
 {
-	int					NoReflectors;
-	Reflector			ReflectorList[MAX_NO_REFLECTORS];
+	int				Count;
+	ClippingObject	List[MAX_NO_CLIPPING_OBJECTS];
 
 #ifndef __CUDA_ARCH__
-	Reflectors()
+	ClippingObjects()
 	{
-		this->NoReflectors = 0;
+		this->Count = 0;
 	}
 #endif
+
+	ClippingObjects& operator = (const ClippingObjects& Other)
+	{
+		this->Count = Other.Count;
+		
+		for (int i = 0; i < MAX_NO_CLIPPING_OBJECTS; i++)
+			this->List[i] = Other.List[i];
+
+		return *this;
+	}
 };
 
 struct EXPOSURE_RENDER_DLL RenderSettings

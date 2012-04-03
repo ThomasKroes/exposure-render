@@ -16,6 +16,7 @@
 #include "Geometry.cuh"
 #include "MonteCarlo.cuh"
 #include "Sample.cuh"
+#include "Texture.cuh"
 
 namespace ExposureRender
 {
@@ -537,12 +538,12 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 
 DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].DiffuseColor), ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].SpecularColor), 5.0f, gReflectors.ReflectorList[SE.ReflectorID].Glossiness);
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.0f), ColorXYZf(0.0f), 5.0f, 0.0f);
 }
 
 DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].DiffuseColor), ToColorXYZf(gReflectors.ReflectorList[SE.ReflectorID].SpecularColor), 5.0f, gReflectors.ReflectorList[SE.ReflectorID].Glossiness);
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture2D(gObjects.List[SE.ObjectID].DiffuseTextureID, SE.UV), EvaluateTexture2D(gObjects.List[SE.ObjectID].SpecularTextureID, SE.UV), 10.0f, GlossinessExponent(EvaluateTexture2D(gObjects.List[SE.ObjectID].GlossinessTextureID, SE.UV).Y()));
 }
 
 }

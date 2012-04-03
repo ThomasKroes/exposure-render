@@ -24,11 +24,11 @@ namespace ExposureRender
 
 DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
-	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Reflector) };
+	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Object) };
 
 	SampleVolume(R, RNG, SE[0]);
 	IntersectLights(R, SE[1], true);
-	IntersectReflectors(R, SE[2]);
+	IntersectObjects(R, SE[2]);
 
 	float T = FLT_MAX;
 
@@ -74,7 +74,7 @@ KERNEL void KrnlSingleScattering(FrameBuffer* pFrameBuffer)
 	if (SE.Valid && SE.Type == ScatterEvent::Light)
 		Lv += SE.Le;
 
-	if (SE.Valid && SE.Type == ScatterEvent::Reflector)
+	if (SE.Valid && SE.Type == ScatterEvent::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);

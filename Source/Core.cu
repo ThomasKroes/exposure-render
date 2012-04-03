@@ -37,27 +37,27 @@ cudaArray* gpSpecular	= NULL;
 cudaArray* gpGlossiness	= NULL;
 cudaArray* gpEmission	= NULL;
 
-CD ExposureRender::VolumeProperties					gVolumeProperties;
-CD ExposureRender::Camera							gCamera;
-CD ExposureRender::Lights							gLights;
-CD ExposureRender::Clippers							gClippers;
-CD ExposureRender::Reflectors						gReflectors;
-CD ExposureRender::RenderSettings					gRenderSettings;
-CD ExposureRender::Textures							gTextures;
-CD ExposureRender::Range							gOpacityRange;
-CD ExposureRender::Range							gDiffuseRange;
-CD ExposureRender::Range							gSpecularRange;
-CD ExposureRender::Range							gGlossinessRange;
-CD ExposureRender::Range							gEmissionRange;
-CD ExposureRender::GaussianFilter					gFrameEstimateFilter;
-CD ExposureRender::BilateralFilter					gPostProcessingFilter;
+CD ExposureRender::VolumeProperties						gVolumeProperties;
+CD ExposureRender::Camera								gCamera;
+CD ExposureRender::Lights								gLights;
+CD ExposureRender::Objects								gObjects;
+CD ExposureRender::ClippingObjects						gClippingObjects;
+CD ExposureRender::Textures								gTextures;
+CD ExposureRender::RenderSettings						gRenderSettings;
+CD ExposureRender::Range								gOpacityRange;
+CD ExposureRender::Range								gDiffuseRange;
+CD ExposureRender::Range								gSpecularRange;
+CD ExposureRender::Range								gGlossinessRange;
+CD ExposureRender::Range								gEmissionRange;
+CD ExposureRender::GaussianFilter						gFrameEstimateFilter;
+CD ExposureRender::BilateralFilter						gPostProcessingFilter;
 
-ExposureRender::FrameBuffer							gFrameBuffer;
+ExposureRender::FrameBuffer								gFrameBuffer;
 
-static std::map<int, ExposureRender::Texture>		gTextureMap;
-static std::map<int, ExposureRender::Light>			gLightsMap;
-static std::map<int, ExposureRender::Clipper>		gClippersMap;
-static std::map<int, ExposureRender::Reflector>		gReflectorsMap;
+static std::map<int, ExposureRender::Texture>			gTextureMap;
+static std::map<int, ExposureRender::Light>				gLightsMap;
+static std::map<int, ExposureRender::Object>			gObjectsMap;
+static std::map<int, ExposureRender::ClippingObject>	gClippingObjectsMap;
 
 int	gNoIterations = 0;
 
@@ -181,6 +181,9 @@ EXPOSURE_RENDER_DLL void BindGlossiness1D(float Glossiness[NO_TF_STEPS], float I
 	Range Int;
 	Int.Set(IntensityRange);
 
+	for (int i = 0; i < NO_TF_STEPS; i++)
+		Glossiness[i] = GlossinessExponent(Glossiness[i]);
+
 	CUDA::HostToConstantDevice(&Int, "gGlossinessRange");
 	CUDA::BindTexture1D(gTexGlossiness, NO_TF_STEPS, Glossiness, gpGlossiness);
 }
@@ -270,12 +273,12 @@ EXPOSURE_RENDER_DLL void BindLight(Light* pLight)
 	{
 		if (It->second.Enabled)
 		{
-			Lights.LightList[Lights.NoLights] = It->second;
-			Lights.NoLights++;
+			Lights.List[Lights.Count] = It->second;
+			Lights.Count++;
 		}
 	}
 
-	CUDA::HostToConstantDevice(&Lights, "gLights");
+	CUDA::HostToConstantDevice(&Lights, "gLights"); 
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight)
@@ -298,22 +301,118 @@ EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight)
 	{
 		if (It->second.Enabled)
 		{
-			Lights.LightList[Lights.NoLights] = It->second;
-			Lights.NoLights++;
+			Lights.List[Lights.Count] = It->second;
+			Lights.Count++;
 		}
 	}
 
 	CUDA::HostToConstantDevice(&Lights, "gLights");
 }
 
-EXPOSURE_RENDER_DLL void BindClippers(Clippers* pClippers)
+EXPOSURE_RENDER_DLL void BindObject(Object* pObject)
 {
-	CUDA::HostToConstantDevice(pClippers, "gClippers");
+	if (!pObject)
+		throw(Exception("Object", "Invalid object pointer!"));
+	
+	std::map<int, ExposureRender::Object>::iterator It;
+
+	It = gObjectsMap.find(pObject->ID);
+
+	gObjectsMap[pObject->ID] = *pObject;
+
+	ExposureRender::Objects Objects;
+
+	for (It = gObjectsMap.begin(); It != gObjectsMap.end(); It++)
+	{
+		if (It->second.Enabled)
+		{
+			Objects.List[Objects.Count] = It->second;
+			Objects.Count++;
+		}
+	}
+
+	CUDA::HostToConstantDevice(&Objects, "gObjects"); 
 }
 
-EXPOSURE_RENDER_DLL void BindReflectors(Reflectors* pReflectors)
+EXPOSURE_RENDER_DLL void UnbindObject(Object* pObject)
 {
-	CUDA::HostToConstantDevice(pReflectors, "gReflectors");
+	if (!pObject)
+		throw(Exception("Object", "Invalid object pointer!"));
+
+	std::map<int, ExposureRender::Object>::iterator It;
+
+	It = gObjectsMap.find(pObject->ID);
+
+	if (It == gObjectsMap.end())
+		return;
+
+	gObjectsMap.erase(It);
+
+	ExposureRender::Objects Objects;
+
+	for (It = gObjectsMap.begin(); It != gObjectsMap.end(); It++)
+	{
+		if (It->second.Enabled)
+		{
+			Objects.List[Objects.Count] = It->second;
+			Objects.Count++;
+		}
+	}
+
+	CUDA::HostToConstantDevice(&Objects, "gObjects");
+}
+
+EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject* pClippingObject)
+{
+	if (!pClippingObject)
+		throw(Exception("Clipping Object", "Invalid clipping object pointer!"));
+	
+	std::map<int, ExposureRender::ClippingObject>::iterator It;
+
+	It = gClippingObjectsMap.find(pClippingObject->ID);
+
+	gClippingObjectsMap[pClippingObject->ID] = *pClippingObject;
+
+	ExposureRender::ClippingObjects ClippingObjects;
+
+	for (It = gClippingObjectsMap.begin(); It != gClippingObjectsMap.end(); It++)
+	{
+		if (It->second.Enabled)
+		{
+			ClippingObjects.List[ClippingObjects.Count] = It->second;
+			ClippingObjects.Count++;
+		}
+	}
+
+	CUDA::HostToConstantDevice(&ClippingObjects, "gClippingObjects"); 
+}
+
+EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject* pClippingObject)
+{
+	if (!pClippingObject)
+		throw(Exception("Clipping Object", "Invalid clipping object pointer!"));
+
+	std::map<int, ExposureRender::ClippingObject>::iterator It;
+
+	It = gClippingObjectsMap.find(pClippingObject->ID);
+
+	if (It == gClippingObjectsMap.end())
+		return;
+
+	gClippingObjectsMap.erase(It);
+
+	ExposureRender::ClippingObjects ClippingObjects;
+
+	for (It = gClippingObjectsMap.begin(); It != gClippingObjectsMap.end(); It++)
+	{
+		if (It->second.Enabled)
+		{
+			ClippingObjects.List[ClippingObjects.Count] = It->second;
+			ClippingObjects.Count++;
+		}
+	}
+
+	CUDA::HostToConstantDevice(&ClippingObjects, "gClippingObjects");
 }
 
 EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings* pRenderSettings)
@@ -374,19 +473,22 @@ EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
 		if (gTextureMap[pTexture->ID].Image.pData)
 			CUDA::Free(gTextureMap[pTexture->ID].Image.pData);
 
-		const int NoPixels = gTextureMap[pTexture->ID].Image.Size[0] * gTextureMap[pTexture->ID].Image.Size[1];
+		if (pTexture->Image.pData)
+		{
+			const int NoPixels = gTextureMap[pTexture->ID].Image.Size[0] * gTextureMap[pTexture->ID].Image.Size[1];
 		
-		CUDA::Allocate(gTextureMap[pTexture->ID].Image.pData, NoPixels);
-		CUDA::MemCopyHostToDevice(pTexture->Image.pData, gTextureMap[pTexture->ID].Image.pData, NoPixels);
+			CUDA::Allocate(gTextureMap[pTexture->ID].Image.pData, NoPixels);
+			CUDA::MemCopyHostToDevice(pTexture->Image.pData, gTextureMap[pTexture->ID].Image.pData, NoPixels);
+		}
 	} 
 
 	ExposureRender::Textures Textures;
 
 	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
 	{
-		Textures.TextureList[Textures.NoTextures] = It->second;
-		Textures.TextureList[Textures.NoTextures].Image.pData = It->second.Image.pData;
-		Textures.NoTextures++;
+		Textures.List[Textures.Count] = It->second;
+		Textures.List[Textures.Count].Image.pData = It->second.Image.pData;
+		Textures.Count++;
 	}
 
 	CUDA::HostToConstantDevice(&Textures, "gTextures");
@@ -413,8 +515,8 @@ EXPOSURE_RENDER_DLL void UnbindTexture(Texture* pTexture)
 
 	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
 	{
-		Textures.TextureList[Textures.NoTextures] = It->second;
-		Textures.NoTextures++;
+		Textures.List[Textures.Count] = It->second;
+		Textures.Count++;
 	}
 
 	CUDA::HostToConstantDevice(&Textures, "gTextures"); 

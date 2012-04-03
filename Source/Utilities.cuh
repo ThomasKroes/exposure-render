@@ -103,11 +103,11 @@ DEVICE float GetOpacity(float NormalizedIntensity)
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
-DEVICE bool Inside(Clipper& C, Vec3f P)
+DEVICE bool Inside(ClippingObject& ClippingObject, Vec3f P)
 {
 	bool Inside = false;
 
-	switch (C.Shape.Type)
+	switch (ClippingObject.Shape.Type)
 	{
 		case 0:		
 		{
@@ -117,42 +117,40 @@ DEVICE bool Inside(Clipper& C, Vec3f P)
 
 		case 1:
 		{
-			Inside = InsideBox(P, ToVec3f(C.Shape.Size));
+			Inside = InsideBox(P, ToVec3f(ClippingObject.Shape.Size));
 			break;
 		}
 
 		case 2:
 		{
-			Inside = InsideSphere(P, C.Shape.OuterRadius);
+			Inside = InsideSphere(P, ClippingObject.Shape.OuterRadius);
 			break;
 		}
 
 		case 3:
 		{
-			Inside = InsideCylinder(P, C.Shape.OuterRadius, C.Shape.Size[1]);
+			Inside = InsideCylinder(P, ClippingObject.Shape.OuterRadius, ClippingObject.Shape.Size[1]);
 			break;
 		}
 	}
 
-	return C.Invert ? !Inside : Inside;
+	return ClippingObject.Invert ? !Inside : Inside;
 }
 
-DEVICE bool Inside(Vec3f P)
+DEVICE bool Inside(const Vec3f& P)
 {
-	for (int i = 0; i < gClippers.NoClippers; i++)
+	for (int i = 0; i < gClippingObjects.Count; i++)
 	{
-		Clipper& C = gClippers.ClipperList[i];
+		const Vec3f P2 = TransformPoint(gClippingObjects.List[i].Shape.InvTM, P);
 
-		const Vec3f P2 = TransformPoint(C.Shape.InvTM, P);
-
-		if (Inside(C, P2))
+		if (Inside(gClippingObjects.List[i], P2))
 			return true;
 	}
 
 	return false;
 }
 
-DEVICE float GetOpacity(Vec3f P)
+DEVICE float GetOpacity(const Vec3f& P)
 {
 	const float Intensity = GetIntensity(P);
 	
@@ -160,13 +158,11 @@ DEVICE float GetOpacity(Vec3f P)
 
 	const float Opacity = GetOpacity(NormalizedIntensity);
 
-	for (int i = 0; i < gClippers.NoClippers; i++)
+	for (int i = 0; i < gClippingObjects.Count; i++)
 	{
-		Clipper& C = gClippers.ClipperList[i];
+		const Vec3f P2 = TransformPoint(gClippingObjects.List[i].Shape.InvTM, P);
 
-		const Vec3f P2 = TransformPoint(C.Shape.InvTM, P);
-
-		if (Inside(C, P2))
+		if (Inside(gClippingObjects.List[i], P2))
 			return 0.0f;
 	}
 
@@ -406,6 +402,11 @@ DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf&
 DEVICE ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
 {
 	 return A + ((Ax - A) / max((float)N, 1.0f));
+}
+
+HOST_DEVICE float GlossinessExponent(const float& Glossiness)
+{
+	return 1000000.0f * powf(Glossiness, 7);
 }
 
 }
