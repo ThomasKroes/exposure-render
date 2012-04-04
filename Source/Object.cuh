@@ -23,19 +23,11 @@ namespace ExposureRender
 // Intersect a reflector with a ray
 DEVICE_NI void IntersectObject(Object& Object, const Ray& R, ScatterEvent& RS)
 {
-	Ray TR = TransformRay(Object.Shape.InvTM, R);
+	Ray Rt = TransformRay(Object.Shape.InvTM, R);
 
 	Intersection Int;
 
-	switch (Object.Shape.Type)
-	{
-		case 0:	IntersectPlane(TR, Object.Shape.OneSided, Vec2f(Object.Shape.Size[0], Object.Shape.Size[1]), Int);		break;
-		case 1:	IntersectDisk(TR, Object.Shape.OneSided, Object.Shape.OuterRadius, Int);								break;
-		case 2:	IntersectRing(TR, Object.Shape.OneSided, Object.Shape.InnerRadius, Object.Shape.OuterRadius, Int);		break;
-		case 3:	IntersectBox(TR, ToVec3f(Object.Shape.Size), Int);														break;
-		case 4:	IntersectSphere(TR, Object.Shape.OuterRadius, Int);														break;
-//		case 5:	IntersectCylinder(TR, Object.Shape.OuterRadius, Object.Shape.Size[1], Int);								break;
-	}
+	IntersectShape(Object.Shape, Rt, Int);
 
 	if (Int.Valid)
 	{
@@ -75,23 +67,7 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 // Determine if the ray intersects the reflector
 DEVICE_NI bool IntersectsObject(Object& Object, const Ray& R)
 {
-	// Transform ray into local shape coordinates
-	const Ray TR = TransformRay(Object.Shape.InvTM, R);
-
-	Intersection Int;
-
-	// Intersect shape
-	switch (Object.Shape.Type)
-	{
-		case 0: IntersectPlane(TR, false, Vec2f(Object.Shape.Size[0], Object.Shape.Size[1]), Int);		break;
-		case 1: IntersectDisk(TR, false, Object.Shape.OuterRadius, Int);								break;
-		case 2: IntersectRing(TR, false, Object.Shape.InnerRadius, Object.Shape.OuterRadius, Int);		break;
-		case 3: IntersectBox(TR, ToVec3f(Object.Shape.Size), Int);										break;
-		case 4: IntersectSphere(TR, Object.Shape.OuterRadius, Int);										break;
-//		case 5: IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1], Int);				break;
-	}
-
-	return Int.Valid;
+	return IntersectsShape(Object.Shape, TransformRay(Object.Shape.InvTM, R));
 }
 
 // Determines if there's an intersection between the ray and any of the scene's reflectors

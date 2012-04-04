@@ -14,7 +14,7 @@
 #pragma once
 
 #include "Light.cuh"
-#include "Reflector.cuh"
+#include "Object.cuh"
 
 namespace ExposureRender
 {

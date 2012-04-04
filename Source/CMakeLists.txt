@@ -76,7 +76,7 @@ SET(ErCudaGeneral
 	Ray.cuh
 	Statistics.cuh
 	Light.cuh
-	Reflector.cuh
+	Object.cuh
 	Benchmark.cuh
 	GradientMagnitude.cuh
 	AutoFocus.cuh
