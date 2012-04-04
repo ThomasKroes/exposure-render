@@ -27,6 +27,22 @@ namespace ExposureRender
 #define	MAX_NO_TIMINGS	64
 #define	MAX_CHAR_SIZE	256
 
+namespace Enums
+{
+	enum ProceduralType
+	{
+		Uniform = 0,
+		Checker,
+		Gradient
+	};
+
+	enum TextureType
+	{
+		Procedural = 0,
+		Image
+	};
+}
+
 struct EXPOSURE_RENDER_DLL Exception
 {
 	char	Type[MAX_CHAR_SIZE];
@@ -402,15 +418,17 @@ struct EXPOSURE_RENDER_DLL Lights
 
 struct EXPOSURE_RENDER_DLL Procedural
 {
-	int			Type;
-	float		UniformColor[3];
-	float		CheckerColor1[3];
-	float		CheckerColor2[3];
+	Enums::ProceduralType	Type;
+	float					UniformColor[3];
+	float					CheckerColor1[3];
+	float					CheckerColor2[3];
+	float					GradientColor1[3];
+	float					GradientColor2[3];
+	float					GradientColor3[3];
 
 #ifndef __CUDA_ARCH__
 	Procedural()
 	{
-		this->Type = 0;
 	}
 #endif
 
@@ -426,6 +444,15 @@ struct EXPOSURE_RENDER_DLL Procedural
 		this->CheckerColor2[0]	= Other.CheckerColor2[0];
 		this->CheckerColor2[1]	= Other.CheckerColor2[1];
 		this->CheckerColor2[2]	= Other.CheckerColor2[2];
+		this->GradientColor1[0]	= Other.GradientColor1[0];
+		this->GradientColor1[1]	= Other.GradientColor1[1];
+		this->GradientColor1[2]	= Other.GradientColor1[2];
+		this->GradientColor2[0]	= Other.GradientColor2[0];
+		this->GradientColor2[1]	= Other.GradientColor2[1];
+		this->GradientColor2[2]	= Other.GradientColor2[2];
+		this->GradientColor3[0]	= Other.GradientColor3[0];
+		this->GradientColor3[1]	= Other.GradientColor3[1];
+		this->GradientColor3[2]	= Other.GradientColor3[2];
 
 		return *this;
 	}
@@ -481,18 +508,17 @@ struct EXPOSURE_RENDER_DLL Image
 
 struct EXPOSURE_RENDER_DLL Texture
 {
-	int			ID;
-	int			Type;
-	Image		Image;
-	Procedural	Procedural;
-	float		Offset[2];
-	float		Repeat[2];
+	int					ID;
+	Enums::TextureType	Type;
+	Image				Image;
+	Procedural			Procedural;
+	float				Offset[2];
+	float				Repeat[2];
 
 #ifndef __CUDA_ARCH__
 	Texture()
 	{
 		this->ID			= 0;
-		this->Type			= 0;
 		this->Offset[0]		= 0.0f;	
 		this->Offset[1]		= 0.0f;	
 		this->Repeat[0]		= 0.0f;	
