@@ -37,13 +37,13 @@ DEVICE_NI ColorXYZf EvaluateProcedural2D(const Procedural& Procedural, const Vec
 
 	switch (Procedural.Type)
 	{
-		case 0:
+		case Enums::Uniform:
 		{
 			L.FromRGB(Procedural.UniformColor[0], Procedural.UniformColor[1], Procedural.UniformColor[2]);
 			break;
 		}
 
-		case 1:
+		case Enums::Checker:
 		{
 			const int UV[2] =
 			{
@@ -66,6 +66,11 @@ DEVICE_NI ColorXYZf EvaluateProcedural2D(const Procedural& Procedural, const Vec
 					L.FromRGB(Procedural.CheckerColor1[0], Procedural.CheckerColor1[1], Procedural.CheckerColor1[2]);
 			}
 
+			break;
+		}
+
+		case Enums::Gradient:
+		{
 			break;
 		}
 	}
@@ -104,15 +109,21 @@ DEVICE_NI ColorXYZf EvaluateTexture2D(const int& ID, const Vec2f& UV)
 	TextureUV[0] = clamp(TextureUV[0], 0.0f, 1.0f);
 	TextureUV[1] = clamp(TextureUV[1], 0.0f, 1.0f);
 
+	if (T.Flip[0])
+		TextureUV[0] = 1.0f - TextureUV[0];
+
+	if (T.Flip[1])
+		TextureUV[1] = 1.0f - TextureUV[1];
+
 	switch (T.Type)
 	{
-		case 0:
+		case Enums::Procedural:
 		{
 			L = EvaluateProcedural2D(T.Procedural, TextureUV);
 			break;
 		}
 
-		case 1:
+		case Enums::Image:
 		{
 			if (T.Image.pData != NULL)
 			{
@@ -145,7 +156,7 @@ DEVICE_NI ColorXYZf EvaluateTexture2D(const int& ID, const Vec2f& UV)
 		}
 	}
 
-	return L;
+	return T.OutputLevel * L;
 }
 
 }

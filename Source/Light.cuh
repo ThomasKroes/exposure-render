@@ -21,22 +21,13 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void SampleLightSurface(Light& Light, LightSample& LS, SurfaceSample& SS)
+DEVICE_NI void SampleLightSurface(Light& Light, LightSample& LS, SurfaceSample& SurfaceSample)
 {
-	// Sample the light surface
-	switch (Light.Shape.Type)
-	{
-		case 0:	SamplePlane(SS, LS.SurfaceUVW, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));		break;
-		case 1:	SampleDisk(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);									break;
-		case 2:	SampleRing(SS, LS.SurfaceUVW, Light.Shape.InnerRadius, Light.Shape.OuterRadius);		break;
-		case 3:	SampleBox(SS, LS.SurfaceUVW, ToVec3f(Light.Shape.Size));								break;
-		case 4:	SampleSphere(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);								break;
-//		case 5:	SampleCylinder(SS, LS.SurfaceUVW, Light.Shape.OuterRadius, Light.Shape.Size[2]);		break;
-	}
+	SampleShape(Light.Shape, LS.SurfaceUVW, SurfaceSample);
 
 	// Transform surface position and normal back to world space
-	SS.P	= TransformPoint(Light.Shape.TM, SS.P);
-	SS.N	= TransformVector(Light.Shape.TM, SS.N);
+	SurfaceSample.P	= TransformPoint(Light.Shape.TM, SurfaceSample.P);
+	SurfaceSample.N	= TransformVector(Light.Shape.TM, SurfaceSample.N);
 }
 
 DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
@@ -60,19 +51,11 @@ DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, Sca
 // Intersects a light with a ray
 DEVICE_NI void IntersectLight(Light& Light, const Ray& R, ScatterEvent& SE)
 {
-	Ray TR = TransformRay(Light.Shape.InvTM, R);
+	const Ray Rt = TransformRay(Light.Shape.InvTM, R);
 
 	Intersection Int;
 
-	switch (Light.Shape.Type)
-	{
-		case 0:	IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]), Int);		break;
-		case 1:	IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius, Int);								break;
-		case 2:	IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius, Int);		break;
-		case 3:	IntersectBox(TR, ToVec3f(Light.Shape.Size), Int);													break;
-		case 4:	IntersectSphere(TR, Light.Shape.OuterRadius, Int);													break;
-//		case 5:	IntersectCylinder(TR, Light.Shape.OuterRadius, Light.Shape.Size[1], Int);							break;
-	}
+	IntersectShape(Light.Shape, Rt, Int);
 
 	if (Int.Valid)
 	{
@@ -118,23 +101,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 // Determine if the ray intersects the light
 DEVICE_NI bool IntersectsLight(Light& Light, const Ray& R)
 {
-	// Transform ray into local shape coordinates
-	const Ray TR = TransformRay(Light.Shape.InvTM, R);
-
-	Intersection Int;
-
-	// Intersect shape
-	switch (Light.Shape.Type)
-	{
-		case 0: IntersectPlane(TR, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]), Int);		break;
-		case 1: IntersectDisk(TR, Light.Shape.OneSided, Light.Shape.OuterRadius, Int);								break;
-		case 2: IntersectRing(TR, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius, Int);		break;
-		case 3: IntersectBox(TR, ToVec3f(Light.Shape.Size), Int);													break;
-		case 4: IntersectSphere(TR, Light.Shape.OuterRadius, Int);													break;
-//		case 5: IntersectCylinderP(TR, Light.Shape.OuterRadius, Light.Shape.Size[1], Int);							break;
-	}
-
-	return Int.Valid;
+	return IntersectsShape(Light.Shape, TransformRay(Light.Shape.InvTM, R));
 }
 
 // Determines if there's an intersection between the ray and any of the scene's lights

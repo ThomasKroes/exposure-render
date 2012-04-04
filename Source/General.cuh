@@ -41,6 +41,16 @@ namespace Enums
 		Procedural = 0,
 		Image
 	};
+
+	enum ShapeType
+	{
+		Plane = 0,
+		Disk,
+		Ring,
+		Box,
+		Sphere,
+		Cylinder
+	};
 }
 
 struct EXPOSURE_RENDER_DLL Exception
@@ -316,7 +326,7 @@ struct EXPOSURE_RENDER_DLL Shape
 	Matrix44			TM;
 	Matrix44			InvTM;
 	bool				OneSided;
-	int					Type;
+	Enums::ShapeType	Type;
 	float				Size[3];
 	float				Area;
 	float				InnerRadius;
@@ -326,7 +336,6 @@ struct EXPOSURE_RENDER_DLL Shape
 	Shape()
 	{
 		this->OneSided		= false;
-		this->Type			= 0;
 		this->Size[0]		= 0.0f;
 		this->Size[1]		= 0.0f;
 		this->Size[2]		= 0.0f;
@@ -508,21 +517,18 @@ struct EXPOSURE_RENDER_DLL Image
 
 struct EXPOSURE_RENDER_DLL Texture
 {
-	int					ID;
-	Enums::TextureType	Type;
-	Image				Image;
-	Procedural			Procedural;
-	float				Offset[2];
-	float				Repeat[2];
+	int						ID;
+	Enums::TextureType		Type;
+	float					OutputLevel;
+	Image					Image;
+	Procedural				Procedural;
+	float					Offset[2];
+	float					Repeat[2];
+	bool					Flip[2];
 
 #ifndef __CUDA_ARCH__
 	Texture()
 	{
-		this->ID			= 0;
-		this->Offset[0]		= 0.0f;	
-		this->Offset[1]		= 0.0f;	
-		this->Repeat[0]		= 0.0f;	
-		this->Repeat[1]		= 0.0f;	
 	}
 #endif
 
@@ -530,12 +536,15 @@ struct EXPOSURE_RENDER_DLL Texture
 	{
 		this->ID			= Other.ID;
 		this->Type			= Other.Type;
+		this->OutputLevel	= Other.OutputLevel;
 		this->Image			= Other.Image;
 		this->Procedural	= Other.Procedural;
 		this->Offset[0]		= Other.Offset[0];
 		this->Offset[1]		= Other.Offset[1];
 		this->Repeat[0]		= Other.Repeat[0];
 		this->Repeat[1]		= Other.Repeat[1];
+		this->Flip[0]		= Other.Flip[0];
+		this->Flip[1]		= Other.Flip[1];
 
 		return *this;
 	}

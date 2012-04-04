@@ -16,12 +16,7 @@
 #include <cuda_runtime.h>
 
 #include "General.cuh"
-#include "Plane.cuh"
-#include "Disk.cuh"
-#include "Ring.cuh"
-#include "Box.cuh"
-#include "Sphere.cuh"
-#include "Cylinder.cuh"
+#include "Shape.cuh"
 #include "MonteCarlo.cuh"
 										
 namespace ExposureRender

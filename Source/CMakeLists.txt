@@ -95,6 +95,7 @@ SET(ErCudaShapes
 	Ring.cuh
 	Sphere.cuh
 	Cylinder.cuh
+	Shape.cuh
 )
 
 # Shapes group
