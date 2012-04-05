@@ -164,4 +164,9 @@ DEVICE_NI void SampleSphere(SurfaceSample& SS, const Vec3f& UVW, const float& Ra
 	SS.P *= Radius;
 }
 
+HOST_DEVICE_NI float SphereArea(const float& Radius)
+{
+	return 4.0f * PI_F * (Radius * Radius);
+}
+
 }

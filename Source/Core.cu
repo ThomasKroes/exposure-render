@@ -274,6 +274,19 @@ EXPOSURE_RENDER_DLL void BindLight(Light* pLight)
 		if (It->second.Enabled)
 		{
 			Lights.List[Lights.Count] = It->second;
+			
+			Shape& Shape = Lights.List[Lights.Count].Shape;
+
+			switch (Shape.Type)
+			{
+				case Enums::Plane:		Shape.Area = PlaneArea(Vec2f(Shape.Size[0], Shape.Size[1]));				break;
+				case Enums::Disk:		Shape.Area = DiskArea(Shape.OuterRadius);									break;
+				case Enums::Ring:		Shape.Area = RingArea(Shape.OuterRadius, Shape.InnerRadius);				break;
+				case Enums::Box:		Shape.Area = BoxArea(Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]));	break;
+				case Enums::Sphere:		Shape.Area = SphereArea(Shape.OuterRadius);									break;
+				case Enums::Cylinder:	Shape.Area = CylinderArea(Shape.OuterRadius, Shape.Size[2]);				break;
+			}
+
 			Lights.Count++;
 		}
 	}

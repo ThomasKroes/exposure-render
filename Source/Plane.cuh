@@ -101,4 +101,9 @@ DEVICE_NI void SamplePlane(SurfaceSample& SS, const Vec3f& UVW, const Vec2f& Siz
 	SS.P *= Vec3f(Size[0], Size[1], 0.0f);
 }
 
+HOST_DEVICE_NI float PlaneArea(const Vec2f& Size)
+{
+	return Size[0] * Size[1];
+}
+
 }

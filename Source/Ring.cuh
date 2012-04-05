@@ -69,4 +69,9 @@ DEVICE_NI void SampleRing(SurfaceSample& SS, const Vec3f& UVW, const float& Inne
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
 }
 
+HOST_DEVICE_NI float RingArea(const float& OuterRadius, const float& InnerRadius)
+{
+	return DiskArea(OuterRadius) - DiskArea(InnerRadius);
+}
+
 }

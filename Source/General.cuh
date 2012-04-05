@@ -49,7 +49,8 @@ namespace Enums
 		Ring,
 		Box,
 		Sphere,
-		Cylinder
+		Cylinder,
+		Cone
 	};
 }
 
