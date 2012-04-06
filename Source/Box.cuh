@@ -114,20 +114,6 @@ DEVICE_NI bool InsideBox(Vec3f P, Vec3f Size)
 	return P[0] > -HalfSize[0] && P[0] < HalfSize[0] && P[1] > -HalfSize[1] && P[1] < HalfSize[1] && P[2] > -HalfSize[2] && P[2] < HalfSize[2];
 }
 
-DEVICE_NI bool InsideAABB(Vec3f P)
-{
-	if (P[0] < gVolumeProperties.MinAABB[0] || P[0] > gVolumeProperties.MaxAABB[0])
-		return false;
-
-	if (P[1] < gVolumeProperties.MinAABB[1] || P[1] > gVolumeProperties.MaxAABB[1])
-		return false;
-
-	if (P[2] < gVolumeProperties.MinAABB[2] || P[2] > gVolumeProperties.MaxAABB[2])
-		return false;
-
-	return true;
-}
-
 DEVICE_NI void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 {
 	int Side = floorf(UVW[0] * 6.0f);

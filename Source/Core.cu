@@ -38,7 +38,6 @@ cudaArray* gpSpecular	= NULL;
 cudaArray* gpGlossiness	= NULL;
 cudaArray* gpEmission	= NULL;
 
-CD ExposureRender::VolumeProperties						gVolumeProperties;
 CD ExposureRender::Camera								gCamera;
 CD ExposureRender::Lights								gLights;
 CD ExposureRender::Objects								gObjects;
@@ -92,34 +91,15 @@ EXPOSURE_RENDER_DLL void Reset()
 	gNoIterations = 0;
 }
 
-EXPOSURE_RENDER_DLL void UnbindDensityBuffer(void)
+EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], float Range[2], unsigned short* pVoxels, bool NormalizeSize)
 {
-	CUDA::FreeArray(gpIntensity);
-	CUDA::UnbindTexture(gTexIntensity);
-}
-
-EXPOSURE_RENDER_DLL void BindIntensityBuffer(unsigned short* pBuffer, int Extent[3])
-{
-	UnbindDensityBuffer();
-	CUDA::BindTexture3D(gTexIntensity, Extent, pBuffer, gpIntensity);
-}
-
-EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize)
-{
-	gTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), pVoxels, NormalizeSize);
-	gTracer.Intensity = 30000;
+	gTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), Range, pVoxels, NormalizeSize);
 
 	Tracer* pTracer = NULL;
 
 	cudaMalloc(&pTracer, sizeof(Tracer));
 	cudaMemcpy(pTracer, &gTracer, sizeof(Tracer), cudaMemcpyHostToDevice);
 	cudaMemcpyToSymbol(gpTracer, &pTracer, sizeof(pTracer));
-
-//	CUDA::Allocate(pTracer); 
-//	CUDA::MemCopyHostToDevice(&gTracer, pTracer); 
-//	CUDA::MemCopyHostToDeviceSymbol(pVolume, gpVolume); 
-//	cudaMemcpyToSymbol(gpTracer, &pTracer, sizeof(Tracer));
-//	CUDA::Hos tToConstantDevice((long*)pVolume, gpVolume);
 }
 
 EXPOSURE_RENDER_DLL void UnbindOpacity1D(void)
@@ -226,11 +206,6 @@ EXPOSURE_RENDER_DLL void BindEmission1D(float Emission[3][NO_TF_STEPS], float In
 		EmissionXYZA[i].FromRGB(Emission[0][i], Emission[1][i], Emission[2][i]);
 
 	CUDA::BindTexture1D(gTexEmission, NO_TF_STEPS, (float4*)EmissionXYZA, gpEmission);
-}
-
-EXPOSURE_RENDER_DLL void BindVolumeProperties(VolumeProperties* pVolumeProperties)
-{
-	CUDA::HostToConstantDevice(pVolumeProperties, "gVolumeProperties");
 }
 
 EXPOSURE_RENDER_DLL void BindCamera(Camera* pCamera)
@@ -656,7 +631,6 @@ EXPOSURE_RENDER_DLL void GetNoIterations(int& NoIterations)
 
 EXPOSURE_RENDER_DLL void Deinitialize()
 {
-	UnbindDensityBuffer();
 	UnbindOpacity1D();
 	UnbindDiffuse1D();
 	UnbindSpecular1D();

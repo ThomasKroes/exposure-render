@@ -42,7 +42,7 @@ public:
 		this->pVoxels = NULL;
 	}
 	
-	HOST void Set(Vec3f Resolution, Vec3f Spacing, T* pVoxels, bool NormalizeSize = false)
+	HOST void Set(Vec3f Resolution, Vec3f Spacing, float Range[2], T* pVoxels, bool NormalizeSize = false)
 	{
 		float Scale = 1.0f;
 
@@ -55,6 +55,9 @@ public:
 		}
 
 		this->Resolution		= Resolution;
+		this->InvResolution[0]	= 1.0f / this->Resolution[0];
+		this->InvResolution[1]	= 1.0f / this->Resolution[1];
+		this->InvResolution[2]	= 1.0f / this->Resolution[2];
 		this->Spacing			= Scale * Spacing;
 		this->InvSpacing[0]		= 1.0f / Spacing[0];
 		this->InvSpacing[1]		= 1.0f / Spacing[1];
@@ -78,6 +81,8 @@ public:
 		this->GradientDeltaZ[1]	= 0.0f;
 		this->GradientDeltaZ[2]	= MinVoxelSize;
 
+		this->IntensityRange.Set(Range);
+
 		this->Free();
 		
 		const int NoVoxels = (int)this->Resolution[0] * (int)this->Resolution[1] * (int)this->Resolution[2];
@@ -100,7 +105,7 @@ public:
 		if (!this->pVoxels)
 			return T();
 
-		XYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0], this->Resolution[1], this->Resolution[2]));
+		XYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
 		
 		return this->pVoxels[XYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + XYZ[1] * (int)this->Resolution[0] + XYZ[0]];
 	}
@@ -115,6 +120,7 @@ public:
 	HOST Volume& Volume::operator = (const Volume& Other)
 	{
 		this->Resolution				= Other.Resolution;
+		this->InvResolution				= Other.InvResolution;
 		this->MinAABB					= Other.MinAABB;
 		this->MaxAABB					= Other.MaxAABB;
 		this->Size						= Other.Size;
@@ -132,6 +138,7 @@ public:
 	}
 	
 	Vec3f	Resolution;
+	Vec3f	InvResolution;
 	Vec3f	MinAABB;
 	Vec3f	MaxAABB;
 	Vec3f	Size;

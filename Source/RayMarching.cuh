@@ -26,7 +26,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	
 	Intersection Int;
 
-	IntersectBox(R, ToVec3f(gVolumeProperties.MinAABB), ToVec3f(gVolumeProperties.MaxAABB), Int);
+	IntersectBox(R, gpTracer->Volume.MinAABB, gpTracer->Volume.MaxAABB, Int);
 
 	if (!Int.Valid)
 		return;
@@ -67,7 +67,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 	Intersection Int;
 		
-	IntersectBox(R, ToVec3f(gVolumeProperties.MinAABB), ToVec3f(gVolumeProperties.MaxAABB), Int);
+	IntersectBox(R, gpTracer->Volume.MinAABB, gpTracer->Volume.MaxAABB, Int);
 	
 	if (!Int.Valid)
 		return false;

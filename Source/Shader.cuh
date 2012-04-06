@@ -500,7 +500,7 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 
 		case 2:
 		{
-			const float NGM			= GradientMagnitude(SE.P) * gVolumeProperties.GradientMagnitudeRange.Inv;
+			const float NGM			= GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 			const float Sensitivity	= 25;
 			const float ExpGF		= 3;
 			const float Exponent	= Sensitivity * powf(gRenderSettings.Shading.GradientFactor, ExpGF) * NGM;
@@ -512,7 +512,7 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 
 		case 3:
 		{
-			const float NGM = GradientMagnitude(SE.P) * gVolumeProperties.GradientMagnitudeRange.Inv;
+			const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 			
 			PdfBrdf = 1.0f - powf(1.0f - NGM, 2.0f);
 			BRDF = RNG.Get1() < PdfBrdf;
@@ -521,7 +521,7 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 
 		case 4:
 		{
-			const float NGM = GradientMagnitude(SE.P) * gVolumeProperties.GradientMagnitudeRange.Inv;
+			const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 
 			if (NGM > gRenderSettings.Shading.GradientThreshold)
 				BRDF = true;
