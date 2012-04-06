@@ -134,7 +134,7 @@ public:
 
 	HOST_DEVICE Vec<T, Size> operator / (const float& f) const
 	{
-		const float Inv = 1.0f / f;
+		const float Inv = f == 0.0f ? 0.0f : 1.0f / f;
 
 		Vec<T, Size> Result;
 
@@ -146,7 +146,7 @@ public:
 
 	HOST_DEVICE Vec<T, Size>& operator /= (float f)
 	{
-		const float Inv = 1.0f / f;
+		const float Inv = f == 0.0f ? 0.0f : 1.0f / f;
 
 		for (int i = 0; i < Size; i++)
 			this->D[i] *= Inv;
@@ -258,6 +258,12 @@ public:
 	{
 		for (int i = 0; i < Size; ++i)
 			this->D[i] = max(Min, min(this->D[i], Max));
+	}
+
+	HOST_DEVICE void Clamp(const Vec<T, Size>& Min, const Vec<T, Size>& Max)
+	{
+		for (int i = 0; i < Size; ++i)
+			this->D[i] = max(Min[i], min(this->D[i], Max[i]));
 	}
 
 	HOST_DEVICE void Set(T V)

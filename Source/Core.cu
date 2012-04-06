@@ -22,6 +22,7 @@ ExposureRender::KernelTimings gKernelTimings;
 #include "Framebuffer.cuh"
 #include "Benchmark.cuh"
 #include "Filter.cuh"
+#include "Tracer.cuh"
 
 texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
 texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexOpacity;
@@ -53,6 +54,10 @@ CD ExposureRender::GaussianFilter						gFrameEstimateFilter;
 CD ExposureRender::BilateralFilter						gPostProcessingFilter;
 
 ExposureRender::FrameBuffer								gFrameBuffer;
+
+__device__ ExposureRender::Tracer* gpTracer;
+
+ExposureRender::Tracer gTracer;
 
 static std::map<int, ExposureRender::Texture>			gTextureMap;
 static std::map<int, ExposureRender::Light>				gLightsMap;
@@ -97,6 +102,24 @@ EXPOSURE_RENDER_DLL void BindIntensityBuffer(unsigned short* pBuffer, int Extent
 {
 	UnbindDensityBuffer();
 	CUDA::BindTexture3D(gTexIntensity, Extent, pBuffer, gpIntensity);
+}
+
+EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize)
+{
+	gTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), pVoxels, NormalizeSize);
+	gTracer.Intensity = 30000;
+
+	Tracer* pTracer = NULL;
+
+	cudaMalloc(&pTracer, sizeof(Tracer));
+	cudaMemcpy(pTracer, &gTracer, sizeof(Tracer), cudaMemcpyHostToDevice);
+	cudaMemcpyToSymbol(gpTracer, &pTracer, sizeof(pTracer));
+
+//	CUDA::Allocate(pTracer); 
+//	CUDA::MemCopyHostToDevice(&gTracer, pTracer); 
+//	CUDA::MemCopyHostToDeviceSymbol(pVolume, gpVolume); 
+//	cudaMemcpyToSymbol(gpTracer, &pTracer, sizeof(Tracer));
+//	CUDA::Hos tToConstantDevice((long*)pVolume, gpVolume);
 }
 
 EXPOSURE_RENDER_DLL void UnbindOpacity1D(void)

@@ -81,6 +81,8 @@ SET(ErCudaGeneral
 	GradientMagnitude.cuh
 	AutoFocus.cuh
 	Texture.cuh
+	Volume.cuh
+	Tracer.cuh
 	Core.cu
 )
 

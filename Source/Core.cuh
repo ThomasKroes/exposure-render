@@ -39,6 +39,7 @@ EXPOSURE_RENDER_DLL void Deinitialize();
 EXPOSURE_RENDER_DLL void Resize(int Size[2]);
 EXPOSURE_RENDER_DLL void Reset();
 EXPOSURE_RENDER_DLL void BindIntensityBuffer(unsigned short* pBuffer, int Extent[3]);
+EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize = false);
 EXPOSURE_RENDER_DLL void BindOpacity1D(float Opacity[NO_TF_STEPS], float Range[2]);
 EXPOSURE_RENDER_DLL void BindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float Range[2]);
 EXPOSURE_RENDER_DLL void BindSpecular1D(float Specular[3][NO_TF_STEPS], float Range[2]);

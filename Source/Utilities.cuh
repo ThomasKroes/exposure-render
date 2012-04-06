@@ -18,6 +18,7 @@
 #include "General.cuh"
 #include "Shape.cuh"
 #include "MonteCarlo.cuh"
+#include "Tracer.cuh"
 										
 namespace ExposureRender
 {
@@ -83,17 +84,18 @@ HOST_DEVICE_NI ColorXYZf ToColorXYZf(float V[3])
 	return ColorXYZf(V[0], V[1], V[2]);
 }
 
-DEVICE float GetIntensity(Vec3f P)
+DEVICE float GetIntensity(const Vec3f& P)
 {
-	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolumeProperties.MinAABB[0]) * gVolumeProperties.InvSize[0], (P[1] - gVolumeProperties.MinAABB[1]) * gVolumeProperties.InvSize[1], (P[2] - gVolumeProperties.MinAABB[2]) * gVolumeProperties.InvSize[2]));
+	return gpTracer->Volume.Get(P); 
+//	return (float)(USHRT_MAX * tex3D(gTexIntensity, (P[0] - gVolumeProperties.MinAABB[0]) * gVolumeProperties.InvSize[0], (P[1] - gVolumeProperties.MinAABB[1]) * gVolumeProperties.InvSize[1], (P[2] - gVolumeProperties.MinAABB[2]) * gVolumeProperties.InvSize[2]));
 }
 
-DEVICE float GetNormalizedIntensity(Vec3f P)
+DEVICE float GetNormalizedIntensity(const Vec3f& P)
 {
 	return (GetIntensity(P) - gVolumeProperties.IntensityRange.Min) * gVolumeProperties.IntensityRange.Inv;
 }
 
-DEVICE float GetOpacity(float NormalizedIntensity)
+DEVICE float GetOpacity(const float& NormalizedIntensity)
 {
 	return tex1D(gTexOpacity, NormalizedIntensity);
 }

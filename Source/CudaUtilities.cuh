@@ -173,6 +173,22 @@ public:
 		CUDA::ThreadSynchronize();
 	}
 
+	template<class T> static void MemCopyHostToDeviceSymbol(T* pHost, char* pDeviceSymbol, int Num = 1)
+	{
+		CUDA::ThreadSynchronize();
+		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)));
+
+		CUDA::ThreadSynchronize();
+	}
+
+	template<class T> static void MemCopyDeviceToDeviceSymbol(T* pDevice, char* pDeviceSymbol, int Num = 1)
+	{
+		CUDA::ThreadSynchronize();
+		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pDevice, Num * sizeof(T), 0, cudaMemcpyDeviceToDevice));
+
+		CUDA::ThreadSynchronize();
+	}
+
 	template<class T> static void MemCopyHostToDevice(T* pHost, T* pDevice, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
