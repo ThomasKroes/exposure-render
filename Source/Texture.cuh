@@ -21,10 +21,10 @@ namespace ExposureRender
 
 DEVICE_NI ColorXYZf EvaluateBitmap(const int& ID, const int& U, const int& V)
 {
-	if (gTextures.List[ID].Image.pData == NULL)
+	if (gpTracer->Textures.List[ID].Image.pData == NULL)
 		return ColorXYZf(0.0f);
 
-	RGBA ColorRGBA = gTextures.List[ID].Image.pData[V * gTextures.List[ID].Image.Size[0] + U];
+	RGBA ColorRGBA = gpTracer->Textures.List[ID].Image.pData[V * gpTracer->Textures.List[ID].Image.Size[0] + U];
 	ColorXYZf L;
 	L.FromRGB(ONE_OVER_255 * (float)ColorRGBA.Data[0], ONE_OVER_255 * (float)ColorRGBA.Data[1], ONE_OVER_255 * (float)ColorRGBA.Data[2]);
 
@@ -87,13 +87,13 @@ DEVICE_NI ColorXYZf EvaluateTexture2D(const int& ID, const Vec2f& UV)
 
 	int id = 0;
 
-	for (int i = 0; i < gTextures.Count; i++)
+	for (int i = 0; i < gpTracer->Textures.Count; i++)
 	{
-		if (gTextures.List[i].ID == ID)
+		if (gpTracer->Textures.List[i].ID == ID)
 			id = i;
 	}
 
-	Texture& T = gTextures.List[id];
+	Texture& T = gpTracer->Textures.List[id];
 
 	Vec2f TextureUV = UV;
 

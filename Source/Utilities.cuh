@@ -24,6 +24,11 @@
 namespace ExposureRender
 {
 
+DEVICE Volume<unsigned short> GetVolume()
+{
+	return gpTracer->Volume;
+}
+
 DEVICE Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
 {
 	Vec3f Vt;
@@ -91,7 +96,7 @@ HOST_DEVICE_NI ColorXYZf ToColorXYZf(float V[3])
 
 DEVICE float GetIntensity(const Vec3f& P)
 {
-	return gpTracer->Volume.Get(P); 
+	return GetVolume().Get(P); 
 }
 
 DEVICE bool Inside(ClippingObject& ClippingObject, Vec3f P)
@@ -186,9 +191,9 @@ DEVICE Vec3f GradientCD(Vec3f P)
 {
 	float Intensity[3][2] = 
 	{
-		{ GetIntensity(P + gpTracer->Volume.GradientDeltaX), GetIntensity(P - gpTracer->Volume.GradientDeltaX) },
-		{ GetIntensity(P + gpTracer->Volume.GradientDeltaY), GetIntensity(P - gpTracer->Volume.GradientDeltaY) },
-		{ GetIntensity(P + gpTracer->Volume.GradientDeltaZ), GetIntensity(P - gpTracer->Volume.GradientDeltaZ) }
+		{ GetIntensity(P + GetVolume().GradientDeltaX), GetIntensity(P - GetVolume().GradientDeltaX) },
+		{ GetIntensity(P + GetVolume().GradientDeltaY), GetIntensity(P - GetVolume().GradientDeltaY) },
+		{ GetIntensity(P + GetVolume().GradientDeltaZ), GetIntensity(P - GetVolume().GradientDeltaZ) }
 	};
 
 	return Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
@@ -199,9 +204,9 @@ DEVICE Vec3f GradientFD(Vec3f P)
 	float Intensity[4] = 
 	{
 		GetIntensity(P),
-		GetIntensity(P + gpTracer->Volume.GradientDeltaX),
-		GetIntensity(P + gpTracer->Volume.GradientDeltaY),
-		GetIntensity(P + gpTracer->Volume.GradientDeltaZ)
+		GetIntensity(P + GetVolume().GradientDeltaX),
+		GetIntensity(P + GetVolume().GradientDeltaY),
+		GetIntensity(P + GetVolume().GradientDeltaZ)
 	};
 
     return Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
@@ -209,7 +214,7 @@ DEVICE Vec3f GradientFD(Vec3f P)
 
 DEVICE Vec3f GradientFiltered(Vec3f P)
 {
-	Vec3f Offset(gpTracer->Volume.GradientDeltaX[0], gpTracer->Volume.GradientDeltaY[1], gpTracer->Volume.GradientDeltaZ[2]);
+	Vec3f Offset(GetVolume().GradientDeltaX[0], GetVolume().GradientDeltaY[1], GetVolume().GradientDeltaZ[2]);
 
     Vec3f G0 = GradientCD(P);
     Vec3f G1 = GradientCD(P + Vec3f(-Offset[0], -Offset[1], -Offset[2]));
@@ -248,19 +253,19 @@ DEVICE float GradientMagnitude(Vec3f P)
 {
 	Vec3f Pts[3][2];
 
-	Pts[0][0] = P + gpTracer->Volume.GradientDeltaX;
-	Pts[0][1] = P - gpTracer->Volume.GradientDeltaX;
-	Pts[1][0] = P + gpTracer->Volume.GradientDeltaY;
-	Pts[1][1] = P - gpTracer->Volume.GradientDeltaY;
-	Pts[2][0] = P + gpTracer->Volume.GradientDeltaZ;
-	Pts[2][1] = P - gpTracer->Volume.GradientDeltaZ;
+	Pts[0][0] = P + GetVolume().GradientDeltaX;
+	Pts[0][1] = P - GetVolume().GradientDeltaX;
+	Pts[1][0] = P + GetVolume().GradientDeltaY;
+	Pts[1][1] = P - GetVolume().GradientDeltaY;
+	Pts[2][0] = P + GetVolume().GradientDeltaZ;
+	Pts[2][1] = P - GetVolume().GradientDeltaZ;
 
 	float D = 0.0f, Sum = 0.0f;
 
 	for (int i = 0; i < 3; i++)
 	{
 		D = GetIntensity(Pts[i][1]) - GetIntensity(Pts[i][0]);
-		D *= 0.5f / gpTracer->Volume.Spacing[i];
+		D *= 0.5f / GetVolume().Spacing[i];
 		Sum += D * D;
 	}
 

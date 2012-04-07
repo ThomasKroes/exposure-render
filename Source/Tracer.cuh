@@ -24,12 +24,52 @@ namespace ExposureRender
 
 struct Tracer
 {
+	~Tracer()
+	{
+	}
+
 	Volume<unsigned short>			Volume;
 	ScalarTransferFunction1D		Opacity1D;
 	ColorTransferFunction1D			Diffuse1D;
 	ColorTransferFunction1D			Specular1D;
 	ScalarTransferFunction1D		Glossiness1D;
 	ColorTransferFunction1D			Emission1D;
+	
+	Lights							Lights;
+	Textures						Textures;
+
+	std::map<int, Light>			LightsMap;
+	std::map<int, Texture>			TexturesMap;
+
+	void CopyLights()
+	{
+		std::map<int, ExposureRender::Light>::iterator It;
+
+		Lights.Count = 0;
+
+		for (It = LightsMap.begin(); It != LightsMap.end(); It++)
+		{
+			if (It->second.Enabled)
+			{
+				Lights.List[Lights.Count] = It->second;
+				Lights.Count++;
+			}
+		}
+	}
+
+	void CopyTextures()
+	{
+		std::map<int, ExposureRender::Texture>::iterator It;
+
+		Textures.Count = 0;
+
+		for (It = TexturesMap.begin(); It != TexturesMap.end(); It++)
+		{
+			Textures.List[Textures.Count] = It->second;
+			Textures.List[Textures.Count].Image.pData = It->second.Image.pData;
+			Textures.Count++;
+		}
+	}
 };
 
 }

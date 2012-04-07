@@ -49,7 +49,7 @@ DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 
 DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
 {
-	Light& Light = gLights.List[LightID];
+	Light& Light = gpTracer->Lights.List[LightID];
 
 	Vec3f Wi;
 
@@ -107,7 +107,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
-	if (gLights.Count <= 0)
+	if (gpTracer->Lights.Count <= 0)
 		return ColorXYZf(0.0f);
 
 	VolumeShader Shader;
@@ -127,7 +127,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 			break;
 	}
 
-	const int LightID = floorf(LS.LightNum * gLights.Count);
+	const int LightID = floorf(LS.LightNum * gpTracer->Lights.Count);
 
 	ColorXYZf Ld;
 	
@@ -136,7 +136,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	for (int i = 0; i < NoSamples; i++)
 		Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID) / (float)NoSamples;
 
-	return (float)gLights.Count * (Ld / (float)NoSamples);
+	return (float)gpTracer->Lights.Count * (Ld / (float)NoSamples);
 }
 
 }

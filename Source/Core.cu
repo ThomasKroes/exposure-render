@@ -25,26 +25,19 @@ ExposureRender::KernelTimings gKernelTimings;
 #include "Filter.cuh"
 #include "Tracer.cuh"
 
+__device__ ExposureRender::Tracer* gpTracer;
+
 CD ExposureRender::Camera								gCamera;
-CD ExposureRender::Lights								gLights;
 CD ExposureRender::Objects								gObjects;
 CD ExposureRender::ClippingObjects						gClippingObjects;
-CD ExposureRender::Textures								gTextures;
 CD ExposureRender::RenderSettings						gRenderSettings;
 CD ExposureRender::GaussianFilter						gFrameEstimateFilter;
 CD ExposureRender::BilateralFilter						gPostProcessingFilter;
 
 ExposureRender::FrameBuffer								gFrameBuffer;
 
-__device__ ExposureRender::Tracer* gpTracer;
-
-ExposureRender::Tracer gTracer;
-
-static std::map<int, ExposureRender::Texture>			gTextureMap;
-static std::map<int, ExposureRender::Light>				gLightsMap;
 static std::map<int, ExposureRender::Object>			gObjectsMap;
 static std::map<int, ExposureRender::ClippingObject>	gClippingObjectsMap;
-
 static std::map<int, ExposureRender::Tracer>			gTracers;
 
 int	gNoIterations = 0;
@@ -61,6 +54,9 @@ int	gNoIterations = 0;
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
 
+
+
+ExposureRender::Tracer gTracer;
 ExposureRender::Tracer* gpCurrentTracer = NULL;
 
 namespace ExposureRender
@@ -174,60 +170,45 @@ EXPOSURE_RENDER_DLL void BindLight(Light Light)
 {
 	std::map<int, ExposureRender::Light>::iterator It;
 
-	It = gLightsMap.find(Light.ID);
+	It = gTracer.LightsMap.find(Light.ID);
 
-	gLightsMap[Light.ID] = Light;
+	const bool Exists = It != gTracer.LightsMap.end();
 
-	ExposureRender::Lights Lights;
+	gTracer.LightsMap[Light.ID] = Light;
 
-	for (It = gLightsMap.begin(); It != gLightsMap.end(); It++)
+	Shape& Shape = gTracer.LightsMap[Light.ID].Shape;
+
+	switch (Shape.Type)
 	{
-		if (It->second.Enabled)
-		{
-			Lights.List[Lights.Count] = It->second;
-			
-			Shape& Shape = Lights.List[Lights.Count].Shape;
-
-			switch (Shape.Type)
-			{
-				case Enums::Plane:		Shape.Area = PlaneArea(Vec2f(Shape.Size[0], Shape.Size[1]));				break;
-				case Enums::Disk:		Shape.Area = DiskArea(Shape.OuterRadius);									break;
-				case Enums::Ring:		Shape.Area = RingArea(Shape.OuterRadius, Shape.InnerRadius);				break;
-				case Enums::Box:		Shape.Area = BoxArea(Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]));	break;
-				case Enums::Sphere:		Shape.Area = SphereArea(Shape.OuterRadius);									break;
-				case Enums::Cylinder:	Shape.Area = CylinderArea(Shape.OuterRadius, Shape.Size[2]);				break;
-			}
-
-			Lights.Count++;
-		}
+		case Enums::Plane:		Shape.Area = PlaneArea(Vec2f(Shape.Size[0], Shape.Size[1]));				break;
+		case Enums::Disk:		Shape.Area = DiskArea(Shape.OuterRadius);									break;
+		case Enums::Ring:		Shape.Area = RingArea(Shape.OuterRadius, Shape.InnerRadius);				break;
+		case Enums::Box:		Shape.Area = BoxArea(Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]));	break;
+		case Enums::Sphere:		Shape.Area = SphereArea(Shape.OuterRadius);									break;
+		case Enums::Cylinder:	Shape.Area = CylinderArea(Shape.OuterRadius, Shape.Size[2]);				break;
 	}
 
-	CUDA::HostToConstantDevice(&Lights, "gLights"); 
+	gTracer.CopyLights();
+	
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(Light Light)
 {
 	std::map<int, ExposureRender::Light>::iterator It;
 
-	It = gLightsMap.find(Light.ID);
+	It = gTracer.LightsMap.find(Light.ID);
 
-	if (It == gLightsMap.end())
+	const bool Exists = It != gTracer.LightsMap.end();
+
+	if (!Exists)
 		return;
 
-	gLightsMap.erase(It);
+	gTracer.LightsMap.erase(It);
+	
+	gTracer.CopyLights();
 
-	ExposureRender::Lights Lights;
-
-	for (It = gLightsMap.begin(); It != gLightsMap.end(); It++)
-	{
-		if (It->second.Enabled)
-		{
-			Lights.List[Lights.Count] = It->second;
-			Lights.Count++;
-		}
-	}
-
-	CUDA::HostToConstantDevice(&Lights, "gLights");
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void BindObject(Object Object)
@@ -328,77 +309,47 @@ EXPOSURE_RENDER_DLL void BindTexture(Texture Texture)
 {
 	std::map<int, ExposureRender::Texture>::iterator It;
 
-	It = gTextureMap.find(Texture.ID);
+	It = gTracer.TexturesMap.find(Texture.ID);
 
-	const bool Exists = It != gTextureMap.end();
+	const bool Exists = It != gTracer.TexturesMap.end();
 
-	gTextureMap[Texture.ID] = Texture;
+	gTracer.TexturesMap[Texture.ID] = Texture;
 
 	if (Texture.Image.Dirty)
 	{
-		if (gTextureMap[Texture.ID].Image.pData)
-			CUDA::Free(gTextureMap[Texture.ID].Image.pData);
+		if (gTracer.TexturesMap[Texture.ID].Image.pData)
+			CUDA::Free(gTracer.TexturesMap[Texture.ID].Image.pData);
 
 		if (Texture.Image.pData)
 		{
-			const int NoPixels = gTextureMap[Texture.ID].Image.Size[0] * gTextureMap[Texture.ID].Image.Size[1];
+			const int NoPixels = gTracer.TexturesMap[Texture.ID].Image.Size[0] * gTracer.TexturesMap[Texture.ID].Image.Size[1];
 		
-			CUDA::Allocate(gTextureMap[Texture.ID].Image.pData, NoPixels);
-			CUDA::MemCopyHostToDevice(Texture.Image.pData, gTextureMap[Texture.ID].Image.pData, NoPixels);
+			CUDA::Allocate(gTracer.TexturesMap[Texture.ID].Image.pData, NoPixels);
+			CUDA::MemCopyHostToDevice(Texture.Image.pData, gTracer.TexturesMap[Texture.ID].Image.pData, NoPixels);
 		}
 	} 
 
-	ExposureRender::Textures Textures;
+	gTracer.CopyTextures();
 
-	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
-	{
-		Textures.List[Textures.Count] = It->second;
-		Textures.List[Textures.Count].Image.pData = It->second.Image.pData;
-		Textures.Count++;
-	}
-
-	CUDA::HostToConstantDevice(&Textures, "gTextures");
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(Texture Texture)
 {
 	std::map<int, ExposureRender::Texture>::iterator It;
 
-	It = gTextureMap.find(Texture.ID);
+	It = gTracer.TexturesMap.find(Texture.ID);
 
-	if (It == gTextureMap.end())
+	if (It == gTracer.TexturesMap.end())
 		return;
 
 	if (It->second.Image.pData)
 		CUDA::Free(It->second.Image.pData);
 
-	gTextureMap.erase(It);
+	gTracer.TexturesMap.erase(It);
+	gTracer.CopyTextures();
 
-	ExposureRender::Textures Textures;
-
-	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
-	{
-		Textures.List[Textures.Count] = It->second;
-		Textures.Count++;
-	}
-
-	CUDA::HostToConstantDevice(&Textures, "gTextures"); 
-}
-
-EXPOSURE_RENDER_DLL void UnbindAllTextures()
-{
-	std::map<int, ExposureRender::Texture>::iterator It;
-
-	for (It = gTextureMap.begin(); It != gTextureMap.end(); It++)
-	{
-		if (It->second.Image.pData)
-		CUDA::Free(It->second.Image.pData);
-	}
-
-	gTextureMap.clear();
-
-	ExposureRender::Textures Textures;
-	CUDA::HostToConstantDevice(&Textures, "gTextures");
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings RenderSettings)
@@ -472,27 +423,6 @@ EXPOSURE_RENDER_DLL void GetEstimate(unsigned char* pData)
 	CUDA::MemCopyDeviceToHost(gFrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
-EXPOSURE_RENDER_DLL void RecordBenchmarkImage()
-{
-//	CUDA::MemCopyDeviceToDevice(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.BenchmarkEstimateRgbaLdr.GetPtr(), gFrameBuffer.CudaDisplayEstimate.GetNoElements()); 
-}
-
-EXPOSURE_RENDER_DLL void GetAverageNrmsError(float& AverageNrmsError)
-{
-	FrameBuffer* pDevFrameBuffer = NULL;
-	CUDA::Allocate(pDevFrameBuffer);
-	CUDA::MemCopyHostToDevice(&gFrameBuffer, pDevFrameBuffer);
-
-	ComputeAverageNrmsError(gFrameBuffer, pDevFrameBuffer, gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1], AverageNrmsError);
-
-	CUDA::Free(pDevFrameBuffer);
-}
-
-EXPOSURE_RENDER_DLL void GetMaximumGradientMagnitude(float& MaximumGradientMagnitude, int Extent[3])
-{
-	ComputeGradientMagnitudeVolume(Extent, MaximumGradientMagnitude);
-}
-
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance)
 {
 	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
@@ -506,16 +436,6 @@ EXPOSURE_RENDER_DLL void GetKernelTimings(KernelTimings* pKernelTimings)
 	*pKernelTimings = gKernelTimings;
 }
 
-EXPOSURE_RENDER_DLL void GetMemoryUsed(float& MemoryUsed)
-{
-	/*
-	CUsize_t free = 0;
-    CUsize_t total = 0;
-    cuMemGetInfo(&free, &total);
-    return total - free;
-	*/ 
-}
-
 EXPOSURE_RENDER_DLL void GetNoIterations(int& NoIterations)
 {
 	NoIterations = gNoIterations; 
@@ -523,17 +443,12 @@ EXPOSURE_RENDER_DLL void GetNoIterations(int& NoIterations)
 
 EXPOSURE_RENDER_DLL void Deinitialize()
 {
-	UnbindAllTextures();
-
 	gFrameBuffer.Free();
 }
 
 EXPOSURE_RENDER_DLL void Initialize()
 {
 	Deinitialize();
-
-	ExposureRender::Lights Lights;
-	CUDA::HostToConstantDevice(&Lights, "gLights");
 }
 
 }
