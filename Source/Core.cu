@@ -28,17 +28,14 @@ ExposureRender::KernelTimings gKernelTimings;
 __device__ ExposureRender::Tracer* gpTracer;
 
 CD ExposureRender::Camera								gCamera;
-CD ExposureRender::Objects								gObjects;
-CD ExposureRender::ClippingObjects						gClippingObjects;
 CD ExposureRender::RenderSettings						gRenderSettings;
 CD ExposureRender::GaussianFilter						gFrameEstimateFilter;
 CD ExposureRender::BilateralFilter						gPostProcessingFilter;
 
 ExposureRender::FrameBuffer								gFrameBuffer;
 
-static std::map<int, ExposureRender::Object>			gObjectsMap;
-static std::map<int, ExposureRender::ClippingObject>	gClippingObjectsMap;
 static std::map<int, ExposureRender::Tracer>			gTracers;
+
 
 int	gNoIterations = 0;
 
@@ -53,8 +50,6 @@ int	gNoIterations = 0;
 #include "Blend.cuh"
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
-
-
 
 ExposureRender::Tracer gTracer;
 ExposureRender::Tracer* gpCurrentTracer = NULL;
@@ -215,94 +210,57 @@ EXPOSURE_RENDER_DLL void BindObject(Object Object)
 {
 	std::map<int, ExposureRender::Object>::iterator It;
 
-	It = gObjectsMap.find(Object.ID);
+	It = gTracer.ObjectsMap.find(Object.ID);
 
-	gObjectsMap[Object.ID] = Object;
+	gTracer.ObjectsMap[Object.ID] = Object;
+	gTracer.CopyObjects();
 
-	ExposureRender::Objects Objects;
-
-	for (It = gObjectsMap.begin(); It != gObjectsMap.end(); It++)
-	{
-		if (It->second.Enabled)
-		{
-			Objects.List[Objects.Count] = It->second;
-			Objects.Count++;
-		}
-	}
-
-	CUDA::HostToConstantDevice(&Objects, "gObjects"); 
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(Object Object)
 {
 	std::map<int, ExposureRender::Object>::iterator It;
 
-	It = gObjectsMap.find(Object.ID);
+	It = gTracer.ObjectsMap.find(Object.ID);
 
-	if (It == gObjectsMap.end())
+	if (It == gTracer.ObjectsMap.end())
 		return;
 
-	gObjectsMap.erase(It);
+	gTracer.ObjectsMap.erase(It);
 
-	ExposureRender::Objects Objects;
+	gTracer.CopyObjects();
 
-	for (It = gObjectsMap.begin(); It != gObjectsMap.end(); It++)
-	{
-		if (It->second.Enabled)
-		{
-			Objects.List[Objects.Count] = It->second;
-			Objects.Count++;
-		}
-	}
-
-	CUDA::HostToConstantDevice(&Objects, "gObjects");
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject ClippingObject)
 {
 	std::map<int, ExposureRender::ClippingObject>::iterator It;
 
-	It = gClippingObjectsMap.find(ClippingObject.ID);
+	It = gTracer.ClippingObjectsMap.find(ClippingObject.ID);
 
-	gClippingObjectsMap[ClippingObject.ID] = ClippingObject;
+	gTracer.ClippingObjectsMap[ClippingObject.ID] = ClippingObject;
 
-	ExposureRender::ClippingObjects ClippingObjects;
+	gTracer.CopyClippingObjects();
 
-	for (It = gClippingObjectsMap.begin(); It != gClippingObjectsMap.end(); It++)
-	{
-		if (It->second.Enabled)
-		{
-			ClippingObjects.List[ClippingObjects.Count] = It->second;
-			ClippingObjects.Count++;
-		}
-	}
-
-	CUDA::HostToConstantDevice(&ClippingObjects, "gClippingObjects"); 
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject ClippingObject)
 {
 	std::map<int, ExposureRender::ClippingObject>::iterator It;
 
-	It = gClippingObjectsMap.find(ClippingObject.ID);
+	It = gTracer.ClippingObjectsMap.find(ClippingObject.ID);
 
-	if (It == gClippingObjectsMap.end())
+	if (It == gTracer.ClippingObjectsMap.end())
 		return;
 
-	gClippingObjectsMap.erase(It);
+	gTracer.ClippingObjectsMap.erase(It);
 
-	ExposureRender::ClippingObjects ClippingObjects;
+	gTracer.CopyClippingObjects();
 
-	for (It = gClippingObjectsMap.begin(); It != gClippingObjectsMap.end(); It++)
-	{
-		if (It->second.Enabled)
-		{
-			ClippingObjects.List[ClippingObjects.Count] = It->second;
-			ClippingObjects.Count++;
-		}
-	}
-
-	CUDA::HostToConstantDevice(&ClippingObjects, "gClippingObjects");
+	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(Texture Texture)

@@ -543,7 +543,7 @@ DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
 
 DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture2D(gObjects.List[SE.ObjectID].DiffuseTextureID, SE.UV), EvaluateTexture2D(gObjects.List[SE.ObjectID].SpecularTextureID, SE.UV), 10.0f, GlossinessExponent(EvaluateTexture2D(gObjects.List[SE.ObjectID].GlossinessTextureID, SE.UV).Y()));
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture2D(gpTracer->Objects.List[SE.ObjectID].DiffuseTextureID, SE.UV), EvaluateTexture2D(gpTracer->Objects.List[SE.ObjectID].SpecularTextureID, SE.UV), 10.0f, GlossinessExponent(EvaluateTexture2D(gpTracer->Objects.List[SE.ObjectID].GlossinessTextureID, SE.UV).Y()));
 }
 
 }

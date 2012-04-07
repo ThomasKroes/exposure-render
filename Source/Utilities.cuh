@@ -135,11 +135,11 @@ DEVICE bool Inside(ClippingObject& ClippingObject, Vec3f P)
 
 DEVICE bool Inside(const Vec3f& P)
 {
-	for (int i = 0; i < gClippingObjects.Count; i++)
+	for (int i = 0; i < gpTracer->ClippingObjects.Count; i++)
 	{
-		const Vec3f P2 = TransformPoint(gClippingObjects.List[i].Shape.InvTM, P);
+		const Vec3f P2 = TransformPoint(gpTracer->ClippingObjects.List[i].Shape.InvTM, P);
 
-		if (Inside(gClippingObjects.List[i], P2))
+		if (Inside(gpTracer->ClippingObjects.List[i], P2))
 			return true;
 	}
 

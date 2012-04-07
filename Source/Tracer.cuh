@@ -36,9 +36,13 @@ struct Tracer
 	ColorTransferFunction1D			Emission1D;
 	
 	Lights							Lights;
+	Objects							Objects;
+	ClippingObjects					ClippingObjects;
 	Textures						Textures;
 
 	std::map<int, Light>			LightsMap;
+	std::map<int, Object>			ObjectsMap;
+	std::map<int, ClippingObject>	ClippingObjectsMap;
 	std::map<int, Texture>			TexturesMap;
 
 	void CopyLights()
@@ -53,6 +57,38 @@ struct Tracer
 			{
 				Lights.List[Lights.Count] = It->second;
 				Lights.Count++;
+			}
+		}
+	}
+
+	void CopyObjects()
+	{
+		std::map<int, ExposureRender::Object>::iterator It;
+
+		Objects.Count = 0;
+
+		for (It = ObjectsMap.begin(); It != ObjectsMap.end(); It++)
+		{
+			if (It->second.Enabled)
+			{
+				Objects.List[Objects.Count] = It->second;
+				Objects.Count++;
+			}
+		}
+	}
+
+	void CopyClippingObjects()
+	{
+		std::map<int, ExposureRender::ClippingObject>::iterator It;
+
+		ClippingObjects.Count = 0;
+
+		for (It = ClippingObjectsMap.begin(); It != ClippingObjectsMap.end(); It++)
+		{
+			if (It->second.Enabled)
+			{
+				ClippingObjects.List[ClippingObjects.Count] = It->second;
+				ClippingObjects.Count++;
 			}
 		}
 	}
