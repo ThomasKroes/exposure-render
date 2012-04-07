@@ -484,7 +484,7 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 
 	float PdfBrdf = 1.0f;
 
-	switch (gRenderSettings.Shading.Type)
+	switch (gpTracer->RenderSettings.Shading.Type)
 	{
 		case 0:
 		{
@@ -503,9 +503,9 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 			const float NGM			= GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 			const float Sensitivity	= 25;
 			const float ExpGF		= 3;
-			const float Exponent	= Sensitivity * powf(gRenderSettings.Shading.GradientFactor, ExpGF) * NGM;
+			const float Exponent	= Sensitivity * powf(gpTracer->RenderSettings.Shading.GradientFactor, ExpGF) * NGM;
 			
-			PdfBrdf = gRenderSettings.Shading.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
+			PdfBrdf = gpTracer->RenderSettings.Shading.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
 			BRDF = RNG.Get1() <= PdfBrdf;
 			break;
 		}
@@ -523,7 +523,7 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 		{
 			const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 
-			if (NGM > gRenderSettings.Shading.GradientThreshold)
+			if (NGM > gpTracer->RenderSettings.Shading.GradientThreshold)
 				BRDF = true;
 			else
 				BRDF = false;
@@ -531,9 +531,9 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 	}
 
 	if (BRDF)
-		return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gRenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+		return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
 	else
-		return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gRenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+		return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
 }
 
 DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)

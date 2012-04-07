@@ -34,11 +34,16 @@ struct Tracer
 	ColorTransferFunction1D			Specular1D;
 	ScalarTransferFunction1D		Glossiness1D;
 	ColorTransferFunction1D			Emission1D;
-	
 	Lights							Lights;
 	Objects							Objects;
 	ClippingObjects					ClippingObjects;
 	Textures						Textures;
+	Camera							Camera;
+	RenderSettings					RenderSettings;
+	GaussianFilter					FrameEstimateFilter;
+	BilateralFilter					PostProcessingFilter;
+	FrameBuffer						FrameBuffer;
+	int								NoIterations;
 
 	std::map<int, Light>			LightsMap;
 	std::map<int, Object>			ObjectsMap;

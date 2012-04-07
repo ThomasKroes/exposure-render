@@ -40,8 +40,8 @@ KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int 
 	
 	__syncthreads();
 
-	Range[TID][0] = max((int)ceilf(X - gFrameEstimateFilter.KernelRadius), 0);
-	Range[TID][1] = min((int)floorf(X + gFrameEstimateFilter.KernelRadius), Width - 1);
+	Range[TID][0] = max((int)ceilf(X - gpTracer->FrameEstimateFilter.KernelRadius), 0);
+	Range[TID][1] = min((int)floorf(X + gpTracer->FrameEstimateFilter.KernelRadius), Width - 1);
 
 	// Filter accumulated sum color
 	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
@@ -61,7 +61,7 @@ KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int 
 	// Execute kernel
 	for (int x = Range[TID][0]; x <= Range[TID][1]; x++)
 	{
-		Weight[TID]			= gFrameEstimateFilter.KernelD[gFrameEstimateFilter.KernelRadius - (x - X)];
+		Weight[TID]			= gpTracer->FrameEstimateFilter.KernelD[gpTracer->FrameEstimateFilter.KernelRadius - (x - X)];
 		Sum[TID]			+= pIn[Y * Width + x] * Weight[TID];
 		TotalWeight[TID]	+= Weight[TID];
 	}
@@ -91,8 +91,8 @@ KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Wi
 	
 	__syncthreads();
 
-	Range[TID][0] = max((int)ceilf(Y - gFrameEstimateFilter.KernelRadius), 0);
-	Range[TID][1] = min((int)floorf(Y + gFrameEstimateFilter.KernelRadius), Height - 1);
+	Range[TID][0] = max((int)ceilf(Y - gpTracer->FrameEstimateFilter.KernelRadius), 0);
+	Range[TID][1] = min((int)floorf(Y + gpTracer->FrameEstimateFilter.KernelRadius), Height - 1);
 
 	// Filter accumulated sum color
 	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
@@ -112,7 +112,7 @@ KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Wi
 	// Execute kernel
 	for (int y = Range[TID][0]; y <= Range[TID][1]; y++)
 	{
-		Weight[TID]			= gFrameEstimateFilter.KernelD[gFrameEstimateFilter.KernelRadius - (y - Y)];
+		Weight[TID]			= gpTracer->FrameEstimateFilter.KernelD[gpTracer->FrameEstimateFilter.KernelRadius - (y - Y)];
 		Sum[TID]			+= pIn[y * Width + X] * Weight[TID];
 		TotalWeight[TID]	+= Weight[TID];
 	}

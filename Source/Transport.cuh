@@ -37,12 +37,12 @@ DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 
 DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 {
-	if (!gRenderSettings.Traversal.Shadows)
+	if (!gpTracer->RenderSettings.Traversal.Shadows)
 		return true;
 
 	Vec3f W = Normalize(P2 - P1);
 
-	const Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, gRenderSettings.Traversal.MaxShadowDistance));
+	const Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, gpTracer->RenderSettings.Traversal.MaxShadowDistance));
 
 	return !Intersect(R, RNG);
 }

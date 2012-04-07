@@ -32,15 +32,15 @@ KERNEL void KrnlComputeAutoFocusDistance(float* pAutoFocusDistance, int FilmU, i
 	{
 		Vec2f ScreenPoint;
 
-		ScreenPoint[0] = gCamera.Screen[0][0] + (gCamera.InvScreen[0] * (float)FilmU);
-		ScreenPoint[1] = gCamera.Screen[1][0] + (gCamera.InvScreen[1] * (float)FilmV);
+		ScreenPoint[0] = gpTracer->Camera.Screen[0][0] + (gpTracer->Camera.InvScreen[0] * (float)FilmU);
+		ScreenPoint[1] = gpTracer->Camera.Screen[1][0] + (gpTracer->Camera.InvScreen[1] * (float)FilmV);
 
 		ScreenPoint += 0.01f * ConcentricSampleDisk(RNG.Get2());
 
-		Rc.O	= ToVec3f(gCamera.Pos);
-		Rc.D	= Normalize(ToVec3f(gCamera.N) + (ScreenPoint[0] * ToVec3f(gCamera.U)) - (ScreenPoint[1] * ToVec3f(gCamera.V)));
-		Rc.MinT	= gCamera.ClipNear;
-		Rc.MaxT	= gCamera.ClipFar;
+		Rc.O	= ToVec3f(gpTracer->Camera.Pos);
+		Rc.D	= Normalize(ToVec3f(gpTracer->Camera.N) + (ScreenPoint[0] * ToVec3f(gpTracer->Camera.U)) - (ScreenPoint[1] * ToVec3f(gpTracer->Camera.V)));
+		Rc.MinT	= gpTracer->Camera.ClipNear;
+		Rc.MaxT	= gpTracer->Camera.ClipFar;
 
 		SampleVolume(Rc, RNG, SE);
 

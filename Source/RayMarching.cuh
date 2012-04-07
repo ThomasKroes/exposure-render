@@ -34,13 +34,13 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	MinT = max(Int.NearT, R.MinT);
 	MaxT = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gRenderSettings.Shading.DensityScale;
+	const float S	= -log(RNG.Get1()) / gpTracer->RenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
 	Vec3f Ps;
 
-	MinT += RNG.Get1() * gRenderSettings.Traversal.StepSize;
+	MinT += RNG.Get1() * gpTracer->RenderSettings.Traversal.StepSize;
 
 	while (Sum < S)
 	{
@@ -49,10 +49,10 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 		if (MinT >= MaxT)
 			return;
 		
-		SigmaT	= gRenderSettings.Shading.DensityScale * GetOpacity(Ps);
+		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * GetOpacity(Ps);
 
-		Sum			+= SigmaT * gRenderSettings.Traversal.StepSize;
-		MinT	+= gRenderSettings.Traversal.StepSize;
+		Sum			+= SigmaT * gpTracer->RenderSettings.Traversal.StepSize;
+		MinT	+= gpTracer->RenderSettings.Traversal.StepSize;
 	}
 
 	SE.SetValid(MinT, Ps, NormalizedGradient(Ps), -R.D, ColorXYZf());
@@ -75,11 +75,11 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 	MinT = max(Int.NearT, R.MinT);
 	MaxT = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gRenderSettings.Shading.DensityScale;
+	const float S	= -log(RNG.Get1()) / gpTracer->RenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT += RNG.Get1() * gRenderSettings.Traversal.StepSizeShadow;
+	MinT += RNG.Get1() * gpTracer->RenderSettings.Traversal.StepSizeShadow;
 
 	while (Sum < S)
 	{
@@ -88,10 +88,10 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= gRenderSettings.Shading.DensityScale * GetOpacity(Ps);
+		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * GetOpacity(Ps);
 
-		Sum			+= SigmaT * gRenderSettings.Traversal.StepSizeShadow;
-		MinT	+= gRenderSettings.Traversal.StepSizeShadow;
+		Sum			+= SigmaT * gpTracer->RenderSettings.Traversal.StepSizeShadow;
+		MinT	+= gpTracer->RenderSettings.Traversal.StepSizeShadow;
 	}
 
 	return true;

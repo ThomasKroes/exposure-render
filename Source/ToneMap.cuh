@@ -25,28 +25,28 @@ namespace ExposureRender
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/BilateralFilter.cpp?r=3
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
 
-KERNEL void KrnlToneMap(FrameBuffer* pFrameBuffer)
+KERNEL void KrnlToneMap()
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= pFrameBuffer->Resolution[0] || Y >= pFrameBuffer->Resolution[1])
+	if (X >= gpTracer->FrameBuffer.Resolution[0] || Y >= gpTracer->FrameBuffer.Resolution[1])
 		return;
 
-	const ColorRGBuc L1 = ToneMap(pFrameBuffer->CudaRunningEstimateXyza.Get(X, Y));
+	const ColorRGBuc L1 = ToneMap(gpTracer->FrameBuffer.CudaRunningEstimateXyza.Get(X, Y));
 
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[0] = L1[0];
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[1] = L1[1];
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[2] = L1[2];
-	pFrameBuffer->CudaDisplayEstimate(X, Y)[3] = pFrameBuffer->CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
+	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[0] = L1[0];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[1] = L1[1];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[2] = L1[2];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[3] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
 }
 
-void ToneMap(FrameBuffer* pFrameBuffer, int Width, int Height)
+void ToneMap()
 {
 	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
+	const dim3 GridDim((int)ceilf((float)gTracer.FrameBuffer.Resolution[0] / (float)BlockDim.x), (int)ceilf((float)gTracer.FrameBuffer.Resolution[1] / (float)BlockDim.y));
 
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlToneMap<<<GridDim, BlockDim>>>(pFrameBuffer)), "Tone map");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlToneMap<<<GridDim, BlockDim>>>()), "Tone map");
 }
 
 }

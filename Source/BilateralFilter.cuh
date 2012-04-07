@@ -29,12 +29,12 @@ namespace ExposureRender
 
 HOST_DEVICE inline float GetSpatialWeight(const int& X, const int& KernelX)
 {
-	return gPostProcessingFilter.KernelD[gPostProcessingFilter.KernelRadius + KernelX - X];
+	return gpTracer->PostProcessingFilter.KernelD[gpTracer->PostProcessingFilter.KernelRadius + KernelX - X];
 }
 
 HOST_DEVICE inline float GaussianSimilarity(const ColorRGBf& A, const ColorRGBf& B)
 {
-	return gPostProcessingFilter.GaussSimilarity[(int)fabs(LuminanceFromRGB(A[0], A[1], A[2]) - LuminanceFromRGB(B[0], B[1], B[2]))];//(int)floorf(A[0] - B[0])];
+	return gpTracer->PostProcessingFilter.GaussSimilarity[(int)fabs(LuminanceFromRGB(A[0], A[1], A[2]) - LuminanceFromRGB(B[0], B[1], B[2]))];//(int)floorf(A[0] - B[0])];
 }
 
 HOST_DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
@@ -64,8 +64,8 @@ KERNEL void KrnlBilateralFilterHorizontal(ColorRGBAuc* pIn, ColorRGBAuc* pOut, i
 	
 	__syncthreads();
 
-	Range[TID][0] = max(0, X - gPostProcessingFilter.KernelRadius);
-	Range[TID][1] = min(X + gPostProcessingFilter.KernelRadius, Width - 1);
+	Range[TID][0] = max(0, X - gpTracer->PostProcessingFilter.KernelRadius);
+	Range[TID][1] = min(X + gpTracer->PostProcessingFilter.KernelRadius, Width - 1);
 
 	__shared__ float Weight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 	__shared__ float TotalWeight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
@@ -139,8 +139,8 @@ KERNEL void KrnlBilateralFilterVertical(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int
 	
 	__syncthreads();
 
-	Range[TID][0] = max(0, Y - gPostProcessingFilter.KernelRadius);
-	Range[TID][1] = min(Y + gPostProcessingFilter.KernelRadius, Height - 1);
+	Range[TID][0] = max(0, Y - gpTracer->PostProcessingFilter.KernelRadius);
+	Range[TID][1] = min(Y + gpTracer->PostProcessingFilter.KernelRadius, Height - 1);
 
 	__shared__ float Weight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 	__shared__ float TotalWeight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
