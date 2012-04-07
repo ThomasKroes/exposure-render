@@ -19,6 +19,7 @@
 #include "Shape.cuh"
 #include "MonteCarlo.cuh"
 #include "Tracer.cuh"
+#include "TransferFunction.cuh"
 										
 namespace ExposureRender
 {
@@ -47,7 +48,6 @@ DEVICE Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
 	return Vec3f(Px, Py, Pz);
 }
 
-// Transform ray with transformation matrix
 DEVICE Ray TransformRay(const Matrix44& TM, const Ray& R)
 {
 	Ray Rt;
@@ -62,6 +62,11 @@ DEVICE Ray TransformRay(const Matrix44& TM, const Ray& R)
 	Rt.MaxT	= (MaxP - Rt.O).Length();
 
 	return Rt;
+}
+
+HOST_DEVICE float GlossinessExponent(const float& Glossiness)
+{
+	return 1000000.0f * powf(Glossiness, 7);
 }
 
 HOST_DEVICE_NI Vec3f ToVec3f(float3 V)
@@ -87,16 +92,6 @@ HOST_DEVICE_NI ColorXYZf ToColorXYZf(float V[3])
 DEVICE float GetIntensity(const Vec3f& P)
 {
 	return gpTracer->Volume.Get(P); 
-}
-
-DEVICE float GetNormalizedIntensity(const Vec3f& P)
-{
-	return (GetIntensity(P) - gpTracer->Volume.IntensityRange.Min) * gpTracer->Volume.IntensityRange.Inv;
-}
-
-DEVICE float GetOpacity(const float& NormalizedIntensity)
-{
-	return tex1D(gTexOpacity, NormalizedIntensity);
 }
 
 DEVICE bool Inside(ClippingObject& ClippingObject, Vec3f P)
@@ -148,8 +143,9 @@ DEVICE bool Inside(const Vec3f& P)
 
 DEVICE float GetOpacity(const Vec3f& P)
 {
-	const float Intensity = GetIntensity(P);
+	return EvaluateScalarTransferFunction1D(GetIntensity(P), gpTracer->Opacity1D);
 	
+	/*
 	const float NormalizedIntensity = (Intensity - gOpacityRange.Min) * gOpacityRange.Inv;
 
 	const float Opacity = GetOpacity(NormalizedIntensity);
@@ -163,37 +159,27 @@ DEVICE float GetOpacity(const Vec3f& P)
 	}
 
 	return Opacity;
+	*/
 }
 
-DEVICE ColorXYZf GetDiffuse(float Intensity)
+DEVICE ColorXYZf GetDiffuse(const float& Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gDiffuseRange.Min) * gDiffuseRange.Inv;
-
-	float4 Diffuse = tex1D(gTexDiffuse, NormalizedIntensity);
-	return ColorXYZf(Diffuse.x, Diffuse.y, Diffuse.z);
+	return EvaluateColorTransferFunction1D(Intensity, gpTracer->Diffuse1D);
 }
 
-DEVICE ColorXYZf GetSpecular(float Intensity)
+DEVICE ColorXYZf GetSpecular(const float& Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gSpecularRange.Min) * gSpecularRange.Inv;
-
-	float4 Specular = tex1D(gTexSpecular, NormalizedIntensity);
-	return ColorXYZf(Specular.x, Specular.y, Specular.z);
+	return EvaluateColorTransferFunction1D(Intensity, gpTracer->Specular1D);
 }
 
-DEVICE float GetGlossiness(float Intensity)
+DEVICE float GetGlossiness(const float& Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gGlossinessRange.Min) * gGlossinessRange.Inv;
-
-	return tex1D(gTexGlossiness, NormalizedIntensity);
+	return GlossinessExponent(EvaluateScalarTransferFunction1D(Intensity, gpTracer->Glossiness1D));
 }
 
-DEVICE ColorXYZf GetEmission(float Intensity)
+DEVICE ColorXYZf GetEmission(const float& Intensity)
 {
-	const float NormalizedIntensity = (Intensity - gEmissionRange.Min) * gEmissionRange.Inv;
-
-	float4 Emission = tex1D(gTexEmission, NormalizedIntensity);
-	return ColorXYZf(Emission.x, Emission.y, Emission.z);
+	return EvaluateColorTransferFunction1D(Intensity, gpTracer->Emission1D);
 }
 
 DEVICE Vec3f GradientCD(Vec3f P)
@@ -398,11 +384,6 @@ DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf&
 DEVICE ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
 {
 	 return A + ((Ax - A) / max((float)N, 1.0f));
-}
-
-HOST_DEVICE float GlossinessExponent(const float& Glossiness)
-{
-	return 1000000.0f * powf(Glossiness, 7);
 }
 
 }

@@ -17,6 +17,7 @@
 
 ExposureRender::KernelTimings gKernelTimings;
 
+
 #include "Core.cuh"
 #include "CudaUtilities.cuh"
 #include "Framebuffer.cuh"
@@ -24,31 +25,12 @@ ExposureRender::KernelTimings gKernelTimings;
 #include "Filter.cuh"
 #include "Tracer.cuh"
 
-texture<unsigned short, cudaTextureType3D, cudaReadModeNormalizedFloat>		gTexIntensity;
-texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexOpacity;
-texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexDiffuse;
-texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexSpecular;
-texture<float, cudaTextureType1D, cudaReadModeElementType>					gTexGlossiness;
-texture<float4, cudaTextureType1D, cudaReadModeElementType>					gTexEmission;
-
-cudaArray* gpIntensity	= NULL;
-cudaArray* gpOpacity	= NULL;
-cudaArray* gpDiffuse	= NULL;
-cudaArray* gpSpecular	= NULL;
-cudaArray* gpGlossiness	= NULL;
-cudaArray* gpEmission	= NULL;
-
 CD ExposureRender::Camera								gCamera;
 CD ExposureRender::Lights								gLights;
 CD ExposureRender::Objects								gObjects;
 CD ExposureRender::ClippingObjects						gClippingObjects;
 CD ExposureRender::Textures								gTextures;
 CD ExposureRender::RenderSettings						gRenderSettings;
-CD ExposureRender::Range								gOpacityRange;
-CD ExposureRender::Range								gDiffuseRange;
-CD ExposureRender::Range								gSpecularRange;
-CD ExposureRender::Range								gGlossinessRange;
-CD ExposureRender::Range								gEmissionRange;
 CD ExposureRender::GaussianFilter						gFrameEstimateFilter;
 CD ExposureRender::BilateralFilter						gPostProcessingFilter;
 
@@ -62,6 +44,8 @@ static std::map<int, ExposureRender::Texture>			gTextureMap;
 static std::map<int, ExposureRender::Light>				gLightsMap;
 static std::map<int, ExposureRender::Object>			gObjectsMap;
 static std::map<int, ExposureRender::ClippingObject>	gClippingObjectsMap;
+
+static std::map<int, ExposureRender::Tracer>			gTracers;
 
 int	gNoIterations = 0;
 
@@ -77,6 +61,8 @@ int	gNoIterations = 0;
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
 
+ExposureRender::Tracer* gpCurrentTracer = NULL;
+
 namespace ExposureRender
 {
 
@@ -91,179 +77,106 @@ EXPOSURE_RENDER_DLL void Reset()
 	gNoIterations = 0;
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], float Range[2], unsigned short* pVoxels, bool NormalizeSize)
+void SetTracer()
 {
-	gTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), Range, pVoxels, NormalizeSize);
+	if (gpCurrentTracer == NULL)
+		cudaMalloc(&gpCurrentTracer, sizeof(Tracer));
 
-	Tracer* pTracer = NULL;
+	cudaMemcpy(gpCurrentTracer, &gTracer, sizeof(Tracer), cudaMemcpyHostToDevice);
+	cudaMemcpyToSymbol(gpTracer, &gpCurrentTracer, sizeof(gpCurrentTracer));
 
-	cudaMalloc(&pTracer, sizeof(Tracer));
-	cudaMemcpy(pTracer, &gTracer, sizeof(Tracer), cudaMemcpyHostToDevice);
-	cudaMemcpyToSymbol(gpTracer, &pTracer, sizeof(pTracer));
+//	cudaFree(pTracer);
 }
 
-EXPOSURE_RENDER_DLL void UnbindOpacity1D(void)
+EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize)
 {
-	CUDA::FreeArray(gpOpacity);
-	CUDA::UnbindTexture(gTexOpacity);
+	gTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), pVoxels, NormalizeSize);
+	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindDiffuse1D(void)
+EXPOSURE_RENDER_DLL void BindOpacity1D(ScalarTransferFunction1D Opacity1D)
 {
-	CUDA::FreeArray(gpDiffuse);
-	CUDA::UnbindTexture(gTexDiffuse);
+	gTracer.Opacity1D = Opacity1D;
+	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindSpecular1D(void)
+EXPOSURE_RENDER_DLL void BindDiffuse1D(ColorTransferFunction1D Diffuse1D)
 {
-	CUDA::FreeArray(gpSpecular);
-	CUDA::UnbindTexture(gTexSpecular);
+	gTracer.Diffuse1D = Diffuse1D;
+	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindGlossiness1D(void)
+EXPOSURE_RENDER_DLL void BindSpecular1D(ColorTransferFunction1D Specular1D)
 {
-	CUDA::FreeArray(gpGlossiness);
-	CUDA::UnbindTexture(gTexGlossiness);
+	gTracer.Specular1D = Specular1D;
+	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindEmission1D(void)
+EXPOSURE_RENDER_DLL void BindGlossiness1D(ScalarTransferFunction1D Glossiness1D)
 {
-	CUDA::FreeArray(gpEmission);
-	CUDA::UnbindTexture(gTexEmission);
+	gTracer.Glossiness1D = Glossiness1D;
+	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindOpacity1D(float Opacity[NO_TF_STEPS], float IntensityRange[2])
+EXPOSURE_RENDER_DLL void BindEmission1D(ColorTransferFunction1D Emission1D)
 {
-	UnbindOpacity1D();
-
-	Range Int;
-	Int.Set(IntensityRange);
-
-	CUDA::HostToConstantDevice(&Int, "gOpacityRange"); 
-	CUDA::BindTexture1D(gTexOpacity, NO_TF_STEPS, Opacity, gpOpacity);
+	gTracer.Emission1D = Emission1D;
+	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float IntensityRange[2])
+EXPOSURE_RENDER_DLL void BindCamera(Camera Camera)
 {
-	UnbindDiffuse1D();
-
-	Range Int;
-	Int.Set(IntensityRange);
-
-	CUDA::HostToConstantDevice(&Int, "gDiffuseRange");
-
-	ColorXYZAf DiffuseXYZA[NO_TF_STEPS];
-
-	for (int i = 0; i < NO_TF_STEPS; i++)
-		DiffuseXYZA[i].FromRGB(Diffuse[0][i], Diffuse[1][i], Diffuse[2][i]);
-
-	CUDA::BindTexture1D(gTexDiffuse, NO_TF_STEPS, (float4*)DiffuseXYZA, gpDiffuse);
-}
-
-EXPOSURE_RENDER_DLL void BindSpecular1D(float Specular[3][NO_TF_STEPS], float IntensityRange[2])
-{
-	UnbindSpecular1D();
-
-	Range Int;
-	Int.Set(IntensityRange);
-
-	CUDA::HostToConstantDevice(&Int, "gSpecularRange");
-
-	ColorXYZAf SpecularXYZA[NO_TF_STEPS];
-
-	for (int i = 0; i < NO_TF_STEPS; i++)
-		SpecularXYZA[i].FromRGB(Specular[0][i], Specular[1][i], Specular[2][i]);
-
-	CUDA::BindTexture1D(gTexSpecular, NO_TF_STEPS, (float4*)SpecularXYZA, gpSpecular);
-}
-
-EXPOSURE_RENDER_DLL void BindGlossiness1D(float Glossiness[NO_TF_STEPS], float IntensityRange[2])
-{
-	UnbindGlossiness1D();
-
-	Range Int;
-	Int.Set(IntensityRange);
-
-	for (int i = 0; i < NO_TF_STEPS; i++)
-		Glossiness[i] = GlossinessExponent(Glossiness[i]);
-
-	CUDA::HostToConstantDevice(&Int, "gGlossinessRange");
-	CUDA::BindTexture1D(gTexGlossiness, NO_TF_STEPS, Glossiness, gpGlossiness);
-}
-
-EXPOSURE_RENDER_DLL void BindEmission1D(float Emission[3][NO_TF_STEPS], float IntensityRange[2])
-{
-	UnbindEmission1D();
-
-	Range Int;
-	Int.Set(IntensityRange);
-
-	CUDA::HostToConstantDevice(&Int, "gEmissionRange");
-
-	ColorXYZAf EmissionXYZA[NO_TF_STEPS];
-
-	for (int i = 0; i < NO_TF_STEPS; i++)
-		EmissionXYZA[i].FromRGB(Emission[0][i], Emission[1][i], Emission[2][i]);
-
-	CUDA::BindTexture1D(gTexEmission, NO_TF_STEPS, (float4*)EmissionXYZA, gpEmission);
-}
-
-EXPOSURE_RENDER_DLL void BindCamera(Camera* pCamera)
-{
-	const Vec3f N = Normalize(ToVec3f(pCamera->Target) - ToVec3f(pCamera->Pos));
-	const Vec3f U = Normalize(Cross(N, ToVec3f(pCamera->Up)));
+	const Vec3f N = Normalize(ToVec3f(Camera.Target) - ToVec3f(Camera.Pos));
+	const Vec3f U = Normalize(Cross(N, ToVec3f(Camera.Up)));
 	const Vec3f V = Normalize(Cross(N, U));
 
-	pCamera->N[0] = N[0];
-	pCamera->N[1] = N[1];
-	pCamera->N[2] = N[2];
-	pCamera->U[0] = U[0];
-	pCamera->U[1] = U[1];
-	pCamera->U[2] = U[2];
-	pCamera->V[0] = V[0];
-	pCamera->V[1] = V[1];
-	pCamera->V[2] = V[2];
+	Camera.N[0] = N[0];
+	Camera.N[1] = N[1];
+	Camera.N[2] = N[2];
+	Camera.U[0] = U[0];
+	Camera.U[1] = U[1];
+	Camera.U[2] = U[2];
+	Camera.V[0] = V[0];
+	Camera.V[1] = V[1];
+	Camera.V[2] = V[2];
 
-	if (pCamera->FocalDistance == -1.0f)
-		pCamera->FocalDistance = (ToVec3f(pCamera->Target) - ToVec3f(pCamera->Pos)).Length();
+	if (Camera.FocalDistance == -1.0f)
+		Camera.FocalDistance = (ToVec3f(Camera.Target) - ToVec3f(Camera.Pos)).Length();
 
 	float Scale = 0.0f;
 
-	Scale = tanf((0.5f * pCamera->FOV / RAD_F));
+	Scale = tanf((0.5f * Camera.FOV / RAD_F));
 
-	const float AspectRatio = (float)pCamera->FilmHeight / (float)pCamera->FilmWidth;
+	const float AspectRatio = (float)Camera.FilmHeight / (float)Camera.FilmWidth;
 
 	if (AspectRatio > 1.0f)
 	{
-		pCamera->Screen[0][0] = -Scale;
-		pCamera->Screen[0][1] = Scale;
-		pCamera->Screen[1][0] = -Scale * AspectRatio;
-		pCamera->Screen[1][1] = Scale * AspectRatio;
+		Camera.Screen[0][0] = -Scale;
+		Camera.Screen[0][1] = Scale;
+		Camera.Screen[1][0] = -Scale * AspectRatio;
+		Camera.Screen[1][1] = Scale * AspectRatio;
 	}
 	else
 	{
-		pCamera->Screen[0][0] = -Scale / AspectRatio;
-		pCamera->Screen[0][1] = Scale / AspectRatio;
-		pCamera->Screen[1][0] = -Scale;
-		pCamera->Screen[1][1] = Scale;
+		Camera.Screen[0][0] = -Scale / AspectRatio;
+		Camera.Screen[0][1] = Scale / AspectRatio;
+		Camera.Screen[1][0] = -Scale;
+		Camera.Screen[1][1] = Scale;
 	}
 
-	pCamera->InvScreen[0] = (pCamera->Screen[0][1] - pCamera->Screen[0][0]) / (float)pCamera->FilmWidth;
-	pCamera->InvScreen[1] = (pCamera->Screen[1][1] - pCamera->Screen[1][0]) / (float)pCamera->FilmHeight;
+	Camera.InvScreen[0] = (Camera.Screen[0][1] - Camera.Screen[0][0]) / (float)Camera.FilmWidth;
+	Camera.InvScreen[1] = (Camera.Screen[1][1] - Camera.Screen[1][0]) / (float)Camera.FilmHeight;
 
-	CUDA::HostToConstantDevice(pCamera, "gCamera");
+	CUDA::HostToConstantDevice(&Camera, "gCamera");
 }
 
-EXPOSURE_RENDER_DLL void BindLight(Light* pLight)
+EXPOSURE_RENDER_DLL void BindLight(Light Light)
 {
-	if (!pLight)
-		throw(Exception("Light", "Invalid light pointer!"));
-	
 	std::map<int, ExposureRender::Light>::iterator It;
 
-	It = gLightsMap.find(pLight->ID);
+	It = gLightsMap.find(Light.ID);
 
-	gLightsMap[pLight->ID] = *pLight;
+	gLightsMap[Light.ID] = Light;
 
 	ExposureRender::Lights Lights;
 
@@ -292,14 +205,11 @@ EXPOSURE_RENDER_DLL void BindLight(Light* pLight)
 	CUDA::HostToConstantDevice(&Lights, "gLights"); 
 }
 
-EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight)
+EXPOSURE_RENDER_DLL void UnbindLight(Light Light)
 {
-	if (!pLight)
-		throw(Exception("Light", "Invalid light pointer!"));
-
 	std::map<int, ExposureRender::Light>::iterator It;
 
-	It = gLightsMap.find(pLight->ID);
+	It = gLightsMap.find(Light.ID);
 
 	if (It == gLightsMap.end())
 		return;
@@ -320,16 +230,13 @@ EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight)
 	CUDA::HostToConstantDevice(&Lights, "gLights");
 }
 
-EXPOSURE_RENDER_DLL void BindObject(Object* pObject)
+EXPOSURE_RENDER_DLL void BindObject(Object Object)
 {
-	if (!pObject)
-		throw(Exception("Object", "Invalid object pointer!"));
-	
 	std::map<int, ExposureRender::Object>::iterator It;
 
-	It = gObjectsMap.find(pObject->ID);
+	It = gObjectsMap.find(Object.ID);
 
-	gObjectsMap[pObject->ID] = *pObject;
+	gObjectsMap[Object.ID] = Object;
 
 	ExposureRender::Objects Objects;
 
@@ -345,14 +252,11 @@ EXPOSURE_RENDER_DLL void BindObject(Object* pObject)
 	CUDA::HostToConstantDevice(&Objects, "gObjects"); 
 }
 
-EXPOSURE_RENDER_DLL void UnbindObject(Object* pObject)
+EXPOSURE_RENDER_DLL void UnbindObject(Object Object)
 {
-	if (!pObject)
-		throw(Exception("Object", "Invalid object pointer!"));
-
 	std::map<int, ExposureRender::Object>::iterator It;
 
-	It = gObjectsMap.find(pObject->ID);
+	It = gObjectsMap.find(Object.ID);
 
 	if (It == gObjectsMap.end())
 		return;
@@ -373,16 +277,13 @@ EXPOSURE_RENDER_DLL void UnbindObject(Object* pObject)
 	CUDA::HostToConstantDevice(&Objects, "gObjects");
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject* pClippingObject)
+EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject ClippingObject)
 {
-	if (!pClippingObject)
-		throw(Exception("Clipping Object", "Invalid clipping object pointer!"));
-	
 	std::map<int, ExposureRender::ClippingObject>::iterator It;
 
-	It = gClippingObjectsMap.find(pClippingObject->ID);
+	It = gClippingObjectsMap.find(ClippingObject.ID);
 
-	gClippingObjectsMap[pClippingObject->ID] = *pClippingObject;
+	gClippingObjectsMap[ClippingObject.ID] = ClippingObject;
 
 	ExposureRender::ClippingObjects ClippingObjects;
 
@@ -398,14 +299,11 @@ EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject* pClippingObject)
 	CUDA::HostToConstantDevice(&ClippingObjects, "gClippingObjects"); 
 }
 
-EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject* pClippingObject)
+EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject ClippingObject)
 {
-	if (!pClippingObject)
-		throw(Exception("Clipping Object", "Invalid clipping object pointer!"));
-
 	std::map<int, ExposureRender::ClippingObject>::iterator It;
 
-	It = gClippingObjectsMap.find(pClippingObject->ID);
+	It = gClippingObjectsMap.find(ClippingObject.ID);
 
 	if (It == gClippingObjectsMap.end())
 		return;
@@ -426,70 +324,27 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject* pClippingObject)
 	CUDA::HostToConstantDevice(&ClippingObjects, "gClippingObjects");
 }
 
-EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings* pRenderSettings)
+EXPOSURE_RENDER_DLL void BindTexture(Texture Texture)
 {
-	CUDA::HostToConstantDevice(pRenderSettings, "gRenderSettings");
-}
-
-EXPOSURE_RENDER_DLL void BindFiltering(Filtering* pFiltering)
-{
-	// Frame estimate filter
-	GaussianFilter Gaussian;
-	
-	Gaussian.KernelRadius = pFiltering->FrameEstimateFilter.KernelRadius;
-
-	const int KernelSize = (2 * Gaussian.KernelRadius) + 1;
-
-	for (int i = 0; i < KernelSize; i++)
-		Gaussian.KernelD[i] = Gauss2D(pFiltering->FrameEstimateFilter.Sigma, Gaussian.KernelRadius - i, 0);
-
-	CUDA::HostToConstantDevice(&Gaussian, "gFrameEstimateFilter");
-
-	// Post processing filter
-	BilateralFilter Bilateral;
-
-	const int SigmaMax = (int)max(pFiltering->PostProcessingFilter.SigmaD, pFiltering->PostProcessingFilter.SigmaR);
-	
-	Bilateral.KernelRadius = (int)ceilf(2.0f * (float)SigmaMax);  
-
-	const float TwoSigmaRSquared = 2 * pFiltering->PostProcessingFilter.SigmaR * pFiltering->PostProcessingFilter.SigmaR;
-
-	const int kernelSize = Bilateral.KernelRadius * 2 + 1;
-	const int center = (kernelSize - 1) / 2;
-
-	for (int x = -center; x < -center + kernelSize; x++)
-		Bilateral.KernelD[x + center] = Gauss2D(pFiltering->PostProcessingFilter.SigmaD, x, 0);
-
-	for (int i = 0; i < 256; i++)
-		Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
-
-	CUDA::HostToConstantDevice(&Bilateral, "gPostProcessingFilter");
-}
-
-EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
-{
-	if (!pTexture)
-		throw(Exception("Texture", "Invalid texture pointer!"));
-	
 	std::map<int, ExposureRender::Texture>::iterator It;
 
-	It = gTextureMap.find(pTexture->ID);
+	It = gTextureMap.find(Texture.ID);
 
 	const bool Exists = It != gTextureMap.end();
 
-	gTextureMap[pTexture->ID] = *pTexture;
+	gTextureMap[Texture.ID] = Texture;
 
-	if (pTexture->Image.Dirty)
+	if (Texture.Image.Dirty)
 	{
-		if (gTextureMap[pTexture->ID].Image.pData)
-			CUDA::Free(gTextureMap[pTexture->ID].Image.pData);
+		if (gTextureMap[Texture.ID].Image.pData)
+			CUDA::Free(gTextureMap[Texture.ID].Image.pData);
 
-		if (pTexture->Image.pData)
+		if (Texture.Image.pData)
 		{
-			const int NoPixels = gTextureMap[pTexture->ID].Image.Size[0] * gTextureMap[pTexture->ID].Image.Size[1];
+			const int NoPixels = gTextureMap[Texture.ID].Image.Size[0] * gTextureMap[Texture.ID].Image.Size[1];
 		
-			CUDA::Allocate(gTextureMap[pTexture->ID].Image.pData, NoPixels);
-			CUDA::MemCopyHostToDevice(pTexture->Image.pData, gTextureMap[pTexture->ID].Image.pData, NoPixels);
+			CUDA::Allocate(gTextureMap[Texture.ID].Image.pData, NoPixels);
+			CUDA::MemCopyHostToDevice(Texture.Image.pData, gTextureMap[Texture.ID].Image.pData, NoPixels);
 		}
 	} 
 
@@ -505,14 +360,11 @@ EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture)
 	CUDA::HostToConstantDevice(&Textures, "gTextures");
 }
 
-EXPOSURE_RENDER_DLL void UnbindTexture(Texture* pTexture)
+EXPOSURE_RENDER_DLL void UnbindTexture(Texture Texture)
 {
-	if (!pTexture)
-		throw(Exception("Texture", "Invalid texture pointer!"));
-
 	std::map<int, ExposureRender::Texture>::iterator It;
 
-	It = gTextureMap.find(pTexture->ID);
+	It = gTextureMap.find(Texture.ID);
 
 	if (It == gTextureMap.end())
 		return;
@@ -547,6 +399,46 @@ EXPOSURE_RENDER_DLL void UnbindAllTextures()
 
 	ExposureRender::Textures Textures;
 	CUDA::HostToConstantDevice(&Textures, "gTextures");
+}
+
+EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings RenderSettings)
+{
+	CUDA::HostToConstantDevice(&RenderSettings, "gRenderSettings");
+}
+
+EXPOSURE_RENDER_DLL void BindFiltering(Filtering Filtering)
+{
+	// Frame estimate filter
+	GaussianFilter Gaussian;
+	
+	Gaussian.KernelRadius = Filtering.FrameEstimateFilter.KernelRadius;
+
+	const int KernelSize = (2 * Gaussian.KernelRadius) + 1;
+
+	for (int i = 0; i < KernelSize; i++)
+		Gaussian.KernelD[i] = Gauss2D(Filtering.FrameEstimateFilter.Sigma, Gaussian.KernelRadius - i, 0);
+
+	CUDA::HostToConstantDevice(&Gaussian, "gFrameEstimateFilter");
+
+	// Post processing filter
+	BilateralFilter Bilateral;
+
+	const int SigmaMax = (int)max(Filtering.PostProcessingFilter.SigmaD, Filtering.PostProcessingFilter.SigmaR);
+	
+	Bilateral.KernelRadius = (int)ceilf(2.0f * (float)SigmaMax);  
+
+	const float TwoSigmaRSquared = 2 * Filtering.PostProcessingFilter.SigmaR * Filtering.PostProcessingFilter.SigmaR;
+
+	const int kernelSize = Bilateral.KernelRadius * 2 + 1;
+	const int center = (kernelSize - 1) / 2;
+
+	for (int x = -center; x < -center + kernelSize; x++)
+		Bilateral.KernelD[x + center] = Gauss2D(Filtering.PostProcessingFilter.SigmaD, x, 0);
+
+	for (int i = 0; i < 256; i++)
+		Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
+
+	CUDA::HostToConstantDevice(&Bilateral, "gPostProcessingFilter");
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate()
@@ -631,11 +523,6 @@ EXPOSURE_RENDER_DLL void GetNoIterations(int& NoIterations)
 
 EXPOSURE_RENDER_DLL void Deinitialize()
 {
-	UnbindOpacity1D();
-	UnbindDiffuse1D();
-	UnbindSpecular1D();
-	UnbindGlossiness1D();
-	UnbindEmission1D();
 	UnbindAllTextures();
 
 	gFrameBuffer.Free();

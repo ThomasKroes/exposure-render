@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include "General.cuh"
+
 namespace ExposureRender
 {
 
@@ -22,40 +24,27 @@ namespace ExposureRender
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
 
-struct VolumeProperties;
-struct Camera;
-struct Light;
-struct Object;
-struct ClippingObject;
-struct Texture;
-struct RenderSettings;
-struct Filtering;
-struct KernelTimings;
-
-#define NO_TF_STEPS 256
-
 EXPOSURE_RENDER_DLL void Initialize();
 EXPOSURE_RENDER_DLL void Deinitialize();
 EXPOSURE_RENDER_DLL void Resize(int Size[2]);
 EXPOSURE_RENDER_DLL void Reset();
-EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], float Range[2], unsigned short* pVoxels, bool NormalizeSize = false);
-EXPOSURE_RENDER_DLL void BindOpacity1D(float Opacity[NO_TF_STEPS], float Range[2]);
-EXPOSURE_RENDER_DLL void BindDiffuse1D(float Diffuse[3][NO_TF_STEPS], float Range[2]);
-EXPOSURE_RENDER_DLL void BindSpecular1D(float Specular[3][NO_TF_STEPS], float Range[2]);
-EXPOSURE_RENDER_DLL void BindGlossiness1D(float Glossiness[NO_TF_STEPS], float Range[2]);
-EXPOSURE_RENDER_DLL void BindIor1D(float IOR[NO_TF_STEPS], float Range[2]);
-EXPOSURE_RENDER_DLL void BindEmission1D(float Emission[3][NO_TF_STEPS], float Range[2]);
-EXPOSURE_RENDER_DLL void BindCamera(Camera* pCamera);
-EXPOSURE_RENDER_DLL void BindLight(Light* pLight);
-EXPOSURE_RENDER_DLL void UnbindLight(Light* pLight);
-EXPOSURE_RENDER_DLL void BindObject(Object* pObject);
-EXPOSURE_RENDER_DLL void UnbindObject(Object* pObject);
-EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject* pClippingObject);
-EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject* pClippingObject);
-EXPOSURE_RENDER_DLL void BindTexture(Texture* pTexture);
-EXPOSURE_RENDER_DLL void UnbindTexture(Texture* pTexture);
-EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings* pRenderSettings);
-EXPOSURE_RENDER_DLL void BindFiltering(Filtering* pFiltering);
+EXPOSURE_RENDER_DLL void BindVolume(int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize = false);
+EXPOSURE_RENDER_DLL void BindOpacity1D(ScalarTransferFunction1D Opacity1D);
+EXPOSURE_RENDER_DLL void BindDiffuse1D(ColorTransferFunction1D Diffuse1D);
+EXPOSURE_RENDER_DLL void BindSpecular1D(ColorTransferFunction1D Specular1D);
+EXPOSURE_RENDER_DLL void BindGlossiness1D(ScalarTransferFunction1D Glossiness1D);
+EXPOSURE_RENDER_DLL void BindEmission1D(ColorTransferFunction1D Emission1D);
+EXPOSURE_RENDER_DLL void BindCamera(Camera Camera);
+EXPOSURE_RENDER_DLL void BindLight(Light Light);
+EXPOSURE_RENDER_DLL void UnbindLight(Light Light);
+EXPOSURE_RENDER_DLL void BindObject(Object Object);
+EXPOSURE_RENDER_DLL void UnbindObject(Object Object);
+EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject ClippingObject);
+EXPOSURE_RENDER_DLL void UnbindClippingObject(ClippingObject ClippingObject);
+EXPOSURE_RENDER_DLL void BindTexture(Texture Texture);
+EXPOSURE_RENDER_DLL void UnbindTexture(Texture Texture);
+EXPOSURE_RENDER_DLL void BindRenderSettings(RenderSettings RenderSettings);
+EXPOSURE_RENDER_DLL void BindFiltering(Filtering Filtering);
 EXPOSURE_RENDER_DLL void RenderEstimate();
 EXPOSURE_RENDER_DLL void GetEstimate(unsigned char* pData);
 EXPOSURE_RENDER_DLL void RecordBenchmarkImage();

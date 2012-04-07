@@ -42,7 +42,7 @@ public:
 		this->pVoxels = NULL;
 	}
 	
-	HOST void Set(Vec3f Resolution, Vec3f Spacing, float Range[2], T* pVoxels, bool NormalizeSize = false)
+	HOST void Set(Vec3f Resolution, Vec3f Spacing, T* pVoxels, bool NormalizeSize = false)
 	{
 		float Scale = 1.0f;
 
@@ -80,8 +80,6 @@ public:
 		this->GradientDeltaZ[0]	= 0.0f;
 		this->GradientDeltaZ[1]	= 0.0f;
 		this->GradientDeltaZ[2]	= MinVoxelSize;
-
-		this->IntensityRange.Set(Range);
 
 		this->Free();
 		
@@ -130,7 +128,6 @@ public:
 		this->GradientDeltaX			= Other.GradientDeltaX;
 		this->GradientDeltaY			= Other.GradientDeltaY;
 		this->GradientDeltaZ			= Other.GradientDeltaZ;
-		this->IntensityRange			= Other.IntensityRange;
 		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
 		this->pVoxels					= Other.pVoxels;
 
@@ -148,7 +145,6 @@ public:
 	Vec3f	GradientDeltaX;
 	Vec3f	GradientDeltaY;
 	Vec3f	GradientDeltaZ;
-	Range	IntensityRange;
 	Range	GradientMagnitudeRange;
 	T*		pVoxels;
 };

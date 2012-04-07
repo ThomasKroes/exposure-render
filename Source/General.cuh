@@ -167,6 +167,16 @@ struct EXPOSURE_RENDER_DLL Range
 		this->Extent	= this->Max - this->Min;
 		this->Inv		= this->Extent != 0.0f ? 1.0f / this->Extent : 0.0f;
 	}
+
+	Range& operator = (const Range& Other)
+	{
+		this->Min 		= Other.Min;
+		this->Max 		= Other.Max;
+		this->Extent	= Other.Extent;
+		this->Inv		= Other.Inv;
+
+		return *this;
+	}
 };
 
 struct EXPOSURE_RENDER_DLL Matrix44
@@ -257,6 +267,63 @@ struct EXPOSURE_RENDER_DLL Camera
 	}
 #endif
 };
+
+#define MAX_NO_TF_NODES 256
+
+struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
+{
+	Range	NodeRange;
+	float	Position[MAX_NO_TF_NODES];
+	float	Data[MAX_NO_TF_NODES];
+	int		Count;
+
+	PiecewiseLinearFunction()
+	{
+		for (int i = 0; i < MAX_NO_TF_NODES; i++)
+		{
+			this->Position[i]	= 0.0f;
+			this->Data[i]		= 0.0f;
+		}
+
+		this->Count = 0;
+	}
+
+	PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
+	{
+		this->NodeRange = Other.NodeRange;
+
+		for (int i = 0; i < MAX_NO_TF_NODES; i++)
+		{
+			this->Position[i]	= Other.Position[i];
+			this->Data[i]		= Other.Data[i];
+		}	
+		
+		this->Count = Other.Count;
+
+		return *this;
+	}
+};
+
+template<int Size>
+struct EXPOSURE_RENDER_DLL TransferFunction1D
+{
+	PiecewiseLinearFunction		PLF[Size];
+	
+	TransferFunction1D()
+	{
+	}
+
+	TransferFunction1D& operator = (const TransferFunction1D& Other)
+	{	
+		for (int i = 0; i < Size; i++)
+			this->PLF[i] = Other.PLF[i];
+		
+		return *this;
+	}
+};
+
+typedef TransferFunction1D<1>	ScalarTransferFunction1D;
+typedef TransferFunction1D<3>	ColorTransferFunction1D;
 
 struct EXPOSURE_RENDER_DLL Shape
 {

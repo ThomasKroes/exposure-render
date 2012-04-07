@@ -83,6 +83,7 @@ SET(ErCudaGeneral
 	Texture.cuh
 	Volume.cuh
 	Tracer.cuh
+	TransferFunction.cuh
 	Core.cu
 )
 

@@ -13,23 +13,39 @@
 
 #pragma once
 
-#include "Defines.cuh"
-#include "Vector.cuh"
-#include "General.cuh"
-#include "CudaUtilities.cuh"
-#include "Volume.cuh"
-
 namespace ExposureRender
 {
 
-struct Tracer
+DEVICE_NI float EvaluatePLF(const float& Intensity, PiecewiseLinearFunction& PLF)
 {
-	Volume<unsigned short>			Volume;
-	ScalarTransferFunction1D		Opacity1D;
-	ColorTransferFunction1D			Diffuse1D;
-	ColorTransferFunction1D			Specular1D;
-	ScalarTransferFunction1D		Glossiness1D;
-	ColorTransferFunction1D			Emission1D;
-};
+	if (Intensity < PLF.NodeRange.Min)
+		return PLF.Data[0];
+
+	if (Intensity > PLF.NodeRange.Max)
+		return PLF.Data[PLF.Count - 1];
+
+	for (int i = 1; i < PLF.Count; i++)
+	{
+		float P1 = PLF.Position[i - 1];
+		float P2 = PLF.Position[i];
+		float DeltaP = P2 - P1;
+		float LerpT = (Intensity - P1) / DeltaP;
+
+		if (Intensity >= P1 && Intensity < P2)
+			return Lerp(LerpT, PLF.Data[i - 1], PLF.Data[i]);
+	}
+
+	return 0.0f;
+}
+
+DEVICE_NI float EvaluateScalarTransferFunction1D(const float& Intensity, ScalarTransferFunction1D& TF)
+{
+	return EvaluatePLF(Intensity, TF.PLF[0]);
+}
+
+DEVICE_NI ColorXYZf EvaluateColorTransferFunction1D(const float& Intensity, ColorTransferFunction1D& TF)
+{
+	return ColorXYZf(EvaluatePLF(Intensity, TF.PLF[0]), EvaluatePLF(Intensity, TF.PLF[1]), EvaluatePLF(Intensity, TF.PLF[2]));
+}
 
 }
