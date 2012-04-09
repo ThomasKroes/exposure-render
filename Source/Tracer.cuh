@@ -111,6 +111,58 @@ struct Tracer
 			Textures.Count++;
 		}
 	}
+
+	struct Indices
+	{
+		int										IDs[64];
+		int										NoIDs;
+		std::map<int, int>						Map;
+		static std::map<int, int>::iterator		IndexIt;
+
+		void BindID(int ID)
+		{
+			this->Map[ID] = ID;
+			this->Update();
+		}
+
+		void UnbindID(int ID)
+		{
+			this->IndexIt = this->Map.find(ID);
+
+			const bool Exists = this->IndexIt != this->Map.end();
+
+			if (!Exists)
+				return;
+
+			this->Map.erase(IndexIt);
+			this->Update();
+		}
+
+		void Update()
+		{
+			this->NoIDs = 0;
+
+			for (this->IndexIt = this->Map.begin(); this->IndexIt != this->Map.end(); this->IndexIt++)
+			{
+				this->IDs[this->NoIDs] = this-> IndexIt->second;
+				this->NoIDs++;
+			}
+		}
+	};
+
+	Indices		VolumeIDs;
+	Indices		LightIDs;
+	Indices		ObjectIDs;
+	Indices		ClippingObjectIDs;
+
+	void BindVolume(int VolumeID)						{	this->VolumeIDs.BindID(VolumeID);						}
+	void UnbindVolume(int VolumeID)						{	this->VolumeIDs.UnbindID(VolumeID);						}
+	void BindLight(int LightID)							{	this->LightIDs.BindID(LightID);							}
+	void UnbindLight(int LightID)						{	this->LightIDs.UnbindID(LightID);						}
+	void BindObject(int ObjectID)						{	this->ObjectIDs.BindID(ObjectID);						}
+	void UnbindObject(int ObjectID)						{	this->ObjectIDs.UnbindID(ObjectID);						}
+	void BindClippingObject(int ClippingObjectID)		{	this->ClippingObjectIDs.BindID(ClippingObjectID);		}
+	void UnbindClippingObject(int ClippingObjectID)		{	this->ClippingObjectIDs.UnbindID(ClippingObjectID);		}
 };
 
 }
