@@ -29,10 +29,10 @@ KERNEL void KrnlComputeEstimate()
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= ((Tracer*)gpTracer)->FrameBuffer.Resolution[0] || Y >= ((Tracer*)gpTracer)->FrameBuffer.Resolution[1])
+	if (X >= gpTracer->FrameBuffer.Resolution[0] || Y >= gpTracer->FrameBuffer.Resolution[1])
 		return;
 
-	((Tracer*)gpTracer)->FrameBuffer.CudaRunningEstimateXyza.Set(CumulativeMovingAverage(((Tracer*)gpTracer)->FrameBuffer.CudaRunningEstimateXyza.Get(X, Y), ((Tracer*)gpTracer)->FrameBuffer.CudaFrameEstimate.Get(X, Y), ((Tracer*)gpTracer)->NoIterations), X, Y);
+	gpTracer->FrameBuffer.CudaRunningEstimateXyza.Set(CumulativeMovingAverage(gpTracer->FrameBuffer.CudaRunningEstimateXyza.Get(X, Y), gpTracer->FrameBuffer.CudaFrameEstimate.Get(X, Y), gpTracer->NoIterations), X, Y);
 }
 
 void ComputeEstimate(int Width, int Height)

@@ -13,64 +13,69 @@
 
 #pragma once
 
-#include "Shader.cuh"
-#include "RayMarching.cuh"
 #include "General.cuh"
-#include "Texture.cuh"
 
 namespace ExposureRender
 {
 
 struct ClippingObject : public ErClippingObject
 {
+	/*
+	DEVICE bool InsideClippingObject(ClippingObject& ClippingObject, const Vec3f& P)
+	{
+		bool Inside = false;
 
+		switch (ClippingObject.Shape.Type)
+		{
+			case 0:		
+			{
+				Inside = InsidePlane(P);
+				break;
+			}
+
+			case 1:
+			{
+				Inside = InsideBox(P, ToVec3f(ClippingObject.Shape.Size));
+				break;
+			}
+
+			case 2:
+			{
+				Inside = InsideSphere(P, ClippingObject.Shape.OuterRadius);
+				break;
+			}
+
+			case 3:
+			{
+				Inside = InsideCylinder(P, ClippingObject.Shape.OuterRadius, ClippingObject.Shape.Size[1]);
+				break;
+			}
+		}
+
+		return ClippingObject.Invert ? !Inside : Inside;
+	}
+
+	DEVICE bool InsideClippingObjects(const Vec3f& P)
+	{
+		for (int i = 0; i < gpTracer->ClippingObjects.Count; i++)
+		{
+			const Vec3f P2 = TransformPoint(gpTracer->ClippingObjects.List[i].Shape.InvTM, P);
+
+			if (Inside(gpTracer->ClippingObjects.List[i], P2))
+				return true;
+		}
+
+		return false;
+	}
+	*/
 };
 
-DEVICE bool InsideClippingObject(ClippingObject& ClippingObject, const Vec3f& P)
+struct ClippingObjects
 {
-	bool Inside = false;
+	ClippingObject	List[MAX_NO_CLIPPING_OBJECTS];
+	int				Count;
+};
 
-	switch (ClippingObject.Shape.Type)
-	{
-		case 0:		
-		{
-			Inside = InsidePlane(P);
-			break;
-		}
-
-		case 1:
-		{
-			Inside = InsideBox(P, ToVec3f(ClippingObject.Shape.Size));
-			break;
-		}
-
-		case 2:
-		{
-			Inside = InsideSphere(P, ClippingObject.Shape.OuterRadius);
-			break;
-		}
-
-		case 3:
-		{
-			Inside = InsideCylinder(P, ClippingObject.Shape.OuterRadius, ClippingObject.Shape.Size[1]);
-			break;
-		}
-	}
-
-	return ClippingObject.Invert ? !Inside : Inside;
-}
-
-DEVICE bool InsideClippingObjects(const Vec3f& P)
-{
-	for (int i = 0; i < gpTracer->ClippingObjects.Count; i++)
-	{
-		const Vec3f P2 = TransformPoint(gpTracer->ClippingObjects.List[i].Shape.InvTM, P);
-
-		if (Inside(gpTracer->ClippingObjects.List[i], P2))
-			return true;
-	}
-
-	return false;
-}
+__device__ int*	gpClippingObjects	= NULL;
 
 }

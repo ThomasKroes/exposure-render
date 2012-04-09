@@ -121,4 +121,17 @@ public:
 	unsigned short*		pVoxels;
 };
 
+struct Volumes
+{
+	Volume		List[MAX_NO_VOLUMES];
+	int			Count;
+};
+
+__device__ Volumes* gpVolumes = NULL;
+
+DEVICE float GetIntensity(const Vec3f& P)
+{
+	return gpVolumes->List[gpTracer->VolumeIDs[0]].Get(P); 
+}
+
 }

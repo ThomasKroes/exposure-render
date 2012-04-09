@@ -11,50 +11,50 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <thrust/reduce.h>
-
 #include "General.cuh"
 
-ExposureRender::ErKernelTimings gKernelTimings;
-
 #include "Core.cuh"
-#include "CudaUtilities.cuh"
-#include "Framebuffer.cuh"
-#include "Benchmark.cuh"
-#include "Filter.cuh"
-
-
-__device__ int* gpTracer;
-__device__ int*	gpSharedResources = NULL;
-
-
-int	gNoIterations = 0;
 
 #include "Tracer.cuh"
+#include "Volume.cuh"
+#include "Light.cuh"
+#include "Object.cuh"
+#include "ClippingObject.cuh"
+#include "Texture.cuh"
+#include "Utilities.cuh"
 
-#include "SharedResources.cuh"
+#include <map>
 
-ExposureRender::SharedResources* pSharedResources = NULL;
+static std::map<int, ExposureRender::Tracer>			gTracers;
+static std::map<int, ExposureRender::Volume>			gVolumes;
+static std::map<int, ExposureRender::Light>				gLights;
+static std::map<int, ExposureRender::Object>			gObjects;
+static std::map<int, ExposureRender::ClippingObject>	gClippingObjects;
+static std::map<int, ExposureRender::Texture>			gTextures;
 
-ExposureRender::SharedResources gSharedResources;
+static int gTracerCounter			= 0;
+static int gVolumeCounter			= 0;
+static int gLightCounter			= 0;
+static int gObjectCounter			= 0;
+static int gClippingObjectCounter	= 0;
+static int gTextureCounter			= 0;
 
 #include "GaussianFilter.cuh"
 #include "BilateralFilter.cuh"
 #include "MedianFilter.cuh"
 #include "Estimate.cuh"
-#include "Utilities.cuh"
+
 #include "SingleScattering.cuh"
-#include "Metropolis.cuh"
 #include "ToneMap.cuh"
-#include "Blend.cuh"
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
 
 
-static std::map<int, ExposureRender::Tracer> gTracers;
-int gNoTracers = 0;
+
+
 
 ExposureRender::Tracer* gpCurrentTracer = NULL;
+
 
 namespace ExposureRender
 {
@@ -117,9 +117,9 @@ EXPOSURE_RENDER_DLL void Reset(int TracerID)
 
 EXPOSURE_RENDER_DLL void InitializeTracer(int& TracerID)
 {
-	TracerID = gNoTracers;
-	gTracers[gNoTracers] = Tracer();
-	gNoTracers++;
+	TracerID = gTracerCounter;
+	gTracers[gTracerCounter] = Tracer();
+	gTracerCounter++;
 
 	EDIT_TRACER(TracerID)
 
@@ -178,48 +178,7 @@ EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera)
 {
 	EDIT_TRACER(TracerID)
 
-	const Vec3f N = Normalize(ToVec3f(Camera.Target) - ToVec3f(Camera.Pos));
-	const Vec3f U = Normalize(Cross(N, ToVec3f(Camera.Up)));
-	const Vec3f V = Normalize(Cross(N, U));
-
-	Camera.N[0] = N[0];
-	Camera.N[1] = N[1];
-	Camera.N[2] = N[2];
-	Camera.U[0] = U[0];
-	Camera.U[1] = U[1];
-	Camera.U[2] = U[2];
-	Camera.V[0] = V[0];
-	Camera.V[1] = V[1];
-	Camera.V[2] = V[2];
-
-	if (Camera.FocalDistance == -1.0f)
-		Camera.FocalDistance = (ToVec3f(Camera.Target) - ToVec3f(Camera.Pos)).Length();
-
-	float Scale = 0.0f;
-
-	Scale = tanf((0.5f * Camera.FOV / RAD_F));
-
-	const float AspectRatio = (float)Camera.FilmHeight / (float)Camera.FilmWidth;
-
-	if (AspectRatio > 1.0f)
-	{
-		Camera.Screen[0][0] = -Scale;
-		Camera.Screen[0][1] = Scale;
-		Camera.Screen[1][0] = -Scale * AspectRatio;
-		Camera.Screen[1][1] = Scale * AspectRatio;
-	}
-	else
-	{
-		Camera.Screen[0][0] = -Scale / AspectRatio;
-		Camera.Screen[0][1] = Scale / AspectRatio;
-		Camera.Screen[1][0] = -Scale;
-		Camera.Screen[1][1] = Scale;
-	}
-
-	Camera.InvScreen[0] = (Camera.Screen[0][1] - Camera.Screen[0][0]) / (float)Camera.FilmWidth;
-	Camera.InvScreen[1] = (Camera.Screen[1][1] - Camera.Screen[1][0]) / (float)Camera.FilmHeight;
-
-	CurrentTracer.Camera = Camera;
+	
 
 	BindTracer(TracerID);
 }
@@ -234,6 +193,7 @@ EXPOSURE_RENDER_DLL void UnbindVolume(ErVolume& Volume)
 
 EXPOSURE_RENDER_DLL void BindLight(ErLight Light)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErLight>::iterator It;
@@ -259,10 +219,12 @@ EXPOSURE_RENDER_DLL void BindLight(ErLight Light)
 	CurrentTracer.CopyLights();
 	
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(ErLight Light)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErLight>::iterator It;
@@ -279,10 +241,12 @@ EXPOSURE_RENDER_DLL void UnbindLight(ErLight Light)
 	CurrentTracer.CopyLights();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void BindObject(ErObject Object)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErObject>::iterator It;
@@ -293,10 +257,12 @@ EXPOSURE_RENDER_DLL void BindObject(ErObject Object)
 	CurrentTracer.CopyObjects();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(ErObject Object)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErObject>::iterator It;
@@ -311,10 +277,12 @@ EXPOSURE_RENDER_DLL void UnbindObject(ErObject Object)
 	CurrentTracer.CopyObjects();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject ClippingObject)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErClippingObject>::iterator It;
@@ -326,10 +294,12 @@ EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject ClippingObject)
 	CurrentTracer.CopyClippingObjects();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(ErClippingObject ClippingObject)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErClippingObject>::iterator It;
@@ -344,10 +314,12 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(ErClippingObject ClippingObject)
 	CurrentTracer.CopyClippingObjects();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErTexture>::iterator It;
@@ -375,10 +347,12 @@ EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture)
 	CurrentTracer.CopyTextures();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(ErTexture Texture)
 {
+	/*
 	EDIT_TRACER(TracerID)
 
 	std::map<int, ExposureRender::ErTexture>::iterator It;
@@ -395,6 +369,7 @@ EXPOSURE_RENDER_DLL void UnbindTexture(ErTexture Texture)
 	CurrentTracer.CopyTextures();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings RenderSettings)
@@ -449,8 +424,6 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
 	EDIT_TRACER(TracerID)
 
-	gKernelTimings.Reset();
-
 	CUDA::ThreadSynchronize();
 
 	SingleScattering(CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
@@ -478,12 +451,6 @@ EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV
 {
 	EDIT_TRACER(TracerID)
 	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
-}
-
-EXPOSURE_RENDER_DLL void GetKernelTimings(int TracerID, ErKernelTimings& KernelTimings)
-{
-	EDIT_TRACER(TracerID)
-	KernelTimings = gKernelTimings;
 }
 
 EXPOSURE_RENDER_DLL void GetNoIterations(int TracerID, int& NoIterations)

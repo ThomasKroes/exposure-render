@@ -22,6 +22,7 @@ namespace ExposureRender
 
 KERNEL void KrnlComputeGradientMagnitudeVolume(unsigned short* pGradientMagnitude, int Width, int Height, int Depth)
 {
+	/*
 	const int X = blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y	= blockIdx.y * blockDim.y + threadIdx.y;
 	const int Z	= blockIdx.z * blockDim.z + threadIdx.z;
@@ -29,11 +30,12 @@ KERNEL void KrnlComputeGradientMagnitudeVolume(unsigned short* pGradientMagnitud
 	if (X >= Width || Y >= Height || Z >= Depth)
 		return;
 	
-	const Vec3f P = ((Tracer*)gpTracer)->Volume.MinAABB + ((Tracer*)gpTracer)->Volume.Size * (Vec3f((float)X + 0.5f, (float)Y + 0.5f, (float)Z + 0.5f) * ((Tracer*)gpTracer)->Volume.InvResolution);
+	const Vec3f P = gpTracer->Volume.MinAABB + gpTracer->Volume.Size * (Vec3f((float)X + 0.5f, (float)Y + 0.5f, (float)Z + 0.5f) * gpTracer->Volume.InvResolution);
 
 	int ID = X + Y * Width + Z * (Width * Height);
 
 	pGradientMagnitude[ID] = GradientMagnitude(P);
+	*/
 }
 
 void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitude)

@@ -13,78 +13,82 @@
 
 #pragma once
 
-#include "Shader.cuh"
-#include "RayMarching.cuh"
 #include "General.cuh"
 #include "Texture.cuh"
+#include "Shape.cuh"
 
 namespace ExposureRender
 {
 
 struct Light : public ErLight
 {
+	DEVICE_NI void SampleSurface(LightSample& LS, SurfaceSample& SurfaceSample)
+	{
+		SampleShape(Shape, LS.SurfaceUVW, SurfaceSample);
 
+		SurfaceSample.P	= TransformPoint(Shape.TM, SurfaceSample.P);
+		SurfaceSample.N	= TransformVector(Shape.TM, SurfaceSample.N);
+	}
+
+	DEVICE_NI void Sample(LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
+	{
+		SampleSurface(LS, SS);
+
+		Wi = Normalize(SS.P - SE.P);
+
+		Le = Multiplier * EvaluateTexture2D(TextureID, SS.UV);
+
+		if (Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
+			Le = ColorXYZf(0.0f);
+
+		if (Unit == 1)
+			Le /= Shape.Area;
+	}
+
+	DEVICE_NI void Intersect(const Ray& R, ScatterEvent& SE)
+	{
+		const Ray Rt = TransformRay(Shape.InvTM, R);
+
+		Intersection Int;
+
+		IntersectShape(Shape, Rt, Int);
+
+		if (Int.Valid)
+		{
+			SE.Valid	= true;
+			SE.P 		= TransformPoint(Shape.TM, Int.P);
+			SE.N 		= TransformVector(Shape.TM, Int.N);
+			SE.T 		= Length(SE.P - R.O);
+			SE.Wo		= -R.D;
+			SE.UV		= Int.UV;
+			SE.Le		= Int.Front ? Multiplier * EvaluateTexture2D(TextureID, SE.UV) : ColorXYZf(0.0f);
+
+			if (Unit == 1)
+				SE.Le /= Shape.Area;
+		}
+	}
+
+	DEVICE_NI bool Intersects(const Ray& R)
+	{
+		return IntersectsShape(Shape, TransformRay(Shape.InvTM, R));
+	}
 };
 
-DEVICE_NI void SampleLightSurface(ErLight& Light, LightSample& LS, SurfaceSample& SurfaceSample)
+struct Lights
 {
-	SampleShape(Light.Shape, LS.SurfaceUVW, SurfaceSample);
+	Light	List[MAX_NO_LIGHTS];
+	int		Count;
+};
 
-	// Transform surface position and normal back to world space
-	SurfaceSample.P	= TransformPoint(Light.Shape.TM, SurfaceSample.P);
-	SurfaceSample.N	= TransformVector(Light.Shape.TM, SurfaceSample.N);
-}
+__device__ Lights* gpLights = NULL;
 
-DEVICE_NI void SampleLight(ErLight& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
-{
-	// First sample the light surface
-	SampleLightSurface(Light, LS, SS);
-
-	// Compute Wi, the normalized vector from the sampled light position to the ray sample position
-	Wi = Normalize(SS.P - SE.P);
-
-	// Compute exitant radiance
-	Le = Light.Multiplier * EvaluateTexture2D(Light.TextureID, SS.UV);
-
-	if (Light.Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
-		Le = ColorXYZf(0.0f);
-
-	if (Light.Unit == 1)
-		Le /= Light.Shape.Area;
-}
-
-// Intersects a light with a ray
-DEVICE_NI void IntersectLight(ErLight& Light, const Ray& R, ScatterEvent& SE)
-{
-	const Ray Rt = TransformRay(Light.Shape.InvTM, R);
-
-	Intersection Int;
-
-	IntersectShape(Light.Shape, Rt, Int);
-
-	if (Int.Valid)
-	{
-		SE.Valid	= true;
-		SE.P 		= TransformPoint(Light.Shape.TM, Int.P);
-		SE.N 		= TransformVector(Light.Shape.TM, Int.N);
-		SE.T 		= Length(SE.P - R.O);
-		SE.Wo		= -R.D;
-		SE.UV		= Int.UV;
-		SE.Le		= Int.Front ? Light.Multiplier * EvaluateTexture2D(Light.TextureID, SE.UV) : ColorXYZf(0.0f);
-
-		if (Light.Unit == 1)
-			SE.Le /= Light.Shape.Area;
-	}
-}
-
-// Finds the nearest intersection with any of the scene's lights
 DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX; 
 
-	for (int i = 0; i < ((Tracer*)gpTracer)->Lights.Count; i++)
+	for (int i = 0; i < gpLights->Count; i++)
 	{
-		ErLight& Light = ((Tracer*)gpTracer)->Lights.List[i];
+		Light& Light = gpLights->List[i];
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 
@@ -93,7 +97,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 		if (RespectVisibility && !Light.Visible)
 			continue;
 
-		IntersectLight(Light, R, LocalRS);
+		Light.Intersect(R, LocalRS);
 
 		if (LocalRS.Valid && LocalRS.T < T)
 		{
@@ -103,18 +107,11 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 	}
 }
 
-// Determine if the ray intersects the light
-DEVICE_NI bool IntersectsLight(ErLight& Light, const Ray& R)
-{
-	return IntersectsShape(Light.Shape, TransformRay(Light.Shape.InvTM, R));
-}
-
-// Determines if there's an intersection between the ray and any of the scene's lights
 DEVICE_NI bool IntersectsLight(const Ray& R)
 {
-	for (int i = 0; i < ((Tracer*)gpTracer)->Lights.Count; i++)
+	for (int i = 0; i < gpLights->Count; i++)
 	{
-		if (IntersectsLight(((Tracer*)gpTracer)->Lights.List[i], R))
+		if (gpLights->List[i].Intersects(R))
 			return true;
 	}
 

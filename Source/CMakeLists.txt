@@ -75,16 +75,11 @@ SET(ErCudaGeneral
 	Color.cuh
 	Ray.cuh
 	Statistics.cuh
-	
-	
+	Camera.cuh
 	GradientMagnitude.cuh
 	AutoFocus.cuh
-	
-	
 	Tracer.cuh
 	TransferFunction.cuh
-	
-	
 	Core.cu
 )
 
@@ -120,7 +115,7 @@ SET(ErShared
 	Object.cuh
 	ClippingObject.cuh
 	Texture.cuh
-	SharedResources.cuh
+	Shared.cuh
 )
 
 # Shared group

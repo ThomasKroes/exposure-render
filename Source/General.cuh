@@ -264,7 +264,7 @@ struct EXPOSURE_RENDER_DLL ErCamera
 	}
 };
 
-#define MAX_NO_LIGHTS 64
+#define MAX_NO_VOLUMES 64
 
 struct EXPOSURE_RENDER_DLL ErVolume
 {

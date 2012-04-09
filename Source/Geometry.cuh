@@ -13,7 +13,6 @@
 
 #pragma once
 
-#include "Vector.cuh"
 #include "Color.cuh"
 #include "Ray.cuh"
 
@@ -21,6 +20,46 @@ using namespace std;
 
 namespace ExposureRender
 {
+
+DEVICE Vec3f TransformVector(const ErMatrix44& TM, const Vec3f& V)
+{
+	Vec3f Vt;
+
+	const float x = V[0], y = V[1], z = V[2];
+
+	Vt[0] = TM.NN[0][0] * x + TM.NN[0][1] * y + TM.NN[0][2] * z;
+	Vt[1] = TM.NN[1][0] * x + TM.NN[1][1] * y + TM.NN[1][2] * z;
+	Vt[2] = TM.NN[2][0] * x + TM.NN[2][1] * y + TM.NN[2][2] * z;
+
+	return Vt;
+}
+
+DEVICE Vec3f TransformPoint(const ErMatrix44& TM, const Vec3f& P)
+{
+	const float x = P[0], y = P[1], z = P[2];
+    
+	const float Px = TM.NN[0][0]*x + TM.NN[0][1]*y + TM.NN[0][2]*z + TM.NN[0][3];
+    const float Py = TM.NN[1][0]*x + TM.NN[1][1]*y + TM.NN[1][2]*z + TM.NN[1][3];
+    const float Pz = TM.NN[2][0]*x + TM.NN[2][1]*y + TM.NN[2][2]*z + TM.NN[2][3];
+	
+	return Vec3f(Px, Py, Pz);
+}
+
+DEVICE Ray TransformRay(const ErMatrix44& TM, const Ray& R)
+{
+	Ray Rt;
+
+	Vec3f P		= TransformPoint(TM, R.O);
+	Vec3f MinP	= TransformPoint(TM, R(R.MinT));
+	Vec3f MaxP	= TransformPoint(TM, R(R.MaxT));
+
+	Rt.O	= P;
+	Rt.D	= Normalize(MaxP - Rt.O);
+	Rt.MinT	= (MinP - Rt.O).Length();
+	Rt.MaxT	= (MaxP - Rt.O).Length();
+
+	return Rt;
+}
 
 DEVICE float SphericalTheta(const Vec3f& W)
 {

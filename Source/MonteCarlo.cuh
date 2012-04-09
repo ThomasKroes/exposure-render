@@ -14,7 +14,6 @@
 #pragma once
 
 #include "Geometry.cuh"
-
 #include "RNG.cuh"
 
 namespace ExposureRender

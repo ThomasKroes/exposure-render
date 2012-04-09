@@ -19,8 +19,6 @@
 #include "Box.cuh"
 #include "Sphere.cuh"
 #include "Cylinder.cuh"
-#include "General.cuh"
-#include "Utilities.cuh"
 
 namespace ExposureRender
 {

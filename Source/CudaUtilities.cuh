@@ -309,7 +309,7 @@ public:
 																						\
 	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop));		\
 																						\
-	gKernelTimings.Add(ErKernelTiming(title, TimeDelta));								\
+	/*gKernelTimings.Add(ErKernelTiming(title, TimeDelta));*/							\
 																						\
 	CUDA::HandleCudaError(cudaEventDestroy(EventStart));								\
 	CUDA::HandleCudaError(cudaEventDestroy(EventStop));									\

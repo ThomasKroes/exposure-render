@@ -49,7 +49,6 @@ EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering);
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID);
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData);
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance);
-EXPOSURE_RENDER_DLL void GetKernelTimings(int TracerID, ErKernelTimings& KernelTimings);
 EXPOSURE_RENDER_DLL void GetNoIterations(int TracerID, int& NoIterations);
 
 }

@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "Shader.cuh"
-#include "RayMarching.cuh"
 #include "General.cuh"
 
 namespace ExposureRender
@@ -22,44 +20,53 @@ namespace ExposureRender
 
 struct Object : public ErObject
 {
+	DEVICE_NI void Intersect(const Ray& R, ScatterEvent& RS)
+	{
+		Ray Rt = TransformRay(Shape.InvTM, R);
 
+		Intersection Int;
+
+		IntersectShape(Shape, Rt, Int);
+
+		if (Int.Valid)
+		{
+			RS.Valid	= true;
+			RS.N 		= TransformVector(Shape.TM, Int.N);
+			RS.P 		= TransformPoint(Shape.TM, Int.P);
+			RS.T 		= Length(RS.P - R.O);
+			RS.Wo		= -R.D;
+			RS.Le		= ColorXYZf(0.0f);
+			RS.UV		= Int.UV;
+		}
+	}
+
+	DEVICE_NI bool Intersects(const Ray& R)
+	{
+		return IntersectsShape(Shape, TransformRay(Shape.InvTM, R));
+	}
 };
 
-// Intersect a reflector with a ray
-DEVICE_NI void IntersectObject(ErObject& Object, const Ray& R, ScatterEvent& RS)
+struct Objects
 {
-	Ray Rt = TransformRay(Object.Shape.InvTM, R);
+	Object	List[MAX_NO_OBJECTS];
+	int		Count;
+};
 
-	Intersection Int;
+__device__ Objects* gpObjects = NULL;
 
-	IntersectShape(Object.Shape, Rt, Int);
-
-	if (Int.Valid)
-	{
-		RS.Valid	= true;
-		RS.N 		= TransformVector(Object.Shape.TM, Int.N);
-		RS.P 		= TransformPoint(Object.Shape.TM, Int.P);
-		RS.T 		= Length(RS.P - R.O);
-		RS.Wo		= -R.D;
-		RS.Le		= ColorXYZf(0.0f);
-		RS.UV		= Int.UV;
-	}
-}
-
-// Finds the nearest intersection with any of the scene's reflectors
 DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 {
 	float T = FLT_MAX;
 
-	for (int i = 0; i < ((Tracer*)gpTracer)->Objects.Count; i++)
+	for (int i = 0; i < gpObjects->Count; i++)
 	{
-		ErObject& Object = ((Tracer*)gpTracer)->Objects.List[i];
+		Object& Object = gpObjects->List[i];
 
 		ScatterEvent LocalRS(ScatterEvent::Object);
 
 		LocalRS.ObjectID = i;
 
-		IntersectObject(Object, R, LocalRS);
+		Object.Intersect(R, LocalRS);
 
 		if (LocalRS.Valid && LocalRS.T < T)
 		{
@@ -69,18 +76,11 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 	}
 }
 
-// Determine if the ray intersects the reflector
-DEVICE_NI bool IntersectsObject(ErObject& Object, const Ray& R)
-{
-	return IntersectsShape(Object.Shape, TransformRay(Object.Shape.InvTM, R));
-}
-
-// Determines if there's an intersection between the ray and any of the scene's reflectors
 DEVICE_NI bool IntersectsObject(const Ray& R)
 {
-	for (int i = 0; i < ((Tracer*)gpTracer)->Objects.Count; i++)
+	for (int i = 0; i < gpObjects->Count; i++)
 	{
-		if (IntersectsObject(((Tracer*)gpTracer)->Objects.List[i], R))
+		if (gpObjects->List[i].Intersects(R))
 			return true;
 	}
 

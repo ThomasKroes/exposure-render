@@ -17,152 +17,40 @@
 #include "Vector.cuh"
 #include "General.cuh"
 #include "CudaUtilities.cuh"
-#include "Volume.cuh"
+#include "Framebuffer.cuh"
+#include "Filter.cuh"
 
 namespace ExposureRender
 {
 
 struct Tracer
 {
-	//Volume<unsigned short>		Volume;
 	ErScalarTransferFunction1D		Opacity1D;
 	ErColorTransferFunction1D		Diffuse1D;
 	ErColorTransferFunction1D		Specular1D;
 	ErScalarTransferFunction1D		Glossiness1D;
 	ErColorTransferFunction1D		Emission1D;
-	/*
-	ErLights						Lights;
-	ErObjects						Objects;
-	ErClippingObjects				ClippingObjects;
-	ErTextures						Textures;
-	*/
+
 	ErCamera						Camera;
 	ErRenderSettings				RenderSettings;
 	GaussianFilter					FrameEstimateFilter;
 	BilateralFilter					PostProcessingFilter;
 	FrameBuffer						FrameBuffer;
 	int								NoIterations;
+	ErKernelTimings					KernelTimings;
 
-	/*
-	std::map<int, ErLight>			LightsMap;
-	std::map<int, ErObject>			ObjectsMap;
-	std::map<int, ErClippingObject>	ClippingObjectsMap;
-	std::map<int, ErTexture>			TexturesMap;
+	int								VolumeIDs[MAX_NO_VOLUMES];
+	int								LightIDs[MAX_NO_LIGHTS];
+	int								ObjectIDs[MAX_NO_OBJECTS];
+	int								ClippingObjectIDs[MAX_NO_CLIPPING_OBJECTS];
 
-	void CopyLights()
-	{
-		std::map<int, ExposureRender::ErLight>::iterator It;
-
-		Lights.Count = 0;
-
-		for (It = LightsMap.begin(); It != LightsMap.end(); It++)
-		{
-			if (It->second.Enabled)
-			{
-				Lights.List[Lights.Count] = It->second;
-				Lights.Count++;
-			}
-		}
-	}
-
-	void CopyObjects()
-	{
-		std::map<int, ExposureRender::ErObject>::iterator It;
-
-		Objects.Count = 0;
-
-		for (It = ObjectsMap.begin(); It != ObjectsMap.end(); It++)
-		{
-			if (It->second.Enabled)
-			{
-				Objects.List[Objects.Count] = It->second;
-				Objects.Count++;
-			}
-		}
-	}
-
-	void CopyClippingObjects()
-	{
-		std::map<int, ExposureRender::ErClippingObject>::iterator It;
-
-		ClippingObjects.Count = 0;
-
-		for (It = ClippingObjectsMap.begin(); It != ClippingObjectsMap.end(); It++)
-		{
-			if (It->second.Enabled)
-			{
-				ClippingObjects.List[ClippingObjects.Count] = It->second;
-				ClippingObjects.Count++;
-			}
-		}
-	}
-
-	void CopyTextures()
-	{
-		std::map<int, ExposureRender::ErTexture>::iterator It;
-
-		Textures.Count = 0;
-
-		for (It = TexturesMap.begin(); It != TexturesMap.end(); It++)
-		{
-			Textures.List[Textures.Count] = It->second;
-			Textures.List[Textures.Count].Image.pData = It->second.Image.pData;
-			Textures.Count++;
-		}
-	}
-	*/
-
-	struct Indices
-	{
-		int										IDs[64];
-		int										NoIDs;
-		std::map<int, int>						Map;
-		static std::map<int, int>::iterator		IndexIt;
-
-		void BindID(int ID)
-		{
-			this->Map[ID] = ID;
-			this->Update();
-		}
-
-		void UnbindID(int ID)
-		{
-			this->IndexIt = this->Map.find(ID);
-
-			const bool Exists = this->IndexIt != this->Map.end();
-
-			if (!Exists)
-				return;
-
-			this->Map.erase(IndexIt);
-			this->Update();
-		}
-
-		void Update()
-		{
-			this->NoIDs = 0;
-
-			for (this->IndexIt = this->Map.begin(); this->IndexIt != this->Map.end(); this->IndexIt++)
-			{
-				this->IDs[this->NoIDs] = this-> IndexIt->second;
-				this->NoIDs++;
-			}
-		}
-	};
-
-	Indices		VolumeIDs;
-	Indices		LightIDs;
-	Indices		ObjectIDs;
-	Indices		ClippingObjectIDs;
-
-	void BindVolume(int VolumeID)						{	this->VolumeIDs.BindID(VolumeID);						}
-	void UnbindVolume(int VolumeID)						{	this->VolumeIDs.UnbindID(VolumeID);						}
-	void BindLight(int LightID)							{	this->LightIDs.BindID(LightID);							}
-	void UnbindLight(int LightID)						{	this->LightIDs.UnbindID(LightID);						}
-	void BindObject(int ObjectID)						{	this->ObjectIDs.BindID(ObjectID);						}
-	void UnbindObject(int ObjectID)						{	this->ObjectIDs.UnbindID(ObjectID);						}
-	void BindClippingObject(int ClippingObjectID)		{	this->ClippingObjectIDs.BindID(ClippingObjectID);		}
-	void UnbindClippingObject(int ClippingObjectID)		{	this->ClippingObjectIDs.UnbindID(ClippingObjectID);		}
+	int								NoVolumes;
+	int								NoLights;
+	int								NoObjects;
+	int								NoClippingObjects;
 };
+
+
+__device__ Tracer*	gpTracer = NULL;
 
 }

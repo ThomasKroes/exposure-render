@@ -480,11 +480,13 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 {
 	const float I = GetIntensity(SE.P);
 
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+/*
 	bool BRDF = false;
 
 	float PdfBrdf = 1.0f;
 
-	switch (((Tracer*)gpTracer)->RenderSettings.Shading.Type)
+	switch (gpTracer->RenderSettings.Shading.Type)
 	{
 		case 0:
 		{
@@ -497,22 +499,23 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 			BRDF = false;
 			break;
 		}
-
+	
+		
 		case 2:
 		{
-			const float NGM			= GradientMagnitude(SE.P) * ((Tracer*)gpTracer)->Volume.GradientMagnitudeRange.Inv;
+			const float NGM			= GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 			const float Sensitivity	= 25;
 			const float ExpGF		= 3;
-			const float Exponent	= Sensitivity * powf(((Tracer*)gpTracer)->RenderSettings.Shading.GradientFactor, ExpGF) * NGM;
+			const float Exponent	= Sensitivity * powf(gpTracer->RenderSettings.Shading.GradientFactor, ExpGF) * NGM;
 			
-			PdfBrdf = ((Tracer*)gpTracer)->RenderSettings.Shading.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
+			PdfBrdf = gpTracer->RenderSettings.Shading.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
 			BRDF = RNG.Get1() <= PdfBrdf;
 			break;
 		}
 
 		case 3:
 		{
-			const float NGM = GradientMagnitude(SE.P) * ((Tracer*)gpTracer)->Volume.GradientMagnitudeRange.Inv;
+			const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 			
 			PdfBrdf = 1.0f - powf(1.0f - NGM, 2.0f);
 			BRDF = RNG.Get1() < PdfBrdf;
@@ -521,29 +524,21 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 
 		case 4:
 		{
-			const float NGM = GradientMagnitude(SE.P) * ((Tracer*)gpTracer)->Volume.GradientMagnitudeRange.Inv;
+			const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
 
-			if (NGM > ((Tracer*)gpTracer)->RenderSettings.Shading.GradientThreshold)
+			if (NGM > gpTracer->RenderSettings.Shading.GradientThreshold)
 				BRDF = true;
 			else
 				BRDF = false;
 		}
+		
 	}
 
 	if (BRDF)
-		return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), ((Tracer*)gpTracer)->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+		return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
 	else
-		return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), ((Tracer*)gpTracer)->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
-}
-
-DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
-{
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.0f), ColorXYZf(0.0f), 5.0f, 0.0f);
-}
-
-DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
-{
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture2D(((Tracer*)gpTracer)->Objects.List[SE.ObjectID].DiffuseTextureID, SE.UV), EvaluateTexture2D(((Tracer*)gpTracer)->Objects.List[SE.ObjectID].SpecularTextureID, SE.UV), 10.0f, GlossinessExponent(EvaluateTexture2D(((Tracer*)gpTracer)->Objects.List[SE.ObjectID].GlossinessTextureID, SE.UV).Y()));
+		return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+	*/
 }
 
 }
