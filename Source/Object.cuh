@@ -21,7 +21,7 @@ namespace ExposureRender
 {
 
 // Intersect a reflector with a ray
-DEVICE_NI void IntersectObject(Object& Object, const Ray& R, ScatterEvent& RS)
+DEVICE_NI void IntersectObject(ErObject& Object, const Ray& R, ScatterEvent& RS)
 {
 	Ray Rt = TransformRay(Object.Shape.InvTM, R);
 
@@ -48,7 +48,7 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 
 	for (int i = 0; i < ((Tracer*)gpTracer)->Objects.Count; i++)
 	{
-		Object& Object = ((Tracer*)gpTracer)->Objects.List[i];
+		ErObject& Object = ((Tracer*)gpTracer)->Objects.List[i];
 
 		ScatterEvent LocalRS(ScatterEvent::Object);
 
@@ -65,7 +65,7 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 }
 
 // Determine if the ray intersects the reflector
-DEVICE_NI bool IntersectsObject(Object& Object, const Ray& R)
+DEVICE_NI bool IntersectsObject(ErObject& Object, const Ray& R)
 {
 	return IntersectsShape(Object.Shape, TransformRay(Object.Shape.InvTM, R));
 }

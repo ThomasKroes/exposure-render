@@ -145,7 +145,7 @@ public:
 	Vec3f	GradientDeltaX;
 	Vec3f	GradientDeltaY;
 	Vec3f	GradientDeltaZ;
-	Range	GradientMagnitudeRange;
+	ErRange	GradientMagnitudeRange;
 	T*		pVoxels;
 };
 

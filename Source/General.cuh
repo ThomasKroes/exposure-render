@@ -54,20 +54,20 @@ namespace Enums
 	};
 }
 
-struct EXPOSURE_RENDER_DLL Exception
+struct EXPOSURE_RENDER_DLL ErException
 {
 	char	Type[MAX_CHAR_SIZE];
 	char	Error[MAX_CHAR_SIZE];
 	char	Description[MAX_CHAR_SIZE];
 	
-	Exception(const char* pType = "", const char* pError = "", const char* pDescription = "")
+	ErException(const char* pType = "", const char* pError = "", const char* pDescription = "")
 	{
 		sprintf_s(Type, MAX_CHAR_SIZE, "%s", pType);
 		sprintf_s(Error, MAX_CHAR_SIZE, "%s", pError);
 		sprintf_s(Description, MAX_CHAR_SIZE, "%s", pDescription);
 	}
 
-	Exception& operator = (const Exception& Other)
+	ErException& operator = (const ErException& Other)
 	{
 		sprintf_s(Type, MAX_CHAR_SIZE, "%s", Other.Type);
 		sprintf_s(Error, MAX_CHAR_SIZE, "%s", Other.Error);
@@ -77,24 +77,24 @@ struct EXPOSURE_RENDER_DLL Exception
 	}
 };
 
-struct EXPOSURE_RENDER_DLL KernelTiming
+struct EXPOSURE_RENDER_DLL ErKernelTiming
 {
 	char	Event[MAX_CHAR_SIZE];
 	float	Duration;
 
-	KernelTiming()
+	ErKernelTiming()
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, "Undefined");
 		this->Duration = 0.0f;
 	}
 
-	KernelTiming(const char* pEvent, const float& Duration)
+	ErKernelTiming(const char* pEvent, const float& Duration)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, pEvent);
 		this->Duration = Duration;
 	}
 
-	KernelTiming& operator = (const KernelTiming& Other)
+	ErKernelTiming& operator = (const ErKernelTiming& Other)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, Other.Event);
 		this->Duration = Other.Duration;
@@ -109,12 +109,12 @@ struct EXPOSURE_RENDER_DLL KernelTiming
 	}
 };
 
-struct EXPOSURE_RENDER_DLL KernelTimings
+struct EXPOSURE_RENDER_DLL ErKernelTimings
 {
 	int				NoTimings;
-	KernelTiming	Timings[MAX_NO_TIMINGS];
+	ErKernelTiming	Timings[MAX_NO_TIMINGS];
 	
-	KernelTimings& operator = (const KernelTimings& Other)
+	ErKernelTimings& operator = (const ErKernelTimings& Other)
 	{
 		for (int i = 0; i < MAX_NO_TIMINGS; i++)
 			this->Timings[i] = Other.Timings[i];
@@ -124,9 +124,9 @@ struct EXPOSURE_RENDER_DLL KernelTimings
 		return *this;
 	}
 
-	void Add(const KernelTiming& KernelTiming)
+	void Add(const ErKernelTiming& ErKernelTiming)
 	{
-		this->Timings[this->NoTimings] = KernelTiming;
+		this->Timings[this->NoTimings] = ErKernelTiming;
 	}
 
 	void Reset()
@@ -143,7 +143,7 @@ struct EXPOSURE_RENDER_DLL KernelTimings
 	}
 };
 
-struct EXPOSURE_RENDER_DLL Range
+struct EXPOSURE_RENDER_DLL ErRange
 {
 	float	Min;
 	float	Max;
@@ -151,7 +151,7 @@ struct EXPOSURE_RENDER_DLL Range
 	float	Inv;
 	
 #ifndef __CUDA_ARCH__
-	Range()
+	ErRange()
 	{
 		this->Min 		= 0.0f;
 		this->Max 		= 0.0f;
@@ -168,7 +168,7 @@ struct EXPOSURE_RENDER_DLL Range
 		this->Inv		= this->Extent != 0.0f ? 1.0f / this->Extent : 0.0f;
 	}
 
-	Range& operator = (const Range& Other)
+	ErRange& operator = (const ErRange& Other)
 	{
 		this->Min 		= Other.Min;
 		this->Max 		= Other.Max;
@@ -179,20 +179,18 @@ struct EXPOSURE_RENDER_DLL Range
 	}
 };
 
-struct EXPOSURE_RENDER_DLL Matrix44
+struct EXPOSURE_RENDER_DLL ErMatrix44
 {
 	float				NN[4][4];
 
-#ifndef __CUDA_ARCH__
-	Matrix44()
+	ErMatrix44()
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
 				this->NN[i][j] = i == j ? 1.0f : 0.0f;
 	}
-#endif
 
-	Matrix44& operator = (const Matrix44& Other)
+	ErMatrix44& operator = (const ErMatrix44& Other)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -202,7 +200,7 @@ struct EXPOSURE_RENDER_DLL Matrix44
 	}
 };
 
-struct EXPOSURE_RENDER_DLL Camera
+struct EXPOSURE_RENDER_DLL ErCamera
 {
 	int					FilmWidth;
 	int					FilmHeight;
@@ -225,8 +223,7 @@ struct EXPOSURE_RENDER_DLL Camera
 	float				InvGamma;
 	float				FOV;
 
-#ifndef __CUDA_ARCH__
-	Camera()
+	ErCamera()
 	{
 		this->FilmWidth			= 0;
 		this->FilmHeight		= 0;
@@ -265,19 +262,18 @@ struct EXPOSURE_RENDER_DLL Camera
 		this->InvGamma			= 0.0f;
 		this->FOV				= 0.0f;
 	}
-#endif
 };
 
 #define MAX_NO_TF_NODES 256
 
-struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
+struct EXPOSURE_RENDER_DLL ErPiecewiseLinearFunction
 {
-	Range	NodeRange;
+	ErRange	NodeRange;
 	float	Position[MAX_NO_TF_NODES];
 	float	Data[MAX_NO_TF_NODES];
 	int		Count;
 
-	PiecewiseLinearFunction()
+	ErPiecewiseLinearFunction()
 	{
 		for (int i = 0; i < MAX_NO_TF_NODES; i++)
 		{
@@ -288,7 +284,7 @@ struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 		this->Count = 0;
 	}
 
-	PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
+	ErPiecewiseLinearFunction& operator = (const ErPiecewiseLinearFunction& Other)
 	{
 		this->NodeRange = Other.NodeRange;
 
@@ -305,15 +301,15 @@ struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 };
 
 template<int Size>
-struct EXPOSURE_RENDER_DLL TransferFunction1D
+struct EXPOSURE_RENDER_DLL ErTransferFunction1D
 {
-	PiecewiseLinearFunction		PLF[Size];
+	ErPiecewiseLinearFunction		PLF[Size];
 	
-	TransferFunction1D()
+	ErTransferFunction1D()
 	{
 	}
 
-	TransferFunction1D& operator = (const TransferFunction1D& Other)
+	ErTransferFunction1D& operator = (const ErTransferFunction1D& Other)
 	{	
 		for (int i = 0; i < Size; i++)
 			this->PLF[i] = Other.PLF[i];
@@ -322,13 +318,13 @@ struct EXPOSURE_RENDER_DLL TransferFunction1D
 	}
 };
 
-typedef TransferFunction1D<1>	ScalarTransferFunction1D;
-typedef TransferFunction1D<3>	ColorTransferFunction1D;
+typedef ErTransferFunction1D<1>	ErScalarTransferFunction1D;
+typedef ErTransferFunction1D<3>	ErColorTransferFunction1D;
 
-struct EXPOSURE_RENDER_DLL Shape
+struct EXPOSURE_RENDER_DLL ErShape
 {
-	Matrix44			TM;
-	Matrix44			InvTM;
+	ErMatrix44			TM;
+	ErMatrix44			InvTM;
 	bool				OneSided;
 	Enums::ShapeType	Type;
 	float				Size[3];
@@ -336,8 +332,7 @@ struct EXPOSURE_RENDER_DLL Shape
 	float				InnerRadius;
 	float				OuterRadius;
 
-#ifndef __CUDA_ARCH__
-	Shape()
+	ErShape()
 	{
 		this->OneSided		= false;
 		this->Size[0]		= 0.0f;
@@ -347,9 +342,8 @@ struct EXPOSURE_RENDER_DLL Shape
 		this->InnerRadius	= 0.0f;
 		this->OuterRadius	= 0.0f;
 	}
-#endif
 	
-	Shape& operator = (const Shape& Other)
+	ErShape& operator = (const ErShape& Other)
 	{
 		this->TM			= Other.TM;
 		this->InvTM			= Other.InvTM;		
@@ -366,18 +360,17 @@ struct EXPOSURE_RENDER_DLL Shape
 	}
 };
 
-struct EXPOSURE_RENDER_DLL Light
+struct EXPOSURE_RENDER_DLL ErLight
 {
 	int		ID;
 	bool	Enabled;
 	bool	Visible;
-	Shape	Shape;
+	ErShape	Shape;
 	int		TextureID;
 	float	Multiplier;
 	int		Unit;
 	
-#ifndef __CUDA_ARCH__
-	Light()
+	ErLight()
 	{
 		this->ID			= 0;
 		this->Enabled		= true;
@@ -386,9 +379,8 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Multiplier	= 100.0f;
 		this->Unit			= 0;
 	}
-#endif
 	
-	Light& operator = (const Light& Other)
+	ErLight& operator = (const ErLight& Other)
 	{
 		this->ID			= Other.ID;
 		this->Enabled		= Other.Enabled;
@@ -404,19 +396,17 @@ struct EXPOSURE_RENDER_DLL Light
 
 #define MAX_NO_LIGHTS 32
 
-struct EXPOSURE_RENDER_DLL Lights
+struct EXPOSURE_RENDER_DLL ErLights
 {
 	int		Count;
-	Light	List[MAX_NO_LIGHTS];
+	ErLight	List[MAX_NO_LIGHTS];
 
-#ifndef __CUDA_ARCH__
-	Lights()
+	ErLights()
 	{
 		this->Count	= 0;
 	}
-#endif
 
-	Lights& operator = (const Lights& Other)
+	ErLights& operator = (const ErLights& Other)
 	{
 		this->Count = Other.Count;
 		
@@ -429,7 +419,7 @@ struct EXPOSURE_RENDER_DLL Lights
 
 #define NO_COLOR_COMPONENTS 4
 
-struct EXPOSURE_RENDER_DLL Procedural
+struct EXPOSURE_RENDER_DLL ErProcedural
 {
 	Enums::ProceduralType	Type;
 	float					UniformColor[3];
@@ -439,13 +429,11 @@ struct EXPOSURE_RENDER_DLL Procedural
 	float					GradientColor2[3];
 	float					GradientColor3[3];
 
-#ifndef __CUDA_ARCH__
-	Procedural()
+	ErProcedural()
 	{
 	}
-#endif
 
-	Procedural& operator = (const Procedural& Other)
+	ErProcedural& operator = (const ErProcedural& Other)
 	{
 		this->Type				= Other.Type;
 		this->UniformColor[0]	= Other.UniformColor[0];
@@ -471,11 +459,11 @@ struct EXPOSURE_RENDER_DLL Procedural
 	}
 };
 
-struct EXPOSURE_RENDER_DLL RGBA
+struct EXPOSURE_RENDER_DLL ErRGBA
 {
 	unsigned char Data[NO_COLOR_COMPONENTS];
 
-	RGBA& operator = (const RGBA& Other)
+	ErRGBA& operator = (const ErRGBA& Other)
 	{
 		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
 			this->Data[i] = Other.Data[i];
@@ -483,22 +471,20 @@ struct EXPOSURE_RENDER_DLL RGBA
 		return *this;
 	}
 
-#ifndef __CUDA_ARCH__
-	RGBA()
+	ErRGBA()
 	{
 		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
 			this->Data[i] = 0;
 	}
-#endif
 };
 
-struct EXPOSURE_RENDER_DLL Image
+struct EXPOSURE_RENDER_DLL ErImage
 {
-	RGBA*		pData;
+	ErRGBA*		pData;
 	int			Size[2];
 	bool		Dirty;
 
-	Image& operator = (const Image& Other)
+	ErImage& operator = (const ErImage& Other)
 	{
 //		this->pData			= Other.pData;
 		this->Size[0]		= Other.Size[0];
@@ -508,35 +494,31 @@ struct EXPOSURE_RENDER_DLL Image
 		return *this;
 	}
 
-#ifndef __CUDA_ARCH__
-	Image()
+	ErImage()
 	{
 		this->pData				= NULL;
 		this->Size[0]			= 0;
 		this->Size[1]			= 0;
 		this->Dirty				= false;
 	}
-#endif
 };
 
-struct EXPOSURE_RENDER_DLL Texture
+struct EXPOSURE_RENDER_DLL ErTexture
 {
 	int						ID;
 	Enums::TextureType		Type;
 	float					OutputLevel;
-	Image					Image;
-	Procedural				Procedural;
+	ErImage					Image;
+	ErProcedural			Procedural;
 	float					Offset[2];
 	float					Repeat[2];
 	bool					Flip[2];
 
-#ifndef __CUDA_ARCH__
-	Texture()
+	ErTexture()
 	{
 	}
-#endif
 
-	Texture& operator = (const Texture& Other)
+	ErTexture& operator = (const ErTexture& Other)
 	{
 		this->ID			= Other.ID;
 		this->Type			= Other.Type;
@@ -556,19 +538,17 @@ struct EXPOSURE_RENDER_DLL Texture
 
 #define MAX_NO_TEXTURES 64
 
-struct EXPOSURE_RENDER_DLL Textures
+struct EXPOSURE_RENDER_DLL ErTextures
 {
 	int			Count;
-	Texture		List[MAX_NO_TEXTURES];
+	ErTexture	List[MAX_NO_TEXTURES];
 	
-#ifndef __CUDA_ARCH__
-	Textures()
+	ErTextures()
 	{
 		this->Count = 0;
 	}
-#endif
 
-	Textures& operator = (const Textures& Other)
+	ErTextures& operator = (const ErTextures& Other)
 	{
 		this->Count = Other.Count;
 		
@@ -579,18 +559,17 @@ struct EXPOSURE_RENDER_DLL Textures
 	}
 };
 
-struct EXPOSURE_RENDER_DLL Object
+struct EXPOSURE_RENDER_DLL ErObject
 {
 	int			ID;
 	bool		Enabled;
-	Shape		Shape;
+	ErShape		Shape;
 	int			DiffuseTextureID;
 	int			SpecularTextureID;
 	int			GlossinessTextureID;
 	float		Ior;
 
-#ifndef __CUDA_ARCH__
-	Object()
+	ErObject()
 	{
 		this->ID					= 0;
 		this->Enabled				= true;
@@ -599,9 +578,8 @@ struct EXPOSURE_RENDER_DLL Object
 		this->GlossinessTextureID	= -1;
 		this->Ior					= 0.0f;
 	}
-#endif
 
-	Object& operator = (const Object& Other)
+	ErObject& operator = (const ErObject& Other)
 	{
 		this->ID					= Other.ID;
 		this->Enabled				= Other.Enabled;
@@ -617,19 +595,17 @@ struct EXPOSURE_RENDER_DLL Object
 
 #define MAX_NO_OBJECTS 32
 
-struct EXPOSURE_RENDER_DLL Objects
+struct EXPOSURE_RENDER_DLL ErObjects
 {
 	int			Count;
-	Object		List[MAX_NO_OBJECTS];
+	ErObject	List[MAX_NO_OBJECTS];
 
-#ifndef __CUDA_ARCH__
-	Objects()
+	ErObjects()
 	{
 		this->Count = 0;
 	}
-#endif
 
-	Objects& operator = (const Objects& Other)
+	ErObjects& operator = (const ErObjects& Other)
 	{
 		this->Count = Other.Count;
 		
@@ -640,23 +616,21 @@ struct EXPOSURE_RENDER_DLL Objects
 	}
 };
 
-struct EXPOSURE_RENDER_DLL ClippingObject
+struct EXPOSURE_RENDER_DLL ErClippingObject
 {
 	int		ID;
 	bool	Enabled;
-	Shape	Shape;
+	ErShape	Shape;
 	bool	Invert;
 
-#ifndef __CUDA_ARCH__
-	ClippingObject()
+	ErClippingObject()
 	{
 		this->ID		= 0;
 		this->Enabled	= true;
 		this->Invert	= false;
 	}
-#endif
 
-	ClippingObject& operator = (const ClippingObject& Other)
+	ErClippingObject& operator = (const ErClippingObject& Other)
 	{
 		this->ID		= Other.ID;
 		this->Enabled	= Other.Enabled;
@@ -669,19 +643,17 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 
 #define MAX_NO_CLIPPING_OBJECTS 32
 
-struct EXPOSURE_RENDER_DLL ClippingObjects
+struct EXPOSURE_RENDER_DLL ErClippingObjects
 {
-	int				Count;
-	ClippingObject	List[MAX_NO_CLIPPING_OBJECTS];
+	int					Count;
+	ErClippingObject	List[MAX_NO_CLIPPING_OBJECTS];
 
-#ifndef __CUDA_ARCH__
-	ClippingObjects()
+	ErClippingObjects()
 	{
 		this->Count = 0;
 	}
-#endif
 
-	ClippingObjects& operator = (const ClippingObjects& Other)
+	ErClippingObjects& operator = (const ErClippingObjects& Other)
 	{
 		this->Count = Other.Count;
 		
@@ -692,27 +664,25 @@ struct EXPOSURE_RENDER_DLL ClippingObjects
 	}
 };
 
-struct EXPOSURE_RENDER_DLL RenderSettings
+struct EXPOSURE_RENDER_DLL ErRenderSettings
 {
-	struct EXPOSURE_RENDER_DLL TraversalSettings
+	struct EXPOSURE_RENDER_DLL ErTraversalSettings
 	{
 		float				StepSize;
 		float				StepSizeShadow;
 		bool				Shadows;
 		float				MaxShadowDistance;
 
-#ifndef __CUDA_ARCH__
-		TraversalSettings()
+		ErTraversalSettings()
 		{
 			this->StepSize			= 0.1f;
 			this->StepSizeShadow	= 0.1f;
 			this->Shadows			= true;
 			this->MaxShadowDistance	= 1.0f;
 		}
-#endif
 	};
 
-	struct EXPOSURE_RENDER_DLL ShadingSettings
+	struct EXPOSURE_RENDER_DLL ErShadingSettings
 	{
 		int					Type;
 		float				DensityScale;
@@ -722,8 +692,7 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 		float				GradientThreshold;
 		float				GradientFactor;
 
-#ifndef __CUDA_ARCH__
-		ShadingSettings()
+		ErShadingSettings()
 		{
 			this->Type					= 0;
 			this->DensityScale			= 100.0f;
@@ -733,57 +702,48 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 			this->GradientThreshold		= 0.5f;
 			this->GradientFactor		= 0.5f;
 		}
-#endif
 	};
 
-	TraversalSettings	Traversal;
-	ShadingSettings		Shading;
+	ErTraversalSettings	Traversal;
+	ErShadingSettings		Shading;
 
-#ifndef __CUDA_ARCH__
-	RenderSettings()
+	ErRenderSettings()
 	{
 	}
-#endif
 };
 
-struct EXPOSURE_RENDER_DLL Filtering
+struct EXPOSURE_RENDER_DLL ErFiltering
 {
-	struct EXPOSURE_RENDER_DLL GaussianFilterParameters
+	struct EXPOSURE_RENDER_DLL ErGaussianFilterParameters
 	{
 		int		KernelRadius;
 		float	Sigma;
 
-#ifndef __CUDA_ARCH__
-		GaussianFilterParameters()
+		ErGaussianFilterParameters()
 		{
 			this->KernelRadius	= 2;
 			this->Sigma			= 1.25f;
 		}
-#endif
 	};
 
-	struct EXPOSURE_RENDER_DLL BilateralFilterParameters
+	struct EXPOSURE_RENDER_DLL ErBilateralFilterParameters
 	{
 		float	SigmaD;
 		float	SigmaR;
 
-#ifndef __CUDA_ARCH__
-		BilateralFilterParameters()
+		ErBilateralFilterParameters()
 		{
 			this->SigmaD	= 5.0f;
 			this->SigmaR	= 5.0f;
 		}
-#endif
 	};
 
-	GaussianFilterParameters	FrameEstimateFilter;
-	BilateralFilterParameters	PostProcessingFilter;
+	ErGaussianFilterParameters	FrameEstimateFilter;
+	ErBilateralFilterParameters	PostProcessingFilter;
 
-#ifndef __CUDA_ARCH__
-	Filtering()
+	ErFiltering()
 	{
 	}
-#endif
 };
 
 }

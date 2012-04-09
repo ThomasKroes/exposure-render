@@ -25,7 +25,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void SampleShape(const Shape& Shape, const Vec3f& SampleUVW, SurfaceSample& SurfaceSample)
+DEVICE_NI void SampleShape(const ErShape& Shape, const Vec3f& SampleUVW, SurfaceSample& SurfaceSample)
 {
 	switch (Shape.Type)
 	{
@@ -38,7 +38,7 @@ DEVICE_NI void SampleShape(const Shape& Shape, const Vec3f& SampleUVW, SurfaceSa
 	}
 }
 
-DEVICE_NI void IntersectShape(const Shape& Shape, const Ray& R, Intersection& Intersection)
+DEVICE_NI void IntersectShape(const ErShape& Shape, const Ray& R, Intersection& Intersection)
 {
 	switch (Shape.Type)
 	{
@@ -51,7 +51,7 @@ DEVICE_NI void IntersectShape(const Shape& Shape, const Ray& R, Intersection& In
 	}
 }
 
-DEVICE_NI bool IntersectsShape(const Shape& Shape, const Ray& R)
+DEVICE_NI bool IntersectsShape(const ErShape& Shape, const Ray& R)
 {
 	Intersection Intersection;
 

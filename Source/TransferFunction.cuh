@@ -16,7 +16,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI float EvaluatePLF(const float& Intensity, PiecewiseLinearFunction& PLF)
+DEVICE_NI float EvaluatePLF(const float& Intensity, ErPiecewiseLinearFunction& PLF)
 {
 	if (Intensity < PLF.NodeRange.Min)
 		return PLF.Data[0];
@@ -38,12 +38,12 @@ DEVICE_NI float EvaluatePLF(const float& Intensity, PiecewiseLinearFunction& PLF
 	return 0.0f;
 }
 
-DEVICE_NI float EvaluateScalarTransferFunction1D(const float& Intensity, ScalarTransferFunction1D& TF)
+DEVICE_NI float EvaluateScalarTransferFunction1D(const float& Intensity, ErScalarTransferFunction1D& TF)
 {
 	return EvaluatePLF(Intensity, TF.PLF[0]);
 }
 
-DEVICE_NI ColorXYZf EvaluateColorTransferFunction1D(const float& Intensity, ColorTransferFunction1D& TF)
+DEVICE_NI ColorXYZf EvaluateColorTransferFunction1D(const float& Intensity, ErColorTransferFunction1D& TF)
 {
 	return ColorXYZf(EvaluatePLF(Intensity, TF.PLF[0]), EvaluatePLF(Intensity, TF.PLF[1]), EvaluatePLF(Intensity, TF.PLF[2]));
 }

@@ -21,7 +21,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void SampleLightSurface(Light& Light, LightSample& LS, SurfaceSample& SurfaceSample)
+DEVICE_NI void SampleLightSurface(ErLight& Light, LightSample& LS, SurfaceSample& SurfaceSample)
 {
 	SampleShape(Light.Shape, LS.SurfaceUVW, SurfaceSample);
 
@@ -30,7 +30,7 @@ DEVICE_NI void SampleLightSurface(Light& Light, LightSample& LS, SurfaceSample& 
 	SurfaceSample.N	= TransformVector(Light.Shape.TM, SurfaceSample.N);
 }
 
-DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
+DEVICE_NI void SampleLight(ErLight& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
 {
 	// First sample the light surface
 	SampleLightSurface(Light, LS, SS);
@@ -49,7 +49,7 @@ DEVICE_NI void SampleLight(Light& Light, LightSample& LS, SurfaceSample& SS, Sca
 }
 
 // Intersects a light with a ray
-DEVICE_NI void IntersectLight(Light& Light, const Ray& R, ScatterEvent& SE)
+DEVICE_NI void IntersectLight(ErLight& Light, const Ray& R, ScatterEvent& SE)
 {
 	const Ray Rt = TransformRay(Light.Shape.InvTM, R);
 
@@ -79,7 +79,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 
 	for (int i = 0; i < ((Tracer*)gpTracer)->Lights.Count; i++)
 	{
-		Light& Light = ((Tracer*)gpTracer)->Lights.List[i];
+		ErLight& Light = ((Tracer*)gpTracer)->Lights.List[i];
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 
@@ -99,7 +99,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 }
 
 // Determine if the ray intersects the light
-DEVICE_NI bool IntersectsLight(Light& Light, const Ray& R)
+DEVICE_NI bool IntersectsLight(ErLight& Light, const Ray& R)
 {
 	return IntersectsShape(Light.Shape, TransformRay(Light.Shape.InvTM, R));
 }

@@ -23,10 +23,10 @@ namespace ExposureRender
 struct SharedResources
 {
 	Volume<unsigned short>				Volumes[32];
-	Light								Lights[MAX_NO_LIGHTS];
-	Object								Objects[MAX_NO_OBJECTS];
-	ClippingObject						ClippingObjects[MAX_NO_CLIPPING_OBJECTS];
-	Texture								Textures[MAX_NO_TEXTURES];
+	ErLight								Lights[MAX_NO_LIGHTS];
+	ErObject								Objects[MAX_NO_OBJECTS];
+	ErClippingObject						ClippingObjects[MAX_NO_CLIPPING_OBJECTS];
+	ErTexture								Textures[MAX_NO_TEXTURES];
 
 	int									NoVolumes;
 	int									NoLights;
@@ -35,10 +35,10 @@ struct SharedResources
 	int									NoTextures;
 
 	std::map<int, Volume<unsigned short>>				VolumesMap;
-	std::map<int, Light>				LightsMap;
-	std::map<int, Object>				ObjectsMap;
-	std::map<int, ClippingObject>		ClippingObjectsMap;
-	std::map<int, Texture>				TexturesMap;
+	std::map<int, ErLight>				LightsMap;
+	std::map<int, ErObject>				ObjectsMap;
+	std::map<int, ErClippingObject>		ClippingObjectsMap;
+	std::map<int, ErTexture>				TexturesMap;
 
 	int									VolumeCounter;
 	int									LightCounter;
@@ -47,10 +47,10 @@ struct SharedResources
 	int									TextureCounter;
 
 	static std::map<int, Volume<unsigned short>>::iterator			VolumeIt;
-	static std::map<int, Light>::iterator			LightIt;
-	static std::map<int, Object>::iterator			ObjectIt;
-	static std::map<int, ClippingObject>::iterator	ClippingObjectIt;
-	static std::map<int, Texture>::iterator			TextureIt;
+	static std::map<int, ErLight>::iterator			LightIt;
+	static std::map<int, ErObject>::iterator			ObjectIt;
+	static std::map<int, ErClippingObject>::iterator	ClippingObjectIt;
+	static std::map<int, ErTexture>::iterator			TextureIt;
 
 	SharedResources()
 	{
@@ -83,7 +83,7 @@ struct SharedResources
 		}
 	}
 
-	void BindLight(Light Light, int& LightID)
+	void BindLight(ErLight Light, int& LightID)
 	{
 		LightID = LightCounter;
 
@@ -94,7 +94,7 @@ struct SharedResources
 		LightsMap[LightID] = Light;
 		LightCounter++;
 
-		Shape& Shape = LightsMap[LightID].Shape;
+		ErShape& Shape = LightsMap[LightID].Shape;
 
 		switch (Shape.Type)
 		{
@@ -118,7 +118,7 @@ struct SharedResources
 		}
 	}
 
-	void UnbindLight(Light Light)
+	void UnbindLight(ErLight Light)
 	{
 		/*
 		LightIt = LightsMap.find(Light);
@@ -143,7 +143,7 @@ struct SharedResources
 		*/
 	}
 	
-	void BindObject(Object Object, int& ObjectID)
+	void BindObject(ErObject Object, int& ObjectID)
 	{
 		ObjectID = ObjectCounter;
 
@@ -164,7 +164,7 @@ struct SharedResources
 		}
 	}
 
-	void UnbindObject(Object Object)
+	void UnbindObject(ErObject Object)
 	{
 		/*
 		ObjectIt = ObjectsMap.find(Object);
@@ -189,7 +189,7 @@ struct SharedResources
 		*/
 	}
 
-	void BindClippingObject(ClippingObject ClippingObject, int& ClippingObjectID)
+	void BindClippingObject(ErClippingObject ClippingObject, int& ClippingObjectID)
 	{
 		ClippingObjectID = ClippingObjectCounter;
 
@@ -210,7 +210,7 @@ struct SharedResources
 		}
 	}
 
-	void UnbindClippingObject(ClippingObject ClippingObject)
+	void UnbindClippingObject(ErClippingObject ClippingObject)
 	{
 		/*
 		ClippingObjectIt = ClippingObjectsMap.find(ClippingObject);
@@ -235,7 +235,7 @@ struct SharedResources
 		*/
 	}
 
-	void BindTexture(Texture Texture, int& TextureID)
+	void BindTexture(ErTexture Texture, int& TextureID)
 	{
 		TextureID = TextureCounter;
 
@@ -270,7 +270,7 @@ struct SharedResources
 		}
 	}
 
-	void UnbindTexture(Texture Texture)
+	void UnbindTexture(ErTexture Texture)
 	{
 		/*
 		TextureIt = TexturesMap.find(Texture);

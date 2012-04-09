@@ -49,7 +49,7 @@ DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 
 DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
 {
-	Light& Light = ((Tracer*)gpTracer)->Lights.List[LightID];
+	ErLight& Light = ((Tracer*)gpTracer)->Lights.List[LightID];
 
 	Vec3f Wi;
 

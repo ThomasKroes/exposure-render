@@ -29,7 +29,7 @@ DEVICE Volume<unsigned short> GetVolume()
 	return ((Tracer*)gpTracer)->Volume;
 }
 
-DEVICE Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
+DEVICE Vec3f TransformVector(const ErMatrix44& TM, const Vec3f& V)
 {
 	Vec3f Vt;
 
@@ -42,7 +42,7 @@ DEVICE Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
 	return Vt;
 }
 
-DEVICE Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
+DEVICE Vec3f TransformPoint(const ErMatrix44& TM, const Vec3f& P)
 {
 	const float x = P[0], y = P[1], z = P[2];
     
@@ -53,7 +53,7 @@ DEVICE Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
 	return Vec3f(Px, Py, Pz);
 }
 
-DEVICE Ray TransformRay(const Matrix44& TM, const Ray& R)
+DEVICE Ray TransformRay(const ErMatrix44& TM, const Ray& R)
 {
 	Ray Rt;
 
@@ -99,7 +99,7 @@ DEVICE float GetIntensity(const Vec3f& P)
 	return GetVolume().Get(P); 
 }
 
-DEVICE bool Inside(ClippingObject& ClippingObject, Vec3f P)
+DEVICE bool Inside(ErClippingObject& ClippingObject, Vec3f P)
 {
 	bool Inside = false;
 

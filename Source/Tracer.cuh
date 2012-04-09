@@ -29,30 +29,30 @@ struct Tracer
 	}
 
 	Volume<unsigned short>			Volume;
-	ScalarTransferFunction1D		Opacity1D;
-	ColorTransferFunction1D			Diffuse1D;
-	ColorTransferFunction1D			Specular1D;
-	ScalarTransferFunction1D		Glossiness1D;
-	ColorTransferFunction1D			Emission1D;
-	Lights							Lights;
-	Objects							Objects;
-	ClippingObjects					ClippingObjects;
-	Textures						Textures;
-	Camera							Camera;
-	RenderSettings					RenderSettings;
+	ErScalarTransferFunction1D		Opacity1D;
+	ErColorTransferFunction1D			Diffuse1D;
+	ErColorTransferFunction1D			Specular1D;
+	ErScalarTransferFunction1D		Glossiness1D;
+	ErColorTransferFunction1D			Emission1D;
+	ErLights							Lights;
+	ErObjects							Objects;
+	ErClippingObjects					ClippingObjects;
+	ErTextures						Textures;
+	ErCamera							Camera;
+	ErRenderSettings					RenderSettings;
 	GaussianFilter					FrameEstimateFilter;
 	BilateralFilter					PostProcessingFilter;
 	FrameBuffer						FrameBuffer;
 	int								NoIterations;
 
-	std::map<int, Light>			LightsMap;
-	std::map<int, Object>			ObjectsMap;
-	std::map<int, ClippingObject>	ClippingObjectsMap;
-	std::map<int, Texture>			TexturesMap;
+	std::map<int, ErLight>			LightsMap;
+	std::map<int, ErObject>			ObjectsMap;
+	std::map<int, ErClippingObject>	ClippingObjectsMap;
+	std::map<int, ErTexture>			TexturesMap;
 
 	void CopyLights()
 	{
-		std::map<int, ExposureRender::Light>::iterator It;
+		std::map<int, ExposureRender::ErLight>::iterator It;
 
 		Lights.Count = 0;
 
@@ -68,7 +68,7 @@ struct Tracer
 
 	void CopyObjects()
 	{
-		std::map<int, ExposureRender::Object>::iterator It;
+		std::map<int, ExposureRender::ErObject>::iterator It;
 
 		Objects.Count = 0;
 
@@ -84,7 +84,7 @@ struct Tracer
 
 	void CopyClippingObjects()
 	{
-		std::map<int, ExposureRender::ClippingObject>::iterator It;
+		std::map<int, ExposureRender::ErClippingObject>::iterator It;
 
 		ClippingObjects.Count = 0;
 
@@ -100,7 +100,7 @@ struct Tracer
 
 	void CopyTextures()
 	{
-		std::map<int, ExposureRender::Texture>::iterator It;
+		std::map<int, ExposureRender::ErTexture>::iterator It;
 
 		Textures.Count = 0;
 

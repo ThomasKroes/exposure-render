@@ -15,7 +15,7 @@
 
 #include "General.cuh"
 
-ExposureRender::KernelTimings gKernelTimings;
+ExposureRender::ErKernelTimings gKernelTimings;
 
 #include "Core.cuh"
 #include "CudaUtilities.cuh"
@@ -82,37 +82,37 @@ void SetTracer()
 //	cudaFree(pTracer);
 }
 
-EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D)
+EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ErScalarTransferFunction1D Opacity1D)
 {
 	gTracer.Opacity1D = Opacity1D;
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ColorTransferFunction1D Diffuse1D)
+EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ErColorTransferFunction1D Diffuse1D)
 {
 	gTracer.Diffuse1D = Diffuse1D;
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ColorTransferFunction1D Specular1D)
+EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ErColorTransferFunction1D Specular1D)
 {
 	gTracer.Specular1D = Specular1D;
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ScalarTransferFunction1D Glossiness1D)
+EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ErScalarTransferFunction1D Glossiness1D)
 {
 	gTracer.Glossiness1D = Glossiness1D;
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ColorTransferFunction1D Emission1D)
+EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ErColorTransferFunction1D Emission1D)
 {
 	gTracer.Emission1D = Emission1D;
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera)
+EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera)
 {
 	const Vec3f N = Normalize(ToVec3f(Camera.Target) - ToVec3f(Camera.Pos));
 	const Vec3f U = Normalize(Cross(N, ToVec3f(Camera.Up)));
@@ -166,9 +166,9 @@ EXPOSURE_RENDER_DLL void BindVolume(int TracerID, int Resolution[3], float Spaci
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindLight(int TracerID, Light Light)
+EXPOSURE_RENDER_DLL void BindLight(int TracerID, ErLight Light)
 {
-	std::map<int, ExposureRender::Light>::iterator It;
+	std::map<int, ExposureRender::ErLight>::iterator It;
 
 	It = gTracer.LightsMap.find(Light.ID);
 
@@ -176,7 +176,7 @@ EXPOSURE_RENDER_DLL void BindLight(int TracerID, Light Light)
 
 	gTracer.LightsMap[Light.ID] = Light;
 
-	Shape& Shape = gTracer.LightsMap[Light.ID].Shape;
+	ErShape& Shape = gTracer.LightsMap[Light.ID].Shape;
 
 	switch (Shape.Type)
 	{
@@ -193,9 +193,9 @@ EXPOSURE_RENDER_DLL void BindLight(int TracerID, Light Light)
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindLight(int TracerID, Light Light)
+EXPOSURE_RENDER_DLL void UnbindLight(int TracerID, ErLight Light)
 {
-	std::map<int, ExposureRender::Light>::iterator It;
+	std::map<int, ExposureRender::ErLight>::iterator It;
 
 	It = gTracer.LightsMap.find(Light.ID);
 
@@ -211,9 +211,9 @@ EXPOSURE_RENDER_DLL void UnbindLight(int TracerID, Light Light)
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindObject(int TracerID, Object Object)
+EXPOSURE_RENDER_DLL void BindObject(int TracerID, ErObject Object)
 {
-	std::map<int, ExposureRender::Object>::iterator It;
+	std::map<int, ExposureRender::ErObject>::iterator It;
 
 	It = gTracer.ObjectsMap.find(Object.ID);
 
@@ -223,9 +223,9 @@ EXPOSURE_RENDER_DLL void BindObject(int TracerID, Object Object)
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindObject(int TracerID, Object Object)
+EXPOSURE_RENDER_DLL void UnbindObject(int TracerID, ErObject Object)
 {
-	std::map<int, ExposureRender::Object>::iterator It;
+	std::map<int, ExposureRender::ErObject>::iterator It;
 
 	It = gTracer.ObjectsMap.find(Object.ID);
 
@@ -239,9 +239,9 @@ EXPOSURE_RENDER_DLL void UnbindObject(int TracerID, Object Object)
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(int TracerID, ClippingObject ClippingObject)
+EXPOSURE_RENDER_DLL void BindClippingObject(int TracerID, ErClippingObject ClippingObject)
 {
-	std::map<int, ExposureRender::ClippingObject>::iterator It;
+	std::map<int, ExposureRender::ErClippingObject>::iterator It;
 
 	It = gTracer.ClippingObjectsMap.find(ClippingObject.ID);
 
@@ -252,9 +252,9 @@ EXPOSURE_RENDER_DLL void BindClippingObject(int TracerID, ClippingObject Clippin
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindClippingObject(int TracerID, ClippingObject ClippingObject)
+EXPOSURE_RENDER_DLL void UnbindClippingObject(int TracerID, ErClippingObject ClippingObject)
 {
-	std::map<int, ExposureRender::ClippingObject>::iterator It;
+	std::map<int, ExposureRender::ErClippingObject>::iterator It;
 
 	It = gTracer.ClippingObjectsMap.find(ClippingObject.ID);
 
@@ -268,9 +268,9 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(int TracerID, ClippingObject Clipp
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindTexture(int TracerID, Texture Texture)
+EXPOSURE_RENDER_DLL void BindTexture(int TracerID, ErTexture Texture)
 {
-	std::map<int, ExposureRender::Texture>::iterator It;
+	std::map<int, ExposureRender::ErTexture>::iterator It;
 
 	It = gTracer.TexturesMap.find(Texture.ID);
 
@@ -297,9 +297,9 @@ EXPOSURE_RENDER_DLL void BindTexture(int TracerID, Texture Texture)
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void UnbindTexture(int TracerID, Texture Texture)
+EXPOSURE_RENDER_DLL void UnbindTexture(int TracerID, ErTexture Texture)
 {
-	std::map<int, ExposureRender::Texture>::iterator It;
+	std::map<int, ExposureRender::ErTexture>::iterator It;
 
 	It = gTracer.TexturesMap.find(Texture.ID);
 
@@ -315,13 +315,13 @@ EXPOSURE_RENDER_DLL void UnbindTexture(int TracerID, Texture Texture)
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings)
+EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings RenderSettings)
 {
 	gTracer.RenderSettings = RenderSettings;
 	SetTracer();
 }
 
-EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, Filtering Filtering)
+EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering)
 {
 	// Frame estimate filter
 	GaussianFilter Gaussian;
@@ -389,7 +389,7 @@ EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV
 	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
 }
 
-EXPOSURE_RENDER_DLL void GetKernelTimings(int TracerID, KernelTimings& KernelTimings)
+EXPOSURE_RENDER_DLL void GetKernelTimings(int TracerID, ErKernelTimings& KernelTimings)
 {
 	KernelTimings = gKernelTimings;
 }

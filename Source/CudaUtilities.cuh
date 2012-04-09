@@ -133,7 +133,7 @@ public:
 	static void HandleCudaError(const cudaError_t& CudaError)
 	{
 		if (CudaError != cudaSuccess)
-			throw(Exception("CUDA", cudaGetErrorString(CudaError), ""));
+			throw(ErException("CUDA", cudaGetErrorString(CudaError), ""));
 	}
 
 	static void ThreadSynchronize()
@@ -309,7 +309,7 @@ public:
 																						\
 	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop));		\
 																						\
-	gKernelTimings.Add(KernelTiming(title, TimeDelta));									\
+	gKernelTimings.Add(ErKernelTiming(title, TimeDelta));								\
 																						\
 	CUDA::HandleCudaError(cudaEventDestroy(EventStart));								\
 	CUDA::HandleCudaError(cudaEventDestroy(EventStop));									\
