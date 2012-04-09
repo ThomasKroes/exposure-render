@@ -355,7 +355,7 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 	CUDA::ThreadSynchronize();
 
 	SingleScattering();
-	FilterGaussian(gTracer.FrameBuffer.CudaFrameEstimate.GetPtr(), gTracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), gTracer.FrameBuffer.Resolution[0], gTracer.FrameBuffer.Resolution[1]);
+//	FilterGaussian(gTracer.FrameBuffer.CudaFrameEstimate.GetPtr(), gTracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), gTracer.FrameBuffer.Resolution[0], gTracer.FrameBuffer.Resolution[1]);
 	ComputeEstimate();
 	ToneMap();
 //	FilterBilateral(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateTemp.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
