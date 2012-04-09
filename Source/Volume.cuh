@@ -125,6 +125,11 @@ struct Volumes
 {
 	Volume		List[MAX_NO_VOLUMES];
 	int			Count;
+
+	Volumes()
+	{
+		this->Count = 0;
+	}
 };
 
 __device__ Volumes* gpVolumes = NULL;

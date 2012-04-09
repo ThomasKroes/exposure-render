@@ -184,6 +184,11 @@ struct Textures
 {
 	Texture		List[MAX_NO_TEXTURES];
 	int			Count;
+
+	Textures()
+	{
+		this->Count = 0;
+	}
 };
 
 __device__ Textures* gpTextures = NULL;

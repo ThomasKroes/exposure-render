@@ -74,6 +74,11 @@ struct ClippingObjects
 {
 	ClippingObject	List[MAX_NO_CLIPPING_OBJECTS];
 	int				Count;
+
+	ClippingObjects()
+	{
+		this->Count = 0;
+	}
 };
 
 __device__ int*	gpClippingObjects	= NULL;

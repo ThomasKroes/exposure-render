@@ -50,6 +50,11 @@ struct Objects
 {
 	Object	List[MAX_NO_OBJECTS];
 	int		Count;
+
+	Objects()
+	{
+		this->Count = 0;
+	}
 };
 
 __device__ Objects* gpObjects = NULL;

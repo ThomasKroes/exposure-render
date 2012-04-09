@@ -78,6 +78,11 @@ struct Lights
 {
 	Light	List[MAX_NO_LIGHTS];
 	int		Count;
+
+	Lights()
+	{
+		this->Count = 0;
+	}
 };
 
 __device__ Lights* gpLights = NULL;

@@ -24,8 +24,14 @@ namespace ExposureRender
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
 
-#define	MAX_NO_TIMINGS	64
-#define	MAX_CHAR_SIZE	256
+#define	MAX_NO_TIMINGS				64
+#define	MAX_CHAR_SIZE				256
+#define MAX_NO_TF_NODES 			256
+#define MAX_NO_VOLUMES				64
+#define MAX_NO_LIGHTS				64
+#define MAX_NO_OBJECTS				64
+#define MAX_NO_CLIPPING_OBJECTS		64
+#define MAX_NO_TEXTURES				64
 
 namespace Enums
 {
@@ -51,6 +57,23 @@ namespace Enums
 		Sphere,
 		Cylinder,
 		Cone
+	};
+
+	enum ShadingMode
+	{
+		BRDF = 0,
+		Phase,
+		Hybrid,
+		Modulation,
+		Threshold,
+		GradientMagnitude
+	};
+
+	enum GradientMode
+	{
+		ForwardDifferences,
+		CentralDifferences,
+		Filtered,
 	};
 }
 
@@ -150,7 +173,6 @@ struct EXPOSURE_RENDER_DLL ErRange
 	float	Extent;
 	float	Inv;
 	
-#ifndef __CUDA_ARCH__
 	ErRange()
 	{
 		this->Min 		= 0.0f;
@@ -158,7 +180,6 @@ struct EXPOSURE_RENDER_DLL ErRange
 		this->Extent	= 0.0f;
 		this->Inv		= 0.0f;
 	}
-#endif
 
 	void Set(float Range[2])
 	{
@@ -264,8 +285,6 @@ struct EXPOSURE_RENDER_DLL ErCamera
 	}
 };
 
-#define MAX_NO_VOLUMES 64
-
 struct EXPOSURE_RENDER_DLL ErVolume
 {
 	int					Resolution[3];
@@ -299,8 +318,6 @@ struct EXPOSURE_RENDER_DLL ErVolume
 		return *this;
 	}
 };
-
-#define MAX_NO_TF_NODES 256
 
 struct EXPOSURE_RENDER_DLL ErPiecewiseLinearFunction
 {
@@ -430,29 +447,6 @@ struct EXPOSURE_RENDER_DLL ErLight
 	}
 };
 
-#define MAX_NO_LIGHTS 64
-
-struct EXPOSURE_RENDER_DLL ErLights
-{
-	int		Count;
-	ErLight	List[MAX_NO_LIGHTS];
-
-	ErLights()
-	{
-		this->Count	= 0;
-	}
-
-	ErLights& operator = (const ErLights& Other)
-	{
-		this->Count = Other.Count;
-		
-		for (int i = 0; i < MAX_NO_LIGHTS; i++)
-			this->List[i] = Other.List[i];
-
-		return *this;
-	}
-};
-
 #define NO_COLOR_COMPONENTS 4
 
 struct EXPOSURE_RENDER_DLL ErProcedural
@@ -572,29 +566,6 @@ struct EXPOSURE_RENDER_DLL ErTexture
 	}
 };
 
-#define MAX_NO_TEXTURES 64
-
-struct EXPOSURE_RENDER_DLL ErTextures
-{
-	int			Count;
-	ErTexture	List[MAX_NO_TEXTURES];
-	
-	ErTextures()
-	{
-		this->Count = 0;
-	}
-
-	ErTextures& operator = (const ErTextures& Other)
-	{
-		this->Count = Other.Count;
-		
-		for (int i = 0; i < MAX_NO_TEXTURES; i++)
-			this->List[i] = Other.List[i];
-
-		return *this;
-	}
-};
-
 struct EXPOSURE_RENDER_DLL ErObject
 {
 	int			ID;
@@ -629,29 +600,6 @@ struct EXPOSURE_RENDER_DLL ErObject
 	}
 };
 
-#define MAX_NO_OBJECTS 64
-
-struct EXPOSURE_RENDER_DLL ErObjects
-{
-	int			Count;
-	ErObject	List[MAX_NO_OBJECTS];
-
-	ErObjects()
-	{
-		this->Count = 0;
-	}
-
-	ErObjects& operator = (const ErObjects& Other)
-	{
-		this->Count = Other.Count;
-		
-		for (int i = 0; i < MAX_NO_OBJECTS; i++)
-			this->List[i] = Other.List[i];
-
-		return *this;
-	}
-};
-
 struct EXPOSURE_RENDER_DLL ErClippingObject
 {
 	int		ID;
@@ -672,29 +620,6 @@ struct EXPOSURE_RENDER_DLL ErClippingObject
 		this->Enabled	= Other.Enabled;
 		this->Shape		= Other.Shape;
 		this->Invert	= Other.Invert;
-
-		return *this;
-	}
-};
-
-#define MAX_NO_CLIPPING_OBJECTS 64
-
-struct EXPOSURE_RENDER_DLL ErClippingObjects
-{
-	int					Count;
-	ErClippingObject	List[MAX_NO_CLIPPING_OBJECTS];
-
-	ErClippingObjects()
-	{
-		this->Count = 0;
-	}
-
-	ErClippingObjects& operator = (const ErClippingObjects& Other)
-	{
-		this->Count = Other.Count;
-		
-		for (int i = 0; i < MAX_NO_CLIPPING_OBJECTS; i++)
-			this->List[i] = Other.List[i];
 
 		return *this;
 	}
