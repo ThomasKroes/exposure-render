@@ -22,6 +22,16 @@ namespace ExposureRender
 
 struct Light : public ErLight
 {
+	Light()
+	{
+		printf("Light()\n");
+	}
+
+	~Light()
+	{
+		printf("~Light()\n");
+	}
+
 	DEVICE_NI void SampleSurface(LightSample& LS, SurfaceSample& SurfaceSample)
 	{
 		SampleShape(Shape, LS.SurfaceUVW, SurfaceSample);
@@ -71,6 +81,28 @@ struct Light : public ErLight
 	DEVICE_NI bool Intersects(const Ray& R)
 	{
 		return IntersectsShape(Shape, TransformRay(Shape.InvTM, R));
+	}
+
+	HOST Light& Light::operator = (const ErLight& Other)
+	{
+		this->Enabled		= Other.Enabled;
+		this->Visible		= Other.Visible;
+		this->Shape			= Other.Shape;
+		this->TextureID		= Other.TextureID;
+		this->Multiplier	= Other.Multiplier;
+		this->Unit			= Other.Unit;
+
+		switch (Shape.Type)
+		{
+			case Enums::Plane:		Shape.Area = PlaneArea(Vec2f(Shape.Size[0], Shape.Size[1]));				break;
+			case Enums::Disk:		Shape.Area = DiskArea(Shape.OuterRadius);									break;
+			case Enums::Ring:		Shape.Area = RingArea(Shape.OuterRadius, Shape.InnerRadius);				break;
+			case Enums::Box:		Shape.Area = BoxArea(Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]));	break;
+			case Enums::Sphere:		Shape.Area = SphereArea(Shape.OuterRadius);									break;
+			case Enums::Cylinder:	Shape.Area = CylinderArea(Shape.OuterRadius, Shape.Size[2]);				break;
+		}
+
+		return *this;
 	}
 };
 

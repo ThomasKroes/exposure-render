@@ -21,9 +21,18 @@ namespace ExposureRender
 
 struct Texture : public ErTexture
 {
+	Texture()
+	{
+		printf("Texture()\n");
+	}
+
+	~Texture()
+	{
+		printf("~Texture()\n");
+	}
+
 	HOST Texture& Texture::operator = (const ErTexture& Other)
 	{
-		this->ID			= Other.ID;
 		this->Type			= Other.Type;
 		this->OutputLevel	= Other.OutputLevel;
 		this->Image			= Other.Image;

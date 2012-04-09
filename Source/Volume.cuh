@@ -23,7 +23,16 @@ namespace ExposureRender
 
 struct Volume : public ErVolume
 {
-public:
+	Volume()
+	{
+		printf("Volume()\n");
+	}
+
+	~Volume()
+	{
+		printf("~Volume()\n");
+	}
+
 	HOST void Free()
 	{
 		if (this->pVoxels != NULL)
@@ -93,7 +102,7 @@ public:
 		this->GradientDeltaZ[1]	= 0.0f;
 		this->GradientDeltaZ[2]	= MinVoxelSize;
 
-		this->Free();
+		// this->Free();
 		
 		const int NoVoxels = (int)this->Resolution[0] * (int)this->Resolution[1] * (int)this->Resolution[2];
 

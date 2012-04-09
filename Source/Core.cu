@@ -141,183 +141,70 @@ EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 
 EXPOSURE_RENDER_DLL void BindLight(ErLight Light, int& ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
-
-	std::map<int, ExposureRender::ErLight>::iterator It;
-
-	It = CurrentTracer.LightsMap.find(Light.ID);
-
-	const bool Exists = It != CurrentTracer.LightsMap.end();
-
-	CurrentTracer.LightsMap[Light.ID] = Light;
-
-	ErShape& Shape = CurrentTracer.LightsMap[Light.ID].Shape;
-
-	switch (Shape.Type)
-	{
-		case Enums::Plane:		Shape.Area = PlaneArea(Vec2f(Shape.Size[0], Shape.Size[1]));				break;
-		case Enums::Disk:		Shape.Area = DiskArea(Shape.OuterRadius);									break;
-		case Enums::Ring:		Shape.Area = RingArea(Shape.OuterRadius, Shape.InnerRadius);				break;
-		case Enums::Box:		Shape.Area = BoxArea(Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]));	break;
-		case Enums::Sphere:		Shape.Area = SphereArea(Shape.OuterRadius);									break;
-		case Enums::Cylinder:	Shape.Area = CylinderArea(Shape.OuterRadius, Shape.Size[2]);				break;
-	}
-
-	CurrentTracer.CopyLights();
-	
-	BindTracer(TracerID);
-	*/
+	ID = gLightCounter;
+	gLights[gLightCounter] = Light;
+	gLightCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
+	std::map<int, ExposureRender::Light>::iterator It;
 
-	std::map<int, ExposureRender::ErLight>::iterator It;
+	It = gLights.find(ID);
 
-	It = CurrentTracer.LightsMap.find(Light.ID);
-
-	const bool Exists = It != CurrentTracer.LightsMap.end();
-
-	if (!Exists)
-		return;
-
-	CurrentTracer.LightsMap.erase(It);
-	
-	CurrentTracer.CopyLights();
-
-	BindTracer(TracerID);
-	*/
+	if (It != gLights.end())
+		gLights.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void BindObject(ErObject Object, int& ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
-
-	std::map<int, ExposureRender::ErObject>::iterator It;
-
-	It = CurrentTracer.ObjectsMap.find(Object.ID);
-
-	CurrentTracer.ObjectsMap[Object.ID] = Object;
-	CurrentTracer.CopyObjects();
-
-	BindTracer(TracerID);
-	*/
+	ID = gObjectCounter;
+	gObjects[gObjectCounter] = Object;
+	gObjectCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
+	std::map<int, ExposureRender::Object>::iterator It;
 
-	std::map<int, ExposureRender::ErObject>::iterator It;
+	It = gObjects.find(ID);
 
-	It = CurrentTracer.ObjectsMap.find(Object.ID);
-
-	if (It == CurrentTracer.ObjectsMap.end())
-		return;
-
-	CurrentTracer.ObjectsMap.erase(It);
-
-	CurrentTracer.CopyObjects();
-
-	BindTracer(TracerID);
-	*/
+	if (It != gObjects.end())
+		gObjects.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject ClippingObject, int& ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
-
-	std::map<int, ExposureRender::ErClippingObject>::iterator It;
-
-	It = CurrentTracer.ClippingObjectsMap.find(ClippingObject.ID);
-
-	CurrentTracer.ClippingObjectsMap[ClippingObject.ID] = ClippingObject;
-
-	CurrentTracer.CopyClippingObjects();
-
-	BindTracer(TracerID);
-	*/
+	ID = gClippingObjectCounter;
+	gClippingObjects[gClippingObjectCounter] = ClippingObject;
+	gClippingObjectCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
+	std::map<int, ExposureRender::ClippingObject>::iterator It;
 
-	std::map<int, ExposureRender::ErClippingObject>::iterator It;
+	It = gClippingObjects.find(ID);
 
-	It = CurrentTracer.ClippingObjectsMap.find(ClippingObject.ID);
-
-	if (It == CurrentTracer.ClippingObjectsMap.end())
-		return;
-
-	CurrentTracer.ClippingObjectsMap.erase(It);
-
-	CurrentTracer.CopyClippingObjects();
-
-	BindTracer(TracerID);
-	*/
+	if (It != gClippingObjects.end())
+		gClippingObjects.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture, int& ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
-
-	std::map<int, ExposureRender::ErTexture>::iterator It;
-
-	It = CurrentTracer.TexturesMap.find(Texture.ID);
-
-	const bool Exists = It != CurrentTracer.TexturesMap.end();
-
-	CurrentTracer.TexturesMap[Texture.ID] = Texture;
-
-	if (Texture.Image.Dirty)
-	{
-		if (CurrentTracer.TexturesMap[Texture.ID].Image.pData)
-			CUDA::Free(CurrentTracer.TexturesMap[Texture.ID].Image.pData);
-
-		if (Texture.Image.pData)
-		{
-			const int NoPixels = CurrentTracer.TexturesMap[Texture.ID].Image.Size[0] * CurrentTracer.TexturesMap[Texture.ID].Image.Size[1];
-		
-			CUDA::Allocate(CurrentTracer.TexturesMap[Texture.ID].Image.pData, NoPixels);
-			CUDA::MemCopyHostToDevice(Texture.Image.pData, CurrentTracer.TexturesMap[Texture.ID].Image.pData, NoPixels);
-		}
-	} 
-
-	CurrentTracer.CopyTextures();
-
-	BindTracer(TracerID);
-	*/
+	ID = gTextureCounter;
+	gTextures[gTextureCounter] = Texture;
+	gTextureCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 {
-	/*
-	EDIT_TRACER(TracerID)
+	std::map<int, ExposureRender::Texture>::iterator It;
 
-	std::map<int, ExposureRender::ErTexture>::iterator It;
+	It = gTextures.find(ID);
 
-	It = CurrentTracer.TexturesMap.find(Texture.ID);
-
-	if (It == CurrentTracer.TexturesMap.end())
-		return;
-
-	if (It->second.Image.pData)
-		CUDA::Free(It->second.Image.pData);
-
-	CurrentTracer.TexturesMap.erase(It);
-	CurrentTracer.CopyTextures();
-
-	BindTracer(TracerID);
-	*/
+	if (It != gTextures.end())
+		gTextures.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void SetTracerVolumeIDs(int ID[MAX_NO_VOLUMES], int Size)
@@ -446,9 +333,6 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 //	FilterGaussian(CurrentTracer.FrameBuffer.CudaFrameEstimate.GetPtr(), CurrentTracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
 	ComputeEstimate(CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
 	ToneMap(CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
-//	FilterBilateral(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateTemp.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
-//	MedianFilter(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
-//	Blend(gFrameBuffer.CudaDisplayEstimate.GetPtr(), gFrameBuffer.CudaDisplayEstimateFiltered.GetPtr(), gFrameBuffer.Resolution[0], gFrameBuffer.Resolution[1]);
 
 	CUDA::ThreadSynchronize();
 

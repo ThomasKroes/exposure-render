@@ -20,6 +20,16 @@ namespace ExposureRender
 
 struct ClippingObject : public ErClippingObject
 {
+	ClippingObject()
+	{
+		printf("ClippingObject()\n");
+	}
+
+	~ClippingObject()
+	{
+		printf("~ClippingObject()\n");
+	}
+
 	/*
 	DEVICE bool InsideClippingObject(ClippingObject& ClippingObject, const Vec3f& P)
 	{
@@ -68,6 +78,15 @@ struct ClippingObject : public ErClippingObject
 		return false;
 	}
 	*/
+
+	HOST ClippingObject& ClippingObject::operator = (const ErClippingObject& Other)
+	{
+		this->Enabled	= Other.Enabled;
+		this->Shape		= Other.Shape;
+		this->Invert	= Other.Invert;
+
+		return *this;
+	}
 };
 
 struct ClippingObjects

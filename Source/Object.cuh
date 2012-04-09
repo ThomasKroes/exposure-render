@@ -20,6 +20,16 @@ namespace ExposureRender
 
 struct Object : public ErObject
 {
+	Object()
+	{
+		printf("Object()\n");
+	}
+
+	~Object()
+	{
+		printf("~Object()\n");
+	}
+
 	DEVICE_NI void Intersect(const Ray& R, ScatterEvent& RS)
 	{
 		Ray Rt = TransformRay(Shape.InvTM, R);
@@ -43,6 +53,18 @@ struct Object : public ErObject
 	DEVICE_NI bool Intersects(const Ray& R)
 	{
 		return IntersectsShape(Shape, TransformRay(Shape.InvTM, R));
+	}
+
+	HOST Object& Object::operator = (const ErObject& Other)
+	{
+		this->Enabled				= Other.Enabled;
+		this->Shape					= Other.Shape;
+		this->DiffuseTextureID		= Other.DiffuseTextureID;
+		this->SpecularTextureID		= Other.SpecularTextureID;
+		this->GlossinessTextureID	= Other.GlossinessTextureID;
+		this->Ior					= Other.Ior;
+
+		return *this;
 	}
 };
 

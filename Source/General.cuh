@@ -71,7 +71,7 @@ namespace Enums
 
 	enum GradientMode
 	{
-		ForwardDifferences,
+		ForwardDifferences = 0,
 		CentralDifferences,
 		Filtered,
 	};
@@ -415,7 +415,6 @@ struct EXPOSURE_RENDER_DLL ErShape
 
 struct EXPOSURE_RENDER_DLL ErLight
 {
-	int		ID;
 	bool	Enabled;
 	bool	Visible;
 	ErShape	Shape;
@@ -425,7 +424,6 @@ struct EXPOSURE_RENDER_DLL ErLight
 	
 	ErLight()
 	{
-		this->ID			= 0;
 		this->Enabled		= true;
 		this->Visible		= true;
 		this->TextureID		= 0;
@@ -435,7 +433,6 @@ struct EXPOSURE_RENDER_DLL ErLight
 	
 	ErLight& operator = (const ErLight& Other)
 	{
-		this->ID			= Other.ID;
 		this->Enabled		= Other.Enabled;
 		this->Visible		= Other.Visible;
 		this->Shape			= Other.Shape;
@@ -535,7 +532,6 @@ struct EXPOSURE_RENDER_DLL ErImage
 
 struct EXPOSURE_RENDER_DLL ErTexture
 {
-	int						ID;
 	Enums::TextureType		Type;
 	float					OutputLevel;
 	ErImage					Image;
@@ -550,7 +546,6 @@ struct EXPOSURE_RENDER_DLL ErTexture
 
 	ErTexture& operator = (const ErTexture& Other)
 	{
-		this->ID			= Other.ID;
 		this->Type			= Other.Type;
 		this->OutputLevel	= Other.OutputLevel;
 		this->Image			= Other.Image;
@@ -568,7 +563,6 @@ struct EXPOSURE_RENDER_DLL ErTexture
 
 struct EXPOSURE_RENDER_DLL ErObject
 {
-	int			ID;
 	bool		Enabled;
 	ErShape		Shape;
 	int			DiffuseTextureID;
@@ -578,7 +572,6 @@ struct EXPOSURE_RENDER_DLL ErObject
 
 	ErObject()
 	{
-		this->ID					= 0;
 		this->Enabled				= true;
 		this->DiffuseTextureID		= -1;
 		this->SpecularTextureID		= -1;
@@ -588,7 +581,6 @@ struct EXPOSURE_RENDER_DLL ErObject
 
 	ErObject& operator = (const ErObject& Other)
 	{
-		this->ID					= Other.ID;
 		this->Enabled				= Other.Enabled;
 		this->Shape					= Other.Shape;
 		this->DiffuseTextureID		= Other.DiffuseTextureID;
@@ -602,21 +594,18 @@ struct EXPOSURE_RENDER_DLL ErObject
 
 struct EXPOSURE_RENDER_DLL ErClippingObject
 {
-	int		ID;
 	bool	Enabled;
 	ErShape	Shape;
 	bool	Invert;
 
 	ErClippingObject()
 	{
-		this->ID		= 0;
 		this->Enabled	= true;
 		this->Invert	= false;
 	}
 
 	ErClippingObject& operator = (const ErClippingObject& Other)
 	{
-		this->ID		= Other.ID;
 		this->Enabled	= Other.Enabled;
 		this->Shape		= Other.Shape;
 		this->Invert	= Other.Invert;
