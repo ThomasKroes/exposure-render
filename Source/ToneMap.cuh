@@ -41,10 +41,10 @@ KERNEL void KrnlToneMap()
 	((Tracer*)gpTracer)->FrameBuffer.CudaDisplayEstimate(X, Y)[3] = ((Tracer*)gpTracer)->FrameBuffer.CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
 }
 
-void ToneMap()
+void ToneMap(int Width, int Height)
 {
 	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)gTracer.FrameBuffer.Resolution[0] / (float)BlockDim.x), (int)ceilf((float)gTracer.FrameBuffer.Resolution[1] / (float)BlockDim.y));
+	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
 
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlToneMap<<<GridDim, BlockDim>>>()), "Tone map");
 }
