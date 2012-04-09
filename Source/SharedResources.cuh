@@ -14,17 +14,15 @@
 #pragma once
 
 #include "General.cuh"
-#include "GridVolume.cuh"
+#include "Volume.cuh"
 #include "Shape.cuh"
 
 namespace ExposureRender
 {
 
-typedef GridVolume<unsigned short> Volume;
-
 struct SharedResources
 {
-	Volume								Volumes[MAX_NO_VOLUMES];
+	Volume<unsigned short>				Volumes[32];
 	Light								Lights[MAX_NO_LIGHTS];
 	Object								Objects[MAX_NO_OBJECTS];
 	ClippingObject						ClippingObjects[MAX_NO_CLIPPING_OBJECTS];
@@ -36,7 +34,7 @@ struct SharedResources
 	int									NoClippingObjects;
 	int									NoTextures;
 
-	std::map<int, Volume>				VolumesMap;
+	std::map<int, Volume<unsigned short>>				VolumesMap;
 	std::map<int, Light>				LightsMap;
 	std::map<int, Object>				ObjectsMap;
 	std::map<int, ClippingObject>		ClippingObjectsMap;
@@ -48,7 +46,7 @@ struct SharedResources
 	int									ClippingObjectCounter;
 	int									TextureCounter;
 
-	static std::map<int, Volume>::iterator			VolumeIt;
+	static std::map<int, Volume<unsigned short>>::iterator			VolumeIt;
 	static std::map<int, Light>::iterator			LightIt;
 	static std::map<int, Object>::iterator			ObjectIt;
 	static std::map<int, ClippingObject>::iterator	ClippingObjectIt;
@@ -72,7 +70,7 @@ struct SharedResources
 	{
 		VolumeID = VolumeCounter;
 
-		VolumesMap[VolumeCounter] = Volume();
+		VolumesMap[VolumeCounter] = Volume<unsigned short>();
 		VolumesMap[VolumeCounter].Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), pVoxels, NormalizeSize);
 		VolumeCounter++;
 		
@@ -112,9 +110,9 @@ struct SharedResources
 
 		for (LightIt = LightsMap.begin(); LightIt != LightsMap.end(); LightIt++)
 		{
-			if (It->second.Enabled)
+			if (LightIt->second.Enabled)
 			{
-				Lights[NoLights] = It->second;
+				Lights[NoLights] = LightIt->second;
 				NoLights++;
 			}
 		}
@@ -122,6 +120,7 @@ struct SharedResources
 
 	void UnbindLight(Light Light)
 	{
+		/*
 		LightIt = LightsMap.find(Light);
 
 		const bool Exists = LightIt != LightsMap.end();
@@ -141,6 +140,7 @@ struct SharedResources
 				NoLights++;
 			}
 		}
+		*/
 	}
 	
 	void BindObject(Object Object, int& ObjectID)
@@ -166,6 +166,7 @@ struct SharedResources
 
 	void UnbindObject(Object Object)
 	{
+		/*
 		ObjectIt = ObjectsMap.find(Object);
 
 		const bool Exists = ObjectIt != ObjectsMap.end();
@@ -185,6 +186,7 @@ struct SharedResources
 				NoObjects++;
 			}
 		}
+		*/
 	}
 
 	void BindClippingObject(ClippingObject ClippingObject, int& ClippingObjectID)
@@ -210,6 +212,7 @@ struct SharedResources
 
 	void UnbindClippingObject(ClippingObject ClippingObject)
 	{
+		/*
 		ClippingObjectIt = ClippingObjectsMap.find(ClippingObject);
 
 		const bool Exists = ClippingObjectIt != ClippingObjectsMap.end();
@@ -229,6 +232,7 @@ struct SharedResources
 				NoClippingObjects++;
 			}
 		}
+		*/
 	}
 
 	void BindTexture(Texture Texture, int& TextureID)
@@ -268,6 +272,7 @@ struct SharedResources
 
 	void UnbindTexture(Texture Texture)
 	{
+		/*
 		TextureIt = TexturesMap.find(Texture);
 
 		const bool Exists = TextureIt != TexturesMap.end();
@@ -288,8 +293,9 @@ struct SharedResources
 			Textures[NoTextures].Image.pData = TextureIt->second.Image.pData;
 			NoTextures++;
 		}
+		*/
 	}
 
-}
+};
 
 }

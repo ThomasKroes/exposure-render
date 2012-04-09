@@ -25,7 +25,7 @@ ExposureRender::KernelTimings gKernelTimings;
 
 
 __device__ int* gpTracer;
-
+__device__ int*	gpSharedResources = NULL;
 
 
 int	gNoIterations = 0;
@@ -34,6 +34,11 @@ int	gNoIterations = 0;
 
 ExposureRender::Tracer gTracer;
 
+#include "SharedResources.cuh"
+
+ExposureRender::SharedResources* pSharedResources = NULL;
+
+ExposureRender::SharedResources gSharedResources;
 
 #include "GaussianFilter.cuh"
 #include "BilateralFilter.cuh"
