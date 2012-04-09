@@ -20,6 +20,11 @@
 namespace ExposureRender
 {
 
+struct Object : public ErObject
+{
+
+};
+
 // Intersect a reflector with a ray
 DEVICE_NI void IntersectObject(ErObject& Object, const Ray& R, ScatterEvent& RS)
 {

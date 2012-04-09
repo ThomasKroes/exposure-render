@@ -14,59 +14,52 @@
 #pragma once
 
 #include "General.cuh"
+
 #include "Volume.cuh"
-#include "Shape.cuh"
+#include "Light.cuh"
+#include "Object.cuh"
+#include "ClippingObject.cuh"
+#include "Texture.cuh"
 
 namespace ExposureRender
 {
 
-struct SharedResources
+struct Shared
 {
-	Volume<unsigned short>				Volumes[32];
-	ErLight								Lights[MAX_NO_LIGHTS];
-	ErObject								Objects[MAX_NO_OBJECTS];
-	ErClippingObject						ClippingObjects[MAX_NO_CLIPPING_OBJECTS];
-	ErTexture								Textures[MAX_NO_TEXTURES];
+	Volume									Volumes[32];
+	Light									Lights[MAX_NO_LIGHTS];
+	Object									Objects[MAX_NO_OBJECTS];
+	ClippingObject							ClippingObjects[MAX_NO_CLIPPING_OBJECTS];
+	Texture									Textures[MAX_NO_TEXTURES];
 
-	int									NoVolumes;
-	int									NoLights;
-	int									NoObjects;
-	int									NoClippingObjects;
-	int									NoTextures;
-
-	std::map<int, Volume<unsigned short>>				VolumesMap;
-	std::map<int, ErLight>				LightsMap;
-	std::map<int, ErObject>				ObjectsMap;
-	std::map<int, ErClippingObject>		ClippingObjectsMap;
+	std::map<int, Volume<unsigned short>>	VolumesMap;
+	std::map<int, ErLight>					LightsMap;
+	std::map<int, ErObject>					ObjectsMap;
+	std::map<int, ErClippingObject>			ClippingObjectsMap;
 	std::map<int, ErTexture>				TexturesMap;
 
-	int									VolumeCounter;
-	int									LightCounter;
-	int									ObjectCounter;
-	int									ClippingObjectCounter;
-	int									TextureCounter;
+	int										VolumeCounter;
+	int										LightCounter;
+	int										ObjectCounter;
+	int										ClippingObjectCounter;
+	int										TextureCounter;
 
-	static std::map<int, Volume<unsigned short>>::iterator			VolumeIt;
-	static std::map<int, ErLight>::iterator			LightIt;
-	static std::map<int, ErObject>::iterator			ObjectIt;
-	static std::map<int, ErClippingObject>::iterator	ClippingObjectIt;
-	static std::map<int, ErTexture>::iterator			TextureIt;
+	static std::map<int, Volume>::iterator				VolumeIt;
+	static std::map<int, Light>::iterator				LightIt;
+	static std::map<int, Object>::iterator				ObjectIt;
+	static std::map<int, ClippingObject>::iterator		ClippingObjectIt;
+	static std::map<int, Texture>::iterator				TextureIt;
 
 	SharedResources()
 	{
-		this->NoVolumes					= 0;
-		this->NoLights					= 0;
-		this->NoObjects					= 0;
-		this->NoClippingObjects			= 0;
-		this->NoTextures				= 0;
-		this->VolumeCounter				= 0;
-		this->LightCounter				= 0;
-		this->ObjectCounter				= 0;
-		this->ClippingObjectCounter		= 0;
-		this->TextureCounter			= 0;
+		this->VolumeCounter			= 0;
+		this->LightCounter			= 0;
+		this->ObjectCounter			= 0;
+		this->ClippingObjectCounter	= 0;
+		this->TextureCounter		= 0;
 	}
 
-	void BindVolume(int Resolution[3], float Spacing[3], unsigned short* pVoxels, int& VolumeID, bool NormalizeSize)
+	void BindVolume(ErVolume Volume)
 	{
 		VolumeID = VolumeCounter;
 
@@ -239,35 +232,8 @@ struct SharedResources
 	{
 		TextureID = TextureCounter;
 
-		TextureIt = TexturesMap.find(TextureID);
-
-		const bool Exists = TextureIt != TexturesMap.end();
-
 		TexturesMap[TextureID] = Texture;
 		TextureCounter++;
-
-		if (Texture.Image.Dirty)
-		{
-			if (TexturesMap[TextureID].Image.pData)
-				CUDA::Free(TexturesMap[TextureID].Image.pData);
-
-			if (Texture.Image.pData)
-			{
-				const int NoPixels = TexturesMap[TextureID].Image.Size[0] * TexturesMap[TextureID].Image.Size[1];
-			
-				CUDA::Allocate(TexturesMap[TextureID].Image.pData, NoPixels);
-				CUDA::MemCopyHostToDevice(Texture.Image.pData, TexturesMap[TextureID].Image.pData, NoPixels);
-			}
-		} 
-
-		NoTextures = 0;
-
-		for (TextureIt = TexturesMap.begin(); TextureIt != TexturesMap.end(); TextureIt++)
-		{
-			Textures[NoTextures] = TextureIt->second;
-			Textures[NoTextures].Image.pData = TextureIt->second.Image.pData;
-			NoTextures++;
-		}
 	}
 
 	void UnbindTexture(ErTexture Texture)

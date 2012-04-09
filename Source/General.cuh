@@ -264,6 +264,42 @@ struct EXPOSURE_RENDER_DLL ErCamera
 	}
 };
 
+#define MAX_NO_LIGHTS 64
+
+struct EXPOSURE_RENDER_DLL ErVolume
+{
+	int					Resolution[3];
+	float				Spacing[3];
+	unsigned short*		pVoxels;
+	bool				NormalizeSize;
+
+	ErVolume()
+	{
+		this->Resolution[0]			= 0;
+		this->Resolution[1]			= 0;
+		this->Resolution[2]			= 0;
+		this->Spacing[0]			= 0.0f;
+		this->Spacing[1]			= 0.0f;
+		this->Spacing[2]			= 0.0f;
+		this->pVoxels				= NULL;
+		this->NormalizeSize			= false;
+	}
+
+	ErVolume& operator = (const ErVolume& Other)
+	{
+		this->Resolution[0]			= Other.Resolution[0];
+		this->Resolution[1]			= Other.Resolution[1];
+		this->Resolution[2]			= Other.Resolution[2];
+		this->Spacing[0]			= Other.Spacing[0];
+		this->Spacing[1]			= Other.Spacing[1];
+		this->Spacing[2]			= Other.Spacing[2];
+		this->pVoxels				= Other.pVoxels;
+		this->NormalizeSize			= Other.NormalizeSize;
+
+		return *this;
+	}
+};
+
 #define MAX_NO_TF_NODES 256
 
 struct EXPOSURE_RENDER_DLL ErPiecewiseLinearFunction
@@ -394,7 +430,7 @@ struct EXPOSURE_RENDER_DLL ErLight
 	}
 };
 
-#define MAX_NO_LIGHTS 32
+#define MAX_NO_LIGHTS 64
 
 struct EXPOSURE_RENDER_DLL ErLights
 {
@@ -593,7 +629,7 @@ struct EXPOSURE_RENDER_DLL ErObject
 	}
 };
 
-#define MAX_NO_OBJECTS 32
+#define MAX_NO_OBJECTS 64
 
 struct EXPOSURE_RENDER_DLL ErObjects
 {
@@ -641,7 +677,7 @@ struct EXPOSURE_RENDER_DLL ErClippingObject
 	}
 };
 
-#define MAX_NO_CLIPPING_OBJECTS 32
+#define MAX_NO_CLIPPING_OBJECTS 64
 
 struct EXPOSURE_RENDER_DLL ErClippingObjects
 {

@@ -21,6 +21,11 @@
 namespace ExposureRender
 {
 
+struct ClippingObject : public ErClippingObject
+{
+
+};
+
 DEVICE bool InsideClippingObject(ClippingObject& ClippingObject, const Vec3f& P)
 {
 	bool Inside = false;

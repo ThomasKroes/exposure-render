@@ -24,7 +24,7 @@
 namespace ExposureRender
 {
 
-DEVICE Volume<unsigned short> GetVolume()
+DEVICE Volume GetVolume()
 {
 	return ((Tracer*)gpTracer)->Volume;
 }

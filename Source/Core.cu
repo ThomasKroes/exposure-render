@@ -224,15 +224,15 @@ EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera)
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(int TracerID, int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize)
+EXPOSURE_RENDER_DLL void BindVolume(ErVolume& Volume)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), pVoxels, NormalizeSize);
-	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindLight(int TracerID, ErLight Light)
+EXPOSURE_RENDER_DLL void UnbindVolume(ErVolume& Volume)
+{
+}
+
+EXPOSURE_RENDER_DLL void BindLight(ErLight Light)
 {
 	EDIT_TRACER(TracerID)
 
@@ -261,7 +261,7 @@ EXPOSURE_RENDER_DLL void BindLight(int TracerID, ErLight Light)
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void UnbindLight(int TracerID, ErLight Light)
+EXPOSURE_RENDER_DLL void UnbindLight(ErLight Light)
 {
 	EDIT_TRACER(TracerID)
 
@@ -281,7 +281,7 @@ EXPOSURE_RENDER_DLL void UnbindLight(int TracerID, ErLight Light)
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindObject(int TracerID, ErObject Object)
+EXPOSURE_RENDER_DLL void BindObject(ErObject Object)
 {
 	EDIT_TRACER(TracerID)
 
@@ -295,7 +295,7 @@ EXPOSURE_RENDER_DLL void BindObject(int TracerID, ErObject Object)
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void UnbindObject(int TracerID, ErObject Object)
+EXPOSURE_RENDER_DLL void UnbindObject(ErObject Object)
 {
 	EDIT_TRACER(TracerID)
 
@@ -313,7 +313,7 @@ EXPOSURE_RENDER_DLL void UnbindObject(int TracerID, ErObject Object)
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(int TracerID, ErClippingObject ClippingObject)
+EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject ClippingObject)
 {
 	EDIT_TRACER(TracerID)
 
@@ -328,7 +328,7 @@ EXPOSURE_RENDER_DLL void BindClippingObject(int TracerID, ErClippingObject Clipp
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void UnbindClippingObject(int TracerID, ErClippingObject ClippingObject)
+EXPOSURE_RENDER_DLL void UnbindClippingObject(ErClippingObject ClippingObject)
 {
 	EDIT_TRACER(TracerID)
 
@@ -346,7 +346,7 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(int TracerID, ErClippingObject Cli
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindTexture(int TracerID, ErTexture Texture)
+EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture)
 {
 	EDIT_TRACER(TracerID)
 
@@ -377,7 +377,7 @@ EXPOSURE_RENDER_DLL void BindTexture(int TracerID, ErTexture Texture)
 	BindTracer(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void UnbindTexture(int TracerID, ErTexture Texture)
+EXPOSURE_RENDER_DLL void UnbindTexture(ErTexture Texture)
 {
 	EDIT_TRACER(TracerID)
 

@@ -21,6 +21,11 @@
 namespace ExposureRender
 {
 
+struct Light : public ErLight
+{
+
+};
+
 DEVICE_NI void SampleLightSurface(ErLight& Light, LightSample& LS, SurfaceSample& SurfaceSample)
 {
 	SampleShape(Light.Shape, LS.SurfaceUVW, SurfaceSample);

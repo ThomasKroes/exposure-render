@@ -24,27 +24,26 @@ namespace ExposureRender
 
 struct Tracer
 {
-	~Tracer()
-	{
-	}
-
-	Volume<unsigned short>			Volume;
+	//Volume<unsigned short>		Volume;
 	ErScalarTransferFunction1D		Opacity1D;
-	ErColorTransferFunction1D			Diffuse1D;
-	ErColorTransferFunction1D			Specular1D;
+	ErColorTransferFunction1D		Diffuse1D;
+	ErColorTransferFunction1D		Specular1D;
 	ErScalarTransferFunction1D		Glossiness1D;
-	ErColorTransferFunction1D			Emission1D;
-	ErLights							Lights;
-	ErObjects							Objects;
-	ErClippingObjects					ClippingObjects;
+	ErColorTransferFunction1D		Emission1D;
+	/*
+	ErLights						Lights;
+	ErObjects						Objects;
+	ErClippingObjects				ClippingObjects;
 	ErTextures						Textures;
-	ErCamera							Camera;
-	ErRenderSettings					RenderSettings;
+	*/
+	ErCamera						Camera;
+	ErRenderSettings				RenderSettings;
 	GaussianFilter					FrameEstimateFilter;
 	BilateralFilter					PostProcessingFilter;
 	FrameBuffer						FrameBuffer;
 	int								NoIterations;
 
+	/*
 	std::map<int, ErLight>			LightsMap;
 	std::map<int, ErObject>			ObjectsMap;
 	std::map<int, ErClippingObject>	ClippingObjectsMap;
@@ -111,6 +110,7 @@ struct Tracer
 			Textures.Count++;
 		}
 	}
+	*/
 
 	struct Indices
 	{

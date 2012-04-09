@@ -19,6 +19,40 @@
 namespace ExposureRender
 {
 
+struct Texture : public ErTexture
+{
+	HOST Texture& Texture::operator = (const ErTexture& Other)
+	{
+		this->ID			= Other.ID;
+		this->Type			= Other.Type;
+		this->OutputLevel	= Other.OutputLevel;
+		this->Image			= Other.Image;
+		this->Procedural	= Other.Procedural;
+		this->Offset[0]		= Other.Offset[0];
+		this->Offset[1]		= Other.Offset[1];
+		this->Repeat[0]		= Other.Repeat[0];
+		this->Repeat[1]		= Other.Repeat[1];
+		this->Flip[0]		= Other.Flip[0];
+		this->Flip[1]		= Other.Flip[1];
+
+		if (this->Image.Dirty)
+		{
+			if (this->Image.pData)
+				CUDA::Free(this->Image.pData);
+
+			if (this->Image.pData)
+			{
+				const int NoPixels = this->Image.Size[0] * this->Image.Size[1];
+			
+				CUDA::Allocate(this->Image.pData, NoPixels);
+				CUDA::MemCopyHostToDevice(Other.Image.pData, this->Image.pData, NoPixels);
+			}
+		} 
+
+		return *this;
+	}
+};
+
 DEVICE_NI ColorXYZf EvaluateBitmap(const int& ID, const int& U, const int& V)
 {
 	if (((Tracer*)gpTracer)->Textures.List[ID].Image.pData == NULL)

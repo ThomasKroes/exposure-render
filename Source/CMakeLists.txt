@@ -75,15 +75,16 @@ SET(ErCudaGeneral
 	Color.cuh
 	Ray.cuh
 	Statistics.cuh
-	Light.cuh
-	Object.cuh
+	
+	
 	GradientMagnitude.cuh
 	AutoFocus.cuh
-	Texture.cuh
-	Volume.cuh
+	
+	
 	Tracer.cuh
 	TransferFunction.cuh
-	SharedResources.cuh
+	
+	
 	Core.cu
 )
 
@@ -112,6 +113,19 @@ SET(ErBenchmark
 # Benchmark group
 SOURCE_GROUP("Benchmark" FILES ${ErBenchmark})
 
+# Shared
+SET(ErShared
+	Volume.cuh
+	Light.cuh
+	Object.cuh
+	ClippingObject.cuh
+	Texture.cuh
+	SharedResources.cuh
+)
+
+# Shared group
+SOURCE_GROUP("Shared" FILES ${ErShared})
+
 # Filters
 SET(ErCudaFilters
 	Filter.cuh
@@ -125,7 +139,7 @@ SET(ErCudaFilters
 SOURCE_GROUP("Filters" FILES ${ErCudaFilters})
 
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErBenchmark} ${ErCudaFilters} SHARED)
+CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErBenchmark} ${ErShared} ${ErCudaFilters} SHARED)
 
 # This is hack, we need a more elegant solution for this!
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)

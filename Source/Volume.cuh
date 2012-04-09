@@ -21,40 +21,52 @@
 namespace ExposureRender
 {
 
-template <class T>
-class Volume
+struct Volume : public ErVolume
 {
 public:
-	HOST_DEVICE Volume()
+	HOST void Free()
 	{
-//		this->Resolution;
-//		this->MinAABB;
-//		this->MaxAABB;
-//		this->Size;
-//		this->InvSize;
-//		this->Spacing;
-//		this->InvSpacing;
-//		this->GradientDeltaX;
-//		this->GradientDeltaY;
-//		this->GradientDeltaZ;
-//		this->IntensityRange;
-//		this->GradientMagnitudeRange;
-		this->pVoxels = NULL;
+		if (this->pVoxels != NULL)
+			CUDA::Free(this->pVoxels);
 	}
-	
-	HOST void Set(Vec3f Resolution, Vec3f Spacing, T* pVoxels, bool NormalizeSize = false)
+
+	HOST_DEVICE unsigned short Get(Vec3i XYZ) const
 	{
+		if (!this->pVoxels)
+			return unsigned short();
+
+		XYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
+		
+		return this->pVoxels[XYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + XYZ[1] * (int)this->Resolution[0] + XYZ[0]];
+	}
+
+	HOST_DEVICE unsigned short Get(Vec3f XYZ) const
+	{
+		Vec3f LocalXYZ = this->Resolution * ((XYZ - this->MinAABB) * this->InvSize);
+
+		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
+	}
+
+	HOST Volume& Volume::operator = (const ErVolume& Other)
+	{
+		this->Resolution[0]		= Other.Resolution[0];
+		this->Resolution[1]		= Other.Resolution[1];
+		this->Resolution[2]		= Other.Resolution[2];
+		this->Spacing[0]		= Other.Spacing[0];
+		this->Spacing[1]		= Other.Spacing[1];
+		this->Spacing[2]		= Other.Spacing[2];
+		this->NormalizeSize		= Other.NormalizeSize;
+
 		float Scale = 1.0f;
 
-		if (NormalizeSize)
+		if (this->NormalizeSize)
 		{
-			const Vec3f PhysicalSize = Resolution * Spacing;
+			const Vec3f PhysicalSize = this->Resolution * this->Spacing;
 			
 			const float Max = max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
 			Scale = 1.0f / Max;
 		}
 
-		this->Resolution		= Resolution;
 		this->InvResolution[0]	= 1.0f / this->Resolution[0];
 		this->InvResolution[1]	= 1.0f / this->Resolution[1];
 		this->InvResolution[2]	= 1.0f / this->Resolution[2];
@@ -86,67 +98,27 @@ public:
 		const int NoVoxels = (int)this->Resolution[0] * (int)this->Resolution[1] * (int)this->Resolution[2];
 
 		if (NoVoxels <= 0)
-			return;
+			return *this;
 
 		CUDA::Allocate(this->pVoxels, NoVoxels);
-		CUDA::MemCopyHostToDevice(pVoxels, this->pVoxels, NoVoxels);
-	}
-
-	HOST void Free()
-	{
-		if (this->pVoxels != NULL)
-			CUDA::Free(this->pVoxels);
-	}
-
-	HOST_DEVICE T Get(Vec3i XYZ) const
-	{
-		if (!this->pVoxels)
-			return T();
-
-		XYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
-		
-		return this->pVoxels[XYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + XYZ[1] * (int)this->Resolution[0] + XYZ[0]];
-	}
-
-	HOST_DEVICE T Get(Vec3f XYZ) const
-	{
-		Vec3f LocalXYZ = this->Resolution * ((XYZ - this->MinAABB) * this->InvSize);
-
-		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
-	}
-
-	HOST Volume& Volume::operator = (const Volume& Other)
-	{
-		this->Resolution				= Other.Resolution;
-		this->InvResolution				= Other.InvResolution;
-		this->MinAABB					= Other.MinAABB;
-		this->MaxAABB					= Other.MaxAABB;
-		this->Size						= Other.Size;
-		this->InvSize					= Other.InvSize;
-		this->Spacing					= Other.Spacing;
-		this->InvSpacing				= Other.InvSpacing;
-		this->GradientDeltaX			= Other.GradientDeltaX;
-		this->GradientDeltaY			= Other.GradientDeltaY;
-		this->GradientDeltaZ			= Other.GradientDeltaZ;
-		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
-		this->pVoxels					= Other.pVoxels;
+		CUDA::MemCopyHostToDevice(Other.pVoxels, this->pVoxels, NoVoxels);
 
 		return *this;
 	}
 	
-	Vec3f	Resolution;
-	Vec3f	InvResolution;
-	Vec3f	MinAABB;
-	Vec3f	MaxAABB;
-	Vec3f	Size;
-	Vec3f	InvSize;
-	Vec3f	Spacing;
-	Vec3f	InvSpacing;
-	Vec3f	GradientDeltaX;
-	Vec3f	GradientDeltaY;
-	Vec3f	GradientDeltaZ;
-	ErRange	GradientMagnitudeRange;
-	T*		pVoxels;
+	Vec3f				Resolution;
+	Vec3f				InvResolution;
+	Vec3f				MinAABB;
+	Vec3f				MaxAABB;
+	Vec3f				Size;
+	Vec3f				InvSize;
+	Vec3f				Spacing;
+	Vec3f				InvSpacing;
+	Vec3f				GradientDeltaX;
+	Vec3f				GradientDeltaY;
+	Vec3f				GradientDeltaZ;
+	ErRange				GradientMagnitudeRange;
+	unsigned short*		pVoxels;
 };
 
 }
