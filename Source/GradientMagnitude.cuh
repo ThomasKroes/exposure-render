@@ -29,7 +29,7 @@ KERNEL void KrnlComputeGradientMagnitudeVolume(unsigned short* pGradientMagnitud
 	if (X >= Width || Y >= Height || Z >= Depth)
 		return;
 	
-	const Vec3f P = gpTracer->Volume.MinAABB + gpTracer->Volume.Size * (Vec3f((float)X + 0.5f, (float)Y + 0.5f, (float)Z + 0.5f) * gpTracer->Volume.InvResolution);
+	const Vec3f P = ((Tracer*)gpTracer)->Volume.MinAABB + ((Tracer*)gpTracer)->Volume.Size * (Vec3f((float)X + 0.5f, (float)Y + 0.5f, (float)Z + 0.5f) * ((Tracer*)gpTracer)->Volume.InvResolution);
 
 	int ID = X + Y * Width + Z * (Width * Height);
 

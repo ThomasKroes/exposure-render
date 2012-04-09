@@ -83,6 +83,7 @@ SET(ErCudaGeneral
 	Volume.cuh
 	Tracer.cuh
 	TransferFunction.cuh
+	SharedResources.cuh
 	Core.cu
 )
 

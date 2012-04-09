@@ -26,7 +26,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	
 	Intersection Int;
 
-	IntersectBox(R, gpTracer->Volume.MinAABB, gpTracer->Volume.MaxAABB, Int);
+	IntersectBox(R, ((Tracer*)gpTracer)->Volume.MinAABB, ((Tracer*)gpTracer)->Volume.MaxAABB, Int);
 
 	if (!Int.Valid)
 		return;
@@ -34,13 +34,13 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	MinT = max(Int.NearT, R.MinT);
 	MaxT = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gpTracer->RenderSettings.Shading.DensityScale;
+	const float S	= -log(RNG.Get1()) / ((Tracer*)gpTracer)->RenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
 	Vec3f Ps;
 
-	MinT += RNG.Get1() * gpTracer->RenderSettings.Traversal.StepSize;
+	MinT += RNG.Get1() * ((Tracer*)gpTracer)->RenderSettings.Traversal.StepSize;
 
 	while (Sum < S)
 	{
@@ -49,10 +49,10 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 		if (MinT >= MaxT)
 			return;
 		
-		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * GetOpacity(Ps);
+		SigmaT	= ((Tracer*)gpTracer)->RenderSettings.Shading.DensityScale * GetOpacity(Ps);
 
-		Sum			+= SigmaT * gpTracer->RenderSettings.Traversal.StepSize;
-		MinT	+= gpTracer->RenderSettings.Traversal.StepSize;
+		Sum			+= SigmaT * ((Tracer*)gpTracer)->RenderSettings.Traversal.StepSize;
+		MinT	+= ((Tracer*)gpTracer)->RenderSettings.Traversal.StepSize;
 	}
 
 	SE.SetValid(MinT, Ps, NormalizedGradient(Ps), -R.D, ColorXYZf());
@@ -67,7 +67,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 	Intersection Int;
 		
-	IntersectBox(R, gpTracer->Volume.MinAABB, gpTracer->Volume.MaxAABB, Int);
+	IntersectBox(R, ((Tracer*)gpTracer)->Volume.MinAABB, ((Tracer*)gpTracer)->Volume.MaxAABB, Int);
 	
 	if (!Int.Valid)
 		return false;
@@ -75,11 +75,11 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 	MinT = max(Int.NearT, R.MinT);
 	MaxT = min(Int.FarT, R.MaxT);
 
-	const float S	= -log(RNG.Get1()) / gpTracer->RenderSettings.Shading.DensityScale;
+	const float S	= -log(RNG.Get1()) / ((Tracer*)gpTracer)->RenderSettings.Shading.DensityScale;
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT += RNG.Get1() * gpTracer->RenderSettings.Traversal.StepSizeShadow;
+	MinT += RNG.Get1() * ((Tracer*)gpTracer)->RenderSettings.Traversal.StepSizeShadow;
 
 	while (Sum < S)
 	{
@@ -88,10 +88,10 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * GetOpacity(Ps);
+		SigmaT	= ((Tracer*)gpTracer)->RenderSettings.Shading.DensityScale * GetOpacity(Ps);
 
-		Sum			+= SigmaT * gpTracer->RenderSettings.Traversal.StepSizeShadow;
-		MinT	+= gpTracer->RenderSettings.Traversal.StepSizeShadow;
+		Sum			+= SigmaT * ((Tracer*)gpTracer)->RenderSettings.Traversal.StepSizeShadow;
+		MinT	+= ((Tracer*)gpTracer)->RenderSettings.Traversal.StepSizeShadow;
 	}
 
 	return true;

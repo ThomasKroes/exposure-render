@@ -26,7 +26,7 @@ namespace ExposureRender
 
 DEVICE Volume<unsigned short> GetVolume()
 {
-	return gpTracer->Volume;
+	return ((Tracer*)gpTracer)->Volume;
 }
 
 DEVICE Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
@@ -135,11 +135,11 @@ DEVICE bool Inside(ClippingObject& ClippingObject, Vec3f P)
 
 DEVICE bool Inside(const Vec3f& P)
 {
-	for (int i = 0; i < gpTracer->ClippingObjects.Count; i++)
+	for (int i = 0; i < ((Tracer*)gpTracer)->ClippingObjects.Count; i++)
 	{
-		const Vec3f P2 = TransformPoint(gpTracer->ClippingObjects.List[i].Shape.InvTM, P);
+		const Vec3f P2 = TransformPoint(((Tracer*)gpTracer)->ClippingObjects.List[i].Shape.InvTM, P);
 
-		if (Inside(gpTracer->ClippingObjects.List[i], P2))
+		if (Inside(((Tracer*)gpTracer)->ClippingObjects.List[i], P2))
 			return true;
 	}
 
@@ -148,7 +148,7 @@ DEVICE bool Inside(const Vec3f& P)
 
 DEVICE float GetOpacity(const Vec3f& P)
 {
-	return EvaluateScalarTransferFunction1D(GetIntensity(P), gpTracer->Opacity1D);
+	return EvaluateScalarTransferFunction1D(GetIntensity(P), ((Tracer*)gpTracer)->Opacity1D);
 	
 	/*
 	const float NormalizedIntensity = (Intensity - gOpacityRange.Min) * gOpacityRange.Inv;
@@ -169,22 +169,22 @@ DEVICE float GetOpacity(const Vec3f& P)
 
 DEVICE ColorXYZf GetDiffuse(const float& Intensity)
 {
-	return EvaluateColorTransferFunction1D(Intensity, gpTracer->Diffuse1D);
+	return EvaluateColorTransferFunction1D(Intensity, ((Tracer*)gpTracer)->Diffuse1D);
 }
 
 DEVICE ColorXYZf GetSpecular(const float& Intensity)
 {
-	return EvaluateColorTransferFunction1D(Intensity, gpTracer->Specular1D);
+	return EvaluateColorTransferFunction1D(Intensity, ((Tracer*)gpTracer)->Specular1D);
 }
 
 DEVICE float GetGlossiness(const float& Intensity)
 {
-	return GlossinessExponent(EvaluateScalarTransferFunction1D(Intensity, gpTracer->Glossiness1D));
+	return GlossinessExponent(EvaluateScalarTransferFunction1D(Intensity, ((Tracer*)gpTracer)->Glossiness1D));
 }
 
 DEVICE ColorXYZf GetEmission(const float& Intensity)
 {
-	return EvaluateColorTransferFunction1D(Intensity, gpTracer->Emission1D);
+	return EvaluateColorTransferFunction1D(Intensity, ((Tracer*)gpTracer)->Emission1D);
 }
 
 DEVICE Vec3f GradientCD(Vec3f P)
@@ -234,7 +234,7 @@ DEVICE Vec3f GradientFiltered(Vec3f P)
 
 DEVICE Vec3f Gradient(Vec3f P)
 {
-	switch (gpTracer->RenderSettings.Shading.GradientComputation)
+	switch (((Tracer*)gpTracer)->RenderSettings.Shading.GradientComputation)
 	{
 		case 0:	return GradientFD(P);
 		case 1:	return GradientCD(P);
@@ -278,15 +278,15 @@ DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
 
 	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gpTracer->Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gpTracer->Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gpTracer->Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * ((Tracer*)gpTracer)->Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * ((Tracer*)gpTracer)->Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * ((Tracer*)gpTracer)->Camera.InvExposure)), 0.0, 1.0f));
 	
 	ColorRGBuc Result;
 
-	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), ((Tracer*)gpTracer)->Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), ((Tracer*)gpTracer)->Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), ((Tracer*)gpTracer)->Camera.InvGamma)), 0.0f, 255.0f));
 
 	return Result;
 }
@@ -301,22 +301,22 @@ DEVICE void SampleCamera(Ray& Rc, CameraSample& CS)
 {
 	Vec2f ScreenPoint;
 
-	ScreenPoint[0] = gpTracer->Camera.Screen[0][0] + (gpTracer->Camera.InvScreen[0] * (float)(CS.FilmUV[0] * (float)gpTracer->Camera.FilmWidth));
-	ScreenPoint[1] = gpTracer->Camera.Screen[1][0] + (gpTracer->Camera.InvScreen[1] * (float)(CS.FilmUV[1] * (float)gpTracer->Camera.FilmHeight));
+	ScreenPoint[0] = ((Tracer*)gpTracer)->Camera.Screen[0][0] + (((Tracer*)gpTracer)->Camera.InvScreen[0] * (float)(CS.FilmUV[0] * (float)((Tracer*)gpTracer)->Camera.FilmWidth));
+	ScreenPoint[1] = ((Tracer*)gpTracer)->Camera.Screen[1][0] + (((Tracer*)gpTracer)->Camera.InvScreen[1] * (float)(CS.FilmUV[1] * (float)((Tracer*)gpTracer)->Camera.FilmHeight));
 
-	Rc.O	= ToVec3f(gpTracer->Camera.Pos);
-	Rc.D	= Normalize(ToVec3f(gpTracer->Camera.N) + (ScreenPoint[0] * ToVec3f(gpTracer->Camera.U)) - (ScreenPoint[1] * ToVec3f(gpTracer->Camera.V)));
-	Rc.MinT	= gpTracer->Camera.ClipNear;
-	Rc.MaxT	= gpTracer->Camera.ClipFar;
+	Rc.O	= ToVec3f(((Tracer*)gpTracer)->Camera.Pos);
+	Rc.D	= Normalize(ToVec3f(((Tracer*)gpTracer)->Camera.N) + (ScreenPoint[0] * ToVec3f(((Tracer*)gpTracer)->Camera.U)) - (ScreenPoint[1] * ToVec3f(((Tracer*)gpTracer)->Camera.V)));
+	Rc.MinT	= ((Tracer*)gpTracer)->Camera.ClipNear;
+	Rc.MaxT	= ((Tracer*)gpTracer)->Camera.ClipFar;
 
-	if (gpTracer->Camera.ApertureSize != 0.0f)
+	if (((Tracer*)gpTracer)->Camera.ApertureSize != 0.0f)
 	{
-		const Vec2f LensUV = gpTracer->Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
+		const Vec2f LensUV = ((Tracer*)gpTracer)->Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
 
-		const Vec3f LI = ToVec3f(gpTracer->Camera.U) * LensUV[0] + ToVec3f(gpTracer->Camera.V) * LensUV[1];
+		const Vec3f LI = ToVec3f(((Tracer*)gpTracer)->Camera.U) * LensUV[0] + ToVec3f(((Tracer*)gpTracer)->Camera.V) * LensUV[1];
 
 		Rc.O += LI;
-		Rc.D = Normalize(Rc.D * gpTracer->Camera.FocalDistance - LI);
+		Rc.D = Normalize(Rc.D * ((Tracer*)gpTracer)->Camera.FocalDistance - LI);
 	}
 }
 
@@ -324,23 +324,23 @@ DEVICE void SampleCamera(Ray& Rc, CameraSample& CS, const int& X, const int& Y)
 {
 	Vec2f FilmUV;
 
-	FilmUV[0] = (float)X / (float)gpTracer->Camera.FilmWidth;
-	FilmUV[1] = (float)Y / (float)gpTracer->Camera.FilmHeight;
+	FilmUV[0] = (float)X / (float)((Tracer*)gpTracer)->Camera.FilmWidth;
+	FilmUV[1] = (float)Y / (float)((Tracer*)gpTracer)->Camera.FilmHeight;
 
-	FilmUV[0] += CS.FilmUV[0] * (1.0f / (float)gpTracer->Camera.FilmWidth);
-	FilmUV[1] += CS.FilmUV[1] * (1.0f / (float)gpTracer->Camera.FilmHeight);
+	FilmUV[0] += CS.FilmUV[0] * (1.0f / (float)((Tracer*)gpTracer)->Camera.FilmWidth);
+	FilmUV[1] += CS.FilmUV[1] * (1.0f / (float)((Tracer*)gpTracer)->Camera.FilmHeight);
 
 	Vec2f ScreenPoint;
 
-	ScreenPoint[0] = gpTracer->Camera.Screen[0][0] + (gpTracer->Camera.InvScreen[0] * (float)(FilmUV[0] * (float)gpTracer->Camera.FilmWidth));
-	ScreenPoint[1] = gpTracer->Camera.Screen[1][0] + (gpTracer->Camera.InvScreen[1] * (float)(FilmUV[1] * (float)gpTracer->Camera.FilmHeight));
+	ScreenPoint[0] = ((Tracer*)gpTracer)->Camera.Screen[0][0] + (((Tracer*)gpTracer)->Camera.InvScreen[0] * (float)(FilmUV[0] * (float)((Tracer*)gpTracer)->Camera.FilmWidth));
+	ScreenPoint[1] = ((Tracer*)gpTracer)->Camera.Screen[1][0] + (((Tracer*)gpTracer)->Camera.InvScreen[1] * (float)(FilmUV[1] * (float)((Tracer*)gpTracer)->Camera.FilmHeight));
 
-	Rc.O	= ToVec3f(gpTracer->Camera.Pos);
-	Rc.D	= Normalize(ToVec3f(gpTracer->Camera.N) + (ScreenPoint[0] * ToVec3f(gpTracer->Camera.U)) - (ScreenPoint[1] * ToVec3f(gpTracer->Camera.V)));
-	Rc.MinT	= gpTracer->Camera.ClipNear;
-	Rc.MaxT	= gpTracer->Camera.ClipFar;
+	Rc.O	= ToVec3f(((Tracer*)gpTracer)->Camera.Pos);
+	Rc.D	= Normalize(ToVec3f(((Tracer*)gpTracer)->Camera.N) + (ScreenPoint[0] * ToVec3f(((Tracer*)gpTracer)->Camera.U)) - (ScreenPoint[1] * ToVec3f(((Tracer*)gpTracer)->Camera.V)));
+	Rc.MinT	= ((Tracer*)gpTracer)->Camera.ClipNear;
+	Rc.MaxT	= ((Tracer*)gpTracer)->Camera.ClipFar;
 
-	if (gpTracer->Camera.ApertureSize != 0.0f)
+	if (((Tracer*)gpTracer)->Camera.ApertureSize != 0.0f)
 	{
 		// sample N-gon
         // FIXME: this could use concentric sampling
@@ -354,15 +354,15 @@ DEVICE void SampleCamera(Ray& Rc, CameraSample& CS, const int& X, const int& Y)
         float a1 = (float) ((side + 1.0f) * PI_F * 2.0f / lensSides + lensRotationRadians);
         float eyeX = (float) ((cos(a0) * (1.0f - offs) + cos(a1) * offs) * dist);
         float eyeY = (float) ((sin(a0) * (1.0f - offs) + sin(a1) * offs) * dist);
-        eyeX *= gpTracer->Camera.ApertureSize;
-        eyeY *= gpTracer->Camera.ApertureSize;
+        eyeX *= ((Tracer*)gpTracer)->Camera.ApertureSize;
+        eyeY *= ((Tracer*)gpTracer)->Camera.ApertureSize;
 
-		const Vec2f LensUV(eyeX, eyeY);// = gpTracer->Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
+		const Vec2f LensUV(eyeX, eyeY);// = ((Tracer*)gpTracer)->Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
 
-		const Vec3f LI = ToVec3f(gpTracer->Camera.U) * LensUV[0] + ToVec3f(gpTracer->Camera.V) * LensUV[1];
+		const Vec3f LI = ToVec3f(((Tracer*)gpTracer)->Camera.U) * LensUV[0] + ToVec3f(((Tracer*)gpTracer)->Camera.V) * LensUV[1];
 
 		Rc.O += LI;
-		Rc.D = Normalize(Rc.D * gpTracer->Camera.FocalDistance - LI);
+		Rc.D = Normalize(Rc.D * ((Tracer*)gpTracer)->Camera.FocalDistance - LI);
 	}
 
 	/*

@@ -22,15 +22,18 @@ ExposureRender::KernelTimings gKernelTimings;
 #include "Framebuffer.cuh"
 #include "Benchmark.cuh"
 #include "Filter.cuh"
-#include "Tracer.cuh"
 
-__device__ ExposureRender::Tracer* gpTracer;
 
-static std::map<int, ExposureRender::Tracer>			gTracers;
+__device__ int* gpTracer;
+
+
 
 int	gNoIterations = 0;
 
+#include "Tracer.cuh"
+
 ExposureRender::Tracer gTracer;
+
 
 #include "GaussianFilter.cuh"
 #include "BilateralFilter.cuh"
@@ -44,6 +47,8 @@ ExposureRender::Tracer gTracer;
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
 
+
+static std::map<int, ExposureRender::Tracer>			gTracers;
 
 ExposureRender::Tracer* gpCurrentTracer = NULL;
 
@@ -70,12 +75,6 @@ void SetTracer()
 	cudaMemcpyToSymbol(gpTracer, &gpCurrentTracer, sizeof(gpCurrentTracer));
 
 //	cudaFree(pTracer);
-}
-
-EXPOSURE_RENDER_DLL void BindVolume(int TracerID, int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize)
-{
-	gTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), pVoxels, NormalizeSize);
-	SetTracer();
 }
 
 EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D)
@@ -153,6 +152,12 @@ EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera)
 
 	gTracer.Camera = Camera;
 
+	SetTracer();
+}
+
+EXPOSURE_RENDER_DLL void BindVolume(int TracerID, int Resolution[3], float Spacing[3], unsigned short* pVoxels, bool NormalizeSize)
+{
+	gTracer.Volume.Set(Vec3f(Resolution[0], Resolution[1], Resolution[2]), Vec3f(Spacing[0], Spacing[1], Spacing[2]), pVoxels, NormalizeSize);
 	SetTracer();
 }
 

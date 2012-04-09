@@ -46,9 +46,9 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 {
 	float T = FLT_MAX;
 
-	for (int i = 0; i < gpTracer->Objects.Count; i++)
+	for (int i = 0; i < ((Tracer*)gpTracer)->Objects.Count; i++)
 	{
-		Object& Object = gpTracer->Objects.List[i];
+		Object& Object = ((Tracer*)gpTracer)->Objects.List[i];
 
 		ScatterEvent LocalRS(ScatterEvent::Object);
 
@@ -73,9 +73,9 @@ DEVICE_NI bool IntersectsObject(Object& Object, const Ray& R)
 // Determines if there's an intersection between the ray and any of the scene's reflectors
 DEVICE_NI bool IntersectsObject(const Ray& R)
 {
-	for (int i = 0; i < gpTracer->Objects.Count; i++)
+	for (int i = 0; i < ((Tracer*)gpTracer)->Objects.Count; i++)
 	{
-		if (IntersectsObject(gpTracer->Objects.List[i], R))
+		if (IntersectsObject(((Tracer*)gpTracer)->Objects.List[i], R))
 			return true;
 	}
 

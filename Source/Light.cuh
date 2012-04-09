@@ -77,9 +77,9 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 {
 	float T = FLT_MAX; 
 
-	for (int i = 0; i < gpTracer->Lights.Count; i++)
+	for (int i = 0; i < ((Tracer*)gpTracer)->Lights.Count; i++)
 	{
-		Light& Light = gpTracer->Lights.List[i];
+		Light& Light = ((Tracer*)gpTracer)->Lights.List[i];
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 
@@ -107,9 +107,9 @@ DEVICE_NI bool IntersectsLight(Light& Light, const Ray& R)
 // Determines if there's an intersection between the ray and any of the scene's lights
 DEVICE_NI bool IntersectsLight(const Ray& R)
 {
-	for (int i = 0; i < gpTracer->Lights.Count; i++)
+	for (int i = 0; i < ((Tracer*)gpTracer)->Lights.Count; i++)
 	{
-		if (IntersectsLight(gpTracer->Lights.List[i], R))
+		if (IntersectsLight(((Tracer*)gpTracer)->Lights.List[i], R))
 			return true;
 	}
 
