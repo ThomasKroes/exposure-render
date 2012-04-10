@@ -13,14 +13,48 @@
 
 #pragma once
 
+#include "Defines.cuh"
 #include "General.cuh"
-#include "Texture.cuh"
+#include "SharedResources.cuh"
 #include "Shape.cuh"
 
 namespace ExposureRender
 {
 
-struct Light : public ErLight
+#define MAX_NO_LIGHTS 64
+
+struct EXPOSURE_RENDER_DLL ErLight
+{
+	bool	Enabled;
+	bool	Visible;
+	ErShape	Shape;
+	int		TextureID;
+	float	Multiplier;
+	int		Unit;
+	
+	ErLight()
+	{
+		this->Enabled		= true;
+		this->Visible		= true;
+		this->TextureID		= 0;
+		this->Multiplier	= 100.0f;
+		this->Unit			= 0;
+	}
+	
+	ErLight& operator = (const ErLight& Other)
+	{
+		this->Enabled		= Other.Enabled;
+		this->Visible		= Other.Visible;
+		this->Shape			= Other.Shape;
+		this->TextureID		= Other.TextureID;
+		this->Multiplier	= Other.Multiplier;
+		this->Unit			= Other.Unit;
+
+		return *this;
+	}
+};
+
+struct Light
 {
 	Light()
 	{
@@ -106,18 +140,12 @@ struct Light : public ErLight
 	}
 };
 
-typedef ResourceList<Light, MAX_NO_LIGHTS> Lights;
-
-DEVICE Lights& GetLights()
-{
-	return *((Lights*)gpLights);
-}
-
+/*
 DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX; 
 
-	for (int i = 0; i < GetLights().Count; i++)
+	for (int i = 0; i < gpLights->Count; i++)
 	{
 		Light& Light = GetLights().Get(i);
 		
@@ -148,6 +176,11 @@ DEVICE_NI bool IntersectsLight(const Ray& R)
 
 	return false;
 }
+*/
 
 // DEVICE void Bind(ErLight
 }
+
+
+
+

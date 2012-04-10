@@ -70,16 +70,13 @@ SET(ErCudaGeneral
 	MonteCarlo.cuh
 	Buffer.cuh
 	Framebuffer.cuh
-	General.cuh
 	Vector.cuh
 	Color.cuh
 	Ray.cuh
 	Statistics.cuh
-	Camera.cuh
 	GradientMagnitude.cuh
 	AutoFocus.cuh
 	Tracer.cuh
-	TransferFunction.cuh
 	Core.cu
 )
 
@@ -94,7 +91,6 @@ SET(ErCudaShapes
 	Ring.cuh
 	Sphere.cuh
 	Cylinder.cuh
-	Shape.cuh
 )
 
 # Shapes group
@@ -108,13 +104,29 @@ SET(ErBenchmark
 # Benchmark group
 SOURCE_GROUP("Benchmark" FILES ${ErBenchmark})
 
-# Shared
-SET(ErShared
+# API
+SET(ErAPI
+	General.cuh
+	Camera.cuh
 	Volume.cuh
 	Light.cuh
 	Object.cuh
 	ClippingObject.cuh
 	Texture.cuh
+	Shape.cuh
+	TransferFunction.cuh
+	RenderSettings.cuh
+	Timing.cuh
+	Exception.cuh
+	Enums.cuh
+)
+
+# API group
+SOURCE_GROUP("API" FILES ${ErAPI})
+
+# Shared
+SET(ErShared
+	Shared.cuh
 	SharedResources.cuh
 )
 
@@ -134,7 +146,7 @@ SET(ErCudaFilters
 SOURCE_GROUP("Filters" FILES ${ErCudaFilters})
 
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErBenchmark} ${ErShared} ${ErCudaFilters} SHARED)
+CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErBenchmark} ${ErAPI} ${ErShared} ${ErCudaFilters} SHARED)
 
 # This is hack, we need a more elegant solution for this!
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)

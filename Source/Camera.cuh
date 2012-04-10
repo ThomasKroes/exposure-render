@@ -20,6 +20,29 @@
 namespace ExposureRender
 {
 
+struct EXPOSURE_RENDER_DLL ErCamera
+{
+	Vec2i	FilmSize;
+	Vec3f	Pos;
+	Vec3f	Target;
+	Vec3f	Up;
+	Vec3f	N;
+	Vec3f	U;
+	Vec3f	V;
+	float	FocalDistance;
+	float	ApertureSize;
+	float	ClipNear;
+	float	ClipFar;
+	float	Screen[2][2];
+	float	Exposure;
+	float	Gamma;
+	float	FOV;
+
+	ErCamera()
+	{
+	}
+};
+
 struct Camera
 {
 	HOST Camera()

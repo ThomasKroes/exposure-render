@@ -16,23 +16,37 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErException
+struct EXPOSURE_RENDER_DLL ErFiltering
 {
-	Enums::ExceptionLevel	Level;
-	char					Message[MAX_CHAR_SIZE];
-
-	ErException(const Enums::ExceptionLevel& Level, const char* pMessage = "")
+	struct EXPOSURE_RENDER_DLL ErGaussianFilterParameters
 	{
-		this->Level = Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
-	}
+		int		KernelRadius;
+		float	Sigma;
 
-	ErException& operator = (const ErException& Other)
+		ErGaussianFilterParameters()
+		{
+			this->KernelRadius	= 2;
+			this->Sigma			= 1.25f;
+		}
+	};
+
+	struct EXPOSURE_RENDER_DLL ErBilateralFilterParameters
 	{
-		this->Level = Other.Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);
+		float	SigmaD;
+		float	SigmaR;
 
-		return *this;
+		ErBilateralFilterParameters()
+		{
+			this->SigmaD	= 5.0f;
+			this->SigmaR	= 5.0f;
+		}
+	};
+
+	ErGaussianFilterParameters	FrameEstimateFilter;
+	ErBilateralFilterParameters	PostProcessingFilter;
+
+	ErFiltering()
+	{
 	}
 };
 

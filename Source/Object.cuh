@@ -13,12 +13,47 @@
 
 #pragma once
 
+#include "Defines.cuh"
 #include "General.cuh"
+#include "SharedResources.cuh"
 
 namespace ExposureRender
 {
 
-struct Object : public ErObject
+#define MAX_NO_OBJECTS 64
+
+struct EXPOSURE_RENDER_DLL ErObject
+{
+	bool		Enabled;
+	ErShape		Shape;
+	int			DiffuseTextureID;
+	int			SpecularTextureID;
+	int			GlossinessTextureID;
+	float		Ior;
+
+	ErObject()
+	{
+		this->Enabled				= true;
+		this->DiffuseTextureID		= -1;
+		this->SpecularTextureID		= -1;
+		this->GlossinessTextureID	= -1;
+		this->Ior					= 0.0f;
+	}
+
+	ErObject& operator = (const ErObject& Other)
+	{
+		this->Enabled				= Other.Enabled;
+		this->Shape					= Other.Shape;
+		this->DiffuseTextureID		= Other.DiffuseTextureID;
+		this->SpecularTextureID		= Other.SpecularTextureID;
+		this->GlossinessTextureID	= Other.GlossinessTextureID;
+		this->Ior					= Other.Ior;
+
+		return *this;
+	}
+};
+
+struct Object
 {
 	Object()
 	{
@@ -66,46 +101,15 @@ struct Object : public ErObject
 
 		return *this;
 	}
+
+	bool		Enabled;
+	Shape		Shape;
+	int			DiffuseTextureID;
+	int			SpecularTextureID;
+	int			GlossinessTextureID;
+	float		Ior;
 };
 
 typedef ResourceList<Object, MAX_NO_OBJECTS> Objects;
-
-DEVICE Objects& GetObjects()
-{
-	return *((Objects*)gpObjects);
-}
-
-DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
-{
-	float T = FLT_MAX;
-
-	for (int i = 0; i < GetObjects().Count; i++)
-	{
-		Object& Object = GetObjects().Get(i);
-
-		ScatterEvent LocalRS(ScatterEvent::Object);
-
-		LocalRS.ObjectID = i;
-
-		Object.Intersect(R, LocalRS);
-
-		if (LocalRS.Valid && LocalRS.T < T)
-		{
-			RS = LocalRS;
-			T = LocalRS.T;
-		}
-	}
-}
-
-DEVICE_NI bool IntersectsObject(const Ray& R)
-{
-	for (int i = 0; i < GetObjects().Count; i++)
-	{
-		if (GetObjects().Get(i).Intersects(R))
-			return true;
-	}
-
-	return false;
-}
 
 }

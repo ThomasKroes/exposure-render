@@ -17,18 +17,19 @@
 
 DEVICE int* gpTracer = NULL;
 
-DEVICE int* gpVolumes			= NULL;
-DEVICE int* gpLights			= NULL;
-DEVICE int* gpObjects			= NULL;
-DEVICE int* gpClippingObjects	= NULL;
-DEVICE int* gpTextures			= NULL;
-
-#include "Tracer.cuh"
 #include "Volume.cuh"
 #include "Light.cuh"
 #include "Object.cuh"
 #include "ClippingObject.cuh"
 #include "Texture.cuh"
+
+DEVICE Volumes* gpVolumes					= NULL;
+DEVICE Objects* gpObjects					= NULL;
+DEVICE ClippingObjects*	gpClippingObjects	= NULL;
+DEVICE Textures* gpTextures					= NULL;
+
+#include "Shared.cuh"
+#include "Tracer.cuh"
 #include "Utilities.cuh"
 
 #include "GaussianFilter.cuh"

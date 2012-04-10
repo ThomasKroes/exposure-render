@@ -14,13 +14,42 @@
 #pragma once
 
 #include "Defines.cuh"
-#include "Vector.cuh"
 #include "General.cuh"
-#include "CudaUtilities.cuh"
-#include "Tracer.cuh"
+#include "SharedResources.cuh"
+#include "Vector.cuh"
 
 namespace ExposureRender
 {
+
+#define MAX_NO_VOLUMES 64
+
+struct EXPOSURE_RENDER_DLL ErVolume
+{
+	Vec3i				Resolution[3];
+	Vec3f				Spacing[3];
+	unsigned short*		pVoxels;
+	bool				NormalizeSize;
+
+	ErVolume()
+	{
+		this->pVoxels			= NULL;
+		this->NormalizeSize		= false;
+	}
+
+	~ErVolume()
+	{
+	}
+
+	ErVolume& operator = (const ErVolume& Other)
+	{
+		this->Resolution		= Other.Resolution;
+		this->Spacing			= Other.Spacing;
+		this->pVoxels			= Other.pVoxels;
+		this->NormalizeSize		= Other.NormalizeSize;
+
+		return *this;
+	}
+};
 
 struct Volume
 {
@@ -152,15 +181,5 @@ struct Volume
 };
 
 typedef ResourceList<Volume, MAX_NO_VOLUMES> Volumes;
-
-DEVICE Volumes& GetVolumes()
-{
-	return *((Volumes*)gpVolumes);
-}
-
-DEVICE float GetIntensity(const Vec3f& P)
-{
-	return GetVolumes().Get(GetTracer().VolumeIDs[0]).Get(P); 
-}
 
 }

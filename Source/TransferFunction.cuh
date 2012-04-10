@@ -16,6 +16,58 @@
 namespace ExposureRender
 {
 
+struct EXPOSURE_RENDER_DLL ErPiecewiseLinearFunction
+{
+	ErRange	NodeRange;
+	float	Position[MAX_NO_TF_NODES];
+	float	Data[MAX_NO_TF_NODES];
+	int		Count;
+
+	ErPiecewiseLinearFunction()
+	{
+		for (int i = 0; i < MAX_NO_TF_NODES; i++)
+		{
+			this->Position[i]	= 0.0f;
+			this->Data[i]		= 0.0f;
+		}
+
+		this->Count = 0;
+	}
+
+	ErPiecewiseLinearFunction& operator = (const ErPiecewiseLinearFunction& Other)
+	{
+		this->NodeRange = Other.NodeRange;
+
+		for (int i = 0; i < MAX_NO_TF_NODES; i++)
+		{
+			this->Position[i]	= Other.Position[i];
+			this->Data[i]		= Other.Data[i];
+		}	
+		
+		this->Count = Other.Count;
+
+		return *this;
+	}
+};
+
+template<int Size>
+struct EXPOSURE_RENDER_DLL ErTransferFunction1D
+{
+	ErPiecewiseLinearFunction		PLF[Size];
+	
+	ErTransferFunction1D& operator = (const ErTransferFunction1D& Other)
+	{	
+		for (int i = 0; i < Size; i++)
+			this->PLF[i] = Other.PLF[i];
+		
+		return *this;
+	}
+};
+
+typedef ErTransferFunction1D<1>	ErScalarTransferFunction1D;
+typedef ErTransferFunction1D<3>	ErColorTransferFunction1D;
+
+
 struct PiecewiseLinearFunction
 {
 	HOST PiecewiseLinearFunction()

@@ -13,27 +13,90 @@
 
 #pragma once
 
+#include "Defines.cuh"
+#include "General.cuh"
+#include "SharedResources.cuh"
+#include "Shape.cuh"
+
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErException
+DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
 {
-	Enums::ExceptionLevel	Level;
-	char					Message[MAX_CHAR_SIZE];
+	float T = FLT_MAX; 
 
-	ErException(const Enums::ExceptionLevel& Level, const char* pMessage = "")
+	for (int i = 0; i < gpLights->Count; i++)
 	{
-		this->Level = Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
+		Light& Light = GetLights().Get(i);
+		
+		ScatterEvent LocalRS(ScatterEvent::Light);
+
+		LocalRS.LightID = i;
+
+		if (RespectVisibility && !Light.Visible)
+			continue;
+
+		Light.Intersect(R, LocalRS);
+
+		if (LocalRS.Valid && LocalRS.T < T)
+		{
+			RS = LocalRS;
+			T = LocalRS.T;
+		}
+	}
+}
+
+DEVICE_NI bool IntersectsLight(const Ray& R)
+{
+	for (int i = 0; i < GetLights().Count; i++)
+	{
+		if (GetLights().Get(i).Intersects(R))
+			return true;
 	}
 
-	ErException& operator = (const ErException& Other)
-	{
-		this->Level = Other.Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);
+	return false;
+}
 
-		return *this;
+DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
+{
+	float T = FLT_MAX;
+
+	for (int i = 0; i < GetObjects().Count; i++)
+	{
+		Object& Object = GetObjects().Get(i);
+
+		ScatterEvent LocalRS(ScatterEvent::Object);
+
+		LocalRS.ObjectID = i;
+
+		Object.Intersect(R, LocalRS);
+
+		if (LocalRS.Valid && LocalRS.T < T)
+		{
+			RS = LocalRS;
+			T = LocalRS.T;
+		}
 	}
-};
+}
+
+DEVICE_NI bool IntersectsObject(const Ray& R)
+{
+	for (int i = 0; i < GetObjects().Count; i++)
+	{
+		if (GetObjects().Get(i).Intersects(R))
+			return true;
+	}
+
+	return false;
+}
+
+DEVICE_NI ColorXYZf EvaluateTexture2D(const int& TextureID, const Vec2f& UV)
+{
+	return GetTextures().Get(TextureID).Evaluate(UV);
+}
 
 }
+
+
+
+

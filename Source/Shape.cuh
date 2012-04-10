@@ -23,6 +23,45 @@
 namespace ExposureRender
 {
 
+struct EXPOSURE_RENDER_DLL ErShape
+{
+	ErMatrix44			TM;
+	ErMatrix44			InvTM;
+	bool				OneSided;
+	Enums::ShapeType	Type;
+	float				Size[3];
+	float				Area;
+	float				InnerRadius;
+	float				OuterRadius;
+
+	ErShape()
+	{
+		this->OneSided		= false;
+		this->Size[0]		= 0.0f;
+		this->Size[1]		= 0.0f;
+		this->Size[2]		= 0.0f;
+		this->Area			= 0.0f;
+		this->InnerRadius	= 0.0f;
+		this->OuterRadius	= 0.0f;
+	}
+	
+	ErShape& operator = (const ErShape& Other)
+	{
+		this->TM			= Other.TM;
+		this->InvTM			= Other.InvTM;		
+		this->OneSided		= Other.OneSided;
+		this->Type			= Other.Type;		
+		this->Size[0]		= Other.Size[0];	
+		this->Size[1]		= Other.Size[1];	
+		this->Size[2]		= Other.Size[2];	
+		this->Area			= Other.Area;		
+		this->InnerRadius	= Other.InnerRadius;
+		this->OuterRadius	= Other.OuterRadius;
+
+		return *this;
+	}
+};
+
 DEVICE_NI void SampleShape(const ErShape& Shape, const Vec3f& SampleUVW, SurfaceSample& SurfaceSample)
 {
 	switch (Shape.Type)

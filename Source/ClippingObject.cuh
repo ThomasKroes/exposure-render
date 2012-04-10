@@ -13,12 +13,40 @@
 
 #pragma once
 
+#include "Defines.cuh"
 #include "General.cuh"
+#include "SharedResources.cuh"
 
 namespace ExposureRender
 {
 
-struct ClippingObject : public ErClippingObject
+#define MAX_NO_CLIPPING_OBJECTS	64
+
+struct EXPOSURE_RENDER_DLL ErClippingObject
+{
+	bool	Enabled;
+	ErShape	Shape;
+	bool	Invert;
+
+	ErClippingObject()
+	{
+		this->Enabled	= true;
+		this->Invert	= false;
+	}
+
+	ErClippingObject& operator = (const ErClippingObject& Other)
+	{
+		this->Enabled	= Other.Enabled;
+		this->Shape		= Other.Shape;
+		this->Invert	= Other.Invert;
+
+		return *this;
+	}
+};
+
+
+
+struct ClippingObject
 {
 	ClippingObject()
 	{
@@ -87,6 +115,11 @@ struct ClippingObject : public ErClippingObject
 
 		return *this;
 	}
+
+	bool		Enabled;
+	ErShape		Shape;
+	bool		Invert;
+
 };
 
 typedef ResourceList<ClippingObject, MAX_NO_CLIPPING_OBJECTS> ClippingObjects;

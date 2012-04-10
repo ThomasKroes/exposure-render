@@ -15,9 +15,128 @@
 
 #include "Defines.cuh"
 #include "General.cuh"
+#include "SharedResources.cuh"
 
 namespace ExposureRender
 {
+
+#define NO_COLOR_COMPONENTS 4
+#define MAX_NO_TEXTURES		64
+
+struct EXPOSURE_RENDER_DLL ErProcedural
+{
+	Enums::ProceduralType	Type;
+	float					UniformColor[3];
+	float					CheckerColor1[3];
+	float					CheckerColor2[3];
+	float					GradientColor1[3];
+	float					GradientColor2[3];
+	float					GradientColor3[3];
+
+	ErProcedural()
+	{
+	}
+
+	ErProcedural& operator = (const ErProcedural& Other)
+	{
+		this->Type				= Other.Type;
+		this->UniformColor[0]	= Other.UniformColor[0];
+		this->UniformColor[1]	= Other.UniformColor[1];
+		this->UniformColor[2]	= Other.UniformColor[2];
+		this->CheckerColor1[0]	= Other.CheckerColor1[0];
+		this->CheckerColor1[1]	= Other.CheckerColor1[1];
+		this->CheckerColor1[2]	= Other.CheckerColor1[2];
+		this->CheckerColor2[0]	= Other.CheckerColor2[0];
+		this->CheckerColor2[1]	= Other.CheckerColor2[1];
+		this->CheckerColor2[2]	= Other.CheckerColor2[2];
+		this->GradientColor1[0]	= Other.GradientColor1[0];
+		this->GradientColor1[1]	= Other.GradientColor1[1];
+		this->GradientColor1[2]	= Other.GradientColor1[2];
+		this->GradientColor2[0]	= Other.GradientColor2[0];
+		this->GradientColor2[1]	= Other.GradientColor2[1];
+		this->GradientColor2[2]	= Other.GradientColor2[2];
+		this->GradientColor3[0]	= Other.GradientColor3[0];
+		this->GradientColor3[1]	= Other.GradientColor3[1];
+		this->GradientColor3[2]	= Other.GradientColor3[2];
+
+		return *this;
+	}
+};
+
+struct EXPOSURE_RENDER_DLL ErRGBA
+{
+	unsigned char Data[NO_COLOR_COMPONENTS];
+
+	ErRGBA& operator = (const ErRGBA& Other)
+	{
+		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
+			this->Data[i] = Other.Data[i];
+
+		return *this;
+	}
+
+	ErRGBA()
+	{
+		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
+			this->Data[i] = 0;
+	}
+};
+
+struct EXPOSURE_RENDER_DLL ErImage
+{
+	ErRGBA*		pData;
+	int			Size[2];
+	bool		Dirty;
+
+	ErImage& operator = (const ErImage& Other)
+	{
+//		this->pData			= Other.pData;
+		this->Size[0]		= Other.Size[0];
+		this->Size[1]		= Other.Size[1];
+		this->Dirty			= Other.Dirty;
+
+		return *this;
+	}
+
+	ErImage()
+	{
+		this->pData				= NULL;
+		this->Size[0]			= 0;
+		this->Size[1]			= 0;
+		this->Dirty				= false;
+	}
+};
+
+struct EXPOSURE_RENDER_DLL ErTexture
+{
+	Enums::TextureType		Type;
+	float					OutputLevel;
+	ErImage					Image;
+	ErProcedural			Procedural;
+	float					Offset[2];
+	float					Repeat[2];
+	bool					Flip[2];
+
+	ErTexture()
+	{
+	}
+
+	ErTexture& operator = (const ErTexture& Other)
+	{
+		this->Type			= Other.Type;
+		this->OutputLevel	= Other.OutputLevel;
+		this->Image			= Other.Image;
+		this->Procedural	= Other.Procedural;
+		this->Offset[0]		= Other.Offset[0];
+		this->Offset[1]		= Other.Offset[1];
+		this->Repeat[0]		= Other.Repeat[0];
+		this->Repeat[1]		= Other.Repeat[1];
+		this->Flip[0]		= Other.Flip[0];
+		this->Flip[1]		= Other.Flip[1];
+
+		return *this;
+	}
+};
 
 struct Texture : public ErTexture
 {
@@ -190,15 +309,5 @@ struct Texture : public ErTexture
 };
 
 typedef ResourceList<Texture, MAX_NO_TEXTURES> Textures;
-
-DEVICE Textures& GetTextures()
-{
-	return *((Textures*)gpTextures);
-}
-
-DEVICE_NI ColorXYZf EvaluateTexture2D(const int& TextureID, const Vec2f& UV)
-{
-	return GetTextures().Get(TextureID).Evaluate(UV);
-}
 
 }
