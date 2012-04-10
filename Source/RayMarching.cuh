@@ -50,7 +50,9 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 		if (MinT >= MaxT)
 			return;
 		
-		SigmaT	= gpTracers[gActiveTracerID].RenderSettings.Shading.DensityScale * GetOpacity(Ps);
+		float Intensity = GetIntensity(Ps);
+
+		SigmaT	= gpTracers[gActiveTracerID].RenderSettings.Shading.DensityScale * gpTracers[gActiveTracerID].Opacity1D.Evaluate(Intensity);
 
 		Sum			+= SigmaT * gpTracers[gActiveTracerID].RenderSettings.Traversal.StepSize;
 		MinT	+= gpTracers[gActiveTracerID].RenderSettings.Traversal.StepSize;
@@ -89,7 +91,9 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 		if (MinT > MaxT)
 			return false;
 		
-		SigmaT	= gpTracers[gActiveTracerID].RenderSettings.Shading.DensityScale * GetOpacity(Ps);
+		float Intensity = GetIntensity(Ps);
+
+		SigmaT	= gpTracers[gActiveTracerID].RenderSettings.Shading.DensityScale * gpTracers[gActiveTracerID].Opacity1D.Evaluate(Intensity);
 
 		Sum			+= SigmaT * gpTracers[gActiveTracerID].RenderSettings.Traversal.StepSizeShadow;
 		MinT	+= gpTracers[gActiveTracerID].RenderSettings.Traversal.StepSizeShadow;

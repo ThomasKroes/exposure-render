@@ -123,35 +123,30 @@ EXPOSURE_RENDER_DLL void SetTracerClippingObjectIDs(int ID[MAX_NO_CLIPPING_OBJEC
 
 EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ErScalarTransferFunction1D Opacity1D)
 {
-	return;
 	gTracers[TracerID].Opacity1D = Opacity1D;
 	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ErColorTransferFunction1D Diffuse1D)
 {
-	return;
 	gTracers[TracerID].Diffuse1D = Diffuse1D;
 	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ErColorTransferFunction1D Specular1D)
 {
-	return;
 	gTracers[TracerID].Specular1D = Specular1D;
 	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ErScalarTransferFunction1D Glossiness1D)
 {
-	return;
 	gTracers[TracerID].Glossiness1D = Glossiness1D;
 	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ErColorTransferFunction1D Emission1D)
 {
-	return;
 	gTracers[TracerID].Emission1D = Emission1D;
 	gTracers.Synchronize();
 }
@@ -164,14 +159,12 @@ EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera)
 
 EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings RenderSettings)
 {
-	return;
 	gTracers[TracerID].RenderSettings = RenderSettings;
 	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering)
 {
-	return;
 	GaussianFilter Gaussian;
 	
 	Gaussian.KernelRadius = Filtering.FrameEstimateFilter.KernelRadius;
@@ -211,8 +204,8 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 	CUDA::ThreadSynchronize();
 
 	SingleScattering(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
-	ComputeEstimate(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
-	ToneMap(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
+//	ComputeEstimate(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
+//	ToneMap(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
 
 	CUDA::ThreadSynchronize();
 

@@ -17,6 +17,7 @@
 #include "Framebuffer.cuh"
 #include "Filter.cuh"
 #include "Camera.cuh"
+#include "TransferFunction.cuh"
 #include "SharedResources.cuh"
 
 namespace ExposureRender
@@ -32,11 +33,11 @@ struct Tracer
 	{
 	}
 		
-	ErScalarTransferFunction1D		Opacity1D;
-	ErColorTransferFunction1D		Diffuse1D;
-	ErColorTransferFunction1D		Specular1D;
-	ErScalarTransferFunction1D		Glossiness1D;
-	ErColorTransferFunction1D		Emission1D;
+	ScalarTransferFunction1D		Opacity1D;
+	ColorTransferFunction1D			Diffuse1D;
+	ColorTransferFunction1D			Specular1D;
+	ScalarTransferFunction1D		Glossiness1D;
+	ColorTransferFunction1D			Emission1D;
 
 	Camera							Camera;
 	ErRenderSettings				RenderSettings;

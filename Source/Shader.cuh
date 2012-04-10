@@ -480,7 +480,11 @@ DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 {
 	const float I = GetIntensity(SE.P);
 
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracers[gActiveTracerID].RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+	ColorXYZf Diffuse = gpTracers[gActiveTracerID].Diffuse1D.Evaluate(I);
+	float Glossiness = gpTracers[gActiveTracerID].Glossiness1D.Evaluate(I);
+	ColorXYZf Specular = gpTracers[gActiveTracerID].Specular1D.Evaluate(I);
+
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, Diffuse, Specular, gpTracers[gActiveTracerID].RenderSettings.Shading.IndexOfReflection, Glossiness);
 /*
 	bool BRDF = false;
 

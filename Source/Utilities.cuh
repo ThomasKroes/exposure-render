@@ -101,31 +101,6 @@ DEVICE bool Inside(const Vec3f& P)
 }
 */
 
-DEVICE float GetOpacity(const Vec3f& P)
-{
-	return EvaluateScalarTransferFunction1D(GetIntensity(P), gpTracers[gActiveTracerID].Opacity1D);
-}
-
-DEVICE ColorXYZf GetDiffuse(const float& Intensity)
-{
-	return EvaluateColorTransferFunction1D(Intensity, gpTracers[gActiveTracerID].Diffuse1D);
-}
-
-DEVICE ColorXYZf GetSpecular(const float& Intensity)
-{
-	return EvaluateColorTransferFunction1D(Intensity, gpTracers[gActiveTracerID].Specular1D);
-}
-
-DEVICE float GetGlossiness(const float& Intensity)
-{
-	return GlossinessExponent(EvaluateScalarTransferFunction1D(Intensity, gpTracers[gActiveTracerID].Glossiness1D));
-}
-
-DEVICE ColorXYZf GetEmission(const float& Intensity)
-{
-	return EvaluateColorTransferFunction1D(Intensity, gpTracers[gActiveTracerID].Emission1D);
-}
-
 DEVICE Vec3f GradientCD(Vec3f P)
 {
 	float Intensity[3][2] = 
