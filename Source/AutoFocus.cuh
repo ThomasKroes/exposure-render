@@ -32,15 +32,15 @@ KERNEL void KrnlComputeAutoFocusDistance(float* pAutoFocusDistance, int FilmU, i
 	{
 		Vec2f ScreenPoint;
 
-		ScreenPoint[0] = gpTracer->Camera.Screen[0][0] + (gpTracer->Camera.InvScreen[0] * (float)FilmU);
-		ScreenPoint[1] = gpTracer->Camera.Screen[1][0] + (gpTracer->Camera.InvScreen[1] * (float)FilmV);
+		ScreenPoint[0] = gpTracers[gActiveTracerID].Camera.Screen[0][0] + (gpTracers[gActiveTracerID].Camera.InvScreen[0] * (float)FilmU);
+		ScreenPoint[1] = gpTracers[gActiveTracerID].Camera.Screen[1][0] + (gpTracers[gActiveTracerID].Camera.InvScreen[1] * (float)FilmV);
 
 		ScreenPoint += 0.01f * ConcentricSampleDisk(RNG.Get2());
 
-		Rc.O	= ToVec3f(gpTracer->Camera.Pos);
-		Rc.D	= Normalize(ToVec3f(gpTracer->Camera.N) + (ScreenPoint[0] * ToVec3f(gpTracer->Camera.U)) - (ScreenPoint[1] * ToVec3f(gpTracer->Camera.V)));
-		Rc.MinT	= gpTracer->Camera.ClipNear;
-		Rc.MaxT	= gpTracer->Camera.ClipFar;
+		Rc.O	= gpTracers[gActiveTracerID].Camera.Pos;
+		Rc.D	= Normalize(gpTracers[gActiveTracerID].Camera.N + (ScreenPoint[0] * gpTracers[gActiveTracerID].Camera.U) - (ScreenPoint[1] * gpTracers[gActiveTracerID].Camera.V));
+		Rc.MinT	= gpTracers[gActiveTracerID].Camera.ClipNear;
+		Rc.MaxT	= gpTracers[gActiveTracerID].Camera.ClipFar;
 
 		SampleVolume(Rc, RNG, SE);
 

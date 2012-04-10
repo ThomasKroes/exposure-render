@@ -24,8 +24,8 @@ namespace ExposureRender
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
 
-EXPOSURE_RENDER_DLL void InitializeTracer(int& TracerID);
-EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID);
+EXPOSURE_RENDER_DLL void InitializeTracer(int& ID);
+EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID);
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2]);
 EXPOSURE_RENDER_DLL void Reset(int TracerID);
 EXPOSURE_RENDER_DLL void BindVolume(ErVolume Volume, int& ID);

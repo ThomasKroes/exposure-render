@@ -14,8 +14,6 @@
 #pragma once
 
 #include "Buffer.cuh"
-#include "Statistics.cuh"
-#include "Sample.cuh"
 
 namespace ExposureRender
 {

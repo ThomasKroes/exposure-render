@@ -11,7 +11,7 @@ namespace ExposureRender
 
 #define KERNEL					__global__
 #define HOST					__host__
-#define DEVICE					__device__ __inline__
+#define DEVICE					__device__
 #define DEVICE_NI				DEVICE __noinline__
 #define HOST_DEVICE				HOST DEVICE 
 #define HOST_DEVICE_NI			HOST_DEVICE __noinline__
@@ -33,5 +33,6 @@ namespace ExposureRender
 #define RAY_EPS_2				2.0f * RAY_EPS
 #define ONE_OVER_6				1.0f / 2.0f
 #define ONE_OVER_255			1.0f / 255.0f
+#define	MAX_CHAR_SIZE			256
 
 }

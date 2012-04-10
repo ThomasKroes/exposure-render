@@ -23,15 +23,6 @@
 #include "Texture.cuh"
 #include "Utilities.cuh"
 
-#include <map>
-
-static std::map<int, ExposureRender::Tracer>			gTracers;
-
-static std::map<int, ExposureRender::Light>				gLights;
-static std::map<int, ExposureRender::Object>			gObjects;
-static std::map<int, ExposureRender::ClippingObject>	gClippingObjects;
-static std::map<int, ExposureRender::Texture>			gTextures;
-
 #include "GaussianFilter.cuh"
 #include "BilateralFilter.cuh"
 #include "MedianFilter.cuh"
@@ -42,118 +33,67 @@ static std::map<int, ExposureRender::Texture>			gTextures;
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
 
-ExposureRender::Tracer* gpCurrentTracer = NULL;
-
 namespace ExposureRender
 {
 
-#define EDIT_TRACER(id)											\
-																\
-std::map<int, Tracer>::iterator TracerIt;						\
-																\
-TracerIt = gTracers.find(id);									\
-																\
-const bool TracerExists = TracerIt != gTracers.end();			\
-																\
-if (!TracerExists)												\
-	throw(ErException("CUDA", "Tracer does not exist", ""));	\
-																\
-Tracer& CurrentTracer = TracerIt->second;
-
-
-
-
-void BindTracer(int TracerID)
-{
-	EDIT_TRACER(TracerID)
-
-	if (gpCurrentTracer == NULL)
-		cudaMalloc(&gpCurrentTracer, sizeof(Tracer));
-
-	cudaMemcpy(gpCurrentTracer, &CurrentTracer, sizeof(Tracer), cudaMemcpyHostToDevice);
-	cudaMemcpyToSymbol(gpTracer, &gpCurrentTracer, sizeof(gpCurrentTracer));
-}
-
-void UnbindTracer(int TracerID)
-{
-	EDIT_TRACER(TracerID)
-
-	gTracers.erase(TracerIt);
-	
-	if (gTracers.empty())
-		CUDA::Free(gpCurrentTracer);
-}
-
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2])
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.FrameBuffer.Resize(Resolution2i(Size));
-
-	BindTracer(TracerID);
+	gTracers[TracerID].FrameBuffer.Resize(Resolution2i(Size));
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void Reset(int TracerID)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.FrameBuffer.Reset();
-	CurrentTracer.NoIterations = 0;
-
-	BindTracer(TracerID);
+	gTracers[TracerID].FrameBuffer.Reset();
+	gTracers[TracerID].NoIterations = 0;
+	gTracers.Synchronize();
 }
 
-EXPOSURE_RENDER_DLL void InitializeTracer(int& TracerID)
+EXPOSURE_RENDER_DLL void InitializeTracer(int& ID)
 {
-	/*
-	TracerID = gTracerCounter;
-	gTracers[gTracerCounter] = Tracer();
-	gTracerCounter++;
-
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.FrameBuffer.Free();
-
-	BindTracer(TracerID);
-	*/
+	gTracers.Bind(Tracer(), ID);
 }
 
-EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID)
+EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
 {
-	
+	gTracers.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(ErVolume Volume, int& ID)
+EXPOSURE_RENDER_DLL void BindVolume(ErVolume V, int& ID)
 {
-	gSharedVolumes.Bind(Volume, ID);
+	gSharedVolumes.Bind(Volume(V), ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 {
+//	gSharedVolumes.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindLight(ErLight Light, int& ID)
+EXPOSURE_RENDER_DLL void BindLight(ErLight L, int& ID)
 {
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 {
+//	gSharedLights.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindObject(ErObject Object, int& ID)
+EXPOSURE_RENDER_DLL void BindObject(ErObject O, int& ID)
 {
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 {
+//	gSharedObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject ClippingObject, int& ID)
+EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject C, int& ID)
 {
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 {
+//	gSharedClippingObjects.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture, int& ID)
@@ -162,6 +102,7 @@ EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture, int& ID)
 
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 {
+//	gSharedTextures.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void SetTracerVolumeIDs(int ID[MAX_NO_VOLUMES], int Size)
@@ -182,68 +123,55 @@ EXPOSURE_RENDER_DLL void SetTracerClippingObjectIDs(int ID[MAX_NO_CLIPPING_OBJEC
 
 EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ErScalarTransferFunction1D Opacity1D)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.Opacity1D = Opacity1D;
-
-	BindTracer(TracerID);
+	return;
+	gTracers[TracerID].Opacity1D = Opacity1D;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ErColorTransferFunction1D Diffuse1D)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.Diffuse1D = Diffuse1D;
-	BindTracer(TracerID);
+	return;
+	gTracers[TracerID].Diffuse1D = Diffuse1D;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ErColorTransferFunction1D Specular1D)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.Specular1D = Specular1D;
-	BindTracer(TracerID);
+	return;
+	gTracers[TracerID].Specular1D = Specular1D;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ErScalarTransferFunction1D Glossiness1D)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.Glossiness1D = Glossiness1D;
-	BindTracer(TracerID);
+	return;
+	gTracers[TracerID].Glossiness1D = Glossiness1D;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ErColorTransferFunction1D Emission1D)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.Emission1D = Emission1D;
-	BindTracer(TracerID);
+	return;
+	gTracers[TracerID].Emission1D = Emission1D;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.Camera = Camera;
-
-	BindTracer(TracerID);
+	gTracers[TracerID].Camera = Camera;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings RenderSettings)
 {
-	EDIT_TRACER(TracerID)
-
-	CurrentTracer.RenderSettings = RenderSettings;
-	
-	BindTracer(TracerID);
+	return;
+	gTracers[TracerID].RenderSettings = RenderSettings;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering)
 {
-	EDIT_TRACER(TracerID)
-
-	// Frame estimate filter
+	return;
 	GaussianFilter Gaussian;
 	
 	Gaussian.KernelRadius = Filtering.FrameEstimateFilter.KernelRadius;
@@ -253,9 +181,8 @@ EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering)
 	for (int i = 0; i < KernelSize; i++)
 		Gaussian.KernelD[i] = Gauss2D(Filtering.FrameEstimateFilter.Sigma, Gaussian.KernelRadius - i, 0);
 
-	CurrentTracer.FrameEstimateFilter = Gaussian;
+	gTracers[TracerID].FrameEstimateFilter = Gaussian;
 	
-	// Post processing filter
 	BilateralFilter Bilateral;
 
 	const int SigmaMax = (int)max(Filtering.PostProcessingFilter.SigmaD, Filtering.PostProcessingFilter.SigmaR);
@@ -273,51 +200,40 @@ EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering)
 	for (int i = 0; i < 256; i++)
 		Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
 
-	CurrentTracer.PostProcessingFilter = Bilateral;
+	gTracers[TracerID].PostProcessingFilter = Bilateral;
 
-	BindTracer(TracerID);
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
 	return;
+	CUDA::ThreadSynchronize();
 
-	EDIT_TRACER(TracerID)
+	SingleScattering(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
+	ComputeEstimate(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
+	ToneMap(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
 
 	CUDA::ThreadSynchronize();
 
-	SingleScattering(CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
-//	FilterGaussian(CurrentTracer.FrameBuffer.CudaFrameEstimate.GetPtr(), CurrentTracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
-	ComputeEstimate(CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
-	ToneMap(CurrentTracer.FrameBuffer.Resolution[0], CurrentTracer.FrameBuffer.Resolution[1]);
-
-	CUDA::ThreadSynchronize();
-
-	CurrentTracer.NoIterations++;
-
-	BindTracer(TracerID);
+	gTracers[TracerID].NoIterations++;
+	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)
 {
-	return;
-
-	EDIT_TRACER(TracerID)
-	CUDA::MemCopyDeviceToHost(CurrentTracer.FrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, CurrentTracer.FrameBuffer.CudaDisplayEstimate.GetNoElements());
+	CUDA::MemCopyDeviceToHost(gTracers[TracerID].FrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gTracers[TracerID].FrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance)
 {
 	return;
-	EDIT_TRACER(TracerID)
 	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
 }
 
 EXPOSURE_RENDER_DLL void GetNoIterations(int TracerID, int& NoIterations)
 {
-	return;
-	EDIT_TRACER(TracerID)
-	NoIterations = CurrentTracer.NoIterations; 
+	NoIterations = gTracers[TracerID].NoIterations; 
 }
 
 }

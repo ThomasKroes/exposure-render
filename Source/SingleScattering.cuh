@@ -51,10 +51,10 @@ KERNEL void KrnlSingleScattering()
 	const int X = blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gpTracer->FrameBuffer.Resolution[0] || Y >= gpTracer->FrameBuffer.Resolution[1])
+	if (X >= gpTracers[gActiveTracerID].FrameBuffer.Resolution[0] || Y >= gpTracers[gActiveTracerID].FrameBuffer.Resolution[1])
 		return;
 	
-	CRNG RNG(gpTracer->FrameBuffer.CudaRandomSeeds1.GetPtr(X, Y), gpTracer->FrameBuffer.CudaRandomSeeds2.GetPtr(X, Y));
+	CRNG RNG(gpTracers[gActiveTracerID].FrameBuffer.CudaRandomSeeds1.GetPtr(X, Y), gpTracers[gActiveTracerID].FrameBuffer.CudaRandomSeeds2.GetPtr(X, Y));
 
 	ColorXYZf Lv = SPEC_BLACK;
 
@@ -64,7 +64,7 @@ KERNEL void KrnlSingleScattering()
 
 	Ray Rc;
 
-	SampleCamera(Rc, Sample.CameraSample, X, Y);
+	gpTracers[gActiveTracerID].Camera.Sample(Rc, Sample.CameraSample);
 
 	SE = SampleRay(Rc, RNG);
 
@@ -79,7 +79,7 @@ KERNEL void KrnlSingleScattering()
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 
-	gpTracer->FrameBuffer.CudaFrameEstimate.Set(L, X, Y);
+	gpTracers[gActiveTracerID].FrameBuffer.CudaFrameEstimate.Set(L, X, Y);
 }
 
 void SingleScattering(int Width, int Height)

@@ -17,7 +17,7 @@
 #include "Vector.cuh"
 #include "General.cuh"
 #include "CudaUtilities.cuh"
-#include "SharedResources.cuh"
+#include "Tracer.cuh"
 
 namespace ExposureRender
 {
@@ -153,13 +153,13 @@ struct Volume
 
 typedef ResourceList<Volume, MAX_NO_VOLUMES> Volumes;
 
-__device__ Volumes* gpVolumes = NULL;
+DEVICE Volumes* gpVolumes = NULL;
 
-SharedResources<Volume, MAX_NO_VOLUMES> gSharedVolumes(gpVolumes);
+SharedResources<Volume, MAX_NO_VOLUMES> gSharedVolumes("gpVolumes");
 
 DEVICE float GetIntensity(const Vec3f& P)
 {
-	return (*gpVolumes)[gpTracer->VolumeIDs[0]].Get(P); 
+	return gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).Get(P); 
 }
 
 }

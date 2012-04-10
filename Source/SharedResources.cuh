@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include "Defines.cuh"
 #include "General.cuh"
 #include "CudaUtilities.cuh"
 
@@ -28,44 +29,59 @@ struct ResourceList
 {
 	int		Count;
 
-	ResourceList()
+	HOST ResourceList()
 	{
 		this->Count = 0;
 	}
 
-	HOST_DEVICE T& operator[](const int& i)
+	HOST_DEVICE T& Get(const int& ID)
 	{
-		return this->List[i];
+		return this->List[ID];
+	}
+
+	HOST void Add(const T& Resource)
+	{
+		if (this->Count + 1 >= MaxSize)
+			return;
+
+		this->List[this->Count] = Resource;
+		this->Count++;
+	}
+
+	HOST void Reset()
+	{
+		this->Count = 0;
 	}
 
 private:
 	T List[MaxSize];
 };
 
-template<class T, int MaxSize>
+template<typename T, int MaxSize>
 struct SharedResources
 {
-	map<int, T>						Resources;
+	typename map<int, T>			Resources;
 	int								Counter;
-	
-	ResourceList<T, MaxSize>*		DevicePtr;
+	char							DeviceSymbol[MAX_CHAR_SIZE];
 	ResourceList<T, MaxSize>*		DeviceAllocation;
-
+	ResourceList<T, MaxSize>		List;
 	typename map<int, T>::iterator	It;
 
-	SharedResources(ResourceList<T, MaxSize>* DevicePtr)
+	HOST SharedResources(const char* pDeviceSymbol)
 	{
-		this->Counter			= 0;
-		this->DevicePtr			= DevicePtr;
-		this->DeviceAllocation	= NULL;
+		this->Counter = 0;
+
+		sprintf_s(DeviceSymbol, MAX_CHAR_SIZE, "%s", pDeviceSymbol);
+
+		this->DeviceAllocation = NULL;
 	}
 
-	~SharedResources()
+	HOST ~SharedResources()
 	{
 //		CUDA::Free(this->DeviceAllocation);
 	}
 	
-	bool Exists(int ID)
+	HOST bool Exists(int ID)
 	{
 		if (ID < 0)
 			return false;
@@ -75,11 +91,16 @@ struct SharedResources
 		return It != Resources.end();
 	}
 
-	void Bind(T Resource, int& ID)
+	HOST void Bind(const T& Resource, int& ID)
 	{
-		this->Resources[ID] = Resource;
+		if (this->Resources.size() >= MaxSize)
+			throw(ErException(Enums::Warning, "Maximum number of resources reached"));
 
-		if (this->Exists(ID))
+		const bool Exists = this->Exists(ID);
+
+		this->Resources[Counter] = Resource;
+
+		if (!Exists)
 		{
 			ID = Counter;
 			Counter++;
@@ -88,8 +109,11 @@ struct SharedResources
 		this->Synchronize();
 	}
 
-	void Unbind(int ID)
+	HOST void Unbind(int ID)
 	{
+		if (!this->Exists(ID))
+			return;
+
 		It = this->Resources.find(ID);
 
 		if (It != Resources.end())
@@ -98,24 +122,31 @@ struct SharedResources
 		this->Synchronize();
 	}
 
-	void Synchronize()
+	HOST void Synchronize()
 	{
 		if (Resources.empty())
 			return;
 
-		ResourceList<T, MaxSize> ResourceList;
+		this->List.Reset();
 
 		for (It = Resources.begin(); It != Resources.end(); It++)
-		{
-			ResourceList[ResourceList.Count] = It->second;
-			ResourceList.Count++;
-		}
-
+			this->List.Add(It->second);
+		
 		if (this->DeviceAllocation == NULL)
-			cudaMalloc(&DeviceAllocation, sizeof(ResourceList));
+			cudaMalloc(&this->DeviceAllocation, sizeof(this->List));	
 
-		cudaMemcpy(DeviceAllocation, &ResourceList, sizeof(ResourceList), cudaMemcpyHostToDevice);
-		cudaMemcpyToSymbol(DevicePtr, &DeviceAllocation, sizeof(DevicePtr));
+		cudaMemcpy(DeviceAllocation, &this->List, sizeof(this->List), cudaMemcpyHostToDevice);
+		cudaMemcpyToSymbol(DeviceSymbol, &DeviceAllocation, sizeof(&this->List));
+	}
+
+	HOST T& operator[](const int& i)
+	{
+		It = this->Resources.find(i);
+
+		if (It == Resources.end())
+			throw(ErException(Enums::Fatal, "Resource does not exist"));
+
+		return this->Resources[i];
 	}
 };
 

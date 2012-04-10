@@ -68,18 +68,11 @@ struct Object : public ErObject
 	}
 };
 
-struct Objects
-{
-	Object	List[MAX_NO_OBJECTS];
-	int		Count;
+typedef ResourceList<Object, MAX_NO_OBJECTS> Objects;
 
-	Objects()
-	{
-		this->Count = 0;
-	}
-};
+DEVICE Objects* gpObjects = NULL;
 
-__device__ Objects* gpObjects = NULL;
+SharedResources<Object, MAX_NO_OBJECTS> gSharedObjects("gpObjects");
 
 DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 {
@@ -87,7 +80,7 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 
 	for (int i = 0; i < gpObjects->Count; i++)
 	{
-		Object& Object = gpObjects->List[i];
+		Object& Object = gpObjects->Get(i);
 
 		ScatterEvent LocalRS(ScatterEvent::Object);
 
@@ -107,7 +100,7 @@ DEVICE_NI bool IntersectsObject(const Ray& R)
 {
 	for (int i = 0; i < gpObjects->Count; i++)
 	{
-		if (gpObjects->List[i].Intersects(R))
+		if (gpObjects->Get(i).Intersects(R))
 			return true;
 	}
 

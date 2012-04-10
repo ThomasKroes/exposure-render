@@ -95,7 +95,6 @@ SET(ErCudaShapes
 	Sphere.cuh
 	Cylinder.cuh
 	Shape.cuh
-	SharedResources.cuh
 )
 
 # Shapes group
@@ -116,7 +115,7 @@ SET(ErShared
 	Object.cuh
 	ClippingObject.cuh
 	Texture.cuh
-	Shared.cuh
+	SharedResources.cuh
 )
 
 # Shared group

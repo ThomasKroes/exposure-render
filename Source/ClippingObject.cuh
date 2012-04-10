@@ -89,17 +89,10 @@ struct ClippingObject : public ErClippingObject
 	}
 };
 
-struct ClippingObjects
-{
-	ClippingObject	List[MAX_NO_CLIPPING_OBJECTS];
-	int				Count;
+typedef ResourceList<ClippingObject, MAX_NO_CLIPPING_OBJECTS> ClippingObjects;
 
-	ClippingObjects()
-	{
-		this->Count = 0;
-	}
-};
+DEVICE ClippingObjects* gpClippingObjects = NULL;
 
-__device__ int*	gpClippingObjects	= NULL;
+SharedResources<ClippingObject, MAX_NO_CLIPPING_OBJECTS> gSharedClippingObjects("gpClippingObjects");
 
 }

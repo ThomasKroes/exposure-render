@@ -24,9 +24,10 @@ namespace ExposureRender
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
 
-#define	MAX_NO_TIMINGS				64
 #define	MAX_CHAR_SIZE				256
+#define	MAX_NO_TIMINGS				64
 #define MAX_NO_TF_NODES 			256
+#define MAX_NO_TRACERS				64
 #define MAX_NO_VOLUMES				64
 #define MAX_NO_LIGHTS				64
 #define MAX_NO_OBJECTS				64
@@ -75,26 +76,31 @@ namespace Enums
 		CentralDifferences,
 		Filtered,
 	};
+
+	enum ExceptionLevel
+	{
+		Info = 0,
+		Warning,
+		Error,
+		Fatal
+	};
 }
 
 struct EXPOSURE_RENDER_DLL ErException
 {
-	char	Type[MAX_CHAR_SIZE];
-	char	Error[MAX_CHAR_SIZE];
-	char	Description[MAX_CHAR_SIZE];
-	
-	ErException(const char* pType = "", const char* pError = "", const char* pDescription = "")
+	Enums::ExceptionLevel	Level;
+	char					Message[MAX_CHAR_SIZE];
+
+	ErException(const Enums::ExceptionLevel& Level, const char* pMessage = "")
 	{
-		sprintf_s(Type, MAX_CHAR_SIZE, "%s", pType);
-		sprintf_s(Error, MAX_CHAR_SIZE, "%s", pError);
-		sprintf_s(Description, MAX_CHAR_SIZE, "%s", pDescription);
+		this->Level = Level;
+		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
 	}
 
 	ErException& operator = (const ErException& Other)
 	{
-		sprintf_s(Type, MAX_CHAR_SIZE, "%s", Other.Type);
-		sprintf_s(Error, MAX_CHAR_SIZE, "%s", Other.Error);
-		sprintf_s(Description, MAX_CHAR_SIZE, "%s", Other.Description);
+		this->Level = Other.Level;
+		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);
 
 		return *this;
 	}
@@ -223,9 +229,7 @@ struct EXPOSURE_RENDER_DLL ErMatrix44
 
 struct EXPOSURE_RENDER_DLL ErCamera
 {
-	int					FilmWidth;
-	int					FilmHeight;
-	int					FilmNoPixels;
+	int					FilmSize[2];
 	float				Pos[3];
 	float				Target[3];
 	float				Up[3];
@@ -237,18 +241,14 @@ struct EXPOSURE_RENDER_DLL ErCamera
 	float				ClipNear;
 	float				ClipFar;
 	float				Screen[2][2];
-	float				InvScreen[2];
 	float				Exposure;
-	float				InvExposure;
 	float				Gamma;
-	float				InvGamma;
 	float				FOV;
 
 	ErCamera()
 	{
-		this->FilmWidth			= 0;
-		this->FilmHeight		= 0;
-		this->FilmNoPixels		= 0;
+		this->FilmSize[0]		= 0;
+		this->FilmSize[1]		= 0;
 		this->Pos[0]			= 0.0f;
 		this->Pos[1]			= 0.0f;
 		this->Pos[2]			= 0.0f;
@@ -275,12 +275,8 @@ struct EXPOSURE_RENDER_DLL ErCamera
 		this->Screen[0][1]		= 0.0f;
 		this->Screen[1][0]		= 0.0f;
 		this->Screen[1][1]		= 0.0f;
-		this->InvScreen[0]		= 0.0f;
-		this->InvScreen[1]		= 0.0f;
 		this->Exposure			= 0.0f;
-		this->InvExposure		= 0.0f;
 		this->Gamma				= 0.0f;
-		this->InvGamma			= 0.0f;
 		this->FOV				= 0.0f;
 	}
 };

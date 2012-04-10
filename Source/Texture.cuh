@@ -189,23 +189,15 @@ struct Texture : public ErTexture
 	}
 };
 
-struct Textures
-{
-	Texture		List[MAX_NO_TEXTURES];
-	int			Count;
+typedef ResourceList<Texture, MAX_NO_TEXTURES> Textures;
 
-	Textures()
-	{
-		this->Count = 0;
-	}
-};
+DEVICE Textures* gpTextures = NULL;
 
-__device__ Textures* gpTextures = NULL;
-
+SharedResources<Texture, MAX_NO_TEXTURES> gSharedTextures("gpTextures");
 
 DEVICE_NI ColorXYZf EvaluateTexture2D(const int& TextureID, const Vec2f& UV)
 {
-	return gpTextures->List[TextureID].Evaluate(UV);
+	return gpTextures->Get(TextureID).Evaluate(UV);
 }
 
 }

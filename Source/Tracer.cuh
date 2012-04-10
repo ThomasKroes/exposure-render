@@ -13,25 +13,32 @@
 
 #pragma once
 
-#include "Defines.cuh"
 #include "Vector.cuh"
-#include "General.cuh"
-#include "CudaUtilities.cuh"
 #include "Framebuffer.cuh"
 #include "Filter.cuh"
+#include "Camera.cuh"
+#include "SharedResources.cuh"
 
 namespace ExposureRender
 {
 
 struct Tracer
 {
+	HOST Tracer()
+	{
+	}
+
+	HOST ~Tracer()
+	{
+	}
+		
 	ErScalarTransferFunction1D		Opacity1D;
 	ErColorTransferFunction1D		Diffuse1D;
 	ErColorTransferFunction1D		Specular1D;
 	ErScalarTransferFunction1D		Glossiness1D;
 	ErColorTransferFunction1D		Emission1D;
 
-	ErCamera						Camera;
+	Camera							Camera;
 	ErRenderSettings				RenderSettings;
 	GaussianFilter					FrameEstimateFilter;
 	BilateralFilter					PostProcessingFilter;
@@ -48,9 +55,50 @@ struct Tracer
 	int								NoLights;
 	int								NoObjects;
 	int								NoClippingObjects;
+
+	HOST Tracer& Tracer::operator = (const Tracer& Other)
+	{
+		this->Opacity1D				= Other.Opacity1D;
+		this->Diffuse1D				= Other.Diffuse1D;
+		this->Specular1D			= Other.Specular1D;
+		this->Glossiness1D			= Other.Glossiness1D;
+		this->Emission1D			= Other.Emission1D;
+
+		this->Camera				= Other.Camera;
+		this->RenderSettings		= Other.RenderSettings;
+		this->FrameEstimateFilter	= Other.FrameEstimateFilter;
+		this->PostProcessingFilter	= Other.PostProcessingFilter;
+		this->FrameBuffer			= Other.FrameBuffer;
+		this->NoIterations			= Other.NoIterations;
+		this->KernelTimings			= Other.KernelTimings;
+		
+		for (int i = 0; i < MAX_NO_VOLUMES; i++)
+			this->VolumeIDs[i] = Other.VolumeIDs[i];
+
+		for (int i = 0; i < MAX_NO_LIGHTS; i++)
+			this->LightIDs[i] = Other.LightIDs[i];
+
+		for (int i = 0; i < MAX_NO_OBJECTS; i++)
+			this->ObjectIDs[i] = Other.ObjectIDs[i];
+
+		for (int i = 0; i < MAX_NO_CLIPPING_OBJECTS; i++)
+			this->ClippingObjectIDs[i] = Other.ClippingObjectIDs[i];
+
+		this->NoVolumes				= Other.NoVolumes;
+		this->NoLights				= Other.NoLights;
+		this->NoObjects				= Other.NoObjects;
+		this->NoClippingObjects		= Other.NoClippingObjects;
+
+		return *this;
+	}
 };
 
 
-__device__ Tracer*	gpTracer = NULL;
+typedef ResourceList<Tracer, MAX_NO_TRACERS> Tracers;
+
+DEVICE Tracer* gpTracers = NULL;
+CD int gActiveTracerID = 0;
+
+SharedResources<Tracer, MAX_NO_TRACERS> gTracers("gpTracers");
 
 }
