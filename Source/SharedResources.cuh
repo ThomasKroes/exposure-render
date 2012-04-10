@@ -137,13 +137,11 @@ struct SharedResources
 		if (this->DeviceAllocation == NULL)
 			CUDA::Allocate(this->DeviceAllocation);
 
-		// CUDA::MemCopyHostToDevice(&this->List, DeviceAllocation);
+		CUDA::MemCopyHostToDevice(&this->List, DeviceAllocation);
 
 		void* pSymbol = NULL;
 
-		CUDA::GetSymbolAddress(&pSymbol, "gpTracers");
- 
-		//CUDA::MemCopyDeviceToDeviceSymbol((ResourceList<T, MaxSize>*)&DeviceAllocation, pSymbol);
+		CUDA::MemCopyDeviceToDeviceSymbol((ResourceList<T, MaxSize>*)&DeviceAllocation, pSymbol);
 	}
 
 	HOST T& operator[](const int& i)
