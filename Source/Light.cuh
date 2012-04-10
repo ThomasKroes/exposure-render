@@ -155,4 +155,5 @@ DEVICE_NI bool IntersectsLight(const Ray& R)
 	return false;
 }
 
+// DEVICE void Bind(ErLight
 }

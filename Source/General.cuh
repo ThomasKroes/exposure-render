@@ -358,10 +358,6 @@ struct EXPOSURE_RENDER_DLL ErTransferFunction1D
 {
 	ErPiecewiseLinearFunction		PLF[Size];
 	
-	ErTransferFunction1D()
-	{
-	}
-
 	ErTransferFunction1D& operator = (const ErTransferFunction1D& Other)
 	{	
 		for (int i = 0; i < Size; i++)

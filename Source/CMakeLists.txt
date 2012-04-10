@@ -95,6 +95,7 @@ SET(ErCudaShapes
 	Sphere.cuh
 	Cylinder.cuh
 	Shape.cuh
+	SharedResources.cuh
 )
 
 # Shapes group

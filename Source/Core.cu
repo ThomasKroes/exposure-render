@@ -26,18 +26,11 @@
 #include <map>
 
 static std::map<int, ExposureRender::Tracer>			gTracers;
-static std::map<int, ExposureRender::Volume>			gVolumes;
+
 static std::map<int, ExposureRender::Light>				gLights;
 static std::map<int, ExposureRender::Object>			gObjects;
 static std::map<int, ExposureRender::ClippingObject>	gClippingObjects;
 static std::map<int, ExposureRender::Texture>			gTextures;
-
-static int gTracerCounter			= 0;
-static int gVolumeCounter			= 0;
-static int gLightCounter			= 0;
-static int gObjectCounter			= 0;
-static int gClippingObjectCounter	= 0;
-static int gTextureCounter			= 0;
 
 #include "GaussianFilter.cuh"
 #include "BilateralFilter.cuh"
@@ -112,6 +105,7 @@ EXPOSURE_RENDER_DLL void Reset(int TracerID)
 
 EXPOSURE_RENDER_DLL void InitializeTracer(int& TracerID)
 {
+	/*
 	TracerID = gTracerCounter;
 	gTracers[gTracerCounter] = Tracer();
 	gTracerCounter++;
@@ -121,6 +115,7 @@ EXPOSURE_RENDER_DLL void InitializeTracer(int& TracerID)
 	CurrentTracer.FrameBuffer.Free();
 
 	BindTracer(TracerID);
+	*/
 }
 
 EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID)
@@ -130,9 +125,7 @@ EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID)
 
 EXPOSURE_RENDER_DLL void BindVolume(ErVolume Volume, int& ID)
 {
-	ID = gVolumeCounter;
-	gVolumes[gVolumeCounter] = Volume;
-	gVolumeCounter++;
+	gSharedVolumes.Bind(Volume, ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
@@ -141,70 +134,34 @@ EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 
 EXPOSURE_RENDER_DLL void BindLight(ErLight Light, int& ID)
 {
-	ID = gLightCounter;
-	gLights[gLightCounter] = Light;
-	gLightCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 {
-	std::map<int, ExposureRender::Light>::iterator It;
-
-	It = gLights.find(ID);
-
-	if (It != gLights.end())
-		gLights.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void BindObject(ErObject Object, int& ID)
 {
-	ID = gObjectCounter;
-	gObjects[gObjectCounter] = Object;
-	gObjectCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 {
-	std::map<int, ExposureRender::Object>::iterator It;
-
-	It = gObjects.find(ID);
-
-	if (It != gObjects.end())
-		gObjects.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject ClippingObject, int& ID)
 {
-	ID = gClippingObjectCounter;
-	gClippingObjects[gClippingObjectCounter] = ClippingObject;
-	gClippingObjectCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 {
-	std::map<int, ExposureRender::ClippingObject>::iterator It;
-
-	It = gClippingObjects.find(ID);
-
-	if (It != gClippingObjects.end())
-		gClippingObjects.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture, int& ID)
 {
-	ID = gTextureCounter;
-	gTextures[gTextureCounter] = Texture;
-	gTextureCounter++;
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 {
-	std::map<int, ExposureRender::Texture>::iterator It;
-
-	It = gTextures.find(ID);
-
-	if (It != gTextures.end())
-		gTextures.erase(It);
 }
 
 EXPOSURE_RENDER_DLL void SetTracerVolumeIDs(int ID[MAX_NO_VOLUMES], int Size)
