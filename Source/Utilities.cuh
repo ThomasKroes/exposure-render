@@ -89,11 +89,11 @@ DEVICE bool Inside(ErClippingObject& ClippingObject, Vec3f P)
 
 DEVICE bool Inside(const Vec3f& P)
 {
-	for (int i = 0; i < gpTracers[gActiveTracerID].ClippingObjects.Count; i++)
+	for (int i = 0; i < GetTracer().ClippingObjects.Count; i++)
 	{
-		const Vec3f P2 = TransformPoint(gpTracers[gActiveTracerID].ClippingObjects.List[i].Shape.InvTM, P);
+		const Vec3f P2 = TransformPoint(GetTracer().ClippingObjects.List[i].Shape.InvTM, P);
 
-		if (Inside(gpTracers[gActiveTracerID].ClippingObjects.List[i], P2))
+		if (Inside(GetTracer().ClippingObjects.List[i], P2))
 			return true;
 	}
 
@@ -105,9 +105,9 @@ DEVICE Vec3f GradientCD(Vec3f P)
 {
 	float Intensity[3][2] = 
 	{
-		{ GetIntensity(P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaX), GetIntensity(P - gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaX) },
-		{ GetIntensity(P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaY), GetIntensity(P - gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaY) },
-		{ GetIntensity(P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaZ), GetIntensity(P - gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaZ) }
+		{ GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX), GetIntensity(P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX) },
+		{ GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY), GetIntensity(P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY) },
+		{ GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ), GetIntensity(P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ) }
 	};
 
 	return Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
@@ -118,9 +118,9 @@ DEVICE Vec3f GradientFD(Vec3f P)
 	float Intensity[4] = 
 	{
 		GetIntensity(P),
-		GetIntensity(P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaX),
-		GetIntensity(P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaY),
-		GetIntensity(P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaZ)
+		GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX),
+		GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY),
+		GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ)
 	};
 
     return Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
@@ -128,7 +128,7 @@ DEVICE Vec3f GradientFD(Vec3f P)
 
 DEVICE Vec3f GradientFiltered(Vec3f P)
 {
-	Vec3f Offset(gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaX[0], gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaY[1], gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaZ[2]);
+	Vec3f Offset(GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX[0], GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY[1], GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ[2]);
 
     Vec3f G0 = GradientCD(P);
     Vec3f G1 = GradientCD(P + Vec3f(-Offset[0], -Offset[1], -Offset[2]));
@@ -148,7 +148,7 @@ DEVICE Vec3f GradientFiltered(Vec3f P)
 
 DEVICE Vec3f Gradient(Vec3f P)
 {
-	switch (gpTracers[gActiveTracerID].RenderSettings.Shading.GradientComputation)
+	switch (GetTracer().RenderSettings.Shading.GradientComputation)
 	{
 		case 0:	return GradientFD(P);
 		case 1:	return GradientCD(P);
@@ -167,19 +167,19 @@ DEVICE float GradientMagnitude(Vec3f P)
 {
 	Vec3f Pts[3][2];
 
-	Pts[0][0] = P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaX;
-	Pts[0][1] = P - gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaX;
-	Pts[1][0] = P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaY;
-	Pts[1][1] = P - gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaY;
-	Pts[2][0] = P + gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaZ;
-	Pts[2][1] = P - gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).GradientDeltaZ;
+	Pts[0][0] = P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX;
+	Pts[0][1] = P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX;
+	Pts[1][0] = P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY;
+	Pts[1][1] = P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY;
+	Pts[2][0] = P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ;
+	Pts[2][1] = P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ;
 
 	float D = 0.0f, Sum = 0.0f;
 
 	for (int i = 0; i < 3; i++)
 	{
 		D = GetIntensity(Pts[i][1]) - GetIntensity(Pts[i][0]);
-		D *= 0.5f / gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).Spacing[i];
+		D *= 0.5f / GetVolumes().Get(GetTracer().VolumeIDs[0]).Spacing[i];
 		Sum += D * D;
 	}
 
@@ -192,15 +192,15 @@ DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
 
 	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * gpTracers[gActiveTracerID].Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * gpTracers[gActiveTracerID].Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * gpTracers[gActiveTracerID].Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
 	
 	ColorRGBuc Result;
 
-	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), gpTracers[gActiveTracerID].Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), gpTracers[gActiveTracerID].Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), gpTracers[gActiveTracerID].Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
 
 	return Result;
 }

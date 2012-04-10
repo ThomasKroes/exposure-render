@@ -124,6 +124,8 @@ struct SharedResources
 
 	HOST void Synchronize()
 	{
+		return;
+
 		if (Resources.empty())
 			return;
 
@@ -133,10 +135,15 @@ struct SharedResources
 			this->List.Add(It->second);
 		
 		if (this->DeviceAllocation == NULL)
-			cudaMalloc(&this->DeviceAllocation, sizeof(this->List));	
+			CUDA::Allocate(this->DeviceAllocation);
 
-		cudaMemcpy(DeviceAllocation, &this->List, sizeof(this->List), cudaMemcpyHostToDevice);
-		cudaMemcpyToSymbol(DeviceSymbol, &DeviceAllocation, sizeof(&this->List));
+		// CUDA::MemCopyHostToDevice(&this->List, DeviceAllocation);
+
+		void* pSymbol = NULL;
+
+		CUDA::GetSymbolAddress(&pSymbol, "gpTracers");
+ 
+		//CUDA::MemCopyDeviceToDeviceSymbol((ResourceList<T, MaxSize>*)&DeviceAllocation, pSymbol);
 	}
 
 	HOST T& operator[](const int& i)

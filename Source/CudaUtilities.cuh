@@ -199,6 +199,12 @@ public:
 
 		CUDA::ThreadSynchronize();
 	}
+
+	static void GetSymbolAddress(void** pDevicePointer, char* pSymbol)
+	{
+		CUDA::ThreadSynchronize();
+		HandleCudaError(cudaGetSymbolAddress(pDevicePointer, pSymbol));
+	}
 };
 
 #define LAUNCH_CUDA_KERNEL_TIMED(cudakernelcall, title)									\

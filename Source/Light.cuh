@@ -108,17 +108,18 @@ struct Light : public ErLight
 
 typedef ResourceList<Light, MAX_NO_LIGHTS> Lights;
 
-DEVICE Lights* gpLights = NULL;
-
-SharedResources<Light, MAX_NO_LIGHTS> gSharedLights("gpLights");
+DEVICE Lights& GetLights()
+{
+	return *((Lights*)gpLights);
+}
 
 DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX; 
 
-	for (int i = 0; i < gpLights->Count; i++)
+	for (int i = 0; i < GetLights().Count; i++)
 	{
-		Light& Light = gpLights->Get(i);
+		Light& Light = GetLights().Get(i);
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 
@@ -139,9 +140,9 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 
 DEVICE_NI bool IntersectsLight(const Ray& R)
 {
-	for (int i = 0; i < gpLights->Count; i++)
+	for (int i = 0; i < GetLights().Count; i++)
 	{
-		if (gpLights->Get(i).Intersects(R))
+		if (GetLights().Get(i).Intersects(R))
 			return true;
 	}
 

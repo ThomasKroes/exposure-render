@@ -70,17 +70,18 @@ struct Object : public ErObject
 
 typedef ResourceList<Object, MAX_NO_OBJECTS> Objects;
 
-DEVICE Objects* gpObjects = NULL;
-
-SharedResources<Object, MAX_NO_OBJECTS> gSharedObjects("gpObjects");
+DEVICE Objects& GetObjects()
+{
+	return *((Objects*)gpObjects);
+}
 
 DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 {
 	float T = FLT_MAX;
 
-	for (int i = 0; i < gpObjects->Count; i++)
+	for (int i = 0; i < GetObjects().Count; i++)
 	{
-		Object& Object = gpObjects->Get(i);
+		Object& Object = GetObjects().Get(i);
 
 		ScatterEvent LocalRS(ScatterEvent::Object);
 
@@ -98,9 +99,9 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 
 DEVICE_NI bool IntersectsObject(const Ray& R)
 {
-	for (int i = 0; i < gpObjects->Count; i++)
+	for (int i = 0; i < GetObjects().Count; i++)
 	{
-		if (gpObjects->Get(i).Intersects(R))
+		if (GetObjects().Get(i).Intersects(R))
 			return true;
 	}
 

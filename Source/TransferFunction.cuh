@@ -109,7 +109,7 @@ struct TransferFunction1D
 	{
 	}
 
-	TransferFunction1D<Size>& operator = (const TransferFunction1D<Size>& Other)
+	HOST TransferFunction1D<Size>& operator = (const TransferFunction1D<Size>& Other)
 	{	
 		for (int i = 0; i < Size; i++)
 			this->PLF[i] = Other.PLF[i];
@@ -117,7 +117,7 @@ struct TransferFunction1D
 		return *this;
 	}
 
-	TransferFunction1D<Size>& operator = (const ErTransferFunction1D<Size>& Other)
+	HOST TransferFunction1D<Size>& operator = (const ErTransferFunction1D<Size>& Other)
 	{	
 		for (int i = 0; i < Size; i++)
 			this->PLF[i] = Other.PLF[i];
@@ -133,13 +133,13 @@ struct TransferFunction1D
 
 struct ScalarTransferFunction1D : public TransferFunction1D<1>
 {
-	ScalarTransferFunction1D& operator = (const ErScalarTransferFunction1D& Other)
+	HOST ScalarTransferFunction1D& operator = (const ErScalarTransferFunction1D& Other)
 	{	
 		this->PLF[0] = Other.PLF[0];
 		return *this;
 	}
 
-	ScalarTransferFunction1D& operator = (const ScalarTransferFunction1D& Other)
+	HOST ScalarTransferFunction1D& operator = (const ScalarTransferFunction1D& Other)
 	{	
 		this->PLF[0] = Other.PLF[0];
 		return *this;
@@ -153,7 +153,7 @@ struct ScalarTransferFunction1D : public TransferFunction1D<1>
 
 struct ColorTransferFunction1D : public TransferFunction1D<3>
 {
-	ColorTransferFunction1D& operator = (const ErColorTransferFunction1D& Other)
+	HOST ColorTransferFunction1D& operator = (const ErColorTransferFunction1D& Other)
 	{	
 		for (int i = 0; i < 3; i++)
 			this->PLF[i] = Other.PLF[i];
@@ -161,7 +161,7 @@ struct ColorTransferFunction1D : public TransferFunction1D<3>
 		return *this;
 	}
 
-	ColorTransferFunction1D& operator = (const ColorTransferFunction1D& Other)
+	HOST ColorTransferFunction1D& operator = (const ColorTransferFunction1D& Other)
 	{	
 		for (int i = 0; i < 3; i++)
 			this->PLF[i] = Other.PLF[i];

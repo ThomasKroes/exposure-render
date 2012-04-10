@@ -12,8 +12,16 @@
 */
 
 #include "General.cuh"
-
+#include "Defines.cuh"
 #include "Core.cuh"
+
+DEVICE int* gpTracer = NULL;
+
+DEVICE int* gpVolumes			= NULL;
+DEVICE int* gpLights			= NULL;
+DEVICE int* gpObjects			= NULL;
+DEVICE int* gpClippingObjects	= NULL;
+DEVICE int* gpTextures			= NULL;
 
 #include "Tracer.cuh"
 #include "Volume.cuh"
@@ -36,32 +44,42 @@
 namespace ExposureRender
 {
 
+std::map<int, Tracer> gTracers;
+
+SharedResources<Volume, MAX_NO_VOLUMES>						gSharedVolumes("gpVolumes");
+SharedResources<Object, MAX_NO_OBJECTS>						gSharedObjects("gpObjects");
+SharedResources<Light, MAX_NO_LIGHTS>						gSharedLights("gpLights");
+SharedResources<ClippingObject, MAX_NO_CLIPPING_OBJECTS>	gSharedClippingObjects("gpClippingObjects");
+SharedResources<Texture, MAX_NO_TEXTURES>					gSharedTextures("gpTextures");
+
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2])
 {
 	gTracers[TracerID].FrameBuffer.Resize(Resolution2i(Size));
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void Reset(int TracerID)
 {
 	gTracers[TracerID].FrameBuffer.Reset();
 	gTracers[TracerID].NoIterations = 0;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void InitializeTracer(int& ID)
 {
-	gTracers.Bind(Tracer(), ID);
+//	cudaSetDevice(0);
+
+//	gTracers.Bind(Tracer(), ID);
 }
 
 EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
 {
-	gTracers.Unbind(ID);
+//	gTracers.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindVolume(ErVolume V, int& ID)
 {
-	gSharedVolumes.Bind(Volume(V), ID);
+//	gSharedVolumes.Bind(Volume(V), ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
@@ -124,93 +142,63 @@ EXPOSURE_RENDER_DLL void SetTracerClippingObjectIDs(int ID[MAX_NO_CLIPPING_OBJEC
 EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ErScalarTransferFunction1D Opacity1D)
 {
 	gTracers[TracerID].Opacity1D = Opacity1D;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ErColorTransferFunction1D Diffuse1D)
 {
 	gTracers[TracerID].Diffuse1D = Diffuse1D;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ErColorTransferFunction1D Specular1D)
 {
 	gTracers[TracerID].Specular1D = Specular1D;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ErScalarTransferFunction1D Glossiness1D)
 {
 	gTracers[TracerID].Glossiness1D = Glossiness1D;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ErColorTransferFunction1D Emission1D)
 {
 	gTracers[TracerID].Emission1D = Emission1D;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera)
 {
 	gTracers[TracerID].Camera = Camera;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings RenderSettings)
 {
 	gTracers[TracerID].RenderSettings = RenderSettings;
-	gTracers.Synchronize();
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering)
 {
-	GaussianFilter Gaussian;
-	
-	Gaussian.KernelRadius = Filtering.FrameEstimateFilter.KernelRadius;
-
-	const int KernelSize = (2 * Gaussian.KernelRadius) + 1;
-
-	for (int i = 0; i < KernelSize; i++)
-		Gaussian.KernelD[i] = Gauss2D(Filtering.FrameEstimateFilter.Sigma, Gaussian.KernelRadius - i, 0);
-
-	gTracers[TracerID].FrameEstimateFilter = Gaussian;
-	
-	BilateralFilter Bilateral;
-
-	const int SigmaMax = (int)max(Filtering.PostProcessingFilter.SigmaD, Filtering.PostProcessingFilter.SigmaR);
-	
-	Bilateral.KernelRadius = (int)ceilf(2.0f * (float)SigmaMax);  
-
-	const float TwoSigmaRSquared = 2 * Filtering.PostProcessingFilter.SigmaR * Filtering.PostProcessingFilter.SigmaR;
-
-	const int kernelSize = Bilateral.KernelRadius * 2 + 1;
-	const int center = (kernelSize - 1) / 2;
-
-	for (int x = -center; x < -center + kernelSize; x++)
-		Bilateral.KernelD[x + center] = Gauss2D(Filtering.PostProcessingFilter.SigmaD, x, 0);
-
-	for (int i = 0; i < 256; i++)
-		Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
-
-	gTracers[TracerID].PostProcessingFilter = Bilateral;
-
-	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
-	return;
+//	CUDA::HostToConstantDevice(&TracerID, gActiveTracerID);
+
 	CUDA::ThreadSynchronize();
 
-	SingleScattering(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
+//	SingleScattering(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
 //	ComputeEstimate(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
 //	ToneMap(gTracers[TracerID].FrameBuffer.Resolution[0], gTracers[TracerID].FrameBuffer.Resolution[1]);
 
 	CUDA::ThreadSynchronize();
 
-	gTracers[TracerID].NoIterations++;
-	gTracers.Synchronize();
+	gTracers[TracerID].NoIterations++; 
+//	gTracers.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)

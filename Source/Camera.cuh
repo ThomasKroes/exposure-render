@@ -175,13 +175,13 @@ float a0 = (float) (side * PI_F * 2.0f / lensSides + lensRotationRadians);
 float a1 = (float) ((side + 1.0f) * PI_F * 2.0f / lensSides + lensRotationRadians);
 float eyeX = (float) ((cos(a0) * (1.0f - offs) + cos(a1) * offs) * dist);
 float eyeY = (float) ((sin(a0) * (1.0f - offs) + sin(a1) * offs) * dist);
-eyeX *= gpTracers[gActiveTracerID].Camera.ApertureSize;
-eyeY *= gpTracers[gActiveTracerID].Camera.ApertureSize;
+eyeX *= GetTracer().Camera.ApertureSize;
+eyeY *= GetTracer().Camera.ApertureSize;
 
-const Vec2f LensUV(eyeX, eyeY);// = gpTracers[gActiveTracerID].Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
+const Vec2f LensUV(eyeX, eyeY);// = GetTracer().Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
 
-const Vec3f LI = ToVec3f(gpTracers[gActiveTracerID].Camera.U) * LensUV[0] + ToVec3f(gpTracers[gActiveTracerID].Camera.V) * LensUV[1];
+const Vec3f LI = ToVec3f(GetTracer().Camera.U) * LensUV[0] + ToVec3f(GetTracer().Camera.V) * LensUV[1];
 
 Rc.O += LI;
-Rc.D = Normalize(Rc.D * gpTracers[gActiveTracerID].Camera.FocalDistance - LI);
+Rc.D = Normalize(Rc.D * GetTracer().Camera.FocalDistance - LI);
 */

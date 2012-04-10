@@ -91,8 +91,4 @@ struct ClippingObject : public ErClippingObject
 
 typedef ResourceList<ClippingObject, MAX_NO_CLIPPING_OBJECTS> ClippingObjects;
 
-DEVICE ClippingObjects* gpClippingObjects = NULL;
-
-SharedResources<ClippingObject, MAX_NO_CLIPPING_OBJECTS> gSharedClippingObjects("gpClippingObjects");
-
 }

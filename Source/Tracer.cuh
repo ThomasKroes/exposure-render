@@ -94,12 +94,9 @@ struct Tracer
 	}
 };
 
-
-typedef ResourceList<Tracer, MAX_NO_TRACERS> Tracers;
-
-DEVICE Tracer* gpTracers = NULL;
-CD int gActiveTracerID = 0;
-
-SharedResources<Tracer, MAX_NO_TRACERS> gTracers("gpTracers");
+DEVICE Tracer& GetTracer()
+{
+	return *((Tracer*)gpTracer);
+}
 
 }

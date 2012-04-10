@@ -191,13 +191,14 @@ struct Texture : public ErTexture
 
 typedef ResourceList<Texture, MAX_NO_TEXTURES> Textures;
 
-DEVICE Textures* gpTextures = NULL;
-
-SharedResources<Texture, MAX_NO_TEXTURES> gSharedTextures("gpTextures");
+DEVICE Textures& GetTextures()
+{
+	return *((Textures*)gpTextures);
+}
 
 DEVICE_NI ColorXYZf EvaluateTexture2D(const int& TextureID, const Vec2f& UV)
 {
-	return gpTextures->Get(TextureID).Evaluate(UV);
+	return GetTextures().Get(TextureID).Evaluate(UV);
 }
 
 }

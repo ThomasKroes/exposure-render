@@ -30,15 +30,15 @@ KERNEL void KrnlToneMap()
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= gpTracers[gActiveTracerID].FrameBuffer.Resolution[0] || Y >= gpTracers[gActiveTracerID].FrameBuffer.Resolution[1])
+	if (X >= GetTracer().FrameBuffer.Resolution[0] || Y >= GetTracer().FrameBuffer.Resolution[1])
 		return;
 
-	const ColorRGBuc L1 = ToneMap(gpTracers[gActiveTracerID].FrameBuffer.CudaRunningEstimateXyza.Get(X, Y));
+	const ColorRGBuc L1 = ToneMap(GetTracer().FrameBuffer.CudaRunningEstimateXyza.Get(X, Y));
 
-	gpTracers[gActiveTracerID].FrameBuffer.CudaDisplayEstimate(X, Y)[0] = L1[0];
-	gpTracers[gActiveTracerID].FrameBuffer.CudaDisplayEstimate(X, Y)[1] = L1[1];
-	gpTracers[gActiveTracerID].FrameBuffer.CudaDisplayEstimate(X, Y)[2] = L1[2];
-	gpTracers[gActiveTracerID].FrameBuffer.CudaDisplayEstimate(X, Y)[3] = gpTracers[gActiveTracerID].FrameBuffer.CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
+	GetTracer().FrameBuffer.CudaDisplayEstimate(X, Y)[0] = L1[0];
+	GetTracer().FrameBuffer.CudaDisplayEstimate(X, Y)[1] = L1[1];
+	GetTracer().FrameBuffer.CudaDisplayEstimate(X, Y)[2] = L1[2];
+	GetTracer().FrameBuffer.CudaDisplayEstimate(X, Y)[3] = GetTracer().FrameBuffer.CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
 }
 
 void ToneMap(int Width, int Height)

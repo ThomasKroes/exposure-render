@@ -23,6 +23,19 @@ struct GaussianFilter
 {
 	int		KernelRadius;
 	float	KernelD[MAX_BILATERAL_FILTER_KERNEL_SIZE];
+
+	/*
+	GaussianFilter Gaussian;
+	
+	Gaussian.KernelRadius = Filtering.FrameEstimateFilter.KernelRadius;
+
+	const int KernelSize = (2 * Gaussian.KernelRadius) + 1;
+
+	for (int i = 0; i < KernelSize; i++)
+		Gaussian.KernelD[i] = Gauss2D(Filtering.FrameEstimateFilter.Sigma, Gaussian.KernelRadius - i, 0);
+
+	gTracers[TracerID].FrameEstimateFilter = Gaussian;
+	*/
 };
 
 struct BilateralFilter
@@ -30,6 +43,27 @@ struct BilateralFilter
 	int		KernelRadius;
 	float	KernelD[MAX_BILATERAL_FILTER_KERNEL_SIZE];
 	float	GaussSimilarity[256];
+
+	/*
+	BilateralFilter Bilateral;
+
+	const int SigmaMax = (int)max(Filtering.PostProcessingFilter.SigmaD, Filtering.PostProcessingFilter.SigmaR);
+	
+	Bilateral.KernelRadius = (int)ceilf(2.0f * (float)SigmaMax);  
+
+	const float TwoSigmaRSquared = 2 * Filtering.PostProcessingFilter.SigmaR * Filtering.PostProcessingFilter.SigmaR;
+
+	const int kernelSize = Bilateral.KernelRadius * 2 + 1;
+	const int center = (kernelSize - 1) / 2;
+
+	for (int x = -center; x < -center + kernelSize; x++)
+		Bilateral.KernelD[x + center] = Gauss2D(Filtering.PostProcessingFilter.SigmaD, x, 0);
+
+	for (int i = 0; i < 256; i++)
+		Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
+
+	gTracers[TracerID].PostProcessingFilter = Bilateral;
+	*/
 };
 
 HOST_DEVICE float Gauss2D(const float& Sigma, const int& X, const int& Y)

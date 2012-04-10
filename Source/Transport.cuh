@@ -39,19 +39,19 @@ DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 
 DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 {
-	if (!gpTracers[gActiveTracerID].RenderSettings.Traversal.Shadows)
+	if (!GetTracer().RenderSettings.Traversal.Shadows)
 		return true;
 
 	Vec3f W = Normalize(P2 - P1);
 
-	const Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, gpTracers[gActiveTracerID].RenderSettings.Traversal.MaxShadowDistance));
+	const Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, GetTracer().RenderSettings.Traversal.MaxShadowDistance));
 
 	return !Intersect(R, RNG);
 }
 
 DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
 {
-	Light& Light = gpLights->Get(LightID);
+	Light& Light = GetLights().Get(LightID);
 
 	Vec3f Wi;
 
@@ -114,12 +114,12 @@ DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
 
 DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture2D(gpObjects->Get(SE.ObjectID).DiffuseTextureID, SE.UV), EvaluateTexture2D(gpObjects->Get(SE.ObjectID).SpecularTextureID, SE.UV), 10.0f, GlossinessExponent(EvaluateTexture2D(gpObjects->Get(SE.ObjectID).GlossinessTextureID, SE.UV).Y()));
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture2D(GetObjects().Get(SE.ObjectID).DiffuseTextureID, SE.UV), EvaluateTexture2D(GetObjects().Get(SE.ObjectID).SpecularTextureID, SE.UV), 10.0f, GlossinessExponent(EvaluateTexture2D(GetObjects().Get(SE.ObjectID).GlossinessTextureID, SE.UV).Y()));
 }
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
-	if (gpLights->Count <= 0)
+	if (GetLights().Count <= 0)
 		return ColorXYZf(0.0f);
 
 	VolumeShader Shader;
@@ -139,7 +139,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 			break;
 	}
 
-	const int LightID = floorf(LS.LightNum * gpLights->Count);
+	const int LightID = floorf(LS.LightNum * GetLights().Count);
 
 	ColorXYZf Ld;
 	
@@ -148,7 +148,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	for (int i = 0; i < NoSamples; i++)
 		Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID) / (float)NoSamples;
 
-	return (float)gpLights->Count * (Ld / (float)NoSamples);
+	return (float)GetLights().Count * (Ld / (float)NoSamples);
 }
 
 }

@@ -153,13 +153,14 @@ struct Volume
 
 typedef ResourceList<Volume, MAX_NO_VOLUMES> Volumes;
 
-DEVICE Volumes* gpVolumes = NULL;
-
-SharedResources<Volume, MAX_NO_VOLUMES> gSharedVolumes("gpVolumes");
+DEVICE Volumes& GetVolumes()
+{
+	return *((Volumes*)gpVolumes);
+}
 
 DEVICE float GetIntensity(const Vec3f& P)
 {
-	return gpVolumes->Get(gpTracers[gActiveTracerID].VolumeIDs[0]).Get(P); 
+	return GetVolumes().Get(GetTracer().VolumeIDs[0]).Get(P); 
 }
 
 }

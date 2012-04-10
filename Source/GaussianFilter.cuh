@@ -41,8 +41,8 @@ KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int 
 	
 	__syncthreads();
 
-	Range[TID][0] = max((int)ceilf(X - gpTracers[gActiveTracerID].FrameEstimateFilter.KernelRadius), 0);
-	Range[TID][1] = min((int)floorf(X + gpTracers[gActiveTracerID].FrameEstimateFilter.KernelRadius), Width - 1);
+	Range[TID][0] = max((int)ceilf(X - GetTracer().FrameEstimateFilter.KernelRadius), 0);
+	Range[TID][1] = min((int)floorf(X + GetTracer().FrameEstimateFilter.KernelRadius), Width - 1);
 
 	// Filter accumulated sum color
 	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
@@ -62,7 +62,7 @@ KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int 
 	// Execute kernel
 	for (int x = Range[TID][0]; x <= Range[TID][1]; x++)
 	{
-		Weight[TID]			= gpTracers[gActiveTracerID].FrameEstimateFilter.KernelD[gpTracers[gActiveTracerID].FrameEstimateFilter.KernelRadius - (x - X)];
+		Weight[TID]			= GetTracer().FrameEstimateFilter.KernelD[GetTracer().FrameEstimateFilter.KernelRadius - (x - X)];
 		Sum[TID]			+= pIn[Y * Width + x] * Weight[TID];
 		TotalWeight[TID]	+= Weight[TID];
 	}
@@ -92,8 +92,8 @@ KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Wi
 	
 	__syncthreads();
 
-	Range[TID][0] = max((int)ceilf(Y - gpTracers[gActiveTracerID].FrameEstimateFilter.KernelRadius), 0);
-	Range[TID][1] = min((int)floorf(Y + gpTracers[gActiveTracerID].FrameEstimateFilter.KernelRadius), Height - 1);
+	Range[TID][0] = max((int)ceilf(Y - GetTracer().FrameEstimateFilter.KernelRadius), 0);
+	Range[TID][1] = min((int)floorf(Y + GetTracer().FrameEstimateFilter.KernelRadius), Height - 1);
 
 	// Filter accumulated sum color
 	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
@@ -113,7 +113,7 @@ KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Wi
 	// Execute kernel
 	for (int y = Range[TID][0]; y <= Range[TID][1]; y++)
 	{
-		Weight[TID]			= gpTracers[gActiveTracerID].FrameEstimateFilter.KernelD[gpTracers[gActiveTracerID].FrameEstimateFilter.KernelRadius - (y - Y)];
+		Weight[TID]			= GetTracer().FrameEstimateFilter.KernelD[GetTracer().FrameEstimateFilter.KernelRadius - (y - Y)];
 		Sum[TID]			+= pIn[y * Width + X] * Weight[TID];
 		TotalWeight[TID]	+= Weight[TID];
 	}
