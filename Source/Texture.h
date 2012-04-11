@@ -14,7 +14,7 @@
 #pragma once
 
 #include "Procedural.h"
-#include "Image.h"
+#include "Bitmap.h"
 
 namespace ExposureRender
 {
@@ -23,7 +23,7 @@ struct EXPOSURE_RENDER_DLL Texture
 {
 	Enums::TextureType	Type;
 	float				OutputLevel;
-	Image				Image;
+	Bitmap				Bitmap;
 	Procedural			Procedural;
 	Vec2f				Offset;
 	Vec2f				Repeat;
@@ -41,7 +41,7 @@ struct EXPOSURE_RENDER_DLL Texture
 	{
 		this->Type			= Other.Type;
 		this->OutputLevel	= Other.OutputLevel;
-		this->Image			= Other.Image;
+		this->Bitmap		= Other.Bitmap;
 		this->Procedural	= Other.Procedural;
 		this->Offset		= Other.Offset;
 		this->Repeat		= Other.Repeat;

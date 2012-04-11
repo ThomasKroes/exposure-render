@@ -13,15 +13,17 @@
 
 #pragma once
 
+#include "Texture.h"
+
 namespace ExposureRender
 {
 
-DEVICE_NI ColorXYZf EvaluateBitmap(const int& U, const int& V)
+DEVICE_NI ColorXYZf EvaluateBitmap(const Bitmap& Bitmap, const int& U, const int& V)
 {
-	if (Image.pData == NULL)
+	if (Bitmap.pData == NULL)
 		return ColorXYZf(0.0f);
 
-	ErRGBA ColorRGBA = Image.pData[V * Image.Size[0] + U];
+	Vec4uc& ColorRGBA = Bitmap.pData[V * Image.Size[0] + U];
 	ColorXYZf L;
 	L.FromRGB(ONE_OVER_255 * (float)ColorRGBA.Data[0], ONE_OVER_255 * (float)ColorRGBA.Data[1], ONE_OVER_255 * (float)ColorRGBA.Data[2]);
 
@@ -109,11 +111,11 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 			break;
 		}
 
-		case Enums::Image:
+		case Enums::Bitmap:
 		{
-			if (T.Image.pData != NULL)
+			if (T.Bitmap.pData != NULL)
 			{
-				const int Size[2] = { T.Image.Size[0], T.Image.Size[1] };
+				const int Size[2] = { T.Bitmap.Size[0], T.Bitmap.Size[1] };
 
 				int umin = int(Size[0] * TextureUV[0]);
 				int vmin = int(Size[1] * TextureUV[1]);
@@ -129,10 +131,10 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 		
 				const ColorXYZf Color[4] = 
 				{
-					EvaluateBitmap(T.Image, umin, vmin),
-					EvaluateBitmap(T.Image, umax, vmin),
-					EvaluateBitmap(T.Image, umin, vmax),
-					EvaluateBitmap(T.Image, umax, vmax)
+					EvaluateBitmap(T.Bitmap, umin, vmin),
+					EvaluateBitmap(T.Bitmap, umax, vmin),
+					EvaluateBitmap(T.Bitmap, umin, vmax),
+					EvaluateBitmap(T.Bitmap, umax, vmax)
 				};
 
 				L = (1.0f - vcoef) * ((1.0f - ucoef) * Color[0] + ucoef * Color[1]) + vcoef * ((1.0f - ucoef) * Color[2] + ucoef * Color[3]);

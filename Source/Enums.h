@@ -28,7 +28,7 @@ namespace Enums
 	enum TextureType
 	{
 		Procedural = 0,
-		Image
+		Bitmap
 	};
 
 	enum ShapeType

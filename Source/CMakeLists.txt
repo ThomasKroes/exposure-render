@@ -119,7 +119,7 @@ SET(ErAPI
 	Object.h
 	ClippingObject.h
 	Procedural.h
-	Image.h
+	Bitmap.h
 	Texture.h
 	Shape.h
 	Matrix.h

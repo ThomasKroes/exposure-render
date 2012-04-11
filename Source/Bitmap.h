@@ -19,23 +19,23 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL Image
+struct EXPOSURE_RENDER_DLL Bitmap
 {
 	Vec4uc*		pData;
 	Vec2i		Size;
 	bool		Dirty;
 
-	Image()
+	Bitmap()
 	{
 		this->pData	= NULL;
 		this->Dirty = false;
 	}
 
-	~Image()
+	~Bitmap()
 	{
 	}
 
-	Image& operator = (const Image& Other)
+	Bitmap& operator = (const Bitmap& Other)
 	{
 //		this->pData	= Other.pData;
 		this->Size	= Other.Size;
