@@ -11,22 +11,27 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "General.cuh"
-#include "Defines.cuh"
 #include "Core.cuh"
 
 DEVICE int* gpTracer = NULL;
 
-#include "Volume.cuh"
-#include "Light.cuh"
-#include "Object.cuh"
-#include "ClippingObject.cuh"
-#include "Texture.cuh"
+typedef List<Volume, MAX_NO_VOLUMES> Volumes;
+typedef List<Light, MAX_NO_LIGHTS> Lights;
+typedef List<Object, MAX_NO_OBJECTS> Objects;
+typedef List<ClippingObject, MAX_NO_CLIPPING_OBJECTS> ClippingObjects;
+typedef List<Texture, MAX_NO_TEXTURES> Textures;
 
-DEVICE Volumes* gpVolumes					= NULL;
-DEVICE Objects* gpObjects					= NULL;
-DEVICE ClippingObjects*	gpClippingObjects	= NULL;
-DEVICE Textures* gpTextures					= NULL;
+DEVICE Volumes* gpVolumes = NULL;
+DEVICE Lights* gpLights = NULL;
+DEVICE Objects* gpObjects = NULL;
+DEVICE ClippingObjects*	gpClippingObjects = NULL;
+DEVICE Textures* gpTextures = NULL;
+
+static CudaList<Volume, MAX_NO_VOLUMES> gVolumes("gpVolumes");
+static CudaList<Light, MAX_NO_LIGHTS> gLights("gpLights");
+static CudaList<Object, MAX_NO_OBJECTS> gObjects("gpObjects");
+static CudaList<ClippingObject, MAX_NO_CLIPPING_OBJECTS> gClippingObjects("gpClippingObjects");
+static CudaList<Texture, MAX_NO_TEXTURES> gTextures("gpTextures");
 
 #include "Shared.cuh"
 #include "Tracer.cuh"
@@ -180,10 +185,6 @@ EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings Rende
 {
 	gTracers[TracerID].RenderSettings = RenderSettings;
 //	gTracers.Synchronize();
-}
-
-EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering)
-{
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)

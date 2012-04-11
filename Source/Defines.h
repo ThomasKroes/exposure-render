@@ -9,6 +9,12 @@ using namespace std;
 namespace ExposureRender
 {
 
+#ifdef _EXPORTING
+	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
+#else
+	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
+#endif
+
 #define KERNEL						__global__
 #define HOST						__host__
 #define DEVICE						__device__
@@ -39,6 +45,7 @@ namespace ExposureRender
 #define MAX_NO_TEXTURES				64
 #define	MAX_NO_TIMINGS				64
 #define MAX_NO_LIGHTS				64
+#define MAX_NO_TF_NODES				128
 #define NO_COLOR_COMPONENTS			4
 
 }

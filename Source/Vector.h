@@ -291,7 +291,7 @@ protected:
 };
 
 template <class T>
-class Vec2 : public Vec<T, 2>
+class EXPOSURE_RENDER_DLL Vec2 : public Vec<T, 2>
 {
 public:
 	HOST_DEVICE Vec2()
@@ -331,7 +331,7 @@ public:
 };
 
 template <class T>
-class Vec3 : public Vec<T, 3>
+class EXPOSURE_RENDER_DLL Vec3 : public Vec<T, 3>
 {
 public:
 	HOST_DEVICE Vec3()
@@ -400,7 +400,7 @@ public:
 };
 
 template <class T>
-class Vec4 : public Vec<T, 4>
+class EXPOSURE_RENDER_DLL Vec4 : public Vec<T, 4>
 {
 public:
 	HOST_DEVICE Vec4()

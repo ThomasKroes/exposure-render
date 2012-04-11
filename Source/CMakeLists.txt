@@ -57,7 +57,6 @@ SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 SET(ErCudaGeneral
 	SingleScattering.cuh
 	Utilities.cuh
-	CudaUtilities.cuh
 	Geometry.cuh
 	Core.cuh
 	Estimate.cuh
@@ -112,6 +111,7 @@ SET(ErAPI
 	Object.h
 	ClippingObject.h
 	Procedural.h
+	Image.h
 	Texture.h
 	Shape.h
 	Matrix.h
@@ -121,6 +121,7 @@ SET(ErAPI
 	Timing.h
 	Exception.h
 	Enums.h
+	CudaUtilities.h
 )
 
 # API group
@@ -129,7 +130,6 @@ SOURCE_GROUP("API" FILES ${ErAPI})
 # Shared
 SET(ErShared
 	Shared.cuh
-	SharedResources.cuh
 	Camera.cuh
 	Volume.cuh
 	Light.cuh

@@ -13,10 +13,6 @@
 
 #pragma once
 
-#include "Defines.cuh"
-#include "General.cuh"
-#include "SharedResources.cuh"
-
 namespace ExposureRender
 {
 

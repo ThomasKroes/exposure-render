@@ -13,40 +13,35 @@
 
 #pragma once
 
+#include "Vector.h"
+#include "CudaUtilities.h"
+
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErFiltering
+struct EXPOSURE_RENDER_DLL Image
 {
-	struct EXPOSURE_RENDER_DLL ErGaussianFilterParameters
+	Vec4uc*		pData;
+	Vec2i		Size;
+	bool		Dirty;
+
+	Image()
 	{
-		int		KernelRadius;
-		float	Sigma;
+		this->pData	= NULL;
+		this->Dirty = false;
+	}
 
-		ErGaussianFilterParameters()
-		{
-			this->KernelRadius	= 2;
-			this->Sigma			= 1.25f;
-		}
-	};
-
-	struct EXPOSURE_RENDER_DLL ErBilateralFilterParameters
+	~Image()
 	{
-		float	SigmaD;
-		float	SigmaR;
+	}
 
-		ErBilateralFilterParameters()
-		{
-			this->SigmaD	= 5.0f;
-			this->SigmaR	= 5.0f;
-		}
-	};
-
-	ErGaussianFilterParameters	FrameEstimateFilter;
-	ErBilateralFilterParameters	PostProcessingFilter;
-
-	ErFiltering()
+	Image& operator = (const Image& Other)
 	{
+//		this->pData	= Other.pData;
+		this->Size	= Other.Size;
+		this->Dirty	= Other.Dirty;
+
+		return *this;
 	}
 };
 

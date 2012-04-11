@@ -15,6 +15,7 @@
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <map>
 
 namespace ExposureRender
 {
@@ -204,6 +205,137 @@ public:
 	{
 		CUDA::ThreadSynchronize();
 		HandleCudaError(cudaGetSymbolAddress(pDevicePointer, pSymbol));
+	}
+};
+
+template<class T, int MaxSize>
+struct List
+{
+	int		Count;
+
+	HOST List()
+	{
+		this->Count = 0;
+	}
+
+	HOST_DEVICE T& Get(const int& ID)
+	{
+		return this->List[ID];
+	}
+
+	HOST void Add(const T& Resource)
+	{
+		if (this->Count + 1 >= MaxSize)
+			return;
+
+		this->List[this->Count] = Resource;
+		this->Count++;
+	}
+
+	HOST void Reset()
+	{
+		this->Count = 0;
+	}
+
+private:
+	T List[MaxSize];
+};
+
+template<typename T, int MaxSize>
+struct CudaList
+{
+	typename map<int, T>			Resources;
+	int								Counter;
+	char							DeviceSymbol[MAX_CHAR_SIZE];
+	List<T, MaxSize>*				DeviceAllocation;
+	List<T, MaxSize>				List;
+	typename map<int, T>::iterator	It;
+
+	HOST CudaList(const char* pDeviceSymbol)
+	{
+		this->Counter = 0;
+
+		sprintf_s(DeviceSymbol, MAX_CHAR_SIZE, "%s", pDeviceSymbol);
+
+		this->DeviceAllocation = NULL;
+	}
+
+	HOST ~CudaList()
+	{
+//		CUDA::Free(this->DeviceAllocation);
+	}
+	
+	HOST bool Exists(int ID)
+	{
+		if (ID < 0)
+			return false;
+
+		It = Resources.find(ID);
+
+		return It != Resources.end();
+	}
+
+	HOST void Bind(const T& Resource, int& ID)
+	{
+		if (this->Resources.size() >= MaxSize)
+			throw(ErException(Enums::Warning, "Maximum number of resources reached"));
+
+		const bool Exists = this->Exists(ID);
+
+		this->Resources[Counter] = Resource;
+
+		if (!Exists)
+		{
+			ID = Counter;
+			Counter++;
+		}
+
+		this->Synchronize();
+	}
+
+	HOST void Unbind(int ID)
+	{
+		if (!this->Exists(ID))
+			return;
+
+		It = this->Resources.find(ID);
+
+		if (It != Resources.end())
+			Resources.erase(It);
+
+		this->Synchronize();
+	}
+
+	HOST void Synchronize()
+	{
+		return;
+
+		if (Resources.empty())
+			return;
+
+		this->List.Reset();
+
+		for (It = Resources.begin(); It != Resources.end(); It++)
+			this->List.Add(It->second);
+		
+		if (this->DeviceAllocation == NULL)
+			CUDA::Allocate(this->DeviceAllocation);
+
+		CUDA::MemCopyHostToDevice(&this->List, DeviceAllocation);
+
+		void* pSymbol = NULL;
+
+		CUDA::MemCopyDeviceToDeviceSymbol((List<T, MaxSize>*)&DeviceAllocation, pSymbol);
+	}
+
+	HOST T& operator[](const int& i)
+	{
+		It = this->Resources.find(i);
+
+		if (It == Resources.end())
+			throw(ErException(Enums::Fatal, "Resource does not exist"));
+
+		return this->Resources[i];
 	}
 };
 

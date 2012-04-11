@@ -15,7 +15,6 @@
 
 #include <cuda_runtime.h>
 
-#include "General.cuh"
 #include "Shape.cuh"
 #include "MonteCarlo.cuh"
 #include "TransferFunction.cuh"

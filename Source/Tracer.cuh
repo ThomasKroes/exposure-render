@@ -13,12 +13,11 @@
 
 #pragma once
 
-#include "Vector.cuh"
+#include "Vector.h"
 #include "Framebuffer.cuh"
 #include "Filter.cuh"
 #include "Camera.cuh"
 #include "TransferFunction.cuh"
-#include "SharedResources.cuh"
 
 namespace ExposureRender
 {

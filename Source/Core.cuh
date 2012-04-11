@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "General.cuh"
+#include "ExposureRender.h"
 
 namespace ExposureRender
 {
@@ -28,28 +28,27 @@ EXPOSURE_RENDER_DLL void InitializeTracer(int& ID);
 EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID);
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2]);
 EXPOSURE_RENDER_DLL void Reset(int TracerID);
-EXPOSURE_RENDER_DLL void BindVolume(ErVolume Volume, int& ID);
+EXPOSURE_RENDER_DLL void BindVolume(Volume Volume, int& ID);
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID);
-EXPOSURE_RENDER_DLL void BindLight(ErLight Light, int& ID);
+EXPOSURE_RENDER_DLL void BindLight(Light Light, int& ID);
 EXPOSURE_RENDER_DLL void UnbindLight(int ID);
-EXPOSURE_RENDER_DLL void BindObject(ErObject Object, int& ID);
+EXPOSURE_RENDER_DLL void BindObject(Object Object, int& ID);
 EXPOSURE_RENDER_DLL void UnbindObject(int ID);
-EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject ClippingObject, int& ID);
+EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject ClippingObject, int& ID);
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID);
-EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture, int& ID);
+EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID);
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID);
 EXPOSURE_RENDER_DLL void SetTracerVolumeIDs(int ID[MAX_NO_VOLUMES], int Size);
 EXPOSURE_RENDER_DLL void SetTracerLightIDs(int ID[MAX_NO_LIGHTS], int Size);
 EXPOSURE_RENDER_DLL void SetTracerObjectIDs(int ID[MAX_NO_OBJECTS], int Size);
 EXPOSURE_RENDER_DLL void SetTracerClippingObjectIDs(int ID[MAX_NO_CLIPPING_OBJECTS], int Size);
-EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ErScalarTransferFunction1D Opacity1D);
-EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ErColorTransferFunction1D Diffuse1D);
-EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ErColorTransferFunction1D Specular1D);
-EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ErScalarTransferFunction1D Glossiness1D);
-EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ErColorTransferFunction1D Emission1D);
-EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera);
-EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings RenderSettings);
-EXPOSURE_RENDER_DLL void BindFiltering(int TracerID, ErFiltering Filtering);
+EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D);
+EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ColorTransferFunction1D Diffuse1D);
+EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ColorTransferFunction1D Specular1D);
+EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ScalarTransferFunction1D Glossiness1D);
+EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ColorTransferFunction1D Emission1D);
+EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera);
+EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings);
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID);
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData);
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance);

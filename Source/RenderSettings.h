@@ -87,8 +87,79 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 		}
 	};
 
+	struct EXPOSURE_RENDER_DLL Filtering
+	{
+		struct EXPOSURE_RENDER_DLL GaussianFilterParameters
+		{
+			int		KernelRadius;
+			float	Sigma;
+
+			GaussianFilterParameters()
+			{
+				this->KernelRadius	= 2;
+				this->Sigma			= 1.25f;
+			}
+
+			~GaussianFilterParameters()
+			{
+			}
+
+			GaussianFilterParameters& operator = (const GaussianFilterParameters& Other)
+			{
+				this->KernelRadius	= Other.KernelRadius;
+				this->Sigma			= Other.Sigma;
+
+				return *this;
+			}
+		};
+
+		struct EXPOSURE_RENDER_DLL BilateralFilterParameters
+		{
+			float	SigmaD;
+			float	SigmaR;
+
+			BilateralFilterParameters()
+			{
+				this->SigmaD	= 5.0f;
+				this->SigmaR	= 5.0f;
+			}
+			
+			~BilateralFilterParameters()
+			{
+			}
+
+			BilateralFilterParameters& operator = (const BilateralFilterParameters& Other)
+			{
+				this->SigmaD	= Other.SigmaD;
+				this->SigmaR	= Other.SigmaR;
+
+				return *this;
+			}
+		};
+
+		GaussianFilterParameters	FrameEstimateFilter;
+		BilateralFilterParameters	PostProcessingFilter;
+
+		Filtering()
+		{
+		}
+
+		~Filtering()
+		{
+		}
+
+		Filtering& operator = (const Filtering& Other)
+		{
+			this->FrameEstimateFilter	= Other.FrameEstimateFilter;
+			this->PostProcessingFilter	= Other.PostProcessingFilter;
+
+			return *this;
+		}
+	};
+
 	TraversalSettings	Traversal;
 	ShadingSettings		Shading;
+	Filtering			Filtering;
 
 	RenderSettings()
 	{
@@ -100,8 +171,9 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 
 	RenderSettings& operator = (const RenderSettings& Other)
 	{
-		this->Traversal	= Other.Traversal;
-		this->Shading	= Other.Shading;
+		this->Traversal		= Other.Traversal;
+		this->Shading		= Other.Shading;
+		this->Filtering		= Other.Filtering;
 
 		return *this;
 	}

@@ -13,7 +13,6 @@
 
 #pragma once
 
-#include "CudaUtilities.cuh"
 #include "Geometry.cuh"
 #include "Utilities.cuh"
 
