@@ -13,27 +13,4 @@
 
 #pragma once
 
-namespace ExposureRender
-{
-
-struct EXPOSURE_RENDER_DLL ErException
-{
-	Enums::ExceptionLevel	Level;
-	char					Message[MAX_CHAR_SIZE];
-
-	ErException(const Enums::ExceptionLevel& Level, const char* pMessage = "")
-	{
-		this->Level = Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
-	}
-
-	ErException& operator = (const ErException& Other)
-	{
-		this->Level = Other.Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);
-
-		return *this;
-	}
-};
-
-}
+#include "Camera.h"

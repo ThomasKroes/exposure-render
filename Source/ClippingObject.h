@@ -13,19 +13,13 @@
 
 #pragma once
 
-#include "Defines.cuh"
-#include "General.cuh"
-#include "SharedResources.cuh"
-
 namespace ExposureRender
 {
 
-#define MAX_NO_CLIPPING_OBJECTS	64
-
-struct EXPOSURE_RENDER_DLL ErClippingObject
+struct EXPOSURE_RENDER_DLL ClippingObject
 {
 	bool	Enabled;
-	ErShape	Shape;
+	Shape	Shape;
 	bool	Invert;
 
 	ErClippingObject()

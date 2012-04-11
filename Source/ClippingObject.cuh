@@ -13,8 +13,9 @@
 
 #pragma once
 
+#include "ExposureRender.h"
+
 #include "Defines.cuh"
-#include "General.cuh"
 #include "SharedResources.cuh"
 
 namespace ExposureRender

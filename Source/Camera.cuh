@@ -13,174 +13,39 @@
 
 #pragma once
 
-#include "General.cuh"
+#include "ExposureRender.h"
+
 #include "MonteCarlo.cuh"
 #include "Sample.cuh"
 
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErCamera
+DEVICE void SampleCamera(Ray& R, CameraSample& CS)
 {
-	Vec2i	FilmSize;
-	Vec3f	Pos;
-	Vec3f	Target;
-	Vec3f	Up;
-	Vec3f	N;
-	Vec3f	U;
-	Vec3f	V;
-	float	FocalDistance;
-	float	ApertureSize;
-	float	ClipNear;
-	float	ClipFar;
-	float	Screen[2][2];
-	float	Exposure;
-	float	Gamma;
-	float	FOV;
+	/*
+	Vec2f ScreenPoint;
 
-	ErCamera()
+	ScreenPoint[0] = this->Screen[0][0] + (this->InvScreen[0] * (float)(CS.FilmUV[0] * (float)this->FilmSize[0]));
+	ScreenPoint[1] = this->Screen[1][0] + (this->InvScreen[1] * (float)(CS.FilmUV[1] * (float)this->FilmSize[1]));
+
+	R.O		= this->Pos;
+	R.D		= Normalize(this->N + (ScreenPoint[0] * this->U) - (ScreenPoint[1] * this->V));
+	R.MinT	= this->ClipNear;
+	R.MaxT	= this->ClipFar;
+
+	if (this->ApertureSize != 0.0f)
 	{
+		const Vec2f LensUV = this->ApertureSize * ConcentricSampleDisk(CS.LensUV);
+
+		const Vec3f LI = this->U * LensUV[0] + this->V * LensUV[1];
+
+		R.O += LI;
+		R.D = Normalize(R.D * this->FocalDistance - LI);
 	}
-};
+	*/
+}
 
-struct Camera
-{
-	HOST Camera()
-	{
-	}
-
-	HOST Camera(const ErCamera& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ~Camera()
-	{
-	}
-
-	HOST Camera& Camera::operator = (const Camera& Other)
-	{
-		this->FilmSize			= Other.FilmSize;
-		this->Pos				= Other.Pos;
-		this->Target			= Other.Target;
-		this->Up				= Other.Up;
-		this->N					= Other.N;
-		this->U					= Other.U;
-		this->V					= Other.V;
-		this->FocalDistance		= Other.FocalDistance;
-		this->ApertureSize		= Other.ApertureSize;
-		this->ClipNear			= Other.ClipNear;
-		this->ClipFar			= Other.ClipFar;
-		this->Screen[0][0]		= Other.Screen[0][0];
-		this->Screen[0][1]		= Other.Screen[0][1];
-		this->Screen[1][0]		= Other.Screen[1][0];
-		this->Screen[1][1]		= Other.Screen[1][1];
-		this->InvScreen[0]		= Other.InvScreen[0];
-		this->InvScreen[1]		= Other.InvScreen[1];
-		this->Exposure			= Other.Exposure;
-		this->InvExposure		= Other.InvExposure;
-		this->Gamma				= Other.Gamma;
-		this->InvGamma			= Other.InvGamma;
-		this->FOV				= Other.FOV;
-
-		return *this;
-	}
-
-	HOST Camera& Camera::operator = (const ErCamera& Other)
-	{
-		this->FilmSize		= Vec2i(Other.FilmSize[0], Other.FilmSize[1]);
-		this->Pos			= Vec3f(Other.Pos[0], Other.Pos[1], Other.Pos[2]);
-		this->Target		= Vec3f(Other.Target[0], Other.Target[1], Other.Target[2]);
-		this->Up			= Vec3f(Other.Up[0], Other.Up[1], Other.Up[2]);
-		this->FocalDistance	= Other.FocalDistance;
-		this->ApertureSize	= Other.ApertureSize;
-		this->ClipNear		= Other.ClipNear;
-		this->ClipFar		= Other.ClipFar;
-		this->Screen[0][0]	= Other.Screen[0][0];
-		this->Screen[0][1]	= Other.Screen[0][1];
-		this->Screen[1][0]	= Other.Screen[1][0];
-		this->Screen[1][1]	= Other.Screen[1][1];
-		this->Exposure		= Other.Exposure;
-		this->InvExposure	= 1.0f / Other.Exposure;
-		this->Gamma			= Other.Gamma;
-		this->InvGamma		= 1.0f / Other.Gamma;
-		this->FOV			= Other.FOV;
-		
-		this->N = Normalize(this->Target - this->Pos);
-		this->U = Normalize(Cross(this->N, this->Up));
-		this->V = Normalize(Cross(this->N, this->U));
-
-		if (this->FocalDistance == -1.0f)
-			this->FocalDistance = (this->Target - this->Pos).Length();
-
-		float Scale = 0.0f;
-
-		Scale = tanf((0.5f * this->FOV / RAD_F));
-
-		const float AspectRatio = (float)this->FilmSize[1] / (float)this->FilmSize[0];
-
-		if (AspectRatio > 1.0f)
-		{
-			this->Screen[0][0] = -Scale;
-			this->Screen[0][1] = Scale;
-			this->Screen[1][0] = -Scale * AspectRatio;
-			this->Screen[1][1] = Scale * AspectRatio;
-		}
-		else
-		{
-			this->Screen[0][0] = -Scale / AspectRatio;
-			this->Screen[0][1] = Scale / AspectRatio;
-			this->Screen[1][0] = -Scale;
-			this->Screen[1][1] = Scale;
-		}
-
-		this->InvScreen[0] = (this->Screen[0][1] - this->Screen[0][0]) / (float)this->FilmSize[0];
-		this->InvScreen[1] = (this->Screen[1][1] - this->Screen[1][0]) / (float)this->FilmSize[1];
-
-		return *this;
-	}
-
-	DEVICE void Sample(Ray& R, CameraSample& CS)
-	{
-		Vec2f ScreenPoint;
-
-		ScreenPoint[0] = this->Screen[0][0] + (this->InvScreen[0] * (float)(CS.FilmUV[0] * (float)this->FilmSize[0]));
-		ScreenPoint[1] = this->Screen[1][0] + (this->InvScreen[1] * (float)(CS.FilmUV[1] * (float)this->FilmSize[1]));
-
-		R.O		= this->Pos;
-		R.D		= Normalize(this->N + (ScreenPoint[0] * this->U) - (ScreenPoint[1] * this->V));
-		R.MinT	= this->ClipNear;
-		R.MaxT	= this->ClipFar;
-
-		if (this->ApertureSize != 0.0f)
-		{
-			const Vec2f LensUV = this->ApertureSize * ConcentricSampleDisk(CS.LensUV);
-
-			const Vec3f LI = this->U * LensUV[0] + this->V * LensUV[1];
-
-			R.O += LI;
-			R.D = Normalize(R.D * this->FocalDistance - LI);
-		}
-	}
-
-	Vec2i	FilmSize;
-	Vec3f	Pos;
-	Vec3f	Target;
-	Vec3f	Up;
-	Vec3f	N;
-	Vec3f	U;
-	Vec3f	V;
-	float	FocalDistance;
-	float	ApertureSize;
-	float	ClipNear;
-	float	ClipFar;
-	float	Screen[2][2];
-	float	InvScreen[2];
-	float	Exposure;
-	float	InvExposure;
-	float	Gamma;
-	float	InvGamma;
-	float	FOV;
 };
 
 }
