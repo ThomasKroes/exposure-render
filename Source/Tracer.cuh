@@ -13,11 +13,11 @@
 
 #pragma once
 
-#include "Vector.h"
+#include "TransferFunction.h"
+#include "Camera.h"
+#include "RenderSettings.h"
+
 #include "Framebuffer.cuh"
-#include "Filter.cuh"
-#include "Camera.cuh"
-#include "TransferFunction.cuh"
 
 namespace ExposureRender
 {
@@ -39,12 +39,9 @@ struct Tracer
 	ColorTransferFunction1D			Emission1D;
 
 	Camera							Camera;
-	ErRenderSettings				RenderSettings;
-	GaussianFilter					FrameEstimateFilter;
-	BilateralFilter					PostProcessingFilter;
+	RenderSettings					RenderSettings;
 	FrameBuffer						FrameBuffer;
 	int								NoIterations;
-	ErKernelTimings					KernelTimings;
 
 	int								VolumeIDs[MAX_NO_VOLUMES];
 	int								LightIDs[MAX_NO_LIGHTS];
@@ -66,11 +63,8 @@ struct Tracer
 
 		this->Camera				= Other.Camera;
 		this->RenderSettings		= Other.RenderSettings;
-		this->FrameEstimateFilter	= Other.FrameEstimateFilter;
-		this->PostProcessingFilter	= Other.PostProcessingFilter;
 		this->FrameBuffer			= Other.FrameBuffer;
 		this->NoIterations			= Other.NoIterations;
-		this->KernelTimings			= Other.KernelTimings;
 		
 		for (int i = 0; i < MAX_NO_VOLUMES; i++)
 			this->VolumeIDs[i] = Other.VolumeIDs[i];

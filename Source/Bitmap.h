@@ -19,6 +19,8 @@
 namespace ExposureRender
 {
 
+typedef Vec<unsigned char, 4> Vec4uc;
+
 struct EXPOSURE_RENDER_DLL Bitmap
 {
 	Vec4uc*		pData;

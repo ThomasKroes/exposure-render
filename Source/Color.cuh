@@ -147,9 +147,9 @@ public:
 
 	HOST_DEVICE void FromRGBf(const float& R, const float& G, const float& B)
 	{
-		this->SetR((unsigned char)(clamp2(R, 0.0f, 1.0f) * 255.0f));
-		this->SetG((unsigned char)(clamp2(G, 0.0f, 1.0f) * 255.0f));
-		this->SetB((unsigned char)(clamp2(B, 0.0f, 1.0f) * 255.0f));
+		this->SetR((unsigned char)(ExposureRender::Clamp(R, 0.0f, 1.0f) * 255.0f));
+		this->SetG((unsigned char)(ExposureRender::Clamp(G, 0.0f, 1.0f) * 255.0f));
+		this->SetB((unsigned char)(ExposureRender::Clamp(B, 0.0f, 1.0f) * 255.0f));
 	}
 
 	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
@@ -164,9 +164,9 @@ public:
 		G =	gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z;
 		B =	bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z;
 
-		clamp2(R, 0.0f, 1.0f);
-		clamp2(G, 0.0f, 1.0f);
-		clamp2(B, 0.0f, 1.0f);
+		ExposureRender::Clamp(R, 0.0f, 1.0f);
+		ExposureRender::Clamp(G, 0.0f, 1.0f);
+		ExposureRender::Clamp(B, 0.0f, 1.0f);
 
 		this->SetR((unsigned char)(R * 255.0f));
 		this->SetG((unsigned char)(G * 255.0f));
@@ -206,10 +206,10 @@ public:
 
 	HOST_DEVICE void FromRGBAf(const float& R, const float& G, const float& B, const float& A)
 	{
-		this->SetR((unsigned char)(clamp2(R, 0.0f, 1.0f) * 255.0f));
-		this->SetG((unsigned char)(clamp2(G, 0.0f, 1.0f) * 255.0f));
-		this->SetB((unsigned char)(clamp2(B, 0.0f, 1.0f) * 255.0f));
-		this->SetA((unsigned char)(clamp2(A, 0.0f, 1.0f) * 255.0f));
+		this->SetR((unsigned char)(ExposureRender::Clamp(R, 0.0f, 1.0f) * 255.0f));
+		this->SetG((unsigned char)(ExposureRender::Clamp(G, 0.0f, 1.0f) * 255.0f));
+		this->SetB((unsigned char)(ExposureRender::Clamp(B, 0.0f, 1.0f) * 255.0f));
+		this->SetA((unsigned char)(ExposureRender::Clamp(A, 0.0f, 1.0f) * 255.0f));
 	}
 
 	HOST_DEVICE void FromXYZ(const float& X, const float& Y, const float& Z)
@@ -224,9 +224,9 @@ public:
 		G =	gWeight[0] * X + gWeight[1] * Y + gWeight[2] * Z;
 		B =	bWeight[0] * X + bWeight[1] * Y + bWeight[2] * Z;
 
-		clamp2(R, 0.0f, 1.0f);
-		clamp2(G, 0.0f, 1.0f);
-		clamp2(B, 0.0f, 1.0f);
+		ExposureRender::Clamp(R, 0.0f, 1.0f);
+		ExposureRender::Clamp(G, 0.0f, 1.0f);
+		ExposureRender::Clamp(B, 0.0f, 1.0f);
 
 		this->SetR((unsigned char)(R * 255.0f));
 		this->SetG((unsigned char)(G * 255.0f));
@@ -447,7 +447,7 @@ HOST_DEVICE inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const Col
 	return ColorXYZf(OneMinusT * C1.GetX() + T * C2.GetX(), OneMinusT * C1.GetY() + T * C2.GetY(), OneMinusT * C1.GetZ() + T * C2.GetZ());
 }
 
-class ColorXYZAf : public Vec4f
+class ColorXYZAf : public Vec<float, 4>
 {
 public:
 	HOST_DEVICE ColorXYZAf(float V = 0.0f)
@@ -487,48 +487,48 @@ public:
 
 	HOST_DEVICE float GetX(void) const
 	{
-		return D[0];
+		return this->D[0];
 	}
 
 	HOST_DEVICE void SetX(float X)
 	{
-		D[0] = X;
+		this->D[0] = X;
 	}
 
 	HOST_DEVICE float GetY(void) const
 	{
-		return D[1];
+		return this->D[1];
 	}
 
 	HOST_DEVICE void SetY(float Y)
 	{
-		D[1] = Y;
+		this->D[1] = Y;
 	}
 
 	HOST_DEVICE float GetZ(void) const
 	{
-		return D[2];
+		return this->D[2];
 	}
 
 	HOST_DEVICE void SetZ(float Z)
 	{
-		D[2] = Z;
+		this->D[2] = Z;
 	}
 
 	HOST_DEVICE float GetA(void) const
 	{
-		return D[3];
+		return this->D[3];
 	}
 
 	HOST_DEVICE void SetA(float A)
 	{
-		D[3] = A;
+		this->D[3] = A;
 	}
 
 	HOST_DEVICE ColorXYZAf& operator += (const ColorXYZAf& XYZ)
 	{
 		for (int i = 0; i < 4; ++i)
-			D[i] += XYZ[i];
+			this->D[i] += XYZ[i];
 
 		return *this;
 	}
@@ -538,7 +538,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.D[i] += XYZ[i];
+			Result[i] += XYZ[i];
 
 		return Result;
 	}
@@ -548,7 +548,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.D[i] -= XYZ[i];
+			Result[i] -= XYZ[i];
 
 		return Result;
 	}
@@ -559,7 +559,7 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.D[i] /= XYZA[i];
+			Result[i] /= XYZA[i];
 
 		return Result;
 	}
@@ -570,69 +570,15 @@ public:
 		ColorXYZAf Result = *this;
 
 		for (int i = 0; i < 4; ++i)
-			Result.D[i] *= XYZA[i];
-
-		return Result;
-	}
-/*
-	HOST_DEVICE ColorXYZAf& operator *= (const ColorXYZAf& XYZ)
-	{
-		for (int i = 0; i < 3; ++i)
-			D[i] *= XYZ[i];
-
-		return *this;
-	}
-
-	HOST_DEVICE ColorXYZAf operator * (const float& F) const
-	{
-		ColorXYZAf Result = *this;
-
-		for (int i = 0; i < 3; ++i)
-			Result.D[i] *= F;
+			Result[i] *= XYZA[i];
 
 		return Result;
 	}
 
-	HOST_DEVICE ColorXYZAf& operator *= (const float& F)
-	{
-		for (int i = 0; i < 3; ++i)
-			D[i] *= F;
-
-		return *this;
-	}
-
-	HOST_DEVICE ColorXYZAf operator / (const float& F) const
-	{
-		ColorXYZAf Result = *this;
-
-		for (int i = 0; i < 3; ++i)
-			Result.D[i] /= F;
-
-		return Result;
-	}
-
-	
-	HOST_DEVICE ColorXYZAf& operator /= (float a)
-	{
-		for (int i = 0; i < 3; ++i)
-			D[i] /= a;
-
-		return *this;
-	}
-	
-
-	HOST_DEVICE ColorXYZAf& ColorXYZAf::operator = (const ColorXYZAf& Other)
-	{
-		for (int i = 0; i < 4; ++i)
-			D[i] = Other[i];
-
-		return *this;
-	}
-*/
 	HOST_DEVICE bool IsBlack() const
 	{
 		for (int i = 0; i < 3; ++i)
-			if (D[i] != 0.0f)
+			if (this->D[i] != 0.0f)
 				return false;
 
 		return true;
@@ -645,7 +591,7 @@ public:
 		float v = 0.0f;
 
 		for (int i = 0; i < 3; i++)
-			v += YWeight[i] * D[i];
+			v += YWeight[i] * this->D[i];
 
 		return v;
 	}
@@ -656,9 +602,9 @@ public:
 		const float CoeffY[3] = { 0.2126f, 0.7152f, 0.0722f };
 		const float CoeffZ[3] = { 0.0193f, 0.1192f, 0.9505f };
 
-		D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
-		D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
-		D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
+		this->D[0] = CoeffX[0] * R + CoeffX[1] * G + CoeffX[2] * B;
+		this->D[1] = CoeffY[0] * R + CoeffY[1] * G + CoeffY[2] * B;
+		this->D[2] = CoeffZ[0] * R + CoeffZ[1] * G + CoeffZ[2] * B;
 	}
 };
 

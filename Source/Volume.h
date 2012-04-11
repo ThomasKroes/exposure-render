@@ -89,7 +89,7 @@ struct Volume
 			CUDA::Free(this->pVoxels);
 	}
 
-	HOST_DEVICE unsigned short Get(Vec3i XYZ) const
+	HOST_DEVICE unsigned short Get(const Vec3i& XYZ) const
 	{
 		if (!this->pVoxels)
 			return unsigned short();
@@ -99,14 +99,14 @@ struct Volume
 		return this->pVoxels[XYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + XYZ[1] * (int)this->Resolution[0] + XYZ[0]];
 	}
 
-	HOST_DEVICE unsigned short Get(Vec3f XYZ) const
+	HOST_DEVICE unsigned short Get(const Vec3f& XYZ) const
 	{
 		Vec3f LocalXYZ = Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
 
 		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
 	}
 	
-	Vec3i				Resolution; // FIXME
+	Vec3i				Resolution;			// FIXME
 	Vec3f				InvResolution;
 	Vec3f				MinAABB;
 	Vec3f				MaxAABB;

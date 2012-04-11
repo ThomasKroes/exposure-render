@@ -27,15 +27,12 @@ DEVICE Objects*			gpObjects			= NULL;
 DEVICE ClippingObjects*	gpClippingObjects	= NULL;
 DEVICE Textures*		gpTextures			= NULL;
 
-ExposureRender::CudaList<ExposureRender::Volume, MAX_NO_VOLUMES>					gVolumes("gpVolumes");
-ExposureRender::CudaList<ExposureRender::Light, MAX_NO_LIGHTS>						gLights("gpLights");
-ExposureRender::CudaList<ExposureRender::Object, MAX_NO_OBJECTS>					gObjects("gpObjects");
-ExposureRender::CudaList<ExposureRender::ClippingObject, MAX_NO_CLIPPING_OBJECTS>	gClippingObjects("gpClippingObjects");
-ExposureRender::CudaList<ExposureRender::Texture, MAX_NO_TEXTURES>					gTextures("gpTextures");
 
-#include "Shared.cuh"
 #include "Tracer.cuh"
+
+
 #include "Utilities.cuh"
+/*
 
 #include "GaussianFilter.cuh"
 #include "BilateralFilter.cuh"
@@ -46,17 +43,18 @@ ExposureRender::CudaList<ExposureRender::Texture, MAX_NO_TEXTURES>					gTextures
 #include "ToneMap.cuh"
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"
+*/
 
 namespace ExposureRender
 {
 
-std::map<int, Tracer> gTracers;
+CudaList<Volume, MAX_NO_VOLUMES>					gVolumes("gpVolumes");
+CudaList<Light, MAX_NO_LIGHTS>						gLights("gpLights");
+CudaList<Object, MAX_NO_OBJECTS>					gObjects("gpObjects");
+CudaList<ClippingObject, MAX_NO_CLIPPING_OBJECTS>	gClippingObjects("gpClippingObjects");
+CudaList<Texture, MAX_NO_TEXTURES>					gTextures("gpTextures");
 
-SharedResources<Volume, MAX_NO_VOLUMES>						gSharedVolumes("gpVolumes");
-SharedResources<Object, MAX_NO_OBJECTS>						gSharedObjects("gpObjects");
-SharedResources<Light, MAX_NO_LIGHTS>						gSharedLights("gpLights");
-SharedResources<ClippingObject, MAX_NO_CLIPPING_OBJECTS>	gSharedClippingObjects("gpClippingObjects");
-SharedResources<Texture, MAX_NO_TEXTURES>					gSharedTextures("gpTextures");
+std::map<int, Tracer> gTracers;
 
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2])
 {
@@ -83,7 +81,7 @@ EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
 //	gTracers.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(ErVolume V, int& ID)
+EXPOSURE_RENDER_DLL void BindVolume(Volume V, int& ID)
 {
 //	gSharedVolumes.Bind(Volume(V), ID);
 }
@@ -93,7 +91,7 @@ EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 //	gSharedVolumes.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindLight(ErLight L, int& ID)
+EXPOSURE_RENDER_DLL void BindLight(Light L, int& ID)
 {
 }
 
@@ -102,7 +100,7 @@ EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 //	gSharedLights.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindObject(ErObject O, int& ID)
+EXPOSURE_RENDER_DLL void BindObject(Object O, int& ID)
 {
 }
 
@@ -111,7 +109,7 @@ EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 //	gSharedObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(ErClippingObject C, int& ID)
+EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject C, int& ID)
 {
 }
 
@@ -120,7 +118,7 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 //	gSharedClippingObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindTexture(ErTexture Texture, int& ID)
+EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID)
 {
 }
 
@@ -145,43 +143,43 @@ EXPOSURE_RENDER_DLL void SetTracerClippingObjectIDs(int ID[MAX_NO_CLIPPING_OBJEC
 {
 }
 
-EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ErScalarTransferFunction1D Opacity1D)
+EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D)
 {
 	gTracers[TracerID].Opacity1D = Opacity1D;
 //	gTracers.Synchronize();
 }
 
-EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ErColorTransferFunction1D Diffuse1D)
+EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ColorTransferFunction1D Diffuse1D)
 {
 	gTracers[TracerID].Diffuse1D = Diffuse1D;
 //	gTracers.Synchronize();
 }
 
-EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ErColorTransferFunction1D Specular1D)
+EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ColorTransferFunction1D Specular1D)
 {
 	gTracers[TracerID].Specular1D = Specular1D;
 //	gTracers.Synchronize();
 }
 
-EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ErScalarTransferFunction1D Glossiness1D)
+EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ScalarTransferFunction1D Glossiness1D)
 {
 	gTracers[TracerID].Glossiness1D = Glossiness1D;
 //	gTracers.Synchronize();
 }
 
-EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ErColorTransferFunction1D Emission1D)
+EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ColorTransferFunction1D Emission1D)
 {
 	gTracers[TracerID].Emission1D = Emission1D;
 //	gTracers.Synchronize();
 }
 
-EXPOSURE_RENDER_DLL void BindCamera(int TracerID, ErCamera Camera)
+EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera)
 {
 	gTracers[TracerID].Camera = Camera;
 //	gTracers.Synchronize();
 }
 
-EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, ErRenderSettings RenderSettings)
+EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings)
 {
 	gTracers[TracerID].RenderSettings = RenderSettings;
 //	gTracers.Synchronize();
@@ -211,7 +209,7 @@ EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance)
 {
 	return;
-	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
+//	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
 }
 
 EXPOSURE_RENDER_DLL void GetNoIterations(int TracerID, int& NoIterations)

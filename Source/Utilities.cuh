@@ -100,106 +100,21 @@ DEVICE bool Inside(const Vec3f& P)
 }
 */
 
-DEVICE Vec3f GradientCD(Vec3f P)
-{
-	float Intensity[3][2] = 
-	{
-		{ GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX), GetIntensity(P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX) },
-		{ GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY), GetIntensity(P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY) },
-		{ GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ), GetIntensity(P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ) }
-	};
-
-	return Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
-}
-
-DEVICE Vec3f GradientFD(Vec3f P)
-{
-	float Intensity[4] = 
-	{
-		GetIntensity(P),
-		GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX),
-		GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY),
-		GetIntensity(P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ)
-	};
-
-    return Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
-}
-
-DEVICE Vec3f GradientFiltered(Vec3f P)
-{
-	Vec3f Offset(GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX[0], GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY[1], GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ[2]);
-
-    Vec3f G0 = GradientCD(P);
-    Vec3f G1 = GradientCD(P + Vec3f(-Offset[0], -Offset[1], -Offset[2]));
-    Vec3f G2 = GradientCD(P + Vec3f( Offset[0],  Offset[1],  Offset[2]));
-    Vec3f G3 = GradientCD(P + Vec3f(-Offset[0],  Offset[1], -Offset[2]));
-    Vec3f G4 = GradientCD(P + Vec3f( Offset[0], -Offset[1],  Offset[2]));
-    Vec3f G5 = GradientCD(P + Vec3f(-Offset[0], -Offset[1],  Offset[2]));
-    Vec3f G6 = GradientCD(P + Vec3f( Offset[0],  Offset[1], -Offset[2]));
-    Vec3f G7 = GradientCD(P + Vec3f(-Offset[0],  Offset[1],  Offset[2]));
-    Vec3f G8 = GradientCD(P + Vec3f( Offset[0], -Offset[1], -Offset[2]));
-    
-	Vec3f L0 = Lerp(Lerp(G1, G2, 0.5), Lerp(G3, G4, 0.5), 0.5);
-    Vec3f L1 = Lerp(Lerp(G5, G6, 0.5), Lerp(G7, G8, 0.5), 0.5);
-    
-	return Lerp(G0, Lerp(L0, L1, 0.5), 0.75);
-}
-
-DEVICE Vec3f Gradient(Vec3f P)
-{
-	switch (GetTracer().RenderSettings.Shading.GradientComputation)
-	{
-		case 0:	return GradientFD(P);
-		case 1:	return GradientCD(P);
-		case 2:	return GradientFiltered(P);
-	}
-
-	return GradientFD(P);
-}
-
-DEVICE Vec3f NormalizedGradient(Vec3f P)
-{
-	return Normalize(Gradient(P));
-}
-
-DEVICE float GradientMagnitude(Vec3f P)
-{
-	Vec3f Pts[3][2];
-
-	Pts[0][0] = P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX;
-	Pts[0][1] = P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaX;
-	Pts[1][0] = P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY;
-	Pts[1][1] = P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaY;
-	Pts[2][0] = P + GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ;
-	Pts[2][1] = P - GetVolumes().Get(GetTracer().VolumeIDs[0]).GradientDeltaZ;
-
-	float D = 0.0f, Sum = 0.0f;
-
-	for (int i = 0; i < 3; i++)
-	{
-		D = GetIntensity(Pts[i][1]) - GetIntensity(Pts[i][0]);
-		D *= 0.5f / GetVolumes().Get(GetTracer().VolumeIDs[0]).Spacing[i];
-		Sum += D * D;
-	}
-
-	return sqrtf(Sum);
-}
-
 DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
 {
 	ColorRGBf RgbHdr;
 
 	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
 
-	RgbHdr.SetR(Clamp(1.0f - expf(-(RgbHdr.GetR() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(Clamp(1.0f - expf(-(RgbHdr.GetG() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(Clamp(1.0f - expf(-(RgbHdr.GetB() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetR(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetR() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetG(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetG() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
+	RgbHdr.SetB(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetB() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
 	
 	ColorRGBuc Result;
 
-	Result.SetR((unsigned char)Clamp((255.0f * powf(RgbHdr.GetR(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetG((unsigned char)Clamp((255.0f * powf(RgbHdr.GetG(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetB((unsigned char)Clamp((255.0f * powf(RgbHdr.GetB(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetR((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetR(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetG((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetG(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetB((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetB(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
 
 	return Result;
 }
@@ -207,7 +122,7 @@ DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
 DEVICE float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
 {
 	const Vec3f W = Normalize(P2 - P1);
-	return (ClampedDot(W, N1) * ClampedDot(-W, N2)) / DistanceSquared(P1, P2);
+	return (ClampedDot(W, N1) * ClampedDot(-1.0f * W, N2)) / DistanceSquared(P1, P2);
 }
 
 DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)

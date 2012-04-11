@@ -23,8 +23,8 @@ DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.O);
 	const Vec3f TopT		= InvR * (Vec3f(0.5f) - R.O);
-	const Vec3f MinT		= Min(TopT, BottomT);
-	const Vec3f MaxT		= Max(TopT, BottomT);
+	const Vec3f MinT		= TopT.Min(BottomT);
+	const Vec3f MaxT		= TopT.Max(BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 
@@ -48,8 +48,8 @@ DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& MinAABB, const Vec3f& Max
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (MinAABB - R.O);
 	const Vec3f TopT		= InvR * (MaxAABB - R.O);
-	const Vec3f MinT		= Min(TopT, BottomT);
-	const Vec3f MaxT		= Max(TopT, BottomT);
+	const Vec3f MinT		= TopT.Min(BottomT);
+	const Vec3f MaxT		= TopT.Max(BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 
@@ -87,8 +87,8 @@ DEVICE_NI bool IntersectBoxP(const Ray& R, const Vec3f& MinAABB, const Vec3f& Ma
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (MinAABB - R.O);
 	const Vec3f TopT		= InvR * (MaxAABB - R.O);
-	const Vec3f MinT		= Min(TopT, BottomT);
-	const Vec3f MaxT		= Max(TopT, BottomT);
+	const Vec3f MinT		= TopT.Min(BottomT);
+	const Vec3f MaxT		= TopT.Max(BottomT);
 	const float LargestMinT = fmaxf(fmaxf(MinT[0], MinT[1]), fmaxf(MinT[0], MinT[2]));
 	const float LargestMaxT = fminf(fminf(MaxT[0], MaxT[1]), fminf(MaxT[0], MaxT[2]));
 

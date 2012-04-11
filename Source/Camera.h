@@ -48,7 +48,7 @@ struct Camera
 		this->Gamma			= Other.Gamma;
 		this->InvGamma		= 1.0f / Other.Gamma;
 		this->FOV			= Other.FOV;
-		 
+		
 		this->N = Normalize(this->Target - this->Pos);
 		this->U = Normalize(Cross(this->N, this->Up));
 		this->V = Normalize(Cross(this->N, this->U));

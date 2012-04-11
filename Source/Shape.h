@@ -86,7 +86,7 @@ struct EXPOSURE_RENDER_DLL Shape
 			case Enums::Plane:		this->Area = PlaneArea(Vec2f(this->Size[0], this->Size[1]));				break;
 			case Enums::Disk:		this->Area = DiskArea(this->OuterRadius);									break;
 			case Enums::Ring:		this->Area = RingArea(this->OuterRadius, this->InnerRadius);				break;
-			case Enums::Box:		this->Area = BoxArea(Vec3f(this->Size[0], this->Size[1], this->Size[2]));	break;
+			case Enums::Box:		this->Area = BoxArea(this->Size);											break;
 			case Enums::Sphere:		this->Area = SphereArea(this->OuterRadius);									break;
 			case Enums::Cylinder:	this->Area = CylinderArea(this->OuterRadius, this->Size[2]);				break;
 		}

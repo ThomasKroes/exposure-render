@@ -13,40 +13,35 @@
 
 #pragma once
 
-#include "ExposureRender.h"
-
-#include "MonteCarlo.cuh"
+#include "Camera.h"
 #include "Sample.cuh"
+#include "MonteCarlo.cuh"
 
 namespace ExposureRender
 {
 
-DEVICE void SampleCamera(Ray& R, CameraSample& CS)
+DEVICE void SampleCamera(const Camera& Camera, Ray& R, CameraSample& CS)
 {
-	/*
 	Vec2f ScreenPoint;
 
-	ScreenPoint[0] = this->Screen[0][0] + (this->InvScreen[0] * (float)(CS.FilmUV[0] * (float)this->FilmSize[0]));
-	ScreenPoint[1] = this->Screen[1][0] + (this->InvScreen[1] * (float)(CS.FilmUV[1] * (float)this->FilmSize[1]));
+	ScreenPoint[0] = Camera.Screen[0][0] + (Camera.InvScreen[0] * (float)(CS.FilmUV[0] * (float)Camera.FilmSize[0]));
+	ScreenPoint[1] = Camera.Screen[1][0] + (Camera.InvScreen[1] * (float)(CS.FilmUV[1] * (float)Camera.FilmSize[1]));
 
-	R.O		= this->Pos;
-	R.D		= Normalize(this->N + (ScreenPoint[0] * this->U) - (ScreenPoint[1] * this->V));
-	R.MinT	= this->ClipNear;
-	R.MaxT	= this->ClipFar;
+	R.O		= Camera.Pos;
+	R.D		= Normalize(Camera.N + (ScreenPoint[0] * Camera.U) - (ScreenPoint[1] * Camera.V));
+	R.MinT	= Camera.ClipNear;
+	R.MaxT	= Camera.ClipFar;
 
-	if (this->ApertureSize != 0.0f)
+	if (Camera.ApertureSize != 0.0f)
 	{
-		const Vec2f LensUV = this->ApertureSize * ConcentricSampleDisk(CS.LensUV);
+		const Vec2f LensUV = Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
 
-		const Vec3f LI = this->U * LensUV[0] + this->V * LensUV[1];
+		const Vec3f LI = Camera.U * LensUV[0] + Camera.V * LensUV[1];
 
 		R.O += LI;
-		R.D = Normalize(R.D * this->FocalDistance - LI);
+		R.D = Normalize(R.D * Camera.FocalDistance - LI);
 	}
-	*/
 }
-
-};
 
 }
 

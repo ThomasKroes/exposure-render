@@ -135,9 +135,6 @@ SET(ErAPI
 # API group
 SOURCE_GROUP("API" FILES ${ErAPI})
 
-# Shared group
-SOURCE_GROUP("Shared" FILES ${ErShared})
-
 # Filters
 SET(ErCudaFilters
 	Filter.cuh
@@ -156,5 +153,22 @@ CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErBenchmark} ${ErAPI}
 # This is hack, we need a more elegant solution for this!
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.lib C:/Workspaces/Voreen/voreen/modules/er/ext/er/lib)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/General.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Core.cuh C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Bitmap.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Camera.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ClippingObject.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/CudaUtilities.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Defines.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Enums.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Exception.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ExposureRender.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Light.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Matrix.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Object.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Procedural.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/RenderSettings.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Shape.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Texture.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Timing.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/TransferFunction.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Vector.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Volume.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)

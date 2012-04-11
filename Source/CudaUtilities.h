@@ -55,7 +55,7 @@ public:
 	template<class T> static void Allocate(T*& pDevicePointer, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMalloc(&pDevicePointer, Num * sizeof(T)));
+		HandleCudaError(cudaMalloc((void**)&pDevicePointer, Num * sizeof(T)));
 
 		CUDA::ThreadSynchronize();
 	}
@@ -210,7 +210,7 @@ public:
 	}
 };
 
-template<class T, int MaxSize>
+template<class T, int MaxSize = 64>
 struct List
 {
 	int Count;
@@ -220,9 +220,14 @@ struct List
 		this->Count = 0;
 	}
 
-	HOST_DEVICE T& Get(const int& ID)
+	HOST_DEVICE T operator[](const int& i) const
 	{
-		return this->Items[ID];
+		return this->Items[i];
+	}
+
+	HOST_DEVICE T& operator[](const int& i)
+	{
+		return this->Items[i];
 	}
 
 	HOST void Add(const T& Resource)
@@ -327,7 +332,7 @@ struct CudaList
 
 		void* pSymbol = NULL;
 
-		CUDA::MemCopyDeviceToDeviceSymbol((List<T, MaxSize>*)&DeviceAllocation, pSymbol);
+		CUDA::MemCopyDeviceToDeviceSymbol(&DeviceAllocation, pSymbol);
 	}
 
 	HOST T& operator[](const int& i)

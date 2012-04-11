@@ -13,218 +13,41 @@
 
 #pragma once
 
+#include "TransferFunction.h"
+
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErPiecewiseLinearFunction
+DEVICE_NI float EvaluatePLF(const PiecewiseLinearFunction& PLF, const float& Intensity)
 {
-	ErRange	NodeRange;
-	float	Position[MAX_NO_TF_NODES];
-	float	Data[MAX_NO_TF_NODES];
-	int		Count;
+	if (Intensity < PLF.NodeRange[0])
+		return PLF.Data[0];
 
-	ErPiecewiseLinearFunction()
+	if (Intensity > PLF.NodeRange[1])
+		return PLF.Data[PLF.Count - 1];
+
+	for (int i = 1; i < PLF.Count; i++)
 	{
-		for (int i = 0; i < MAX_NO_TF_NODES; i++)
-		{
-			this->Position[i]	= 0.0f;
-			this->Data[i]		= 0.0f;
-		}
+		float P1 = PLF.Position[i - 1];
+		float P2 = PLF.Position[i];
+		float DeltaP = P2 - P1;
+		float LerpT = (Intensity - P1) / DeltaP;
 
-		this->Count = 0;
+		if (Intensity >= P1 && Intensity < P2)
+			return Lerp(LerpT, PLF.Data[i - 1], PLF.Data[i]);
 	}
 
-	ErPiecewiseLinearFunction& operator = (const ErPiecewiseLinearFunction& Other)
-	{
-		this->NodeRange = Other.NodeRange;
+	return 0.0f;
+}
 
-		for (int i = 0; i < MAX_NO_TF_NODES; i++)
-		{
-			this->Position[i]	= Other.Position[i];
-			this->Data[i]		= Other.Data[i];
-		}	
-		
-		this->Count = Other.Count;
-
-		return *this;
-	}
-};
-
-template<int Size>
-struct EXPOSURE_RENDER_DLL ErTransferFunction1D
+DEVICE_NI float EvaluateScalarTranserFunction(const ScalarTransferFunction1D& STF, const float& Intensity)
 {
-	ErPiecewiseLinearFunction		PLF[Size];
-	
-	ErTransferFunction1D& operator = (const ErTransferFunction1D& Other)
-	{	
-		for (int i = 0; i < Size; i++)
-			this->PLF[i] = Other.PLF[i];
-		
-		return *this;
-	}
-};
+	return EvaluatePLF(STF.PLF[0], Intensity);
+}
 
-typedef ErTransferFunction1D<1>	ErScalarTransferFunction1D;
-typedef ErTransferFunction1D<3>	ErColorTransferFunction1D;
-
-
-struct PiecewiseLinearFunction
+DEVICE_NI ColorXYZf EvaluateColorTranserFunction(const ColorTransferFunction1D& CTF, const float& Intensity)
 {
-	HOST PiecewiseLinearFunction()
-	{
-	}
-
-	HOST PiecewiseLinearFunction(const PiecewiseLinearFunction& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ~PiecewiseLinearFunction()
-	{
-	}
-
-	HOST PiecewiseLinearFunction& PiecewiseLinearFunction::operator = (const PiecewiseLinearFunction& Other)
-	{
-		this->NodeRange[0] = Other.NodeRange[0];
-		this->NodeRange[1] = Other.NodeRange[1];
-
-		for (int i = 0; i < MAX_NO_TF_NODES; i++)
-		{
-			this->Position[i]	= Other.Position[i];
-			this->Data[i]		= Other.Data[i];
-		}	
-		
-		this->Count = Other.Count;
-
-		return *this;
-	}
-
-	HOST PiecewiseLinearFunction& PiecewiseLinearFunction::operator = (const ErPiecewiseLinearFunction& Other)
-	{
-		this->NodeRange[0] = Other.NodeRange.Min;
-		this->NodeRange[1] = Other.NodeRange.Min;
-
-		for (int i = 0; i < MAX_NO_TF_NODES; i++)
-		{
-			this->Position[i]	= Other.Position[i];
-			this->Data[i]		= Other.Data[i];
-		}	
-		
-		this->Count = Other.Count;
-
-		return *this;
-	}
-
-	DEVICE_NI float Evaluate(const float& Intensity)
-	{
-		if (Intensity < this->NodeRange[0])
-			return this->Data[0];
-
-		if (Intensity > this->NodeRange[1])
-			return this->Data[Count - 1];
-
-		for (int i = 1; i < this->Count; i++)
-		{
-			float P1 = this->Position[i - 1];
-			float P2 = this->Position[i];
-			float DeltaP = P2 - P1;
-			float LerpT = (Intensity - P1) / DeltaP;
-
-			if (Intensity >= P1 && Intensity < P2)
-				return Lerp(LerpT, this->Data[i - 1], this->Data[i]);
-		}
-
-		return 0.0f;
-	}
-
-	float	NodeRange[2];
-	float	Position[MAX_NO_TF_NODES];
-	float	Data[MAX_NO_TF_NODES];
-	int		Count;
-};
-
-template<int Size>
-struct TransferFunction1D
-{
-	PiecewiseLinearFunction PLF[Size];
-	
-	HOST TransferFunction1D()
-	{
-	}
-
-	HOST TransferFunction1D(const TransferFunction1D& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ~TransferFunction1D()
-	{
-	}
-
-	HOST TransferFunction1D<Size>& operator = (const TransferFunction1D<Size>& Other)
-	{	
-		for (int i = 0; i < Size; i++)
-			this->PLF[i] = Other.PLF[i];
-		
-		return *this;
-	}
-
-	HOST TransferFunction1D<Size>& operator = (const ErTransferFunction1D<Size>& Other)
-	{	
-		for (int i = 0; i < Size; i++)
-			this->PLF[i] = Other.PLF[i];
-		
-		return *this;
-	}
-
-	DEVICE_NI float Evaluate(const float& Intensity)
-	{
-		return PLF[0].Evaluate(Intensity);
-	}
-};
-
-struct ScalarTransferFunction1D : public TransferFunction1D<1>
-{
-	HOST ScalarTransferFunction1D& operator = (const ErScalarTransferFunction1D& Other)
-	{	
-		this->PLF[0] = Other.PLF[0];
-		return *this;
-	}
-
-	HOST ScalarTransferFunction1D& operator = (const ScalarTransferFunction1D& Other)
-	{	
-		this->PLF[0] = Other.PLF[0];
-		return *this;
-	}
-
-	DEVICE_NI float Evaluate(const float& Intensity)
-	{
-		return PLF[0].Evaluate(Intensity);
-	}
-};
-
-struct ColorTransferFunction1D : public TransferFunction1D<3>
-{
-	HOST ColorTransferFunction1D& operator = (const ErColorTransferFunction1D& Other)
-	{	
-		for (int i = 0; i < 3; i++)
-			this->PLF[i] = Other.PLF[i];
-
-		return *this;
-	}
-
-	HOST ColorTransferFunction1D& operator = (const ColorTransferFunction1D& Other)
-	{	
-		for (int i = 0; i < 3; i++)
-			this->PLF[i] = Other.PLF[i];
-
-		return *this;
-	}
-
-	DEVICE_NI ColorXYZf Evaluate(const float& Intensity)
-	{
-		return ColorXYZf(PLF[0].Evaluate(Intensity), PLF[1].Evaluate(Intensity), PLF[2].Evaluate(Intensity));
-	}
-};
+	return ColorXYZf(EvaluatePLF(CTF.PLF[0], Intensity), EvaluatePLF(CTF.PLF[1], Intensity), EvaluatePLF(CTF.PLF[2], Intensity));
+}
 
 }
