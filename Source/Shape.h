@@ -13,20 +13,15 @@
 
 #pragma once
 
-#include "Plane.cuh"
-#include "Disk.cuh"
-#include "Ring.cuh"
-#include "Box.cuh"
-#include "Sphere.cuh"
-#include "Cylinder.cuh"
+#include "Matrix.h"
 
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErShape
+struct EXPOSURE_RENDER_DLL Shape
 {
-	ErMatrix44			TM;
-	ErMatrix44			InvTM;
+	Matrix44			TM;
+	Matrix44			InvTM;
 	bool				OneSided;
 	Enums::ShapeType	Type;
 	float				Size[3];
@@ -34,9 +29,10 @@ struct EXPOSURE_RENDER_DLL ErShape
 	float				InnerRadius;
 	float				OuterRadius;
 
-	ErShape()
+	Shape()
 	{
 		this->OneSided		= false;
+		this->Type			= Enums::Plane;
 		this->Size[0]		= 0.0f;
 		this->Size[1]		= 0.0f;
 		this->Size[2]		= 0.0f;
@@ -44,65 +40,36 @@ struct EXPOSURE_RENDER_DLL ErShape
 		this->InnerRadius	= 0.0f;
 		this->OuterRadius	= 0.0f;
 	}
+
+	~Shape()
+	{
+	}
 	
-	ErShape& operator = (const ErShape& Other)
+	Shape& operator = (const Shape& Other)
 	{
 		this->TM			= Other.TM;
-		this->InvTM			= Other.InvTM;		
+		this->InvTM			= Other.InvTM;
 		this->OneSided		= Other.OneSided;
-		this->Type			= Other.Type;		
-		this->Size[0]		= Other.Size[0];	
-		this->Size[1]		= Other.Size[1];	
-		this->Size[2]		= Other.Size[2];	
-		this->Area			= Other.Area;		
+		this->Type			= Other.Type;
+		this->Size[0]		= Other.Size[0];
+		this->Size[1]		= Other.Size[1];
+		this->Size[2]		= Other.Size[2];
+		
+		switch (this->Type)
+		{
+			case Enums::Plane:		this->Area = PlaneArea(Vec2f(this->Size[0], this->Size[1]));				break;
+			case Enums::Disk:		this->Area = DiskArea(this->OuterRadius);									break;
+			case Enums::Ring:		this->Area = RingArea(this->OuterRadius, this->InnerRadius);				break;
+			case Enums::Box:		this->Area = BoxArea(Vec3f(this->Size[0], this->Size[1], this->Size[2]));	break;
+			case Enums::Sphere:		this->Area = SphereArea(this->OuterRadius);									break;
+			case Enums::Cylinder:	this->Area = CylinderArea(this->OuterRadius, this->Size[2]);				break;
+		}
+
 		this->InnerRadius	= Other.InnerRadius;
 		this->OuterRadius	= Other.OuterRadius;
 
 		return *this;
 	}
 };
-
-DEVICE_NI void SampleShape(const ErShape& Shape, const Vec3f& SampleUVW, SurfaceSample& SurfaceSample)
-{
-	switch (Shape.Type)
-	{
-		case Enums::Plane:		SamplePlane(SurfaceSample, SampleUVW, Vec2f(Shape.Size[0], Shape.Size[1]));					break;
-		case Enums::Disk:		SampleDisk(SurfaceSample, SampleUVW, Shape.OuterRadius);									break;
-		case Enums::Ring:		SampleRing(SurfaceSample, SampleUVW, Shape.InnerRadius, Shape.OuterRadius);					break;
-		case Enums::Box:		SampleBox(SurfaceSample, SampleUVW, Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]));	break;
-		case Enums::Sphere:		SampleSphere(SurfaceSample, SampleUVW, Shape.OuterRadius);									break;
-//		case Enums::Cylinder:	SampleCylinder(SurfaceSample, SampleUVW, Shape.OuterRadius, Shape.Size[2]);					break;
-	}
-}
-
-DEVICE_NI void IntersectShape(const ErShape& Shape, const Ray& R, Intersection& Intersection)
-{
-	switch (Shape.Type)
-	{
-		case Enums::Plane:		IntersectPlane(R, Shape.OneSided, Vec2f(Shape.Size[0], Shape.Size[1]), Intersection);		break;
-		case Enums::Disk:		IntersectDisk(R, Shape.OneSided, Shape.OuterRadius, Intersection);							break;
-		case Enums::Ring:		IntersectRing(R, Shape.OneSided, Shape.InnerRadius, Shape.OuterRadius, Intersection);		break;
-		case Enums::Box:		IntersectBox(R, Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]), Intersection);			break;
-		case Enums::Sphere:		IntersectSphere(R, Shape.OuterRadius, Intersection);										break;
-//		case Enums::Cylinder:	IntersectCylinder(R, Shape.OuterRadius, Shape.Size[1], Intersection);						break;
-	}
-}
-
-DEVICE_NI bool IntersectsShape(const ErShape& Shape, const Ray& R)
-{
-	Intersection Intersection;
-
-	switch (Shape.Type)
-	{
-		case Enums::Plane:		 IntersectPlane(R, Shape.OneSided, Vec2f(Shape.Size[0], Shape.Size[1]), Intersection);		break;
-		case Enums::Disk:		 IntersectDisk(R, Shape.OneSided, Shape.OuterRadius, Intersection);							break;
-		case Enums::Ring:		 IntersectRing(R, Shape.OneSided, Shape.InnerRadius, Shape.OuterRadius, Intersection);		break;
-		case Enums::Box:		 IntersectBox(R, Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]), Intersection);			break;
-		case Enums::Sphere:		 IntersectSphere(R, Shape.OuterRadius, Intersection);										break;
-//		case Enums::Cylinder:	 IntersectCylinderP(R, Shape.OuterRadius, Shape.Size[1], Intersection);						break;
-	}
-
-	return Intersection.Valid;
-}
 
 }

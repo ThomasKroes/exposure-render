@@ -14,3 +14,12 @@
 #pragma once
 
 #include "Camera.h"
+#include "Exception.h"
+#include "RenderSettings.h"
+#include "Texture.h"
+#include "TransferFunction.h"
+#include "Timing.h"
+#include "Volume.h"
+#include "Light.h"
+#include "Object.h"
+#include "ClippingObject.h"

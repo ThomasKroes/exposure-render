@@ -114,6 +114,7 @@ SET(ErAPI
 	ClippingObject.h
 	Texture.h
 	Shape.h
+	Matrix.h
 	TransferFunction.h
 	RenderSettings.h
 	Timing.h

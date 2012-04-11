@@ -36,5 +36,9 @@ namespace ExposureRender
 #define	MAX_CHAR_SIZE				256
 #define MAX_NO_VOLUMES				64
 #define MAX_NO_CLIPPING_OBJECTS		64
+#define MAX_NO_TEXTURES				64
+#define	MAX_NO_TIMINGS				64
+#define MAX_NO_LIGHTS				64
+#define NO_COLOR_COMPONENTS			4
 
 }

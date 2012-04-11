@@ -13,14 +13,10 @@
 
 #pragma once
 
-#include "Defines.cuh"
-#include "General.cuh"
-#include "SharedResources.cuh"
+#include "Shape.h"
 
 namespace ExposureRender
 {
-
-#define MAX_NO_OBJECTS 64
 
 struct EXPOSURE_RENDER_DLL ErObject
 {

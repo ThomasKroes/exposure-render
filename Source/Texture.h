@@ -13,15 +13,11 @@
 
 #pragma once
 
-#include "Defines.cuh"
-#include "General.cuh"
-#include "SharedResources.cuh"
+#include "Defines.h"
+#include "Enums.h"
 
 namespace ExposureRender
 {
-
-#define NO_COLOR_COMPONENTS 4
-#define MAX_NO_TEXTURES		64
 
 struct EXPOSURE_RENDER_DLL ErProcedural
 {

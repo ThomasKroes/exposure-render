@@ -13,32 +13,31 @@
 
 #pragma once
 
-#include "Defines.cuh"
-#include "General.cuh"
-#include "SharedResources.cuh"
-#include "Shape.cuh"
+#include "Shape.h"
 
 namespace ExposureRender
 {
 
-#define MAX_NO_LIGHTS 64
-
-struct EXPOSURE_RENDER_DLL ErLight
+struct EXPOSURE_RENDER_DLL Light
 {
 	bool	Enabled;
 	bool	Visible;
-	ErShape	Shape;
+	Shape	Shape;
 	int		TextureID;
 	float	Multiplier;
 	int		Unit;
 	
-	ErLight()
+	Light()
 	{
 		this->Enabled		= true;
 		this->Visible		= true;
 		this->TextureID		= 0;
 		this->Multiplier	= 100.0f;
 		this->Unit			= 0;
+	}
+
+	~Light()
+	{
 	}
 	
 	ErLight& operator = (const ErLight& Other)
@@ -126,15 +125,7 @@ struct Light
 		this->Multiplier	= Other.Multiplier;
 		this->Unit			= Other.Unit;
 
-		switch (Shape.Type)
-		{
-			case Enums::Plane:		Shape.Area = PlaneArea(Vec2f(Shape.Size[0], Shape.Size[1]));				break;
-			case Enums::Disk:		Shape.Area = DiskArea(Shape.OuterRadius);									break;
-			case Enums::Ring:		Shape.Area = RingArea(Shape.OuterRadius, Shape.InnerRadius);				break;
-			case Enums::Box:		Shape.Area = BoxArea(Vec3f(Shape.Size[0], Shape.Size[1], Shape.Size[2]));	break;
-			case Enums::Sphere:		Shape.Area = SphereArea(Shape.OuterRadius);									break;
-			case Enums::Cylinder:	Shape.Area = CylinderArea(Shape.OuterRadius, Shape.Size[2]);				break;
-		}
+		
 
 		return *this;
 	}

@@ -13,6 +13,9 @@
 
 #pragma once
 
+#include "Defines.h"
+#include "Enums.h"
+
 namespace ExposureRender
 {
 
