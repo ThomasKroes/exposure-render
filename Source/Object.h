@@ -18,16 +18,16 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErObject
+struct EXPOSURE_RENDER_DLL Object
 {
 	bool		Enabled;
-	ErShape		Shape;
+	Shape		Shape;
 	int			DiffuseTextureID;
 	int			SpecularTextureID;
 	int			GlossinessTextureID;
 	float		Ior;
 
-	ErObject()
+	Object()
 	{
 		this->Enabled				= true;
 		this->DiffuseTextureID		= -1;
@@ -36,57 +36,11 @@ struct EXPOSURE_RENDER_DLL ErObject
 		this->Ior					= 0.0f;
 	}
 
-	ErObject& operator = (const ErObject& Other)
-	{
-		this->Enabled				= Other.Enabled;
-		this->Shape					= Other.Shape;
-		this->DiffuseTextureID		= Other.DiffuseTextureID;
-		this->SpecularTextureID		= Other.SpecularTextureID;
-		this->GlossinessTextureID	= Other.GlossinessTextureID;
-		this->Ior					= Other.Ior;
-
-		return *this;
-	}
-};
-
-struct Object
-{
-	Object()
-	{
-		printf("Object()\n");
-	}
-
 	~Object()
 	{
-		printf("~Object()\n");
 	}
 
-	DEVICE_NI void Intersect(const Ray& R, ScatterEvent& RS)
-	{
-		Ray Rt = TransformRay(Shape.InvTM, R);
-
-		Intersection Int;
-
-		IntersectShape(Shape, Rt, Int);
-
-		if (Int.Valid)
-		{
-			RS.Valid	= true;
-			RS.N 		= TransformVector(Shape.TM, Int.N);
-			RS.P 		= TransformPoint(Shape.TM, Int.P);
-			RS.T 		= Length(RS.P - R.O);
-			RS.Wo		= -R.D;
-			RS.Le		= ColorXYZf(0.0f);
-			RS.UV		= Int.UV;
-		}
-	}
-
-	DEVICE_NI bool Intersects(const Ray& R)
-	{
-		return IntersectsShape(Shape, TransformRay(Shape.InvTM, R));
-	}
-
-	HOST Object& Object::operator = (const ErObject& Other)
+	Object& operator = (const Object& Other)
 	{
 		this->Enabled				= Other.Enabled;
 		this->Shape					= Other.Shape;
@@ -97,15 +51,6 @@ struct Object
 
 		return *this;
 	}
-
-	bool		Enabled;
-	Shape		Shape;
-	int			DiffuseTextureID;
-	int			SpecularTextureID;
-	int			GlossinessTextureID;
-	float		Ior;
 };
-
-typedef ResourceList<Object, MAX_NO_OBJECTS> Objects;
 
 }

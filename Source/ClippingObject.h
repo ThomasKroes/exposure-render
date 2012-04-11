@@ -24,86 +24,17 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 	Shape	Shape;
 	bool	Invert;
 
-	ErClippingObject()
+	ClippingObject()
 	{
 		this->Enabled	= true;
 		this->Invert	= false;
 	}
-
-	ErClippingObject& operator = (const ErClippingObject& Other)
-	{
-		this->Enabled	= Other.Enabled;
-		this->Shape		= Other.Shape;
-		this->Invert	= Other.Invert;
-
-		return *this;
-	}
-};
-
-
-
-struct ClippingObject
-{
-	ClippingObject()
-	{
-		printf("ClippingObject()\n");
-	}
-
+	
 	~ClippingObject()
 	{
-		printf("~ClippingObject()\n");
 	}
 
-	/*
-	DEVICE bool InsideClippingObject(ClippingObject& ClippingObject, const Vec3f& P)
-	{
-		bool Inside = false;
-
-		switch (ClippingObject.Shape.Type)
-		{
-			case 0:		
-			{
-				Inside = InsidePlane(P);
-				break;
-			}
-
-			case 1:
-			{
-				Inside = InsideBox(P, ToVec3f(ClippingObject.Shape.Size));
-				break;
-			}
-
-			case 2:
-			{
-				Inside = InsideSphere(P, ClippingObject.Shape.OuterRadius);
-				break;
-			}
-
-			case 3:
-			{
-				Inside = InsideCylinder(P, ClippingObject.Shape.OuterRadius, ClippingObject.Shape.Size[1]);
-				break;
-			}
-		}
-
-		return ClippingObject.Invert ? !Inside : Inside;
-	}
-
-	DEVICE bool InsideClippingObjects(const Vec3f& P)
-	{
-		for (int i = 0; i < gpTracer->ClippingObjects.Count; i++)
-		{
-			const Vec3f P2 = TransformPoint(gpTracer->ClippingObjects.List[i].Shape.InvTM, P);
-
-			if (Inside(gpTracer->ClippingObjects.List[i], P2))
-				return true;
-		}
-
-		return false;
-	}
-	*/
-
-	HOST ClippingObject& ClippingObject::operator = (const ErClippingObject& Other)
+	ClippingObject& operator = (const ClippingObject& Other)
 	{
 		this->Enabled	= Other.Enabled;
 		this->Shape		= Other.Shape;
@@ -111,13 +42,6 @@ struct ClippingObject
 
 		return *this;
 	}
-
-	bool		Enabled;
-	ErShape		Shape;
-	bool		Invert;
-
 };
-
-typedef ResourceList<ClippingObject, MAX_NO_CLIPPING_OBJECTS> ClippingObjects;
 
 }

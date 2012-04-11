@@ -20,12 +20,12 @@ namespace ExposureRender
 
 struct EXPOSURE_RENDER_DLL Light
 {
-	bool	Enabled;
-	bool	Visible;
-	Shape	Shape;
-	int		TextureID;
-	float	Multiplier;
-	int		Unit;
+	bool					Enabled;
+	bool					Visible;
+	Shape					Shape;
+	int						TextureID;
+	float					Multiplier;
+	Enums::EmissionUnit		Unit;
 	
 	Light()
 	{
@@ -33,14 +33,14 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Visible		= true;
 		this->TextureID		= 0;
 		this->Multiplier	= 100.0f;
-		this->Unit			= 0;
+		this->Unit			= Enums::Power;
 	}
 
 	~Light()
 	{
 	}
 	
-	ErLight& operator = (const ErLight& Other)
+	Light& operator = (const Light& Other)
 	{
 		this->Enabled		= Other.Enabled;
 		this->Visible		= Other.Visible;
@@ -53,125 +53,4 @@ struct EXPOSURE_RENDER_DLL Light
 	}
 };
 
-struct Light
-{
-	Light()
-	{
-		printf("Light()\n");
-	}
-
-	~Light()
-	{
-		printf("~Light()\n");
-	}
-
-	DEVICE_NI void SampleSurface(LightSample& LS, SurfaceSample& SurfaceSample)
-	{
-		SampleShape(Shape, LS.SurfaceUVW, SurfaceSample);
-
-		SurfaceSample.P	= TransformPoint(Shape.TM, SurfaceSample.P);
-		SurfaceSample.N	= TransformVector(Shape.TM, SurfaceSample.N);
-	}
-
-	DEVICE_NI void Sample(LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
-	{
-		SampleSurface(LS, SS);
-
-		Wi = Normalize(SS.P - SE.P);
-
-		Le = Multiplier * EvaluateTexture2D(TextureID, SS.UV);
-
-		if (Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
-			Le = ColorXYZf(0.0f);
-
-		if (Unit == 1)
-			Le /= Shape.Area;
-	}
-
-	DEVICE_NI void Intersect(const Ray& R, ScatterEvent& SE)
-	{
-		const Ray Rt = TransformRay(Shape.InvTM, R);
-
-		Intersection Int;
-
-		IntersectShape(Shape, Rt, Int);
-
-		if (Int.Valid)
-		{
-			SE.Valid	= true;
-			SE.P 		= TransformPoint(Shape.TM, Int.P);
-			SE.N 		= TransformVector(Shape.TM, Int.N);
-			SE.T 		= Length(SE.P - R.O);
-			SE.Wo		= -R.D;
-			SE.UV		= Int.UV;
-			SE.Le		= Int.Front ? Multiplier * EvaluateTexture2D(TextureID, SE.UV) : ColorXYZf(0.0f);
-
-			if (Unit == 1)
-				SE.Le /= Shape.Area;
-		}
-	}
-
-	DEVICE_NI bool Intersects(const Ray& R)
-	{
-		return IntersectsShape(Shape, TransformRay(Shape.InvTM, R));
-	}
-
-	HOST Light& Light::operator = (const ErLight& Other)
-	{
-		this->Enabled		= Other.Enabled;
-		this->Visible		= Other.Visible;
-		this->Shape			= Other.Shape;
-		this->TextureID		= Other.TextureID;
-		this->Multiplier	= Other.Multiplier;
-		this->Unit			= Other.Unit;
-
-		
-
-		return *this;
-	}
-};
-
-/*
-DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
-{
-	float T = FLT_MAX; 
-
-	for (int i = 0; i < gpLights->Count; i++)
-	{
-		Light& Light = GetLights().Get(i);
-		
-		ScatterEvent LocalRS(ScatterEvent::Light);
-
-		LocalRS.LightID = i;
-
-		if (RespectVisibility && !Light.Visible)
-			continue;
-
-		Light.Intersect(R, LocalRS);
-
-		if (LocalRS.Valid && LocalRS.T < T)
-		{
-			RS = LocalRS;
-			T = LocalRS.T;
-		}
-	}
 }
-
-DEVICE_NI bool IntersectsLight(const Ray& R)
-{
-	for (int i = 0; i < GetLights().Count; i++)
-	{
-		if (GetLights().Get(i).Intersects(R))
-			return true;
-	}
-
-	return false;
-}
-*/
-
-// DEVICE void Bind(ErLight
-}
-
-
-
-

@@ -19,69 +19,29 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErKernelTiming
+struct EXPOSURE_RENDER_DLL KernelTiming
 {
 	char	Event[MAX_CHAR_SIZE];
 	float	Duration;
 
-	ErKernelTiming()
+	KernelTiming()
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, "Undefined");
 		this->Duration = 0.0f;
 	}
 
-	ErKernelTiming(const char* pEvent, const float& Duration)
+	KernelTiming(const char* pEvent, const float& Duration)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, pEvent);
 		this->Duration = Duration;
 	}
 
-	ErKernelTiming& operator = (const ErKernelTiming& Other)
+	KernelTiming& operator = (const KernelTiming& Other)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, Other.Event);
 		this->Duration = Other.Duration;
 
 		return *this;
-	}
-
-	void Init()
-	{
-		sprintf_s(this->Event, MAX_CHAR_SIZE, "");
-		this->Duration = 0.0f;
-	}
-};
-
-struct EXPOSURE_RENDER_DLL ErKernelTimings
-{
-	int				NoTimings;
-	ErKernelTiming	Timings[MAX_NO_TIMINGS];
-	
-	ErKernelTimings& operator = (const ErKernelTimings& Other)
-	{
-		for (int i = 0; i < MAX_NO_TIMINGS; i++)
-			this->Timings[i] = Other.Timings[i];
-
-		this->NoTimings = Other.NoTimings;
-
-		return *this;
-	}
-
-	void Add(const ErKernelTiming& ErKernelTiming)
-	{
-		this->Timings[this->NoTimings] = ErKernelTiming;
-	}
-
-	void Reset()
-	{
-		this->NoTimings = 0;
-	}
-
-	void Init()
-	{
-		this->NoTimings = 0;
-
-		for (int i = 0; i < MAX_NO_TIMINGS; i++)
-			this->Timings[i].Init();
 	}
 };
 

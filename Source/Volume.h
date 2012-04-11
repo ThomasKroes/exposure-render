@@ -19,60 +19,14 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErVolume
-{
-	Vec3i				Resolution[3];
-	Vec3f				Spacing[3];
-	unsigned short*		pVoxels;
-	bool				NormalizeSize;
-
-	ErVolume()
-	{
-		this->pVoxels			= NULL;
-		this->NormalizeSize		= false;
-	}
-
-	~ErVolume()
-	{
-	}
-
-	ErVolume& operator = (const ErVolume& Other)
-	{
-		this->Resolution		= Other.Resolution;
-		this->Spacing			= Other.Spacing;
-		this->pVoxels			= Other.pVoxels;
-		this->NormalizeSize		= Other.NormalizeSize;
-
-		return *this;
-	}
-};
-
 struct Volume
 {
-	Volume() { }
-	~Volume() { }
-
-	HOST void Free()
+	Volume()
 	{
-		if (this->pVoxels != NULL)
-			CUDA::Free(this->pVoxels);
 	}
 
-	HOST_DEVICE unsigned short Get(Vec3i XYZ) const
+	~Volume()
 	{
-		if (!this->pVoxels)
-			return unsigned short();
-
-		XYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
-		
-		return this->pVoxels[XYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + XYZ[1] * (int)this->Resolution[0] + XYZ[0]];
-	}
-
-	HOST_DEVICE unsigned short Get(Vec3f XYZ) const
-	{
-		Vec3f LocalXYZ = this->Resolution * ((XYZ - this->MinAABB) * this->InvSize);
-
-		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
 	}
 
 	HOST Volume& Volume::operator = (const Volume& Other)
@@ -133,23 +87,44 @@ struct Volume
 
 		return *this;
 	}
+
+	HOST void Free()
+	{
+		if (this->pVoxels != NULL)
+			CUDA::Free(this->pVoxels);
+	}
+
+	HOST_DEVICE unsigned short Get(Vec3i XYZ) const
+	{
+		if (!this->pVoxels)
+			return unsigned short();
+
+		XYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
+		
+		return this->pVoxels[XYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + XYZ[1] * (int)this->Resolution[0] + XYZ[0]];
+	}
+
+	HOST_DEVICE unsigned short Get(Vec3f XYZ) const
+	{
+		Vec3f LocalXYZ = this->Resolution * ((XYZ - this->MinAABB) * this->InvSize);
+
+		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
+	}
 	
-	Vec3f				Resolution;
-	Vec3f				InvResolution;
-	Vec3f				MinAABB;
-	Vec3f				MaxAABB;
-	Vec3f				Size;
-	Vec3f				InvSize;
+	int					Resolution[3];
+	float				InvResolution[3];
+	float				MinAABB[3];
+	float				MaxAABB[3];
+	float				Size;
+	float				InvSize;
 	bool				NormalizeSize;
-	Vec3f				Spacing;
-	Vec3f				InvSpacing;
-	Vec3f				GradientDeltaX;
-	Vec3f				GradientDeltaY;
-	Vec3f				GradientDeltaZ;
-	ErRange				GradientMagnitudeRange;
+	float				Spacing;
+	float				InvSpacing;
+	float				GradientDeltaX;
+	float				GradientDeltaY;
+	float				GradientDeltaZ;
+	float				GradientMagnitudeRange[2];
 	unsigned short*		pVoxels;
 };
-
-typedef ResourceList<Volume, MAX_NO_VOLUMES> Volumes;
 
 }

@@ -66,6 +66,13 @@ namespace Enums
 		Error,
 		Fatal
 	};
+
+	enum EmissionUnit
+	{
+		Power = 0,
+		Lux,
+		Intensity
+	};
 }
 
 }
