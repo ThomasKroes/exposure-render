@@ -19,18 +19,22 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErException
+struct EXPOSURE_RENDER_DLL Exception
 {
 	Enums::ExceptionLevel	Level;
 	char					Message[MAX_CHAR_SIZE];
 
-	ErException(const Enums::ExceptionLevel& Level, const char* pMessage = "")
+	Exception(const Enums::ExceptionLevel& Level, const char* pMessage = "")
 	{
 		this->Level = Level;
 		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
 	}
 
-	ErException& operator = (const ErException& Other)
+	~Exception()
+	{
+	}
+
+	Exception& operator = (const Exception& Other)
 	{
 		this->Level = Other.Level;
 		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);

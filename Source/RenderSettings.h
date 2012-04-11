@@ -19,51 +19,91 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErRenderSettings
+struct EXPOSURE_RENDER_DLL RenderSettings
 {
-	struct EXPOSURE_RENDER_DLL ErTraversalSettings
+	struct EXPOSURE_RENDER_DLL TraversalSettings
 	{
 		float				StepSize;
 		float				StepSizeShadow;
 		bool				Shadows;
 		float				MaxShadowDistance;
 
-		ErTraversalSettings()
+		TraversalSettings()
 		{
 			this->StepSize			= 0.1f;
 			this->StepSizeShadow	= 0.1f;
 			this->Shadows			= true;
 			this->MaxShadowDistance	= 1.0f;
 		}
+
+		~TraversalSettings()
+		{
+		}
+
+		TraversalSettings& operator = (const TraversalSettings& Other)
+		{
+			this->StepSize				= Other.StepSize;
+			this->StepSizeShadow		= Other.StepSizeShadow;
+			this->Shadows				= Other.Shadows;
+			this->MaxShadowDistance		= Other.MaxShadowDistance;
+
+			return *this;
+		}
 	};
 
-	struct EXPOSURE_RENDER_DLL ErShadingSettings
+	struct EXPOSURE_RENDER_DLL ShadingSettings
 	{
 		int					Type;
 		float				DensityScale;
-		float				IndexOfReflection;
 		bool				OpacityModulated;
 		int					GradientComputation;
 		float				GradientThreshold;
 		float				GradientFactor;
 
-		ErShadingSettings()
+		ShadingSettings()
 		{
 			this->Type					= 0;
 			this->DensityScale			= 100.0f;
-			this->IndexOfReflection		= 5.0f;
 			this->OpacityModulated		= true;
 			this->GradientComputation	= 1;
 			this->GradientThreshold		= 0.5f;
 			this->GradientFactor		= 0.5f;
 		}
+
+		~ShadingSettings()
+		{
+		}
+
+		ShadingSettings& operator = (const ShadingSettings& Other)
+		{
+			this->Type					= Other.Type;
+			this->DensityScale			= Other.DensityScale;
+			this->OpacityModulated		= Other.OpacityModulated;
+			this->GradientComputation	= Other.GradientComputation;
+			this->GradientThreshold		= Other.GradientThreshold;
+			this->GradientFactor		= Other.GradientFactor;
+
+			return *this;
+		}
 	};
 
-	ErTraversalSettings	Traversal;
-	ErShadingSettings		Shading;
+	TraversalSettings	Traversal;
+	ShadingSettings		Shading;
 
-	ErRenderSettings()
+	RenderSettings()
 	{
+	}
+
+	~RenderSettings()
+	{
+	}
+
+	RenderSettings& operator = (const RenderSettings& Other)
+	{
+		this->Traversal	= Other.Traversal;
+		this->Shading	= Other.Shading;
+
+		return *this;
 	}
 };
 

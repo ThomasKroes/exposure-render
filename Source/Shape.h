@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include "Vector.h"
 #include "Matrix.h"
 
 namespace ExposureRender
@@ -24,7 +25,7 @@ struct EXPOSURE_RENDER_DLL Shape
 	Matrix44			InvTM;
 	bool				OneSided;
 	Enums::ShapeType	Type;
-	float				Size[3];
+	Vec3f				Size;
 	float				Area;
 	float				InnerRadius;
 	float				OuterRadius;
@@ -33,9 +34,6 @@ struct EXPOSURE_RENDER_DLL Shape
 	{
 		this->OneSided		= false;
 		this->Type			= Enums::Plane;
-		this->Size[0]		= 0.0f;
-		this->Size[1]		= 0.0f;
-		this->Size[2]		= 0.0f;
 		this->Area			= 0.0f;
 		this->InnerRadius	= 0.0f;
 		this->OuterRadius	= 0.0f;
@@ -51,9 +49,7 @@ struct EXPOSURE_RENDER_DLL Shape
 		this->InvTM			= Other.InvTM;
 		this->OneSided		= Other.OneSided;
 		this->Type			= Other.Type;
-		this->Size[0]		= Other.Size[0];
-		this->Size[1]		= Other.Size[1];
-		this->Size[2]		= Other.Size[2];
+		this->Size			= Other.Size;
 		
 		switch (this->Type)
 		{

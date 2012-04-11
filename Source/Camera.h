@@ -13,8 +13,7 @@
 
 #pragma once
 
-#include "Defines.h"
-#include "Enums.h"
+#include "Vector.h"
 
 namespace ExposureRender
 {
@@ -36,24 +35,20 @@ struct Camera
 	
 	HOST Camera& Camera::operator = (const Camera& Other)
 	{
-		this->FilmSize		= Vec2i(Other.FilmSize[0], Other.FilmSize[1]);
-		this->Pos			= Vec3f(Other.Pos[0], Other.Pos[1], Other.Pos[2]);
-		this->Target		= Vec3f(Other.Target[0], Other.Target[1], Other.Target[2]);
-		this->Up			= Vec3f(Other.Up[0], Other.Up[1], Other.Up[2]);
+		this->FilmSize		= Other.FilmSize;
+		this->Pos			= Other.Pos;
+		this->Target		= Other.Target;
+		this->Up			= Other.Up;
 		this->FocalDistance	= Other.FocalDistance;
 		this->ApertureSize	= Other.ApertureSize;
 		this->ClipNear		= Other.ClipNear;
 		this->ClipFar		= Other.ClipFar;
-		this->Screen[0][0]	= Other.Screen[0][0];
-		this->Screen[0][1]	= Other.Screen[0][1];
-		this->Screen[1][0]	= Other.Screen[1][0];
-		this->Screen[1][1]	= Other.Screen[1][1];
 		this->Exposure		= Other.Exposure;
 		this->InvExposure	= 1.0f / Other.Exposure;
 		this->Gamma			= Other.Gamma;
 		this->InvGamma		= 1.0f / Other.Gamma;
 		this->FOV			= Other.FOV;
-		
+		 
 		this->N = Normalize(this->Target - this->Pos);
 		this->U = Normalize(Cross(this->N, this->Up));
 		this->V = Normalize(Cross(this->N, this->U));
@@ -88,13 +83,13 @@ struct Camera
 		return *this;
 	}
 
-	int		FilmSize[2];
-	float	Pos[3];
-	float	Target[3];
-	float	Up[3];
-	float	N[3];
-	float	U[3];
-	float	V[3];
+	Vec2i	FilmSize;
+	Vec3f	Pos;
+	Vec3f	Target;
+	Vec3f	Up;
+	Vec3f	N;
+	Vec3f	U;
+	Vec3f	V;
 	float	FocalDistance;
 	float	ApertureSize;
 	float	ClipNear;

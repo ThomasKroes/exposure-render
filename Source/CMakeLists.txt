@@ -69,7 +69,6 @@ SET(ErCudaGeneral
 	MonteCarlo.cuh
 	Buffer.cuh
 	Framebuffer.cuh
-	Vector.cuh
 	Color.cuh
 	Ray.cuh
 	Statistics.cuh
@@ -112,9 +111,11 @@ SET(ErAPI
 	Light.h
 	Object.h
 	ClippingObject.h
+	Procedural.h
 	Texture.h
 	Shape.h
 	Matrix.h
+	Vector.h
 	TransferFunction.h
 	RenderSettings.h
 	Timing.h

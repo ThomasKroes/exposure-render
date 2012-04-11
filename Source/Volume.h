@@ -13,8 +13,7 @@
 
 #pragma once
 
-#include "Defines.h"
-#include "Enums.h"
+#include "Vector.h"
 
 namespace ExposureRender
 {
@@ -31,12 +30,8 @@ struct Volume
 
 	HOST Volume& Volume::operator = (const Volume& Other)
 	{
-		this->Resolution[0]		= Other.Resolution[0];
-		this->Resolution[1]		= Other.Resolution[1];
-		this->Resolution[2]		= Other.Resolution[2];
-		this->Spacing[0]		= Other.Spacing[0];
-		this->Spacing[1]		= Other.Spacing[1];
-		this->Spacing[2]		= Other.Spacing[2];
+		this->Resolution		= Other.Resolution;
+		this->Spacing			= Other.Spacing;
 		this->NormalizeSize		= Other.NormalizeSize;
 
 		float Scale = 1.0f;
@@ -49,17 +44,11 @@ struct Volume
 			Scale = 1.0f / Max;
 		}
 
-		this->InvResolution[0]	= 1.0f / this->Resolution[0];
-		this->InvResolution[1]	= 1.0f / this->Resolution[1];
-		this->InvResolution[2]	= 1.0f / this->Resolution[2];
+		this->InvResolution		= 1.0f / this->Resolution;
 		this->Spacing			= Scale * Spacing;
-		this->InvSpacing[0]		= 1.0f / Spacing[0];
-		this->InvSpacing[1]		= 1.0f / Spacing[1];
-		this->InvSpacing[2]		= 1.0f / Spacing[2];
+		this->InvSpacing		= 1.0f / Spacing;
 		this->Size				= this->Resolution * this->Spacing;
-		this->InvSize[0]		= 1.0f / this->Size[0];
-		this->InvSize[1]		= 1.0f / this->Size[1];
-		this->InvSize[2]		= 1.0f / this->Size[2];
+		this->InvSize			= 1.0f / this->Size;
 		this->MinAABB			= -0.5f * this->Size;
 		this->MaxAABB			= 0.5f * this->Size;
 
@@ -111,18 +100,18 @@ struct Volume
 		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
 	}
 	
-	int					Resolution[3];
-	float				InvResolution[3];
-	float				MinAABB[3];
-	float				MaxAABB[3];
-	float				Size;
-	float				InvSize;
+	Vec3i				Resolution;
+	Vec3f				InvResolution;
+	Vec3f				MinAABB;
+	Vec3f				MaxAABB;
+	Vec3f				Size;
+	Vec3f				InvSize;
 	bool				NormalizeSize;
-	float				Spacing;
-	float				InvSpacing;
-	float				GradientDeltaX;
-	float				GradientDeltaY;
-	float				GradientDeltaZ;
+	Vec3f				Spacing;
+	Vec3f				InvSpacing;
+	Vec3f				GradientDeltaX;
+	Vec3f				GradientDeltaY;
+	Vec3f				GradientDeltaZ;
 	float				GradientMagnitudeRange[2];
 	unsigned short*		pVoxels;
 };

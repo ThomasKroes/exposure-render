@@ -15,8 +15,6 @@
 
 #include <cstdio>
 
-#include "Vector.cuh"
-
 namespace ExposureRender
 {
 

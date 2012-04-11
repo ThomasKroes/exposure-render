@@ -13,7 +13,8 @@
 
 #pragma once
 
-#include "Defines.cuh"
+#include "Defines.h"
+#include "Enums.h"
 
 namespace ExposureRender
 {
@@ -22,8 +23,6 @@ HOST_DEVICE inline float clamp2(float v, float a, float b)
 {
 	return max(a, min(v, b));
 }
-
-typedef unsigned char uChar;
 
 template <class T, int Size>
 class Vec

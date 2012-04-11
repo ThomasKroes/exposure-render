@@ -13,51 +13,10 @@
 
 #pragma once
 
-#include "Defines.h"
-#include "Enums.h"
+#include "Procedural.h"
 
 namespace ExposureRender
 {
-
-struct EXPOSURE_RENDER_DLL Procedural
-{
-	Enums::ProceduralType	Type;
-	float					UniformColor[3];
-	float					CheckerColor1[3];
-	float					CheckerColor2[3];
-	float					GradientColor1[3];
-	float					GradientColor2[3];
-	float					GradientColor3[3];
-
-	ErProcedural()
-	{
-	}
-
-	ErProcedural& operator = (const ErProcedural& Other)
-	{
-		this->Type				= Other.Type;
-		this->UniformColor[0]	= Other.UniformColor[0];
-		this->UniformColor[1]	= Other.UniformColor[1];
-		this->UniformColor[2]	= Other.UniformColor[2];
-		this->CheckerColor1[0]	= Other.CheckerColor1[0];
-		this->CheckerColor1[1]	= Other.CheckerColor1[1];
-		this->CheckerColor1[2]	= Other.CheckerColor1[2];
-		this->CheckerColor2[0]	= Other.CheckerColor2[0];
-		this->CheckerColor2[1]	= Other.CheckerColor2[1];
-		this->CheckerColor2[2]	= Other.CheckerColor2[2];
-		this->GradientColor1[0]	= Other.GradientColor1[0];
-		this->GradientColor1[1]	= Other.GradientColor1[1];
-		this->GradientColor1[2]	= Other.GradientColor1[2];
-		this->GradientColor2[0]	= Other.GradientColor2[0];
-		this->GradientColor2[1]	= Other.GradientColor2[1];
-		this->GradientColor2[2]	= Other.GradientColor2[2];
-		this->GradientColor3[0]	= Other.GradientColor3[0];
-		this->GradientColor3[1]	= Other.GradientColor3[1];
-		this->GradientColor3[2]	= Other.GradientColor3[2];
-
-		return *this;
-	}
-};
 
 struct EXPOSURE_RENDER_DLL ErRGBA
 {
