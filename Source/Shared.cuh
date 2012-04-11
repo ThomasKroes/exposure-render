@@ -24,7 +24,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 
 	for (int i = 0; i < gpLights->Count; i++)
 	{
-		Light& Light = GetLights().Get(i);
+		Light& Light = gpLights->Get(i);
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 

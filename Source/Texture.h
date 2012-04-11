@@ -21,13 +21,13 @@ namespace ExposureRender
 
 struct EXPOSURE_RENDER_DLL Texture
 {
-	Enums::TextureType		Type;
-	float					OutputLevel;
-	Image					Image;
-	Procedural				Procedural;
-	Vec2f					Offset;
-	Vec2f					Repeat;
-	bool					Flip[2];
+	Enums::TextureType	Type;
+	float				OutputLevel;
+	Image				Image;
+	Procedural			Procedural;
+	Vec2f				Offset;
+	Vec2f				Repeat;
+	bool				Flip[2];
 
 	Texture()
 	{
@@ -47,7 +47,36 @@ struct EXPOSURE_RENDER_DLL Texture
 		this->Repeat		= Other.Repeat;
 		this->Flip[0]		= Other.Flip[0];
 		this->Flip[1]		= Other.Flip[1];
+		
+		/*
+		this->Type			= Other.Type;
+		this->OutputLevel	= Other.OutputLevel;
+		this->Image			= Other.Image;
+		this->Procedural	= Other.Procedural;
+		this->Offset[0]		= Other.Offset[0];
+		this->Offset[1]		= Other.Offset[1];
+		this->Repeat[0]		= Other.Repeat[0];
+		this->Repeat[1]		= Other.Repeat[1];
+		this->Flip[0]		= Other.Flip[0];
+		this->Flip[1]		= Other.Flip[1];
 
+		if (this->Image.Dirty)
+		{
+			if (this->Image.pData)
+				CUDA::Free(this->Image.pData);
+
+			if (this->Image.pData)
+			{
+				const int NoPixels = this->Image.Size[0] * this->Image.Size[1];
+			
+				CUDA::Allocate(this->Image.pData, NoPixels);
+				CUDA::MemCopyHostToDevice(Other.Image.pData, this->Image.pData, NoPixels);
+			}
+		} 
+
+		return *this;
+		*/
+		
 		return *this;
 	}
 };

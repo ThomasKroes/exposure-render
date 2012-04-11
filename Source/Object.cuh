@@ -13,99 +13,42 @@
 
 #pragma once
 
+#include "Object.h"
+
 namespace ExposureRender
 {
 
-#define MAX_NO_OBJECTS 64
-
-struct EXPOSURE_RENDER_DLL ErObject
+DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 {
-	bool		Enabled;
-	ErShape		Shape;
-	int			DiffuseTextureID;
-	int			SpecularTextureID;
-	int			GlossinessTextureID;
-	float		Ior;
+	float T = FLT_MAX;
 
-	ErObject()
+	for (int i = 0; i < gpObjects.Count; i++)
 	{
-		this->Enabled				= true;
-		this->DiffuseTextureID		= -1;
-		this->SpecularTextureID		= -1;
-		this->GlossinessTextureID	= -1;
-		this->Ior					= 0.0f;
-	}
+		Object& Object = gpObjects.Get(i);
 
-	ErObject& operator = (const ErObject& Other)
-	{
-		this->Enabled				= Other.Enabled;
-		this->Shape					= Other.Shape;
-		this->DiffuseTextureID		= Other.DiffuseTextureID;
-		this->SpecularTextureID		= Other.SpecularTextureID;
-		this->GlossinessTextureID	= Other.GlossinessTextureID;
-		this->Ior					= Other.Ior;
+		ScatterEvent LocalRS(ScatterEvent::Object);
 
-		return *this;
-	}
-};
+		LocalRS.ObjectID = i;
 
-struct Object
-{
-	Object()
-	{
-		printf("Object()\n");
-	}
+		Object.Intersect(R, LocalRS);
 
-	~Object()
-	{
-		printf("~Object()\n");
-	}
-
-	DEVICE_NI void Intersect(const Ray& R, ScatterEvent& RS)
-	{
-		Ray Rt = TransformRay(Shape.InvTM, R);
-
-		Intersection Int;
-
-		IntersectShape(Shape, Rt, Int);
-
-		if (Int.Valid)
+		if (LocalRS.Valid && LocalRS.T < T)
 		{
-			RS.Valid	= true;
-			RS.N 		= TransformVector(Shape.TM, Int.N);
-			RS.P 		= TransformPoint(Shape.TM, Int.P);
-			RS.T 		= Length(RS.P - R.O);
-			RS.Wo		= -R.D;
-			RS.Le		= ColorXYZf(0.0f);
-			RS.UV		= Int.UV;
+			RS = LocalRS;
+			T = LocalRS.T;
 		}
 	}
+}
 
-	DEVICE_NI bool Intersects(const Ray& R)
+DEVICE_NI bool IntersectsObject(const Ray& R)
+{
+	for (int i = 0; i < gpObjects.Count; i++)
 	{
-		return IntersectsShape(Shape, TransformRay(Shape.InvTM, R));
+		if (gpObjects.Get(i).Intersects(R))
+			return true;
 	}
 
-	HOST Object& Object::operator = (const ErObject& Other)
-	{
-		this->Enabled				= Other.Enabled;
-		this->Shape					= Other.Shape;
-		this->DiffuseTextureID		= Other.DiffuseTextureID;
-		this->SpecularTextureID		= Other.SpecularTextureID;
-		this->GlossinessTextureID	= Other.GlossinessTextureID;
-		this->Ior					= Other.Ior;
-
-		return *this;
-	}
-
-	bool		Enabled;
-	Shape		Shape;
-	int			DiffuseTextureID;
-	int			SpecularTextureID;
-	int			GlossinessTextureID;
-	float		Ior;
-};
-
-typedef ResourceList<Object, MAX_NO_OBJECTS> Objects;
+	return false;
+}
 
 }

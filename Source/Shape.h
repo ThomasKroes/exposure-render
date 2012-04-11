@@ -19,6 +19,36 @@
 namespace ExposureRender
 {
 
+float PlaneArea(const Vec2f& Size)
+{
+	return Size[0] * Size[1];
+}
+
+float DiskArea(const float& Radius)
+{
+	return PI_F * (Radius * Radius);
+}
+
+float RingArea(const float& OuterRadius, const float& InnerRadius)
+{
+	return DiskArea(OuterRadius) - DiskArea(InnerRadius);
+}
+
+float BoxArea(const Vec3f& Size)
+{
+	return (2.0f * Size[0] * Size[1]) + (2.0f * Size[0] * Size[2]) + (2.0f * Size[1] * Size[2]);
+}
+
+float SphereArea(const float& Radius)
+{
+	return 4.0f * PI_F * (Radius * Radius);
+}
+
+float CylinderArea(const float& Radius, const float& Height)
+{
+	return (2.0f * PI_F * (Radius * Radius)) + (2.0f * PI_F * Radius * Height);
+}
+
 struct EXPOSURE_RENDER_DLL Shape
 {
 	Matrix44			TM;

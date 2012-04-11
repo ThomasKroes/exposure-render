@@ -15,23 +15,23 @@
 
 DEVICE int* gpTracer = NULL;
 
-typedef List<Volume, MAX_NO_VOLUMES> Volumes;
-typedef List<Light, MAX_NO_LIGHTS> Lights;
-typedef List<Object, MAX_NO_OBJECTS> Objects;
-typedef List<ClippingObject, MAX_NO_CLIPPING_OBJECTS> ClippingObjects;
-typedef List<Texture, MAX_NO_TEXTURES> Textures;
+typedef ExposureRender::List<ExposureRender::Volume, MAX_NO_VOLUMES>					Volumes;
+typedef ExposureRender::List<ExposureRender::Light, MAX_NO_LIGHTS>						Lights;
+typedef ExposureRender::List<ExposureRender::Object, MAX_NO_OBJECTS>					Objects;
+typedef ExposureRender::List<ExposureRender::ClippingObject, MAX_NO_CLIPPING_OBJECTS>	ClippingObjects;
+typedef ExposureRender::List<ExposureRender::Texture, MAX_NO_TEXTURES>					Textures;
 
-DEVICE Volumes* gpVolumes = NULL;
-DEVICE Lights* gpLights = NULL;
-DEVICE Objects* gpObjects = NULL;
-DEVICE ClippingObjects*	gpClippingObjects = NULL;
-DEVICE Textures* gpTextures = NULL;
+DEVICE Volumes*			gpVolumes			= NULL;
+DEVICE Lights*			gpLights			= NULL;
+DEVICE Objects*			gpObjects			= NULL;
+DEVICE ClippingObjects*	gpClippingObjects	= NULL;
+DEVICE Textures*		gpTextures			= NULL;
 
-static CudaList<Volume, MAX_NO_VOLUMES> gVolumes("gpVolumes");
-static CudaList<Light, MAX_NO_LIGHTS> gLights("gpLights");
-static CudaList<Object, MAX_NO_OBJECTS> gObjects("gpObjects");
-static CudaList<ClippingObject, MAX_NO_CLIPPING_OBJECTS> gClippingObjects("gpClippingObjects");
-static CudaList<Texture, MAX_NO_TEXTURES> gTextures("gpTextures");
+ExposureRender::CudaList<ExposureRender::Volume, MAX_NO_VOLUMES>					gVolumes("gpVolumes");
+ExposureRender::CudaList<ExposureRender::Light, MAX_NO_LIGHTS>						gLights("gpLights");
+ExposureRender::CudaList<ExposureRender::Object, MAX_NO_OBJECTS>					gObjects("gpObjects");
+ExposureRender::CudaList<ExposureRender::ClippingObject, MAX_NO_CLIPPING_OBJECTS>	gClippingObjects("gpClippingObjects");
+ExposureRender::CudaList<ExposureRender::Texture, MAX_NO_TEXTURES>					gTextures("gpTextures");
 
 #include "Shared.cuh"
 #include "Tracer.cuh"

@@ -123,9 +123,4 @@ DEVICE_NI void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float 
 
 }
 
-HOST_DEVICE_NI float CylinderArea(const float& Radius, const float& Height)
-{
-	return (2.0f * PI_F * (Radius * Radius)) + (2.0f * PI_F * Radius * Height);
-}
-
 }

@@ -74,6 +74,14 @@ SET(ErCudaGeneral
 	GradientMagnitude.cuh
 	AutoFocus.cuh
 	Tracer.cuh
+	Camera.cuh
+	Volume.cuh
+	Light.cuh
+	Object.cuh
+	ClippingObject.cuh
+	Texture.cuh
+	Shape.cuh
+	TransferFunction.cuh
 	Core.cu
 )
 
@@ -126,20 +134,6 @@ SET(ErAPI
 
 # API group
 SOURCE_GROUP("API" FILES ${ErAPI})
-
-# Shared
-SET(ErShared
-	Shared.cuh
-	Camera.cuh
-	Volume.cuh
-	Light.cuh
-	Object.cuh
-	ClippingObject.cuh
-	Texture.cuh
-	Shape.cuh
-	TransferFunction.cuh
-	RenderSettings.cuh
-)
 
 # Shared group
 SOURCE_GROUP("Shared" FILES ${ErShared})

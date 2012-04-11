@@ -185,9 +185,4 @@ DEVICE_NI void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
 	SS.P *= Size;
 }
 
-HOST_DEVICE_NI float BoxArea(const Vec3f& Size)
-{
-	return (2.0f * Size[0] * Size[1]) + (2.0f * Size[0] * Size[2]) + (2.0f * Size[1] * Size[2]);
-}
-
 }

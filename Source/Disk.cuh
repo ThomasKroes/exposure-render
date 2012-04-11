@@ -68,10 +68,4 @@ DEVICE_NI void SampleDisk(SurfaceSample& SS, const Vec3f& UVW, const float& Radi
 	SS.P *= Radius;
 }
 
-HOST_DEVICE_NI float DiskArea(const float& Radius)
-{
-	return PI_F * (Radius * Radius);
-}
-
-
 }

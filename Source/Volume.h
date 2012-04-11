@@ -38,17 +38,23 @@ struct Volume
 
 		if (this->NormalizeSize)
 		{
-			const Vec3f PhysicalSize = this->Resolution * this->Spacing;
+			const Vec3f PhysicalSize = Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) * this->Spacing;
 			
 			const float Max = max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
 			Scale = 1.0f / Max;
 		}
 
-		this->InvResolution		= 1.0f / this->Resolution;
+		this->InvResolution[0]	= 1.0f / this->Resolution[0];
+		this->InvResolution[1]	= 1.0f / this->Resolution[1];
+		this->InvResolution[2]	= 1.0f / this->Resolution[2];
 		this->Spacing			= Scale * Spacing;
-		this->InvSpacing		= 1.0f / Spacing;
-		this->Size				= this->Resolution * this->Spacing;
-		this->InvSize			= 1.0f / this->Size;
+		this->InvSpacing[0]		= 1.0f / Spacing[0];
+		this->InvSpacing[1]		= 1.0f / Spacing[1];
+		this->InvSpacing[2]		= 1.0f / Spacing[2];
+		this->Size				= Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) * this->Spacing;
+		this->InvSize[0]		= 1.0f / this->Size[0];
+		this->InvSize[1]		= 1.0f / this->Size[1];
+		this->InvSize[2]		= 1.0f / this->Size[2];
 		this->MinAABB			= -0.5f * this->Size;
 		this->MaxAABB			= 0.5f * this->Size;
 
@@ -69,7 +75,7 @@ struct Volume
 		const int NoVoxels = (int)this->Resolution[0] * (int)this->Resolution[1] * (int)this->Resolution[2];
 
 		if (NoVoxels <= 0)
-			return;
+			return *this;
 
 		CUDA::Allocate(this->pVoxels, NoVoxels);
 		CUDA::MemCopyHostToDevice(Other.pVoxels, this->pVoxels, NoVoxels);
@@ -95,12 +101,12 @@ struct Volume
 
 	HOST_DEVICE unsigned short Get(Vec3f XYZ) const
 	{
-		Vec3f LocalXYZ = this->Resolution * ((XYZ - this->MinAABB) * this->InvSize);
+		Vec3f LocalXYZ = Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
 
 		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
 	}
 	
-	Vec3i				Resolution;
+	Vec3i				Resolution; // FIXME
 	Vec3f				InvResolution;
 	Vec3f				MinAABB;
 	Vec3f				MaxAABB;

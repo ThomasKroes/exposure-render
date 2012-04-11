@@ -16,294 +16,133 @@
 namespace ExposureRender
 {
 
-#define NO_COLOR_COMPONENTS 4
-#define MAX_NO_TEXTURES		64
-
-struct EXPOSURE_RENDER_DLL ErProcedural
+DEVICE_NI ColorXYZf EvaluateBitmap(const int& U, const int& V)
 {
-	Enums::ProceduralType	Type;
-	float					UniformColor[3];
-	float					CheckerColor1[3];
-	float					CheckerColor2[3];
-	float					GradientColor1[3];
-	float					GradientColor2[3];
-	float					GradientColor3[3];
+	if (Image.pData == NULL)
+		return ColorXYZf(0.0f);
 
-	ErProcedural()
-	{
-	}
+	ErRGBA ColorRGBA = Image.pData[V * Image.Size[0] + U];
+	ColorXYZf L;
+	L.FromRGB(ONE_OVER_255 * (float)ColorRGBA.Data[0], ONE_OVER_255 * (float)ColorRGBA.Data[1], ONE_OVER_255 * (float)ColorRGBA.Data[2]);
 
-	ErProcedural& operator = (const ErProcedural& Other)
-	{
-		this->Type				= Other.Type;
-		this->UniformColor[0]	= Other.UniformColor[0];
-		this->UniformColor[1]	= Other.UniformColor[1];
-		this->UniformColor[2]	= Other.UniformColor[2];
-		this->CheckerColor1[0]	= Other.CheckerColor1[0];
-		this->CheckerColor1[1]	= Other.CheckerColor1[1];
-		this->CheckerColor1[2]	= Other.CheckerColor1[2];
-		this->CheckerColor2[0]	= Other.CheckerColor2[0];
-		this->CheckerColor2[1]	= Other.CheckerColor2[1];
-		this->CheckerColor2[2]	= Other.CheckerColor2[2];
-		this->GradientColor1[0]	= Other.GradientColor1[0];
-		this->GradientColor1[1]	= Other.GradientColor1[1];
-		this->GradientColor1[2]	= Other.GradientColor1[2];
-		this->GradientColor2[0]	= Other.GradientColor2[0];
-		this->GradientColor2[1]	= Other.GradientColor2[1];
-		this->GradientColor2[2]	= Other.GradientColor2[2];
-		this->GradientColor3[0]	= Other.GradientColor3[0];
-		this->GradientColor3[1]	= Other.GradientColor3[1];
-		this->GradientColor3[2]	= Other.GradientColor3[2];
+	return L;
+}
 
-		return *this;
-	}
-};
-
-struct EXPOSURE_RENDER_DLL ErRGBA
+DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f& UVW)
 {
-	unsigned char Data[NO_COLOR_COMPONENTS];
+	ColorXYZf L;
 
-	ErRGBA& operator = (const ErRGBA& Other)
+	switch (Procedural.Type)
 	{
-		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
-			this->Data[i] = Other.Data[i];
-
-		return *this;
-	}
-
-	ErRGBA()
-	{
-		for (int i = 0; i < NO_COLOR_COMPONENTS; i++)
-			this->Data[i] = 0;
-	}
-};
-
-struct EXPOSURE_RENDER_DLL ErImage
-{
-	ErRGBA*		pData;
-	int			Size[2];
-	bool		Dirty;
-
-	ErImage& operator = (const ErImage& Other)
-	{
-//		this->pData			= Other.pData;
-		this->Size[0]		= Other.Size[0];
-		this->Size[1]		= Other.Size[1];
-		this->Dirty			= Other.Dirty;
-
-		return *this;
-	}
-
-	ErImage()
-	{
-		this->pData				= NULL;
-		this->Size[0]			= 0;
-		this->Size[1]			= 0;
-		this->Dirty				= false;
-	}
-};
-
-struct EXPOSURE_RENDER_DLL ErTexture
-{
-	Enums::TextureType		Type;
-	float					OutputLevel;
-	ErImage					Image;
-	ErProcedural			Procedural;
-	float					Offset[2];
-	float					Repeat[2];
-	bool					Flip[2];
-
-	ErTexture()
-	{
-	}
-
-	ErTexture& operator = (const ErTexture& Other)
-	{
-		this->Type			= Other.Type;
-		this->OutputLevel	= Other.OutputLevel;
-		this->Image			= Other.Image;
-		this->Procedural	= Other.Procedural;
-		this->Offset[0]		= Other.Offset[0];
-		this->Offset[1]		= Other.Offset[1];
-		this->Repeat[0]		= Other.Repeat[0];
-		this->Repeat[1]		= Other.Repeat[1];
-		this->Flip[0]		= Other.Flip[0];
-		this->Flip[1]		= Other.Flip[1];
-
-		return *this;
-	}
-};
-
-struct Texture : public ErTexture
-{
-	Texture()
-	{
-		printf("Texture()\n");
-	}
-
-	~Texture()
-	{
-		printf("~Texture()\n");
-	}
-
-	HOST Texture& Texture::operator = (const ErTexture& Other)
-	{
-		this->Type			= Other.Type;
-		this->OutputLevel	= Other.OutputLevel;
-		this->Image			= Other.Image;
-		this->Procedural	= Other.Procedural;
-		this->Offset[0]		= Other.Offset[0];
-		this->Offset[1]		= Other.Offset[1];
-		this->Repeat[0]		= Other.Repeat[0];
-		this->Repeat[1]		= Other.Repeat[1];
-		this->Flip[0]		= Other.Flip[0];
-		this->Flip[1]		= Other.Flip[1];
-
-		if (this->Image.Dirty)
+		case Enums::Uniform:
 		{
-			if (this->Image.pData)
-				CUDA::Free(this->Image.pData);
+			L.FromRGB(Procedural.UniformColor[0], Procedural.UniformColor[1], Procedural.UniformColor[2]);
+			break;
+		}
 
-			if (this->Image.pData)
+		case Enums::Checker:
+		{
+			const int UV[2] =
 			{
-				const int NoPixels = this->Image.Size[0] * this->Image.Size[1];
-			
-				CUDA::Allocate(this->Image.pData, NoPixels);
-				CUDA::MemCopyHostToDevice(Other.Image.pData, this->Image.pData, NoPixels);
+				(int)(UVW[0] * 2.0f),
+				(int)(UVW[1] * 2.0f)
+			};
+
+			if (UV[0] % 2 == 0)
+			{
+				if (UV[1] % 2 == 0)
+					L.FromRGB(Procedural.CheckerColor1[0], Procedural.CheckerColor1[1], Procedural.CheckerColor1[2]);
+				else
+					L.FromRGB(Procedural.CheckerColor2[0], Procedural.CheckerColor2[1], Procedural.CheckerColor2[2]);
 			}
-		} 
-
-		return *this;
-	}
-
-	DEVICE_NI ColorXYZf EvaluateBitmap(const int& U, const int& V)
-	{
-		if (Image.pData == NULL)
-			return ColorXYZf(0.0f);
-
-		ErRGBA ColorRGBA = Image.pData[V * Image.Size[0] + U];
-		ColorXYZf L;
-		L.FromRGB(ONE_OVER_255 * (float)ColorRGBA.Data[0], ONE_OVER_255 * (float)ColorRGBA.Data[1], ONE_OVER_255 * (float)ColorRGBA.Data[2]);
-
-		return L;
-	}
-
-	DEVICE_NI ColorXYZf EvaluateProcedural(const Vec2f& UVW)
-	{
-		ColorXYZf L;
-
-		switch (Procedural.Type)
-		{
-			case Enums::Uniform:
+			else
 			{
-				L.FromRGB(Procedural.UniformColor[0], Procedural.UniformColor[1], Procedural.UniformColor[2]);
-				break;
+				if (UV[1] % 2 == 0)
+					L.FromRGB(Procedural.CheckerColor2[0], Procedural.CheckerColor2[1], Procedural.CheckerColor2[2]);
+				else
+					L.FromRGB(Procedural.CheckerColor1[0], Procedural.CheckerColor1[1], Procedural.CheckerColor1[2]);
 			}
 
-			case Enums::Checker:
+			break;
+		}
+
+		case Enums::Gradient:
+		{
+			break;
+		}
+	}
+
+	return L;
+}
+
+DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
+{
+	Texture& T = pTextures[ID];
+
+	ColorXYZf L;
+
+	Vec2f TextureUV = UV;
+
+	TextureUV[0] *= T.Repeat[0];
+	TextureUV[1] *= T.Repeat[1];
+	
+	TextureUV[0] += T.Offset[0];
+	TextureUV[1] += 1.0f - T.Offset[1];
+	
+	TextureUV[0] = TextureUV[0] - floorf(TextureUV[0]);
+	TextureUV[1] = TextureUV[1] - floorf(TextureUV[1]);
+
+	TextureUV[0] = clamp(TextureUV[0], 0.0f, 1.0f);
+	TextureUV[1] = clamp(TextureUV[1], 0.0f, 1.0f);
+
+	if (T.Flip[0])
+		TextureUV[0] = 1.0f - TextureUV[0];
+
+	if (T.Flip[1])
+		TextureUV[1] = 1.0f - TextureUV[1];
+
+	switch (T.Type)
+	{
+		case Enums::Procedural:
+		{
+			L = EvaluateProcedural(T.Procedural, TextureUV);
+			break;
+		}
+
+		case Enums::Image:
+		{
+			if (T.Image.pData != NULL)
 			{
-				const int UV[2] =
+				const int Size[2] = { T.Image.Size[0], T.Image.Size[1] };
+
+				int umin = int(Size[0] * TextureUV[0]);
+				int vmin = int(Size[1] * TextureUV[1]);
+				int umax = int(Size[0] * TextureUV[0]) + 1;
+				int vmax = int(Size[1] * TextureUV[1]) + 1;
+				float ucoef = fabsf(Size[0] * TextureUV[0] - umin);
+				float vcoef = fabsf(Size[1] * TextureUV[1] - vmin);
+
+				umin = min(max(umin, 0), Size[0] - 1);
+				umax = min(max(umax, 0), Size[0] - 1);
+				vmin = min(max(vmin, 0), Size[1] - 1);
+				vmax = min(max(vmax, 0), Size[1] - 1);
+		
+				const ColorXYZf Color[4] = 
 				{
-					(int)(UVW[0] * 2.0f),
-					(int)(UVW[1] * 2.0f)
+					EvaluateBitmap(T.Image, umin, vmin),
+					EvaluateBitmap(T.Image, umax, vmin),
+					EvaluateBitmap(T.Image, umin, vmax),
+					EvaluateBitmap(T.Image, umax, vmax)
 				};
 
-				if (UV[0] % 2 == 0)
-				{
-					if (UV[1] % 2 == 0)
-						L.FromRGB(Procedural.CheckerColor1[0], Procedural.CheckerColor1[1], Procedural.CheckerColor1[2]);
-					else
-						L.FromRGB(Procedural.CheckerColor2[0], Procedural.CheckerColor2[1], Procedural.CheckerColor2[2]);
-				}
-				else
-				{
-					if (UV[1] % 2 == 0)
-						L.FromRGB(Procedural.CheckerColor2[0], Procedural.CheckerColor2[1], Procedural.CheckerColor2[2]);
-					else
-						L.FromRGB(Procedural.CheckerColor1[0], Procedural.CheckerColor1[1], Procedural.CheckerColor1[2]);
-				}
-
-				break;
+				L = (1.0f - vcoef) * ((1.0f - ucoef) * Color[0] + ucoef * Color[1]) + vcoef * ((1.0f - ucoef) * Color[2] + ucoef * Color[3]);
 			}
 
-			case Enums::Gradient:
-			{
-				break;
-			}
+			break;
 		}
-
-		return L;
 	}
 
-	DEVICE_NI ColorXYZf Evaluate(const Vec2f& UV)
-	{
-		ColorXYZf L;
-
-		Vec2f TextureUV = UV;
-
-		TextureUV[0] *= Repeat[0];
-		TextureUV[1] *= Repeat[1];
-		
-		TextureUV[0] += Offset[0];
-		TextureUV[1] += 1.0f - Offset[1];
-		
-		TextureUV[0] = TextureUV[0] - floorf(TextureUV[0]);
-		TextureUV[1] = TextureUV[1] - floorf(TextureUV[1]);
-
-		TextureUV[0] = clamp(TextureUV[0], 0.0f, 1.0f);
-		TextureUV[1] = clamp(TextureUV[1], 0.0f, 1.0f);
-
-		if (Flip[0])
-			TextureUV[0] = 1.0f - TextureUV[0];
-
-		if (Flip[1])
-			TextureUV[1] = 1.0f - TextureUV[1];
-
-		switch (Type)
-		{
-			case Enums::Procedural:
-			{
-				L = EvaluateProcedural(TextureUV);
-				break;
-			}
-
-			case Enums::Image:
-			{
-				if (Image.pData != NULL)
-				{
-					const int Size[2] = { Image.Size[0], Image.Size[1] };
-
-					int umin = int(Size[0] * TextureUV[0]);
-					int vmin = int(Size[1] * TextureUV[1]);
-					int umax = int(Size[0] * TextureUV[0]) + 1;
-					int vmax = int(Size[1] * TextureUV[1]) + 1;
-					float ucoef = fabsf(Size[0] * TextureUV[0] - umin);
-					float vcoef = fabsf(Size[1] * TextureUV[1] - vmin);
-
-					umin = min(max(umin, 0), Size[0] - 1);
-					umax = min(max(umax, 0), Size[0] - 1);
-					vmin = min(max(vmin, 0), Size[1] - 1);
-					vmax = min(max(vmax, 0), Size[1] - 1);
-			
-					const ColorXYZf Color[4] = 
-					{
-						EvaluateBitmap(umin, vmin),
-						EvaluateBitmap(umax, vmin),
-						EvaluateBitmap(umin, vmax),
-						EvaluateBitmap(umax, vmax)
-					};
-
-					L = (1.0f - vcoef) * ((1.0f - ucoef) * Color[0] + ucoef * Color[1]) + vcoef * ((1.0f - ucoef) * Color[2] + ucoef * Color[3]);
-				}
-
-				break;
-			}
-		}
-
-		return OutputLevel * L;
-	}
-};
-
-typedef ResourceList<Texture, MAX_NO_TEXTURES> Textures;
+	return T.OutputLevel * L;
+}
 
 }

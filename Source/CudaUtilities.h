@@ -17,6 +17,8 @@
 #include <cuda_runtime_api.h>
 #include <map>
 
+#include "Exception.h"
+
 namespace ExposureRender
 {
 
@@ -42,7 +44,7 @@ public:
 	static void HandleCudaError(const cudaError_t& CudaError)
 	{
 		if (CudaError != cudaSuccess)
-			throw(ErException(Enums::Error, cudaGetErrorString(CudaError)));
+			throw(Exception(Enums::Error, cudaGetErrorString(CudaError)));
 	}
 
 	static void ThreadSynchronize()
@@ -211,7 +213,7 @@ public:
 template<class T, int MaxSize>
 struct List
 {
-	int		Count;
+	int Count;
 
 	HOST List()
 	{
@@ -220,7 +222,7 @@ struct List
 
 	HOST_DEVICE T& Get(const int& ID)
 	{
-		return this->List[ID];
+		return this->Items[ID];
 	}
 
 	HOST void Add(const T& Resource)
@@ -228,7 +230,7 @@ struct List
 		if (this->Count + 1 >= MaxSize)
 			return;
 
-		this->List[this->Count] = Resource;
+		this->Items[this->Count] = Resource;
 		this->Count++;
 	}
 
@@ -238,7 +240,7 @@ struct List
 	}
 
 private:
-	T List[MaxSize];
+	T Items[MaxSize];
 };
 
 template<typename T, int MaxSize>
