@@ -19,17 +19,17 @@
 namespace ExposureRender
 {
 
-template <class T, int Size>
+template<class T, int Size>
 class EXPOSURE_RENDER_DLL Vec
 {
 public:
 	HOST_DEVICE Vec()
 	{
 		for (int i = 0; i < Size; i++)
-			this->D[i] = T();
+			this->D[i] = float();
 	}
 
-	HOST_DEVICE Vec(T V)
+	HOST_DEVICE Vec(float V)
 	{
 		for (int i = 0; i < Size; i++)
 			this->D[i] = V;
@@ -41,10 +41,6 @@ public:
 			this->D[i] = Other[i];
 	}
 
-	HOST_DEVICE virtual ~Vec()
-	{
-	}
-
 	HOST_DEVICE Vec<T, Size>& operator = (const Vec<T, Size>& Other)
 	{
 		for (int i = 0; i < Size; i++)
@@ -53,12 +49,12 @@ public:
 		return *this;
 	}
 
-	HOST_DEVICE T operator[](const int& i) const
+	HOST_DEVICE float operator[](const int& i) const
 	{
 		return this->D[i];
 	}
 
-	HOST_DEVICE T& operator[](const int& i)
+	HOST_DEVICE float& operator[](const int& i)
 	{
 		return this->D[i];
 	}
@@ -104,7 +100,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = T(this->D[i] * F);
+			Result[i] = float(this->D[i] * F);
 
 		return Result;
 	}
@@ -137,7 +133,7 @@ public:
 		return Result;
 	}
 
-	HOST_DEVICE Vec<T, Size>& operator /= (const T& F)
+	HOST_DEVICE Vec<T, Size>& operator /= (const float& F)
 	{
 		const float Inv = F == 0.0f ? 0.0f : 1.0f / F;
 
@@ -224,9 +220,9 @@ public:
 		return false;
 	}
 
-	HOST_DEVICE T Max(void)
+	HOST_DEVICE float Max(void)
 	{
-		T Max;
+		float Max;
 
 		for (int i = 1; i < Size; i++)
 		{
@@ -237,9 +233,9 @@ public:
 		return Max;
 	}
 
-	HOST_DEVICE T Min(void)
+	HOST_DEVICE float Min(void)
 	{
-		T Min;
+		float Min;
 
 		for (int i = 1; i < Size; i++)
 		{
@@ -252,7 +248,7 @@ public:
 
 	HOST_DEVICE Vec<T, Size> Min(const Vec<T, Size>& Other) const
 	{
-		Vec<T, Size> Result;
+		Vec Result;
 		
 		for (int i = 0; i < Size; i++)
 			Result[i] = min(this->D[i], Other[i]);
@@ -262,7 +258,7 @@ public:
 
 	HOST_DEVICE Vec<T, Size> Max(const Vec<T, Size>& Other) const
 	{
-		Vec<T, Size> Result;
+		Vec Result;
 		
 		for (int i = 0; i < Size; i++)
 			Result[i] = max(this->D[i], Other[i]);
@@ -270,45 +266,61 @@ public:
 		return Result;
 	}
 
-	HOST_DEVICE void Clamp(T Min, T Max)
+	HOST_DEVICE void Clamp(float Min, float Max)
 	{
 		for (int i = 0; i < Size; ++i)
 			this->D[i] = max(Min, min(this->D[i], Max));
 	}
 
-	HOST_DEVICE void Clamp(const Vec<T, Size>& Min, const Vec<T, Size>& Max)
+	HOST_DEVICE void Clamp(const Vec& Min, const Vec& Max)
 	{
 		for (int i = 0; i < Size; ++i)
 			this->D[i] = max(Min[i], min(this->D[i], Max[i]));
 	}
 
 protected:
-	T	D[Size];
+	float	D[Size];
 };
 
-template <class T>
-class EXPOSURE_RENDER_DLL Vec2 : public Vec<T, 2>
+class EXPOSURE_RENDER_DLL Vec2i : public Vec<int, 2>
 {
 public:
-	HOST_DEVICE Vec2() :
-		Vec<T, 2>()
+	HOST_DEVICE Vec2i() :
+		Vec<int, 2>()
+	{
+	}
+	
+	HOST_DEVICE Vec2i(const int& V)
+	{
+		this->D[0] = V;
+		this->D[1] = V;
+	}
+
+	HOST_DEVICE Vec2i(const int& V0, const int& V1)
+	{
+		this->D[0] = V0;
+		this->D[1] = V1;
+	}
+};
+
+class EXPOSURE_RENDER_DLL Vec2f : public Vec<float, 2>
+{
+public:
+	HOST_DEVICE Vec2f() :
+		Vec<float, 2>()
 	{
 	}
 
-	HOST_DEVICE Vec2(const Vec<T, 2>& V) :
-		Vec<T, 2>(V)
+	HOST_DEVICE Vec2f(const float& V)
 	{
+		this->D[0] = V;
+		this->D[1] = V;
 	}
 
-	HOST_DEVICE Vec2(const T& V) :
-		Vec<T, 2>(V)
+	HOST_DEVICE Vec2f(const float& V0, const float& V1)
 	{
-	}
-
-	HOST_DEVICE Vec2(T V1, T V2)
-	{
-		this->D[0] = V1;
-		this->D[1] = V2;
+		this->D[0] = V0;
+		this->D[1] = V1;
 	}
 
 	HOST_DEVICE float LengthSquared(void) const
@@ -329,30 +341,49 @@ public:
 	}
 };
 
-template <class T>
-class EXPOSURE_RENDER_DLL Vec3 : public Vec<T, 3>
+class EXPOSURE_RENDER_DLL Vec3i : public Vec<int, 3>
 {
 public:
-	HOST_DEVICE Vec3() :
-		Vec<T, 3>()
+	HOST_DEVICE Vec3i() :
+		Vec<int, 3>()
 	{
 	}
 	
-	HOST_DEVICE Vec3(const Vec<T, 3>& V) :
-		Vec<T, 3>(V)
+	HOST_DEVICE Vec3i(const int& V)
+	{
+		this->D[0] = V;
+		this->D[1] = V;
+		this->D[2] = V;
+	}
+
+	HOST_DEVICE Vec3i(const int& V0, const int& V1, const int& V2)
+	{
+		this->D[0] = V0;
+		this->D[1] = V1;
+		this->D[2] = V2;
+	}
+};
+
+class EXPOSURE_RENDER_DLL Vec3f : public Vec<float, 3>
+{
+public:
+	HOST_DEVICE Vec3f() :
+		Vec<float, 3>()
 	{
 	}
 
-	HOST_DEVICE Vec3(const T& V) :
-		Vec<T, 3>(V)
+	HOST_DEVICE Vec3f(const float& V)
 	{
+		this->D[0] = V;
+		this->D[1] = V;
+		this->D[2] = V;
 	}
 
-	HOST_DEVICE Vec3(T V1, T V2, T V3)
+	HOST_DEVICE Vec3f(const float& V0, const float& V1, const float& V2)
 	{
-		this->D[0] = V1;
-		this->D[1] = V2;
-		this->D[2] = V3;
+		this->D[0] = V0;
+		this->D[1] = V1;
+		this->D[2] = V2;
 	}
 
 	HOST_DEVICE float LengthSquared(void) const
@@ -373,14 +404,14 @@ public:
 		this->D[2] /= L;
 	}
 
-	HOST_DEVICE float Dot(Vec3 V) const
+	HOST_DEVICE float Dot(const Vec3f& V) const
 	{
 		return (this->D[0] * V[0] + this->D[1] * V[1] + this->D[2] * V[2]);
 	}
 
-	HOST_DEVICE Vec3 Cross(Vec3 V) const
+	HOST_DEVICE Vec3f Cross(const Vec3f& V) const
 	{
-		return Vec3( (this->D[1] * V[2]) - (this->D[2] * V[1]), (this->D[2] * V[0]) - (this->D[0] * V[2]), (this->D[0] * V[1]) - (this->D[1] * V[0]) );
+		return Vec3f( (this->D[1] * V[2]) - (this->D[2] * V[1]), (this->D[2] * V[0]) - (this->D[0] * V[2]), (this->D[0] * V[1]) - (this->D[1] * V[0]) );
 	}
 
 	HOST_DEVICE void ScaleBy(float F)
@@ -391,18 +422,10 @@ public:
 	}
 };
 
-typedef Vec2<unsigned char>	Vec2uc;
-typedef Vec2<short>			Vec2s;
-typedef Vec2<int>			Vec2i;
-typedef Vec2<float>			Vec2f;
-typedef Vec2<double>		Vec2d;
 
-typedef Vec3<unsigned char>	Vec3uc;
-typedef Vec3<short>			Vec3s;
-typedef Vec3<int>			Vec3i;
-typedef Vec3<float>			Vec3f;
-typedef Vec3<double>		Vec3d;
 
+
+/*
 
 template <class T> inline HOST_DEVICE Vec2<T> operator + (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] + B[0], A[1] + B[1]);							};
 template <class T> inline HOST_DEVICE Vec2<T> operator - (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] - B[0], A[1] - B[1]);							};
@@ -422,6 +445,7 @@ template <class T> inline HOST_DEVICE Vec3<T> operator / (const Vec3<T>& A, cons
 
 template <class T> HOST_DEVICE inline Vec2<T> Normalize(Vec2<T> V)									{ Vec2<T> R = V; R.Normalize(); return R; 							};
 template <class T> HOST_DEVICE inline Vec3<T> Normalize(Vec3<T> V)									{ Vec3<T> R = V; R.Normalize(); return R; 							};
+*/
 
 template <class T>
 HOST_DEVICE inline float Clamp(const T& Value, const T& Min, const T& Max)

@@ -32,6 +32,9 @@ DEVICE Textures*		gpTextures			= NULL;
 DEVICE ExposureRender::Tracer* gpTracer = NULL;
 
 #include "Utilities.cuh"
+
+#include "TransferFunction.cuh"
+
 /*
 
 #include "GaussianFilter.cuh"
@@ -48,6 +51,8 @@ DEVICE ExposureRender::Tracer* gpTracer = NULL;
 namespace ExposureRender
 {
 
+ColorTransferFunction1D CTF;
+
 CudaList<Volume, MAX_NO_VOLUMES>					gVolumes("gpVolumes");
 CudaList<Light, MAX_NO_LIGHTS>						gLights("gpLights");
 CudaList<Object, MAX_NO_OBJECTS>					gObjects("gpObjects");
@@ -60,6 +65,10 @@ EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2])
 {
 	gTracers[TracerID].FrameBuffer.Resize(Resolution2i(Size));
 //	gTracers.Synchronize();
+
+//	CTF.PLF[0].Position[0] = 0.0f;
+	Vec2f Test; 
+	Test[0] = 0.0f;
 }
 
 EXPOSURE_RENDER_DLL void Reset(int TracerID)

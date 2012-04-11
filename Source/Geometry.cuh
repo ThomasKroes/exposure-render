@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Color.cuh"
+#include "Color.h"
 #include "Ray.cuh"
 
 using namespace std;

@@ -32,6 +32,10 @@ struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 		this->Count = 0;
 	}
 
+	~PiecewiseLinearFunction()
+	{
+	}
+
 	PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
 	{
 		this->NodeRange		= Other.NodeRange;

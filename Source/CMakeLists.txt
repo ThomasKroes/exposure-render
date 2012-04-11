@@ -67,7 +67,6 @@ SET(ErCudaGeneral
 	MonteCarlo.cuh
 	Buffer.cuh
 	Framebuffer.cuh
-	Color.cuh
 	Ray.cuh
 	Statistics.cuh
 	GradientMagnitude.cuh
@@ -129,6 +128,8 @@ SET(ErAPI
 	Exception.h
 	Enums.h
 	CudaUtilities.h
+	Color.h
+	Test.cpp
 )
 
 # API group
@@ -171,4 +172,4 @@ ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${P
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/TransferFunction.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Vector.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Volume.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Core.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Color.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)

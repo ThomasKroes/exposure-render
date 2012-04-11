@@ -251,12 +251,12 @@ private:
 template<typename T, int MaxSize>
 struct CudaList
 {
-	typename map<int, T>			Resources;
-	int								Counter;
-	char							DeviceSymbol[MAX_CHAR_SIZE];
-	List<T, MaxSize>*				DeviceAllocation;
-	List<T, MaxSize>				List;
-	typename map<int, T>::iterator	It;
+	typename std::map<int, T>				Resources;
+	int										Counter;
+	char									DeviceSymbol[MAX_CHAR_SIZE];
+	List<T, MaxSize>*						DeviceAllocation;
+	List<T, MaxSize>						List;
+	typename std::map<int, T>::iterator		It;
 
 	HOST CudaList(const char* pDeviceSymbol)
 	{
@@ -315,8 +315,6 @@ struct CudaList
 
 	HOST void Synchronize()
 	{
-		return;
-
 		if (Resources.empty())
 			return;
 

@@ -23,14 +23,14 @@
 
 using namespace std;
 
-namespace ExposureRender
-{
-
 #ifdef _EXPORTING
 	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
 #else
 	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
 #endif
+
+namespace ExposureRender
+{
 
 #ifdef __CUDA_ARCH__
 	#define KERNEL						__global__

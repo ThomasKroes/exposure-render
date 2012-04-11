@@ -26,6 +26,8 @@ struct Volume
 {
 	Volume()
 	{
+//		ExposureRender::Vec2f t;
+//		t[0] = 15.0f;
 	}
 
 	~Volume()
@@ -110,9 +112,9 @@ struct Volume
 
 	HOST_DEVICE unsigned short Get(const Vec3f& XYZ) const
 	{
-		Vec3f LocalXYZ = Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
+		Vec3f LocalXYZ = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
 
-		return this->Get(Vec3i(LocalXYZ[0], LocalXYZ[1], LocalXYZ[2]));
+		return this->Get(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
 	}
 	
 	Vec3i				Resolution;			// FIXME
