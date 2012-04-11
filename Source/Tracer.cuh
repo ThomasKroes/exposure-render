@@ -87,9 +87,4 @@ struct Tracer
 	}
 };
 
-DEVICE Tracer& GetTracer()
-{
-	return *((Tracer*)gpTracer);
-}
-
 }

@@ -25,6 +25,25 @@ namespace ExposureRender
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/BilateralFilter.cpp?r=3
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
 
+DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
+{
+	ColorRGBf RgbHdr;
+
+	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
+
+	RgbHdr.SetR(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetR() * gpTracer->Camera.InvExposure)), 0.0f, 1.0f));
+	RgbHdr.SetG(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetG() * gpTracer->Camera.InvExposure)), 0.0f, 1.0f));
+	RgbHdr.SetB(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetB() * gpTracer->Camera.InvExposure)), 0.0f, 1.0f));
+	
+	ColorRGBuc Result;
+
+	Result.SetR((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetR(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetG((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetG(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
+	Result.SetB((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetB(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
+
+	return Result;
+}
+
 KERNEL void KrnlToneMap()
 {
 	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;

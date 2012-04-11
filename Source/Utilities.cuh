@@ -100,24 +100,7 @@ DEVICE bool Inside(const Vec3f& P)
 }
 */
 
-DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
-{
-	ColorRGBf RgbHdr;
 
-	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
-
-	RgbHdr.SetR(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetR() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetG(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetG() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
-	RgbHdr.SetB(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetB() * GetTracer().Camera.InvExposure)), 0.0, 1.0f));
-	
-	ColorRGBuc Result;
-
-	Result.SetR((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetR(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetG((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetG(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetB((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetB(), GetTracer().Camera.InvGamma)), 0.0f, 255.0f));
-
-	return Result;
-}
 
 DEVICE float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
 {

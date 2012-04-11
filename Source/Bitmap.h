@@ -14,7 +14,10 @@
 #pragma once
 
 #include "Vector.h"
-#include "CudaUtilities.h"
+
+#if defined (__CUDA_ARCH__)
+	#include "CudaUtilities.h"
+#endif
 
 namespace ExposureRender
 {

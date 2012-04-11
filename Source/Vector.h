@@ -104,7 +104,7 @@ public:
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = this->D[i] * F;
+			Result[i] = T(this->D[i] * F);
 
 		return Result;
 	}
@@ -250,7 +250,7 @@ public:
 		return Min;
 	}
 
-	HOST_DEVICE Vec<T, Size> Min(const Vec<T, Size>& Other)
+	HOST_DEVICE Vec<T, Size> Min(const Vec<T, Size>& Other) const
 	{
 		Vec<T, Size> Result;
 		
@@ -260,7 +260,7 @@ public:
 		return Result;
 	}
 
-	HOST_DEVICE Vec<T, Size> Max(const Vec<T, Size>& Other)
+	HOST_DEVICE Vec<T, Size> Max(const Vec<T, Size>& Other) const
 	{
 		Vec<T, Size> Result;
 		

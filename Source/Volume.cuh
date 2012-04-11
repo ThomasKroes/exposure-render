@@ -20,7 +20,7 @@ namespace ExposureRender
 
 DEVICE float GetIntensity(const int& VolumeID, const Vec3f& P)
 {
-	return (*(*gpVolumes))[VolumeID].Get(P);
+	return (*gpVolumes)[VolumeID].Get(P);
 }
 
 DEVICE Vec3f GradientCD(const int& VolumeID, const Vec3f& P)

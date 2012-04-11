@@ -59,7 +59,8 @@ struct EXPOSURE_RENDER_DLL Texture
 		this->Repeat[1]		= Other.Repeat[1];
 		this->Flip[0]		= Other.Flip[0];
 		this->Flip[1]		= Other.Flip[1];
-
+		
+#ifdef __CUDA_ARCH__
 		if (this->Image.Dirty)
 		{
 			if (this->Image.pData)
@@ -73,6 +74,7 @@ struct EXPOSURE_RENDER_DLL Texture
 				CUDA::MemCopyHostToDevice(Other.Image.pData, this->Image.pData, NoPixels);
 			}
 		} 
+#endif
 
 		return *this;
 		*/

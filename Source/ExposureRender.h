@@ -23,3 +23,4 @@
 #include "Light.h"
 #include "Object.h"
 #include "ClippingObject.h"
+#include "Core.h"

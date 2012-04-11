@@ -18,12 +18,6 @@
 namespace ExposureRender
 {
 
-#ifdef _EXPORTING
-	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
-#else
-	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
-#endif
-
 EXPOSURE_RENDER_DLL void InitializeTracer(int& ID);
 EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID);
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2]);
