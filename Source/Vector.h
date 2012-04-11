@@ -20,7 +20,7 @@ namespace ExposureRender
 {
 
 template <class T, int Size>
-class Vec
+class EXPOSURE_RENDER_DLL Vec
 {
 public:
 	HOST_DEVICE Vec()

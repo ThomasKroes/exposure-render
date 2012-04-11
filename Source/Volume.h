@@ -42,7 +42,7 @@ struct Volume
 
 		if (this->NormalizeSize)
 		{
-			const Vec3f PhysicalSize = Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) * this->Spacing;
+			const Vec3f PhysicalSize = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * this->Spacing;
 			
 			const float Max = max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
 			Scale = 1.0f / Max;
@@ -55,7 +55,7 @@ struct Volume
 		this->InvSpacing[0]		= 1.0f / Spacing[0];
 		this->InvSpacing[1]		= 1.0f / Spacing[1];
 		this->InvSpacing[2]		= 1.0f / Spacing[2];
-		this->Size				= Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) * this->Spacing;
+		this->Size				= Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * this->Spacing;
 		this->InvSize[0]		= 1.0f / this->Size[0];
 		this->InvSize[1]		= 1.0f / this->Size[1];
 		this->InvSize[2]		= 1.0f / this->Size[2];

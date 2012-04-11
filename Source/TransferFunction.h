@@ -13,45 +13,31 @@
 
 #pragma once
 
-#include "Defines.h"
-#include "Enums.h"
+#include "Vector.h"
 
 namespace ExposureRender
 {
 
+typedef Vec<float, MAX_NO_TF_NODES> NodesVector;
+
 struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 {
-	float	NodeRange[2];
-	float	Position[MAX_NO_TF_NODES];
-	float	Data[MAX_NO_TF_NODES];
-	int		Count;
+	Vec2f			NodeRange;
+	NodesVector		Position;
+	NodesVector		Data;
+	int				Count;
 
 	PiecewiseLinearFunction()
 	{
-		this->NodeRange[0]	= 0.0f;
-		this->NodeRange[1]	= 0.0f;
-
-		for (int i = 0; i < MAX_NO_TF_NODES; i++)
-		{
-			this->Position[i]	= 0.0f;
-			this->Data[i]		= 0.0f;
-		}
-
 		this->Count = 0;
 	}
 
 	PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
 	{
-		this->NodeRange[0] = Other.NodeRange[0];
-		this->NodeRange[1] = Other.NodeRange[1];
-
-		for (int i = 0; i < MAX_NO_TF_NODES; i++)
-		{
-			this->Position[i]	= Other.Position[i];
-			this->Data[i]		= Other.Data[i];
-		}	
-		
-		this->Count = Other.Count;
+		this->NodeRange		= Other.NodeRange;
+		this->Position		= Other.Position;
+		this->Data			= Other.Data;
+		this->Count			= Other.Count;
 
 		return *this;
 	}
