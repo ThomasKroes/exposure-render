@@ -133,32 +133,37 @@ public:
 	}
 };
 
-template <class T> inline HOST_DEVICE ColorRGBAuc operator / (const ColorRGBAuc& V, const T& F)				{ return ColorRGBAuc((float)V[0] / F, (float)V[1] / F, (float)V[2] / F, V[3]);						};
+static inline HOST_DEVICE ColorXYZf operator + (const ColorXYZf& A, const ColorXYZf& B)				{ return ColorXYZf(A[0] + B[0], A[1] + B[1], A[2] + B[2]);						};
+static inline HOST_DEVICE ColorXYZf operator - (const ColorXYZf& A, const ColorXYZf& B)				{ return ColorXYZf(A[0] - B[0], A[1] - B[1], A[2] - B[2]);						};
+static inline HOST_DEVICE ColorXYZf operator * (const ColorXYZf& V, const float& F)					{ return ColorXYZf(V[0] * F, V[1] * F, V[2] * F);								};
+static inline HOST_DEVICE ColorXYZf operator * (const float& F, const ColorXYZf& V)					{ return ColorXYZf(V[0] * F, V[1] * F, V[2] * F);								};
+static inline HOST_DEVICE ColorXYZf operator / (const ColorXYZf& V, const float& F)					{ return ColorXYZf(V[0] / F, V[1] / F, V[2] / F);								};
 
-HOST_DEVICE inline ColorRGBAuc operator * (const float& F, const ColorRGBAuc& XYZ)
-{
-	return ColorRGBAuc((unsigned char)(XYZ[0] * F), (unsigned char)(XYZ[1] * F), (unsigned char)(XYZ[2] * F));
-}
+static inline HOST_DEVICE ColorXYZAf operator + (const ColorXYZAf& A, const ColorXYZAf& B)			{ return ColorXYZAf(A[0] + B[0], A[1] + B[1], A[2] + B[2], A[3] + B[3]);		};
+static inline HOST_DEVICE ColorXYZAf operator - (const ColorXYZAf& A, const ColorXYZAf& B)			{ return ColorXYZAf(A[0] - B[0], A[1] - B[1], A[2] - B[2], A[3] - B[3]);		};
+static inline HOST_DEVICE ColorXYZAf operator * (const ColorXYZAf& V, const float& F)				{ return ColorXYZAf(V[0] * F, V[1] * F, V[2] * F, V[3] * F);					};
+static inline HOST_DEVICE ColorXYZAf operator * (const float& F, const ColorXYZAf& V)				{ return ColorXYZAf(V[0] * F, V[1] * F, V[2] * F, V[3] * F);					};
+static inline HOST_DEVICE ColorXYZAf operator / (const ColorXYZAf& V, const float& F)				{ return ColorXYZAf(V[0] / F, V[1] / F, V[2] / F, V[3] / F);					};
 
-HOST_DEVICE inline ColorRGBAuc operator + (const ColorRGBAuc& A, const ColorRGBAuc& B)
-{
-	return ColorRGBAuc(A[0] + B[0], A[1] + B[1], A[2] + B[2], A[3] + B[3]);
-}
+static inline HOST_DEVICE ColorRGBuc operator + (const ColorRGBuc& A, const ColorRGBuc& B)			{ return ColorRGBuc(A[0] + B[0], A[1] + B[1], A[2] + B[2]);						};
+static inline HOST_DEVICE ColorRGBuc operator - (const ColorRGBuc& A, const ColorRGBuc& B)			{ return ColorRGBuc(A[0] - B[0], A[1] - B[1], A[2] - B[2]);						};
+static inline HOST_DEVICE ColorRGBuc operator * (const ColorRGBuc& V, const unsigned char& C)		{ return ColorRGBuc(V[0] * C, V[1] * C, V[2] * C);								};
+static inline HOST_DEVICE ColorRGBuc operator * (const unsigned char& C, const ColorRGBuc& V)		{ return ColorRGBuc(V[0] * C, V[1] * C, V[2] * C);								};
+static inline HOST_DEVICE ColorRGBuc operator / (const ColorRGBuc& V, const unsigned char& C)		{ return ColorRGBuc(V[0] / C, V[1] / C, V[2] / C);								};
 
-HOST_DEVICE inline ColorXYZf operator * (const float& F, const ColorXYZf& XYZ)
-{
-	return XYZ * F;
-}
+static inline HOST_DEVICE ColorRGBAuc operator + (const ColorRGBAuc& A, const ColorRGBAuc& B)		{ return ColorRGBAuc(A[0] + B[0], A[1] + B[1], A[2] + B[2], A[3] + B[3]);		};
+static inline HOST_DEVICE ColorRGBAuc operator - (const ColorRGBAuc& A, const ColorRGBAuc& B)		{ return ColorRGBAuc(A[0] - B[0], A[1] - B[1], A[2] - B[2], A[3] - B[3]);		};
+static inline HOST_DEVICE ColorRGBAuc operator * (const ColorRGBAuc& V, const unsigned char& C)		{ return ColorRGBAuc(V[0] * C, V[1] * C, V[2] * C, V[3] * C);					};
+static inline HOST_DEVICE ColorRGBAuc operator * (const unsigned char& C, const ColorRGBAuc& V)		{ return ColorRGBAuc(V[0] * C, V[1] * C, V[2] * C, V[3] * C);					};
+static inline HOST_DEVICE ColorRGBAuc operator / (const ColorRGBAuc& V, const unsigned char& C)		{ return ColorRGBAuc(V[0] / C, V[1] / C, V[2] / C, V[3] / C);					};
+
+
+
 
 HOST_DEVICE inline ColorXYZf Lerp(const float& T, const ColorXYZf& C1, const ColorXYZf& C2)
 {
 	const float OneMinusT = 1.0f - T;
 	return ColorXYZf(OneMinusT * C1[0] + T * C2[0], OneMinusT * C1[1] + T * C2[1], OneMinusT * C1[2] + T * C2[2]);
-}
-
-HOST_DEVICE inline ColorXYZAf operator * (const float& F, const ColorXYZAf& XYZA)
-{
-	return XYZA * F;
 }
 
 HOST_DEVICE inline ColorXYZAf Lerp(const float& T, const ColorXYZAf& C1, const ColorXYZAf& C2)

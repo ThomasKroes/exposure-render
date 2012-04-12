@@ -19,6 +19,12 @@
 namespace ExposureRender
 {
 
+template <class T>
+HOST_DEVICE inline float Clamp(const T& Value, const T& Min, const T& Max)
+{
+    return Value < Min ? Min : (Value > Max ? Max : Value);
+}
+
 template<class T, int Size>
 class EXPOSURE_RENDER_DLL Vec
 {
@@ -26,10 +32,10 @@ public:
 	HOST_DEVICE Vec()
 	{
 		for (int i = 0; i < Size; i++)
-			this->D[i] = float();
+			this->D[i] = T();
 	}
 
-	HOST_DEVICE Vec(float V)
+	HOST_DEVICE Vec(const T& V)
 	{
 		for (int i = 0; i < Size; i++)
 			this->D[i] = V;
@@ -49,12 +55,12 @@ public:
 		return *this;
 	}
 
-	HOST_DEVICE float operator[](const int& i) const
+	HOST_DEVICE T operator[](const int& i) const
 	{
 		return this->D[i];
 	}
 
-	HOST_DEVICE float& operator[](const int& i)
+	HOST_DEVICE T& operator[](const int& i)
 	{
 		return this->D[i];
 	}
@@ -95,22 +101,14 @@ public:
 		return *this;
 	}
 
-	HOST_DEVICE Vec<T, Size> operator * (const float& F) const
+	HOST_DEVICE Vec<T, Size> operator * (const Vec<T, Size>& V)
 	{
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = float(this->D[i] * F);
+			Result[i] = this->D[i] * V[i];
 
 		return Result;
-	}
-
-	HOST_DEVICE Vec<T, Size>& operator *= (const float& F)
-	{
-		for (int i = 0; i < Size; i++)
-			this->D[i] *= F;
-
-		return *this;
 	}
 
 	HOST_DEVICE Vec<T, Size>& operator *= (const Vec<T, Size>& V)
@@ -121,26 +119,14 @@ public:
 		return *this;
 	}
 
-	HOST_DEVICE Vec<T, Size> operator / (const float& F) const
+	HOST_DEVICE Vec<T, Size> operator / (const Vec<T, Size>& V)
 	{
-		const float Inv = F == 0.0f ? 0.0f : 1.0f / F;
-
 		Vec<T, Size> Result;
 
 		for (int i = 0; i < Size; i++)
-			Result[i] = this->D[i] * Inv;
+			Result[i] = this->D[i] / V[i];
 
 		return Result;
-	}
-
-	HOST_DEVICE Vec<T, Size>& operator /= (const float& F)
-	{
-		const float Inv = F == 0.0f ? 0.0f : 1.0f / F;
-
-		for (int i = 0; i < Size; i++)
-			this->D[i] *= Inv;
-
-		return *this;
 	}
 
 	HOST_DEVICE Vec<T, Size>& operator /= (const Vec<T, Size>& V)
@@ -220,9 +206,9 @@ public:
 		return false;
 	}
 
-	HOST_DEVICE float Max(void)
+	HOST_DEVICE T Max(void)
 	{
-		float Max;
+		T Max;
 
 		for (int i = 1; i < Size; i++)
 		{
@@ -233,9 +219,9 @@ public:
 		return Max;
 	}
 
-	HOST_DEVICE float Min(void)
+	HOST_DEVICE T Min(void)
 	{
-		float Min;
+		T Min;
 
 		for (int i = 1; i < Size; i++)
 		{
@@ -248,7 +234,7 @@ public:
 
 	HOST_DEVICE Vec<T, Size> Min(const Vec<T, Size>& Other) const
 	{
-		Vec Result;
+		Vec<T, Size> Result;
 		
 		for (int i = 0; i < Size; i++)
 			Result[i] = min(this->D[i], Other[i]);
@@ -258,7 +244,7 @@ public:
 
 	HOST_DEVICE Vec<T, Size> Max(const Vec<T, Size>& Other) const
 	{
-		Vec Result;
+		Vec<T, Size> Result;
 		
 		for (int i = 0; i < Size; i++)
 			Result[i] = max(this->D[i], Other[i]);
@@ -266,20 +252,20 @@ public:
 		return Result;
 	}
 
-	HOST_DEVICE void Clamp(float Min, float Max)
+	HOST_DEVICE void Clamp(const T& Min, const T& Max)
 	{
 		for (int i = 0; i < Size; ++i)
 			this->D[i] = max(Min, min(this->D[i], Max));
 	}
 
-	HOST_DEVICE void Clamp(const Vec& Min, const Vec& Max)
+	HOST_DEVICE void Clamp(const Vec<T, Size>& Min, const Vec<T, Size>& Max)
 	{
 		for (int i = 0; i < Size; ++i)
 			this->D[i] = max(Min[i], min(this->D[i], Max[i]));
 	}
 
 protected:
-	float	D[Size];
+	T	D[Size];
 };
 
 class EXPOSURE_RENDER_DLL Vec2i : public Vec<int, 2>
@@ -290,6 +276,11 @@ public:
 	{
 	}
 	
+	HOST_DEVICE Vec2i(const Vec<int, 2>& V) :
+		Vec<int, 2>(V)
+	{
+	}
+
 	HOST_DEVICE Vec2i(const int& V)
 	{
 		this->D[0] = V;
@@ -301,6 +292,14 @@ public:
 		this->D[0] = V0;
 		this->D[1] = V1;
 	}
+
+	HOST_DEVICE Vec2i& operator = (const Vec2i& Other)
+	{
+		for (int i = 0; i < 2; i++)
+			this->D[i] = Other[i];
+
+		return *this;
+	}
 };
 
 class EXPOSURE_RENDER_DLL Vec2f : public Vec<float, 2>
@@ -311,6 +310,11 @@ public:
 	{
 	}
 
+	HOST_DEVICE Vec2f(const Vec<float, 2>& V) :
+		Vec<float, 2>(V)
+	{
+	}
+		
 	HOST_DEVICE Vec2f(const float& V)
 	{
 		this->D[0] = V;
@@ -321,6 +325,14 @@ public:
 	{
 		this->D[0] = V0;
 		this->D[1] = V1;
+	}
+
+	HOST_DEVICE Vec2f& operator = (const Vec2f& Other)
+	{
+		for (int i = 0; i < 2; i++)
+			this->D[i] = Other[i];
+
+		return *this;
 	}
 
 	HOST_DEVICE float LengthSquared(void) const
@@ -349,6 +361,11 @@ public:
 	{
 	}
 	
+	HOST_DEVICE Vec3i(const Vec<int, 3>& V) :
+		Vec<int, 3>(V)
+	{
+	}
+
 	HOST_DEVICE Vec3i(const int& V)
 	{
 		this->D[0] = V;
@@ -362,6 +379,14 @@ public:
 		this->D[1] = V1;
 		this->D[2] = V2;
 	}
+
+	HOST_DEVICE Vec3i& operator = (const Vec3i& Other)
+	{
+		for (int i = 0; i < 3; i++)
+			this->D[i] = Other[i];
+
+		return *this;
+	}
 };
 
 class EXPOSURE_RENDER_DLL Vec3f : public Vec<float, 3>
@@ -370,6 +395,16 @@ public:
 	HOST_DEVICE Vec3f() :
 		Vec<float, 3>()
 	{
+	}
+
+	HOST_DEVICE Vec3f(const Vec<float, 3>& V) :
+		Vec<float, 3>(V)
+	{
+	}
+
+	HOST_DEVICE Vec3f(const Vec3f& Other)
+	{
+		*this = Other;
 	}
 
 	HOST_DEVICE Vec3f(const float& V)
@@ -384,6 +419,14 @@ public:
 		this->D[0] = V0;
 		this->D[1] = V1;
 		this->D[2] = V2;
+	}
+
+	HOST_DEVICE Vec3f& operator = (const Vec3f& Other)
+	{
+		for (int i = 0; i < 3; i++)
+			this->D[i] = Other[i];
+
+		return *this;
 	}
 
 	HOST_DEVICE float LengthSquared(void) const
@@ -422,49 +465,62 @@ public:
 	}
 };
 
+static inline HOST_DEVICE Vec2i operator + (const Vec2i& A, const Vec2i& B)					{ return Vec2i(A[0] + B[0], A[1] + B[1]);						};
+static inline HOST_DEVICE Vec2i operator - (const Vec2i& A, const Vec2i& B)					{ return Vec2i(A[0] - B[0], A[1] - B[1]);						};
+static inline HOST_DEVICE Vec2i operator * (const Vec2i& V, const int& I)					{ return Vec2i(V[0] * I, V[1] * I);								};
+static inline HOST_DEVICE Vec2i operator * (const int& I, const Vec2i& V)					{ return Vec2i(V[0] * I, V[1] * I);								};
+static inline HOST_DEVICE Vec2i operator * (const Vec2i& A, const Vec2i& B)					{ return Vec2i(A[0] * B[0], A[1] * B[1]);						};
+static inline HOST_DEVICE Vec2i operator / (const Vec2i& V, const int& I)					{ return Vec2i(V[0] / I, V[1] / I);								};
+static inline HOST_DEVICE Vec2i operator / (const Vec2i& A, const Vec2i& B)					{ return Vec2i(A[0] / B[0], A[1] / B[1]);						};
 
+static inline HOST_DEVICE Vec2f operator + (const Vec2f& A, const Vec2f& B)					{ return Vec2f(A[0] + B[0], A[1] + B[1]);						};
+static inline HOST_DEVICE Vec2f operator - (const Vec2f& A, const Vec2f& B)					{ return Vec2f(A[0] - B[0], A[1] - B[1]);						};
+static inline HOST_DEVICE Vec2f operator * (const Vec2f& V, const float& F)					{ return Vec2f(V[0] * F, V[1] * F);								};
+static inline HOST_DEVICE Vec2f operator * (const float& F, const Vec2f& V)					{ return Vec2f(V[0] * F, V[1] * F);								};
+static inline HOST_DEVICE Vec2f operator * (const Vec2f& A, const Vec2f& B)					{ return Vec2f(A[0] * B[0], A[1] * B[1]);						};
+static inline HOST_DEVICE Vec2f operator / (const Vec2f& V, const float& F)					{ return Vec2f(V[0] / F, V[1] / F);								};
+static inline HOST_DEVICE Vec2f operator / (const Vec2f& A, const Vec2f& B)					{ return Vec2f(A[0] / B[0], A[1] / B[1]);						};
 
+static inline HOST_DEVICE Vec2f Normalize(const Vec2f& V)									{ Vec2f R = V; R.Normalize(); return R; 						};
+static inline HOST_DEVICE float Length(const Vec2f& V)										{ return V.Length();											};
 
 /*
-
-template <class T> inline HOST_DEVICE Vec2<T> operator + (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] + B[0], A[1] + B[1]);							};
-template <class T> inline HOST_DEVICE Vec2<T> operator - (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] - B[0], A[1] - B[1]);							};
-template <class T> inline HOST_DEVICE Vec2<T> operator * (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] * F, V[1] * F);								};
-template <class T> inline HOST_DEVICE Vec2<T> operator * (T F, Vec2<T> V)							{ return Vec2<T>(V[0] * F, V[1] * F);								};
-template <class T> inline HOST_DEVICE Vec2<T> operator * (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] * B[0], A[1] * B[1]);							};
-template <class T> inline HOST_DEVICE Vec2<T> operator / (const Vec2<T>& V, const T& F)				{ return Vec2<T>(V[0] / F, V[1] / F);								};
-template <class T> inline HOST_DEVICE Vec2<T> operator / (const Vec2<T>& A, const Vec2<T>& B)		{ return Vec2<T>(A[0] / B[0], A[1] / B[1]);							};
-
-template <class T> inline HOST_DEVICE Vec3<T> operator + (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] + V3[0], V1[1] + V3[1], V1[2] + V3[2]);		};
-template <class T> inline HOST_DEVICE Vec3<T> operator - (const Vec3<T>& V1, const Vec3<T>& V3)		{ return Vec3<T>(V1[0] - V3[0], V1[1] - V3[1], V1[2] - V3[2]);		};
-template <class T> inline HOST_DEVICE Vec3<T> operator * (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
-template <class T> inline HOST_DEVICE Vec3<T> operator * (T F, Vec3<T> V)							{ return Vec3<T>(V[0] * F, V[1] * F, V[2] * F);						};
-template <class T> inline HOST_DEVICE Vec3<T> operator * (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] * B[0], A[1] * B[1], A[2] * B[2]);			};
-template <class T> inline HOST_DEVICE Vec3<T> operator / (const Vec3<T>& V, const T& F)				{ return Vec3<T>(V[0] / F, V[1] / F, V[2] / F);						};
-template <class T> inline HOST_DEVICE Vec3<T> operator / (const Vec3<T>& A, const Vec3<T>& B)		{ return Vec3<T>(A[0] / B[0], A[1] / B[1], A[2] / B[2]);			};
-
-template <class T> HOST_DEVICE inline Vec2<T> Normalize(Vec2<T> V)									{ Vec2<T> R = V; R.Normalize(); return R; 							};
-template <class T> HOST_DEVICE inline Vec3<T> Normalize(Vec3<T> V)									{ Vec3<T> R = V; R.Normalize(); return R; 							};
+static inline HOST_DEVICE Vec2f Cross(const Vec2f& A, const Vec2f& B)						{ return A.Cross(B);											};
+static inline HOST_DEVICE float Dot(const Vec2f& A, const Vec2f& B)							{ return A.Dot(B);												};
+static inline HOST_DEVICE float AbsDot(const Vec2f& A, const Vec2f& B)						{ return fabs(A.Dot(B));										};
+static inline HOST_DEVICE float ClampedAbsDot(const Vec2f& A, const Vec2f& B)				{ return Clamp(fabs(A.Dot(B)), 0.0f, 1.0f);						};
+static inline HOST_DEVICE float ClampedDot(const Vec2f& A, const Vec2f& B)					{ return Clamp(Dot(A, B), 0.0f, 1.0f);							};
 */
 
-template <class T>
-HOST_DEVICE inline float Clamp(const T& Value, const T& Min, const T& Max)
-{
-    return Value < Min ? Min : (Value > Max ? Max : Value);
-}
+static inline HOST_DEVICE float Distance(const Vec2f& A, const Vec2f& B)					{ return (A - B).Length();										};
+static inline HOST_DEVICE float DistanceSquared(const Vec2f& A, const Vec2f& B)				{ return (A - B).LengthSquared();								};
+static inline HOST_DEVICE Vec2f Lerp(const Vec2f& A, const Vec2f& B, const float& LerpC)	{ return A + LerpC * (B - A);									};
 
+static inline HOST_DEVICE Vec3i operator + (const Vec3i& A, const Vec3i& B)					{ return Vec3i(A[0] + B[0], A[1] + B[1], A[2] + B[2]);			};
+static inline HOST_DEVICE Vec3i operator - (const Vec3i& A, const Vec3i& B)					{ return Vec3i(A[0] - B[0], A[1] - B[1], A[2] - B[2]);			};
+static inline HOST_DEVICE Vec3i operator * (const Vec3i& V, const int& I)					{ return Vec3i(V[0] * I, V[1] * I, V[2] * I);					};
+static inline HOST_DEVICE Vec3i operator * (const int& I, const Vec3i& V)					{ return Vec3i(V[0] * I, V[1] * I, V[2] * I);					};
+static inline HOST_DEVICE Vec3i operator * (const Vec3i& A, const Vec3i& B)					{ return Vec3i(A[0] * B[0], A[1] * B[1], A[2] * B[2]);			};
+static inline HOST_DEVICE Vec3i operator / (const Vec3i& V, const int& I)					{ return Vec3i(V[0] / I, V[1] / I, V[2] / I);					};
+static inline HOST_DEVICE Vec3i operator / (const Vec3i& A, const Vec3i& B)					{ return Vec3i(A[0] / B[0], A[1] / B[1], A[2] / B[2]);			};
 
+static inline HOST_DEVICE Vec3f operator + (const Vec3f& A, const Vec3f& B)					{ return Vec3f(A[0] + B[0], A[1] + B[1], A[2] + B[2]);			};
+static inline HOST_DEVICE Vec3f operator - (const Vec3f& A, const Vec3f& B)					{ return Vec3f(A[0] - B[0], A[1] - B[1], A[2] - B[2]);			};
+static inline HOST_DEVICE Vec3f operator * (const Vec3f& V, const float& F)					{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);					};
+static inline HOST_DEVICE Vec3f operator * (const float& F, const Vec3f& V)					{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);					};
+static inline HOST_DEVICE Vec3f operator * (const Vec3f& A, const Vec3f& B)					{ return Vec3f(A[0] * B[0], A[1] * B[1], A[2] * B[2]);			};
+static inline HOST_DEVICE Vec3f operator / (const Vec3f& V, const float& F)					{ return Vec3f(V[0] / F, V[1] / F, V[2] / F);					};
+static inline HOST_DEVICE Vec3f operator / (const Vec3f& A, const Vec3f& B)					{ return Vec3f(A[0] / B[0], A[1] / B[1], A[2] / B[2]);			};
 
-HOST_DEVICE inline float Length(const Vec3f& V)										{ return V.Length();						};
-
-HOST_DEVICE inline Vec3f Cross(Vec3f A, Vec3f B)									{ return A.Cross(B);						};
-HOST_DEVICE inline float Dot(Vec3f A, Vec3f B)										{ return A.Dot(B);							};
-HOST_DEVICE inline float AbsDot(Vec3f A, Vec3f B)									{ return fabs(A.Dot(B));					};
-HOST_DEVICE inline float ClampedAbsDot(Vec3f A, Vec3f B)							{ return Clamp(fabs(A.Dot(B)), 0.0f, 1.0f);	};
-HOST_DEVICE inline float ClampedDot(Vec3f A, Vec3f B)								{ return Clamp(Dot(A, B), 0.0f, 1.0f);		};
-HOST_DEVICE inline float Distance(Vec3f A, Vec3f B)									{ return (A - B).Length();					};
-HOST_DEVICE inline float DistanceSquared(Vec3f A, Vec3f B)							{ return (A - B).LengthSquared();			};
-
-HOST_DEVICE inline Vec3f Lerp(Vec3f A, Vec3f B, float T)							{ return A + T * (B - A);					};
+static inline HOST_DEVICE Vec3f Normalize(const Vec3f& V)									{ Vec3f R = V; R.Normalize(); return R; 						};
+static inline HOST_DEVICE float Length(const Vec3f& V)										{ return V.Length();											};
+static inline HOST_DEVICE Vec3f Cross(const Vec3f& A, const Vec3f& B)						{ return A.Cross(B);											};
+static inline HOST_DEVICE float Dot(const Vec3f& A, const Vec3f& B)							{ return A.Dot(B);												};
+static inline HOST_DEVICE float AbsDot(const Vec3f& A, const Vec3f& B)						{ return fabs(A.Dot(B));										};
+static inline HOST_DEVICE float ClampedAbsDot(const Vec3f& A, const Vec3f& B)				{ return Clamp(fabs(A.Dot(B)), 0.0f, 1.0f);						};
+static inline HOST_DEVICE float ClampedDot(const Vec3f& A, const Vec3f& B)					{ return Clamp(Dot(A, B), 0.0f, 1.0f);							};
+static inline HOST_DEVICE float Distance(const Vec3f& A, const Vec3f& B)					{ return (A - B).Length();										};
+static inline HOST_DEVICE float DistanceSquared(const Vec3f& A, const Vec3f& B)				{ return (A - B).LengthSquared();								};
+static inline HOST_DEVICE Vec3f Lerp(const Vec3f& A, const Vec3f& B, const float& LerpC)	{ return A + LerpC * (B - A);									};
 
 }

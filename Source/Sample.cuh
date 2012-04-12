@@ -252,7 +252,6 @@ struct MetroSample
 	{
 		this->LightingSample.LargeStep(RNG);
 		this->CameraSample.LargeStep(RNG);
-		this->OldL.Set(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 	DEVICE MetroSample Mutate(CRNG& RNG)

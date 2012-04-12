@@ -129,7 +129,7 @@ SET(ErAPI
 	Enums.h
 	CudaUtilities.h
 	Color.h
-	Test.cpp
+	ExposureRender.cpp
 )
 
 # API group
