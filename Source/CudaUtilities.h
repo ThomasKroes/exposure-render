@@ -220,12 +220,7 @@ struct List
 		this->Count = 0;
 	}
 
-	HOST_DEVICE T operator[](const int& i) const
-	{
-		return this->Items[i];
-	}
-
-	HOST_DEVICE T& operator[](const int& i)
+	HOST_DEVICE const T& Get(const int& i)
 	{
 		return this->Items[i];
 	}

@@ -23,24 +23,15 @@ DEVICE_NI ColorXYZf EvaluateBitmap(const Bitmap& Bitmap, const int& U, const int
 	if (Bitmap.pData == NULL)
 		return ColorXYZf(0.0f);
 
-	Vec4uc& ColorRGBA = Bitmap.pData[V * Image.Size[0] + U];
-	ColorXYZf L;
-	L.FromRGB(ONE_OVER_255 * (float)ColorRGBA.Data[0], ONE_OVER_255 * (float)ColorRGBA.Data[1], ONE_OVER_255 * (float)ColorRGBA.Data[2]);
-
-	return L;
+	return ColorXYZf(Bitmap.pData[V * Bitmap.Size[0] + U]);
 }
 
 DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f& UVW)
 {
-	ColorXYZf L;
-
 	switch (Procedural.Type)
 	{
 		case Enums::Uniform:
-		{
-			L.FromRGB(Procedural.UniformColor[0], Procedural.UniformColor[1], Procedural.UniformColor[2]);
-			break;
-		}
+			return ColorXYZf(Procedural.UniformColor[0]);
 
 		case Enums::Checker:
 		{
@@ -53,33 +44,29 @@ DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f
 			if (UV[0] % 2 == 0)
 			{
 				if (UV[1] % 2 == 0)
-					L.FromRGB(Procedural.CheckerColor1[0], Procedural.CheckerColor1[1], Procedural.CheckerColor1[2]);
+					return ColorXYZf(Procedural.CheckerColor1);
 				else
-					L.FromRGB(Procedural.CheckerColor2[0], Procedural.CheckerColor2[1], Procedural.CheckerColor2[2]);
+					return ColorXYZf(Procedural.CheckerColor2);
 			}
 			else
 			{
 				if (UV[1] % 2 == 0)
-					L.FromRGB(Procedural.CheckerColor2[0], Procedural.CheckerColor2[1], Procedural.CheckerColor2[2]);
+					return ColorXYZf(Procedural.CheckerColor2);
 				else
-					L.FromRGB(Procedural.CheckerColor1[0], Procedural.CheckerColor1[1], Procedural.CheckerColor1[2]);
+					return ColorXYZf(Procedural.CheckerColor1);
 			}
-
-			break;
 		}
 
 		case Enums::Gradient:
-		{
-			break;
-		}
+			return EvaluateColorTransferFunction(Procedural.Gradient, UVW[1]);
 	}
 
-	return L;
+	return SPEC_BLACK;
 }
 
 DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 {
-	Texture& T = pTextures[ID];
+	const Texture& T = gpTextures->Get(ID);
 
 	ColorXYZf L;
 
@@ -94,8 +81,8 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 	TextureUV[0] = TextureUV[0] - floorf(TextureUV[0]);
 	TextureUV[1] = TextureUV[1] - floorf(TextureUV[1]);
 
-	TextureUV[0] = clamp(TextureUV[0], 0.0f, 1.0f);
-	TextureUV[1] = clamp(TextureUV[1], 0.0f, 1.0f);
+	TextureUV[0] = Clamp(TextureUV[0], 0.0f, 1.0f);
+	TextureUV[1] = Clamp(TextureUV[1], 0.0f, 1.0f);
 
 	if (T.Flip[0])
 		TextureUV[0] = 1.0f - TextureUV[0];

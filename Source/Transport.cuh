@@ -17,6 +17,7 @@
 #include "Light.cuh"
 #include "Object.cuh"
 #include "Shader.cuh"
+#include "Texture.cuh"
 
 namespace ExposureRender
 {
@@ -39,19 +40,19 @@ DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 
 DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 {
-	if (!GetTracer().RenderSettings.Traversal.Shadows)
+	if (!gpTracer->RenderSettings.Traversal.Shadows)
 		return true;
 
 	Vec3f W = Normalize(P2 - P1);
 
-	const Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, GetTracer().RenderSettings.Traversal.MaxShadowDistance));
+	const Ray R(P1 + W * RAY_EPS, W, 0.0f, min((P2 - P1).Length() - RAY_EPS_2, gpTracer->RenderSettings.Traversal.MaxShadowDistance));
 
 	return !Intersect(R, RNG);
 }
 
 DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
 {
-	Light& Light = GetLights().Get(LightID);
+	const Light& Light = gpLights->Get(LightID);
 
 	Vec3f Wi;
 
@@ -60,13 +61,13 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 	SurfaceSample SS;
 
-	Light.Sample(LS.LightSample, SS, SE, Wi, Li);
+	SampleLight(Light, LS.LightSample, SS, SE, Wi, Li);
 
 	ColorXYZf F = Shader.F(SE.Wo, Wi);
 	
 	float BsdfPdf = Shader.Pdf(SE.Wo, Wi);
 
-	if (!Li.IsBlack() && !F.IsBlack() && BsdfPdf > 0.0f && Visible(SE.P, SS.P, RNG))
+	if (!Li.AllZero() && !F.AllZero() && BsdfPdf > 0.0f && Visible(SE.P, SS.P, RNG))
 	{
 		const float LightPdf = DistanceSquared(SE.P, SS.P) / (AbsDot(SS.N, -Wi) * Light.Shape.Area);
 
@@ -80,7 +81,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 	F = Shader.SampleF(SE.Wo, Wi, BsdfPdf, LS.BrdfSample);
 
-	if (F.IsBlack() || BsdfPdf <= 0.0f)
+	if (F.AllZero() || BsdfPdf <= 0.0f)
 		return Ld;
 	
 	ScatterEvent SE2(ScatterEvent::Light);
@@ -92,7 +93,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 	Li = SE2.Le;
 
-	if (!Li.IsBlack() && Visible(SE.P, SE2.P, RNG))
+	if (!Li.AllZero() && Visible(SE.P, SE2.P, RNG))
 	{
 		const float LightPdf = DistanceSquared(SE.P, SE2.P) / (AbsDot(SE.N, -Wi) * Light.Shape.Area);
 
@@ -114,12 +115,12 @@ DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
 
 DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture2D(GetObjects().Get(SE.ObjectID).DiffuseTextureID, SE.UV), EvaluateTexture2D(GetObjects().Get(SE.ObjectID).SpecularTextureID, SE.UV), 10.0f, GlossinessExponent(EvaluateTexture2D(GetObjects().Get(SE.ObjectID).GlossinessTextureID, SE.UV).Y()));
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture(gpObjects->Get(SE.ObjectID).DiffuseTextureID, SE.UV), EvaluateTexture(gpObjects->Get(SE.ObjectID).SpecularTextureID, SE.UV), 10.0f, 100.0f);//GlossinessExponent(EvaluateTexture(gpObjects->Get(SE.ObjectID).GlossinessTextureID, SE.UV).Y()));
 }
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
-	if (GetLights().Count <= 0)
+	if (gpLights->Count <= 0)
 		return ColorXYZf(0.0f);
 
 	VolumeShader Shader;
@@ -139,7 +140,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 			break;
 	}
 
-	const int LightID = floorf(LS.LightNum * GetLights().Count);
+	const int LightID = floorf(LS.LightNum * gpLights->Count);
 
 	ColorXYZf Ld;
 	
@@ -148,7 +149,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	for (int i = 0; i < NoSamples; i++)
 		Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID) / (float)NoSamples;
 
-	return (float)GetLights().Count * (Ld / (float)NoSamples);
+	return (float)gpLights->Count * (Ld / (float)NoSamples);
 }
 
 }

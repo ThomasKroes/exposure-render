@@ -14,6 +14,7 @@
 #pragma once
 
 #include "Vector.h"
+#include "Color.h"
 
 #if defined (__CUDA_ARCH__)
 	#include "CudaUtilities.h"
@@ -22,13 +23,11 @@
 namespace ExposureRender
 {
 
-typedef Vec<unsigned char, 4> Vec4uc;
-
 struct EXPOSURE_RENDER_DLL Bitmap
 {
-	Vec4uc*		pData;
-	Vec2i		Size;
-	bool		Dirty;
+	ColorRGBAuc*	pData;
+	Vec2i			Size;
+	bool			Dirty;
 
 	Bitmap()
 	{

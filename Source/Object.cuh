@@ -20,11 +20,12 @@ namespace ExposureRender
 
 DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 {
+	/*
 	float T = FLT_MAX;
 
-	for (int i = 0; i < gpObjects.Count; i++)
+	for (int i = 0; i < gpObjects->Count; i++)
 	{
-		Object& Object = gpObjects.Get(i);
+		const Object& Object = gpObjects->Get(i);
 
 		ScatterEvent LocalRS(ScatterEvent::Object);
 
@@ -38,16 +39,19 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 			T = LocalRS.T;
 		}
 	}
+	*/
 }
 
 DEVICE_NI bool IntersectsObject(const Ray& R)
 {
-	for (int i = 0; i < gpObjects.Count; i++)
+	/*
+	for (int i = 0; i < gpObjects->Count; i++)
 	{
-		if (gpObjects.Get(i).Intersects(R))
+		if (gpObjects->Get(i).Intersects(R))
 			return true;
 	}
-
+	*/
+	
 	return false;
 }
 

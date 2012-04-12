@@ -221,7 +221,7 @@ struct ScatterEvent
 	{
 	}
 
-	HOST_DEVICE ScatterEvent(SampleType Type)
+	HOST_DEVICE ScatterEvent(const SampleType& Type)
 	{
 		this->Type = Type;
 		this->SetInvalid();

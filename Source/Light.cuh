@@ -18,13 +18,22 @@
 namespace ExposureRender
 {
 
+DEVICE_NI void IntersectLight()
+{
+}
+
+DEVICE_NI void IntersectsLight()
+{
+}
+
 DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
 {
+	/*
 	float T = FLT_MAX; 
 
 	for (int i = 0; i < gpLights->Count; i++)
 	{
-		Light& Light = gpLights->Get(i);
+		const Light& Light = gpLights->Get(i);
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 
@@ -33,7 +42,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 		if (RespectVisibility && !Light.Visible)
 			continue;
 
-		Light.Intersect(R, LocalRS);
+		Intersect(R, LocalRS);
 
 		if (LocalRS.Valid && LocalRS.T < T)
 		{
@@ -41,15 +50,18 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 			T = LocalRS.T;
 		}
 	}
+	*/
 }
 
 DEVICE_NI bool IntersectsLight(const Ray& R)
 {
+	/*
 	for (int i = 0; i < gpLights->Count; i++)
 	{
 		if (gpLights->Get(i).Intersects(R))
 			return true;
 	}
+	*/
 
 	return false;
 }

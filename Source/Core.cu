@@ -34,7 +34,7 @@ DEVICE ExposureRender::Tracer* gpTracer = NULL;
 #include "Utilities.cuh"
 
 #include "TransferFunction.cuh"
-
+#include "SingleScattering.cuh"
 /*
 
 #include "GaussianFilter.cuh"
@@ -42,7 +42,7 @@ DEVICE ExposureRender::Tracer* gpTracer = NULL;
 #include "MedianFilter.cuh"
 #include "Estimate.cuh"
 
-#include "SingleScattering.cuh"
+
 #include "ToneMap.cuh"
 #include "GradientMagnitude.cuh"
 #include "AutoFocus.cuh"

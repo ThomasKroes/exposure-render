@@ -14,6 +14,7 @@
 #pragma once
 
 #include "TransferFunction.h"
+#include "Color.h"
 
 namespace ExposureRender
 {
@@ -40,12 +41,12 @@ DEVICE_NI float EvaluatePLF(const PiecewiseLinearFunction& PLF, const float& Int
 	return 0.0f;
 }
 
-DEVICE_NI float EvaluateScalarTranserFunction(const ScalarTransferFunction1D& STF, const float& Intensity)
+DEVICE_NI float EvaluateScalarTransferFunction(const ScalarTransferFunction1D& STF, const float& Intensity)
 {
 	return EvaluatePLF(STF.PLF[0], Intensity);
 }
 
-DEVICE_NI ColorXYZf EvaluateColorTranserFunction(const ColorTransferFunction1D& CTF, const float& Intensity)
+DEVICE_NI ColorXYZf EvaluateColorTransferFunction(const ColorTransferFunction1D& CTF, const float& Intensity)
 {
 	return ColorXYZf(EvaluatePLF(CTF.PLF[0], Intensity), EvaluatePLF(CTF.PLF[1], Intensity), EvaluatePLF(CTF.PLF[2], Intensity));
 }

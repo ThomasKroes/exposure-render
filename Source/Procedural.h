@@ -22,9 +22,9 @@ namespace ExposureRender
 struct EXPOSURE_RENDER_DLL Procedural
 {
 	Enums::ProceduralType		Type;
-	Vec3f						UniformColor;
-	Vec3f						CheckerColor1;
-	Vec3f						CheckerColor2;
+	ColorXYZf					UniformColor;
+	ColorXYZf					CheckerColor1;
+	ColorXYZf					CheckerColor2;
 	ColorTransferFunction1D		Gradient;
 
 	Procedural()

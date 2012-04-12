@@ -14,6 +14,7 @@
 #pragma once
 
 #include "Transport.cuh"
+#include "Camera.cuh"
 
 namespace ExposureRender
 {
@@ -51,12 +52,12 @@ KERNEL void KrnlSingleScattering()
 	const int X = blockIdx.x * blockDim.x + threadIdx.x;
 	const int Y = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (X >= GetTracer().FrameBuffer.Resolution[0] || Y >= GetTracer().FrameBuffer.Resolution[1])
+	if (X >= gpTracer->FrameBuffer.Resolution[0] || Y >= gpTracer->FrameBuffer.Resolution[1])
 		return;
 	
 	return;
 
-	CRNG RNG(GetTracer().FrameBuffer.CudaRandomSeeds1.GetPtr(X, Y), GetTracer().FrameBuffer.CudaRandomSeeds2.GetPtr(X, Y));
+	CRNG RNG(gpTracer->FrameBuffer.CudaRandomSeeds1.GetPtr(X, Y), gpTracer->FrameBuffer.CudaRandomSeeds2.GetPtr(X, Y));
 
 	ColorXYZf Lv = SPEC_BLACK;
 
@@ -66,16 +67,16 @@ KERNEL void KrnlSingleScattering()
 
 	Ray Rc;
 
-	GetTracer().Camera.Sample(Rc, Sample.CameraSample);
+	SampleCamera(gpTracer->Camera, Rc, Sample.CameraSample);
 
 	Intersection Int;
 
-	IntersectBox(Rc, GetVolumes().Get(GetTracer().VolumeIDs[0]).MinAABB, GetVolumes().Get(GetTracer().VolumeIDs[0]).MaxAABB, Int);
+	IntersectBox(Rc, gpVolumes->Get(0).MinAABB, gpVolumes->Get(0).MaxAABB, Int);
 
 	if (Int.Valid)
-		GetTracer().FrameBuffer.CudaFrameEstimate.Set(ColorXYZf(1.0f), X, Y);
+		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(1.0f), X, Y);
 	else
-		GetTracer().FrameBuffer.CudaFrameEstimate.Set(ColorXYZf(0.0f), X, Y);
+		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(0.0f), X, Y);
 
 	/*
 	SE = SampleRay(Rc, RNG);
@@ -91,7 +92,7 @@ KERNEL void KrnlSingleScattering()
 
 	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
 
-	GetTracer().FrameBuffer.CudaFrameEstimate.Set(L, X, Y);
+	gpTracer->FrameBuffer.CudaFrameEstimate.Set(L, X, Y);
 	*/
 }
 
