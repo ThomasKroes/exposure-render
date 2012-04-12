@@ -57,7 +57,7 @@ struct SurfaceSample
 
 	DEVICE SurfaceSample(void)
 	{
-		this->P		= Vec3f(0.0f);
+		this->P		= Vec3f();
 		this->N		= Vec3f(0.0f, 0.0f, 1.0f);
 		this->UV	= Vec2f(0.0f);
 	}
@@ -78,7 +78,7 @@ struct LightSample
 
 	DEVICE LightSample(void)
 	{
-		this->SurfaceUVW = Vec3f(0.0f);
+		this->SurfaceUVW = Vec3f();
 	}
 
 	DEVICE LightSample(CRNG& RNG)

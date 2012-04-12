@@ -242,9 +242,9 @@ struct ScatterEvent
 	{
 		this->Valid		= false;
 		this->T			= 0.0f;
-		this->P			= Vec3f(0.0f);
-		this->N			= Vec3f(0.0f);
-		this->Wo		= Vec3f(0.0f);
+		this->P			= Vec3f();
+		this->N			= Vec3f();
+		this->Wo		= Vec3f();
 		this->Le		= ColorXYZf(0.0f);
 		this->UV		= Vec2f(0.0f);
 	}
@@ -296,8 +296,8 @@ struct Intersection
 		this->Front		= true;
 		this->NearT		= 0.0f;
 		this->FarT		= FLT_MAX;
-		this->P			= Vec3f(0.0f);
-		this->N			= Vec3f(0.0f);
+		this->P			= Vec3f();
+		this->N			= Vec3f();
 		this->UV		= Vec2f(0.0f);
 	}
 
