@@ -57,7 +57,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 	Vec3f Wi;
 
 	// Incident radiance (Li), direct light (Ld)
-	ColorXYZf Li = SPEC_BLACK, Ld = SPEC_BLACK;
+	ColorXYZf Li = ColorXYZf::Black(), Ld = ColorXYZf::Black();
 
 	SurfaceSample SS;
 
@@ -67,7 +67,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 	
 	float BsdfPdf = Shader.Pdf(SE.Wo, Wi);
 
-	if (!Li.AllZero() && !F.AllZero() && BsdfPdf > 0.0f && Visible(SE.P, SS.P, RNG))
+	if (!Li.IsBlack() && !F.IsBlack() && BsdfPdf > 0.0f && Visible(SE.P, SS.P, RNG))
 	{
 		const float LightPdf = DistanceSquared(SE.P, SS.P) / (AbsDot(SS.N, -Wi) * Light.Shape.Area);
 
@@ -81,7 +81,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 	F = Shader.SampleF(SE.Wo, Wi, BsdfPdf, LS.BrdfSample);
 
-	if (F.AllZero() || BsdfPdf <= 0.0f)
+	if (F.IsBlack() || BsdfPdf <= 0.0f)
 		return Ld;
 	
 	ScatterEvent SE2(ScatterEvent::Light);
@@ -93,7 +93,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 
 	Li = SE2.Le;
 
-	if (!Li.AllZero() && Visible(SE.P, SE2.P, RNG))
+	if (!Li.IsBlack() && Visible(SE.P, SE2.P, RNG))
 	{
 		const float LightPdf = DistanceSquared(SE.P, SE2.P) / (AbsDot(SE.N, -Wi) * Light.Shape.Area);
 

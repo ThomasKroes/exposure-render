@@ -226,7 +226,7 @@ struct Microfacet
 		this->Blinn.SampleF(Wo, Wi, Pdf, U);
 
 		if (!SameHemisphere(Wo, Wi))
-			return SPEC_BLACK;
+			return ColorXYZf::Black();
 
 		return this->F(Wo, Wi);
 	}

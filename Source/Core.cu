@@ -63,7 +63,7 @@ std::map<int, Tracer> gTracers;
 
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2])
 {
-	gTracers[TracerID].FrameBuffer.Resize(Resolution2i(Size));
+	gTracers[TracerID].FrameBuffer.Resize(Resolution2i(Size[0], Size[1]));
 //	gTracers.Synchronize();
 
 //	CTF.PLF[0].Position[0] = 0.0f;

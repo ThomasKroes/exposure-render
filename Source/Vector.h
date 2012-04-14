@@ -19,373 +19,409 @@
 namespace ExposureRender
 {
 
-
 template <class T>
-HOST_DEVICE inline float Clamp(const T& Value, const T& Min, const T& Max)
+HOST_DEVICE inline T Clamp(const T& Value, const T& Min, const T& Max)
 {
     return Value < Min ? Min : (Value > Max ? Max : Value);
 }
 
-#define DATA(type, size)										\
-protected:														\
-	type	D[size];
+#define DATA(type, size)																	\
+protected:																					\
+	type	D[size];																		\
 
-#define DEFAULT_CONSTRUCTOR(classname, size)					\
-HOST_DEVICE classname()											\
-{																\
-	for (int i = 0; i < Size; i++)								\
-		this->D[i] = 0;											\
+
+#define DEFAULT_CONSTRUCTOR(classname, size)												\
+HOST_DEVICE classname()																		\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] = 0;																		\
 }
 	
-#define COPY_CONSTRUCTOR(classname, size)						\
-HOST_DEVICE classname(const classname& Other)					\
-{																\
-	for (int i = 0; i < Size; i++)								\
-		this->D[i] = Other[i];									\
+#define COPY_CONSTRUCTOR(classname, size)													\
+HOST_DEVICE classname(const classname& Other)												\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] = Other[i];																\
 }
 
-#define GENERIC_CONSTRUCTOR(classname, type, size)				\
-HOST_DEVICE classname(const type& V)							\
-{																\
-	for (int i = 0; i < Size; i++)								\
-		this->D[i] = V;											\
+#define GENERIC_CONSTRUCTOR(classname, type, size)											\
+HOST_DEVICE classname(const type& V)														\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] = V;																		\
 }
 
-#define ARRAY_CONSTRUCTOR(classname, type, size)				\
-HOST_DEVICE classname(const type V[size])						\
-{																\
-	for (int i = 0; i < Size; i++)								\
-		this->D[i] = V[i];										\
+#define ARRAY_CONSTRUCTOR(classname, type, size)											\
+HOST_DEVICE classname(const type V[size])													\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] = V[i];																	\
 }
 
-#define CONSTRUCTORS(classname, type, size)						\
-DEFAULT_CONSTRUCTOR(classname, size)							\
-COPY_CONSTRUCTOR(classname, size)								\
-GENERIC_CONSTRUCTOR(classname, type, size)						\
-ARRAY_CONSTRUCTOR(classname, type, size)						
-
-#define OPERATOR_SUBSCRIPT(type)								\
-HOST_DEVICE type operator[](const int& i) const					\
-{																\
-	return this->D[i];											\
+#define VEC2_CONSTRUCTOR(classname, type)													\
+HOST_DEVICE classname(const type& V1, const type& V2)										\
+{																							\
+	this->D[0] = V1;																		\
+	this->D[1] = V2;																		\
 }
 
-#define OPERATOR_SUBSCRIPT_REF(type)							\
-HOST_DEVICE type& operator[](const int& i)						\
-{																\
-	return this->D[i];											\
+#define VEC3_CONSTRUCTOR(classname, type)													\
+HOST_DEVICE classname(const type& V1, const type& V2, const type& V3)						\
+{																							\
+	this->D[0] = V1;																		\
+	this->D[1] = V2;																		\
+	this->D[2] = V3;																		\
 }
 
-#define OPERATOR_ASS(classname, size)							\
-HOST_DEVICE classname& operator = (const classname& Other)		\
-{																\
-	for (int i = 0; i < Size; i++)								\
-		this->D[i] = Other[i];									\
-																\
-	return *this;												\
+#define VEC4_CONSTRUCTOR(classname, type)													\
+HOST_DEVICE classname(const type& V1, const type& V2, const type& V3, const type& V4)		\
+{																							\
+	this->D[0] = V1;																		\
+	this->D[1] = V2;																		\
+	this->D[2] = V3;																		\
+	this->D[3] = V4;																		\
+}
+
+#define CONSTRUCTORS(classname, type, size)													\
+DEFAULT_CONSTRUCTOR(classname, size)														\
+COPY_CONSTRUCTOR(classname, size)															\
+GENERIC_CONSTRUCTOR(classname, type, size)													\
+ARRAY_CONSTRUCTOR(classname, type, size)													
+
+#define OPERATOR_SUBSCRIPT(type)															\
+HOST_DEVICE type operator[](const int& i) const												\
+{																							\
+	return this->D[i];																		\
+}
+
+#define OPERATOR_SUBSCRIPT_REF(type)														\
+HOST_DEVICE type& operator[](const int& i)													\
+{																							\
+	return this->D[i];																		\
+}
+
+#define OPERATOR_ASS(classname, size)														\
+HOST_DEVICE classname& operator = (const classname& Other)									\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] = Other[i];																\
+																							\
+	return *this;																			\
 }	
 
-#define OPERATOR_PLUS(classname, size)							\
-HOST_DEVICE classname operator + (const classname& V) const		\
-{																\
-	classname Result;											\
-																\
-	for (int i = 0; i < size; i++)								\
-		Result[i] = this->D[i] + V[i];							\
-																\
-	return Result;												\
+#define OPERATOR_PLUS(classname, size)														\
+HOST_DEVICE classname operator + (const classname& V) const									\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = this->D[i] + V[i];														\
+																							\
+	return Result;																			\
 }
 
 
-#define OPERATOR_PLUS_ASS(classname, size)						\
-HOST_DEVICE classname& operator += (const classname& V)			\
-{																\
-	for (int i = 0; i < size; i++)								\
-		this->D[i] += V[i];										\
-																\
-	return *this;												\
+#define OPERATOR_PLUS_ASS(classname, size)													\
+HOST_DEVICE classname& operator += (const classname& V)										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] += V[i];																	\
+																							\
+	return *this;																			\
 }
 
-#define OPERATOR_MINUS(classname, size)							\
-HOST_DEVICE classname operator - (const classname& V) const		\
-{																\
-	classname Result;											\
-																\
-	for (int i = 0; i < size; i++)								\
-		Result[i] = this->D[i] - V[i];							\
-																\
-	return Result;												\
+#define OPERATOR_MINUS(classname, size)														\
+HOST_DEVICE classname operator - (const classname& V) const									\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = this->D[i] - V[i];														\
+																							\
+	return Result;																			\
 }
 
 
-#define OPERATOR_MINUS_ASS(classname, size)						\
-HOST_DEVICE classname& operator -= (const classname& V)			\
-{																\
-	for (int i = 0; i < size; i++)								\
-		this->D[i] -= V[i];										\
-																\
-	return *this;												\
+#define OPERATOR_MINUS_ASS(classname, size)													\
+HOST_DEVICE classname& operator -= (const classname& V)										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] -= V[i];																	\
+																							\
+	return *this;																			\
 }
 
-#define OPERATOR_MULTIPLY(classname, size)						\
-HOST_DEVICE classname& operator * (const classname& V)			\
-{																\
-	classname Result;											\
-																\
-	for (int i = 0; i < size; i++)								\
-		Result[i] = this->D[i] * V[i];							\
-																\
-	return Result;												\
+#define OPERATOR_MULTIPLY(classname, type, size)											\
+HOST_DEVICE classname operator * (const classname& V) const									\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = this->D[i] * V[i];														\
+																							\
+	return Result;																			\
+}																							\
+																							\
+HOST_DEVICE classname operator * (const int& I) const										\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = this->D[i] * (type)I;													\
+																							\
+	return Result;																			\
+}																							\
+																							\
+																							\
+HOST_DEVICE classname operator * (const float& F) const										\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = this->D[i] * (type)F;													\
+																							\
+	return Result;																			\
 }
 
-#define OPERATOR_MULTIPLY_ASS(classname, size)					\
-HOST_DEVICE classname& operator *= (const classname& V)			\
-{																\
-	for (int i = 0; i < size; i++)								\
-		this->D[i] *= V[i];										\
-																\
-	return *this;												\
+#define OPERATOR_MULTIPLY_ASS(classname, type, size)										\
+HOST_DEVICE classname& operator *= (const classname& V)										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] *= V[i];																	\
+																							\
+	return *this;																			\
+}																							\
+																							\
+HOST_DEVICE classname& operator *= (const int& I)											\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] *= (type)I;																\
+																							\
+	return *this;																			\
+}																							\
+																							\
+HOST_DEVICE classname& operator *= (const float& F)											\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] *= (type)F;																\
+																							\
+	return *this;																			\
 }
 
-#define OPERATOR_DIVIDE(classname, size)						\
-HOST_DEVICE classname& operator / (const classname& V)			\
-{																\
-	classname Result;											\
-																\
-	for (int i = 0; i < size; i++)								\
-		Result[i] = this->D[i] / V[i];							\
-																\
-	return Result;												\
+#define OPERATOR_DIVIDE(classname, size)													\
+HOST_DEVICE classname operator / (const classname& V) const									\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = this->D[i] / V[i];														\
+																							\
+	return Result;																			\
 }
 
-#define OPERATOR_DIVIDE_ASS(classname, size)					\
-HOST_DEVICE classname& operator /= (const classname& V)			\
-{																\
-	for (int i = 0; i < size; i++)								\
-		this->D[i] /= V[i];										\
-																\
-	return *this;												\
+#define OPERATOR_DIVIDE_ASS(classname, size)												\
+HOST_DEVICE classname& operator /= (const classname& V)										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+		this->D[i] /= V[i];																	\
+																							\
+	return *this;																			\
 }
 
-#define OPERATOR_NEGATE(classname, size)						\
-HOST_DEVICE classname operator - () const						\
-{																\
-	classname Result;											\
-																\
-	for (int i = 0; i < size; i++)								\
-		Result[i] = -this->D[i];								\
-																\
-	return Result;												\
+#define OPERATOR_NEGATE(classname, size)													\
+HOST_DEVICE classname operator - () const													\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = -this->D[i];															\
+																							\
+	return Result;																			\
 }
 
-#define OPERATOR_LESS(classname, size)							\
-HOST_DEVICE bool operator < (const classname& V) const			\
-{																\
-	for (int i = 0; i < Size; i++)								\
-	{															\
-		if (this->D[i] >= V[i])									\
-			return false;										\
-	}															\
-																\
-	return true;												\
+#define OPERATOR_LESS(classname, size)														\
+HOST_DEVICE bool operator < (const classname& V) const										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+	{																						\
+		if (this->D[i] >= V[i])																\
+			return false;																	\
+	}																						\
+																							\
+	return true;																			\
 }
 
-#define OPERATOR_LESS_EQ(classname, size)						\
-HOST_DEVICE bool operator <= (const classname& V) const			\
-{																\
-	for (int i = 0; i < Size; i++)								\
-	{															\
-		if (this->D[i] > V[i])									\
-			return false;										\
-	}															\
-																\
-	return true;												\
+#define OPERATOR_LESS_EQ(classname, size)													\
+HOST_DEVICE bool operator <= (const classname& V) const										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+	{																						\
+		if (this->D[i] > V[i])																\
+			return false;																	\
+	}																						\
+																							\
+	return true;																			\
 }
 
-#define OPERATOR_GREATER(classname, size)						\
-HOST_DEVICE bool operator > (const classname& V) const			\
-{																\
-	for (int i = 0; i < Size; i++)								\
-	{															\
-		if (this->D[i] <= V[i])									\
-			return false;										\
-	}															\
-																\
-	return true;												\
+#define OPERATOR_GREATER(classname, size)													\
+HOST_DEVICE bool operator > (const classname& V) const										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+	{																						\
+		if (this->D[i] <= V[i])																\
+			return false;																	\
+	}																						\
+																							\
+	return true;																			\
 }
 
-#define OPERATOR_GREATER_EQ(classname, size)					\
-HOST_DEVICE bool operator >= (const classname& V) const			\
-{																\
-	for (int i = 0; i < Size; i++)								\
-	{															\
-		if (this->D[i] < V[i])									\
-			return false;										\
-	}															\
-																\
-	return true;												\
+#define OPERATOR_GREATER_EQ(classname, size)												\
+HOST_DEVICE bool operator >= (const classname& V) const										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+	{																						\
+		if (this->D[i] < V[i])																\
+			return false;																	\
+	}																						\
+																							\
+	return true;																			\
 }
 
-#define OPERATOR_EQ(classname, size)							\
-HOST_DEVICE bool operator == (const classname& V) const			\
-{																\
-	for (int i = 0; i < Size; i++)								\
-	{															\
-		if (this->D[i] != V[i])									\
-			return false;										\
-	}															\
-																\
-	return true;												\
+#define OPERATOR_EQ(classname, size)														\
+HOST_DEVICE bool operator == (const classname& V) const										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+	{																						\
+		if (this->D[i] != V[i])																\
+			return false;																	\
+	}																						\
+																							\
+	return true;																			\
 }
 
-#define OPERATOR_NEQ(classname, size)							\
-HOST_DEVICE bool operator != (const classname& V) const			\
-{																\
-	for (int i = 0; i < Size; i++)								\
-	{															\
-		if (this->D[i] != V[i])									\
-			return true;										\
-	}															\
-																\
-	return false;												\
+#define OPERATOR_NEQ(classname, size)														\
+HOST_DEVICE bool operator != (const classname& V) const										\
+{																							\
+	for (int i = 0; i < size; i++)															\
+	{																						\
+		if (this->D[i] != V[i])																\
+			return true;																	\
+	}																						\
+																							\
+	return false;																			\
 }
 
-#define SUBSCRIPT_OPERATORS(type)								\
-OPERATOR_SUBSCRIPT(type)										\
-OPERATOR_SUBSCRIPT_REF(type)									\
+#define MIN_ELEMENT(type, size)																\
+HOST_DEVICE type Min()																		\
+{																							\
+	type Min = D[0];																		\
+																							\
+	for (int i = 1; i < size; i++)															\
+	{																						\
+		if (D[i] < Min)																		\
+			Min = this->D[i];																\
+	}																						\
+																							\
+	return Min;																				\
+}
 
-#define COMPARISON_OPERATORS(classname, size)					\
-OPERATOR_LESS(classname, size)									\
-OPERATOR_LESS_EQ(classname, size)								\
-OPERATOR_GREATER(classname, size)								\
-OPERATOR_GREATER_EQ(classname, size)							\
-OPERATOR_EQ(classname, size)									\
-OPERATOR_NEQ(classname, size)									\
+#define MAX_ELEMENT(type, size)																\
+HOST_DEVICE type Max()																		\
+{																							\
+	type Max = D[0];																		\
+																							\
+	for (int i = 1; i < size; i++)															\
+	{																						\
+		if (D[i] > Max)																		\
+			Max = this->D[i];																\
+	}																						\
+																							\
+	return Max;																				\
+}
 
-#define ARITHMETIC_OPERATORS(classname, size)					\
-OPERATOR_PLUS(classname, size)									\
-OPERATOR_PLUS_ASS(classname, size)								\
-OPERATOR_MINUS(classname, size)									\
-OPERATOR_MINUS_ASS(classname, size)								\
-OPERATOR_MULTIPLY(classname, size)								\
-OPERATOR_MULTIPLY_ASS(classname, size)							\
-OPERATOR_DIVIDE(classname, size)								\
-OPERATOR_DIVIDE_ASS(classname, size)							\
-OPERATOR_NEGATE(classname, size)										
+#define MIN_VECTOR(classname, size)															\
+HOST_DEVICE classname Min(const classname& Other) const										\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = min(this->D[i], Other[i]);												\
+																							\
+	return Result;																			\
+}
 
-#define ALL_OPERATORS(classname, type, size)					\
-SUBSCRIPT_OPERATORS(type)										\
-ARITHMETIC_OPERATORS(classname, size)							\
-COMPARISON_OPERATORS(classname, size)							\
+#define MAX_VECTOR(classname, size)															\
+HOST_DEVICE classname Max(const classname& Other) const										\
+{																							\
+	classname Result;																		\
+																							\
+	for (int i = 0; i < size; i++)															\
+		Result[i] = max(this->D[i], Other[i]);												\
+																							\
+	return Result;																			\
+}
 
+#define CLAMP_SINGLE(type, size)															\
+HOST_DEVICE void Clamp(const type& Min, const type& Max)									\
+{																							\
+	for (int i = 0; i < size; ++i)															\
+		this->D[i] = max(Min, min(this->D[i], Max));										\
+}
 
+#define CLAMP_VECTOR(classname, size)														\
+HOST_DEVICE void Clamp(const classname& Min, const classname& Max)							\
+{																							\
+	for (int i = 0; i < size; ++i)															\
+		this->D[i] = max(Min[i], min(this->D[i], Max[i]));									\
+}																							
 
-template<class T, int Size>
-class EXPOSURE_RENDER_DLL Vec
-{
-public:
-	HOST_DEVICE Vec()
-	{
-		for (int i = 0; i < Size; i++)
-			this->D[i] = T();
-	}
+#define CLAMP(classname, type, size)														\
+CLAMP_SINGLE(type, size)																	\
+CLAMP_VECTOR(classname, size)																
 
-	/*
-	HOST_DEVICE Vec(const T& V)
-	{
-		for (int i = 0; i < Size; i++)
-			this->D[i] = V;
-	}
-	*/
+#define MIN_MAX(classname, type, size)														\
+MIN_ELEMENT(type, size)																		\
+MAX_ELEMENT(type, size)																		\
+MIN_VECTOR(classname, size)																	\
+MAX_VECTOR(classname, size)																								
 
-	HOST_DEVICE Vec(const T V[Size])
-	{
-		for (int i = 0; i < Size; i++)
-			this->D[i] = V[i];
-	}
+#define SUBSCRIPT_OPERATORS(type)															\
+OPERATOR_SUBSCRIPT(type)																	\
+OPERATOR_SUBSCRIPT_REF(type)																
 
-	HOST_DEVICE Vec(const Vec<T, Size>& Other)
-	{
-		for (int i = 0; i < Size; i++)
-			this->D[i] = Other[i];
-	}
+#define COMPARISON_OPERATORS(classname, size)												\
+OPERATOR_LESS(classname, size)																\
+OPERATOR_LESS_EQ(classname, size)															\
+OPERATOR_GREATER(classname, size)															\
+OPERATOR_GREATER_EQ(classname, size)														\
+OPERATOR_EQ(classname, size)																\
+OPERATOR_NEQ(classname, size)																
 
-	HOST_DEVICE T Max(void)
-	{
-		T Max;
+#define ARITHMETIC_OPERATORS(classname, type, size)											\
+OPERATOR_PLUS(classname, size)																\
+OPERATOR_PLUS_ASS(classname, size)															\
+OPERATOR_MINUS(classname, size)																\
+OPERATOR_MINUS_ASS(classname, size)															\
+OPERATOR_MULTIPLY(classname, type, size)													\
+OPERATOR_MULTIPLY_ASS(classname, type, size)												\
+OPERATOR_DIVIDE(classname, size)															\
+OPERATOR_DIVIDE_ASS(classname, size)														\
+OPERATOR_NEGATE(classname, size)															
 
-		for (int i = 1; i < Size; i++)
-		{
-			if (D[i] > this->D[i - 1])
-				Max = this->D[i];
-		}
-
-		return Max;
-	}
-
-	HOST_DEVICE T Min(void)
-	{
-		T Min;
-
-		for (int i = 1; i < Size; i++)
-		{
-			if (this->D[i] < D[i - 1])
-				Min = this->D[i];
-		}
-
-		return Min;
-	}
-
-	HOST_DEVICE Vec<T, Size> Min(const Vec<T, Size>& Other) const
-	{
-		Vec<T, Size> Result;
-		
-		for (int i = 0; i < Size; i++)
-			Result[i] = min(this->D[i], Other[i]);
-
-		return Result;
-	}
-
-	HOST_DEVICE Vec<T, Size> Max(const Vec<T, Size>& Other) const
-	{
-		Vec<T, Size> Result;
-		
-		for (int i = 0; i < Size; i++)
-			Result[i] = max(this->D[i], Other[i]);
-
-		return Result;
-	}
-
-	HOST_DEVICE void Clamp(const T& Min, const T& Max)
-	{
-		for (int i = 0; i < Size; ++i)
-			this->D[i] = max(Min, min(this->D[i], Max));
-	}
-
-	HOST_DEVICE void Clamp(const Vec<T, Size>& Min, const Vec<T, Size>& Max)
-	{
-		for (int i = 0; i < Size; ++i)
-			this->D[i] = max(Min[i], min(this->D[i], Max[i]));
-	}
-
-	HOST_DEVICE bool AllZero()
-	{
-		for (int i = 0; i < Size; ++i)
-			if (this->D[i] != T())
-				return false;
-
-		return true;
-	}
-
-protected:
-	T	D[Size];
-};
+#define ALL_OPERATORS(classname, type, size)												\
+SUBSCRIPT_OPERATORS(type)																	\
+ARITHMETIC_OPERATORS(classname, type, size)													\
+COMPARISON_OPERATORS(classname, size)														
 
 class EXPOSURE_RENDER_DLL Vec2i
 {
 public:
 	CONSTRUCTORS(Vec2i, int, 2)
+	VEC2_CONSTRUCTOR(Vec2i, int)
 	ALL_OPERATORS(Vec2i, int, 2)
+	MIN_MAX(Vec2i, int, 2)
+	CLAMP(Vec2i, int, 2)
+
 	DATA(int, 2)
 };
 
@@ -393,7 +429,10 @@ class EXPOSURE_RENDER_DLL Vec2f
 {
 public:
 	CONSTRUCTORS(Vec2f, float, 2)
+	VEC2_CONSTRUCTOR(Vec2f, float)
 	ALL_OPERATORS(Vec2f, float, 2)
+	MIN_MAX(Vec2f, float, 2)
+	CLAMP(Vec2f, float, 2)
 
 	HOST_DEVICE float LengthSquared(void) const
 	{
@@ -415,19 +454,26 @@ public:
 	DATA(float, 2)
 };
 
-class EXPOSURE_RENDER_DLL Vec3i : public Vec<int, 3>
+class EXPOSURE_RENDER_DLL Vec3i
 {
 public:
 	CONSTRUCTORS(Vec3i, int, 3)
+	VEC3_CONSTRUCTOR(Vec3i, int)
 	ALL_OPERATORS(Vec3i, int, 3)
+	MIN_MAX(Vec3i, int, 3)
+	CLAMP(Vec3i, int, 3)
+
 	DATA(int, 3)
 };
 
-class EXPOSURE_RENDER_DLL Vec3f : public Vec<float, 3>
+class EXPOSURE_RENDER_DLL Vec3f
 {
 public:
 	CONSTRUCTORS(Vec3f, float, 3)
+	VEC3_CONSTRUCTOR(Vec3f, float)
 	ALL_OPERATORS(Vec3f, float, 3)
+	MIN_MAX(Vec3f, float, 3)
+	CLAMP(Vec3f, float, 3)
 
 	HOST_DEVICE float LengthSquared(void) const
 	{
@@ -467,54 +513,26 @@ public:
 	DATA(float, 3)
 };
 
-class EXPOSURE_RENDER_DLL Vec4i : public Vec<int, 4>
+class EXPOSURE_RENDER_DLL Vec4i
 {
 public:
 	CONSTRUCTORS(Vec4i, int, 4)
+	VEC4_CONSTRUCTOR(Vec4i, int)
 	ALL_OPERATORS(Vec4i, int, 4)
+	MIN_MAX(Vec4i, int, 4)
+	CLAMP(Vec4i, int, 4)
+
 	DATA(int, 4)
 };
 
-class EXPOSURE_RENDER_DLL Vec4f : public Vec<float, 4>
+class EXPOSURE_RENDER_DLL Vec4f
 {
 public:
 	CONSTRUCTORS(Vec4f, float, 4)
+	VEC4_CONSTRUCTOR(Vec4f, float)
 	ALL_OPERATORS(Vec4f, float, 4)
-
-	HOST_DEVICE float LengthSquared(void) const
-	{
-		return this->D[0] * this->D[0] + this->D[1] * this->D[1] + this->D[2] * this->D[2];
-	}
-
-	HOST_DEVICE float Length(void) const
-	{
-		return sqrtf(this->LengthSquared());
-	}
-
-	HOST_DEVICE void Normalize(void)
-	{
-		const float L = this->Length();
-		this->D[0] /= L;
-		this->D[1] /= L;
-		this->D[2] /= L;
-	}
-
-	HOST_DEVICE float Dot(const Vec4f& V) const
-	{
-		return (this->D[0] * V[0] + this->D[1] * V[1] + this->D[2] * V[2]);
-	}
-
-	HOST_DEVICE Vec4f Cross(const Vec4f& V) const
-	{
-		return Vec4f( (this->D[1] * V[2]) - (this->D[2] * V[1]), (this->D[2] * V[0]) - (this->D[0] * V[2]), (this->D[0] * V[1]) - (this->D[1] * V[0]) );
-	}
-
-	HOST_DEVICE void ScaleBy(float F)
-	{
-		this->D[0] *= F;
-		this->D[1] *= F;
-		this->D[2] *= F;
-	}
+	MIN_MAX(Vec4f, float, 4)
+	CLAMP(Vec4f, float, 4)
 
 	DATA(float, 4)
 };
@@ -526,7 +544,6 @@ static inline HOST_DEVICE Vec2i operator * (const int& I, const Vec2i& V)					{ 
 //static inline HOST_DEVICE Vec2f operator - (const Vec2f& A, const Vec2f& B)					{ return A - B;													};
 static inline HOST_DEVICE Vec2f operator * (const Vec2f& V, const float& F)					{ return Vec2f(V[0] * F, V[1] * F);								};
 static inline HOST_DEVICE Vec2f operator * (const float& F, const Vec2f& V)					{ return Vec2f(V[0] * F, V[1] * F);								};
-static inline HOST_DEVICE Vec2f operator * (const Vec2f& A, const Vec2f& B)					{ return A * B;													};
 
 static inline HOST_DEVICE Vec2f Normalize(const Vec2f& V)									{ Vec2f R = V; R.Normalize(); return R; 						};
 static inline HOST_DEVICE float Length(const Vec2f& V)										{ return V.Length();											};
@@ -546,12 +563,10 @@ static inline HOST_DEVICE Vec2f Lerp(const Vec2f& A, const Vec2f& B, const float
 //static inline HOST_DEVICE Vec3i operator - (const Vec3i& A, const Vec3i& B)					{ return A - B;													};
 static inline HOST_DEVICE Vec3i operator * (const Vec3i& V, const int& I)					{ return Vec3i(V[0] * I, V[1] * I, V[2] * I);					};
 static inline HOST_DEVICE Vec3i operator * (const int& I, const Vec3i& V)					{ return Vec3i(V[0] * I, V[1] * I, V[2] * I);					};
-static inline HOST_DEVICE Vec3i operator * (const Vec3i& A, const Vec3i& B)					{ return A * B;													};
 
 //static inline HOST_DEVICE Vec3f operator - (const Vec3f& A, const Vec3f& B)					{ return A - B;													};
-static inline HOST_DEVICE Vec3f operator * (const Vec3f& V, const float& F)					{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);					};
+//static inline HOST_DEVICE Vec3f operator * (const Vec3f& V, const float& F)					{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);					};
 static inline HOST_DEVICE Vec3f operator * (const float& F, const Vec3f& V)					{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);					};
-static inline HOST_DEVICE Vec3f operator * (const Vec3f& A, const Vec3f& B)					{ return A * B;													};
 
 static inline HOST_DEVICE Vec3f Normalize(const Vec3f& V)									{ Vec3f R = V; R.Normalize(); return R; 						};
 static inline HOST_DEVICE float Length(const Vec3f& V)										{ return V.Length();											};

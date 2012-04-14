@@ -18,7 +18,13 @@
 namespace ExposureRender
 {
 
-typedef Vec<float, MAX_NO_TF_NODES> NodesVector;
+class EXPOSURE_RENDER_DLL NodesVector
+{
+public:
+	CONSTRUCTORS(NodesVector, float, MAX_NO_TF_NODES)
+	ALL_OPERATORS(NodesVector, float, MAX_NO_TF_NODES)
+	DATA(float, MAX_NO_TF_NODES)
+};
 
 struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 {

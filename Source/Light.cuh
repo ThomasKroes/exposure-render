@@ -18,6 +18,43 @@
 namespace ExposureRender
 {
 
+DEVICE void SampleLightSurface(const Light& Light, LightSample& LS, SurfaceSample& SS)
+{
+	/*
+	// Sample the light surface
+	switch (Light.Shape.Type)
+	{
+		case 0:	SamplePlane(SS, LS.SurfaceUVW, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));		break;
+		case 1:	SampleDisk(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);									break;
+		case 2:	SampleRing(SS, LS.SurfaceUVW, Light.Shape.InnerRadius, Light.Shape.OuterRadius);		break;
+		case 3:	SampleBox(SS, LS.SurfaceUVW, ToVec3f(Light.Shape.Size));								break;
+		case 4:	SampleSphere(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);								break;
+//		case 5:	SampleCylinder(SS, LS.SurfaceUVW, Light.Shape.OuterRadius, Light.Shape.Size[2]);		break;
+	}
+
+	// Transform surface position and normal back to world space
+	SS.P	= TransformPoint(Light.Shape.TM, SS.P);
+	SS.N	= TransformVector(Light.Shape.TM, SS.N);
+	*/
+}
+
+DEVICE_NI void SampleLight(const Light& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
+{
+	/*
+	// First sample the light surface
+	SampleLightSurface(Light, LS, SS);
+
+	// Compute Wi, the normalized vector from the sampled light position to the ray sample position
+	Wi = Normalize(SS.P - SE.P);
+
+	// Compute the probability of sampling the light per unit area
+//	LightPdf = G(SE.P, SE.N, LS.SS.P, LS.SS.N) * Light.Shape.Area;
+
+	// Compute exitant radiance
+	Le = ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
+	*/
+}
+
 DEVICE_NI void IntersectLight()
 {
 }

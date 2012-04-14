@@ -59,7 +59,7 @@ KERNEL void KrnlSingleScattering()
 
 	CRNG RNG(gpTracer->FrameBuffer.CudaRandomSeeds1.GetPtr(X, Y), gpTracer->FrameBuffer.CudaRandomSeeds2.GetPtr(X, Y));
 
-	ColorXYZf Lv = SPEC_BLACK;
+	ColorXYZf Lv = ColorXYZf::Black();
 
 	ScatterEvent SE;
 

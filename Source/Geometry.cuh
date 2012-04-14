@@ -126,71 +126,61 @@ HOST_DEVICE void Swap(int& I1, int& I2)
 
 }
 
+#define NO_ELEMENTS(type, size)					\
+HOST_DEVICE type GetNoElements(void) const		\
+{												\
+	type NoElements = this->D[0];				\
+												\
+	for (int i = 1; i < size; i++)				\
+		NoElements *= this->D[i];				\
+												\
+	return NoElements;							\
+}
 
-template <class T, int NoDimensions>
-class Resolution : public Vec<T, NoDimensions>
+class Resolution2i
 {
 public:
-	HOST_DEVICE Resolution()
-	{
-		for (int i = 0; i < NoDimensions; i++)
-			this->D[i] = T();
-	}
+	CONSTRUCTORS(Resolution2i, int, 2)
+	VEC2_CONSTRUCTOR(Resolution2i, int)
+	ALL_OPERATORS(Resolution2i, int, 2)
+	NO_ELEMENTS(int, 2)
 
-	HOST_DEVICE Resolution(T Res)
-	{
-		for (int i = 0; i < NoDimensions; i++)
-			this->D[i] = Res;
-	}
-
-	HOST_DEVICE Resolution(T Resolution[NoDimensions])
-	{
-		for (int i = 0; i < NoDimensions; i++)
-			this->D[i] = Resolution[i];
-	}
-
-	HOST_DEVICE Vec<T, NoDimensions> Inv(void) const
-	{
-		return 1.0f / *this;
-	}
-
-	HOST_DEVICE int GetNoElements(void) const
-	{
-		T NoElements = this->D[0];
-
-		for (int i = 1; i < NoDimensions; i++)
-			NoElements *= this->D[i];
-
-		return NoElements;			
-	}
-
-	HOST_DEVICE bool operator == (const Resolution& R) const
-	{
-		for (int i = 0; i < NoDimensions; i++)
-		{
-			if (this->D[i] != R[i])
-				return false;
-		}
-
-		return true;
-	}
-
-	HOST_DEVICE bool operator != (const Resolution& R) const
-	{
-		for (int i = 0; i < NoDimensions; i++)
-		{
-			if (this->D[i] != R[i])
-				return true;
-		}
-
-		return false;
-	}
+	DATA(int, 2)
 };
 
-typedef Resolution<int, 2>				Resolution2i;
-typedef Resolution<int, 3>				Resolution3i;
-typedef Resolution<float, 2>			Resolution2f;
-typedef Resolution<float, 3>			Resolution3f;
+class Resolution2f
+{
+public:
+	CONSTRUCTORS(Resolution2f, float, 2)
+	VEC2_CONSTRUCTOR(Resolution2f, float)
+	ALL_OPERATORS(Resolution2f, float, 2)
+	NO_ELEMENTS(float, 2)
+
+	DATA(float, 2)
+};
+
+class Resolution3i
+{
+public:
+	CONSTRUCTORS(Resolution3i, int, 3)
+	VEC2_CONSTRUCTOR(Resolution3i, int)
+	ALL_OPERATORS(Resolution3i, int, 3)
+	NO_ELEMENTS(int, 3)
+
+	DATA(int, 3)
+};
+
+class Resolution3f
+{
+public:
+	CONSTRUCTORS(Resolution3f, float, 3)
+	VEC2_CONSTRUCTOR(Resolution3f, float)
+	ALL_OPERATORS(Resolution3f, float, 3)
+	NO_ELEMENTS(float, 3)
+
+	DATA(float, 3)
+};
+
 
 inline float RandomFloat(void)
 {

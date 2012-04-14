@@ -23,7 +23,7 @@ DEVICE_NI ColorXYZf EvaluateBitmap(const Bitmap& Bitmap, const int& U, const int
 	if (Bitmap.pData == NULL)
 		return ColorXYZf(0.0f);
 
-	return ColorXYZf(Bitmap.pData[V * Bitmap.Size[0] + U]);
+	return ColorXYZf::FromRGBAuc(Bitmap.pData[V * Bitmap.Size[0] + U]);
 }
 
 DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f& UVW)
@@ -61,7 +61,7 @@ DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f
 			return EvaluateColorTransferFunction(Procedural.Gradient, UVW[1]);
 	}
 
-	return SPEC_BLACK;
+	return ColorXYZf::Black();
 }
 
 DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
@@ -116,7 +116,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 				vmin = min(max(vmin, 0), Size[1] - 1);
 				vmax = min(max(vmax, 0), Size[1] - 1);
 		
-				const ColorXYZf Color[4] = 
+				ColorXYZf Color[4] = 
 				{
 					EvaluateBitmap(T.Bitmap, umin, vmin),
 					EvaluateBitmap(T.Bitmap, umax, vmin),
