@@ -284,7 +284,7 @@ struct CudaList
 
 		const bool Exists = this->Exists(ID);
 
-		this->Resources[Counter] = Resource;
+		this->Resources[Counter] = T::FromHost(Resource);
 
 		if (!Exists)
 		{
@@ -321,7 +321,8 @@ struct CudaList
 		if (this->DeviceAllocation == NULL)
 			CUDA::Allocate(this->DeviceAllocation);
 		
-		cudaMemcpyToSymbol("gpVolumes", &this->DeviceAllocation, sizeof(&this->DeviceAllocation));
+		cudaMemcpy(this->DeviceAllocation, &this->List, sizeof(this->List), cudaMemcpyHostToDevice);
+		cudaMemcpyToSymbol(this->DeviceSymbol, &this->DeviceAllocation, sizeof(&this->DeviceAllocation));
 
 		// CUDA::Allocate(this->DeviceAllocation);
 

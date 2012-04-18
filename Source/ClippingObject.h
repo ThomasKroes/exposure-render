@@ -48,8 +48,10 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 		return *this;
 	}
 
-	HOST void ToDevice()
+	HOST static ClippingObject FromHost(const ClippingObject& Other)
 	{
+		ClippingObject Result = Other;
+		return Result;
 	}
 };
 

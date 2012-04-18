@@ -193,7 +193,8 @@ struct ScatterEvent
 	{
 		Volume,
 		Light,
-		Object
+		Object,
+		SlicePlane
 	};
 
 	SampleType	Type;

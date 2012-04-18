@@ -24,8 +24,8 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Object) };
 
 	SampleVolume(R, RNG, SE[0]);
-	IntersectLights(R, SE[1], true);
-	IntersectObjects(R, SE[2]);
+	//IntersectLights(R, SE[1], true);
+	//IntersectObjects(R, SE[2]);
 
 	float T = FLT_MAX;
 
@@ -53,42 +53,28 @@ KERNEL void KrnlSingleScattering()
 
 	ScatterEvent SE;
 
-	MetroSample Sample(RNG);
+	MetroSample Sample(RNG); 
 
-	Ray Rc;
+	Ray R;
 
-	SampleCamera(gpTracer->Camera, Rc, Sample.CameraSample);
+	SampleCamera(gpTracer->Camera, R, IDx, IDy, Sample.CameraSample);
 
-	Intersection Int;
-
-	gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(0.0f, IDx  > 100 ? 255.0f : 0.0f, 0.0f, 0.0f), IDx, IDy);
-	//gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[1] = X  > 100 ? 255 : 0;
-	return;
-	IntersectBox(Rc, gpVolumes->Get(0).MinAABB, gpVolumes->Get(0).MaxAABB, Int);
+	SE = SampleRay(R, RNG);
 	
-
-
-	if (Int.Valid)
-		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(1.0f), IDx, IDy);
-	else
-		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(0.0f), IDx, IDy);
-
-	/*
-	SE = SampleRay(Rc, RNG);
-
 	if (SE.Valid && SE.Type == ScatterEvent::Volume)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
+	/*
 	if (SE.Valid && SE.Type == ScatterEvent::Light)
 		Lv += SE.Le;
 
 	if (SE.Valid && SE.Type == ScatterEvent::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
-
-	ColorXYZAf L(Lv.GetX(), Lv.GetY(), Lv.GetZ(), SE.Valid >= 0 ? 1.0f : 0.0f);
-
-	gpTracer->FrameBuffer.CudaFrameEstimate.Set(L, X, Y);
 	*/
+
+	
+
+	gpTracer->FrameBuffer.CudaFrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
 }
 
 void SingleScattering(int Width, int Height)

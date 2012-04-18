@@ -89,6 +89,12 @@ struct EXPOSURE_RENDER_DLL Texture
 		return *this;
 		*/
 	}
+
+	HOST static Texture FromHost(const Texture& Other)
+	{
+		Texture Result = Other;
+		return Result;
+	}
 };
 
 }

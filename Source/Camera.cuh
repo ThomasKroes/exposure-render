@@ -20,12 +20,12 @@
 namespace ExposureRender
 {
 
-DEVICE void SampleCamera(const Camera& Camera, Ray& R, CameraSample& CS)
+DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& V, CameraSample& CS)
 {
 	Vec2f ScreenPoint;
 
-	ScreenPoint[0] = Camera.Screen[0][0] + (Camera.InvScreen[0] * (float)(CS.FilmUV[0] * (float)Camera.FilmSize[0]));
-	ScreenPoint[1] = Camera.Screen[1][0] + (Camera.InvScreen[1] * (float)(CS.FilmUV[1] * (float)Camera.FilmSize[1]));
+	ScreenPoint[0] = Camera.Screen[0][0] + (Camera.InvScreen[0] * (float)(U + CS.FilmUV[0] * 1.0f / Camera.FilmSize[0]));
+	ScreenPoint[1] = Camera.Screen[1][0] + (Camera.InvScreen[1] * (float)(V + CS.FilmUV[1] * 1.0f / Camera.FilmSize[1]));
 
 	R.O		= Camera.Pos;
 	R.D		= Normalize(Camera.N + (ScreenPoint[0] * Camera.U) - (ScreenPoint[1] * Camera.V));

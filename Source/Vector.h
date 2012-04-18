@@ -20,9 +20,21 @@ namespace ExposureRender
 {
 
 template <class T>
+HOST_DEVICE inline T Min(const T& A, const T& B)
+{
+    return A < B ? A : B;
+}
+
+template <class T>
+HOST_DEVICE inline T Max(const T& A, const T& B)
+{
+    return A > B ? A : B;
+}
+
+template <class T>
 HOST_DEVICE inline T Clamp(const T& Value, const T& Min, const T& Max)
 {
-    return Value < Min ? Min : (Value > Max ? Max : Value);
+	return ExposureRender::Max(Min, ExposureRender::Min(Value, Max));
 }
 
 #define DATA(type, size)																	\
@@ -373,7 +385,7 @@ HOST_DEVICE void Clamp(const classname& Min, const classname& Max)							\
 {																							\
 	for (int i = 0; i < size; ++i)															\
 		this->D[i] = max(Min[i], min(this->D[i], Max[i]));									\
-}																							
+}
 
 #define CLAMP(classname, type, size)														\
 CLAMP_SINGLE(type, size)																	\

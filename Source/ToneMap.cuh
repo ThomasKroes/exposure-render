@@ -26,17 +26,17 @@ DEVICE ColorRGBuc ToneMap(const ColorXYZAf& XYZA)
 {
 	ColorRGBf RGBf = ColorRGBf::FromXYZAf(XYZA);
 
-	RGBf[0] = 1.0f - expf(-(RGBf[0] * gpTracer->Camera.InvExposure));
-	RGBf[1] = 1.0f - expf(-(RGBf[1] * gpTracer->Camera.InvExposure));
-	RGBf[2] = 1.0f - expf(-(RGBf[2] * gpTracer->Camera.InvExposure));
+	RGBf[0] = 1.0f - expf(-(RGBf[0] / gpTracer->Camera.Exposure));
+	RGBf[1] = 1.0f - expf(-(RGBf[1] / gpTracer->Camera.Exposure));
+	RGBf[2] = 1.0f - expf(-(RGBf[2] / gpTracer->Camera.Exposure));
 
 	RGBf.Clamp(0.0f, 1.0f);
 
 	ColorRGBuc RGBuc;
 
-	RGBuc[0] = 255.0f * powf(RGBuc[0], gpTracer->Camera.InvGamma);
-	RGBuc[1] = 255.0f * powf(RGBuc[1], gpTracer->Camera.InvGamma);
-	RGBuc[2] = 255.0f * powf(RGBuc[2], gpTracer->Camera.InvGamma);
+	RGBuc[0] = 255.0f * RGBf[0];//powf(RGBf[0] / gpTracer->Camera.Gamma);
+	RGBuc[1] = 255.0f * RGBf[1];//powf(RGBf[1] / gpTracer->Camera.Gamma);
+	RGBuc[2] = 255.0f * RGBf[2];//powf(RGBf[2] / gpTracer->Camera.Gamma);
 
 	return RGBuc;
 }
@@ -47,10 +47,10 @@ KERNEL void KrnlToneMap()
 
 	const ColorRGBuc RGB = ToneMap(gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy));
 
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[0] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[0];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[1] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[1];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[2] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[2];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[3] = 255;
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[0] = RGB[0];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[1] = RGB[1];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[2] = RGB[2];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[3] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[3] * 255.0f;
 }
 
 void ToneMap(int Width, int Height)

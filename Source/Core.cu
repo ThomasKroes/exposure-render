@@ -111,50 +111,52 @@ EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
 
 EXPOSURE_RENDER_DLL void BindVolume(Volume V, int& ID)
 {
-//	Volumes Vs;
-//	cudaMemcpyToSymbol("gpVolumes", &Vs, sizeof(&Vs));
-//	gVolumes.Bind(V, ID);
+	gVolumes.Bind(V, ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 {
-//	gSharedVolumes.Unbind(ID);
+	gVolumes.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindLight(Light L, int& ID)
 {
+	gLights.Bind(L, ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 {
-//	gSharedLights.Unbind(ID);
+	gLights.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindObject(Object O, int& ID)
 {
+	gObjects.Bind(O, ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 {
-//	gSharedObjects.Unbind(ID);
+	gObjects.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject C, int& ID)
 {
+	gClippingObjects.Bind(C, ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 {
-//	gSharedClippingObjects.Unbind(ID);
+	gClippingObjects.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID)
 {
+	gTextures.Bind(Texture, ID);
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 {
-//	gSharedTextures.Unbind(ID);
+	gTextures.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void SetTracerVolumeIDs(int ID[MAX_NO_VOLUMES], int Size)
@@ -207,6 +209,7 @@ EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.Camera = Camera;
+	Tracer.Camera.ToDevice();
 }
 
 EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings)

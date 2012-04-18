@@ -64,9 +64,8 @@ struct Camera
 
 	HOST void ToDevice()
 	{
-		this->InvExposure	= 1.0f / this->Exposure;
-		this->Gamma			= this->Gamma;
-		this->InvGamma		= 1.0f / this->Gamma;
+		this->InvExposure	= this->Exposure == 0.0f ? 0.0f : 1.0f / this->Exposure;
+		this->InvGamma		= this->Gamma == 0.0f ? 0.0f : 1.0f / this->Gamma;
 		
 		this->N = Normalize(this->Target - this->Pos);
 		this->U = Normalize(Cross(this->N, this->Up));

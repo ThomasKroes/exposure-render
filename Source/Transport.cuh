@@ -120,8 +120,12 @@ DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
-	if (gpLights->Count <= 0)
-		return ColorXYZf(0.0f);
+	ColorXYZf Ld;
+
+	Ld += EvaluateColorTransferFunction(gpTracer->Emission1D, GetIntensity(0, SE.P));
+
+	if (gpTracer->NoLights <= 0)
+		return Ld;
 
 	VolumeShader Shader;
 	
@@ -141,15 +145,10 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	}
 
 	const int LightID = floorf(LS.LightNum * gpLights->Count);
-
-	ColorXYZf Ld;
 	
-	int NoSamples = 1;
+	Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID);
 
-	for (int i = 0; i < NoSamples; i++)
-		Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID) / (float)NoSamples;
-
-	return (float)gpLights->Count * (Ld / (float)NoSamples);
+	return (float)gpTracer->NoLights * Ld;
 }
 
 }

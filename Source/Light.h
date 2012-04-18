@@ -57,8 +57,10 @@ struct EXPOSURE_RENDER_DLL Light
 		return *this;
 	}
 
-	HOST void ToDevice()
+	HOST static Light FromHost(const Light& Other)
 	{
+		Light Result = Other;
+		return Result;
 	}
 };
 
