@@ -19,10 +19,6 @@
 namespace ExposureRender
 {
 
-#define KRNL_SINGLE_SCATTERING_BLOCK_W		16
-#define KRNL_SINGLE_SCATTERING_BLOCK_H		8
-#define KRNL_SINGLE_SCATTERING_BLOCK_SIZE	KRNL_SINGLE_SCATTERING_BLOCK_W * KRNL_SINGLE_SCATTERING_BLOCK_H
-
 DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Object) };
@@ -49,15 +45,9 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 
 KERNEL void KrnlSingleScattering()
 {
-	const int X = blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y = blockIdx.y * blockDim.y + threadIdx.y;
+	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
-	if (X >= gpTracer->FrameBuffer.Resolution[0] || Y >= gpTracer->FrameBuffer.Resolution[1])
-		return;
-	
-	return;
-
-	CRNG RNG(gpTracer->FrameBuffer.CudaRandomSeeds1.GetPtr(X, Y), gpTracer->FrameBuffer.CudaRandomSeeds2.GetPtr(X, Y));
+	CRNG RNG(gpTracer->FrameBuffer.CudaRandomSeeds1.GetPtr(IDx, IDy), gpTracer->FrameBuffer.CudaRandomSeeds2.GetPtr(IDx, IDy));
 
 	ColorXYZf Lv = ColorXYZf::Black();
 
@@ -71,12 +61,17 @@ KERNEL void KrnlSingleScattering()
 
 	Intersection Int;
 
+	gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(0.0f, IDx  > 100 ? 255.0f : 0.0f, 0.0f, 0.0f), IDx, IDy);
+	//gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[1] = X  > 100 ? 255 : 0;
+	return;
 	IntersectBox(Rc, gpVolumes->Get(0).MinAABB, gpVolumes->Get(0).MaxAABB, Int);
+	
+
 
 	if (Int.Valid)
-		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(1.0f), X, Y);
+		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(1.0f), IDx, IDy);
 	else
-		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(0.0f), X, Y);
+		gpTracer->FrameBuffer.CudaFrameEstimate.Set(ColorXYZAf(0.0f), IDx, IDy);
 
 	/*
 	SE = SampleRay(Rc, RNG);
@@ -98,9 +93,7 @@ KERNEL void KrnlSingleScattering()
 
 void SingleScattering(int Width, int Height)
 {
-	const dim3 BlockDim(KRNL_SINGLE_SCATTERING_BLOCK_W, KRNL_SINGLE_SCATTERING_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
-
+	LAUNCH_DIMENSIONS(Width, Height, 1, 16, 8, 1)
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlSingleScattering<<<GridDim, BlockDim>>>()), "Single Scattering"); 
 }
 

@@ -24,23 +24,32 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 	Shape	Shape;
 	bool	Invert;
 
-	ClippingObject()
+	HOST ClippingObject()
 	{
 		this->Enabled	= true;
 		this->Invert	= false;
 	}
 	
-	~ClippingObject()
+	HOST ~ClippingObject()
 	{
 	}
+	
+	HOST ClippingObject(const ClippingObject& Other)
+	{
+		*this = Other;
+	}
 
-	ClippingObject& operator = (const ClippingObject& Other)
+	HOST ClippingObject& operator = (const ClippingObject& Other)
 	{
 		this->Enabled	= Other.Enabled;
 		this->Shape		= Other.Shape;
 		this->Invert	= Other.Invert;
 
 		return *this;
+	}
+
+	HOST void ToDevice()
+	{
 	}
 };
 

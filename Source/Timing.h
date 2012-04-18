@@ -24,19 +24,28 @@ struct EXPOSURE_RENDER_DLL KernelTiming
 	char	Event[MAX_CHAR_SIZE];
 	float	Duration;
 
-	KernelTiming()
+	HOST KernelTiming()
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, "Undefined");
 		this->Duration = 0.0f;
 	}
+	
+	HOST ~KernelTiming()
+	{
+	}
+	
+	HOST KernelTiming(const KernelTiming& Other)
+	{
+		*this = Other;
+	}
 
-	KernelTiming(const char* pEvent, const float& Duration)
+	HOST KernelTiming(const char* pEvent, const float& Duration)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, pEvent);
 		this->Duration = Duration;
 	}
 
-	KernelTiming& operator = (const KernelTiming& Other)
+	HOST KernelTiming& operator = (const KernelTiming& Other)
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, Other.Event);
 		this->Duration = Other.Duration;

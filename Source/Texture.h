@@ -29,15 +29,20 @@ struct EXPOSURE_RENDER_DLL Texture
 	Vec2f				Repeat;
 	bool				Flip[2];
 
-	Texture()
+	HOST Texture()
 	{
 	}
 
-	~Texture()
+	HOST ~Texture()
 	{
 	}
+	
+	HOST Texture(const Texture& Other)
+	{
+		*this = Other;
+	}
 
-	Texture& operator = (const Texture& Other)
+	HOST Texture& operator = (const Texture& Other)
 	{
 		this->Type			= Other.Type;
 		this->OutputLevel	= Other.OutputLevel;
@@ -48,6 +53,11 @@ struct EXPOSURE_RENDER_DLL Texture
 		this->Flip[0]		= Other.Flip[0];
 		this->Flip[1]		= Other.Flip[1];
 		
+		return *this;
+	}
+
+	HOST void ToDevice()
+	{
 		/*
 		this->Type			= Other.Type;
 		this->OutputLevel	= Other.OutputLevel;
@@ -78,8 +88,6 @@ struct EXPOSURE_RENDER_DLL Texture
 
 		return *this;
 		*/
-		
-		return *this;
 	}
 };
 

@@ -33,13 +33,18 @@ struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 	NodesVector		Data;
 	int				Count;
 
-	PiecewiseLinearFunction()
+	HOST PiecewiseLinearFunction()
 	{
 		this->Count = 0;
 	}
 
-	~PiecewiseLinearFunction()
+	HOST ~PiecewiseLinearFunction()
 	{
+	}
+
+	HOST PiecewiseLinearFunction(const PiecewiseLinearFunction& Other)
+	{
+		*this = Other;
 	}
 
 	PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
@@ -58,7 +63,20 @@ struct EXPOSURE_RENDER_DLL TransferFunction1D
 {
 	PiecewiseLinearFunction PLF[Size];
 	
-	TransferFunction1D& operator = (const TransferFunction1D& Other)
+	HOST TransferFunction1D()
+	{
+	}
+
+	HOST ~TransferFunction1D()
+	{
+	}
+
+	HOST TransferFunction1D(const TransferFunction1D& Other)
+	{
+		*this = Other;
+	}
+
+	HOST TransferFunction1D& operator = (const TransferFunction1D& Other)
 	{	
 		for (int i = 0; i < Size; i++)
 			this->PLF[i] = Other.PLF[i];

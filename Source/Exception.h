@@ -24,17 +24,22 @@ struct EXPOSURE_RENDER_DLL Exception
 	Enums::ExceptionLevel	Level;
 	char					Message[MAX_CHAR_SIZE];
 
-	Exception(const Enums::ExceptionLevel& Level, const char* pMessage = "")
+	HOST Exception(const Enums::ExceptionLevel& Level, const char* pMessage = "")
 	{
 		this->Level = Level;
 		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
 	}
 
-	~Exception()
+	HOST ~Exception()
 	{
 	}
 
-	Exception& operator = (const Exception& Other)
+	HOST Exception(const Exception& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Exception& operator = (const Exception& Other)
 	{
 		this->Level = Other.Level;
 		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);

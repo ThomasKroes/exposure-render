@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Color.cuh"
+#include "Color.h"
 #include "Geometry.cuh"
 #include "Filter.cuh"
 
@@ -27,14 +27,14 @@ namespace ExposureRender
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/BilateralFilter.cpp?r=3
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
 
-DEVICE inline float GetSpatialWeight(const int& X, const int& KernelX)
+DEVICE inline float GetSpatialWeight(BilateralFilter& Filter, const int& IDx, const int& KernelX)
 {
-	return gpTracer->PostProcessingFilter.KernelD[gpTracer->PostProcessingFilter.KernelRadius + KernelX - X];
+	return Filter.KernelD[Filter.KernelRadius + KernelX - IDx];
 }
 
-DEVICE inline float GaussianSimilarity(const ColorRGBf& A, const ColorRGBf& B)
+DEVICE inline float GaussianSimilarity(BilateralFilter& Filter, const ColorRGBf& A, const ColorRGBf& B)
 {
-	return gpTracer->PostProcessingFilter.GaussSimilarity[(int)fabs(LuminanceFromRGB(A[0], A[1], A[2]) - LuminanceFromRGB(B[0], B[1], B[2]))];//(int)floorf(A[0] - B[0])];
+	return Filter.GaussSimilarity[(int)fabs(LuminanceFromRGB(A[0], A[1], A[2]) - LuminanceFromRGB(B[0], B[1], B[2]))];//(int)floorf(A[0] - B[0])];
 }
 
 DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
@@ -42,158 +42,146 @@ DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
 	return ColorRGBf(Color[0], Color[1], Color[2]);
 }
 
-DEVICE inline float FilterWeight(const int& X, const int& KernelX, const ColorRGBf& KernelPosColor, const ColorRGBf& CenterColor)
+DEVICE inline float FilterWeight(const int& IDx, const int& KernelX, const ColorRGBf& KernelPosColor, const ColorRGBf& CenterColor)
 {
-	return GetSpatialWeight(X, KernelX) * GaussianSimilarity(KernelPosColor, CenterColor);
+	return GetSpatialWeight(IDx, KernelX) * GaussianSimilarity(KernelPosColor, CenterColor);
 }
 
 KERNEL void KrnlBilateralFilterHorizontal(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int Width, int Height)
 {
-	// Indexing
-	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y 	= blockIdx.y * blockDim.y + threadIdx.y;
-	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
-	const int PID	= Y * Width + X;
-
-	// Exit if beyond image boundaries
-	if (X >= Width || Y >= Height)
-		return;
+	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
 	// Compute kernel spatial range, taking into account the image boundaries
 	__shared__ int Range[KRNL_BILATERAL_FILTER_BLOCK_SIZE][2];
 	
 	__syncthreads();
 
-	Range[TID][0] = max(0, X - gpTracer->PostProcessingFilter.KernelRadius);
-	Range[TID][1] = min(X + gpTracer->PostProcessingFilter.KernelRadius, Width - 1);
+	BilateralFilter& Filter = gpTracer->RenderSettings.Filtering.PostProcessingFilter;
+
+	Range[IDt][0] = max(0, IDx - Filter.KernelRadius);
+	Range[IDt][1] = min(IDx + Filter.KernelRadius, Width - 1);
 
 	__shared__ float Weight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 	__shared__ float TotalWeight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 	
 	__syncthreads();
 
-	Weight[TID]			= 0.0f;
-	TotalWeight[TID]	= 0.0f;
+	Weight[IDt]			= 0.0f;
+	TotalWeight[IDt]	= 0.0f;
 	
 	// Filter accumulated sum color
 	__shared__ ColorRGBf Sum[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 
 	__syncthreads();
 
-	Sum[TID].Black();
+	Sum[IDt].Black();
 
 	// Kernel center pixel color
-	ColorRGBf CenterColor = ToColorRGBf(pIn[PID]);
+	ColorRGBf CenterColor = ToColorRGBf(pIn[IDk]);
 
 	// Execute kernel
-	for (int x = Range[TID][0]; x < Range[TID][1]; x++)
+	for (int x = Range[IDt][0]; x < Range[IDt][1]; x++)
 	{
 		// Get color at kernel position
-		ColorRGBf KernelPosColor = ToColorRGBf(pIn[Y * Width + x]);
+		ColorRGBf KernelPosColor = ToColorRGBf(pIn[IDy * Width + x]);
 
 		// Compute composite weight
-		Weight[TID] = FilterWeight(X, x, KernelPosColor, CenterColor);
+		Weight[IDt] = FilterWeight(IDx, x, KernelPosColor, CenterColor);
 
 		// Compute total weight for normalization
-		TotalWeight[TID] += Weight[TID];
+		TotalWeight[IDt] += Weight[IDt];
 		
 		// Apply weight
-		ColorRGBf C = KernelPosColor * Weight[TID];
+		ColorRGBf C = KernelPosColor * Weight[IDt];
 
 		// Compute sum color
-		Sum[TID] += C;
+		Sum[IDt] += C;
     }
 
 	__syncthreads();
 
-    if (TotalWeight[TID] > 0.0f)
+    if (TotalWeight[IDt] > 0.0f)
 	{
-		pOut[PID][0] = Clamp(Sum[TID][0] / TotalWeight[TID], 0.0f, 255.0f);
-		pOut[PID][1] = Clamp(Sum[TID][1] / TotalWeight[TID], 0.0f, 255.0f);
-		pOut[PID][2] = Clamp(Sum[TID][2] / TotalWeight[TID], 0.0f, 255.0f);
-		pOut[PID][3] = 255;
+		pOut[IDk][0] = Clamp(Sum[IDt][0] / TotalWeight[IDt], 0.0f, 255.0f);
+		pOut[IDk][1] = Clamp(Sum[IDt][1] / TotalWeight[IDt], 0.0f, 255.0f);
+		pOut[IDk][2] = Clamp(Sum[IDt][2] / TotalWeight[IDt], 0.0f, 255.0f);
+		pOut[IDk][3] = 255;
 	}
 	else
 	{
-		pOut[PID][0] = 0;
-		pOut[PID][1] = 0;
-		pOut[PID][2] = 0;
-		pOut[PID][3] = 255;
+		pOut[IDk][0] = 0;
+		pOut[IDk][1] = 0;
+		pOut[IDk][2] = 0;
+		pOut[IDk][3] = 255;
 	}
 }
 
 KERNEL void KrnlBilateralFilterVertical(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int Width, int Height)
 {
-	// Indexing
-	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y 	= blockIdx.y * blockDim.y + threadIdx.y;
-	const int TID	= threadIdx.y * blockDim.x + threadIdx.x;
-	const int PID	= Y * Width + X;
-
-	// Exit if beyond image boundaries
-	if (X >= Width || Y >= Height)
-		return;
+	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
 	// Compute kernel spatial range, taking into account the image boundaries
 	__shared__ int Range[KRNL_BILATERAL_FILTER_BLOCK_SIZE][2];
 	
 	__syncthreads();
 
-	Range[TID][0] = max(0, Y - gpTracer->PostProcessingFilter.KernelRadius);
-	Range[TID][1] = min(Y + gpTracer->PostProcessingFilter.KernelRadius, Height - 1);
+	BilateralFilter& Filter = gpTracer->RenderSettings.Filtering.PostProcessingFilter;
+
+	Range[IDt][0] = max(0, IDy - Filter.KernelRadius);
+	Range[IDt][1] = min(IDy + Filter.KernelRadius, Height - 1);
 
 	__shared__ float Weight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 	__shared__ float TotalWeight[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 	
 	__syncthreads();
 
-	Weight[TID]			= 0.0f;
-	TotalWeight[TID]	= 0.0f;
+	Weight[IDt]			= 0.0f;
+	TotalWeight[IDt]	= 0.0f;
 	
 	// Filter accumulated sum color
 	__shared__ ColorRGBf Sum[KRNL_BILATERAL_FILTER_BLOCK_SIZE];
 
 	__syncthreads();
 
-	Sum[TID].Black();
+	Sum[IDt].Black();
 
 	// Kernel center pixel color
-	ColorRGBf CenterColor = ToColorRGBf(pIn[PID]);
+	ColorRGBf CenterColor = ToColorRGBf(pIn[IDk]);
 
 	// Execute kernel
-	for (int y = Range[TID][0]; y < Range[TID][1]; y++)
+	for (int y = Range[IDt][0]; y < Range[IDt][1]; y++)
 	{
 		// Get color at kernel position
-		ColorRGBf KernelPosColor = ToColorRGBf(pIn[y * Width + X]);
+		ColorRGBf KernelPosColor = ToColorRGBf(pIn[y * Width + IDx]);
 
 		// Compute composite weight
-		Weight[TID] = FilterWeight(Y, y, KernelPosColor, CenterColor);
+		Weight[IDt] = FilterWeight(IDy, y, KernelPosColor, CenterColor);
 
 		// Compute total weight for normalization
-		TotalWeight[TID] += Weight[TID];
+		TotalWeight[IDt] += Weight[IDt];
 		
 		// Apply weight
-		ColorRGBf C = KernelPosColor * Weight[TID];
+		ColorRGBf C = KernelPosColor * Weight[IDt];
 
 		// Compute sum color
-		Sum[TID] += C;
+		Sum[IDt] += C;
     }
 
 	__syncthreads();
 
-	if (TotalWeight[TID] > 0.0f)
+	if (TotalWeight[IDt] > 0.0f)
 	{
-		pOut[PID][0] = Clamp(Sum[TID][0] / TotalWeight[TID], 0.0f, 255.0f);
-		pOut[PID][1] = Clamp(Sum[TID][1] / TotalWeight[TID], 0.0f, 255.0f);
-		pOut[PID][2] = Clamp(Sum[TID][2] / TotalWeight[TID], 0.0f, 255.0f);
-		pOut[PID][3] = 255;
+		pOut[IDk][0] = Clamp(Sum[IDt][0] / TotalWeight[IDt], 0.0f, 255.0f);
+		pOut[IDk][1] = Clamp(Sum[IDt][1] / TotalWeight[IDt], 0.0f, 255.0f);
+		pOut[IDk][2] = Clamp(Sum[IDt][2] / TotalWeight[IDt], 0.0f, 255.0f);
+		pOut[IDk][3] = 255;
 	}
 	else
 	{
-		pOut[PID][0] = 0;
-		pOut[PID][1] = 0;
-		pOut[PID][2] = 0;
-		pOut[PID][3] = 255;
+		pOut[IDk][0] = 0;
+		pOut[IDk][1] = 0;
+		pOut[IDk][2] = 0;
+		pOut[IDk][3] = 255;
 	}
 }
 

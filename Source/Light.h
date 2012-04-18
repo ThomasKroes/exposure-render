@@ -27,7 +27,7 @@ struct EXPOSURE_RENDER_DLL Light
 	float					Multiplier;
 	Enums::EmissionUnit		Unit;
 	
-	Light()
+	HOST Light()
 	{
 		this->Enabled		= true;
 		this->Visible		= true;
@@ -36,11 +36,16 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Unit			= Enums::Power;
 	}
 
-	~Light()
+	HOST ~Light()
 	{
 	}
+
+	HOST Light(const Light& Other)
+	{
+		*this = Other;
+	}
 	
-	Light& operator = (const Light& Other)
+	HOST Light& operator = (const Light& Other)
 	{
 		this->Enabled		= Other.Enabled;
 		this->Visible		= Other.Visible;
@@ -50,6 +55,10 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Unit			= Other.Unit;
 
 		return *this;
+	}
+
+	HOST void ToDevice()
+	{
 	}
 };
 

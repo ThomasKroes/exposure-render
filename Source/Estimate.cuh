@@ -19,26 +19,16 @@
 namespace ExposureRender
 {
 
-#define KRNL_ESTIMATE_BLOCK_W		16
-#define KRNL_ESTIMATE_BLOCK_H		8
-#define KRNL_ESTIMATE_BLOCK_SIZE	KRNL_ESTIMATE_BLOCK_W * KRNL_ESTIMATE_BLOCK_H
-
 KERNEL void KrnlComputeEstimate()
 {
-	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
-	if (X >= gpTracer->FrameBuffer.Resolution[0] || Y >= gpTracer->FrameBuffer.Resolution[1])
-		return;
-
-	gpTracer->FrameBuffer.CudaRunningEstimateXyza.Set(CumulativeMovingAverage(gpTracer->FrameBuffer.CudaRunningEstimateXyza.Get(X, Y), gpTracer->FrameBuffer.CudaFrameEstimate.Get(X, Y), gpTracer->NoIterations), X, Y);
+	gpTracer->FrameBuffer.CudaRunningEstimateXyza.Set(CumulativeMovingAverage(gpTracer->FrameBuffer.CudaRunningEstimateXyza.Get(IDx, IDy), gpTracer->FrameBuffer.CudaFrameEstimate.Get(IDx, IDy), gpTracer->NoIterations), IDx, IDy);
 }
 
 void ComputeEstimate(int Width, int Height)
 {
-	const dim3 BlockDim(KRNL_ESTIMATE_BLOCK_W, KRNL_ESTIMATE_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
-
+	LAUNCH_DIMENSIONS(Width, Height, 1, 16, 8, 1)
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlComputeEstimate<<<GridDim, BlockDim>>>()), "Compute running estimate");
 }
 

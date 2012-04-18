@@ -36,19 +36,37 @@ struct Camera
 	
 	HOST Camera& Camera::operator = (const Camera& Other)
 	{
-		this->FilmSize		= Other.FilmSize;
-		this->Pos			= Other.Pos;
-		this->Target		= Other.Target;
-		this->Up			= Other.Up;
-		this->FocalDistance	= Other.FocalDistance;
-		this->ApertureSize	= Other.ApertureSize;
-		this->ClipNear		= Other.ClipNear;
-		this->ClipFar		= Other.ClipFar;
-		this->Exposure		= Other.Exposure;
-		this->InvExposure	= 1.0f / Other.Exposure;
-		this->Gamma			= Other.Gamma;
-		this->InvGamma		= 1.0f / Other.Gamma;
-		this->FOV			= Other.FOV;
+		this->FilmSize			= Other.FilmSize;
+		this->Pos				= Other.Pos;
+		this->Target			= Other.Target;
+		this->Up				= Other.Up;
+		this->N					= Other.N;
+		this->U					= Other.U;
+		this->V					= Other.V;
+		this->FocalDistance		= Other.FocalDistance;
+		this->ApertureSize		= Other.ApertureSize;
+		this->ClipNear			= Other.ClipNear;
+		this->ClipFar			= Other.ClipFar;
+		this->Screen[0][0]		= Other.Screen[0][0];
+		this->Screen[0][1]		= Other.Screen[0][1];
+		this->Screen[1][0]		= Other.Screen[1][0];
+		this->Screen[1][1]		= Other.Screen[1][1];
+		this->InvScreen[0]		= Other.InvScreen[0];
+		this->InvScreen[1]		= Other.InvScreen[1];
+		this->Exposure			= Other.Exposure;
+		this->InvExposure		= Other.InvExposure;
+		this->Gamma				= Other.Gamma;
+		this->InvGamma			= Other.InvGamma;
+		this->FOV				= Other.FOV;
+
+		return *this;
+	}
+
+	HOST void ToDevice()
+	{
+		this->InvExposure	= 1.0f / this->Exposure;
+		this->Gamma			= this->Gamma;
+		this->InvGamma		= 1.0f / this->Gamma;
 		
 		this->N = Normalize(this->Target - this->Pos);
 		this->U = Normalize(Cross(this->N, this->Up));
@@ -80,8 +98,6 @@ struct Camera
 
 		this->InvScreen[0] = (this->Screen[0][1] - this->Screen[0][0]) / (float)this->FilmSize[0];
 		this->InvScreen[1] = (this->Screen[1][1] - this->Screen[1][0]) / (float)this->FilmSize[1];
-
-		return *this;
 	}
 
 	Vec2i	FilmSize;

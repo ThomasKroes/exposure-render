@@ -45,10 +45,11 @@ public:
 	CLAMP(ColorRGBf, float, 3)
 	IS_BLACK(3)
 
-	DATA(float, 3)
-
 	static inline HOST_DEVICE ColorRGBf FromXYZf(const ColorXYZf& XYZ);
+	static inline HOST_DEVICE ColorRGBf FromXYZAf(const ColorXYZAf& XYZA);
 	static inline HOST_DEVICE ColorRGBf Black() { return ColorRGBf(); }
+
+	DATA(float, 3)
 };
 
 class EXPOSURE_RENDER_DLL ColorXYZf
@@ -124,6 +125,18 @@ HOST_DEVICE ColorRGBf ColorRGBf::FromXYZf(const ColorXYZf& XYZ)
 	Result[0] =  3.240479f * XYZ[0] - 1.537150f * XYZ[1] - 0.498535f * XYZ[2];
 	Result[1] = -0.969256f * XYZ[0] + 1.875991f * XYZ[1] + 0.041556f * XYZ[2];
 	Result[2] =  0.055648f * XYZ[0] - 0.204043f * XYZ[1] + 1.057311f * XYZ[2];
+
+	return Result;
+};
+
+HOST_DEVICE ColorRGBf ColorRGBf::FromXYZAf(const ColorXYZAf& XYZA)
+{
+	ColorRGBf Result;
+
+	Result[0] =  3.240479f * XYZA[0] - 1.537150f * XYZA[1] - 0.498535f * XYZA[2];
+	Result[1] = -0.969256f * XYZA[0] + 1.875991f * XYZA[1] + 0.041556f * XYZA[2];
+	Result[2] =  0.055648f * XYZA[0] - 0.204043f * XYZA[1] + 1.057311f * XYZA[2];
+	Result[3] = XYZA[3];
 
 	return Result;
 };

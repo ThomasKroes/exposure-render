@@ -537,35 +537,22 @@ public:
 	DATA(float, 4)
 };
 
-//static inline HOST_DEVICE Vec2i operator - (const Vec2i& A, const Vec2i& B)					{ Vec2i Result = A; return A -= B;								};
 static inline HOST_DEVICE Vec2i operator * (const Vec2i& V, const int& I)					{ return Vec2i(V[0] * I, V[1] * I);								};
 static inline HOST_DEVICE Vec2i operator * (const int& I, const Vec2i& V)					{ return Vec2i(V[0] * I, V[1] * I);								};
 
-//static inline HOST_DEVICE Vec2f operator - (const Vec2f& A, const Vec2f& B)					{ return A - B;													};
 static inline HOST_DEVICE Vec2f operator * (const Vec2f& V, const float& F)					{ return Vec2f(V[0] * F, V[1] * F);								};
 static inline HOST_DEVICE Vec2f operator * (const float& F, const Vec2f& V)					{ return Vec2f(V[0] * F, V[1] * F);								};
 
 static inline HOST_DEVICE Vec2f Normalize(const Vec2f& V)									{ Vec2f R = V; R.Normalize(); return R; 						};
 static inline HOST_DEVICE float Length(const Vec2f& V)										{ return V.Length();											};
 
-/*
-static inline HOST_DEVICE Vec2f Cross(const Vec2f& A, const Vec2f& B)						{ return A.Cross(B);											};
-static inline HOST_DEVICE float Dot(const Vec2f& A, const Vec2f& B)							{ return A.Dot(B);												};
-static inline HOST_DEVICE float AbsDot(const Vec2f& A, const Vec2f& B)						{ return fabs(A.Dot(B));										};
-static inline HOST_DEVICE float ClampedAbsDot(const Vec2f& A, const Vec2f& B)				{ return Clamp(fabs(A.Dot(B)), 0.0f, 1.0f);						};
-static inline HOST_DEVICE float ClampedDot(const Vec2f& A, const Vec2f& B)					{ return Clamp(Dot(A, B), 0.0f, 1.0f);							};
-*/
-
 static inline HOST_DEVICE float Distance(const Vec2f& A, const Vec2f& B)					{ return (A - B).Length();										};
 static inline HOST_DEVICE float DistanceSquared(const Vec2f& A, const Vec2f& B)				{ return (A - B).LengthSquared();								};
 static inline HOST_DEVICE Vec2f Lerp(const Vec2f& A, const Vec2f& B, const float& LerpC)	{ return A + LerpC * (B - A);									};
 
-//static inline HOST_DEVICE Vec3i operator - (const Vec3i& A, const Vec3i& B)					{ return A - B;													};
 static inline HOST_DEVICE Vec3i operator * (const Vec3i& V, const int& I)					{ return Vec3i(V[0] * I, V[1] * I, V[2] * I);					};
 static inline HOST_DEVICE Vec3i operator * (const int& I, const Vec3i& V)					{ return Vec3i(V[0] * I, V[1] * I, V[2] * I);					};
 
-//static inline HOST_DEVICE Vec3f operator - (const Vec3f& A, const Vec3f& B)					{ return A - B;													};
-//static inline HOST_DEVICE Vec3f operator * (const Vec3f& V, const float& F)					{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);					};
 static inline HOST_DEVICE Vec3f operator * (const float& F, const Vec3f& V)					{ return Vec3f(V[0] * F, V[1] * F, V[2] * F);					};
 
 static inline HOST_DEVICE Vec3f Normalize(const Vec3f& V)									{ Vec3f R = V; R.Normalize(); return R; 						};

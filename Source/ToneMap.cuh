@@ -18,53 +18,44 @@
 namespace ExposureRender
 {
 
-#define KRNL_TONE_MAP_BLOCK_W		16 
-#define KRNL_TONE_MAP_BLOCK_H		8
-#define KRNL_TONE_MAP_BLOCK_SIZE	KRNL_TONE_MAP_BLOCK_W * KRNL_TONE_MAP_BLOCK_H
-
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/BilateralFilter.cpp?r=3
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
 
-DEVICE ColorRGBuc ToneMap(ColorXYZAf XYZA)
+
+DEVICE ColorRGBuc ToneMap(const ColorXYZAf& XYZA)
 {
-	ColorRGBf RgbHdr;
+	ColorRGBf RGBf = ColorRGBf::FromXYZAf(XYZA);
 
-	RgbHdr.FromXYZ(XYZA.GetX(), XYZA.GetY(), XYZA.GetZ());
+	RGBf[0] = 1.0f - expf(-(RGBf[0] * gpTracer->Camera.InvExposure));
+	RGBf[1] = 1.0f - expf(-(RGBf[1] * gpTracer->Camera.InvExposure));
+	RGBf[2] = 1.0f - expf(-(RGBf[2] * gpTracer->Camera.InvExposure));
 
-	RgbHdr.SetR(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetR() * gpTracer->Camera.InvExposure)), 0.0f, 1.0f));
-	RgbHdr.SetG(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetG() * gpTracer->Camera.InvExposure)), 0.0f, 1.0f));
-	RgbHdr.SetB(ExposureRender::Clamp(1.0f - expf(-(RgbHdr.GetB() * gpTracer->Camera.InvExposure)), 0.0f, 1.0f));
-	
-	ColorRGBuc Result;
+	RGBf.Clamp(0.0f, 1.0f);
 
-	Result.SetR((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetR(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetG((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetG(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
-	Result.SetB((unsigned char)ExposureRender::Clamp((255.0f * powf(RgbHdr.GetB(), gpTracer->Camera.InvGamma)), 0.0f, 255.0f));
+	ColorRGBuc RGBuc;
 
-	return Result;
+	RGBuc[0] = 255.0f * powf(RGBuc[0], gpTracer->Camera.InvGamma);
+	RGBuc[1] = 255.0f * powf(RGBuc[1], gpTracer->Camera.InvGamma);
+	RGBuc[2] = 255.0f * powf(RGBuc[2], gpTracer->Camera.InvGamma);
+
+	return RGBuc;
 }
 
 KERNEL void KrnlToneMap()
 {
-	const int X 	= blockIdx.x * blockDim.x + threadIdx.x;
-	const int Y		= blockIdx.y * blockDim.y + threadIdx.y;
+	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
-	if (X >= gpTracer->FrameBuffer.Resolution[0] || Y >= gpTracer->FrameBuffer.Resolution[1])
-		return;
+	const ColorRGBuc RGB = ToneMap(gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy));
 
-	const ColorRGBuc L1 = ToneMap(gpTracer->FrameBuffer.CudaRunningEstimateXyza.Get(X, Y));
-
-	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[0] = L1[0];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[1] = L1[1];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[2] = L1[2];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(X, Y)[3] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(X, Y)[3] * 255.0f;
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[0] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[0];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[1] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[1];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[2] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[2];
+	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[3] = 255;
 }
 
 void ToneMap(int Width, int Height)
 {
-	const dim3 BlockDim(KRNL_TONE_MAP_BLOCK_W, KRNL_TONE_MAP_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
-
+	LAUNCH_DIMENSIONS(Width, Height, 1, 16, 8, 1)
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlToneMap<<<GridDim, BlockDim>>>()), "Tone map");
 }
 

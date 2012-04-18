@@ -23,14 +23,23 @@ struct EXPOSURE_RENDER_DLL Matrix44
 {
 	float NN[4][4];
 
-	Matrix44()
+	HOST Matrix44()
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
 				this->NN[i][j] = i == j ? 1.0f : 0.0f;
 	}
 
-	Matrix44& operator = (const Matrix44& Other)
+	HOST ~Matrix44()
+	{
+	}
+
+	HOST Matrix44(const Matrix44& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Matrix44& operator = (const Matrix44& Other)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)

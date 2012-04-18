@@ -27,16 +27,21 @@ struct EXPOSURE_RENDER_DLL Procedural
 	ColorXYZf					CheckerColor2;
 	ColorTransferFunction1D		Gradient;
 
-	Procedural()
+	HOST Procedural()
 	{
 		this->Type = Enums::Uniform;
 	}
 	
-	~Procedural()
+	HOST ~Procedural()
 	{
 	}
 
-	Procedural& operator = (const Procedural& Other)
+	HOST Procedural(const Procedural& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Procedural& operator = (const Procedural& Other)
 	{
 		this->Type			= Other.Type;
 		this->UniformColor	= Other.UniformColor;

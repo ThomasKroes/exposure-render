@@ -27,7 +27,7 @@ struct EXPOSURE_RENDER_DLL Object
 	int			GlossinessTextureID;
 	float		Ior;
 
-	Object()
+	HOST Object()
 	{
 		this->Enabled				= true;
 		this->DiffuseTextureID		= -1;
@@ -36,11 +36,16 @@ struct EXPOSURE_RENDER_DLL Object
 		this->Ior					= 0.0f;
 	}
 
-	~Object()
+	HOST ~Object()
 	{
 	}
 
-	Object& operator = (const Object& Other)
+	HOST Object(const Object& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Object& operator = (const Object& Other)
 	{
 		this->Enabled				= Other.Enabled;
 		this->Shape					= Other.Shape;
@@ -50,6 +55,10 @@ struct EXPOSURE_RENDER_DLL Object
 		this->Ior					= Other.Ior;
 
 		return *this;
+	}
+
+	HOST void ToDevice()
+	{
 	}
 };
 

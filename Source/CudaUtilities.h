@@ -272,15 +272,15 @@ struct CudaList
 		if (ID < 0)
 			return false;
 
-		It = Resources.find(ID);
+		this->It = Resources.find(ID);
 
-		return It != Resources.end();
+		return this->It != this->Resources.end();
 	}
 
 	HOST void Bind(const T& Resource, int& ID)
 	{
 		if (this->Resources.size() >= MaxSize)
-			throw(ErException(Enums::Warning, "Maximum number of resources reached"));
+			throw(Exception(Enums::Warning, "Maximum number of resources reached"));
 
 		const bool Exists = this->Exists(ID);
 
@@ -288,8 +288,8 @@ struct CudaList
 
 		if (!Exists)
 		{
-			ID = Counter;
-			Counter++;
+			ID = this->Counter;
+			this->Counter++;
 		}
 
 		this->Synchronize();
@@ -300,77 +300,122 @@ struct CudaList
 		if (!this->Exists(ID))
 			return;
 
-		It = this->Resources.find(ID);
+		this->It = this->Resources.find(ID);
 
 		if (It != Resources.end())
-			Resources.erase(It);
+			this->Resources.erase(this->It);
 
 		this->Synchronize();
 	}
 
 	HOST void Synchronize()
 	{
-		if (Resources.empty())
+		if (this->Resources.empty())
 			return;
 
 		this->List.Reset();
-
-		for (It = Resources.begin(); It != Resources.end(); It++)
-			this->List.Add(It->second);
+		
+		for (this->It = this->Resources.begin(); this->It != this->Resources.end(); this->It++)
+			this->List.Add(this->It->second);
 		
 		if (this->DeviceAllocation == NULL)
 			CUDA::Allocate(this->DeviceAllocation);
+		
+		cudaMemcpyToSymbol("gpVolumes", &this->DeviceAllocation, sizeof(&this->DeviceAllocation));
 
-		CUDA::MemCopyHostToDevice(&this->List, DeviceAllocation);
+		// CUDA::Allocate(this->DeviceAllocation);
 
-		void* pSymbol = NULL;
-
-		CUDA::MemCopyDeviceToDeviceSymbol(&DeviceAllocation, pSymbol);
+		//cudaMemcpy(this->DeviceAllocation, &this->List, sizeof(this->List), cudaMemcpyHostToDevice);
+		//cudaMemcpyToSymbol(gpTracer, &this->DeviceAllocation, sizeof(gpCurrentTracer));
+		//CUDA::MemCopyHostToDevice(&this->List, this->DeviceAllocation);
+		//CUDA::MemCopyDeviceToDeviceSymbol(&this->DeviceAllocation, "gpVolumes");
 	}
 
 	HOST T& operator[](const int& i)
 	{
-		It = this->Resources.find(i);
+		this->It = this->Resources.find(i);
 
-		if (It == Resources.end())
+		if (this->It == Resources.end())
 			throw(ErException(Enums::Fatal, "Resource does not exist"));
 
 		return this->Resources[i];
 	}
 };
 
-#define LAUNCH_CUDA_KERNEL_TIMED(cudakernelcall, title)									\
-{																						\
-	cudaEvent_t EventStart, EventStop;													\
-																						\
-	CUDA::HandleCudaError(cudaEventCreate(&EventStart));								\
-	CUDA::HandleCudaError(cudaEventCreate(&EventStop));									\
-	CUDA::HandleCudaError(cudaEventRecord(EventStart, 0));								\
-																						\
-	cudakernelcall;																		\
-																						\
-	CUDA::HandleCudaError(cudaGetLastError());											\
-	CUDA::HandleCudaError(cudaThreadSynchronize());										\
-																						\
-	CUDA::HandleCudaError(cudaEventRecord(EventStop, 0));								\
-	CUDA::HandleCudaError(cudaEventSynchronize(EventStop));								\
-																						\
-	float TimeDelta = 0.0f;																\
-																						\
-	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop));		\
-																						\
-	/*gKernelTimings.Add(ErKernelTiming(title, TimeDelta));*/							\
-																						\
-	CUDA::HandleCudaError(cudaEventDestroy(EventStart));								\
-	CUDA::HandleCudaError(cudaEventDestroy(EventStop));									\
+#define LAUNCH_DIMENSIONS(width, height, depth, block_width, block_height, block_depth)						\
+																											\
+	dim3 BlockDim;																							\
+																											\
+	BlockDim.x = block_width;																				\
+	BlockDim.y = block_height;																				\
+	BlockDim.z = block_depth;																				\
+																											\
+	dim3 GridDim;																							\
+																											\
+	GridDim.x = (int)ceilf((float)width / (float)BlockDim.x);												\
+	GridDim.y = (int)ceilf((float)height / (float)BlockDim.y);												\
+	GridDim.z = (int)ceilf((float)depth / (float)BlockDim.z);
+
+#define LAUNCH_CUDA_KERNEL_TIMED(cudakernelcall, title)														\
+{																											\
+	cudaEvent_t EventStart, EventStop;																		\
+																											\
+	CUDA::HandleCudaError(cudaEventCreate(&EventStart));													\
+	CUDA::HandleCudaError(cudaEventCreate(&EventStop));														\
+	CUDA::HandleCudaError(cudaEventRecord(EventStart, 0));													\
+																											\
+	cudakernelcall;																							\
+																											\
+	CUDA::HandleCudaError(cudaGetLastError());																\
+	CUDA::HandleCudaError(cudaThreadSynchronize());															\
+																											\
+	CUDA::HandleCudaError(cudaEventRecord(EventStop, 0));													\
+	CUDA::HandleCudaError(cudaEventSynchronize(EventStop));													\
+																											\
+	float TimeDelta = 0.0f;																					\
+																											\
+	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop));							\
+																											\
+	/*gKernelTimings.Add(ErKernelTiming(title, TimeDelta));*/												\
+																											\
+	CUDA::HandleCudaError(cudaEventDestroy(EventStart));													\
+	CUDA::HandleCudaError(cudaEventDestroy(EventStop));														\
 }
 
-#define LAUNCH_CUDA_KERNEL(cudakernelcall)												\
-{																						\
-	cudakernelcall;																		\
-																						\
-	CUDA::HandleCudaError(cudaGetLastError());											\
-	CUDA::HandleCudaError(cudaThreadSynchronize());										\
+#define LAUNCH_CUDA_KERNEL(cudakernelcall)																	\
+{																											\
+	cudakernelcall;																							\
+																											\
+	CUDA::HandleCudaError(cudaGetLastError());																\
+	CUDA::HandleCudaError(cudaThreadSynchronize());															\
 }
+
+#define KERNEL_1D(width)																					\
+	const int IDx 	= blockIdx.x * blockDim.x + threadIdx.x;												\
+	const int IDt	= threadIdx.x;																			\
+	const int IDk	= IDx;																					\
+																											\
+	if (IDx >= width)																						\
+		return;
+
+#define KERNEL_2D(width, height)																			\
+	const int IDx 	= blockIdx.x * blockDim.x + threadIdx.x;												\
+	const int IDy 	= blockIdx.y * blockDim.y + threadIdx.y;												\
+	const int IDt	= threadIdx.y * blockDim.x + threadIdx.x;												\
+	const int IDk	= IDy * width + IDx;																	\
+																											\
+	if (IDx >= width || IDy >= height)																		\
+		return;
+
+#define KERNEL_3D(width, height, depth)																		\
+	const int IDx 	= blockIdx.x * blockDim.x + threadIdx.x;												\
+	const int IDy 	= blockIdx.y * blockDim.y + threadIdx.y;												\
+	const int IDz 	= blockIdx.z * blockDim.z + threadIdx.z;												\
+	const int IDt	= threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x;		\
+	const int IDk	= IDz * width * height + IDy * width + IDx;												\
+																											\
+	if (IDx >= width || IDy >= height || IDz >= depth)														\
+		return;
+
 
 }

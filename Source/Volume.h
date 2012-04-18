@@ -24,22 +24,67 @@ namespace ExposureRender
 
 struct Volume
 {
-	Volume()
+	HOST Volume()
 	{
-//		ExposureRender::Vec2f t;
-//		t[0] = 15.0f;
 	}
 
-	~Volume()
+	HOST ~Volume()
 	{
+	}
+	
+	HOST Volume(const Volume& Other)
+	{
+		*this = Other;
 	}
 
 	HOST Volume& Volume::operator = (const Volume& Other)
 	{
-		this->Resolution		= Other.Resolution;
-		this->Spacing			= Other.Spacing;
-		this->NormalizeSize		= Other.NormalizeSize;
+		this->Resolution				= Other.Resolution;
+		this->InvResolution				= Other.InvResolution;
+		this->MinAABB					= Other.MinAABB;
+		this->MaxAABB					= Other.MaxAABB;
+		this->Size						= Other.Size;
+		this->InvSize					= Other.InvSize;
+		this->NormalizeSize				= Other.NormalizeSize;
+		this->Spacing					= Other.Spacing;
+		this->InvSpacing				= Other.InvSpacing;
+		this->GradientDeltaX			= Other.GradientDeltaX;
+		this->GradientDeltaY			= Other.GradientDeltaY;
+		this->GradientDeltaZ			= Other.GradientDeltaZ;
+		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
+		this->pVoxels					= Other.pVoxels;
 
+		return *this;
+	}
+
+	HOST void Free()
+	{
+#ifdef __CUDA_ARCH__
+		if (this->pVoxels != NULL)
+			CUDA::Free(this->pVoxels);
+#endif
+	}
+
+	HOST_DEVICE unsigned short Get(const Vec3i& XYZ) const
+	{
+		if (!this->pVoxels)
+			return unsigned short();
+		
+		Vec3i ClampedXYZ = XYZ;
+		ClampedXYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
+		
+		return this->pVoxels[ClampedXYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + ClampedXYZ[1] * (int)this->Resolution[0] + ClampedXYZ[0]];
+	}
+
+	HOST_DEVICE unsigned short Get(const Vec3f& XYZ) const
+	{
+		Vec3f LocalXYZ = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
+
+		return this->Get(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
+	}
+	
+	HOST void ToDevice()
+	{
 		float Scale = 1.0f;
 
 		if (this->NormalizeSize)
@@ -82,41 +127,13 @@ struct Volume
 		const int NoVoxels = (int)this->Resolution[0] * (int)this->Resolution[1] * (int)this->Resolution[2];
 
 		if (NoVoxels <= 0)
-			return *this;
+			return;
 
 		CUDA::Allocate(this->pVoxels, NoVoxels);
-		CUDA::MemCopyHostToDevice(Other.pVoxels, this->pVoxels, NoVoxels);
-#endif
-
-		return *this;
-	}
-
-	HOST void Free()
-	{
-#ifdef __CUDA_ARCH__
-		if (this->pVoxels != NULL)
-			CUDA::Free(this->pVoxels);
+		// CUDA::MemCopyHostToDevice(Other.pVoxels, this->pVoxels, NoVoxels);
 #endif
 	}
 
-	HOST_DEVICE unsigned short Get(const Vec3i& XYZ) const
-	{
-		if (!this->pVoxels)
-			return unsigned short();
-		
-		Vec3i ClampedXYZ = XYZ;
-		ClampedXYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
-		
-		return this->pVoxels[ClampedXYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + ClampedXYZ[1] * (int)this->Resolution[0] + ClampedXYZ[0]];
-	}
-
-	HOST_DEVICE unsigned short Get(const Vec3f& XYZ) const
-	{
-		Vec3f LocalXYZ = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
-
-		return this->Get(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
-	}
-	
 	Vec3i				Resolution;			// FIXME
 	Vec3f				InvResolution;
 	Vec3f				MinAABB;
@@ -129,7 +146,7 @@ struct Volume
 	Vec3f				GradientDeltaX;
 	Vec3f				GradientDeltaY;
 	Vec3f				GradientDeltaZ;
-	float				GradientMagnitudeRange[2];
+	Vec2f				GradientMagnitudeRange;
 	unsigned short*		pVoxels;
 };
 

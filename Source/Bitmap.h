@@ -29,23 +29,32 @@ struct EXPOSURE_RENDER_DLL Bitmap
 	Vec2i			Size;
 	bool			Dirty;
 
-	Bitmap()
+	HOST Bitmap()
 	{
 		this->pData	= NULL;
 		this->Dirty = false;
 	}
 
-	~Bitmap()
+	HOST ~Bitmap()
 	{
 	}
 
-	Bitmap& operator = (const Bitmap& Other)
+	HOST Bitmap(const Bitmap& Other)
 	{
-//		this->pData	= Other.pData;
+		*this = Other;
+	}
+
+	HOST Bitmap& operator = (const Bitmap& Other)
+	{
+		this->pData	= Other.pData;
 		this->Size	= Other.Size;
 		this->Dirty	= Other.Dirty;
 
 		return *this;
+	}
+
+	HOST void ToDevice()
+	{
 	}
 };
 

@@ -60,7 +60,7 @@ struct EXPOSURE_RENDER_DLL Shape
 	float				InnerRadius;
 	float				OuterRadius;
 
-	Shape()
+	HOST Shape()
 	{
 		this->OneSided		= false;
 		this->Type			= Enums::Plane;
@@ -69,11 +69,16 @@ struct EXPOSURE_RENDER_DLL Shape
 		this->OuterRadius	= 0.0f;
 	}
 
-	~Shape()
+	HOST ~Shape()
 	{
 	}
+
+	HOST Shape(const Shape& Other)
+	{
+		*this = Other;
+	}
 	
-	Shape& operator = (const Shape& Other)
+	HOST Shape& operator = (const Shape& Other)
 	{
 		this->TM			= Other.TM;
 		this->InvTM			= Other.InvTM;
