@@ -57,14 +57,14 @@ struct EXPOSURE_RENDER_DLL Light
 		this->Multiplier	= Other.Multiplier;
 		this->Unit			= Other.Unit;
 
+		this->Shape.Update();
+
 		return *this;
 	}
 
-	HOST static Light FromHost(const Light& Other)
+	HOST void FromHost(const Light& Other)
 	{
-		Light Result = Other;
-		Result.Shape.Update();
-		return Result;
+		*this = Other;
 	}
 };
 

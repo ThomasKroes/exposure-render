@@ -63,44 +63,26 @@ struct EXPOSURE_RENDER_DLL Texture
 		return *this;
 	}
 
-	HOST void ToDevice()
+	HOST void FromHost(const Texture& Other)
 	{
-		/*
-		this->Type			= Other.Type;
-		this->OutputLevel	= Other.OutputLevel;
-		this->Image			= Other.Image;
-		this->Procedural	= Other.Procedural;
-		this->Offset[0]		= Other.Offset[0];
-		this->Offset[1]		= Other.Offset[1];
-		this->Repeat[0]		= Other.Repeat[0];
-		this->Repeat[1]		= Other.Repeat[1];
-		this->Flip[0]		= Other.Flip[0];
-		this->Flip[1]		= Other.Flip[1];
-		
 #ifdef __CUDA_ARCH__
-		if (this->Image.Dirty)
-		{
-			if (this->Image.pData)
-				CUDA::Free(this->Image.pData);
-
-			if (this->Image.pData)
-			{
-				const int NoPixels = this->Image.Size[0] * this->Image.Size[1];
-			
-				CUDA::Allocate(this->Image.pData, NoPixels);
-				CUDA::MemCopyHostToDevice(Other.Image.pData, this->Image.pData, NoPixels);
-			}
-		} 
+		if (this->Bitmap.Dirty)
+			CUDA::Free(this->Bitmap.pData);
 #endif
 
-		return *this;
-		*/
-	}
+		*this = Other;
 
-	HOST static Texture FromHost(const Texture& Other)
-	{
-		Texture Result = Other;
-		return Result;
+#ifdef __CUDA_ARCH__
+		if (this->Bitmap.Dirty && Other.Bitmap.pData)
+		{
+			const int NoPixels = this->Bitmap.Size[0] * this->Bitmap.Size[1];
+			
+			this->Bitmap.pData = NULL;
+
+			CUDA::Allocate(this->Bitmap.pData, NoPixels);
+			CUDA::MemCopyHostToDevice(Other.Bitmap.pData, this->Bitmap.pData, NoPixels);
+		} 
+#endif
 	}
 };
 

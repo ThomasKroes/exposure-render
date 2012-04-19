@@ -251,12 +251,12 @@ struct CudaList
 		if (!Exists)
 		{
 			ID = this->ResourceCounter;
-			this->ResourceMap[ID] = T::FromHost(Resource);
+			this->ResourceMap[ID].FromHost(Resource);
 			this->ResourceCounter++;
 		}
 		else
 		{
-			this->ResourceMap[ID] = T::FromHost(Resource);
+			this->ResourceMap[ID].FromHost(Resource);
 		}
 
 		this->Synchronize();

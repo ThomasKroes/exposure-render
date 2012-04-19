@@ -102,62 +102,60 @@ struct Volume
 		return this->Get(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
 	}
 	
-	HOST static Volume FromHost(const Volume& Other)
+	HOST void FromHost(const Volume& Other)
 	{
-		Volume Result = Other;
+		*this = Other;
 		
 		float Scale = 1.0f;
 
-		if (Result.NormalizeSize)
+		if (this->NormalizeSize)
 		{
-			const Vec3f PhysicalSize = Vec3f((float)Result.Resolution[0], (float)Result.Resolution[1], (float)Result.Resolution[2]) * Result.Spacing;
+			const Vec3f PhysicalSize = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * this->Spacing;
 			
 			const float Max = max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
 			Scale = 1.0f / Max;
 		}
 
-		Result.InvResolution[0]	= 1.0f / Result.Resolution[0];
-		Result.InvResolution[1]	= 1.0f / Result.Resolution[1];
-		Result.InvResolution[2]	= 1.0f / Result.Resolution[2];
-		Result.Spacing			= Scale * Result.Spacing;
-		Result.InvSpacing[0]	= 1.0f / Result.Spacing[0];
-		Result.InvSpacing[1]	= 1.0f / Result.Spacing[1];
-		Result.InvSpacing[2]	= 1.0f / Result.Spacing[2];
-		Result.Size				= Vec3f((float)Result.Resolution[0], (float)Result.Resolution[1], (float)Result.Resolution[2]) * Result.Spacing;
-		Result.InvSize[0]		= 1.0f / Result.Size[0];
-		Result.InvSize[1]		= 1.0f / Result.Size[1];
-		Result.InvSize[2]		= 1.0f / Result.Size[2];
-		Result.MinAABB			= -0.5f * Result.Size;
-		Result.MaxAABB			= 0.5f * Result.Size;
+		this->InvResolution[0]	= 1.0f / this->Resolution[0];
+		this->InvResolution[1]	= 1.0f / this->Resolution[1];
+		this->InvResolution[2]	= 1.0f / this->Resolution[2];
+		this->Spacing			= Scale * this->Spacing;
+		this->InvSpacing[0]		= 1.0f / this->Spacing[0];
+		this->InvSpacing[1]		= 1.0f / this->Spacing[1];
+		this->InvSpacing[2]		= 1.0f / this->Spacing[2];
+		this->Size				= Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * this->Spacing;
+		this->InvSize[0]		= 1.0f / this->Size[0];
+		this->InvSize[1]		= 1.0f / this->Size[1];
+		this->InvSize[2]		= 1.0f / this->Size[2];
+		this->MinAABB			= -0.5f * this->Size;
+		this->MaxAABB			= 0.5f * this->Size;
 
-		const float MinVoxelSize = min(Result.Spacing[0], min(Result.Spacing[1], Result.Spacing[2]));
+		const float MinVoxelSize = min(this->Spacing[0], min(this->Spacing[1], this->Spacing[2]));
 
-		Result.GradientDeltaX[0]	= MinVoxelSize;
-		Result.GradientDeltaX[1]	= 0.0f;
-		Result.GradientDeltaX[2]	= 0.0f;
-		Result.GradientDeltaY[0]	= 0.0f;
-		Result.GradientDeltaY[1]	= MinVoxelSize;
-		Result.GradientDeltaY[2]	= 0.0f;
-		Result.GradientDeltaZ[0]	= 0.0f;
-		Result.GradientDeltaZ[1]	= 0.0f;
-		Result.GradientDeltaZ[2]	= MinVoxelSize;
+		this->GradientDeltaX[0]	= MinVoxelSize;
+		this->GradientDeltaX[1]	= 0.0f;
+		this->GradientDeltaX[2]	= 0.0f;
+		this->GradientDeltaY[0]	= 0.0f;
+		this->GradientDeltaY[1]	= MinVoxelSize;
+		this->GradientDeltaY[2]	= 0.0f;
+		this->GradientDeltaZ[0]	= 0.0f;
+		this->GradientDeltaZ[1]	= 0.0f;
+		this->GradientDeltaZ[2]	= MinVoxelSize;
 
 #ifdef __CUDA_ARCH__
-		// Result.Free();
+		// this->Free();
 		
-		const int NoVoxels = (int)Result.Resolution[0] * (int)Result.Resolution[1] * (int)Result.Resolution[2];
+		const int NoVoxels = (int)this->Resolution[0] * (int)this->Resolution[1] * (int)this->Resolution[2];
 
 		if (NoVoxels <= 0)
-			return Result;
+			return;
 		
 		unsigned short* pDeviceVoxels = NULL;
 		CUDA::Allocate(pDeviceVoxels, NoVoxels);
 
-		CUDA::MemCopyHostToDevice(Result.pVoxels, pDeviceVoxels, NoVoxels);
-		Result.pVoxels = pDeviceVoxels;
+		CUDA::MemCopyHostToDevice(this->pVoxels, pDeviceVoxels, NoVoxels);
+		this->pVoxels = pDeviceVoxels;
 #endif
-
-		return Result;
 	}
 };
 

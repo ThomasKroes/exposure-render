@@ -60,10 +60,9 @@ struct EXPOSURE_RENDER_DLL Object
 		return *this;
 	}
 
-	HOST static Object FromHost(const Object& Other)
+	HOST void FromHost(const Object& Other)
 	{
-		Object Result = Other;
-		return Result;
+		*this = Other;
 	}
 };
 
