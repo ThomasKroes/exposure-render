@@ -20,16 +20,16 @@ namespace ExposureRender
 
 DEVICE float GetIntensity(const int& VolumeID, const Vec3f& P)
 {
-	return gpVolumes->Get(VolumeID).Get(P);
+	return gpVolumes[VolumeID].Get(P);
 }
 
 DEVICE Vec3f GradientCD(const int& VolumeID, const Vec3f& P)
 {
 	const float Intensity[3][2] = 
 	{
-		{ GetIntensity(VolumeID, P + gpVolumes->Get(VolumeID).GradientDeltaX), GetIntensity(VolumeID, P - gpVolumes->Get(VolumeID).GradientDeltaX) },
-		{ GetIntensity(VolumeID, P + gpVolumes->Get(VolumeID).GradientDeltaY), GetIntensity(VolumeID, P - gpVolumes->Get(VolumeID).GradientDeltaY) },
-		{ GetIntensity(VolumeID, P + gpVolumes->Get(VolumeID).GradientDeltaZ), GetIntensity(VolumeID, P - gpVolumes->Get(VolumeID).GradientDeltaZ) }
+		{ GetIntensity(VolumeID, P + gpVolumes[VolumeID].GradientDeltaX), GetIntensity(VolumeID, P - gpVolumes[VolumeID].GradientDeltaX) },
+		{ GetIntensity(VolumeID, P + gpVolumes[VolumeID].GradientDeltaY), GetIntensity(VolumeID, P - gpVolumes[VolumeID].GradientDeltaY) },
+		{ GetIntensity(VolumeID, P + gpVolumes[VolumeID].GradientDeltaZ), GetIntensity(VolumeID, P - gpVolumes[VolumeID].GradientDeltaZ) }
 	};
 
 	return Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
@@ -40,9 +40,9 @@ DEVICE Vec3f GradientFD(const int& VolumeID, const Vec3f& P)
 	const float Intensity[4] = 
 	{
 		GetIntensity(VolumeID, P),
-		GetIntensity(VolumeID, P + gpVolumes->Get(VolumeID).GradientDeltaX),
-		GetIntensity(VolumeID, P + gpVolumes->Get(VolumeID).GradientDeltaY),
-		GetIntensity(VolumeID, P + gpVolumes->Get(VolumeID).GradientDeltaZ)
+		GetIntensity(VolumeID, P + gpVolumes[VolumeID].GradientDeltaX),
+		GetIntensity(VolumeID, P + gpVolumes[VolumeID].GradientDeltaY),
+		GetIntensity(VolumeID, P + gpVolumes[VolumeID].GradientDeltaZ)
 	};
 
     return Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
@@ -50,7 +50,7 @@ DEVICE Vec3f GradientFD(const int& VolumeID, const Vec3f& P)
 
 DEVICE Vec3f GradientFiltered(const int& VolumeID, const Vec3f& P)
 {
-	Vec3f Offset(gpVolumes->Get(VolumeID).GradientDeltaX[0], gpVolumes->Get(VolumeID).GradientDeltaY[1], gpVolumes->Get(VolumeID).GradientDeltaZ[2]);
+	Vec3f Offset(gpVolumes[VolumeID].GradientDeltaX[0], gpVolumes[VolumeID].GradientDeltaY[1], gpVolumes[VolumeID].GradientDeltaZ[2]);
 
     Vec3f G0 = GradientCD(VolumeID, P);
     Vec3f G1 = GradientCD(VolumeID, P + Vec3f(-Offset[0], -Offset[1], -Offset[2]));
@@ -89,19 +89,19 @@ DEVICE float GradientMagnitude(const int& VolumeID, const Vec3f& P)
 {
 	Vec3f Pts[3][2];
 
-	Pts[0][0] = P + gpVolumes->Get(VolumeID).GradientDeltaX;
-	Pts[0][1] = P - gpVolumes->Get(VolumeID).GradientDeltaX;
-	Pts[1][0] = P + gpVolumes->Get(VolumeID).GradientDeltaY;
-	Pts[1][1] = P - gpVolumes->Get(VolumeID).GradientDeltaY;
-	Pts[2][0] = P + gpVolumes->Get(VolumeID).GradientDeltaZ;
-	Pts[2][1] = P - gpVolumes->Get(VolumeID).GradientDeltaZ;
+	Pts[0][0] = P + gpVolumes[VolumeID].GradientDeltaX;
+	Pts[0][1] = P - gpVolumes[VolumeID].GradientDeltaX;
+	Pts[1][0] = P + gpVolumes[VolumeID].GradientDeltaY;
+	Pts[1][1] = P - gpVolumes[VolumeID].GradientDeltaY;
+	Pts[2][0] = P + gpVolumes[VolumeID].GradientDeltaZ;
+	Pts[2][1] = P - gpVolumes[VolumeID].GradientDeltaZ;
 
 	float D = 0.0f, Sum = 0.0f;
 
 	for (int i = 0; i < 3; i++)
 	{
 		D = GetIntensity(VolumeID, Pts[i][1]) - GetIntensity(VolumeID, Pts[i][0]);
-		D *= 0.5f / gpVolumes->Get(VolumeID).Spacing[i];
+		D *= 0.5f / gpVolumes[VolumeID].Spacing[i];
 		Sum += D * D;
 	}
 

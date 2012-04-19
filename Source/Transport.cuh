@@ -28,12 +28,14 @@ DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 
 	if (IntersectsLight(R))
 		return true;
-
+	
+	/*
 	if (IntersectsObject(R))
 		return true;
-
+*/
 	if (ScatterEventInVolume(R, RNG))
 		return true;
+	
 
 	return false;
 }
@@ -50,19 +52,16 @@ DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 	return !Intersect(R, RNG);
 }
 
-DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader, int LightID)
+DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader)
 {
-	const Light& Light = gpLights->Get(LightID);
-
 	Vec3f Wi;
-
-	// Incident radiance (Li), direct light (Ld)
-	ColorXYZf Li = ColorXYZf::Black(), Ld = ColorXYZf::Black();
+	
+	ColorXYZf Li, Ld;
 
 	SurfaceSample SS;
 
 	SampleLight(Light, LS.LightSample, SS, SE, Wi, Li);
-
+	
 	ColorXYZf F = Shader.F(SE.Wo, Wi);
 	
 	float BsdfPdf = Shader.Pdf(SE.Wo, Wi);
@@ -79,6 +78,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 			Ld += F * Li / LightPdf;
 	}
 
+	/*
 	F = Shader.SampleF(SE.Wo, Wi, BsdfPdf, LS.BrdfSample);
 
 	if (F.IsBlack() || BsdfPdf <= 0.0f)
@@ -87,7 +87,7 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 	ScatterEvent SE2(ScatterEvent::Light);
 
 	IntersectLights(Ray(SE.P, Wi), SE2);
-
+	
 	if (!SE2.Valid || SE2.LightID != LightID)
 		return Ld;
 
@@ -104,7 +104,8 @@ DEVICE_NI ColorXYZf EstimateDirectLight(LightingSample& LS, ScatterEvent& SE, CR
 		else
 			Ld += F * Li / BsdfPdf;
 	}
-
+	*/
+	
 	return Ld;
 }
 
@@ -115,7 +116,7 @@ DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
 
 DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture(gpObjects->Get(SE.ObjectID).DiffuseTextureID, SE.UV), EvaluateTexture(gpObjects->Get(SE.ObjectID).SpecularTextureID, SE.UV), 10.0f, 100.0f);//GlossinessExponent(EvaluateTexture(gpObjects->Get(SE.ObjectID).GlossinessTextureID, SE.UV).Y()));
+	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture(gpObjects[0].DiffuseTextureID, SE.UV), EvaluateTexture(gpObjects[0].SpecularTextureID, SE.UV), 10.0f, 100.0f);//GlossinessExponent(EvaluateTexture(gpObjects[0].GlossinessTextureID, SE.UV).Y()));
 }
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
@@ -124,11 +125,21 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 
 	Ld += EvaluateColorTransferFunction(gpTracer->Emission1D, GetIntensity(0, SE.P));
 
-	if (gpTracer->NoLights <= 0)
+	return Ld;
+
+	if (gpTracer->LightIDs.Count <= 0)
 		return Ld;
 
-	VolumeShader Shader;
+	const int LightID = gpTracer->LightIDs[floorf(LS.LightNum * gpTracer->LightIDs.Count)];
+
+	if (LightID < 0)
+		return Ld;
+
+	const Light& Light = gpLights[0];
 	
+	VolumeShader Shader = VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 15.0f, 100.f);
+ 
+	/*
 	switch (SE.Type)
 	{
 		case ScatterEvent::Volume:	
@@ -143,12 +154,12 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 			Shader = GetReflectorShader(SE, RNG);
 			break;
 	}
+	*/
 
-	const int LightID = floorf(LS.LightNum * gpLights->Count);
-	
-	Ld += EstimateDirectLight(LS, SE, RNG, Shader, LightID);
+	Ld += EstimateDirectLight(Light, LS, SE, RNG, Shader);
 
-	return (float)gpTracer->NoLights * Ld;
+	return Ld;
+	return (float)gpTracer->LightIDs.Count * Ld;
 }
 
 }

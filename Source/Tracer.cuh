@@ -43,15 +43,10 @@ struct Tracer
 	FrameBuffer						FrameBuffer;
 	int								NoIterations;
 
-	int								VolumeIDs[MAX_NO_VOLUMES];
-	int								LightIDs[MAX_NO_LIGHTS];
-	int								ObjectIDs[MAX_NO_OBJECTS];
-	int								ClippingObjectIDs[MAX_NO_CLIPPING_OBJECTS];
-
-	int								NoVolumes;
-	int								NoLights;
-	int								NoObjects;
-	int								NoClippingObjects;
+	int								VolumeID;
+	Indices							LightIDs;
+	Indices							ObjectIDs;
+	Indices							ClippingObjectIDs;
 
 	HOST Tracer& Tracer::operator = (const Tracer& Other)
 	{
@@ -60,28 +55,14 @@ struct Tracer
 		this->Specular1D			= Other.Specular1D;
 		this->Glossiness1D			= Other.Glossiness1D;
 		this->Emission1D			= Other.Emission1D;
-
 		this->Camera				= Other.Camera;
 		this->RenderSettings		= Other.RenderSettings;
 		this->FrameBuffer			= Other.FrameBuffer;
 		this->NoIterations			= Other.NoIterations;
-		
-		for (int i = 0; i < MAX_NO_VOLUMES; i++)
-			this->VolumeIDs[i] = Other.VolumeIDs[i];
-
-		for (int i = 0; i < MAX_NO_LIGHTS; i++)
-			this->LightIDs[i] = Other.LightIDs[i];
-
-		for (int i = 0; i < MAX_NO_OBJECTS; i++)
-			this->ObjectIDs[i] = Other.ObjectIDs[i];
-
-		for (int i = 0; i < MAX_NO_CLIPPING_OBJECTS; i++)
-			this->ClippingObjectIDs[i] = Other.ClippingObjectIDs[i];
-
-		this->NoVolumes				= Other.NoVolumes;
-		this->NoLights				= Other.NoLights;
-		this->NoObjects				= Other.NoObjects;
-		this->NoClippingObjects		= Other.NoClippingObjects;
+		this->VolumeID				= Other.VolumeID;
+		this->LightIDs				= Other.LightIDs;
+		this->ObjectIDs				= Other.ObjectIDs;
+		this->ClippingObjectIDs		= Other.ClippingObjectIDs;
 
 		return *this;
 	}

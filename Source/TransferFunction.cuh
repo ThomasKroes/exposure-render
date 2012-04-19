@@ -21,6 +21,9 @@ namespace ExposureRender
 
 DEVICE_NI float EvaluatePLF(const PiecewiseLinearFunction& PLF, const float& Intensity)
 {
+	if (PLF.Count <= 0)
+		return 0.0f;
+
 	if (Intensity < PLF.NodeRange[0])
 		return PLF.Data[0];
 

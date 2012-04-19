@@ -20,6 +20,7 @@ namespace ExposureRender
 
 struct EXPOSURE_RENDER_DLL Light
 {
+	int						ID;
 	bool					Enabled;
 	bool					Visible;
 	Shape					Shape;
@@ -29,10 +30,11 @@ struct EXPOSURE_RENDER_DLL Light
 	
 	HOST Light()
 	{
+		this->ID			= -1;
 		this->Enabled		= true;
 		this->Visible		= true;
 		this->TextureID		= 0;
-		this->Multiplier	= 100.0f;
+		this->Multiplier	= 1.0f;
 		this->Unit			= Enums::Power;
 	}
 
@@ -47,6 +49,7 @@ struct EXPOSURE_RENDER_DLL Light
 	
 	HOST Light& operator = (const Light& Other)
 	{
+		this->ID			= Other.ID;
 		this->Enabled		= Other.Enabled;
 		this->Visible		= Other.Visible;
 		this->Shape			= Other.Shape;
@@ -60,6 +63,7 @@ struct EXPOSURE_RENDER_DLL Light
 	HOST static Light FromHost(const Light& Other)
 	{
 		Light Result = Other;
+		Result.Shape.Update();
 		return Result;
 	}
 };

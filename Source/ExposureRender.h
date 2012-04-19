@@ -41,10 +41,10 @@ EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject ClippingObject, int& 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID);
 EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID);
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID);
-EXPOSURE_RENDER_DLL void SetTracerVolumeIDs(int ID[MAX_NO_VOLUMES], int Size);
-EXPOSURE_RENDER_DLL void SetTracerLightIDs(int ID[MAX_NO_LIGHTS], int Size);
-EXPOSURE_RENDER_DLL void SetTracerObjectIDs(int ID[MAX_NO_OBJECTS], int Size);
-EXPOSURE_RENDER_DLL void SetTracerClippingObjectIDs(int ID[MAX_NO_CLIPPING_OBJECTS], int Size);
+EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID);
+EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs);
+EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs);
+EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs);
 EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D);
 EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ColorTransferFunction1D Diffuse1D);
 EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ColorTransferFunction1D Specular1D);

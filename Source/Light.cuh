@@ -14,63 +14,80 @@
 #pragma once
 
 #include "Light.h"
+#include "Texture.cuh"
 
 namespace ExposureRender
 {
 
 DEVICE void SampleLightSurface(const Light& Light, LightSample& LS, SurfaceSample& SS)
 {
-	/*
-	// Sample the light surface
 	switch (Light.Shape.Type)
 	{
 		case 0:	SamplePlane(SS, LS.SurfaceUVW, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));		break;
 		case 1:	SampleDisk(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);									break;
 		case 2:	SampleRing(SS, LS.SurfaceUVW, Light.Shape.InnerRadius, Light.Shape.OuterRadius);		break;
-		case 3:	SampleBox(SS, LS.SurfaceUVW, ToVec3f(Light.Shape.Size));								break;
+		case 3:	SampleBox(SS, LS.SurfaceUVW, Light.Shape.Size);											break;
 		case 4:	SampleSphere(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);								break;
 //		case 5:	SampleCylinder(SS, LS.SurfaceUVW, Light.Shape.OuterRadius, Light.Shape.Size[2]);		break;
 	}
 
-	// Transform surface position and normal back to world space
-	SS.P	= TransformPoint(Light.Shape.TM, SS.P);
-	SS.N	= TransformVector(Light.Shape.TM, SS.N);
-	*/
+	SS.P = TransformPoint(Light.Shape.TM, SS.P);
+	SS.N = TransformVector(Light.Shape.TM, SS.N);
 }
 
 DEVICE_NI void SampleLight(const Light& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
 {
-	/*
-	// First sample the light surface
 	SampleLightSurface(Light, LS, SS);
 
-	// Compute Wi, the normalized vector from the sampled light position to the ray sample position
 	Wi = Normalize(SS.P - SE.P);
 
-	// Compute the probability of sampling the light per unit area
-//	LightPdf = G(SE.P, SE.N, LS.SS.P, LS.SS.N) * Light.Shape.Area;
+	Le = Light.Multiplier * EvaluateTexture(Light.TextureID, SS.UV);
+	
+	if (Light.Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
+		Le = ColorXYZf::Black();
 
-	// Compute exitant radiance
-	Le = ColorXYZf(Light.Color[0], Light.Color[1], Light.Color[2]);
-	*/
+	if (Light.Unit == 1)
+		Le /= Light.Shape.Area;
 }
 
-DEVICE_NI void IntersectLight()
+DEVICE_NI void IntersectLight(const Light& Light, const Ray& R, ScatterEvent& SE)
 {
-}
+	Ray Rt = TransformRay(Light.Shape.InvTM, R);
 
-DEVICE_NI void IntersectsLight()
-{
+	Intersection Int;
+
+	switch (Light.Shape.Type)
+	{
+		case 0:	IntersectPlane(Rt, Light.Shape.OneSided, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]), Int);		break;
+		case 1:	IntersectDisk(Rt, Light.Shape.OneSided, Light.Shape.OuterRadius, Int);								break;
+		case 2:	IntersectRing(Rt, Light.Shape.OneSided, Light.Shape.InnerRadius, Light.Shape.OuterRadius, Int);		break;
+		case 3:	IntersectBox(Rt, Light.Shape.Size, Int);															break;
+		case 4:	IntersectSphere(Rt, Light.Shape.OuterRadius, Int);													break;
+//		case 5:	IntersectCylinder(Rt, Light.Shape.OuterRadius, Light.Shape.Size[1], Int);							break;
+	}
+
+	if (Int.Valid)
+	{
+		SE.Valid	= true;
+		SE.P 		= TransformPoint(Light.Shape.TM, Int.P);
+		SE.N 		= TransformVector(Light.Shape.TM, Int.N);
+		SE.T 		= Length(SE.P - R.O);
+		SE.Wo		= -R.D;
+		SE.UV		= Int.UV;
+		SE.Le		= Int.Front ? Light.Multiplier * EvaluateTexture(Light.TextureID, SE.UV) : ColorXYZf::Black();
+		
+		if (Light.Unit == 1)
+			SE.Le /= Light.Shape.Area;
+	}
 }
 
 DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
 {
-	/*
 	float T = FLT_MAX; 
 
-	for (int i = 0; i < gpLights->Count; i++)
+	for (int i = 0; i < gpTracer->LightIDs.Count; i++)
 	{
-		const Light& Light = gpLights->Get(i);
+		const Light& Light = gpLights[gpTracer->LightIDs[i]];
 		
 		ScatterEvent LocalRS(ScatterEvent::Light);
 
@@ -79,7 +96,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 		if (RespectVisibility && !Light.Visible)
 			continue;
 
-		Intersect(R, LocalRS);
+		IntersectLight(Light, R, LocalRS);
 
 		if (LocalRS.Valid && LocalRS.T < T)
 		{
@@ -87,18 +104,22 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 			T = LocalRS.T;
 		}
 	}
-	*/
+}
+
+DEVICE_NI bool IntersectsLight(const Light& Light, const Ray& R)
+{
+	return IntersectsShape(Light.Shape, TransformRay(Light.Shape.InvTM, R));
 }
 
 DEVICE_NI bool IntersectsLight(const Ray& R)
 {
-	/*
-	for (int i = 0; i < gpLights->Count; i++)
+	for (int i = 0; i < gpTracer->LightIDs.Count; i++)
 	{
-		if (gpLights->Get(i).Intersects(R))
+		const Light& Light = gpLights[gpTracer->LightIDs[i]];
+
+		if (IntersectsLight(Light, R))
 			return true;
 	}
-	*/
 
 	return false;
 }

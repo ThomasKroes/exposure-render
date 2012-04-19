@@ -24,8 +24,27 @@ namespace ExposureRender
 
 struct Volume
 {
+	int					ID;
+	Vec3i				Resolution;			// FIXME
+	Vec3f				InvResolution;
+	Vec3f				MinAABB;
+	Vec3f				MaxAABB;
+	Vec3f				Size;
+	Vec3f				InvSize;
+	bool				NormalizeSize;
+	Vec3f				Spacing;
+	Vec3f				InvSpacing;
+	Vec3f				GradientDeltaX;
+	Vec3f				GradientDeltaY;
+	Vec3f				GradientDeltaZ;
+	Vec2f				GradientMagnitudeRange;
+	unsigned short*		pVoxels;
+
 	HOST Volume()
 	{
+		this->ID			= -1;
+		this->NormalizeSize	= false;
+		this->pVoxels		= NULL;
 	}
 
 	HOST ~Volume()
@@ -140,21 +159,6 @@ struct Volume
 
 		return Result;
 	}
-
-	Vec3i				Resolution;			// FIXME
-	Vec3f				InvResolution;
-	Vec3f				MinAABB;
-	Vec3f				MaxAABB;
-	Vec3f				Size;
-	Vec3f				InvSize;
-	bool				NormalizeSize;
-	Vec3f				Spacing;
-	Vec3f				InvSpacing;
-	Vec3f				GradientDeltaX;
-	Vec3f				GradientDeltaY;
-	Vec3f				GradientDeltaZ;
-	Vec2f				GradientMagnitudeRange;
-	unsigned short*		pVoxels;
 };
 
 }

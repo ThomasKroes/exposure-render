@@ -41,95 +41,89 @@ private:
 class CUDA
 {
 public:
-	static void HandleCudaError(const cudaError_t& CudaError)
+	static void HandleCudaError(const cudaError_t& CudaError, const char* pTitle = "")
 	{
+		char Message[256];
+
+		sprintf_s(Message, 256, "%s (%s)", cudaGetErrorString(CudaError), pTitle);
+
 		if (CudaError != cudaSuccess)
-			throw(Exception(Enums::Error, cudaGetErrorString(CudaError)));
+			throw(Exception(Enums::Error, Message));
 	}
 
 	static void ThreadSynchronize()
 	{
-		CUDA::HandleCudaError(cudaThreadSynchronize());
+		CUDA::HandleCudaError(cudaThreadSynchronize(), "cudaThreadSynchronize");
 	}
 
 	template<class T> static void Allocate(T*& pDevicePointer, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMalloc((void**)&pDevicePointer, Num * sizeof(T)));
-
+		HandleCudaError(cudaMalloc((void**)&pDevicePointer, Num * sizeof(T)), "cudaMalloc");
 		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void AllocatePiched(T*& pDevicePointer, const int Pitch, const int Width, const int Height)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMallocPitch((void**)&pDevicePointer, (size_t*)&Pitch, Width * sizeof(T), Height));
-
+		HandleCudaError(cudaMallocPitch((void**)&pDevicePointer, (size_t*)&Pitch, Width * sizeof(T), Height), "cudaMallocPitch");
 		CUDA::ThreadSynchronize();
 	}
 	
 	template<class T> static void MemSet(T*& pDevicePointer, const int Value, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemset((void*)pDevicePointer, Value, (size_t)(Num * sizeof(T))));
-
+		HandleCudaError(cudaMemset((void*)pDevicePointer, Value, (size_t)(Num * sizeof(T))), "cudaMemset");
 		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void HostToConstantDevice(T* pHost, char* pDeviceSymbol, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)));
-
+		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)), "cudaMemcpyToSymbol");
 		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyHostToDeviceSymbol(T* pHost, char* pDeviceSymbol, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)));
-
+		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)), "cudaMemcpyToSymbol");
 		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyDeviceToDeviceSymbol(T* pDevice, char* pDeviceSymbol, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pDevice, Num * sizeof(T), 0, cudaMemcpyDeviceToDevice));
-
+		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pDevice, Num * sizeof(T), 0, cudaMemcpyDeviceToDevice), "cudaMemcpyToSymbol");
 		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyHostToDevice(T* pHost, T* pDevice, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpy(pDevice, pHost, Num * sizeof(T), cudaMemcpyHostToDevice));
-
+		HandleCudaError(cudaMemcpy(pDevice, pHost, Num * sizeof(T), cudaMemcpyHostToDevice), "cudaMemcpy");
 		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyDeviceToHost(T* pDevice, T* pHost, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpy(pHost, pDevice, Num * sizeof(T), cudaMemcpyDeviceToHost));
-
+		HandleCudaError(cudaMemcpy(pHost, pDevice, Num * sizeof(T), cudaMemcpyDeviceToHost), "cudaMemcpy");
 		CUDA::ThreadSynchronize();
 	}
 
 	template<class T> static void MemCopyDeviceToDevice(T* pDeviceSource, T* pDeviceDestination, int Num = 1)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpy(pDeviceDestination, pDeviceSource, Num * sizeof(T), cudaMemcpyDeviceToDevice));
-
+		HandleCudaError(cudaMemcpy(pDeviceDestination, pDeviceSource, Num * sizeof(T), cudaMemcpyDeviceToDevice), "cudaMemcpy");
 		CUDA::ThreadSynchronize();
 	}
 
 	static void FreeArray(cudaArray*& pCudaArray)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaFreeArray(pCudaArray));
+		HandleCudaError(cudaFreeArray(pCudaArray), "cudaFreeArray");
 		pCudaArray = NULL;
-
 		CUDA::ThreadSynchronize();
 	}
 
@@ -140,7 +134,7 @@ public:
 
 		CUDA::ThreadSynchronize();
 		
-		HandleCudaError(cudaFree(pBuffer));
+		HandleCudaError(cudaFree(pBuffer), "cudaFree");
 		pBuffer = NULL;
 
 		CUDA::ThreadSynchronize();
@@ -149,7 +143,7 @@ public:
 	static void UnbindTexture(textureReference& pTextureReference)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaUnbindTexture(&pTextureReference));
+		HandleCudaError(cudaUnbindTexture(&pTextureReference), "cudaUnbindTexture");
 
 		CUDA::ThreadSynchronize();
 	}
@@ -206,51 +200,17 @@ public:
 	static void GetSymbolAddress(void** pDevicePointer, char* pSymbol)
 	{
 		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaGetSymbolAddress(pDevicePointer, pSymbol));
+		HandleCudaError(cudaGetSymbolAddress(pDevicePointer, pSymbol), "cudaGetSymbolAddress");
 	}
 };
 
-template<class T, int MaxSize = 64>
-struct List
-{
-	int Count;
-
-	HOST List()
-	{
-		this->Count = 0;
-	}
-
-	HOST_DEVICE const T& Get(const int& i)
-	{
-		return this->Items[i];
-	}
-
-	HOST void Add(const T& Resource)
-	{
-		if (this->Count + 1 >= MaxSize)
-			return;
-
-		this->Items[this->Count] = Resource;
-		this->Count++;
-	}
-
-	HOST void Reset()
-	{
-		this->Count = 0;
-	}
-
-private:
-	T Items[MaxSize];
-};
-
-template<typename T, int MaxSize>
+template<typename T, int MaxSize = 256>
 struct CudaList
 {
-	typename std::map<int, T>				Resources;
+	std::map<int, T>						Resources;
 	int										Counter;
 	char									DeviceSymbol[MAX_CHAR_SIZE];
-	List<T, MaxSize>*						DeviceAllocation;
-	List<T, MaxSize>						List;
+	T*										DevicePtr;
 	typename std::map<int, T>::iterator		It;
 
 	HOST CudaList(const char* pDeviceSymbol)
@@ -259,12 +219,12 @@ struct CudaList
 
 		sprintf_s(DeviceSymbol, MAX_CHAR_SIZE, "%s", pDeviceSymbol);
 
-		this->DeviceAllocation = NULL;
+		this->DevicePtr = NULL;
 	}
 
 	HOST ~CudaList()
 	{
-//		CUDA::Free(this->DeviceAllocation);
+//		CUDA::Free(this->DevicePtr);
 	}
 	
 	HOST bool Exists(int ID)
@@ -283,13 +243,16 @@ struct CudaList
 			throw(Exception(Enums::Warning, "Maximum number of resources reached"));
 
 		const bool Exists = this->Exists(ID);
-
-		this->Resources[Counter] = T::FromHost(Resource);
-
+		
 		if (!Exists)
 		{
 			ID = this->Counter;
+			this->Resources[ID] = T::FromHost(Resource);
 			this->Counter++;
+		}
+		else
+		{
+			this->Resources[ID] = T::FromHost(Resource);
 		}
 
 		this->Synchronize();
@@ -310,26 +273,25 @@ struct CudaList
 
 	HOST void Synchronize()
 	{
-		if (this->Resources.empty())
+		if (this->Resources.size() <= 0)
 			return;
 
-		this->List.Reset();
-		
+		T* pHostList = new T[this->Resources.size()];
+	
+		int Size = 0;
+
 		for (this->It = this->Resources.begin(); this->It != this->Resources.end(); this->It++)
-			this->List.Add(this->It->second);
+		{
+			pHostList[Size] = this->It->second;
+			Size++;
+		}
 		
-		if (this->DeviceAllocation == NULL)
-			CUDA::Allocate(this->DeviceAllocation);
-		
-		cudaMemcpy(this->DeviceAllocation, &this->List, sizeof(this->List), cudaMemcpyHostToDevice);
-		cudaMemcpyToSymbol(this->DeviceSymbol, &this->DeviceAllocation, sizeof(&this->DeviceAllocation));
+		CUDA::Free(this->DevicePtr);
+		CUDA::Allocate(this->DevicePtr, (int)this->Resources.size());
+		CUDA::MemCopyHostToDevice(pHostList, this->DevicePtr);
+		CUDA::MemCopyHostToDeviceSymbol(&this->DevicePtr, this->DeviceSymbol);
 
-		// CUDA::Allocate(this->DeviceAllocation);
-
-		//cudaMemcpy(this->DeviceAllocation, &this->List, sizeof(this->List), cudaMemcpyHostToDevice);
-		//cudaMemcpyToSymbol(gpTracer, &this->DeviceAllocation, sizeof(gpCurrentTracer));
-		//CUDA::MemCopyHostToDevice(&this->List, this->DeviceAllocation);
-		//CUDA::MemCopyDeviceToDeviceSymbol(&this->DeviceAllocation, "gpVolumes");
+		delete[] pHostList;
 	}
 
 	HOST T& operator[](const int& i)
@@ -375,7 +337,7 @@ struct CudaList
 																											\
 	float TimeDelta = 0.0f;																					\
 																											\
-	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop));							\
+	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop), title);					\
 																											\
 	/*gKernelTimings.Add(ErKernelTiming(title, TimeDelta));*/												\
 																											\

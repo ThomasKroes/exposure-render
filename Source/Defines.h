@@ -68,12 +68,6 @@ namespace ExposureRender
 #define ONE_OVER_6					1.0f / 2.0f
 #define ONE_OVER_255				1.0f / 255.0f
 #define	MAX_CHAR_SIZE				256
-#define MAX_NO_VOLUMES				64
-#define MAX_NO_OBJECTS				64
-#define MAX_NO_CLIPPING_OBJECTS		64
-#define MAX_NO_TEXTURES				64
-#define	MAX_NO_TIMINGS				64
-#define MAX_NO_LIGHTS				64
 #define MAX_NO_TF_NODES				128
 #define NO_COLOR_COMPONENTS			4
 

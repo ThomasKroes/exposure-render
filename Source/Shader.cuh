@@ -478,13 +478,7 @@ struct VolumeShader
 
 DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
 {
-	const float I = GetIntensity(0, SE.P);
-
-	ColorXYZf Diffuse	= EvaluateColorTransferFunction(gpTracer->Diffuse1D, I);
-	float Glossiness	= EvaluateScalarTransferFunction(gpTracer->Glossiness1D, I);
-	ColorXYZf Specular	= EvaluateColorTransferFunction(gpTracer->Specular1D, I);
-
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, Diffuse, Specular, 15.0f, Glossiness);
+	return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 15.0f, 100.f);
 /*
 	bool BRDF = false;
 

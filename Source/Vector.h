@@ -38,7 +38,6 @@ HOST_DEVICE inline T Clamp(const T& Value, const T& Min, const T& Max)
 }
 
 #define DATA(type, size)																	\
-protected:																					\
 	type	D[size];																		\
 
 
@@ -577,5 +576,32 @@ static inline HOST_DEVICE float ClampedDot(const Vec3f& A, const Vec3f& B)					{
 static inline HOST_DEVICE float Distance(const Vec3f& A, const Vec3f& B)					{ return (A - B).Length();										};
 static inline HOST_DEVICE float DistanceSquared(const Vec3f& A, const Vec3f& B)				{ return (A - B).LengthSquared();								};
 static inline HOST_DEVICE Vec3f Lerp(const Vec3f& A, const Vec3f& B, const float& LerpC)	{ return A + LerpC * (B - A);									};
+
+class EXPOSURE_RENDER_DLL Indices
+{
+public:
+	HOST Indices()
+	{
+		for (int i = 0; i < 256; i++)
+			this->D[i] = -1;
+
+		this->Count = 0;
+	}
+
+	SUBSCRIPT_OPERATORS(int)
+	
+	HOST Indices& operator = (const Indices& Other)
+	{
+		for (int i = 0; i < 256; i++)
+			this->D[i] = Other.D[i];
+
+		this->Count = Other.Count;
+
+		return *this;
+	}
+
+	int D[256];
+	int Count;
+};
 
 }

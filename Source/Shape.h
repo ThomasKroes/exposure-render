@@ -85,7 +85,15 @@ struct EXPOSURE_RENDER_DLL Shape
 		this->OneSided		= Other.OneSided;
 		this->Type			= Other.Type;
 		this->Size			= Other.Size;
-		
+		this->Area			= Other.Area;
+		this->InnerRadius	= Other.InnerRadius;
+		this->OuterRadius	= Other.OuterRadius;
+
+		return *this;
+	}
+
+	HOST void Update()
+	{
 		switch (this->Type)
 		{
 			case Enums::Plane:		this->Area = PlaneArea(Vec2f(this->Size[0], this->Size[1]));				break;
@@ -95,11 +103,6 @@ struct EXPOSURE_RENDER_DLL Shape
 			case Enums::Sphere:		this->Area = SphereArea(this->OuterRadius);									break;
 			case Enums::Cylinder:	this->Area = CylinderArea(this->OuterRadius, this->Size[2]);				break;
 		}
-
-		this->InnerRadius	= Other.InnerRadius;
-		this->OuterRadius	= Other.OuterRadius;
-
-		return *this;
 	}
 };
 

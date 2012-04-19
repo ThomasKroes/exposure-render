@@ -21,6 +21,7 @@ namespace ExposureRender
 
 struct EXPOSURE_RENDER_DLL Texture
 {
+	int					ID;
 	Enums::TextureType	Type;
 	float				OutputLevel;
 	Bitmap				Bitmap;
@@ -31,6 +32,11 @@ struct EXPOSURE_RENDER_DLL Texture
 
 	HOST Texture()
 	{
+		this->ID			= -1;
+		this->Type			= Enums::Procedural;
+		this->OutputLevel	= 1.0f;
+		this->Flip[0]		= false;
+		this->Flip[1]		= false;
 	}
 
 	HOST ~Texture()
@@ -44,6 +50,7 @@ struct EXPOSURE_RENDER_DLL Texture
 
 	HOST Texture& operator = (const Texture& Other)
 	{
+		this->ID			= Other.ID;
 		this->Type			= Other.Type;
 		this->OutputLevel	= Other.OutputLevel;
 		this->Bitmap		= Other.Bitmap;

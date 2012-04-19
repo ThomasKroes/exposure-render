@@ -20,12 +20,14 @@ namespace ExposureRender
 
 struct EXPOSURE_RENDER_DLL ClippingObject
 {
+	int		ID;
 	bool	Enabled;
 	Shape	Shape;
 	bool	Invert;
 
 	HOST ClippingObject()
 	{
+		this->ID		= - 1;
 		this->Enabled	= true;
 		this->Invert	= false;
 	}
@@ -41,6 +43,7 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 
 	HOST ClippingObject& operator = (const ClippingObject& Other)
 	{
+		this->ID		= Other.ID;
 		this->Enabled	= Other.Enabled;
 		this->Shape		= Other.Shape;
 		this->Invert	= Other.Invert;

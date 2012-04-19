@@ -15,21 +15,20 @@
 
 #include "ExposureRender.h"
 
-typedef ExposureRender::List<ExposureRender::Volume, MAX_NO_VOLUMES>					Volumes;
-typedef ExposureRender::List<ExposureRender::Light, MAX_NO_LIGHTS>						Lights;
-typedef ExposureRender::List<ExposureRender::Object, MAX_NO_OBJECTS>					Objects;
-typedef ExposureRender::List<ExposureRender::ClippingObject, MAX_NO_CLIPPING_OBJECTS>	ClippingObjects;
-typedef ExposureRender::List<ExposureRender::Texture, MAX_NO_TEXTURES>					Textures;
-
-DEVICE Volumes*			gpVolumes			= NULL;
-DEVICE Lights*			gpLights			= NULL;
-DEVICE Objects*			gpObjects			= NULL;
-DEVICE ClippingObjects*	gpClippingObjects	= NULL;
-DEVICE Textures*		gpTextures			= NULL;
-
 #include "Tracer.cuh"
 
-DEVICE ExposureRender::Tracer* gpTracer = NULL;
+DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
+DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
+DEVICE ExposureRender::Light*			gpLights			= NULL;
+DEVICE ExposureRender::Object*			gpObjects			= NULL;
+DEVICE ExposureRender::ClippingObject*	gpClippingObjects	= NULL;
+DEVICE ExposureRender::Texture*			gpTextures			= NULL;
+
+ExposureRender::CudaList<ExposureRender::Volume>			gVolumes("gpVolumes");
+ExposureRender::CudaList<ExposureRender::Light>				gLights("gpLights");
+ExposureRender::CudaList<ExposureRender::Object>			gObjects("gpObjects");
+ExposureRender::CudaList<ExposureRender::ClippingObject>	gClippingObjects("gpClippingObjects");
+ExposureRender::CudaList<ExposureRender::Texture>			gTextures("gpTextures");
 
 #include "Utilities.cuh"
 
@@ -47,11 +46,7 @@ DEVICE ExposureRender::Tracer* gpTracer = NULL;
 #include "AutoFocus.cuh"
 */
 
-ExposureRender::CudaList<ExposureRender::Volume, MAX_NO_VOLUMES> gVolumes("gpVolumes");
-ExposureRender::CudaList<ExposureRender::Light, MAX_NO_LIGHTS> gLights("gpLights");
-ExposureRender::CudaList<ExposureRender::Object, MAX_NO_OBJECTS> gObjects("gpObjects");
-ExposureRender::CudaList<ExposureRender::ClippingObject, MAX_NO_CLIPPING_OBJECTS> gClippingObjects("gpClippingObjects");
-ExposureRender::CudaList<ExposureRender::Texture, MAX_NO_TEXTURES> gTextures("gpTextures");
+
 
 #define EDIT_TRACER(id)												\
 std::map<int, Tracer>::iterator	It;									\
@@ -97,6 +92,11 @@ EXPOSURE_RENDER_DLL void InitializeTracer(int& ID)
 		ID = gTracers.size();
 
 	gTracers[ID] = Tracer();
+
+	gVolumes.Synchronize();
+	gLights.Synchronize();
+	gObjects.Synchronize();
+	gClippingObjects.Synchronize();
 }
 
 EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
@@ -159,20 +159,32 @@ EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 	gTextures.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void SetTracerVolumeIDs(int ID[MAX_NO_VOLUMES], int Size)
+EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID)
 {
+	EDIT_TRACER(TracerID)
+	Tracer.VolumeID = VolumeID;
+	Reset(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void SetTracerLightIDs(int ID[MAX_NO_LIGHTS], int Size)
+EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs)
 {
+	EDIT_TRACER(TracerID)
+	Tracer.LightIDs = LightIDs;
+	Reset(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void SetTracerObjectIDs(int ID[MAX_NO_OBJECTS], int Size)
+EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs)
 {
+	EDIT_TRACER(TracerID)
+	Tracer.ObjectIDs = ObjectIDs;
+	Reset(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void SetTracerClippingObjectIDs(int ID[MAX_NO_CLIPPING_OBJECTS], int Size)
+EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs)
 {
+	EDIT_TRACER(TracerID)
+	Tracer.ClippingObjectIDs = ClippingObjectIDs;
+	Reset(TracerID);
 }
 
 EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D)

@@ -28,7 +28,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	
 	Intersection Int;
 
-	IntersectBox(R, gpVolumes->Get(0).MinAABB, gpVolumes->Get(0).MaxAABB, Int);
+	IntersectBox(R, gpVolumes[0].MinAABB, gpVolumes[0].MaxAABB, Int);
 
 	if (!Int.Valid)
 		return;
@@ -71,7 +71,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 	Intersection Int;
 		
-	IntersectBox(R, gpVolumes->Get(0).MinAABB, gpVolumes->Get(0).MaxAABB, Int);
+	IntersectBox(R, gpVolumes[0].MinAABB, gpVolumes[0].MaxAABB, Int);
 	
 	if (!Int.Valid)
 		return false;
@@ -96,7 +96,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * EvaluateScalarTransferFunction(gpTracer->Opacity1D, Intensity);
 
-		Sum			+= SigmaT * gpTracer->RenderSettings.Traversal.StepSizeShadow;
+		Sum		+= SigmaT * gpTracer->RenderSettings.Traversal.StepSizeShadow;
 		MinT	+= gpTracer->RenderSettings.Traversal.StepSizeShadow;
 	}
 

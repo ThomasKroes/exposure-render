@@ -31,7 +31,7 @@ DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f
 	switch (Procedural.Type)
 	{
 		case Enums::Uniform:
-			return ColorXYZf(Procedural.UniformColor[0]);
+			return ColorXYZf(Procedural.UniformColor);
 
 		case Enums::Checker:
 		{
@@ -58,7 +58,7 @@ DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f
 		}
 
 		case Enums::Gradient:
-			return EvaluateColorTransferFunction(Procedural.Gradient, UVW[1]);
+			return EvaluateColorTransferFunction(Procedural.Gradient, UVW[0]);
 	}
 
 	return ColorXYZf::Black();
@@ -66,7 +66,10 @@ DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f
 
 DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 {
-	const Texture& T = gpTextures->Get(ID);
+	if (ID < 0)
+		return ColorXYZf::Black();
+
+	const Texture& T = gpTextures[ID];
 
 	ColorXYZf L;
 

@@ -20,6 +20,7 @@ namespace ExposureRender
 
 struct EXPOSURE_RENDER_DLL Object
 {
+	int			ID;
 	bool		Enabled;
 	Shape		Shape;
 	int			DiffuseTextureID;
@@ -29,6 +30,7 @@ struct EXPOSURE_RENDER_DLL Object
 
 	HOST Object()
 	{
+		this->ID					= -1;
 		this->Enabled				= true;
 		this->DiffuseTextureID		= -1;
 		this->SpecularTextureID		= -1;
@@ -47,6 +49,7 @@ struct EXPOSURE_RENDER_DLL Object
 
 	HOST Object& operator = (const Object& Other)
 	{
+		this->ID					= Other.ID;
 		this->Enabled				= Other.Enabled;
 		this->Shape					= Other.Shape;
 		this->DiffuseTextureID		= Other.DiffuseTextureID;
