@@ -29,6 +29,22 @@ HOST_DEVICE bool IsBlack()					\
 	return true;							\
 }
 
+#define LUMINANCE							\
+HOST_DEVICE float Y() const					\
+{											\
+	float Weight[3] =						\
+	{										\
+		0.212671f, 0.715160f, 0.072169f		\
+	};										\
+											\
+	float L = 0.0f;							\
+											\
+	for (int i = 0; i < 3; i++)				\
+		L += Weight[i] * this->D[i];		\
+											\
+	return L;								\
+}
+
 class ColorRGBf;
 class ColorXYZf;
 class ColorXYZAf;
@@ -61,6 +77,7 @@ public:
 	MIN_MAX(ColorXYZf, float, 3)
 	CLAMP(ColorXYZf, float, 3)
 	IS_BLACK(3)
+	LUMINANCE
 
 	static inline HOST_DEVICE ColorXYZf FromRGBf(const ColorRGBf& RGB);
 	static inline HOST_DEVICE ColorXYZf FromRGBuc(const ColorRGBuc& RGB);
@@ -79,7 +96,8 @@ public:
 	MIN_MAX(ColorXYZAf, float, 4)
 	CLAMP(ColorXYZAf, float, 4)
 	IS_BLACK(4)
-
+	LUMINANCE
+	
 	static inline HOST_DEVICE ColorXYZAf FromRGBf(const ColorRGBf& RGB);
 	static inline HOST_DEVICE ColorXYZAf Black() { return ColorXYZAf(); }
 
