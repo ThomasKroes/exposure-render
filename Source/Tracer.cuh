@@ -66,13 +66,28 @@ struct Tracer
 
 		return *this;
 	}
-
-	HOST void BindLightIDs(const Indices& LightIDs, map<int, int> HashMap)
+	
+	HOST void BindIDs(Indices SourceIDs, Indices& TargetIDs, map<int, int> HashMap)
 	{
-		for (int i = 0; i < LightIDs.Count; i++)
-			this->LightIDs[i] = HashMap[LightIDs[i]];
+		for (int i = 0; i < SourceIDs.Count; i++)
+			TargetIDs[i] = HashMap[SourceIDs[i]];
 
-		this->LightIDs.Count = LightIDs.Count;
+		TargetIDs.Count = SourceIDs.Count;
+	}
+
+	HOST void BindLightIDs(Indices LightIDs, map<int, int> HashMap)
+	{
+		BindIDs(LightIDs, this->LightIDs, HashMap);
+	}
+
+	HOST void BindObjectIDs(Indices ObjectIDs, map<int, int> HashMap)
+	{
+		BindIDs(ObjectIDs, this->ObjectIDs, HashMap);
+	}
+
+	HOST void BindClippingObjectIDs(Indices ClippingObjectIDs, map<int, int> HashMap)
+	{
+		BindIDs(ClippingObjectIDs, this->ClippingObjectIDs, HashMap);
 	}
 };
 

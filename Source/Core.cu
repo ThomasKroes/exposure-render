@@ -176,14 +176,14 @@ EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs)
 EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs)
 {
 	EDIT_TRACER(TracerID)
-//	Tracer.ObjectIDs = ObjectIDs;
+	Tracer.BindObjectIDs(ObjectIDs, gObjects.HashMap);
 	Reset(TracerID);
 }
 
 EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs)
 {
 	EDIT_TRACER(TracerID)
-//	Tracer.ClippingObjectIDs = ClippingObjectIDs;
+	Tracer.BindClippingObjectIDs(ClippingObjectIDs, gClippingObjects.HashMap);
 	Reset(TracerID);
 }
 
