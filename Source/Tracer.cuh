@@ -66,6 +66,14 @@ struct Tracer
 
 		return *this;
 	}
+
+	HOST void BindLightIDs(const Indices& LightIDs, map<int, int> HashMap)
+	{
+		for (int i = 0; i < LightIDs.Count; i++)
+			this->LightIDs[i] = HashMap[LightIDs[i]];
+
+		this->LightIDs.Count = LightIDs.Count;
+	}
 };
 
 }

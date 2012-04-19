@@ -19,6 +19,8 @@
 
 #include "Exception.h"
 
+using namespace std;
+
 namespace ExposureRender
 {
 
@@ -207,15 +209,17 @@ public:
 template<typename T, int MaxSize = 256>
 struct CudaList
 {
-	std::map<int, T>						Resources;
-	int										Counter;
-	char									DeviceSymbol[MAX_CHAR_SIZE];
-	T*										DevicePtr;
-	typename std::map<int, T>::iterator		It;
-
+	map<int, T>							ResourceMap;
+	typename map<int, T>::iterator		ResourceMapIt;
+	map<int, int>						HashMap;
+	typename map<int, int>::iterator	HashMapIt;
+	int									ResourceCounter;
+	char								DeviceSymbol[MAX_CHAR_SIZE];
+	T*									DevicePtr;
+	
 	HOST CudaList(const char* pDeviceSymbol)
 	{
-		this->Counter = 0;
+		this->ResourceCounter = 0;
 
 		sprintf_s(DeviceSymbol, MAX_CHAR_SIZE, "%s", pDeviceSymbol);
 
@@ -232,27 +236,27 @@ struct CudaList
 		if (ID < 0)
 			return false;
 
-		this->It = Resources.find(ID);
+		this->ResourceMapIt = this->ResourceMap.find(ID);
 
-		return this->It != this->Resources.end();
+		return this->ResourceMapIt != this->ResourceMap.end();
 	}
 
 	HOST void Bind(const T& Resource, int& ID)
 	{
-		if (this->Resources.size() >= MaxSize)
-			throw(Exception(Enums::Warning, "Maximum number of resources reached"));
+		if (this->ResourceMap.size() >= MaxSize)
+			throw(Exception(Enums::Warning, "Maximum number of ResourceMap reached"));
 
 		const bool Exists = this->Exists(ID);
 		
 		if (!Exists)
 		{
-			ID = this->Counter;
-			this->Resources[ID] = T::FromHost(Resource);
-			this->Counter++;
+			ID = this->ResourceCounter;
+			this->ResourceMap[ID] = T::FromHost(Resource);
+			this->ResourceCounter++;
 		}
 		else
 		{
-			this->Resources[ID] = T::FromHost(Resource);
+			this->ResourceMap[ID] = T::FromHost(Resource);
 		}
 
 		this->Synchronize();
@@ -263,32 +267,38 @@ struct CudaList
 		if (!this->Exists(ID))
 			return;
 
-		this->It = this->Resources.find(ID);
+		this->ResourceMapIt = this->ResourceMap.find(ID);
 
-		if (It != Resources.end())
-			this->Resources.erase(this->It);
+		if (this->ResourceMapIt != this->ResourceMap.end())
+			this->ResourceMap.erase(this->ResourceMapIt);
+
+		this->HashMapIt = this->HashMap.find(ID);
+
+		if (this->HashMapIt != this->HashMap.end())
+			this->HashMap.erase(this->HashMapIt);
 
 		this->Synchronize();
 	}
 
 	HOST void Synchronize()
 	{
-		if (this->Resources.size() <= 0)
+		if (this->ResourceMap.size() <= 0)
 			return;
 
-		T* pHostList = new T[this->Resources.size()];
+		T* pHostList = new T[this->ResourceMap.size()];
 	
 		int Size = 0;
 
-		for (this->It = this->Resources.begin(); this->It != this->Resources.end(); this->It++)
+		for (this->ResourceMapIt = this->ResourceMap.begin(); this->ResourceMapIt != this->ResourceMap.end(); this->ResourceMapIt++)
 		{
-			pHostList[Size] = this->It->second;
+			pHostList[Size] = this->ResourceMapIt->second;
+			HashMap[this->ResourceMapIt->first] = Size;
 			Size++;
 		}
 		
 		CUDA::Free(this->DevicePtr);
-		CUDA::Allocate(this->DevicePtr, (int)this->Resources.size());
-		CUDA::MemCopyHostToDevice(pHostList, this->DevicePtr);
+		CUDA::Allocate(this->DevicePtr, (int)this->ResourceMap.size());
+		CUDA::MemCopyHostToDevice(pHostList, this->DevicePtr, Size);
 		CUDA::MemCopyHostToDeviceSymbol(&this->DevicePtr, this->DeviceSymbol);
 
 		delete[] pHostList;
@@ -296,12 +306,12 @@ struct CudaList
 
 	HOST T& operator[](const int& i)
 	{
-		this->It = this->Resources.find(i);
+		this->ResourceMapIt = this->ResourceMap.find(i);
 
-		if (this->It == Resources.end())
+		if (this->ResourceMapIt == ResourceMap.end())
 			throw(ErException(Enums::Fatal, "Resource does not exist"));
 
-		return this->Resources[i];
+		return this->ResourceMap[i];
 	}
 };
 

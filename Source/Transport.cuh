@@ -130,7 +130,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	if (gpTracer->LightIDs.Count <= 0)
 		return Ld;
 
-	const int LightID = gpTracer->LightIDs[floorf(LS.LightNum * gpTracer->LightIDs.Count)];
+	const int LightID = gpTracer->LightIDs[(int)floorf(LS.LightNum * gpTracer->LightIDs.Count)];
 
 	if (LightID < 0)
 		return Ld;

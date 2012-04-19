@@ -24,7 +24,7 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Object) };
 
 	SampleVolume(R, RNG, SE[0]);
-//	IntersectLights(R, SE[1], true);
+	IntersectLights(R, SE[1], true);
 	//IntersectObjects(R, SE[2]);
 
 	float T = FLT_MAX;
@@ -63,10 +63,10 @@ KERNEL void KrnlSingleScattering()
 
 	if (SE.Valid && SE.Type == ScatterEvent::Volume)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
-/*
+
 	if (SE.Valid && SE.Type == ScatterEvent::Light)
 		Lv += SE.Le;
-	
+	/*
 	
 	if (SE.Valid && SE.Type == ScatterEvent::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);

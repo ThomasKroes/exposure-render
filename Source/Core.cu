@@ -169,21 +169,21 @@ EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID)
 EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs)
 {
 	EDIT_TRACER(TracerID)
-	Tracer.LightIDs = LightIDs;
+	Tracer.BindLightIDs(LightIDs, gLights.HashMap);
 	Reset(TracerID);
 }
 
 EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs)
 {
 	EDIT_TRACER(TracerID)
-	Tracer.ObjectIDs = ObjectIDs;
+//	Tracer.ObjectIDs = ObjectIDs;
 	Reset(TracerID);
 }
 
 EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs)
 {
 	EDIT_TRACER(TracerID)
-	Tracer.ClippingObjectIDs = ClippingObjectIDs;
+//	Tracer.ClippingObjectIDs = ClippingObjectIDs;
 	Reset(TracerID);
 }
 
