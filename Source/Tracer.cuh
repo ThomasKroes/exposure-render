@@ -18,6 +18,7 @@
 #include "RenderSettings.h"
 
 #include "Framebuffer.cuh"
+#include "Filter.cuh"
 
 namespace ExposureRender
 {
@@ -47,6 +48,9 @@ struct Tracer
 	Indices							LightIDs;
 	Indices							ObjectIDs;
 	Indices							ClippingObjectIDs;
+	
+	GaussianFilter					FrameEstimateFilter;
+	BilateralFilter					PostProcessingFilter;
 
 	HOST Tracer& Tracer::operator = (const Tracer& Other)
 	{
@@ -63,6 +67,8 @@ struct Tracer
 		this->LightIDs				= Other.LightIDs;
 		this->ObjectIDs				= Other.ObjectIDs;
 		this->ClippingObjectIDs		= Other.ClippingObjectIDs;
+		this->FrameEstimateFilter	= Other.FrameEstimateFilter;
+		this->PostProcessingFilter	= Other.PostProcessingFilter;
 
 		return *this;
 	}
@@ -88,6 +94,41 @@ struct Tracer
 	HOST void BindClippingObjectIDs(Indices ClippingObjectIDs, map<int, int> HashMap)
 	{
 		BindIDs(ClippingObjectIDs, this->ClippingObjectIDs, HashMap);
+	}
+
+	HOST void BindRenderSettings(const ExposureRender::RenderSettings& RS)
+	{
+		this->RenderSettings = RenderSettings;
+
+		// FIXME
+
+		this->FrameEstimateFilter.KernelRadius = this->RenderSettings.Filtering.FrameEstimateFilterParams.KernelRadius;
+
+		const int KernelSize = (2 * this->FrameEstimateFilter.KernelRadius) + 1;
+
+		for (int i = 0; i < KernelSize; i++)
+			FrameEstimateFilter.KernelD[i] = 1.0f;//Gauss2D(RS.Filtering.FrameEstimateFilterParams.Sigma, RS.Filtering.FrameEstimateFilterParams.KernelRadius - i, 0);
+
+		/*
+		BilateralFilter Bilateral;
+
+		const int SigmaMax = (int)max(Filtering.PostProcessingFilter.SigmaD, Filtering.PostProcessingFilter.SigmaR);
+		
+		Bilateral.KernelRadius = (int)ceilf(2.0f * (float)SigmaMax);  
+
+		const float TwoSigmaRSquared = 2 * Filtering.PostProcessingFilter.SigmaR * Filtering.PostProcessingFilter.SigmaR;
+
+		const int kernelSize = Bilateral.KernelRadius * 2 + 1;
+		const int center = (kernelSize - 1) / 2;
+
+		for (int x = -center; x < -center + kernelSize; x++)
+			Bilateral.KernelD[x + center] = Gauss2D(Filtering.PostProcessingFilter.SigmaD, x, 0);
+
+		for (int i = 0; i < 256; i++)
+			Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
+
+		gTracers[TracerID].PostProcessingFilter = Bilateral;
+		*/
 	}
 };
 

@@ -24,7 +24,7 @@ namespace ExposureRender
 #define KRNL_GAUSSIAN_FILTER_BLOCK_H		8
 #define KRNL_GAUSSIAN_FILTER_BLOCK_SIZE		KRNL_GAUSSIAN_FILTER_BLOCK_W * KRNL_GAUSSIAN_FILTER_BLOCK_H
 
-KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int Width, int Height)
+KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut)
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
@@ -33,17 +33,17 @@ KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int 
 	
 	__syncthreads();
 
-	GaussianFilter& Filter = gpTracer->RenderSettings.Filtering.FrameEstimateFilter;
+	const GaussianFilter& Filter = gpTracer->FrameEstimateFilter;
 
 	Range[IDt][0] = max((int)ceilf(IDx - Filter.KernelRadius), 0);
-	Range[IDt][1] = min((int)floorf(IDx + Filter.KernelRadius), Width - 1);
+	Range[IDt][1] = min((int)floorf(IDx + Filter.KernelRadius), gpTracer->FrameBuffer.Resolution[0] - 1);
 
 	// Filter accumulated sum color
 	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
 
 	__syncthreads();
 
-	Sum[IDt].Set(0.0f, 0.0f, 0.0f, 0.0f);
+	Sum[IDt] = ColorXYZAf(0.0f, 0.0f, 0.0f, 0.0f);
 
 	__shared__ float Weight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
 	__shared__ float TotalWeight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
@@ -57,7 +57,7 @@ KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int 
 	for (int x = Range[IDt][0]; x <= Range[IDt][1]; x++)
 	{
 		Weight[IDt]			= Filter.KernelD[Filter.KernelRadius - (x - IDx)];
-		Sum[IDt]			+= pIn[IDy * Width + x] * Weight[IDt];
+		Sum[IDt]			+= pIn[IDy * gpTracer->FrameBuffer.Resolution[0] + x] * Weight[IDt];
 		TotalWeight[IDt]	+= Weight[IDt];
 	}
 
@@ -69,7 +69,7 @@ KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut, int 
 		pOut[IDk] = ColorXYZAf(0.0f);
 }
 
-KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Width, int Height)
+KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut)
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
@@ -78,17 +78,17 @@ KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Wi
 	
 	__syncthreads();
 
-	GaussianFilter& Filter = gpTracer->RenderSettings.Filtering.FrameEstimateFilter;
+	const GaussianFilter& Filter = gpTracer->FrameEstimateFilter;
 
 	Range[IDt][0] = max((int)ceilf(IDy - Filter.KernelRadius), 0);
-	Range[IDt][1] = min((int)floorf(IDy + Filter.KernelRadius), Height - 1);
+	Range[IDt][1] = min((int)floorf(IDy + Filter.KernelRadius), gpTracer->FrameBuffer.Resolution[1] - 1);
 
 	// Filter accumulated sum color
 	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
 
 	__syncthreads();
 
-	Sum[IDt].Set(0.0f, 0.0f, 0.0f, 0.0f);
+	Sum[IDt] = ColorXYZAf(0.0f, 0.0f, 0.0f, 0.0f);
 
 	__shared__ float Weight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
 	__shared__ float TotalWeight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
@@ -102,7 +102,7 @@ KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Wi
 	for (int y = Range[IDt][0]; y <= Range[IDt][1]; y++)
 	{
 		Weight[IDt]			= Filter.KernelD[Filter.KernelRadius - (y - IDy)];
-		Sum[IDt]			+= pIn[y * Width + IDx] * Weight[IDt];
+		Sum[IDt]			+= pIn[y * gpTracer->FrameBuffer.Resolution[0] + IDx] * Weight[IDt];
 		TotalWeight[IDt]	+= Weight[IDt];
 	}
 
@@ -116,11 +116,9 @@ KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut, int Wi
 
 void FilterGaussian(ColorXYZAf* pImage, ColorXYZAf* pTemp, int Width, int Height)
 {
-	const dim3 BlockDim(KRNL_GAUSSIAN_FILTER_BLOCK_W, KRNL_GAUSSIAN_FILTER_BLOCK_H);
-	const dim3 GridDim((int)ceilf((float)Width / (float)BlockDim.x), (int)ceilf((float)Height / (float)BlockDim.y));
-
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp, Width, Height)), "Gaussian filter (Horizontal)");
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage, Width, Height)), "Gaussian filter (Vertical)");
+	LAUNCH_DIMENSIONS(Width, Height, 1, 16, 8, 1)
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp)), "Gaussian filter (Horizontal)");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage)), "Gaussian filter (Vertical)");
 }
 
 }

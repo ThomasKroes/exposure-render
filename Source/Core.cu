@@ -37,8 +37,9 @@ ExposureRender::CudaList<ExposureRender::Texture>			gTextures("gpTextures");
 #include "Estimate.cuh"
 #include "ToneMap.cuh"
 
-/*
+
 #include "GaussianFilter.cuh"
+/*
 #include "BilateralFilter.cuh"
 #include "MedianFilter.cuh"
 
@@ -227,7 +228,7 @@ EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera)
 EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings)
 {
 	EDIT_TRACER(TracerID)
-	Tracer.RenderSettings = RenderSettings;
+	Tracer.BindRenderSettings(RenderSettings);
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
@@ -238,9 +239,10 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 
 	SingleScattering(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ComputeEstimate(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
+	FilterGaussian(Tracer.FrameBuffer.CudaFrameEstimate.GetPtr(), Tracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ToneMap(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 
-	Tracer.NoIterations++; 
+	Tracer.NoIterations++;
 }
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)

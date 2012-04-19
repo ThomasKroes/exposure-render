@@ -157,8 +157,9 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 			}
 		};
 
-		GaussianFilterParameters	FrameEstimateFilter;
-		BilateralFilterParameters	PostProcessingFilter;
+		// FIXME
+		GaussianFilterParameters	FrameEstimateFilterParams;
+		BilateralFilterParameters	PostProcessingFilterParams;
 
 		HOST Filtering()
 		{
@@ -175,8 +176,8 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 
 		HOST Filtering& operator = (const Filtering& Other)
 		{
-			this->FrameEstimateFilter	= Other.FrameEstimateFilter;
-			this->PostProcessingFilter	= Other.PostProcessingFilter;
+			this->FrameEstimateFilterParams		= Other.FrameEstimateFilterParams;
+			this->PostProcessingFilterParams	= Other.PostProcessingFilterParams;
 
 			return *this;
 		}
