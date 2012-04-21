@@ -62,7 +62,7 @@ struct Camera
 		return *this;
 	}
 
-	HOST void ToDevice()
+	HOST void BindDevice()
 	{
 		this->InvExposure	= this->Exposure == 0.0f ? 0.0f : 1.0f / this->Exposure;
 		this->InvGamma		= this->Gamma == 0.0f ? 0.0f : 1.0f / this->Gamma;

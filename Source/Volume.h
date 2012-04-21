@@ -22,33 +22,24 @@
 namespace ExposureRender
 {
 
-struct Volume
+class Volume
 {
-	int					ID;
-	Vec3i				Resolution;			// FIXME
-	Vec3f				InvResolution;
-	Vec3f				MinAABB;
-	Vec3f				MaxAABB;
-	Vec3f				Size;
-	Vec3f				InvSize;
-	bool				NormalizeSize;
-	Vec3f				Spacing;
-	Vec3f				InvSpacing;
-	Vec3f				GradientDeltaX;
-	Vec3f				GradientDeltaY;
-	Vec3f				GradientDeltaZ;
-	Vec2f				GradientMagnitudeRange;
-	unsigned short*		pVoxels;
-
+public:
 	HOST Volume()
 	{
-		this->ID			= -1;
-		this->NormalizeSize	= false;
-		this->pVoxels		= NULL;
+		this->ID				= -1;
+		this->NormalizeSize		= false;
+		this->HostVoxels		= NULL;
+		this->DeviceVoxels		= NULL;
+		this->Dirty				= false;
+		this->HostMemoryOwner	= false;
+		this->DeviceMemoryOwner	= false;
 	}
 
 	HOST ~Volume()
 	{
+		this->UnbindVoxels();
+		this->UnbindDevice();
 	}
 	
 	HOST Volume(const Volume& Other)
@@ -58,41 +49,36 @@ struct Volume
 
 	HOST Volume& Volume::operator = (const Volume& Other)
 	{
+		this->ID						= Other.ID;
 		this->Resolution				= Other.Resolution;
+		this->Spacing					= Other.Spacing;
+		this->NormalizeSize				= Other.NormalizeSize;
 		this->InvResolution				= Other.InvResolution;
 		this->MinAABB					= Other.MinAABB;
 		this->MaxAABB					= Other.MaxAABB;
 		this->Size						= Other.Size;
 		this->InvSize					= Other.InvSize;
-		this->NormalizeSize				= Other.NormalizeSize;
-		this->Spacing					= Other.Spacing;
 		this->InvSpacing				= Other.InvSpacing;
 		this->GradientDeltaX			= Other.GradientDeltaX;
 		this->GradientDeltaY			= Other.GradientDeltaY;
 		this->GradientDeltaZ			= Other.GradientDeltaZ;
 		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
-		this->pVoxels					= Other.pVoxels;
+//		this->HostVoxels				= Other.HostVoxels;
+//		this->DeviceVoxels				= Other.DeviceVoxels;
+		this->Dirty						= Other.Dirty;
 
 		return *this;
 	}
 
-	HOST void Free()
-	{
-#ifdef __CUDA_ARCH__
-		if (this->pVoxels != NULL)
-			CUDA::Free(this->pVoxels);
-#endif
-	}
-
 	HOST_DEVICE unsigned short Get(const Vec3i& XYZ) const
 	{
-		if (!this->pVoxels)
+		if (!this->DeviceVoxels)
 			return unsigned short();
 		
 		Vec3i ClampedXYZ = XYZ;
 		ClampedXYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
 		
-		return this->pVoxels[ClampedXYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + ClampedXYZ[1] * (int)this->Resolution[0] + ClampedXYZ[0]];
+		return this->DeviceVoxels[ClampedXYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + ClampedXYZ[1] * (int)this->Resolution[0] + ClampedXYZ[0]];
 	}
 
 	HOST_DEVICE unsigned short Get(const Vec3f& XYZ) const
@@ -101,11 +87,51 @@ struct Volume
 
 		return this->Get(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
 	}
-	
-	HOST void FromHost(const Volume& Other)
+
+	HOST void BindVoxels(const unsigned short* Voxels, const Vec3i& Resolution, const Vec3f& Spacing, const bool& NormalizeSize = false)
 	{
-		*this = Other;
-		
+		if (Voxels == NULL)
+			throw(Exception(Enums::Warning, "BindVoxels() failed: voxels pointer is NULL"));
+
+		this->Resolution		= Resolution;
+		this->Spacing			= Spacing;
+		this->NormalizeSize		= NormalizeSize;
+
+		this->UnbindVoxels();
+
+		const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
+
+		if (NoVoxels <= 0)
+			throw(Exception(Enums::Warning, "BindVoxels() failed: bad no. voxels!"));
+
+		this->HostVoxels = new unsigned short[NoVoxels];
+
+		memcpy(this->HostVoxels, Voxels, NoVoxels * sizeof(unsigned short));
+
+		this->Dirty = true;
+	}
+
+	HOST void UnbindVoxels()
+	{
+		if (!this->HostMemoryOwner)
+			return;
+
+		if (this->HostVoxels != NULL)
+		{
+			delete[] this->HostVoxels;
+			this->HostVoxels = NULL;
+		}
+
+		this->Dirty = true;
+	}
+
+	HOST void BindDevice(const Volume& HostVolume)
+	{
+		if (HostVolume.Dirty)
+			this->UnbindDevice();
+
+		*this = HostVolume;
+
 		float Scale = 1.0f;
 
 		if (this->NormalizeSize)
@@ -132,31 +158,55 @@ struct Volume
 
 		const float MinVoxelSize = min(this->Spacing[0], min(this->Spacing[1], this->Spacing[2]));
 
-		this->GradientDeltaX[0]	= MinVoxelSize;
-		this->GradientDeltaX[1]	= 0.0f;
-		this->GradientDeltaX[2]	= 0.0f;
-		this->GradientDeltaY[0]	= 0.0f;
-		this->GradientDeltaY[1]	= MinVoxelSize;
-		this->GradientDeltaY[2]	= 0.0f;
-		this->GradientDeltaZ[0]	= 0.0f;
-		this->GradientDeltaZ[1]	= 0.0f;
-		this->GradientDeltaZ[2]	= MinVoxelSize;
+		this->GradientDeltaX = Vec3f(MinVoxelSize, 0.0f, 0.0f);
+		this->GradientDeltaY = Vec3f(0.0f, MinVoxelSize, 0.0f);
+		this->GradientDeltaZ = Vec3f(0.0f, 0.0f, MinVoxelSize);
 
 #ifdef __CUDA_ARCH__
-		// this->Free();
-		
-		const int NoVoxels = (int)this->Resolution[0] * (int)this->Resolution[1] * (int)this->Resolution[2];
+		if (this->Dirty && this->HostVoxels)
+		{
+			const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
 
-		if (NoVoxels <= 0)
-			return;
-		
-		unsigned short* pDeviceVoxels = NULL;
-		CUDA::Allocate(pDeviceVoxels, NoVoxels);
+			if (NoVoxels > 0)
+			{
+				Cuda::Allocate(this->DeviceVoxels, NoVoxels);
+				Cuda::MemCopyHostToDevice(HostVolume.HostVoxels, this->DeviceVoxels, NoVoxels);
+			}
 
-		CUDA::MemCopyHostToDevice(this->pVoxels, pDeviceVoxels, NoVoxels);
-		this->pVoxels = pDeviceVoxels;
+			this->Dirty = false;
+		}
 #endif
 	}
+
+	HOST void UnbindDevice()
+	{
+		if (!this->DeviceMemoryOwner)
+			return;
+
+#ifdef __CUDA_ARCH__
+		Cuda::Free(this->DeviceVoxels);
+#endif
+	}
+
+	int					ID;
+	Vec3i				Resolution;			// FIXME
+	bool				NormalizeSize;
+	Vec3f				Spacing;
+	Vec3f				InvResolution;
+	Vec3f				MinAABB;
+	Vec3f				MaxAABB;
+	Vec3f				Size;
+	Vec3f				InvSize;
+	Vec3f				InvSpacing;
+	Vec3f				GradientDeltaX;
+	Vec3f				GradientDeltaY;
+	Vec3f				GradientDeltaZ;
+	Vec2f				GradientMagnitudeRange;
+	unsigned short*		HostVoxels;
+	unsigned short*		DeviceVoxels;
+	bool				Dirty;
+	bool				HostMemoryOwner;
+	bool				DeviceMemoryOwner;
 };
 
 }

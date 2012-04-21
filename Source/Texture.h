@@ -19,17 +19,9 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL Texture
+class EXPOSURE_RENDER_DLL Texture
 {
-	int					ID;
-	Enums::TextureType	Type;
-	float				OutputLevel;
-	Bitmap				Bitmap;
-	Procedural			Procedural;
-	Vec2f				Offset;
-	Vec2f				Repeat;
-	bool				Flip[2];
-
+public:
 	HOST Texture()
 	{
 		this->ID			= -1;
@@ -63,27 +55,24 @@ struct EXPOSURE_RENDER_DLL Texture
 		return *this;
 	}
 
-	HOST void FromHost(const Texture& Other)
+	HOST void BindDevice(const Texture& HostTexture)
 	{
-#ifdef __CUDA_ARCH__
-		if (this->Bitmap.Dirty)
-			CUDA::Free(this->Bitmap.pData);
-#endif
-
-		*this = Other;
-
-#ifdef __CUDA_ARCH__
-		if (this->Bitmap.Dirty && Other.Bitmap.pData)
-		{
-			const int NoPixels = this->Bitmap.Size[0] * this->Bitmap.Size[1];
-			
-			this->Bitmap.pData = NULL;
-
-			CUDA::Allocate(this->Bitmap.pData, NoPixels);
-			CUDA::MemCopyHostToDevice(Other.Bitmap.pData, this->Bitmap.pData, NoPixels);
-		} 
-#endif
+		*this = HostTexture;
+		this->Bitmap.BindDevice(HostTexture.Bitmap);
 	}
+
+	HOST void UnbindDevice()
+	{
+	}
+
+	int					ID;
+	Enums::TextureType	Type;
+	float				OutputLevel;
+	Bitmap				Bitmap;
+	Procedural			Procedural;
+	Vec2f				Offset;
+	Vec2f				Repeat;
+	bool				Flip[2];
 };
 
 }

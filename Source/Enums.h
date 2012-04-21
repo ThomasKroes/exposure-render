@@ -18,6 +18,12 @@ namespace ExposureRender
 
 namespace Enums
 {
+	enum MemoryType
+	{
+		Host,
+		Device
+	};
+
 	enum ProceduralType
 	{
 		Uniform = 0,

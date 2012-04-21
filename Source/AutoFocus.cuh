@@ -61,12 +61,12 @@ void ComputeAutoFocusDistance(int FilmU, int FilmV, float& AutoFocusDistance)
 {
 	float* pAutoFocusDistance = NULL;
 
-	CUDA::Allocate(pAutoFocusDistance);
+	Cuda::Allocate(pAutoFocusDistance);
 
 	LAUNCH_CUDA_KERNEL((KrnlComputeAutoFocusDistance<<<1, 1>>>(pAutoFocusDistance, FilmU, FilmV, rand(), rand())));
 	
-	CUDA::MemCopyDeviceToHost(pAutoFocusDistance, &AutoFocusDistance);
-	CUDA::Free(pAutoFocusDistance);
+	Cuda::MemCopyDeviceToHost(pAutoFocusDistance, &AutoFocusDistance);
+	Cuda::Free(pAutoFocusDistance);
 }
 
 }

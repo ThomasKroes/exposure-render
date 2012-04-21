@@ -41,9 +41,9 @@ public:
 			return;
 
 		if (Pitched)
-			CUDA::AllocatePiched(this->pData, this->Pitch, this->GetWidth(), this->GetHeight());
+			Cuda::AllocatePiched(this->pData, this->Pitch, this->GetWidth(), this->GetHeight());
 		else
-			CUDA::Allocate(this->pData, this->GetNoElements());
+			Cuda::Allocate(this->pData, this->GetNoElements());
 
 		this->Reset();
 	}
@@ -53,14 +53,14 @@ public:
 		if (this->GetSize() <= 0)
 			return;
 
-		CUDA::MemSet(this->pData, 0, this->GetNoElements());
+		Cuda::MemSet(this->pData, 0, this->GetNoElements());
 	}
 
 	HOST void Free(void)
 	{
 		if (this->pData)
 		{
-			CUDA::Free(this->pData);
+			Cuda::Free(this->pData);
 		}
 		
 		this->Pitch			= 0;

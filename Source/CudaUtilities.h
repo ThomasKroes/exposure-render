@@ -24,200 +24,119 @@ using namespace std;
 namespace ExposureRender
 {
 
-class CCudaTimer
+namespace Cuda
 {
-public:
-	CCudaTimer(void);
-	virtual ~CCudaTimer(void);
-
-	void	StartTimer(void);
-	float	StopTimer(void);
-	float	ElapsedTime(void);
-
-private:
-	bool			m_Started;
-	cudaEvent_t 	m_EventStart;
-	cudaEvent_t 	m_EventStop;
-};
-
-class CUDA
-{
-public:
-	static void HandleCudaError(const cudaError_t& CudaError, const char* pTitle = "")
-	{
-		char Message[256];
-
-		sprintf_s(Message, 256, "%s (%s)", cudaGetErrorString(CudaError), pTitle);
-
-		if (CudaError != cudaSuccess)
-			throw(Exception(Enums::Error, Message));
-	}
-
-	static void ThreadSynchronize()
-	{
-		CUDA::HandleCudaError(cudaThreadSynchronize(), "cudaThreadSynchronize");
-	}
-
-	template<class T> static void Allocate(T*& pDevicePointer, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMalloc((void**)&pDevicePointer, Num * sizeof(T)), "cudaMalloc");
-		CUDA::ThreadSynchronize();
-	}
-
-	template<class T> static void AllocatePiched(T*& pDevicePointer, const int Pitch, const int Width, const int Height)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMallocPitch((void**)&pDevicePointer, (size_t*)&Pitch, Width * sizeof(T), Height), "cudaMallocPitch");
-		CUDA::ThreadSynchronize();
-	}
 	
-	template<class T> static void MemSet(T*& pDevicePointer, const int Value, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemset((void*)pDevicePointer, Value, (size_t)(Num * sizeof(T))), "cudaMemset");
-		CUDA::ThreadSynchronize();
-	}
+static inline void HandleCudaError(const cudaError_t& CudaError, const char* pTitle = "")
+{
+	char Message[256];
 
-	template<class T> static void HostToConstantDevice(T* pHost, char* pDeviceSymbol, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)), "cudaMemcpyToSymbol");
-		CUDA::ThreadSynchronize();
-	}
+	sprintf_s(Message, 256, "%s (%s)", cudaGetErrorString(CudaError), pTitle);
 
-	template<class T> static void MemCopyHostToDeviceSymbol(T* pHost, char* pDeviceSymbol, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)), "cudaMemcpyToSymbol");
-		CUDA::ThreadSynchronize();
-	}
+	if (CudaError != cudaSuccess)
+		throw(Exception(Enums::Error, Message));
+}
 
-	template<class T> static void MemCopyDeviceToDeviceSymbol(T* pDevice, char* pDeviceSymbol, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pDevice, Num * sizeof(T), 0, cudaMemcpyDeviceToDevice), "cudaMemcpyToSymbol");
-		CUDA::ThreadSynchronize();
-	}
+static inline void ThreadSynchronize()
+{
+	Cuda::HandleCudaError(cudaThreadSynchronize(), "cudaThreadSynchronize");
+}
 
-	template<class T> static void MemCopyHostToDevice(T* pHost, T* pDevice, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpy(pDevice, pHost, Num * sizeof(T), cudaMemcpyHostToDevice), "cudaMemcpy");
-		CUDA::ThreadSynchronize();
-	}
+template<class T> static inline void Allocate(T*& pDevicePointer, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMalloc((void**)&pDevicePointer, Num * sizeof(T)), "cudaMalloc");
+	Cuda::ThreadSynchronize();
+}
 
-	template<class T> static void MemCopyDeviceToHost(T* pDevice, T* pHost, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpy(pHost, pDevice, Num * sizeof(T), cudaMemcpyDeviceToHost), "cudaMemcpy");
-		CUDA::ThreadSynchronize();
-	}
+template<class T> static inline void AllocatePiched(T*& pDevicePointer, const int Pitch, const int Width, const int Height)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMallocPitch((void**)&pDevicePointer, (size_t*)&Pitch, Width * sizeof(T), Height), "cudaMallocPitch");
+	Cuda::ThreadSynchronize();
+}
 
-	template<class T> static void MemCopyDeviceToDevice(T* pDeviceSource, T* pDeviceDestination, int Num = 1)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaMemcpy(pDeviceDestination, pDeviceSource, Num * sizeof(T), cudaMemcpyDeviceToDevice), "cudaMemcpy");
-		CUDA::ThreadSynchronize();
-	}
+template<class T> static inline void MemSet(T*& pDevicePointer, const int Value, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMemset((void*)pDevicePointer, Value, (size_t)(Num * sizeof(T))), "cudaMemset");
+	Cuda::ThreadSynchronize();
+}
 
-	static void FreeArray(cudaArray*& pCudaArray)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaFreeArray(pCudaArray), "cudaFreeArray");
-		pCudaArray = NULL;
-		CUDA::ThreadSynchronize();
-	}
+template<class T> static inline void HostToConstantDevice(T* pHost, char* pDeviceSymbol, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)), "cudaMemcpyToSymbol");
+	Cuda::ThreadSynchronize();
+}
 
-	template<class T> static void Free(T*& pBuffer)
-	{
-		if (pBuffer == NULL)
-			return;
+template<class T> static inline void MemCopyHostToDeviceSymbol(T* pHost, char* pDeviceSymbol, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pHost, Num * sizeof(T)), "cudaMemcpyToSymbol");
+	Cuda::ThreadSynchronize();
+}
 
-		CUDA::ThreadSynchronize();
-		
-		HandleCudaError(cudaFree(pBuffer), "cudaFree");
-		pBuffer = NULL;
+template<class T> static inline void MemCopyDeviceToDeviceSymbol(T* pDevice, char* pDeviceSymbol, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMemcpyToSymbol(pDeviceSymbol, pDevice, Num * sizeof(T), 0, cudaMemcpyDeviceToDevice), "cudaMemcpyToSymbol");
+	Cuda::ThreadSynchronize();
+}
 
-		CUDA::ThreadSynchronize();
-	}
+template<class T> static inline void MemCopyHostToDevice(T* pHost, T* pDevice, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMemcpy(pDevice, pHost, Num * sizeof(T), cudaMemcpyHostToDevice), "cudaMemcpy");
+	Cuda::ThreadSynchronize();
+}
 
-	static void UnbindTexture(textureReference& pTextureReference)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaUnbindTexture(&pTextureReference), "cudaUnbindTexture");
+template<class T> static inline void MemCopyDeviceToHost(T* pDevice, T* pHost, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMemcpy(pHost, pDevice, Num * sizeof(T), cudaMemcpyDeviceToHost), "cudaMemcpy");
+	Cuda::ThreadSynchronize();
+}
 
-		CUDA::ThreadSynchronize();
-	}
+template<class T> static inline void MemCopyDeviceToDevice(T* pDeviceSource, T* pDeviceDestination, int Num = 1)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaMemcpy(pDeviceDestination, pDeviceSource, Num * sizeof(T), cudaMemcpyDeviceToDevice), "cudaMemcpy");
+	Cuda::ThreadSynchronize();
+}
 
-	template<class T> static void BindTexture1D(textureReference& TextureReference, int Num, const T* pBuffer, cudaArray*& pCudaArray, cudaTextureFilterMode TextureFilterMode = cudaFilterModeLinear, cudaTextureAddressMode TextureAddressMode = cudaAddressModeClamp, bool Normalized = true)
-	{
-		CUDA::ThreadSynchronize();
+static inline void FreeArray(cudaArray*& pCudaArray)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaFreeArray(pCudaArray), "cudaFreeArray");
+	pCudaArray = NULL;
+	Cuda::ThreadSynchronize();
+}
 
-		const cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
+template<class T> static inline void Free(T*& pBuffer)
+{
+	if (pBuffer == NULL)
+		return;
 
-		TextureReference.normalized		= Normalized;
-		TextureReference.filterMode		= TextureFilterMode;
-		TextureReference.addressMode[0]	= TextureAddressMode;
+	Cuda::ThreadSynchronize();
+	
+	HandleCudaError(cudaFree(pBuffer), "cudaFree");
+	pBuffer = NULL;
 
-		CUDA::FreeArray(pCudaArray);
+	Cuda::ThreadSynchronize();
+}
 
-		HandleCudaError(cudaMallocArray(&pCudaArray, &ChannelDescription, Num, 1));
-		HandleCudaError(cudaMemcpyToArray(pCudaArray, 0, 0, pBuffer, Num * sizeof(T), cudaMemcpyHostToDevice));
-		HandleCudaError(cudaBindTextureToArray(&TextureReference, pCudaArray, &ChannelDescription));
-
-		CUDA::ThreadSynchronize();
-	}
-
-	template<class T> static void BindTexture3D(textureReference& TextureReference, int Extent[3], const T* pBuffer, cudaArray*& pCudaArray, cudaTextureFilterMode TextureFilterMode = cudaFilterModeLinear, cudaTextureAddressMode TextureAddressMode = cudaAddressModeClamp, bool Normalized = true)
-	{
-		CUDA::ThreadSynchronize();
-
-		const cudaChannelFormatDesc ChannelDescription = cudaCreateChannelDesc<T>();
-
-		const cudaExtent CudaExtent = make_cudaExtent(Extent[0], Extent[1], Extent[2]);
-
-		HandleCudaError(cudaMalloc3DArray(&pCudaArray, &ChannelDescription, CudaExtent));
-
-		cudaMemcpy3DParms CopyParams = {0};
-
-		CopyParams.srcPtr		= make_cudaPitchedPtr((void*)pBuffer, CudaExtent.width * sizeof(unsigned short), CudaExtent.width, CudaExtent.height);
-		CopyParams.dstArray		= pCudaArray;
-		CopyParams.extent		= CudaExtent;
-		CopyParams.kind			= cudaMemcpyHostToDevice;
-		
-		HandleCudaError(cudaMemcpy3D(&CopyParams));
-
-		TextureReference.normalized		= Normalized;
-		TextureReference.filterMode		= TextureFilterMode;      
-		TextureReference.addressMode[0]	= TextureAddressMode;  
-		TextureReference.addressMode[1]	= TextureAddressMode;
-  		TextureReference.addressMode[2]	= TextureAddressMode;
-
-		HandleCudaError(cudaBindTextureToArray(&TextureReference, pCudaArray, &ChannelDescription));
-
-		CUDA::ThreadSynchronize();
-	}
-
-	static void GetSymbolAddress(void** pDevicePointer, char* pSymbol)
-	{
-		CUDA::ThreadSynchronize();
-		HandleCudaError(cudaGetSymbolAddress(pDevicePointer, pSymbol), "cudaGetSymbolAddress");
-	}
-};
+static inline void GetSymbolAddress(void** pDevicePointer, char* pSymbol)
+{
+	Cuda::ThreadSynchronize();
+	HandleCudaError(cudaGetSymbolAddress(pDevicePointer, pSymbol), "cudaGetSymbolAddress");
+}
 
 template<typename T, int MaxSize = 256>
-struct CudaList
+class List
 {
-	map<int, T>							ResourceMap;
-	typename map<int, T>::iterator		ResourceMapIt;
-	map<int, int>						HashMap;
-	typename map<int, int>::iterator	HashMapIt;
-	int									ResourceCounter;
-	char								DeviceSymbol[MAX_CHAR_SIZE];
-	T*									DevicePtr;
-	
-	HOST CudaList(const char* pDeviceSymbol)
+public:
+	HOST List(const char* pDeviceSymbol)
 	{
 		this->ResourceCounter = 0;
 
@@ -226,9 +145,8 @@ struct CudaList
 		this->DevicePtr = NULL;
 	}
 
-	HOST ~CudaList()
+	HOST ~List()
 	{
-//		CUDA::Free(this->DevicePtr);
 	}
 	
 	HOST bool Exists(int ID)
@@ -251,12 +169,12 @@ struct CudaList
 		if (!Exists)
 		{
 			ID = this->ResourceCounter;
-			this->ResourceMap[ID].FromHost(Resource);
+			//this->ResourceMap[ID].BindDevice(Resource);
 			this->ResourceCounter++;
 		}
 		else
 		{
-			this->ResourceMap[ID].FromHost(Resource);
+			//this->ResourceMap[ID].BindDevice(Resource);
 		}
 
 		this->Synchronize();
@@ -296,10 +214,10 @@ struct CudaList
 			Size++;
 		}
 		
-		CUDA::Free(this->DevicePtr);
-		CUDA::Allocate(this->DevicePtr, (int)this->ResourceMap.size());
-		CUDA::MemCopyHostToDevice(pHostList, this->DevicePtr, Size);
-		CUDA::MemCopyHostToDeviceSymbol(&this->DevicePtr, this->DeviceSymbol);
+		Cuda::Free(this->DevicePtr);
+		Cuda::Allocate(this->DevicePtr, (int)this->ResourceMap.size());
+		Cuda::MemCopyHostToDevice(pHostList, this->DevicePtr, Size);
+		Cuda::MemCopyHostToDeviceSymbol(&this->DevicePtr, this->DeviceSymbol);
 
 		delete[] pHostList;
 	}
@@ -313,6 +231,14 @@ struct CudaList
 
 		return this->ResourceMap[i];
 	}
+
+	map<int, T>							ResourceMap;
+	typename map<int, T>::iterator		ResourceMapIt;
+	map<int, int>						HashMap;
+	typename map<int, int>::iterator	HashMapIt;
+	int									ResourceCounter;
+	char								DeviceSymbol[MAX_CHAR_SIZE];
+	T*									DevicePtr;
 };
 
 #define LAUNCH_DIMENSIONS(width, height, depth, block_width, block_height, block_depth)						\
@@ -333,34 +259,34 @@ struct CudaList
 {																											\
 	cudaEvent_t EventStart, EventStop;																		\
 																											\
-	CUDA::HandleCudaError(cudaEventCreate(&EventStart));													\
-	CUDA::HandleCudaError(cudaEventCreate(&EventStop));														\
-	CUDA::HandleCudaError(cudaEventRecord(EventStart, 0));													\
+	Cuda::HandleCudaError(cudaEventCreate(&EventStart));													\
+	Cuda::HandleCudaError(cudaEventCreate(&EventStop));														\
+	Cuda::HandleCudaError(cudaEventRecord(EventStart, 0));													\
 																											\
 	cudakernelcall;																							\
 																											\
-	CUDA::HandleCudaError(cudaGetLastError());																\
-	CUDA::HandleCudaError(cudaThreadSynchronize());															\
+	Cuda::HandleCudaError(cudaGetLastError());																\
+	Cuda::HandleCudaError(cudaThreadSynchronize());															\
 																											\
-	CUDA::HandleCudaError(cudaEventRecord(EventStop, 0));													\
-	CUDA::HandleCudaError(cudaEventSynchronize(EventStop));													\
+	Cuda::HandleCudaError(cudaEventRecord(EventStop, 0));													\
+	Cuda::HandleCudaError(cudaEventSynchronize(EventStop));													\
 																											\
 	float TimeDelta = 0.0f;																					\
 																											\
-	CUDA::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop), title);					\
+	Cuda::HandleCudaError(cudaEventElapsedTime(&TimeDelta, EventStart, EventStop), title);					\
 																											\
 	/*gKernelTimings.Add(ErKernelTiming(title, TimeDelta));*/												\
 																											\
-	CUDA::HandleCudaError(cudaEventDestroy(EventStart));													\
-	CUDA::HandleCudaError(cudaEventDestroy(EventStop));														\
+	Cuda::HandleCudaError(cudaEventDestroy(EventStart));													\
+	Cuda::HandleCudaError(cudaEventDestroy(EventStop));														\
 }
 
 #define LAUNCH_CUDA_KERNEL(cudakernelcall)																	\
 {																											\
 	cudakernelcall;																							\
 																											\
-	CUDA::HandleCudaError(cudaGetLastError());																\
-	CUDA::HandleCudaError(cudaThreadSynchronize());															\
+	Cuda::HandleCudaError(cudaGetLastError());																\
+	Cuda::HandleCudaError(cudaThreadSynchronize());															\
 }
 
 #define KERNEL_1D(width)																					\
@@ -390,5 +316,6 @@ struct CudaList
 	if (IDx >= width || IDy >= height || IDz >= depth)														\
 		return;
 
+}
 
 }

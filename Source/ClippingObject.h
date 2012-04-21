@@ -51,9 +51,13 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 		return *this;
 	}
 
-	HOST void FromHost(const ClippingObject& Other)
+	HOST void BindDevice(const ClippingObject& HostClippingObject)
 	{
-		*this = Other;
+		*this = HostClippingObject;
+	}
+
+	HOST void UnbindDevice()
+	{
 	}
 };
 

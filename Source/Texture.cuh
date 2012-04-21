@@ -20,10 +20,10 @@ namespace ExposureRender
 
 DEVICE_NI ColorXYZf EvaluateBitmap(const Bitmap& Bitmap, const int& U, const int& V)
 {
-	if (Bitmap.pData == NULL)
+	if (Bitmap.DevicePixels == NULL)
 		return ColorXYZf(0.0f);
 
-	return ColorXYZf::FromRGBAuc(Bitmap.pData[V * Bitmap.Size[0] + U]);
+	return ColorXYZf::FromRGBAuc(Bitmap.DevicePixels[V * Bitmap.Size[0] + U]);
 }
 
 DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f& UVW)
@@ -103,7 +103,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 
 		case Enums::Bitmap:
 		{
-			if (T.Bitmap.pData != NULL)
+			if (T.Bitmap.DevicePixels != NULL)
 			{
 				const int Size[2] = { T.Bitmap.Size[0], T.Bitmap.Size[1] };
 

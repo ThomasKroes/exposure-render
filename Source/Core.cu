@@ -24,11 +24,11 @@ DEVICE ExposureRender::Object*			gpObjects			= NULL;
 DEVICE ExposureRender::ClippingObject*	gpClippingObjects	= NULL;
 DEVICE ExposureRender::Texture*			gpTextures			= NULL;
 
-ExposureRender::CudaList<ExposureRender::Volume>			gVolumes("gpVolumes");
-ExposureRender::CudaList<ExposureRender::Light>				gLights("gpLights");
-ExposureRender::CudaList<ExposureRender::Object>			gObjects("gpObjects");
-ExposureRender::CudaList<ExposureRender::ClippingObject>	gClippingObjects("gpClippingObjects");
-ExposureRender::CudaList<ExposureRender::Texture>			gTextures("gpTextures");
+ExposureRender::Cuda::List<ExposureRender::Volume>			gVolumes("gpVolumes");
+ExposureRender::Cuda::List<ExposureRender::Light>			gLights("gpLights");
+ExposureRender::Cuda::List<ExposureRender::Object>			gObjects("gpObjects");
+ExposureRender::Cuda::List<ExposureRender::ClippingObject>	gClippingObjects("gpClippingObjects");
+ExposureRender::Cuda::List<ExposureRender::Texture>			gTextures("gpTextures");
 
 #include "Utilities.cuh"
 
@@ -61,10 +61,10 @@ DEVICE ExposureRender::Tracer* pTracer = NULL;
 void BindTracer(ExposureRender::Tracer& Tracer)
 {
 	if (pTracer == NULL)
-		ExposureRender::CUDA::Allocate(pTracer);
+		ExposureRender::Cuda::Allocate(pTracer);
 	
-	ExposureRender::CUDA::MemCopyHostToDevice(&Tracer, pTracer);
-	ExposureRender::CUDA::MemCopyHostToDeviceSymbol(&pTracer, "gpTracer");
+	ExposureRender::Cuda::MemCopyHostToDevice(&Tracer, pTracer);
+	ExposureRender::Cuda::MemCopyHostToDeviceSymbol(&pTracer, "gpTracer");
 }
 
 namespace ExposureRender
@@ -110,7 +110,7 @@ EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
 		gTracers.erase(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(Volume V, int& ID)
+EXPOSURE_RENDER_DLL void BindVolume(const Volume& V, int& ID)
 {
 	gVolumes.Bind(V, ID);
 }
@@ -120,7 +120,7 @@ EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 	gVolumes.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindLight(Light L, int& ID)
+EXPOSURE_RENDER_DLL void BindLight(const Light& L, int& ID)
 {
 	gLights.Bind(L, ID);
 }
@@ -130,7 +130,7 @@ EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 	gLights.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindObject(Object O, int& ID)
+EXPOSURE_RENDER_DLL void BindObject(const Object& O, int& ID)
 {
 	gObjects.Bind(O, ID);
 }
@@ -140,7 +140,7 @@ EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 	gObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject C, int& ID)
+EXPOSURE_RENDER_DLL void BindClippingObject(const ClippingObject& C, int& ID)
 {
 	gClippingObjects.Bind(C, ID);
 }
@@ -150,7 +150,7 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 	gClippingObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID)
+EXPOSURE_RENDER_DLL void BindTexture(const Texture& Texture, int& ID)
 {
 	gTextures.Bind(Texture, ID);
 }
@@ -167,65 +167,65 @@ EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID)
 	Reset(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs)
+EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, const Indices& LightIDs)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.BindLightIDs(LightIDs, gLights.HashMap);
 	Reset(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs)
+EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, const Indices& ObjectIDs)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.BindObjectIDs(ObjectIDs, gObjects.HashMap);
 	Reset(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs)
+EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, const Indices& ClippingObjectIDs)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.BindClippingObjectIDs(ClippingObjectIDs, gClippingObjects.HashMap);
 	Reset(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D)
+EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, const ScalarTransferFunction1D& Opacity1D)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.Opacity1D = Opacity1D;
 }
 
-EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ColorTransferFunction1D Diffuse1D)
+EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, const ColorTransferFunction1D& Diffuse1D)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.Diffuse1D = Diffuse1D;
 }
 
-EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ColorTransferFunction1D Specular1D)
+EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, const ColorTransferFunction1D& Specular1D)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.Specular1D = Specular1D;
 }
 
-EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ScalarTransferFunction1D Glossiness1D)
+EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, const ScalarTransferFunction1D& Glossiness1D)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.Glossiness1D = Glossiness1D;
 }
 
-EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ColorTransferFunction1D Emission1D)
+EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, const ColorTransferFunction1D& Emission1D)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.Emission1D = Emission1D;
 }
 
-EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera)
+EXPOSURE_RENDER_DLL void BindCamera(int TracerID, const Camera& Camera)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.Camera = Camera;
-	Tracer.Camera.ToDevice();
+	Tracer.Camera.BindDevice();
 }
 
-EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings)
+EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, const RenderSettings& RenderSettings)
 {
 	EDIT_TRACER(TracerID)
 	Tracer.BindRenderSettings(RenderSettings);
@@ -248,7 +248,7 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)
 {
 	EDIT_TRACER(TracerID)
-	CUDA::MemCopyDeviceToHost(Tracer.FrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, Tracer.FrameBuffer.CudaDisplayEstimate.GetNoElements());
+	Cuda::MemCopyDeviceToHost(Tracer.FrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, Tracer.FrameBuffer.CudaDisplayEstimate.GetNoElements());
 }
 
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance)

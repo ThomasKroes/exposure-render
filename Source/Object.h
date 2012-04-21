@@ -60,9 +60,13 @@ struct EXPOSURE_RENDER_DLL Object
 		return *this;
 	}
 
-	HOST void FromHost(const Object& Other)
+	HOST void BindDevice(const Object& HostObject)
 	{
-		*this = Other;
+		*this = HostObject;
+	}
+	
+	HOST void UnbindDevice()
+	{
 	}
 };
 

@@ -44,6 +44,7 @@ SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 
 # General
 SET(ErCudaGeneral
+	Cuda.h
 	SingleScattering.cuh
 	Utilities.cuh
 	Geometry.cuh
@@ -57,7 +58,6 @@ SET(ErCudaGeneral
 	Buffer.cuh
 	Framebuffer.cuh
 	Ray.cuh
-	Statistics.cuh
 	GradientMagnitude.cuh
 	AutoFocus.cuh
 	Tracer.cuh
@@ -88,14 +88,6 @@ SET(ErCudaShapes
 # Shapes group
 SOURCE_GROUP("Shapes" FILES ${ErCudaShapes})
 
-# Benchmark
-SET(ErBenchmark
-	Benchmark.cuh
-)
-
-# Benchmark group
-SOURCE_GROUP("Benchmark" FILES ${ErBenchmark})
-
 # API
 SET(ErAPI
 	ExposureRender.h
@@ -116,7 +108,6 @@ SET(ErAPI
 	Timing.h
 	Exception.h
 	Enums.h
-	CudaUtilities.h
 	Color.h
 	ExposureRender.cpp
 )
@@ -129,7 +120,6 @@ SET(ErCudaFilters
 	Filter.cuh
 	BilateralFilter.cuh
 	GaussianFilter.cuh
-	Blend.cuh
 	ToneMap.cuh
 )
 
@@ -137,7 +127,7 @@ SET(ErCudaFilters
 SOURCE_GROUP("Filters" FILES ${ErCudaFilters})
 
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErBenchmark} ${ErAPI} ${ErShared} ${ErCudaFilters} SHARED)
+CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErAPI} ${ErShared} ${ErCudaFilters} SHARED)
 
 # This is hack, we need a more elegant solution for this!
 ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)

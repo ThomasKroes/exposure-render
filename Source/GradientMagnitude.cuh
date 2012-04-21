@@ -46,7 +46,7 @@ void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitu
 	unsigned short* pGradientMagnitude = NULL;
 
 	// Allocate temporary linear memory for computation
-	CUDA::Allocate(pGradientMagnitude, Extent[0] * Extent[1] * Extent[2]);
+	Cuda::Allocate(pGradientMagnitude, Extent[0] * Extent[1] * Extent[2]);
 
 	// Execute gradient computation kernel
 	LAUNCH_CUDA_KERNEL((KrnlComputeGradientMagnitudeVolume<<<GridDim, BlockDim>>>(pGradientMagnitude, Extent[0], Extent[1], Extent[2])));
@@ -59,7 +59,7 @@ void ComputeGradientMagnitudeVolume(int Extent[3], float& MaximumGradientMagnitu
 	Result = thrust::reduce(DevicePtr, DevicePtr + Extent[0] * Extent[1] * Extent[2], Result, thrust::maximum<unsigned short>());
 	
 	// Free temporary memory
-	CUDA::Free(pGradientMagnitude);
+	Cuda::Free(pGradientMagnitude);
 
 	// Set result
 	MaximumGradientMagnitude = Result;

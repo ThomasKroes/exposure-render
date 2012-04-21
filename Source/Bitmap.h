@@ -23,20 +23,22 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL Bitmap
+class EXPOSURE_RENDER_DLL Bitmap
 {
-	ColorRGBAuc*	pData;
-	Vec2i			Size;
-	bool			Dirty;
-
+public:
 	HOST Bitmap()
 	{
-		this->pData	= NULL;
-		this->Dirty = false;
+		this->HostPixels		= NULL;
+		this->DevicePixels		= NULL;
+		this->Dirty				= false;
+		this->HostMemoryOwner	= false;
+		this->DeviceMemoryOwner	= false;
 	}
 
 	HOST ~Bitmap()
 	{
+		this->UnbindPixels();
+		this->UnbindDevice();
 	}
 
 	HOST Bitmap(const Bitmap& Other)
@@ -46,16 +48,95 @@ struct EXPOSURE_RENDER_DLL Bitmap
 
 	HOST Bitmap& operator = (const Bitmap& Other)
 	{
-		this->pData	= Other.pData;
-		this->Size	= Other.Size;
-		this->Dirty	= Other.Dirty;
+		this->HostPixels	= Other.HostPixels;
+		this->DevicePixels	= Other.DevicePixels;
+		this->Size			= Other.Size;
+		this->Dirty			= Other.Dirty;
 
 		return *this;
 	}
 
-	HOST void ToDevice()
+	HOST void BindPixels(const ColorRGBAuc* Pixels, const Vec2i& Size)
 	{
+		if (Pixels == NULL)
+			throw(Exception(Enums::Warning, "BindPixels() failed: pixels pointer is NULL"));
+
+		this->Size = Size;
+
+		this->UnbindPixels();
+
+		const int NoPixels = this->Size[0] * this->Size[1];
+
+		if (NoPixels <= 0)
+			throw(Exception(Enums::Warning, "BindPixels() failed: bad no. voxels!"));
+
+		this->HostPixels = new ColorRGBAuc[NoPixels];
+
+		memcpy(this->HostPixels, Pixels, NoPixels * sizeof(ColorRGBAuc));
+
+		this->Dirty				= true;
+		this->HostMemoryOwner	= true;
 	}
+
+	HOST void UnbindPixels()
+	{
+		if (!this->HostMemoryOwner)
+			return;
+
+		if (this->HostPixels != NULL)
+		{
+			delete[] this->HostPixels;
+			this->HostPixels = NULL;
+		}
+
+		this->Dirty				= true;
+		this->DeviceMemoryOwner	= true;
+	}
+
+	HOST void BindDevice(const Bitmap& HostBitmap)
+	{
+		if (HostBitmap.Dirty)
+			this->UnbindDevice();
+
+		*this = HostBitmap;
+
+#ifdef __CUDA_ARCH__
+		if (this->Dirty)
+		{
+			if (this->HostPixels)
+			{
+				const int NoPixels = this->Size[0] * this->Size[1];
+
+				if (NoPixels > 0)
+				{
+					Cuda::Allocate(this->DevicePixels, NoPixels);
+					Cuda::MemCopyHostToDevice(HostBitmap.HostPixels, this->DevicePixels, NoPixels);
+				}
+			}
+
+			this->Dirty = false;
+		} 
+#endif
+	}
+
+	HOST void UnbindDevice()
+	{
+		if (!this->DeviceMemoryOwner)
+			return;
+
+#ifdef __CUDA_ARCH__
+		Cuda::Free(this->DevicePixels);
+#endif
+	}
+
+	ColorRGBAuc*	HostPixels;
+	ColorRGBAuc*	DevicePixels;
+	Vec2i			Size;
+	bool			Dirty;
+	bool			HostMemoryOwner;
+	bool			DeviceMemoryOwner;
+
+	friend class Texture;
 };
 
 }
