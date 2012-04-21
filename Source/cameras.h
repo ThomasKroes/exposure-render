@@ -13,35 +13,12 @@
 
 #pragma once
 
-#include "Camera.h"
-#include "Sample.cuh"
-#include "MonteCarlo.cuh"
+#include "camera.h"
+#include "sample.h"
+#include "montecarlo.h"
 
 namespace ExposureRender
 {
-
-DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& V, CameraSample& CS)
-{
-	Vec2f ScreenPoint;
-
-	ScreenPoint[0] = Camera.Screen[0][0] + (Camera.InvScreen[0] * (float)(U + CS.FilmUV[0] * 1.0f / Camera.FilmSize[0]));
-	ScreenPoint[1] = Camera.Screen[1][0] + (Camera.InvScreen[1] * (float)(V + CS.FilmUV[1] * 1.0f / Camera.FilmSize[1]));
-
-	R.O		= Camera.Pos;
-	R.D		= Normalize(Camera.N + (ScreenPoint[0] * Camera.U) - (ScreenPoint[1] * Camera.V));
-	R.MinT	= Camera.ClipNear;
-	R.MaxT	= Camera.ClipFar;
-
-	if (Camera.ApertureSize != 0.0f)
-	{
-		const Vec2f LensUV = Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
-
-		const Vec3f LI = Camera.U * LensUV[0] + Camera.V * LensUV[1];
-
-		R.O += LI;
-		R.D = Normalize(R.D * Camera.FocalDistance - LI);
-	}
-}
 
 }
 

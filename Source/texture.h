@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Procedural.h"
-#include "Bitmap.h"
+#include "procedural.h"
+#include "bitmap.h"
 
 namespace ExposureRender
 {

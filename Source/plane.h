@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Geometry.cuh"
-#include "Sample.cuh"
+#include "geometry.h"
+#include "sample.h"
 
 namespace ExposureRender
 {

@@ -13,16 +13,16 @@
 
 #pragma once
 
-#include "Camera.h"
-#include "Exception.h"
-#include "RenderSettings.h"
-#include "Texture.h"
-#include "TransferFunction.h"
-#include "Timing.h"
-#include "Volume.h"
-#include "Light.h"
-#include "Object.h"
-#include "ClippingObject.h"
+#include "camera.h"
+#include "exception.h"
+#include "rendersettings.h"
+#include "texture.h"
+#include "transferfunction.h"
+#include "timing.h"
+#include "volume.h"
+#include "light.h"
+#include "object.h"
+#include "clippingobject.h"
 
 namespace ExposureRender
 {

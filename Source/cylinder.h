@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Geometry.cuh"
-#include "Disk.cuh"
+#include "geometry.h"
+#include "disk.h"
 
 // http://www.cl.cam.ac.uk/teaching/1999/AGraphHCI/SMAG/node2.html
 // http://mrl.nyu.edu/~dzorin/intro-graphics/lectures/lecture11/index.htm

@@ -17,7 +17,7 @@
 #include <cuda_runtime_api.h>
 #include <map>
 
-#include "Exception.h"
+#include "exception.h"
 
 using namespace std;
 

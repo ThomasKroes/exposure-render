@@ -13,9 +13,9 @@
 
 #define __CUDA_ARCH__ 200
 
-#include "ExposureRender.h"
+#include "exposurerender.h"
 
-#include "Tracer.cuh"
+#include "tracer.h"
 
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
@@ -30,15 +30,15 @@ ExposureRender::Cuda::List<ExposureRender::Object>			gObjects("gpObjects");
 ExposureRender::Cuda::List<ExposureRender::ClippingObject>	gClippingObjects("gpClippingObjects");
 ExposureRender::Cuda::List<ExposureRender::Texture>			gTextures("gpTextures");
 
-#include "Utilities.cuh"
+#include "utilities.h"
 
 // Kernels
-#include "SingleScattering.cuh"
-#include "Estimate.cuh"
-#include "ToneMap.cuh"
+#include "singlescattering.cuh"
+#include "estimate.cuh"
+#include "toneMap.cuh"
 
 
-#include "GaussianFilter.cuh"
+#include "gaussianfilter.cuh"
 /*
 #include "BilateralFilter.cuh"
 #include "MedianFilter.cuh"

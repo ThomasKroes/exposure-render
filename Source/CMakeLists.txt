@@ -43,112 +43,86 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_EXPORTING")
 SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 
 # General
-SET(ErCudaGeneral
-	Cuda.h
-	SingleScattering.cuh
-	Utilities.cuh
-	Geometry.cuh
-	Estimate.cuh
-	Transport.cuh
-	RayMarching.cuh
-	Shader.cuh
-	Sample.cuh
-	RNG.cuh
-	MonteCarlo.cuh
-	Buffer.cuh
-	Framebuffer.cuh
-	Ray.cuh
-	GradientMagnitude.cuh
-	AutoFocus.cuh
-	Tracer.cuh
-	Camera.cuh
-	Volume.cuh
-	Light.cuh
-	Object.cuh
-	ClippingObject.cuh
-	Texture.cuh
-	Shape.cuh
-	TransferFunction.cuh
-	Core.cu
+SET(General
+	cuda.h
+	utilities.h
+	geometry.h
+	transport.h
+	raymarching.h
+	shader.h
+	sample.h
+	rng.h
+	montecarlo.h
+	buffer.h
+	framebuffer.h
+	ray.h
+	tracer.h
+	volumes.h
+	lights.h
+	objects.h
+	clippingobjects.h
+	textures.h
+	transferfunctions.h
+	filter.h
 )
 
 # General group
-SOURCE_GROUP("General" FILES ${ErCudaGeneral})
+SOURCE_GROUP("General" FILES ${General})
 
 # Shapes
-SET(ErCudaShapes
-	Plane.cuh
-	Box.cuh
-	Disk.cuh
-	Ring.cuh
-	Sphere.cuh
-	Cylinder.cuh
+SET(Shapes
+	shapes.h
+	plane.h
+	box.h
+	disk.h
+	ring.h
+	sphere.h
+	cylinder.h
 )
 
 # Shapes group
-SOURCE_GROUP("Shapes" FILES ${ErCudaShapes})
+SOURCE_GROUP("Shapes" FILES ${Shapes})
 
 # API
-SET(ErAPI
-	ExposureRender.h
-	Defines.h
-	Camera.h
-	Volume.h
-	Light.h
-	Object.h
-	ClippingObject.h
-	Procedural.h
-	Bitmap.h
-	Texture.h
-	Shape.h
-	Matrix.h
-	Vector.h
-	TransferFunction.h
-	RenderSettings.h
-	Timing.h
-	Exception.h
-	Enums.h
-	Color.h
-	ExposureRender.cpp
+SET(API
+	exposurerender.h
+	defines.h
+	camera.h
+	volume.h
+	light.h
+	object.h
+	clippingobject.h
+	procedural.h
+	bitmap.h
+	texture.h
+	shape.h
+	matrix.h
+	vector.h
+	transferfunction.h
+	rendersettings.h
+	timing.h
+	exception.h
+	enums.h
+	color.h
 )
 
 # API group
-SOURCE_GROUP("API" FILES ${ErAPI})
+SOURCE_GROUP("API" FILES ${API})
 
 # Filters
-SET(ErCudaFilters
-	Filter.cuh
-	BilateralFilter.cuh
-	GaussianFilter.cuh
-	ToneMap.cuh
+SET(Cuda
+	singlescattering.cuh
+	estimate.cuh
+	gradientmagnitude.cuh
+	bilateralfilter.cuh
+	gaussianfilter.cuh
+	tonemap.cuh
+	autofocus.cuh
+	core.cu
 )
 
 # Filters group
-SOURCE_GROUP("Filters" FILES ${ErCudaFilters})
+SOURCE_GROUP("Cuda" FILES ${Cuda})
 
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${ErCudaGeneral} ${ErCudaShapes} ${ErAPI} ${ErShared} ${ErCudaFilters} SHARED)
-
-# This is hack, we need a more elegant solution for this!
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.dll C:/Workspaces/Voreen/voreen/modules/er/ext/er/bin)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/relwithdebinfo/ErCore.lib C:/Workspaces/Voreen/voreen/modules/er/ext/er/lib)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Bitmap.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Camera.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ClippingObject.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/CudaUtilities.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Defines.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Enums.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Exception.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ExposureRender.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Light.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Matrix.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Object.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Procedural.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/RenderSettings.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Shape.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Texture.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Timing.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/TransferFunction.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Vector.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Volume.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
-ADD_CUSTOM_COMMAND(TARGET ErCore POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Color.h C:/Workspaces/Voreen/voreen/modules/er/ext/er/include)
+CUDA_ADD_LIBRARY(ErCore ${General} ${Shapes} ${API} ${Cuda} SHARED)

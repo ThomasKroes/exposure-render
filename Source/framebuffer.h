@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Buffer.cuh"
+#include "buffer.h"
 
 namespace ExposureRender
 {

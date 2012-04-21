@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Shape.h"
+#include "shape.h"
 
 namespace ExposureRender
 {

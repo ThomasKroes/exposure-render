@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "Geometry.cuh"
-#include "MonteCarlo.cuh"
-#include "Sample.cuh"
-#include "Texture.cuh"
+#include "geometry.h"
+#include "montecarlo.h"
+#include "sample.h"
+#include "textures.h"
 
 namespace ExposureRender
 {

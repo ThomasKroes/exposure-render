@@ -13,8 +13,9 @@
 
 #pragma once
 
-#include "Light.h"
-#include "Texture.cuh"
+#include "light.h"
+#include "textures.h"
+#include "shapes.h"
 
 namespace ExposureRender
 {
@@ -23,12 +24,12 @@ DEVICE void SampleLightSurface(const Light& Light, LightSample& LS, SurfaceSampl
 {
 	switch (Light.Shape.Type)
 	{
-		case 0:	SamplePlane(SS, LS.SurfaceUVW, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));		break;
-		case 1:	SampleDisk(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);									break;
-		case 2:	SampleRing(SS, LS.SurfaceUVW, Light.Shape.InnerRadius, Light.Shape.OuterRadius);		break;
-		case 3:	SampleBox(SS, LS.SurfaceUVW, Light.Shape.Size);											break;
-		case 4:	SampleSphere(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);								break;
-//		case 5:	SampleCylinder(SS, LS.SurfaceUVW, Light.Shape.OuterRadius, Light.Shape.Size[2]);		break;
+		case 0:	SamplePlane(SS, LS.SurfaceUVW, Vec2f(Light.Shape.Size[0], Light.Shape.Size[1]));	break;
+		case 1:	SampleDisk(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);								break;
+		case 2:	SampleRing(SS, LS.SurfaceUVW, Light.Shape.InnerRadius, Light.Shape.OuterRadius);	break;
+		case 3:	SampleBox(SS, LS.SurfaceUVW, Light.Shape.Size);										break;
+		case 4:	SampleSphere(SS, LS.SurfaceUVW, Light.Shape.OuterRadius);							break;
+//		case 5:	SampleCylinder(SS, LS.SurfaceUVW, Light.Shape.OuterRadius, Light.Shape.Size[2]);	break;
 	}
 
 	SS.P = TransformPoint(Light.Shape.TM, SS.P);

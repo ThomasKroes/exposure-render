@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Defines.h"
-#include "Enums.h"
+#include "defines.h"
+#include "enums.h"
 
 namespace ExposureRender
 {

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Vector.h"
+#include "vector.h"
 #include "Matrix.h"
 
 namespace ExposureRender

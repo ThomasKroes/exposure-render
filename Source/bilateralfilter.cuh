@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include "Color.h"
-#include "Geometry.cuh"
-#include "Filter.cuh"
+#include "color.h"
+#include "geometry.h"
+#include "filter.h"
 
 namespace ExposureRender
 {

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Volume.h"
+#include "volume.h"
 
 namespace ExposureRender
 {

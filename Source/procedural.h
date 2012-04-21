@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Vector.h"
-#include "TransferFunction.h"
+#include "vector.h"
+#include "transferfunction.h"
 
 namespace ExposureRender
 {

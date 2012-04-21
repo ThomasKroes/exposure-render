@@ -13,12 +13,12 @@
 
 #pragma once
 
-#include "Plane.cuh"
-#include "Disk.cuh"
-#include "Ring.cuh"
-#include "Box.cuh"
-#include "Sphere.cuh"
-#include "Cylinder.cuh"
+#include "plane.h"
+#include "disk.h"
+#include "ring.h"
+#include "box.h"
+#include "sphere.h"
+#include "cylinder.h"
 
 namespace ExposureRender
 {

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "MonteCarlo.cuh"
+#include "montecarlo.h"
 
 namespace ExposureRender
 {

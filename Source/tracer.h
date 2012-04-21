@@ -13,12 +13,11 @@
 
 #pragma once
 
-#include "TransferFunction.h"
-#include "Camera.h"
-#include "RenderSettings.h"
-
-#include "Framebuffer.cuh"
-#include "Filter.cuh"
+#include "transferfunction.h"
+#include "camera.h"
+#include "rendersettings.h"
+#include "framebuffer.h"
+#include "filter.h"
 
 namespace ExposureRender
 {

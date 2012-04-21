@@ -13,11 +13,11 @@
 
 #pragma once
 
-#include "RayMarching.cuh"
-#include "Light.cuh"
-#include "Object.cuh"
-#include "Shader.cuh"
-#include "Texture.cuh"
+#include "raymarching.h"
+#include "lights.h"
+#include "objects.h"
+#include "shader.h"
+#include "textures.h"
 
 namespace ExposureRender
 {

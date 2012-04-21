@@ -14,9 +14,10 @@
 
 #pragma once
 
-#include "Geometry.cuh"
-#include "Volume.cuh"
-#include "TransferFunction.cuh"
+#include "geometry.h"
+#include "volumes.h"
+#include "transferfunctions.h"
+#include "shapes.h"
 
 namespace ExposureRender
 {

@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "TransferFunction.h"
-#include "Color.h"
+#include "transferfunction.h"
+#include "color.h"
 
 namespace ExposureRender
 {

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "ClippingObject.h"
+#include "clippingobject.h"
 
 namespace ExposureRender
 {
