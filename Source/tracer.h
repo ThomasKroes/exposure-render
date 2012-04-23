@@ -97,11 +97,11 @@ struct Tracer
 
 	HOST void BindRenderSettings(const ExposureRender::RenderSettings& RS)
 	{
-		this->RenderSettings = RenderSettings;
+		this->RenderSettings = RS;
 
 		// FIXME
 
-		this->FrameEstimateFilter.KernelRadius = this->RenderSettings.Filtering.FrameEstimateFilterParams.KernelRadius;
+		this->FrameEstimateFilter.KernelRadius = 2;//this->RenderSettings.Filtering.FrameEstimateFilterParams.KernelRadius;
 
 		const int KernelSize = (2 * this->FrameEstimateFilter.KernelRadius) + 1;
 

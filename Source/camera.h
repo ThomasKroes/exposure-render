@@ -58,11 +58,13 @@ struct Camera
 		this->Gamma				= Other.Gamma;
 		this->InvGamma			= Other.InvGamma;
 		this->FOV				= Other.FOV;
+		
+		this->Update();
 
 		return *this;
 	}
 
-	HOST void BindDevice()
+	HOST void Update()
 	{
 		this->InvExposure	= this->Exposure == 0.0f ? 0.0f : 1.0f / this->Exposure;
 		this->InvGamma		= this->Gamma == 0.0f ? 0.0f : 1.0f / this->Gamma;

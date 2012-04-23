@@ -14,7 +14,6 @@
 #pragma once
 
 #include "transport.h"
-#include "cameras.h"
 
 namespace ExposureRender
 {

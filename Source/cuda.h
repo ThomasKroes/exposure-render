@@ -169,12 +169,12 @@ public:
 		if (!Exists)
 		{
 			ID = this->ResourceCounter;
-			//this->ResourceMap[ID].BindDevice(Resource);
+			this->ResourceMap[ID].BindDevice(Resource);
 			this->ResourceCounter++;
 		}
 		else
 		{
-			//this->ResourceMap[ID].BindDevice(Resource);
+			this->ResourceMap[ID].BindDevice(Resource);
 		}
 
 		this->Synchronize();

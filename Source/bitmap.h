@@ -37,8 +37,10 @@ public:
 
 	HOST ~Bitmap()
 	{
+		/*
 		this->UnbindPixels();
 		this->UnbindDevice();
+		*/
 	}
 
 	HOST Bitmap(const Bitmap& Other)

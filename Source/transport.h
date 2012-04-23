@@ -119,7 +119,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 {
 	ColorXYZf Ld;
 
-	const float Intensity = GetIntensity(0, SE.P);
+	const float Intensity = GetIntensity(gpTracer->VolumeID, SE.P);
 
 	Ld += EvaluateColorTransferFunction(gpTracer->Emission1D, Intensity);
 

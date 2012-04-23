@@ -27,19 +27,21 @@ class Volume
 public:
 	HOST Volume()
 	{
-		this->ID				= -1;
-		this->NormalizeSize		= false;
-		this->HostVoxels		= NULL;
-		this->DeviceVoxels		= NULL;
-		this->Dirty				= false;
-		this->HostMemoryOwner	= false;
-		this->DeviceMemoryOwner	= false;
+		this->ID					= -1;
+		this->NormalizeSize			= false;
+		this->HostVoxels			= NULL;
+		this->DeviceVoxels			= NULL;
+		this->Dirty					= false;
+		this->HostMemoryOwner		= false;
+		this->DeviceMemoryOwner		= false;
 	}
 
 	HOST ~Volume()
 	{
+		/*
 		this->UnbindVoxels();
 		this->UnbindDevice();
+		*/
 	}
 	
 	HOST Volume(const Volume& Other)
@@ -63,8 +65,8 @@ public:
 		this->GradientDeltaY			= Other.GradientDeltaY;
 		this->GradientDeltaZ			= Other.GradientDeltaZ;
 		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
-//		this->HostVoxels				= Other.HostVoxels;
-//		this->DeviceVoxels				= Other.DeviceVoxels;
+		this->HostVoxels				= Other.HostVoxels;
+		this->DeviceVoxels				= Other.DeviceVoxels;
 		this->Dirty						= Other.Dirty;
 
 		return *this;
@@ -134,6 +136,8 @@ public:
 
 		float Scale = 1.0f;
 
+		this->NormalizeSize = true;
+
 		if (this->NormalizeSize)
 		{
 			const Vec3f PhysicalSize = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * this->Spacing;
@@ -163,7 +167,7 @@ public:
 		this->GradientDeltaZ = Vec3f(0.0f, 0.0f, MinVoxelSize);
 
 #ifdef __CUDA_ARCH__
-		if (this->Dirty && this->HostVoxels)
+		if (this->Dirty && HostVolume.HostVoxels)
 		{
 			const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
 
@@ -184,6 +188,7 @@ public:
 			return;
 
 #ifdef __CUDA_ARCH__
+		printf("ExposureRender::Volume::UnbindDevice()\n");
 		Cuda::Free(this->DeviceVoxels);
 #endif
 	}

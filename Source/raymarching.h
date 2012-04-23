@@ -52,7 +52,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 		if (MinT >= MaxT)
 			return;
 		
-		float Intensity = GetIntensity(0, Ps);
+		float Intensity = GetIntensity(gpTracer->VolumeID, Ps);
 
 		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * EvaluateScalarTransferFunction(gpTracer->Opacity1D, Intensity);
 
@@ -60,7 +60,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 		MinT	+= gpTracer->RenderSettings.Traversal.StepSize;
 	}
 
-	SE.SetValid(MinT, Ps, NormalizedGradient(0, Ps), -R.D, ColorXYZf());
+	SE.SetValid(MinT, Ps, NormalizedGradient(gpTracer->VolumeID, Ps), -R.D, ColorXYZf());
 }
 
 // Determines if there is a scatter event along the ray
@@ -93,7 +93,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 		if (MinT > MaxT)
 			return false;
 		
-		float Intensity = GetIntensity(0, Ps);
+		float Intensity = GetIntensity(gpTracer->VolumeID, Ps);
 
 		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * EvaluateScalarTransferFunction(gpTracer->Opacity1D, Intensity);
 
