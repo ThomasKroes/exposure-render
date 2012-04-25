@@ -60,35 +60,57 @@ public:
 	}
 };
 
-template<int Size>
-class EXPOSURE_RENDER_DLL TransferFunction1D
+class EXPOSURE_RENDER_DLL ScalarTransferFunction1D
 {
 public:
-	PiecewiseLinearFunction PLF[Size];
+	PiecewiseLinearFunction PLF;
 	
-	HOST TransferFunction1D()
+	HOST ScalarTransferFunction1D()
 	{
 	}
 
-	HOST ~TransferFunction1D()
+	HOST ~ScalarTransferFunction1D()
 	{
 	}
 
-	HOST TransferFunction1D(const TransferFunction1D& Other)
+	HOST ScalarTransferFunction1D(const ScalarTransferFunction1D& Other)
 	{
 		*this = Other;
 	}
 
-	HOST TransferFunction1D& operator = (const TransferFunction1D& Other)
+	HOST ScalarTransferFunction1D& operator = (const ScalarTransferFunction1D& Other)
 	{	
-		for (int i = 0; i < Size; i++)
-			this->PLF[i] = Other.PLF[i];
+		this->PLF = Other.PLF;
 		
 		return *this;
 	}
 };
 
-typedef TransferFunction1D<1> ScalarTransferFunction1D;
-typedef TransferFunction1D<3> ColorTransferFunction1D;
+class EXPOSURE_RENDER_DLL ColorTransferFunction1D
+{
+public:
+	PiecewiseLinearFunction PLF[3];
+	
+	HOST ColorTransferFunction1D()
+	{
+	}
+
+	HOST ~ColorTransferFunction1D()
+	{
+	}
+
+	HOST ColorTransferFunction1D(const ColorTransferFunction1D& Other)
+	{
+		*this = Other;
+	}
+
+	HOST ColorTransferFunction1D& operator = (const ColorTransferFunction1D& Other)
+	{	
+		for (int i = 0; i < 3; i++)
+			this->PLF[i] = Other.PLF[i];
+		
+		return *this;
+	}
+};
 
 }

@@ -77,29 +77,6 @@ EXPOSURE_RENDER_DLL void Restart(int TracerID)
 	Tracer.NoIterations = 0;
 }
 
-EXPOSURE_RENDER_DLL void InitializeTracer(int& ID)
-{
-	if (ID < 0)
-		ID = gTracers.size();
-
-	gTracers[ID] = Tracer();
-
-	gVolumes.Synchronize();
-	gLights.Synchronize();
-	gObjects.Synchronize();
-	gClippingObjects.Synchronize();
-}
-
-EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
-{
-	std::map<int, Tracer>::iterator	It;
-	
-	It = gTracers.find(ID);
-	
-	if (It != gTracers.end())
-		gTracers.erase(ID);
-}
-
 EXPOSURE_RENDER_DLL void BindTracer(Tracer T, int& TracerID)
 {
 	EDIT_TRACER(TracerID)
@@ -161,6 +138,16 @@ EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 	gTextures.Unbind(ID);
 }
 
+EXPOSURE_RENDER_DLL void BindBitmap(Bitmap B, int& ID)
+{
+	gBitmaps.Bind(B, ID);
+}
+
+EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
+{
+	gBitmaps.Unbind(ID);
+}
+
 EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID)
 {
 	EDIT_TRACER(TracerID)
@@ -193,7 +180,7 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 
 	SingleScattering(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ComputeEstimate(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
-	FilterGaussian(Tracer.FrameBuffer.CudaFrameEstimate.GetPtr(), Tracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
+//	FilterGaussian(Tracer.FrameBuffer.CudaFrameEstimate.GetPtr(), Tracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ToneMap(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 
 	Tracer.NoIterations++;

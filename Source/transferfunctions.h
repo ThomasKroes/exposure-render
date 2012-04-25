@@ -46,7 +46,7 @@ DEVICE_NI float EvaluatePLF(const PiecewiseLinearFunction& PLF, const float& Int
 
 DEVICE_NI float EvaluateScalarTransferFunction(const ScalarTransferFunction1D& STF, const float& Intensity)
 {
-	return EvaluatePLF(STF.PLF[0], Intensity);
+	return EvaluatePLF(STF.PLF, Intensity);
 }
 
 DEVICE_NI ColorXYZf EvaluateColorTransferFunction(const ColorTransferFunction1D& CTF, const float& Intensity)

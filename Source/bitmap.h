@@ -16,6 +16,10 @@
 #include "bindable.h"
 #include "color.h"
 
+#ifdef __CUDA_ARCH__
+	#include "cuda.h"
+#endif
+
 namespace ExposureRender
 {
 

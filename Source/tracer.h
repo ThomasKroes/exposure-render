@@ -17,8 +17,10 @@
 #include "transferfunction.h"
 #include "camera.h"
 #include "rendersettings.h"
-#include "framebuffer.h"
-#include "filter.h"
+
+#ifdef __CUDA_ARCH__
+	#include "framebuffer.h"
+#endif
 
 namespace ExposureRender
 {
@@ -51,14 +53,16 @@ public:
 		this->Emission1D			= Other.Emission1D;
 		this->Camera				= Other.Camera;
 		this->RenderSettings		= Other.RenderSettings;
+
+#ifdef __CUDA_ARCH__
 		this->FrameBuffer			= Other.FrameBuffer;
+#endif
+
 		this->NoIterations			= Other.NoIterations;
 		this->VolumeID				= Other.VolumeID;
 		this->LightIDs				= Other.LightIDs;
 		this->ObjectIDs				= Other.ObjectIDs;
 		this->ClippingObjectIDs		= Other.ClippingObjectIDs;
-		this->FrameEstimateFilter	= Other.FrameEstimateFilter;
-		this->PostProcessingFilter	= Other.PostProcessingFilter;
 
 		return *this;
 	}
@@ -89,7 +93,8 @@ public:
 	HOST void BindRenderSettings(const ExposureRender::RenderSettings& RS)
 	{
 		this->RenderSettings = RS;
-
+		
+		/*
 		// FIXME
 
 		this->FrameEstimateFilter.KernelRadius = 2;//this->RenderSettings.Filtering.FrameEstimateFilterParams.KernelRadius;
@@ -99,7 +104,7 @@ public:
 		for (int i = 0; i < KernelSize; i++)
 			FrameEstimateFilter.KernelD[i] = 1.0f;//Gauss2D(RS.Filtering.FrameEstimateFilterParams.Sigma, RS.Filtering.FrameEstimateFilterParams.KernelRadius - i, 0);
 
-		/*
+		
 		BilateralFilter Bilateral;
 
 		const int SigmaMax = (int)max(Filtering.PostProcessingFilter.SigmaD, Filtering.PostProcessingFilter.SigmaR);
@@ -129,16 +134,17 @@ public:
 
 	Camera							Camera;
 	RenderSettings					RenderSettings;
+
+#ifdef __CUDA_ARCH__
 	FrameBuffer						FrameBuffer;
+#endif
+
 	int								NoIterations;
 
 	int								VolumeID;
 	Indices							LightIDs;
 	Indices							ObjectIDs;
 	Indices							ClippingObjectIDs;
-	
-	GaussianFilter					FrameEstimateFilter;
-	BilateralFilter					PostProcessingFilter;
 };
 
 }

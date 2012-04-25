@@ -24,8 +24,6 @@
 namespace ExposureRender
 {
 
-EXPOSURE_RENDER_DLL void InitializeTracer(int& ID);
-EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID);
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2]);
 EXPOSURE_RENDER_DLL void Restart(int TracerID);
 EXPOSURE_RENDER_DLL void BindTracer(Tracer Tracer, int& TracerID);
@@ -40,6 +38,8 @@ EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject ClippingObject, int& 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID);
 EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID);
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID);
+EXPOSURE_RENDER_DLL void BindBitmap(Bitmap Bitmap, int& ID);
+EXPOSURE_RENDER_DLL void UnbindBitmap(int ID);
 EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID);
 EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs);
 EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs);

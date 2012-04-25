@@ -13,6 +13,8 @@
 
 #pragma once
 
+#ifdef __CUDA_ARCH__
+
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <map>
@@ -319,3 +321,5 @@ public:
 }
 
 }
+
+#endif
