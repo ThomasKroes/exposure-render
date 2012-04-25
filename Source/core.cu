@@ -77,20 +77,21 @@ EXPOSURE_RENDER_DLL void Restart(int TracerID)
 	Tracer.NoIterations = 0;
 }
 
-EXPOSURE_RENDER_DLL void BindTracer(Tracer T, int& TracerID)
+EXPOSURE_RENDER_DLL void BindTracer(const Tracer& T)
 {
-	EDIT_TRACER(TracerID)
-	Tracer = T;
-	Restart(TracerID);
+	if (T.ID < 0)
+		T.ID = gTracers.size(); 
+
+	gTracers[T.ID] = T;
 }
 
 EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID)
 {
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(Volume V, int& ID)
+EXPOSURE_RENDER_DLL void BindVolume(const Volume& V)
 {
-	gVolumes.Bind(V, ID);
+	gVolumes.Bind(V);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
@@ -98,9 +99,9 @@ EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 	gVolumes.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindLight(Light L, int& ID)
+EXPOSURE_RENDER_DLL void BindLight(const Light& L)
 {
-	gLights.Bind(L, ID);
+	gLights.Bind(L);
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
@@ -108,9 +109,9 @@ EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 	gLights.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindObject(Object O, int& ID)
+EXPOSURE_RENDER_DLL void BindObject(const Object& O)
 {
-	gObjects.Bind(O, ID);
+	gObjects.Bind(O);
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
@@ -118,9 +119,9 @@ EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 	gObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject C, int& ID)
+EXPOSURE_RENDER_DLL void BindClippingObject(const ClippingObject& C)
 {
-	gClippingObjects.Bind(C, ID);
+	gClippingObjects.Bind(C);
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
@@ -128,9 +129,9 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 	gClippingObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID)
+EXPOSURE_RENDER_DLL void BindTexture(const Texture& Texture)
 {
-	gTextures.Bind(Texture, ID);
+	gTextures.Bind(Texture);
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
@@ -138,9 +139,9 @@ EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 	gTextures.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindBitmap(Bitmap B, int& ID)
+EXPOSURE_RENDER_DLL void BindBitmap(const Bitmap& B)
 {
-	gBitmaps.Bind(B, ID);
+	gBitmaps.Bind(B);
 }
 
 EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
@@ -177,8 +178,9 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 	EDIT_TRACER(TracerID)
 
 	BindDeviceTracer(Tracer);
-
+	
 	SingleScattering(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
+	return;
 	ComputeEstimate(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 //	FilterGaussian(Tracer.FrameBuffer.CudaFrameEstimate.GetPtr(), Tracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ToneMap(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);

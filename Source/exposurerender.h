@@ -26,19 +26,19 @@ namespace ExposureRender
 
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2]);
 EXPOSURE_RENDER_DLL void Restart(int TracerID);
-EXPOSURE_RENDER_DLL void BindTracer(Tracer Tracer, int& TracerID);
+EXPOSURE_RENDER_DLL void BindTracer(const Tracer& Tracer);
 EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID);
-EXPOSURE_RENDER_DLL void BindVolume(Volume Volume, int& ID);
+EXPOSURE_RENDER_DLL void BindVolume(const Volume& Volume);
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID);
-EXPOSURE_RENDER_DLL void BindLight(Light Light, int& ID);
+EXPOSURE_RENDER_DLL void BindLight(const Light& Light);
 EXPOSURE_RENDER_DLL void UnbindLight(int ID);
-EXPOSURE_RENDER_DLL void BindObject(Object Object, int& ID);
+EXPOSURE_RENDER_DLL void BindObject(const Object& Object);
 EXPOSURE_RENDER_DLL void UnbindObject(int ID);
-EXPOSURE_RENDER_DLL void BindClippingObject(ClippingObject ClippingObject, int& ID);
+EXPOSURE_RENDER_DLL void BindClippingObject(const ClippingObject& ClippingObject);
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID);
-EXPOSURE_RENDER_DLL void BindTexture(Texture Texture, int& ID);
+EXPOSURE_RENDER_DLL void BindTexture(const Texture& Texture);
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID);
-EXPOSURE_RENDER_DLL void BindBitmap(Bitmap Bitmap, int& ID);
+EXPOSURE_RENDER_DLL void BindBitmap(const Bitmap& Bitmap);
 EXPOSURE_RENDER_DLL void UnbindBitmap(int ID);
 EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID);
 EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs);

@@ -25,10 +25,10 @@ DEVICE_NI float EvaluatePLF(const PiecewiseLinearFunction& PLF, const float& Int
 		return 0.0f;
 
 	if (Intensity < PLF.NodeRange[0])
-		return PLF.Data[0];
+		return PLF.Value[0];
 
 	if (Intensity > PLF.NodeRange[1])
-		return PLF.Data[PLF.Count - 1];
+		return PLF.Value[PLF.Count - 1];
 
 	for (int i = 1; i < PLF.Count; i++)
 	{
@@ -38,7 +38,7 @@ DEVICE_NI float EvaluatePLF(const PiecewiseLinearFunction& PLF, const float& Int
 		float LerpT = (Intensity - P1) / DeltaP;
 
 		if (Intensity >= P1 && Intensity < P2)
-			return Lerp(LerpT, PLF.Data[i - 1], PLF.Data[i]);
+			return Lerp(LerpT, PLF.Value[i - 1], PLF.Value[i]);
 	}
 
 	return 0.0f;

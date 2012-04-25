@@ -30,11 +30,6 @@ public:
 class EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 {
 public:
-	Vec2f			NodeRange;
-	NodesVector		Position;
-	NodesVector		Data;
-	int				Count;
-
 	HOST PiecewiseLinearFunction()
 	{
 		this->Count = 0;
@@ -49,22 +44,97 @@ public:
 		*this = Other;
 	}
 
-	PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
+	HOST PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
 	{
 		this->NodeRange		= Other.NodeRange;
 		this->Position		= Other.Position;
-		this->Data			= Other.Data;
+		this->Value			= Other.Value;
 		this->Count			= Other.Count;
 
 		return *this;
 	}
+
+	HOST void AddNode(const float& Position, const float& Value)
+	{
+		if (this->Count + 1 >= MAX_NO_TF_NODES)
+			return;
+
+		this->Position[this->Count] = Position;
+		this->Value[this->Count]	= Value;
+
+		if (Value < this->NodeRange[0])
+			this->NodeRange[0] = Value;
+
+		if (Value > this->NodeRange[1])
+			this->NodeRange[1] = Value;
+
+		this->Count++;
+	}
+
+	Vec2f			NodeRange;
+	NodesVector		Position;
+	NodesVector		Value;
+	int				Count;
+};
+
+class EXPOSURE_RENDER_DLL ScalarNode
+{
+public:
+	HOST ScalarNode(float Position, float Value) :
+		Position(Position),
+		Value(Value)
+	{
+	}
+
+	HOST ScalarNode() :
+		Position(0.0f),
+		Value(0.0f)
+	{
+	}
+
+	HOST ScalarNode(const ScalarNode& Other)
+	{
+		*this = Other;
+	}
+
+	HOST ScalarNode& operator = (const ScalarNode& Other)
+	{
+		this->Position	= Other.Position;
+		this->Value		= Other.Value;
+
+		return *this;
+	}
+
+	float	Position;
+	float	Value;
+};
+
+class EXPOSURE_RENDER_DLL ColorNode
+{
+public:
+	HOST ColorNode()
+	{
+	}
+
+	HOST ColorNode(const ColorNode& Other)
+	{
+		*this = Other;
+	}
+
+	HOST ColorNode& operator = (const ColorNode& Other)
+	{
+		for (int i = 0; i < 3; i++)
+			this->ScalarNodes[i] = Other.ScalarNodes[i];
+
+		return *this;
+	}
+
+	ScalarNode	ScalarNodes[3];
 };
 
 class EXPOSURE_RENDER_DLL ScalarTransferFunction1D
 {
 public:
-	PiecewiseLinearFunction PLF;
-	
 	HOST ScalarTransferFunction1D()
 	{
 	}
@@ -84,13 +154,18 @@ public:
 		
 		return *this;
 	}
+
+	HOST void AddNode(const ScalarNode& Node)
+	{
+		this->PLF.AddNode(Node.Position, Node.Value);
+	}
+
+	PiecewiseLinearFunction PLF;
 };
 
 class EXPOSURE_RENDER_DLL ColorTransferFunction1D
 {
 public:
-	PiecewiseLinearFunction PLF[3];
-	
 	HOST ColorTransferFunction1D()
 	{
 	}
@@ -111,6 +186,14 @@ public:
 		
 		return *this;
 	}
+
+	HOST void AddNode(const ColorNode& Node)
+	{
+		for (int i = 0; i < 3; i++)
+			this->PLF[i].AddNode(Node.ScalarNodes[i].Position, Node.ScalarNodes[i].Value);
+	}
+
+	PiecewiseLinearFunction PLF[3];
 };
 
 }

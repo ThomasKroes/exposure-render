@@ -57,9 +57,9 @@ public:
 	GET_SET(Dirty, bool)
 	*/
 
-	int		ID;
-	bool	Enabled;
-	bool	Dirty;
+	mutable int		ID;
+	bool			Enabled;
+	bool			Dirty;
 };
 
 }

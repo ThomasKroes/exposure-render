@@ -161,22 +161,22 @@ public:
 		return this->ResourceMapIt != this->ResourceMap.end();
 	}
 
-	HOST void Bind(const T& Resource, int& ID)
+	HOST void Bind(const T& Resource)
 	{
 		if (this->ResourceMap.size() >= MaxSize)
 			throw(Exception(Enums::Warning, "Maximum number of ResourceMap reached"));
 
-		const bool Exists = this->Exists(ID);
+		const bool Exists = this->Exists(Resource.ID);
 		
 		if (!Exists)
 		{
-			ID = this->ResourceCounter;
-			this->ResourceMap[ID].BindDevice(Resource);
+			Resource.ID = this->ResourceCounter;
+			this->ResourceMap[Resource.ID].BindDevice(Resource);
 			this->ResourceCounter++;
 		}
 		else
 		{
-			this->ResourceMap[ID].BindDevice(Resource);
+			this->ResourceMap[Resource.ID].BindDevice(Resource);
 		}
 
 		this->Synchronize();
