@@ -13,35 +13,31 @@
 
 #pragma once
 
+#include "bindable.h"
 #include "vector.h"
 
-#if defined (__CUDA_ARCH__)
+#ifdef __CUDA_ARCH__
 	#include "cuda.h"
 #endif
 
 namespace ExposureRender
 {
 
-class Volume
+class EXPOSURE_RENDER_DLL Volume : public Bindable
 {
 public:
-	HOST Volume()
+	HOST Volume() :
+		Bindable()
 	{
-		this->ID					= -1;
 		this->NormalizeSize			= false;
 		this->HostVoxels			= NULL;
 		this->DeviceVoxels			= NULL;
-		this->Dirty					= false;
 		this->HostMemoryOwner		= false;
 		this->DeviceMemoryOwner		= false;
 	}
 
 	HOST ~Volume()
 	{
-		/*
-		this->UnbindVoxels();
-		this->UnbindDevice();
-		*/
 	}
 	
 	HOST Volume(const Volume& Other)
@@ -51,7 +47,8 @@ public:
 
 	HOST Volume& Volume::operator = (const Volume& Other)
 	{
-		this->ID						= Other.ID;
+		Bindable::operator=(Other);
+
 		this->Resolution				= Other.Resolution;
 		this->Spacing					= Other.Spacing;
 		this->NormalizeSize				= Other.NormalizeSize;
@@ -67,7 +64,6 @@ public:
 		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
 		this->HostVoxels				= Other.HostVoxels;
 		this->DeviceVoxels				= Other.DeviceVoxels;
-		this->Dirty						= Other.Dirty;
 
 		return *this;
 	}
@@ -193,25 +189,23 @@ public:
 #endif
 	}
 
-	int					ID;
-	Vec3i				Resolution;			// FIXME
-	bool				NormalizeSize;
-	Vec3f				Spacing;
-	Vec3f				InvResolution;
-	Vec3f				MinAABB;
-	Vec3f				MaxAABB;
-	Vec3f				Size;
-	Vec3f				InvSize;
-	Vec3f				InvSpacing;
-	Vec3f				GradientDeltaX;
-	Vec3f				GradientDeltaY;
-	Vec3f				GradientDeltaZ;
-	Vec2f				GradientMagnitudeRange;
-	unsigned short*		HostVoxels;
-	unsigned short*		DeviceVoxels;
-	bool				Dirty;
-	bool				HostMemoryOwner;
-	bool				DeviceMemoryOwner;
+	Vec3i			Resolution;			// FIXME
+	bool			NormalizeSize;
+	Vec3f			Spacing;
+	Vec3f			InvResolution;
+	Vec3f			MinAABB;
+	Vec3f			MaxAABB;
+	Vec3f			Size;
+	Vec3f			InvSize;
+	Vec3f			InvSpacing;
+	Vec3f			GradientDeltaX;
+	Vec3f			GradientDeltaY;
+	Vec3f			GradientDeltaZ;
+	Vec2f			GradientMagnitudeRange;
+	unsigned short*	HostVoxels;
+	unsigned short*	DeviceVoxels;
+	bool			HostMemoryOwner;
+	bool			DeviceMemoryOwner;
 };
 
 }

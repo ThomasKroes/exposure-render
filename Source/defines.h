@@ -71,4 +71,38 @@ namespace ExposureRender
 #define MAX_NO_TF_NODES				128
 #define NO_COLOR_COMPONENTS			4
 
+	/*
+
+#define VEC3_CONSTRUCTOR(classname, type)													\
+HOST_DEVICE classname(const type& V1, const type& V2, const type& V3)						\
+{																							\
+	this->D[0] = V1;																		\
+	this->D[1] = V2;																		\
+	this->D[2] = V3;																		\
+}
+
+#define GET(name, type)					\
+virtual type Get##name()				\
+{										\
+	return this->name;					\
+}
+
+#define GET_REF(name, type)				\
+virtual type& Get##name()				\
+{										\
+	return this->name;					\
+}
+
+#define SET(name, type)					\
+virtual void Set##name(type arg)		\
+{										\
+	if (this->name != arg)				\
+		this->name = arg;				\
+}
+
+#define GET_SET(name, type)				\
+GET(name, type)							\
+SET(name, type)
+*/
+
 }

@@ -13,20 +13,21 @@
 
 #pragma once
 
+#include "bindable.h"
 #include "procedural.h"
-#include "bitmap.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Texture
+	class EXPOSURE_RENDER_DLL Texture : public Bindable
 {
 public:
-	HOST Texture()
+	HOST Texture() :
+		Bindable()
 	{
-		this->ID			= -1;
 		this->Type			= Enums::Procedural;
 		this->OutputLevel	= 1.0f;
+		this->BitmapID		= -1;
 		this->Flip[0]		= false;
 		this->Flip[1]		= false;
 	}
@@ -42,10 +43,11 @@ public:
 
 	HOST Texture& operator = (const Texture& Other)
 	{
-		this->ID			= Other.ID;
+		Bindable::operator=(Other);
+
 		this->Type			= Other.Type;
 		this->OutputLevel	= Other.OutputLevel;
-		this->Bitmap		= Other.Bitmap;
+		this->BitmapID		= Other.BitmapID;
 		this->Procedural	= Other.Procedural;
 		this->Offset		= Other.Offset;
 		this->Repeat		= Other.Repeat;
@@ -58,17 +60,15 @@ public:
 	HOST void BindDevice(const Texture& HostTexture)
 	{
 		*this = HostTexture;
-		this->Bitmap.BindDevice(HostTexture.Bitmap);
 	}
 
 	HOST void UnbindDevice()
 	{
 	}
 
-	int					ID;
 	Enums::TextureType	Type;
 	float				OutputLevel;
-	Bitmap				Bitmap;
+	int					BitmapID;
 	Procedural			Procedural;
 	Vec2f				Offset;
 	Vec2f				Repeat;

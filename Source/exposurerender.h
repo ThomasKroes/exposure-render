@@ -13,16 +13,13 @@
 
 #pragma once
 
-#include "camera.h"
-#include "exception.h"
-#include "rendersettings.h"
-#include "texture.h"
-#include "transferfunction.h"
-#include "timing.h"
+#include "tracer.h"
 #include "volume.h"
 #include "light.h"
 #include "object.h"
 #include "clippingobject.h"
+#include "texture.h"
+#include "bitmap.h"
 
 namespace ExposureRender
 {
@@ -31,6 +28,8 @@ EXPOSURE_RENDER_DLL void InitializeTracer(int& ID);
 EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID);
 EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2]);
 EXPOSURE_RENDER_DLL void Restart(int TracerID);
+EXPOSURE_RENDER_DLL void BindTracer(Tracer Tracer, int& TracerID);
+EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID);
 EXPOSURE_RENDER_DLL void BindVolume(Volume Volume, int& ID);
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID);
 EXPOSURE_RENDER_DLL void BindLight(Light Light, int& ID);
@@ -45,13 +44,6 @@ EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID);
 EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs);
 EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs);
 EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs);
-EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D);
-EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ColorTransferFunction1D Diffuse1D);
-EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ColorTransferFunction1D Specular1D);
-EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ScalarTransferFunction1D Glossiness1D);
-EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ColorTransferFunction1D Emission1D);
-EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera);
-EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings);
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID);
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData);
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance);

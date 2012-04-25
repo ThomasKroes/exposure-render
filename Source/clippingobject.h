@@ -13,22 +13,18 @@
 
 #pragma once
 
+#include "bindable.h"
 #include "shape.h"
 
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ClippingObject
+class EXPOSURE_RENDER_DLL ClippingObject : public Bindable
 {
-	int		ID;
-	bool	Enabled;
-	Shape	Shape;
-	bool	Invert;
-
-	HOST ClippingObject()
+public:
+	HOST ClippingObject() :
+		Bindable()
 	{
-		this->ID		= - 1;
-		this->Enabled	= true;
 		this->Invert	= false;
 	}
 	
@@ -43,8 +39,8 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 
 	HOST ClippingObject& operator = (const ClippingObject& Other)
 	{
-		this->ID		= Other.ID;
-		this->Enabled	= Other.Enabled;
+		Bindable::operator=(Other);
+
 		this->Shape		= Other.Shape;
 		this->Invert	= Other.Invert;
 
@@ -59,6 +55,9 @@ struct EXPOSURE_RENDER_DLL ClippingObject
 	HOST void UnbindDevice()
 	{
 	}
+
+	Shape	Shape;
+	bool	Invert;
 };
 
 }

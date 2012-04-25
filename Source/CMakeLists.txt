@@ -56,7 +56,6 @@ SET(General
 	buffer.h
 	framebuffer.h
 	ray.h
-	tracer.h
 	volumes.h
 	lights.h
 	objects.h
@@ -86,6 +85,9 @@ SOURCE_GROUP("Shapes" FILES ${Shapes})
 # API
 SET(API
 	exposurerender.h
+	exposurerender.cpp
+	bindable.h
+	tracer.h
 	defines.h
 	camera.h
 	volume.h

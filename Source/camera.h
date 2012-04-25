@@ -14,13 +14,13 @@
 #pragma once
 
 #include "vector.h"
-#include "color.h"
 
 namespace ExposureRender
 {
 
-struct Camera
+class EXPOSURE_RENDER_DLL Camera
 {
+public:
 	HOST Camera()
 	{
 	}

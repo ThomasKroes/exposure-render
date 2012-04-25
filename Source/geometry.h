@@ -15,6 +15,7 @@
 
 #include "color.h"
 #include "ray.h"
+#include "matrix.h"
 
 using namespace std;
 

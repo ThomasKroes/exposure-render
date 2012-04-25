@@ -13,60 +13,53 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "shape.h"
+#include "defines.h"
+#include "enums.h"
+#include "exception.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Object : public Bindable
+class EXPOSURE_RENDER_DLL Bindable
 {
 public:
-	HOST Object() :
-		Bindable()
+	HOST Bindable()
 	{
-		this->DiffuseTextureID		= -1;
-		this->SpecularTextureID		= -1;
-		this->GlossinessTextureID	= -1;
-		this->Ior					= 0.0f;
+		this->ID		= -1;
+		this->Enabled	= true;
+		this->Dirty		= NULL;
 	}
 
-	HOST ~Object()
+	HOST ~Bindable()
 	{
 	}
 
-	HOST Object(const Object& Other)
+	HOST Bindable(const Bindable& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Object& operator = (const Object& Other)
+	HOST Bindable& operator = (const Bindable& Other)
 	{
-		Bindable::operator=(Other);
-
-		this->Shape					= Other.Shape;
-		this->DiffuseTextureID		= Other.DiffuseTextureID;
-		this->SpecularTextureID		= Other.SpecularTextureID;
-		this->GlossinessTextureID	= Other.GlossinessTextureID;
-		this->Ior					= Other.Ior;
+		this->ID		= Other.ID;
+		this->Enabled	= Other.Enabled;
+		this->Dirty		= Other.Dirty;
 
 		return *this;
 	}
 
-	HOST void BindDevice(const Object& HostObject)
-	{
-		*this = HostObject;
-	}
-	
-	HOST void UnbindDevice()
-	{
-	}
+	HOST void BindHost();
+	HOST void UnbindHost();
 
-	Shape		Shape;
-	int			DiffuseTextureID;
-	int			SpecularTextureID;
-	int			GlossinessTextureID;
-	float		Ior;
+	/*
+	GET_SET(ID, int)
+	GET_SET(Enabled, bool)
+	GET_SET(Dirty, bool)
+	*/
+
+	int		ID;
+	bool	Enabled;
+	bool	Dirty;
 };
 
 }

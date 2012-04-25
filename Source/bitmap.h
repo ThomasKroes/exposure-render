@@ -13,34 +13,26 @@
 
 #pragma once
 
-#include "vector.h"
+#include "bindable.h"
 #include "color.h"
-
-#if defined (__CUDA_ARCH__)
-	#include "cuda.h"
-#endif
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Bitmap
+class EXPOSURE_RENDER_DLL Bitmap : public Bindable
 {
 public:
-	HOST Bitmap()
+	HOST Bitmap() :
+		Bindable()
 	{
 		this->HostPixels		= NULL;
 		this->DevicePixels		= NULL;
-		this->Dirty				= false;
 		this->HostMemoryOwner	= false;
 		this->DeviceMemoryOwner	= false;
 	}
 
 	HOST ~Bitmap()
 	{
-		/*
-		this->UnbindPixels();
-		this->UnbindDevice();
-		*/
 	}
 
 	HOST Bitmap(const Bitmap& Other)
@@ -53,7 +45,6 @@ public:
 		this->HostPixels	= Other.HostPixels;
 		this->DevicePixels	= Other.DevicePixels;
 		this->Size			= Other.Size;
-		this->Dirty			= Other.Dirty;
 
 		return *this;
 	}
@@ -134,7 +125,6 @@ public:
 	ColorRGBAuc*	HostPixels;
 	ColorRGBAuc*	DevicePixels;
 	Vec2i			Size;
-	bool			Dirty;
 	bool			HostMemoryOwner;
 	bool			DeviceMemoryOwner;
 

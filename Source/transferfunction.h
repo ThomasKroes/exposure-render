@@ -13,7 +13,8 @@
 
 #pragma once
 
-#include "vector.h"
+#include "bindable.h"
+#include "color.h"
 
 namespace ExposureRender
 {
@@ -26,8 +27,9 @@ public:
 	DATA(float, MAX_NO_TF_NODES)
 };
 
-struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
+class EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 {
+public:
 	Vec2f			NodeRange;
 	NodesVector		Position;
 	NodesVector		Data;
@@ -59,8 +61,9 @@ struct EXPOSURE_RENDER_DLL PiecewiseLinearFunction
 };
 
 template<int Size>
-struct EXPOSURE_RENDER_DLL TransferFunction1D
+class EXPOSURE_RENDER_DLL TransferFunction1D
 {
+public:
 	PiecewiseLinearFunction PLF[Size];
 	
 	HOST TransferFunction1D()

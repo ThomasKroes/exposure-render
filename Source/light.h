@@ -13,25 +13,18 @@
 
 #pragma once
 
+#include "bindable.h"
 #include "shape.h"
 
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL Light
+	class EXPOSURE_RENDER_DLL Light : public Bindable
 {
-	int						ID;
-	bool					Enabled;
-	bool					Visible;
-	Shape					Shape;
-	int						TextureID;
-	float					Multiplier;
-	Enums::EmissionUnit		Unit;
-	
-	HOST Light()
+public:
+	HOST Light() :
+		Bindable()
 	{
-		this->ID			= -1;
-		this->Enabled		= true;
 		this->Visible		= true;
 		this->TextureID		= 0;
 		this->Multiplier	= 1.0f;
@@ -49,8 +42,8 @@ struct EXPOSURE_RENDER_DLL Light
 	
 	HOST Light& operator = (const Light& Other)
 	{
-		this->ID			= Other.ID;
-		this->Enabled		= Other.Enabled;
+		Bindable::operator=(Other);
+
 		this->Visible		= Other.Visible;
 		this->Shape			= Other.Shape;
 		this->TextureID		= Other.TextureID;
@@ -70,6 +63,12 @@ struct EXPOSURE_RENDER_DLL Light
 	HOST void UnbindDevice()
 	{
 	}
+
+	bool					Visible;
+	Shape					Shape;
+	int						TextureID;
+	float					Multiplier;
+	Enums::EmissionUnit		Unit;
 };
 
 }

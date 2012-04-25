@@ -23,31 +23,21 @@ DEVICE ExposureRender::Light*			gpLights			= NULL;
 DEVICE ExposureRender::Object*			gpObjects			= NULL;
 DEVICE ExposureRender::ClippingObject*	gpClippingObjects	= NULL;
 DEVICE ExposureRender::Texture*			gpTextures			= NULL;
+DEVICE ExposureRender::Bitmap*			gpBitmaps			= NULL;
 
 ExposureRender::Cuda::List<ExposureRender::Volume>			gVolumes("gpVolumes");
 ExposureRender::Cuda::List<ExposureRender::Light>			gLights("gpLights");
 ExposureRender::Cuda::List<ExposureRender::Object>			gObjects("gpObjects");
 ExposureRender::Cuda::List<ExposureRender::ClippingObject>	gClippingObjects("gpClippingObjects");
 ExposureRender::Cuda::List<ExposureRender::Texture>			gTextures("gpTextures");
+ExposureRender::Cuda::List<ExposureRender::Bitmap>			gBitmaps("gpBitmaps");
 
 #include "utilities.h"
 
-// Kernels
 #include "singlescattering.cuh"
 #include "estimate.cuh"
 #include "toneMap.cuh"
-
-
 #include "gaussianfilter.cuh"
-/*
-#include "BilateralFilter.cuh"
-#include "MedianFilter.cuh"
-
-#include "GradientMagnitude.cuh"
-#include "AutoFocus.cuh"
-*/
-
-
 
 #define EDIT_TRACER(id)												\
 std::map<int, Tracer>::iterator	It;									\
@@ -58,7 +48,7 @@ Tracer& Tracer = gTracers[id];
 
 DEVICE ExposureRender::Tracer* pTracer = NULL;
 
-void BindTracer(ExposureRender::Tracer& Tracer)
+void BindDeviceTracer(ExposureRender::Tracer& Tracer)
 {
 	if (pTracer == NULL)
 		ExposureRender::Cuda::Allocate(pTracer);
@@ -108,6 +98,17 @@ EXPOSURE_RENDER_DLL void DeinitializeTracer(int ID)
 	
 	if (It != gTracers.end())
 		gTracers.erase(ID);
+}
+
+EXPOSURE_RENDER_DLL void BindTracer(Tracer T, int& TracerID)
+{
+	EDIT_TRACER(TracerID)
+	Tracer = T;
+	Restart(TracerID);
+}
+
+EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID)
+{
 }
 
 EXPOSURE_RENDER_DLL void BindVolume(Volume V, int& ID)
@@ -184,59 +185,11 @@ EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObje
 	Tracer.BindClippingObjectIDs(ClippingObjectIDs, gClippingObjects.HashMap);
 }
 
-EXPOSURE_RENDER_DLL void BindOpacity1D(int TracerID, ScalarTransferFunction1D Opacity1D)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.Opacity1D = Opacity1D;
-	Restart(TracerID);
-}
-
-EXPOSURE_RENDER_DLL void BindDiffuse1D(int TracerID, ColorTransferFunction1D Diffuse1D)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.Diffuse1D = Diffuse1D;
-	Restart(TracerID);
-}
-
-EXPOSURE_RENDER_DLL void BindSpecular1D(int TracerID, ColorTransferFunction1D Specular1D)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.Specular1D = Specular1D;
-	Restart(TracerID);
-}
-
-EXPOSURE_RENDER_DLL void BindGlossiness1D(int TracerID, ScalarTransferFunction1D Glossiness1D)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.Glossiness1D = Glossiness1D;
-	Restart(TracerID);
-}
-
-EXPOSURE_RENDER_DLL void BindEmission1D(int TracerID, ColorTransferFunction1D Emission1D)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.Emission1D = Emission1D;
-	Restart(TracerID);
-}
-
-EXPOSURE_RENDER_DLL void BindCamera(int TracerID, Camera Camera)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.Camera = Camera;
-	Restart(TracerID);
-}
-
-EXPOSURE_RENDER_DLL void BindRenderSettings(int TracerID, RenderSettings RenderSettings)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.BindRenderSettings(RenderSettings);
-}
-
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
 	EDIT_TRACER(TracerID)
 
-	BindTracer(Tracer);
+	BindDeviceTracer(Tracer);
 
 	SingleScattering(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ComputeEstimate(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);

@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include "bindable.h"
 #include "transferfunction.h"
 #include "camera.h"
 #include "rendersettings.h"
@@ -22,37 +23,27 @@
 namespace ExposureRender
 {
 
-struct Tracer
+class EXPOSURE_RENDER_DLL Tracer : public Bindable
 {
-	HOST Tracer()
+public:
+	HOST Tracer() :
+		Bindable()
 	{
 	}
 
 	HOST ~Tracer()
 	{
 	}
-		
-	ScalarTransferFunction1D		Opacity1D;
-	ColorTransferFunction1D			Diffuse1D;
-	ColorTransferFunction1D			Specular1D;
-	ScalarTransferFunction1D		Glossiness1D;
-	ColorTransferFunction1D			Emission1D;
-
-	Camera							Camera;
-	RenderSettings					RenderSettings;
-	FrameBuffer						FrameBuffer;
-	int								NoIterations;
-
-	int								VolumeID;
-	Indices							LightIDs;
-	Indices							ObjectIDs;
-	Indices							ClippingObjectIDs;
 	
-	GaussianFilter					FrameEstimateFilter;
-	BilateralFilter					PostProcessingFilter;
+	HOST Tracer(const Tracer& Other)
+	{
+		*this = Other;
+	}
 
 	HOST Tracer& Tracer::operator = (const Tracer& Other)
 	{
+		Bindable::operator=(Other);
+
 		this->Opacity1D				= Other.Opacity1D;
 		this->Diffuse1D				= Other.Diffuse1D;
 		this->Specular1D			= Other.Specular1D;
@@ -129,6 +120,25 @@ struct Tracer
 		gTracers[TracerID].PostProcessingFilter = Bilateral;
 		*/
 	}
+
+	ScalarTransferFunction1D		Opacity1D;
+	ColorTransferFunction1D			Diffuse1D;
+	ColorTransferFunction1D			Specular1D;
+	ScalarTransferFunction1D		Glossiness1D;
+	ColorTransferFunction1D			Emission1D;
+
+	Camera							Camera;
+	RenderSettings					RenderSettings;
+	FrameBuffer						FrameBuffer;
+	int								NoIterations;
+
+	int								VolumeID;
+	Indices							LightIDs;
+	Indices							ObjectIDs;
+	Indices							ClippingObjectIDs;
+	
+	GaussianFilter					FrameEstimateFilter;
+	BilateralFilter					PostProcessingFilter;
 };
 
 }

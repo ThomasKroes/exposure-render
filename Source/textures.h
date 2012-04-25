@@ -103,6 +103,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 
 		case Enums::Bitmap:
 		{
+			/*
 			if (T.Bitmap.DevicePixels != NULL)
 			{
 				const int Size[2] = { T.Bitmap.Size[0], T.Bitmap.Size[1] };
@@ -129,6 +130,7 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 
 				L = (1.0f - vcoef) * ((1.0f - ucoef) * Color[0] + ucoef * Color[1]) + vcoef * ((1.0f - ucoef) * Color[2] + ucoef * Color[3]);
 			}
+			*/
 
 			break;
 		}
