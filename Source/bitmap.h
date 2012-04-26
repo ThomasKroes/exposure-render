@@ -107,7 +107,7 @@ public:
 
 	HOST ~Bitmap()
 	{
-		Cuda::Free(this->Pixels);
+		Cuda::Free(this->DevicePixels);
 	}
 
 	HOST Bitmap(const Bitmap& Other)
@@ -122,15 +122,15 @@ public:
 
 	HOST Bitmap& operator = (const Bitmap& Other)
 	{
-		this->Size		= Other.Size;
-		this->Pixels	= Other.Pixels;
+		this->Size			= Other.Size;
+		this->DevicePixels	= Other.DevicePixels;
 		
 		return *this;
 	}
 
 	HOST Bitmap& operator = (const ErBitmap& Other)
 	{
-		ErTracer::operator=(Other);
+		ErBitmap::operator=(Other);
 
 		if (Other.Dirty)
 		{
@@ -140,8 +140,8 @@ public:
 
 			if (NoPixels > 0)
 			{
-				Cuda::Allocate(this->Pixels, NoPixels);
-				Cuda::MemCopyHostToDevice(Other.Pixels, this->Pixels, NoPixels);
+				Cuda::Allocate(this->DevicePixels, NoPixels);
+				Cuda::MemCopyHostToDevice(Other.HostPixels, this->DevicePixels, NoPixels);
 				
 				this->DeviceMemoryOwner = true;
 			}

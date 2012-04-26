@@ -120,7 +120,7 @@ class Tracer : public ErTracer
 public:
 	HOST Tracer() :
 		ErTracer(),
-		FrameBuffer()
+		fb()
 	{
 	}
 
@@ -142,8 +142,9 @@ public:
 		return *this;
 	}
 
-	FrameBuffer	FrameBuffer;	
+	FrameBuffer	fb;
 };
+
 #endif
 
 }

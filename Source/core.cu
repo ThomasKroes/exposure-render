@@ -15,9 +15,6 @@
 
 #include "exposurerender.h"
 
-#include "tracer.h"
-#include "framebuffer.h"
-
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
 DEVICE ExposureRender::FrameBuffer*		gpFrameBuffer		= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
