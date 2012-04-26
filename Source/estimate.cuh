@@ -21,9 +21,9 @@ namespace ExposureRender
 
 KERNEL void KrnlComputeEstimate()
 {
-	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
+	KERNEL_2D(gpFrameBuffer->Resolution[0], gpFrameBuffer->Resolution[1])
 
-	gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy) = CumulativeMovingAverage(gpTracer->FrameBuffer.CudaRunningEstimateXyza.Get(IDx, IDy), gpTracer->FrameBuffer.CudaFrameEstimate.Get(IDx, IDy), gpTracer->NoIterations);
+	gpFrameBuffer->CudaRunningEstimateXyza(IDx, IDy) = CumulativeMovingAverage(gpFrameBuffer->CudaRunningEstimateXyza.Get(IDx, IDy), gpFrameBuffer->CudaFrameEstimate.Get(IDx, IDy), gpTracer->NoIterations);
 }
 
 void ComputeEstimate(int Width, int Height)

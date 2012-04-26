@@ -19,29 +19,31 @@
 namespace ExposureRender
 {
 
-	class EXPOSURE_RENDER_DLL Texture : public Bindable
+class EXPOSURE_RENDER_DLL ErTexture : public Bindable
 {
 public:
-	HOST Texture() :
-		Bindable()
+	HOST ErTexture() :
+		Bindable(),
+		Type(Enums::Procedural),
+		OutputLevel(1.0f),
+		BitmapID(-1),
+		Procedural(),
+		Offset(0.0f, 0.0f),
+		Repeat(0.0f, 0.0f),
+		Flip(0, 0)
 	{
-		this->Type			= Enums::Procedural;
-		this->OutputLevel	= 1.0f;
-		this->BitmapID		= -1;
-		this->Flip[0]		= false;
-		this->Flip[1]		= false;
 	}
 
-	HOST ~Texture()
+	HOST ~ErTexture()
 	{
 	}
 	
-	HOST Texture(const Texture& Other)
+	HOST ErTexture(const ErTexture& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Texture& operator = (const Texture& Other)
+	HOST ErTexture& operator = (const ErTexture& Other)
 	{
 		Bindable::operator=(Other);
 
@@ -51,13 +53,12 @@ public:
 		this->Procedural	= Other.Procedural;
 		this->Offset		= Other.Offset;
 		this->Repeat		= Other.Repeat;
-		this->Flip[0]		= Other.Flip[0];
-		this->Flip[1]		= Other.Flip[1];
+		this->Flip			= Other.Flip;
 		
 		return *this;
 	}
 
-	HOST void BindDevice(const Texture& HostTexture)
+	HOST void BindDevice(const ErTexture& HostTexture)
 	{
 		*this = HostTexture;
 	}
@@ -72,7 +73,44 @@ public:
 	Procedural			Procedural;
 	Vec2f				Offset;
 	Vec2f				Repeat;
-	bool				Flip[2];
+	Vec2i				Flip;
+};
+
+class EXPOSURE_RENDER_DLL Texture : public ErTexture
+{
+public:
+	HOST Texture() :
+		ErTexture()
+	{
+	}
+
+	HOST ~Texture()
+	{
+	}
+	
+	HOST Texture(const Texture& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Texture(const ErTexture& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Texture& operator = (const Texture& Other)
+	{
+		ErTexture::operator=(Other);
+		
+		return *this;
+	}
+
+	HOST Texture& operator = (const ErTexture& Other)
+	{
+		ErTexture::operator=(Other);
+		
+		return *this;
+	}
 };
 
 }

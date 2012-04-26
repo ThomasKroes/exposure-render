@@ -23,33 +23,32 @@
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Bitmap : public Bindable
+class EXPOSURE_RENDER_DLL ErBitmap : public Bindable
 {
 public:
-	HOST Bitmap() :
-		Bindable()
-	{
-		this->HostPixels		= NULL;
-		this->DevicePixels		= NULL;
-		this->HostMemoryOwner	= false;
-		this->DeviceMemoryOwner	= false;
-	}
-
-	HOST ~Bitmap()
+	HOST ErBitmap() :
+		Bindable(),
+		Size(0, 0),
+		HostPixels(NULL),
+		HostMemoryOwner(false)
 	{
 	}
 
-	HOST Bitmap(const Bitmap& Other)
+	HOST ~ErBitmap()
+	{
+	}
+
+	HOST ErBitmap(const ErBitmap& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Bitmap& operator = (const Bitmap& Other)
+	HOST ErBitmap& operator = (const ErBitmap& Other)
 	{
-		this->HostPixels	= Other.HostPixels;
-		this->DevicePixels	= Other.DevicePixels;
-		this->Size			= Other.Size;
-
+		this->Size				= Other.Size;
+		this->HostPixels		= Other.HostPixels;
+		this->HostMemoryOwner	= Other.HostMemoryOwner;
+		
 		return *this;
 	}
 
@@ -86,53 +85,75 @@ public:
 			this->HostPixels = NULL;
 		}
 
-		this->Dirty				= true;
-		this->DeviceMemoryOwner	= true;
+		this->Dirty = true;
 	}
 
-	HOST void BindDevice(const Bitmap& HostBitmap)
-	{
-		if (HostBitmap.Dirty)
-			this->UnbindDevice();
-
-		*this = HostBitmap;
-
-#ifdef __CUDA_ARCH__
-		if (this->Dirty)
-		{
-			if (this->HostPixels)
-			{
-				const int NoPixels = this->Size[0] * this->Size[1];
-
-				if (NoPixels > 0)
-				{
-					Cuda::Allocate(this->DevicePixels, NoPixels);
-					Cuda::MemCopyHostToDevice(HostBitmap.HostPixels, this->DevicePixels, NoPixels);
-				}
-			}
-
-			this->Dirty = false;
-		} 
-#endif
-	}
-
-	HOST void UnbindDevice()
-	{
-		if (!this->DeviceMemoryOwner)
-			return;
-
-#ifdef __CUDA_ARCH__
-		Cuda::Free(this->DevicePixels);
-#endif
-	}
-
-	ColorRGBAuc*	HostPixels;
-	ColorRGBAuc*	DevicePixels;
 	Vec2i			Size;
+	ColorRGBAuc*	HostPixels;
 	bool			HostMemoryOwner;
-	bool			DeviceMemoryOwner;
-
-	friend class Texture;
 };
+
+#ifdef __CUDA_ARCH__
+
+class Bitmap : public ErBitmap
+{
+public:
+	HOST Bitmap() :
+		ErBitmap(),
+		DevicePixels(NULL),
+		DeviceMemoryOwner(false)
+	{
+	}
+
+	HOST ~Bitmap()
+	{
+		Cuda::Free(this->Pixels);
+	}
+
+	HOST Bitmap(const Bitmap& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Bitmap(const ErBitmap& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Bitmap& operator = (const Bitmap& Other)
+	{
+		this->Size		= Other.Size;
+		this->Pixels	= Other.Pixels;
+		
+		return *this;
+	}
+
+	HOST Bitmap& operator = (const ErBitmap& Other)
+	{
+		ErTracer::operator=(Other);
+
+		if (Other.Dirty)
+		{
+			Cuda::Free(this->DevicePixels);
+
+			const int NoPixels = this->Size[0] * this->Size[1];
+
+			if (NoPixels > 0)
+			{
+				Cuda::Allocate(this->Pixels, NoPixels);
+				Cuda::MemCopyHostToDevice(Other.Pixels, this->Pixels, NoPixels);
+				
+				this->DeviceMemoryOwner = true;
+			}
+		}
+
+		return *this;
+	}
+
+	ColorRGBAuc*	DevicePixels;
+	bool			DeviceMemoryOwner;
+};
+
+#endif
 
 }

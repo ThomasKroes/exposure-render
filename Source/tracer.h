@@ -18,31 +18,43 @@
 #include "camera.h"
 #include "rendersettings.h"
 
-#ifdef __CUDA_ARCH__
-	#include "framebuffer.h"
-#endif
+#include <map>
+
+using namespace std;
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Tracer : public Bindable
+class EXPOSURE_RENDER_DLL ErTracer : public Bindable
 {
 public:
-	HOST Tracer() :
-		Bindable()
+	HOST ErTracer() :
+		Bindable(),
+		Opacity1D(),
+		Diffuse1D(),
+		Specular1D(),
+		Glossiness1D(),
+		Emission1D(),
+		Camera(),
+		RenderSettings(),
+		NoIterations(0),
+		VolumeID(0),
+		LightIDs(),
+		ObjectIDs(),
+		ClippingObjectIDs()
 	{
 	}
 
-	HOST ~Tracer()
+	HOST ~ErTracer()
 	{
 	}
 	
-	HOST Tracer(const Tracer& Other)
+	HOST ErTracer(const ErTracer& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Tracer& Tracer::operator = (const Tracer& Other)
+	HOST ErTracer& ErTracer::operator = (const ErTracer& Other)
 	{
 		Bindable::operator=(Other);
 
@@ -53,11 +65,6 @@ public:
 		this->Emission1D			= Other.Emission1D;
 		this->Camera				= Other.Camera;
 		this->RenderSettings		= Other.RenderSettings;
-
-#ifdef __CUDA_ARCH__
-		this->FrameBuffer			= Other.FrameBuffer;
-#endif
-
 		this->NoIterations			= Other.NoIterations;
 		this->VolumeID				= Other.VolumeID;
 		this->LightIDs				= Other.LightIDs;
@@ -90,61 +97,53 @@ public:
 		BindIDs(ClippingObjectIDs, this->ClippingObjectIDs, HashMap);
 	}
 
-	HOST void BindRenderSettings(const ExposureRender::RenderSettings& RS)
-	{
-		this->RenderSettings = RS;
-		
-		/*
-		// FIXME
-
-		this->FrameEstimateFilter.KernelRadius = 2;//this->RenderSettings.Filtering.FrameEstimateFilterParams.KernelRadius;
-
-		const int KernelSize = (2 * this->FrameEstimateFilter.KernelRadius) + 1;
-
-		for (int i = 0; i < KernelSize; i++)
-			FrameEstimateFilter.KernelD[i] = 1.0f;//Gauss2D(RS.Filtering.FrameEstimateFilterParams.Sigma, RS.Filtering.FrameEstimateFilterParams.KernelRadius - i, 0);
-
-		
-		BilateralFilter Bilateral;
-
-		const int SigmaMax = (int)max(Filtering.PostProcessingFilter.SigmaD, Filtering.PostProcessingFilter.SigmaR);
-		
-		Bilateral.KernelRadius = (int)ceilf(2.0f * (float)SigmaMax);  
-
-		const float TwoSigmaRSquared = 2 * Filtering.PostProcessingFilter.SigmaR * Filtering.PostProcessingFilter.SigmaR;
-
-		const int kernelSize = Bilateral.KernelRadius * 2 + 1;
-		const int center = (kernelSize - 1) / 2;
-
-		for (int x = -center; x < -center + kernelSize; x++)
-			Bilateral.KernelD[x + center] = Gauss2D(Filtering.PostProcessingFilter.SigmaD, x, 0);
-
-		for (int i = 0; i < 256; i++)
-			Bilateral.GaussSimilarity[i] = expf(-((float)i / TwoSigmaRSquared));
-
-		gTracers[TracerID].PostProcessingFilter = Bilateral;
-		*/
-	}
-
-	ScalarTransferFunction1D		Opacity1D;
-	ColorTransferFunction1D			Diffuse1D;
-	ColorTransferFunction1D			Specular1D;
-	ScalarTransferFunction1D		Glossiness1D;
-	ColorTransferFunction1D			Emission1D;
-
-	Camera							Camera;
-	RenderSettings					RenderSettings;
-
-#ifdef __CUDA_ARCH__
-	FrameBuffer						FrameBuffer;
-#endif
-
+	ErScalarTransferFunction1D		Opacity1D;
+	ErColorTransferFunction1D		Diffuse1D;
+	ErColorTransferFunction1D		Specular1D;
+	ErScalarTransferFunction1D		Glossiness1D;
+	ErColorTransferFunction1D		Emission1D;
+	ErCamera						Camera;
+	ErRenderSettings				RenderSettings;
 	int								NoIterations;
-
 	int								VolumeID;
 	Indices							LightIDs;
 	Indices							ObjectIDs;
 	Indices							ClippingObjectIDs;
 };
+
+#ifdef __CUDA_ARCH__
+
+#include "framebuffer.h"
+
+class Tracer : public ErTracer
+{
+public:
+	HOST Tracer() :
+		ErTracer(),
+		FrameBuffer()
+	{
+	}
+
+	HOST ~Tracer()
+	{
+	}
+	
+	HOST Tracer(const ErTracer& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Tracer& Tracer::operator = (const ErTracer& Other)
+	{
+		ErTracer::operator=(Other);
+		
+		this->FrameBuffer.Resize(Other.Camera.FilmSize);
+
+		return *this;
+	}
+
+	FrameBuffer	FrameBuffer;	
+};
+#endif
 
 }

@@ -24,26 +24,23 @@
 namespace ExposureRender
 {
 
-EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2]);
-EXPOSURE_RENDER_DLL void Restart(int TracerID);
-EXPOSURE_RENDER_DLL void BindTracer(const Tracer& Tracer);
+EXPOSURE_RENDER_DLL void InitializeTracer(const Tracer& Tracer);
+EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID);
+EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer);
 EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID);
-EXPOSURE_RENDER_DLL void BindVolume(const Volume& Volume);
+EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume);
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID);
-EXPOSURE_RENDER_DLL void BindLight(const Light& Light);
+EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light);
 EXPOSURE_RENDER_DLL void UnbindLight(int ID);
-EXPOSURE_RENDER_DLL void BindObject(const Object& Object);
+EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object);
 EXPOSURE_RENDER_DLL void UnbindObject(int ID);
-EXPOSURE_RENDER_DLL void BindClippingObject(const ClippingObject& ClippingObject);
+EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject);
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID);
-EXPOSURE_RENDER_DLL void BindTexture(const Texture& Texture);
+EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture);
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID);
-EXPOSURE_RENDER_DLL void BindBitmap(const Bitmap& Bitmap);
+EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap);
 EXPOSURE_RENDER_DLL void UnbindBitmap(int ID);
-EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID);
-EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs);
-EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs);
-EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs);
+EXPOSURE_RENDER_DLL void ResizeFrameBuffer(int TracerID, Resolution2i Resolution);
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID);
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData);
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance);

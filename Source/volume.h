@@ -23,67 +23,38 @@
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Volume : public Bindable
+class EXPOSURE_RENDER_DLL ErVolume : public Bindable
 {
 public:
-	HOST Volume() :
-		Bindable()
+	HOST ErVolume() :
+		Bindable(),
+		Resolution(0, 0, 0),
+		NormalizeSize(false),
+		Spacing(0.0f, 0.0f, 0.0f),
+		HostVoxels(NULL),
+		HostMemoryOwner(false)
 	{
-		this->NormalizeSize			= false;
-		this->HostVoxels			= NULL;
-		this->DeviceVoxels			= NULL;
-		this->HostMemoryOwner		= false;
-		this->DeviceMemoryOwner		= false;
 	}
 
-	HOST ~Volume()
+	HOST ~ErVolume()
 	{
 	}
 	
-	HOST Volume(const Volume& Other)
+	HOST ErVolume(const ErVolume& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Volume& Volume::operator = (const Volume& Other)
+	HOST ErVolume& ErVolume::operator = (const ErVolume& Other)
 	{
 		Bindable::operator=(Other);
 
 		this->Resolution				= Other.Resolution;
 		this->Spacing					= Other.Spacing;
 		this->NormalizeSize				= Other.NormalizeSize;
-		this->InvResolution				= Other.InvResolution;
-		this->MinAABB					= Other.MinAABB;
-		this->MaxAABB					= Other.MaxAABB;
-		this->Size						= Other.Size;
-		this->InvSize					= Other.InvSize;
-		this->InvSpacing				= Other.InvSpacing;
-		this->GradientDeltaX			= Other.GradientDeltaX;
-		this->GradientDeltaY			= Other.GradientDeltaY;
-		this->GradientDeltaZ			= Other.GradientDeltaZ;
-		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
 		this->HostVoxels				= Other.HostVoxels;
-		this->DeviceVoxels				= Other.DeviceVoxels;
 
 		return *this;
-	}
-
-	HOST_DEVICE unsigned short Get(const Vec3i& XYZ) const
-	{
-		if (!this->DeviceVoxels)
-			return unsigned short();
-		
-		Vec3i ClampedXYZ = XYZ;
-		ClampedXYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
-		
-		return this->DeviceVoxels[ClampedXYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + ClampedXYZ[1] * (int)this->Resolution[0] + ClampedXYZ[0]];
-	}
-
-	HOST_DEVICE unsigned short Get(const Vec3f& XYZ) const
-	{
-		Vec3f LocalXYZ = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
-
-		return this->Get(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
 	}
 
 	HOST void BindVoxels(const unsigned short* Voxels, const Vec3i& Resolution, const Vec3f& Spacing, const bool& NormalizeSize = false)
@@ -123,12 +94,70 @@ public:
 		this->Dirty = true;
 	}
 
-	HOST void BindDevice(const Volume& HostVolume)
-	{
-		if (HostVolume.Dirty)
-			this->UnbindDevice();
+	Vec3i				Resolution;
+	bool				NormalizeSize;
+	Vec3f				Spacing;
+	unsigned short*		HostVoxels;
+	bool				HostMemoryOwner;
+};
 
-		*this = HostVolume;
+class EXPOSURE_RENDER_DLL Volume : public ErVolume
+{
+public:
+	HOST Volume() :
+		ErVolume()
+
+	{
+	}
+
+	HOST ~Volume()
+	{
+	}
+	
+	HOST Volume(const Volume& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Volume(const ErVolume& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Volume& Volume::operator = (const Volume& Other)
+	{
+		ErVolume::operator=(Other);
+
+		this->InvResolution				= Other.InvResolution;
+		this->MinAABB					= Other.MinAABB;
+		this->MaxAABB					= Other.MaxAABB;
+		this->Size						= Other.Size;
+		this->InvSize					= Other.InvSize;
+		this->InvSpacing				= Other.InvSpacing;
+		this->GradientDeltaX			= Other.GradientDeltaX;
+		this->GradientDeltaY			= Other.GradientDeltaY;
+		this->GradientDeltaZ			= Other.GradientDeltaZ;
+		this->GradientMagnitudeRange	= Other.GradientMagnitudeRange;
+		this->DeviceVoxels				= Other.DeviceVoxels;
+
+		return *this;
+	}
+
+	HOST Volume& Volume::operator = (const ErVolume& Other)
+	{
+		ErVolume::operator=(Other);
+
+		this->BindDevice();
+
+		return *this;
+	}
+
+	HOST void BindDevice()
+	{
+		if (!this->Dirty)
+			return;
+
+		this->UnbindDevice();
 
 		float Scale = 1.0f;
 
@@ -163,17 +192,15 @@ public:
 		this->GradientDeltaZ = Vec3f(0.0f, 0.0f, MinVoxelSize);
 
 #ifdef __CUDA_ARCH__
-		if (this->Dirty && HostVolume.HostVoxels)
+		if (this->Dirty && this->HostVoxels)
 		{
 			const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
 
 			if (NoVoxels > 0)
 			{
 				Cuda::Allocate(this->DeviceVoxels, NoVoxels);
-				Cuda::MemCopyHostToDevice(HostVolume.HostVoxels, this->DeviceVoxels, NoVoxels);
+				Cuda::MemCopyHostToDevice(this->HostVoxels, this->DeviceVoxels, NoVoxels);
 			}
-
-			this->Dirty = false;
 		}
 #endif
 	}
@@ -184,14 +211,28 @@ public:
 			return;
 
 #ifdef __CUDA_ARCH__
-		printf("ExposureRender::Volume::UnbindDevice()\n");
 		Cuda::Free(this->DeviceVoxels);
 #endif
 	}
 
-	Vec3i			Resolution;			// FIXME
-	bool			NormalizeSize;
-	Vec3f			Spacing;
+	HOST_DEVICE unsigned short Get(const Vec3i& XYZ) const
+	{
+		if (!this->DeviceVoxels)
+			return unsigned short();
+		
+		Vec3i ClampedXYZ = XYZ;
+		ClampedXYZ.Clamp(Vec3i(0, 0, 0), Vec3i(this->Resolution[0] - 1, this->Resolution[1] - 1, this->Resolution[2] - 1));
+		
+		return this->DeviceVoxels[ClampedXYZ[2] * (int)this->Resolution[0] * (int)this->Resolution[1] + ClampedXYZ[1] * (int)this->Resolution[0] + ClampedXYZ[0]];
+	}
+
+	HOST_DEVICE unsigned short Get(const Vec3f& XYZ) const
+	{
+		Vec3f LocalXYZ = Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) * ((XYZ - this->MinAABB) * this->InvSize);
+
+		return this->Get(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
+	}
+
 	Vec3f			InvResolution;
 	Vec3f			MinAABB;
 	Vec3f			MaxAABB;
@@ -202,9 +243,7 @@ public:
 	Vec3f			GradientDeltaY;
 	Vec3f			GradientDeltaZ;
 	Vec2f			GradientMagnitudeRange;
-	unsigned short*	HostVoxels;
 	unsigned short*	DeviceVoxels;
-	bool			HostMemoryOwner;
 	bool			DeviceMemoryOwner;
 };
 

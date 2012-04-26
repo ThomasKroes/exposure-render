@@ -13,94 +13,28 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "shape.h"
+#include "defines.h"
+#include "enums.h"
+#include "exception.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL ErLight : public Bindable
+class DeviceObject
 {
 public:
-	HOST ErLight() :
-		Bindable()
-	{
-		this->Visible		= true;
-		this->TextureID		= 0;
-		this->Multiplier	= 1.0f;
-		this->Unit			= Enums::Power;
-	}
-
-	HOST ~ErLight()
+	HOST DeviceObject()
 	{
 	}
 
-	HOST ErLight(const ErLight& Other)
+	HOST ~DeviceObject()
+	{
+	}
+
+	HOST DeviceObject(const DeviceObject& Other)
 	{
 		*this = Other;
-	}
-	
-	HOST ErLight& operator = (const ErLight& Other)
-	{
-		Bindable::operator=(Other);
-
-		this->Visible		= Other.Visible;
-		this->Shape			= Other.Shape;
-		this->TextureID		= Other.TextureID;
-		this->Multiplier	= Other.Multiplier;
-		this->Unit			= Other.Unit;
-
-		return *this;
-	}
-
-	bool					Visible;
-	Shape					Shape;
-	int						TextureID;
-	float					Multiplier;
-	Enums::EmissionUnit		Unit;
-};
-
-#ifdef __CUDA_ARCH__
-
-class Light : public ErLight
-{
-public:
-	HOST Light() :
-		ErLight()
-	{
-	}
-
-	HOST ~Light()
-	{
-	}
-
-	HOST Light(const Light& Other)
-	{
-		*this = Other;
-	}
-
-	HOST Light(const ErLight& Other)
-	{
-		*this = Other;
-	}
-	
-	HOST Light& operator = (const Light& Other)
-	{
-		ErLight::operator=(Other);
-		this->Shape.Update();
-
-		return *this;
-	}
-
-	HOST Light& operator = (const ErLight& Other)
-	{
-		ErLight::operator=(Other);
-		this->Shape.Update();
-
-		return *this;
 	}
 };
-
-#endif
 
 }

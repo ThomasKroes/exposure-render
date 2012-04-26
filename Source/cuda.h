@@ -229,7 +229,7 @@ public:
 		this->ResourceMapIt = this->ResourceMap.find(i);
 
 		if (this->ResourceMapIt == ResourceMap.end())
-			throw(ErException(Enums::Fatal, "Resource does not exist"));
+			throw(Exception(Enums::Fatal, "Resource does not exist"));
 
 		return this->ResourceMap[i];
 	}
@@ -242,6 +242,94 @@ public:
 	char								DeviceSymbol[MAX_CHAR_SIZE];
 	T*									DevicePtr;
 };
+
+template<typename T, int MaxSize = 256>
+class SynchronizeSingle
+{
+public:
+	HOST SynchronizeSingle(const char* pDeviceSymbol)
+	{
+		this->ResourceCounter = 0;
+
+		sprintf_s(DeviceSymbol, MAX_CHAR_SIZE, "%s", pDeviceSymbol);
+
+		Cuda::Allocate(this->DevicePtr, sizeof(T));
+	}
+
+	HOST ~SynchronizeSingle()
+	{
+		Cuda::Free(this->DevicePtr);
+	}
+	
+	HOST bool Exists(int ID)
+	{
+		if (ID < 0)
+			return false;
+
+		this->ResourceMapIt = this->ResourceMap.find(ID);
+
+		return this->ResourceMapIt != this->ResourceMap.end();
+	}
+
+	HOST void Bind(const T& Resource)
+	{
+		if (this->ResourceMap.size() >= MaxSize)
+			throw(Exception(Enums::Warning, "Maximum number of items reached"));
+
+		const bool Exists = this->Exists(Resource.ID);
+		
+		if (!Exists)
+		{
+			Resource.ID = this->ResourceCounter;
+			this->ResourceMap[Resource.ID] = Resource;
+			this->ResourceCounter++;
+		}
+		else
+		{
+			this->ResourceMap[Resource.ID] = Resource;
+		}
+
+		this->Synchronize(Resource.ID);
+	}
+
+	HOST void Unbind(int ID)
+	{
+		if (!this->Exists(ID))
+			return;
+
+		this->ResourceMapIt = this->ResourceMap.find(ID);
+
+		if (this->ResourceMapIt != this->ResourceMap.end())
+			this->ResourceMap.erase(this->ResourceMapIt);
+	}
+
+	HOST void Synchronize(int ResourceID)
+	{
+		if (!this->Exists(ResourceID))
+			return;
+
+		this->ResourceMapIt = this->ResourceMap.find(ID);
+
+		Cuda::MemCopyHostToDevice(this->ResourceMapIt->second, this->DevicePtr, sizeof(T));
+		Cuda::MemCopyHostToDeviceSymbol(&this->DevicePtr, this->DeviceSymbol);
+	}
+
+	HOST T& operator[](const int& i)
+	{
+		if (!this->Exists(i))
+			throw(Exception(Enums::Fatal, "Resource does not exist"));
+
+		return this->ResourceMap[i];
+	}
+
+protected:
+	map<int, T>						ResourceMap;
+	typename map<int, T>::iterator	ResourceMapIt;
+	int								ResourceCounter;
+	char							DeviceSymbol[MAX_CHAR_SIZE];
+	T*								DevicePtr;
+};
+
 
 #define LAUNCH_DIMENSIONS(width, height, depth, block_width, block_height, block_depth)						\
 																											\

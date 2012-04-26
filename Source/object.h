@@ -19,10 +19,10 @@
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Object : public Bindable
+class EXPOSURE_RENDER_DLL ErObject : public Bindable
 {
 public:
-	HOST Object() :
+	HOST ErObject() :
 		Bindable()
 	{
 		this->DiffuseTextureID		= -1;
@@ -31,16 +31,16 @@ public:
 		this->Ior					= 0.0f;
 	}
 
-	HOST ~Object()
+	HOST ~ErObject()
 	{
 	}
 
-	HOST Object(const Object& Other)
+	HOST ErObject(const ErObject& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Object& operator = (const Object& Other)
+	HOST ErObject& operator = (const ErObject& Other)
 	{
 		Bindable::operator=(Other);
 
@@ -53,20 +53,48 @@ public:
 		return *this;
 	}
 
-	HOST void BindDevice(const Object& HostObject)
-	{
-		*this = HostObject;
-	}
-	
-	HOST void UnbindDevice()
-	{
-	}
-
 	Shape		Shape;
 	int			DiffuseTextureID;
 	int			SpecularTextureID;
 	int			GlossinessTextureID;
 	float		Ior;
+};
+
+class EXPOSURE_RENDER_DLL Object : public ErObject
+{
+public:
+	HOST Object() :
+		ErObject()
+	{
+	}
+
+	HOST ~Object()
+	{
+	}
+
+	HOST Object(const Object& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Object(const ErObject& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Object& operator = (const Object& Other)
+	{
+		ErObject::operator=(Other);
+
+		return *this;
+	}
+
+	HOST Object& operator = (const ErObject& Other)
+	{
+		ErObject::operator=(Other);
+
+		return *this;
+	}
 };
 
 }

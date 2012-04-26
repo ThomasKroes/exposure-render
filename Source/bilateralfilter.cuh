@@ -49,7 +49,7 @@ DEVICE inline float FilterWeight(const int& IDx, const int& KernelX, const Color
 
 KERNEL void KrnlBilateralFilterHorizontal(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int Width, int Height)
 {
-	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
+	KERNEL_2D(gpFrameBuffer->Resolution[0], gpFrameBuffer->Resolution[1])
 
 	// Compute kernel spatial range, taking into account the image boundaries
 	__shared__ int Range[KRNL_BILATERAL_FILTER_BLOCK_SIZE][2];
@@ -118,7 +118,7 @@ KERNEL void KrnlBilateralFilterHorizontal(ColorRGBAuc* pIn, ColorRGBAuc* pOut, i
 
 KERNEL void KrnlBilateralFilterVertical(ColorRGBAuc* pIn, ColorRGBAuc* pOut, int Width, int Height)
 {
-	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
+	KERNEL_2D(gpFrameBuffer->Resolution[0], gpFrameBuffer->Resolution[1])
 
 	// Compute kernel spatial range, taking into account the image boundaries
 	__shared__ int Range[KRNL_BILATERAL_FILTER_BLOCK_SIZE][2];

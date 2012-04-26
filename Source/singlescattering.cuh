@@ -67,9 +67,9 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 
 KERNEL void KrnlSingleScattering()
 {
-	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
+	KERNEL_2D(gpFrameBuffer->Resolution[0], gpFrameBuffer->Resolution[1])
 
-	CRNG RNG(gpTracer->FrameBuffer.CudaRandomSeeds1.GetPtr(IDx, IDy), gpTracer->FrameBuffer.CudaRandomSeeds2.GetPtr(IDx, IDy));
+	CRNG RNG(gpFrameBuffer->CudaRandomSeeds1.GetPtr(IDx, IDy), gpFrameBuffer->CudaRandomSeeds2.GetPtr(IDx, IDy));
 
 	ColorXYZf Lv = ColorXYZf::Black();
 
@@ -92,7 +92,7 @@ KERNEL void KrnlSingleScattering()
 	if (SE.Valid && SE.Type == ScatterEvent::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
-	gpTracer->FrameBuffer.CudaFrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
+	gpFrameBuffer->CudaFrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
 }
 
 void SingleScattering(int Width, int Height)

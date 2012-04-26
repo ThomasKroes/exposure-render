@@ -19,14 +19,13 @@
 namespace ExposureRender
 {
 
-template<class T, bool Pitched>
+template<class T>
 class CCudaBuffer2D
 {
 public:
 	CCudaBuffer2D(void) :
 		Resolution(),
-		pData(NULL),
-		Pitch(0)
+		pData(NULL)
 	{
 	}
 
@@ -40,39 +39,26 @@ public:
 		if (this->GetNoElements() <= 0)
 			return;
 
-		if (Pitched)
-			Cuda::AllocatePiched(this->pData, this->Pitch, this->GetWidth(), this->GetHeight());
-		else
-			Cuda::Allocate(this->pData, this->GetNoElements());
+		Cuda::Allocate(this->pData, this->GetNoElements());
 
 		this->Reset();
 	}
 
 	HOST void Reset(void)
 	{
-		if (this->GetSize() <= 0)
-			return;
-
 		Cuda::MemSet(this->pData, 0, this->GetNoElements());
 	}
 
 	HOST void Free(void)
 	{
-		if (this->pData)
-		{
-			Cuda::Free(this->pData);
-		}
+		Cuda::Free(this->pData);
 		
-		this->Pitch			= 0;
-		this->Resolution	= Resolution2i();
+		this->Resolution = Resolution2i();
 	}
 
 	HOST_DEVICE T& operator()(const int X, const int Y)
 	{
-		if (Pitched)
-			return this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
-		else
-			return this->pData[Y * this->GetWidth() + X];
+		return this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
@@ -82,10 +68,7 @@ public:
 
 	HOST_DEVICE int GetSize(void) const
 	{
-		if (Pitched)
-			return this->Resolution[1] * this->Pitch;
-		else
-			return this->GetNoElements() * sizeof(T);
+		return this->GetNoElements() * sizeof(T);
 	}
 
 	HOST_DEVICE T Get(const int& X = 0, const int& Y = 0)
@@ -93,10 +76,7 @@ public:
 		if (X > this->GetWidth() || Y > this->GetHeight())
 			return T();
 
-		if (Pitched)
-			return this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
-		else
-			return this->pData[Y * this->GetWidth() + X];
+		return this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE T& GetRef(const int& X = 0, const int& Y = 0)
@@ -104,10 +84,7 @@ public:
 		if (X > this->GetWidth() || Y > this->GetHeight())
 			return T();
 
-		if (Pitched)
-			return this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
-		else
-			return this->pData[Y * this->GetWidth() + X];
+		return this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE T* GetPtr(const int& X = 0, const int& Y = 0)
@@ -115,10 +92,7 @@ public:
 		if (X > this->GetWidth() || Y > this->GetHeight())
 			return NULL;
 
-		if (Pitched)
-			return &this->pData[Y * (this->GetPitch() / sizeof(T)) + X];
-		else
-			return &this->pData[Y * this->GetWidth() + X];
+		return &this->pData[Y * this->GetWidth() + X];
 	}
 
 	HOST_DEVICE void Set(T Value, int X = 0, int Y = 0)
@@ -126,10 +100,7 @@ public:
 		if (X > this->GetWidth() || Y > this->GetHeight())
 			return;
 
-		if (Pitched)
-			this->pData[Y * (this->GetPitch() / sizeof(T)) + X] = Value;
-		else
-			this->pData[Y * this->GetWidth() + X] = Value;
+		this->pData[Y * this->GetWidth() + X] = Value;
 	}
 
 	HOST_DEVICE int GetWidth(void) const
@@ -142,18 +113,9 @@ public:
 		return this->Resolution[1];
 	}
 
-	HOST_DEVICE int GetPitch(void) const
-	{
-		if (Pitched)
-			return this->Pitch;
-		else
-			return this->GetWidth() * sizeof(T);
-	}
-
 protected:
 	Resolution2i		Resolution;
 	T*					pData;
-	size_t				Pitch;
 };
 
 template<class T>
@@ -265,7 +227,7 @@ protected:
 	T*				pData;
 };
 
-class CCudaRandomBuffer2D : public CCudaBuffer2D<unsigned int, false>
+class CCudaRandomBuffer2D : public CCudaBuffer2D<unsigned int>
 {
 public:
 	void Resize(Resolution2i Resolution)

@@ -16,8 +16,10 @@
 #include "exposurerender.h"
 
 #include "tracer.h"
+#include "framebuffer.h"
 
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
+DEVICE ExposureRender::FrameBuffer*		gpFrameBuffer		= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
 DEVICE ExposureRender::Light*			gpLights			= NULL;
 DEVICE ExposureRender::Object*			gpObjects			= NULL;
@@ -25,12 +27,16 @@ DEVICE ExposureRender::ClippingObject*	gpClippingObjects	= NULL;
 DEVICE ExposureRender::Texture*			gpTextures			= NULL;
 DEVICE ExposureRender::Bitmap*			gpBitmaps			= NULL;
 
-ExposureRender::Cuda::List<ExposureRender::Volume>			gVolumes("gpVolumes");
-ExposureRender::Cuda::List<ExposureRender::Light>			gLights("gpLights");
-ExposureRender::Cuda::List<ExposureRender::Object>			gObjects("gpObjects");
-ExposureRender::Cuda::List<ExposureRender::ClippingObject>	gClippingObjects("gpClippingObjects");
-ExposureRender::Cuda::List<ExposureRender::Texture>			gTextures("gpTextures");
-ExposureRender::Cuda::List<ExposureRender::Bitmap>			gBitmaps("gpBitmaps");
+ExposureRender::Cuda::List<ExposureRender::Volume>						gVolumes("gpVolumes");
+ExposureRender::Cuda::List<ExposureRender::FrameBuffer>					gFramebuffers("gpFramebuffers");
+ExposureRender::Cuda::List<ExposureRender::Light>						gLights("gpLights");
+ExposureRender::Cuda::List<ExposureRender::Object>						gObjects("gpObjects");
+ExposureRender::Cuda::List<ExposureRender::ClippingObject>				gClippingObjects("gpClippingObjects");
+ExposureRender::Cuda::List<ExposureRender::Texture>						gTextures("gpTextures");
+ExposureRender::Cuda::List<ExposureRender::Bitmap>						gBitmaps("gpBitmaps");
+
+ExposureRender::Cuda::SynchronizeSingle<ExposureRender::Tracer>			gTracers("gpTracer");
+ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffers("gpFrameBuffer");
 
 #include "utilities.h"
 
@@ -39,59 +45,34 @@ ExposureRender::Cuda::List<ExposureRender::Bitmap>			gBitmaps("gpBitmaps");
 #include "toneMap.cuh"
 #include "gaussianfilter.cuh"
 
-#define EDIT_TRACER(id)												\
-std::map<int, Tracer>::iterator	It;									\
-It = gTracers.find(id);												\
-if (It == gTracers.end())											\
-	throw(Exception(Enums::Error, "Tracer does not exist!"));		\
-Tracer& Tracer = gTracers[id];										
-
-DEVICE ExposureRender::Tracer* pTracer = NULL;
-
-void BindDeviceTracer(ExposureRender::Tracer& Tracer)
-{
-	if (pTracer == NULL)
-		ExposureRender::Cuda::Allocate(pTracer);
-	
-	ExposureRender::Cuda::MemCopyHostToDevice(&Tracer, pTracer);
-	ExposureRender::Cuda::MemCopyHostToDeviceSymbol(&pTracer, "gpTracer");
-}
-
 namespace ExposureRender
 {
 
-std::map<int, Tracer> gTracers;
-
-EXPOSURE_RENDER_DLL void Resize(int TracerID, int Size[2])
+EXPOSURE_RENDER_DLL void InitializeTracer(const Tracer& Tracer)
 {
-	EDIT_TRACER(TracerID)
-
-	Tracer.FrameBuffer.Resize(Resolution2i(Size[0], Size[1]));
+	gTracers.Bind(Tracer);
+	gFrameBuffers.Bind(FrameBuffer());
 }
 
-EXPOSURE_RENDER_DLL void Restart(int TracerID)
+EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID)
 {
-	EDIT_TRACER(TracerID)
-
-	Tracer.FrameBuffer.Reset();
-	Tracer.NoIterations = 0;
+	gTracers.Unbind(TracerID);
+	gFrameBuffers.Unbind(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindTracer(const Tracer& T)
+EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer)
 {
-	if (T.ID < 0)
-		T.ID = gTracers.size(); 
-
-	gTracers[T.ID] = T;
+	gTracers.Bind(Tracer);
 }
 
 EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID)
 {
+	gTracers.Unbind(TracerID);
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(const Volume& V)
+EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume)
 {
-	gVolumes.Bind(V);
+	gVolumes.Bind(Volume);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
@@ -99,9 +80,9 @@ EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 	gVolumes.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindLight(const Light& L)
+EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light)
 {
-	gLights.Bind(L);
+	gLights.Bind(Light);
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
@@ -109,9 +90,9 @@ EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 	gLights.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindObject(const Object& O)
+EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object)
 {
-	gObjects.Bind(O);
+	gObjects.Bind(Object);
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
@@ -119,9 +100,9 @@ EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 	gObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindClippingObject(const ClippingObject& C)
+EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject)
 {
-	gClippingObjects.Bind(C);
+	gClippingObjects.Bind(ClippingObject);
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
@@ -129,7 +110,7 @@ EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 	gClippingObjects.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindTexture(const Texture& Texture)
+EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture)
 {
 	gTextures.Bind(Texture);
 }
@@ -139,9 +120,9 @@ EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 	gTextures.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void BindBitmap(const Bitmap& B)
+EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap)
 {
-	gBitmaps.Bind(B);
+	gBitmaps.Bind(Bitmap);
 }
 
 EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
@@ -149,49 +130,27 @@ EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
 	gBitmaps.Unbind(ID);
 }
 
-EXPOSURE_RENDER_DLL void SetVolumeID(int TracerID, int VolumeID)
+EXPOSURE_RENDER_DLL void ResizeFrameBuffer(int TracerID, Resolution2i Resolution)
 {
-	EDIT_TRACER(TracerID)
-	Tracer.VolumeID = VolumeID;
-}
-
-EXPOSURE_RENDER_DLL void SetLightIDs(int TracerID, Indices LightIDs)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.BindLightIDs(LightIDs, gLights.HashMap);
-}
-
-EXPOSURE_RENDER_DLL void SetObjectIDs(int TracerID, Indices ObjectIDs)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.BindObjectIDs(ObjectIDs, gObjects.HashMap);
-}
-
-EXPOSURE_RENDER_DLL void SetClippingObjectIDs(int TracerID, Indices ClippingObjectIDs)
-{
-	EDIT_TRACER(TracerID)
-	Tracer.BindClippingObjectIDs(ClippingObjectIDs, gClippingObjects.HashMap);
+	gFrameBuffers[TracerID].Resize(Resolution);
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
-	EDIT_TRACER(TracerID)
+	gTracers.Synchronize(TracerID);
 
-	BindDeviceTracer(Tracer);
-	
-	SingleScattering(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
+	SingleScattering(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 	return;
-	ComputeEstimate(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
+	ComputeEstimate(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 //	FilterGaussian(Tracer.FrameBuffer.CudaFrameEstimate.GetPtr(), Tracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
-	ToneMap(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
+	ToneMap(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 
-	Tracer.NoIterations++;
+	gTracers[TracerID].NoIterations++;
 }
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)
 {
-	EDIT_TRACER(TracerID)
-	Cuda::MemCopyDeviceToHost(Tracer.FrameBuffer.CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, Tracer.FrameBuffer.CudaDisplayEstimate.GetNoElements());
+	Cuda::MemCopyDeviceToHost(gFrameBuffers[TracerID].CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffers[TracerID].CudaDisplayEstimate.GetNoElements());
 }
 
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance)
@@ -202,8 +161,7 @@ EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV
 
 EXPOSURE_RENDER_DLL void GetNoIterations(int TracerID, int& NoIterations)
 {
-	EDIT_TRACER(TracerID)
-	NoIterations = Tracer.NoIterations; 
+	NoIterations = gTracers[TracerID].NoIterations; 
 }
 
 }

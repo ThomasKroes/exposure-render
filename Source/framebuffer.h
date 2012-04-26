@@ -92,20 +92,20 @@ public:
 		return this->Resolution[1];
 	}
 
-	Resolution2i							Resolution;
+	Resolution2i					Resolution;
 	
-	CCudaBuffer2D<ColorXYZAf, false>		CudaRunningEstimateXyza;
-	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimate;
-	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateTemp;
-	CCudaBuffer2D<ColorRGBAuc, false>		CudaDisplayEstimateFiltered;
+	CCudaBuffer2D<ColorXYZAf>		CudaRunningEstimateXyza;
+	CCudaBuffer2D<ColorRGBAuc>		CudaDisplayEstimate;
+	CCudaBuffer2D<ColorRGBAuc>		CudaDisplayEstimateTemp;
+	CCudaBuffer2D<ColorRGBAuc>		CudaDisplayEstimateFiltered;
 
-	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimate;
-	CCudaBuffer2D<ColorXYZAf, false>		CudaFrameEstimateTemp;
+	CCudaBuffer2D<ColorXYZAf>		CudaFrameEstimate;
+	CCudaBuffer2D<ColorXYZAf>		CudaFrameEstimateTemp;
 	
-	CCudaRandomBuffer2D						CudaRandomSeeds1;
-	CCudaRandomBuffer2D						CudaRandomSeeds2;
-	CCudaRandomBuffer2D						CudaRandomSeedsCopy1;
-	CCudaRandomBuffer2D						CudaRandomSeedsCopy2;
+	CCudaRandomBuffer2D				CudaRandomSeeds1;
+	CCudaRandomBuffer2D				CudaRandomSeeds2;
+	CCudaRandomBuffer2D				CudaRandomSeedsCopy1;
+	CCudaRandomBuffer2D				CudaRandomSeedsCopy2;
 };
 
 }

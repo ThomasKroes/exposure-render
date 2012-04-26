@@ -138,7 +138,7 @@ HOST_DEVICE type GetNoElements(void) const		\
 	return NoElements;							\
 }
 
-class Resolution2i
+class EXPOSURE_RENDER_DLL Resolution2i
 {
 public:
 	CONSTRUCTORS(Resolution2i, int, 2)
@@ -149,7 +149,7 @@ public:
 	DATA(int, 2)
 };
 
-class Resolution2f
+class EXPOSURE_RENDER_DLL Resolution2f
 {
 public:
 	CONSTRUCTORS(Resolution2f, float, 2)
@@ -160,7 +160,7 @@ public:
 	DATA(float, 2)
 };
 
-class Resolution3i
+class EXPOSURE_RENDER_DLL Resolution3i
 {
 public:
 	CONSTRUCTORS(Resolution3i, int, 3)
@@ -171,7 +171,7 @@ public:
 	DATA(int, 3)
 };
 
-class Resolution3f
+class EXPOSURE_RENDER_DLL Resolution3f
 {
 public:
 	CONSTRUCTORS(Resolution3f, float, 3)

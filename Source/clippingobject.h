@@ -19,13 +19,44 @@
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL ClippingObject : public Bindable
+class EXPOSURE_RENDER_DLL ErClippingObject : public Bindable
 {
 public:
-	HOST ClippingObject() :
+	HOST ErClippingObject() :
 		Bindable()
 	{
 		this->Invert	= false;
+	}
+	
+	HOST ~ErClippingObject()
+	{
+	}
+	
+	HOST ErClippingObject(const ErClippingObject& Other)
+	{
+		*this = Other;
+	}
+
+	HOST ErClippingObject& operator = (const ErClippingObject& Other)
+	{
+		Bindable::operator=(Other);
+
+		this->Shape		= Other.Shape;
+		this->Invert	= Other.Invert;
+
+		return *this;
+	}
+
+	Shape	Shape;
+	bool	Invert;
+};
+
+class EXPOSURE_RENDER_DLL ClippingObject : public ErClippingObject
+{
+public:
+	HOST ClippingObject() :
+		ErClippingObject()
+	{
 	}
 	
 	HOST ~ClippingObject()
@@ -37,27 +68,23 @@ public:
 		*this = Other;
 	}
 
+	HOST ClippingObject(const ErClippingObject& Other)
+	{
+		*this = Other;
+	}
+
 	HOST ClippingObject& operator = (const ClippingObject& Other)
 	{
-		Bindable::operator=(Other);
-
-		this->Shape		= Other.Shape;
-		this->Invert	= Other.Invert;
-
+		ErClippingObject::operator=(Other);
 		return *this;
 	}
 
-	HOST void BindDevice(const ClippingObject& HostClippingObject)
+	HOST ClippingObject& operator = (const ErClippingObject& Other)
 	{
-		*this = HostClippingObject;
+		ErClippingObject::operator=(Other);
+		return *this;
 	}
-
-	HOST void UnbindDevice()
-	{
-	}
-
-	Shape	Shape;
-	bool	Invert;
 };
+
 
 }
