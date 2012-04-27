@@ -15,6 +15,7 @@
 
 #include "exposurerender.h"
 
+/*
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
 DEVICE ExposureRender::FrameBuffer*		gpFrameBuffer		= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
@@ -162,3 +163,4 @@ EXPOSURE_RENDER_DLL void GetNoIterations(int TracerID, int& NoIterations)
 }
 
 }
+*/
