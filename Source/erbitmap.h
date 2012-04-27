@@ -13,53 +13,80 @@
 
 #pragma once
 
-#include "defines.h"
-#include "enums.h"
-#include "exception.h"
+#include "erbindable.h"
+#include "color.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Bindable
+class EXPOSURE_RENDER_DLL ErBitmap : public ErBindable
 {
 public:
-	HOST Bindable()
-	{
-		this->ID		= -1;
-		this->Enabled	= true;
-		this->Dirty		= NULL;
-	}
-
-	HOST ~Bindable()
+	HOST ErBitmap() :
+		ErBindable(),
+		Size(0, 0),
+		HostPixels(NULL),
+		HostMemoryOwner(false)
 	{
 	}
 
-	HOST Bindable(const Bindable& Other)
+	HOST ~ErBitmap()
+	{
+	}
+
+	HOST ErBitmap(const ErBitmap& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Bindable& operator = (const Bindable& Other)
+	HOST ErBitmap& operator = (const ErBitmap& Other)
 	{
-		this->ID		= Other.ID;
-		this->Enabled	= Other.Enabled;
-		this->Dirty		= Other.Dirty;
-
+		this->Size				= Other.Size;
+		this->HostPixels		= Other.HostPixels;
+		this->HostMemoryOwner	= Other.HostMemoryOwner;
+		
 		return *this;
 	}
 
-	HOST void BindHost();
-	HOST void UnbindHost();
+	HOST void BindPixels(const ColorRGBAuc* Pixels, const Vec2i& Size)
+	{
+		if (Pixels == NULL)
+			throw(Exception(Enums::Warning, "BindPixels() failed: pixels pointer is NULL"));
 
-	/*
-	GET_SET(ID, int)
-	GET_SET(Enabled, bool)
-	GET_SET(Dirty, bool)
-	*/
+		this->Size = Size;
 
-	mutable int		ID;
-	bool			Enabled;
-	bool			Dirty;
+		this->UnbindPixels();
+
+		const int NoPixels = this->Size[0] * this->Size[1];
+
+		if (NoPixels <= 0)
+			throw(Exception(Enums::Warning, "BindPixels() failed: bad no. pixels!"));
+
+		this->HostPixels = new ColorRGBAuc[NoPixels];
+
+		memcpy(this->HostPixels, Pixels, NoPixels * sizeof(ColorRGBAuc));
+
+		this->Dirty				= true;
+		this->HostMemoryOwner	= true;
+	}
+
+	HOST void UnbindPixels()
+	{
+		if (!this->HostMemoryOwner)
+			return;
+
+		if (this->HostPixels != NULL)
+		{
+			delete[] this->HostPixels;
+			this->HostPixels = NULL;
+		}
+
+		this->Dirty = true;
+	}
+
+	Vec2i			Size;
+	ColorRGBAuc*	HostPixels;
+	bool			HostMemoryOwner;
 };
 
 }

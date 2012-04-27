@@ -13,9 +13,53 @@
 
 #pragma once
 
-#include "camera.h"
+#include "defines.h"
+#include "enums.h"
+#include "exception.h"
 
 namespace ExposureRender
 {
+
+class EXPOSURE_RENDER_DLL ErBindable
+{
+public:
+	HOST ErBindable()
+	{
+		this->ID		= -1;
+		this->Enabled	= true;
+		this->Dirty		= NULL;
+	}
+
+	HOST ~ErBindable()
+	{
+	}
+
+	HOST ErBindable(const ErBindable& Other)
+	{
+		*this = Other;
+	}
+
+	HOST ErBindable& operator = (const ErBindable& Other)
+	{
+		this->ID		= Other.ID;
+		this->Enabled	= Other.Enabled;
+		this->Dirty		= Other.Dirty;
+
+		return *this;
+	}
+
+	HOST void BindHost();
+	HOST void UnbindHost();
+
+	/*
+	GET_SET(ID, int)
+	GET_SET(Enabled, bool)
+	GET_SET(Dirty, bool)
+	*/
+
+	mutable int		ID;
+	bool			Enabled;
+	bool			Dirty;
+};
 
 }

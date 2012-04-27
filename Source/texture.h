@@ -13,67 +13,46 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "procedural.h"
+#include "ertexture.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL ErTexture : public Bindable
+class EXPOSURE_RENDER_DLL Texture : public ErTexture
 {
 public:
-	HOST ErTexture() :
-		Bindable(),
-		Type(Enums::Procedural),
-		OutputLevel(1.0f),
-		BitmapID(-1),
-		Procedural(),
-		Offset(0.0f, 0.0f),
-		Repeat(0.0f, 0.0f),
-		Flip(0, 0)
+	HOST Texture() :
+		ErTexture()
 	{
 	}
 
-	HOST ~ErTexture()
+	HOST ~Texture()
 	{
 	}
 	
-	HOST ErTexture(const ErTexture& Other)
+	HOST Texture(const Texture& Other)
 	{
 		*this = Other;
 	}
 
-	HOST ErTexture& operator = (const ErTexture& Other)
+	HOST Texture(const ErTexture& Other)
 	{
-		Bindable::operator=(Other);
+		*this = Other;
+	}
 
-		this->Type			= Other.Type;
-		this->OutputLevel	= Other.OutputLevel;
-		this->BitmapID		= Other.BitmapID;
-		this->Procedural	= Other.Procedural;
-		this->Offset		= Other.Offset;
-		this->Repeat		= Other.Repeat;
-		this->Flip			= Other.Flip;
+	HOST Texture& operator = (const Texture& Other)
+	{
+		ErTexture::operator=(Other);
 		
 		return *this;
 	}
 
-	HOST void BindDevice(const ErTexture& HostTexture)
+	HOST Texture& operator = (const ErTexture& Other)
 	{
-		*this = HostTexture;
+		ErTexture::operator=(Other);
+		
+		return *this;
 	}
-
-	HOST void UnbindDevice()
-	{
-	}
-
-	Enums::TextureType	Type;
-	float				OutputLevel;
-	int					BitmapID;
-	Procedural			Procedural;
-	Vec2f				Offset;
-	Vec2f				Repeat;
-	Vec2i				Flip;
 };
 
 }

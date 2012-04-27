@@ -78,6 +78,13 @@ SET(General
 	color.h
 	exposurerender.h
 	exposurerender.cpp
+	tracer.h
+	volume.h
+	light.h
+	object.h
+	clippingobject.h
+	texture.h
+	bitmap.h
 )
 
 # General group
@@ -98,19 +105,19 @@ SET(Shapes
 SOURCE_GROUP("Shapes" FILES ${Shapes})
 
 # API
-SET(Bindable
-	bindable.h
-	tracer.h
-	volume.h
-	light.h
-	object.h
-	clippingobject.h
-	texture.h
-	bitmap.h
+SET(ErBindable
+	erbindable.h
+	ertracer.h
+	ervolume.h
+	erlight.h
+	erobject.h
+	erclippingobject.h
+	ertexture.h
+	erbitmap.h
 )
 
 # API group
-SOURCE_GROUP("Bindable" FILES ${Bindable})
+SOURCE_GROUP("ErBindable" FILES ${ErBindable})
 
 # Filters
 SET(Cuda
@@ -122,18 +129,10 @@ SET(Cuda
 	tonemap.cuh
 	autofocus.cuh
 	core.cu
-	bitmap.cuh
-	camera.cuh
-	clippingobject.cuh
-	light.cuh
-	object.cuh
-	texture.cuh
-	tracer.cuh
-	volume.cuh
 )
 
 # Filters group
 SOURCE_GROUP("Cuda" FILES ${Cuda})
 
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${General} ${Shapes} ${Bindable} ${Cuda} SHARED)
+CUDA_ADD_LIBRARY(ErCore ${General} ${Shapes} ${ErBindable} ${Cuda} SHARED)

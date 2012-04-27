@@ -13,42 +13,44 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "shape.h"
+#include "erclippingobject.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL ErClippingObject : public Bindable
+class EXPOSURE_RENDER_DLL ClippingObject : public ErClippingObject
 {
 public:
-	HOST ErClippingObject() :
-		Bindable()
-	{
-		this->Invert	= false;
-	}
-	
-	HOST ~ErClippingObject()
+	HOST ClippingObject() :
+		ErClippingObject()
 	{
 	}
 	
-	HOST ErClippingObject(const ErClippingObject& Other)
+	HOST ~ClippingObject()
+	{
+	}
+	
+	HOST ClippingObject(const ClippingObject& Other)
 	{
 		*this = Other;
 	}
 
-	HOST ErClippingObject& operator = (const ErClippingObject& Other)
+	HOST ClippingObject(const ErClippingObject& Other)
 	{
-		Bindable::operator=(Other);
+		*this = Other;
+	}
 
-		this->Shape		= Other.Shape;
-		this->Invert	= Other.Invert;
-
+	HOST ClippingObject& operator = (const ClippingObject& Other)
+	{
+		ErClippingObject::operator=(Other);
 		return *this;
 	}
 
-	Shape	Shape;
-	bool	Invert;
+	HOST ClippingObject& operator = (const ErClippingObject& Other)
+	{
+		ErClippingObject::operator=(Other);
+		return *this;
+	}
 };
 
 }

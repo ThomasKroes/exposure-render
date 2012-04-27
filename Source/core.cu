@@ -13,13 +13,13 @@
 
 #define __CUDA_ARCH__ 200
 
-#include "tracer.cuh"
-#include "volume.cuh"
-#include "light.cuh"
-#include "object.cuh"
-#include "clippingobject.cuh"
-#include "texture.cuh"
-#include "bitmap.cuh"
+#include "tracer.h"
+#include "volume.h"
+#include "light.h"
+#include "object.h"
+#include "clippingobject.h"
+#include "texture.h"
+#include "bitmap.h"
 
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;

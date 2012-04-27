@@ -13,10 +13,8 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "transferfunction.h"
-#include "camera.h"
-#include "rendersettings.h"
+#include "ertracer.h"
+#include "framebuffer.h"
 
 #include <map>
 
@@ -25,90 +23,34 @@ using namespace std;
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL ErTracer : public Bindable
+class Tracer : public ErTracer
 {
 public:
-	HOST ErTracer() :
-		Bindable(),
-		Opacity1D(),
-		Diffuse1D(),
-		Specular1D(),
-		Glossiness1D(),
-		Emission1D(),
-		Camera(),
-		RenderSettings(),
-		NoIterations(0),
-		VolumeID(0),
-		LightIDs(),
-		ObjectIDs(),
-		ClippingObjectIDs()
+	HOST Tracer() :
+		ErTracer(),
+		FrameBuffer()
 	{
 	}
 
-	HOST ~ErTracer()
+	HOST ~Tracer()
 	{
 	}
 	
-	HOST ErTracer(const ErTracer& Other)
+	HOST Tracer(const ErTracer& Other)
 	{
 		*this = Other;
 	}
 
-	HOST ErTracer& ErTracer::operator = (const ErTracer& Other)
+	HOST Tracer& Tracer::operator = (const ErTracer& Other)
 	{
-		Bindable::operator=(Other);
-
-		this->Opacity1D				= Other.Opacity1D;
-		this->Diffuse1D				= Other.Diffuse1D;
-		this->Specular1D			= Other.Specular1D;
-		this->Glossiness1D			= Other.Glossiness1D;
-		this->Emission1D			= Other.Emission1D;
-		this->Camera				= Other.Camera;
-		this->RenderSettings		= Other.RenderSettings;
-		this->NoIterations			= Other.NoIterations;
-		this->VolumeID				= Other.VolumeID;
-		this->LightIDs				= Other.LightIDs;
-		this->ObjectIDs				= Other.ObjectIDs;
-		this->ClippingObjectIDs		= Other.ClippingObjectIDs;
+		ErTracer::operator=(Other);
+		
+		this->FrameBuffer.Resize(Other.Camera.FilmSize);
 
 		return *this;
 	}
-	
-	HOST void BindIDs(Indices SourceIDs, Indices& TargetIDs, map<int, int> HashMap)
-	{
-		for (int i = 0; i < SourceIDs.Count; i++)
-			TargetIDs[i] = HashMap[SourceIDs[i]];
 
-		TargetIDs.Count = SourceIDs.Count;
-	}
-
-	HOST void BindLightIDs(Indices LightIDs, map<int, int> HashMap)
-	{
-		BindIDs(LightIDs, this->LightIDs, HashMap);
-	}
-
-	HOST void BindObjectIDs(Indices ObjectIDs, map<int, int> HashMap)
-	{
-		BindIDs(ObjectIDs, this->ObjectIDs, HashMap);
-	}
-
-	HOST void BindClippingObjectIDs(Indices ClippingObjectIDs, map<int, int> HashMap)
-	{
-		BindIDs(ClippingObjectIDs, this->ClippingObjectIDs, HashMap);
-	}
-
-	ScalarTransferFunction1D		Opacity1D;
-	ColorTransferFunction1D			Diffuse1D;
-	ColorTransferFunction1D			Specular1D;
-	ScalarTransferFunction1D		Glossiness1D;
-	ColorTransferFunction1D			Emission1D;
-	Camera							Camera;
-	RenderSettings					RenderSettings;
-	int								NoIterations;
-	int								VolumeID;
-	Indices							LightIDs;
-	Indices							ObjectIDs;
-	Indices							ClippingObjectIDs;
+	FrameBuffer	FrameBuffer;
 };
 
 }

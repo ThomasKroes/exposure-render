@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "bindable.h"
+#include "erbindable.h"
 #include "color.h"
 
 namespace ExposureRender

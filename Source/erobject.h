@@ -13,46 +13,51 @@
 
 #pragma once
 
-#include "object.h"
+#include "erbindable.h"
+#include "shape.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL Object : public ErObject
+class EXPOSURE_RENDER_DLL ErObject : public ErBindable
 {
 public:
-	HOST Object() :
-		ErObject()
+	HOST ErObject() :
+		ErBindable()
+	{
+		this->DiffuseTextureID		= -1;
+		this->SpecularTextureID		= -1;
+		this->GlossinessTextureID	= -1;
+		this->Ior					= 0.0f;
+	}
+
+	HOST ~ErObject()
 	{
 	}
 
-	HOST ~Object()
-	{
-	}
-
-	HOST Object(const Object& Other)
+	HOST ErObject(const ErObject& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Object(const ErObject& Other)
+	HOST ErObject& operator = (const ErObject& Other)
 	{
-		*this = Other;
-	}
+		ErBindable::operator=(Other);
 
-	HOST Object& operator = (const Object& Other)
-	{
-		ErObject::operator=(Other);
+		this->Shape					= Other.Shape;
+		this->DiffuseTextureID		= Other.DiffuseTextureID;
+		this->SpecularTextureID		= Other.SpecularTextureID;
+		this->GlossinessTextureID	= Other.GlossinessTextureID;
+		this->Ior					= Other.Ior;
 
 		return *this;
 	}
 
-	HOST Object& operator = (const ErObject& Other)
-	{
-		ErObject::operator=(Other);
-
-		return *this;
-	}
+	Shape		Shape;
+	int			DiffuseTextureID;
+	int			SpecularTextureID;
+	int			GlossinessTextureID;
+	float		Ior;
 };
 
 }

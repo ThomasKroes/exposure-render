@@ -13,51 +13,48 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "shape.h"
+#include "erlight.h"
 
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL ErLight : public Bindable
+class Light : public ErLight
 {
 public:
-	HOST ErLight() :
-		Bindable()
-	{
-		this->Visible		= true;
-		this->TextureID		= 0;
-		this->Multiplier	= 1.0f;
-		this->Unit			= Enums::Power;
-	}
-
-	HOST ~ErLight()
+	HOST Light() :
+		ErLight()
 	{
 	}
 
-	HOST ErLight(const ErLight& Other)
+	HOST ~Light()
+	{
+	}
+
+	HOST Light(const Light& Other)
+	{
+		*this = Other;
+	}
+
+	HOST Light(const ErLight& Other)
 	{
 		*this = Other;
 	}
 	
-	HOST ErLight& operator = (const ErLight& Other)
+	HOST Light& operator = (const Light& Other)
 	{
-		Bindable::operator=(Other);
-
-		this->Visible		= Other.Visible;
-		this->Shape			= Other.Shape;
-		this->TextureID		= Other.TextureID;
-		this->Multiplier	= Other.Multiplier;
-		this->Unit			= Other.Unit;
+		ErLight::operator=(Other);
+		this->Shape.Update();
 
 		return *this;
 	}
 
-	bool					Visible;
-	Shape					Shape;
-	int						TextureID;
-	float					Multiplier;
-	Enums::EmissionUnit		Unit;
+	HOST Light& operator = (const ErLight& Other)
+	{
+		ErLight::operator=(Other);
+		this->Shape.Update();
+
+		return *this;
+	}
 };
 
 }

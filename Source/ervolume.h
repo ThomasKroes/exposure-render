@@ -13,44 +13,88 @@
 
 #pragma once
 
-#include "tracer.h"
-#include "framebuffer.h"
-
-#include <map>
-
-using namespace std;
+#include "erbindable.h"
+#include "vector.h"
 
 namespace ExposureRender
 {
 
-class Tracer : public ErTracer
+class EXPOSURE_RENDER_DLL ErVolume : public ErBindable
 {
 public:
-	HOST Tracer() :
-		ErTracer(),
-		FrameBuffer()
+	HOST ErVolume() :
+		ErBindable(),
+		Resolution(0, 0, 0),
+		NormalizeSize(false),
+		Spacing(0.0f, 0.0f, 0.0f),
+		HostVoxels(NULL),
+		HostMemoryOwner(false)
 	{
 	}
 
-	HOST ~Tracer()
+	HOST ~ErVolume()
 	{
 	}
 	
-	HOST Tracer(const ErTracer& Other)
+	HOST ErVolume(const ErVolume& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Tracer& Tracer::operator = (const ErTracer& Other)
+	HOST ErVolume& ErVolume::operator = (const ErVolume& Other)
 	{
-		ErTracer::operator=(Other);
-		
-		this->FrameBuffer.Resize(Other.Camera.FilmSize);
+		ErBindable::operator=(Other);
+
+		this->Resolution				= Other.Resolution;
+		this->Spacing					= Other.Spacing;
+		this->NormalizeSize				= Other.NormalizeSize;
+		this->HostVoxels				= Other.HostVoxels;
 
 		return *this;
 	}
 
-	FrameBuffer	FrameBuffer;
+	HOST void BindVoxels(const unsigned short* Voxels, const Vec3i& Resolution, const Vec3f& Spacing, const bool& NormalizeSize = false)
+	{
+		if (Voxels == NULL)
+			throw(Exception(Enums::Warning, "BindVoxels() failed: voxels pointer is NULL"));
+
+		this->Resolution		= Resolution;
+		this->Spacing			= Spacing;
+		this->NormalizeSize		= NormalizeSize;
+
+		this->UnbindVoxels();
+
+		const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
+
+		if (NoVoxels <= 0)
+			throw(Exception(Enums::Warning, "BindVoxels() failed: bad no. voxels!"));
+
+		this->HostVoxels = new unsigned short[NoVoxels];
+
+		memcpy(this->HostVoxels, Voxels, NoVoxels * sizeof(unsigned short));
+
+		this->Dirty = true;
+	}
+
+	HOST void UnbindVoxels()
+	{
+		if (!this->HostMemoryOwner)
+			return;
+
+		if (this->HostVoxels != NULL)
+		{
+			delete[] this->HostVoxels;
+			this->HostVoxels = NULL;
+		}
+
+		this->Dirty = true;
+	}
+
+	Vec3i				Resolution;
+	bool				NormalizeSize;
+	Vec3f				Spacing;
+	unsigned short*		HostVoxels;
+	bool				HostMemoryOwner;
 };
 
 }
