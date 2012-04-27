@@ -54,8 +54,6 @@ SET(General
 	sample.h
 	rng.h
 	montecarlo.h
-	buffer.h
-	framebuffer.h
 	ray.h
 	volumes.h
 	lights.h
@@ -85,6 +83,9 @@ SET(General
 	clippingobject.h
 	texture.h
 	bitmap.h
+	hostbuffer.h
+	devicebuffer.h
+	framebuffer.h
 )
 
 # General group
@@ -105,7 +106,7 @@ SET(Shapes
 SOURCE_GROUP("Shapes" FILES ${Shapes})
 
 # API
-SET(ErBindable
+SET(Bindable
 	erbindable.h
 	ertracer.h
 	ervolume.h
@@ -117,7 +118,7 @@ SET(ErBindable
 )
 
 # API group
-SOURCE_GROUP("ErBindable" FILES ${ErBindable})
+SOURCE_GROUP("Bindable" FILES ${ErBindable})
 
 # Filters
 SET(Cuda

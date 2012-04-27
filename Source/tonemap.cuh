@@ -45,12 +45,12 @@ KERNEL void KrnlToneMap()
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
-	const ColorRGBuc RGB = ToneMap(gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy));
+	const ColorRGBuc RGB = ToneMap(gpTracer->FrameBuffer.RunningEstimateXyza(IDx, IDy));
 
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[0] = RGB[0];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[1] = RGB[1];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[2] = RGB[2];
-	gpTracer->FrameBuffer.CudaDisplayEstimate(IDx, IDy)[3] = gpTracer->FrameBuffer.CudaRunningEstimateXyza(IDx, IDy)[3] * 255.0f;
+	gpTracer->FrameBuffer.DisplayEstimate(IDx, IDy)[0] = RGB[0];
+	gpTracer->FrameBuffer.DisplayEstimate(IDx, IDy)[1] = RGB[1];
+	gpTracer->FrameBuffer.DisplayEstimate(IDx, IDy)[2] = RGB[2];
+	gpTracer->FrameBuffer.DisplayEstimate(IDx, IDy)[3] = gpTracer->FrameBuffer.RunningEstimateXyza(IDx, IDy)[3] * 255.0f;
 }
 
 void ToneMap(int Width, int Height)

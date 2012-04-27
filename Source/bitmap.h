@@ -15,7 +15,7 @@
 
 #include "erbitmap.h"
 
-namespace ExposrureRender
+namespace ExposureRender
 {
 
 class Bitmap : public ErBitmap

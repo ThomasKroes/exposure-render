@@ -143,7 +143,7 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 	SingleScattering(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 	return;
 	ComputeEstimate(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
-//	FilterGaussian(Tracer.FrameBuffer.CudaFrameEstimate.GetPtr(), Tracer.FrameBuffer.CudaFrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
+//	FilterGaussian(Tracer.FrameBuffer.FrameEstimate.GetPtr(), Tracer.FrameBuffer.FrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ToneMap(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 
 	gTracers[TracerID].NoIterations++;
@@ -151,7 +151,7 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)
 {
-	Cuda::MemCopyDeviceToHost(gFrameBuffers[TracerID].CudaDisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffers[TracerID].CudaDisplayEstimate.GetNoElements());
+	Cuda::MemCopyDeviceToHost(gFrameBuffers[TracerID].DisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffers[TracerID].DisplayEstimate.GetNoElements());
 }
 
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance)

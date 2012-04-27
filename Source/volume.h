@@ -16,7 +16,7 @@
 #include "ervolume.h"
 #include "cuda.h"
 
-namespace ExposureRenderr
+namespace ExposureRender
 {
 
 class EXPOSURE_RENDER_DLL Volume : public ErVolume
