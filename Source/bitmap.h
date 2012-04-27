@@ -14,6 +14,7 @@
 #pragma once
 
 #include "erbitmap.h"
+#include "devicebuffer.h"
 
 namespace ExposureRender
 {
@@ -23,8 +24,7 @@ class Bitmap : public ErBitmap
 public:
 	HOST Bitmap() :
 		ErBitmap(),
-		DevicePixels(NULL),
-		DeviceMemoryOwner(false)
+		DevicePixels(),
 	{
 	}
 
@@ -45,8 +45,8 @@ public:
 
 	HOST_DEVICE Bitmap& operator = (const Bitmap& Other)
 	{
-		this->Size			= Other.Size;
-		this->DevicePixels	= Other.DevicePixels;
+		this->DevicePixels		= Other.DevicePixels;
+		this->Size				= Other.Size;
 		
 		return *this;
 	}
@@ -55,26 +55,12 @@ public:
 	{
 		ErBitmap::operator=(Other);
 
-		if (Other.Dirty)
-		{
-			Cuda::Free(this->DevicePixels);
-
-			const int NoPixels = this->Size[0] * this->Size[1];
-
-			if (NoPixels > 0)
-			{
-				Cuda::Allocate(this->DevicePixels, NoPixels);
-				Cuda::MemCopyHostToDevice(Other.HostPixels, this->DevicePixels, NoPixels);
-				
-				this->DeviceMemoryOwner = true;
-			}
-		}
+//		this->DevicePixels = Other.HostPixels;
 
 		return *this;
 	}
 
-	ColorRGBAuc*	DevicePixels;
-	bool			DeviceMemoryOwner;
+	DeviceBuffer2D<ColorRGBAuc>	DevicePixels;
 };
 
 }

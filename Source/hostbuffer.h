@@ -14,109 +14,9 @@
 #pragma once
 
 #include "geometry.h"
-#include "cuda.h"
 
 namespace ExposureRender
 {
-
-template<class T, bool pitched = false>
-class DeviceBuffer2D
-{
-public:
-	DeviceBuffer2D(void) :
-		Resolution(),
-		pData(NULL)
-	{
-	}
-
-	HOST void Resize(Resolution2i Resolution)
-	{
-		if (this->Resolution != Resolution)
-			this->Free();
-
-		this->Resolution = Resolution;
-
-		if (this->GetNoElements() <= 0)
-			return;
-
-		Cuda::Allocate(this->pData, this->GetNoElements());
-
-		this->Reset();
-	}
-
-	HOST void Reset(void)
-	{
-		Cuda::MemSet(this->pData, 0, this->GetNoElements());
-	}
-
-	HOST void Free(void)
-	{
-		Cuda::Free(this->pData);
-		
-		this->Resolution = Resolution2i();
-	}
-
-	HOST_DEVICE T& operator()(const int X, const int Y)
-	{
-		return this->pData[Y * this->GetWidth() + X];
-	}
-
-	HOST_DEVICE int GetNoElements(void) const
-	{
-		return this->Resolution.GetNoElements();
-	}
-
-	HOST_DEVICE int GetSize(void) const
-	{
-		return this->GetNoElements() * sizeof(T);
-	}
-
-	HOST_DEVICE T Get(const int& X = 0, const int& Y = 0)
-	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return T();
-
-		return this->pData[Y * this->GetWidth() + X];
-	}
-
-	HOST_DEVICE T& GetRef(const int& X = 0, const int& Y = 0)
-	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return T();
-
-		return this->pData[Y * this->GetWidth() + X];
-	}
-
-	HOST_DEVICE T* GetPtr(const int& X = 0, const int& Y = 0)
-	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return NULL;
-
-		return &this->pData[Y * this->GetWidth() + X];
-	}
-
-	HOST_DEVICE void Set(T Value, int X = 0, int Y = 0)
-	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return;
-
-		this->pData[Y * this->GetWidth() + X] = Value;
-	}
-
-	HOST_DEVICE int GetWidth(void) const
-	{
-		return this->Resolution[0];
-	}
-
-	HOST_DEVICE int GetHeight(void) const
-	{
-		return this->Resolution[1];
-	}
-
-protected:
-	Resolution2i		Resolution;
-	T*					pData;
-};
 
 template<class T, bool pitched = false>
 class HostBuffer2D
@@ -225,26 +125,6 @@ public:
 protected:
 	Resolution2i	Resolution;
 	T*				pData;
-};
-
-class DeviceRandomBuffer2D : public DeviceBuffer2D<unsigned int>
-{
-public:
-	void Resize(Resolution2i Resolution)
-	{
-		DeviceBuffer2D::Resize(Resolution);
-
-		unsigned int* pSeeds = (unsigned int*)malloc(this->GetSize());
-
-		memset(pSeeds, 0, this->GetSize());
-
-		for (int i = 0; i < this->GetNoElements(); i++)
-			pSeeds[i] = rand();
-
-		cudaMemcpy(this->pData, pSeeds, this->GetSize(), cudaMemcpyHostToDevice);
-
-		free(pSeeds);
-	}
 };
 
 }

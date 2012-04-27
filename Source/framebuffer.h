@@ -13,7 +13,8 @@
 
 #pragma once
 
-#include "buffer.h"
+#include "hostbuffer.h"
+#include "devicebuffer.h"
 
 namespace ExposureRender
 {
