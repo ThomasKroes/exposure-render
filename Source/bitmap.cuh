@@ -13,87 +13,10 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "color.h"
-
-#ifdef __CUDA_ARCH__
-	#include "cuda.h"
-#endif
+#include "bitmap.h"
 
 namespace ExposureRender
 {
-
-class EXPOSURE_RENDER_DLL ErBitmap : public Bindable
-{
-public:
-	HOST ErBitmap() :
-		Bindable(),
-		Size(0, 0),
-		HostPixels(NULL),
-		HostMemoryOwner(false)
-	{
-	}
-
-	HOST ~ErBitmap()
-	{
-	}
-
-	HOST ErBitmap(const ErBitmap& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ErBitmap& operator = (const ErBitmap& Other)
-	{
-		this->Size				= Other.Size;
-		this->HostPixels		= Other.HostPixels;
-		this->HostMemoryOwner	= Other.HostMemoryOwner;
-		
-		return *this;
-	}
-
-	HOST void BindPixels(const ColorRGBAuc* Pixels, const Vec2i& Size)
-	{
-		if (Pixels == NULL)
-			throw(Exception(Enums::Warning, "BindPixels() failed: pixels pointer is NULL"));
-
-		this->Size = Size;
-
-		this->UnbindPixels();
-
-		const int NoPixels = this->Size[0] * this->Size[1];
-
-		if (NoPixels <= 0)
-			throw(Exception(Enums::Warning, "BindPixels() failed: bad no. voxels!"));
-
-		this->HostPixels = new ColorRGBAuc[NoPixels];
-
-		memcpy(this->HostPixels, Pixels, NoPixels * sizeof(ColorRGBAuc));
-
-		this->Dirty				= true;
-		this->HostMemoryOwner	= true;
-	}
-
-	HOST void UnbindPixels()
-	{
-		if (!this->HostMemoryOwner)
-			return;
-
-		if (this->HostPixels != NULL)
-		{
-			delete[] this->HostPixels;
-			this->HostPixels = NULL;
-		}
-
-		this->Dirty = true;
-	}
-
-	Vec2i			Size;
-	ColorRGBAuc*	HostPixels;
-	bool			HostMemoryOwner;
-};
-
-#ifdef __CUDA_ARCH__
 
 class Bitmap : public ErBitmap
 {
@@ -110,17 +33,17 @@ public:
 		Cuda::Free(this->DevicePixels);
 	}
 
-	HOST Bitmap(const Bitmap& Other)
+	HOST_DEVICE Bitmap(const Bitmap& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Bitmap(const ErBitmap& Other)
+	HOST_DEVICE Bitmap(const ErBitmap& Other)
 	{
 		*this = Other;
 	}
 
-	HOST Bitmap& operator = (const Bitmap& Other)
+	HOST_DEVICE Bitmap& operator = (const Bitmap& Other)
 	{
 		this->Size			= Other.Size;
 		this->DevicePixels	= Other.DevicePixels;
@@ -128,7 +51,7 @@ public:
 		return *this;
 	}
 
-	HOST Bitmap& operator = (const ErBitmap& Other)
+	HOST_DEVICE Bitmap& operator = (const ErBitmap& Other)
 	{
 		ErBitmap::operator=(Other);
 
@@ -153,7 +76,5 @@ public:
 	ColorRGBAuc*	DevicePixels;
 	bool			DeviceMemoryOwner;
 };
-
-#endif
 
 }

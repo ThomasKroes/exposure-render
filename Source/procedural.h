@@ -25,7 +25,7 @@ struct EXPOSURE_RENDER_DLL Procedural
 	ColorXYZf					UniformColor;
 	ColorXYZf					CheckerColor1;
 	ColorXYZf					CheckerColor2;
-	ErColorTransferFunction1D		Gradient;
+	ColorTransferFunction1D		Gradient;
 
 	HOST Procedural()
 	{

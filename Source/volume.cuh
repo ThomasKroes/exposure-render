@@ -13,100 +13,17 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "vector.h"
-
-#ifdef __CUDA_ARCH__
-	#include "cuda.h"
-#endif
+#include "volume.h"
+#include "cuda.h"
 
 namespace ExposureRender
 {
-
-class EXPOSURE_RENDER_DLL ErVolume : public Bindable
-{
-public:
-	HOST ErVolume() :
-		Bindable(),
-		Resolution(0, 0, 0),
-		NormalizeSize(false),
-		Spacing(0.0f, 0.0f, 0.0f),
-		HostVoxels(NULL),
-		HostMemoryOwner(false)
-	{
-	}
-
-	HOST ~ErVolume()
-	{
-	}
-	
-	HOST ErVolume(const ErVolume& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ErVolume& ErVolume::operator = (const ErVolume& Other)
-	{
-		Bindable::operator=(Other);
-
-		this->Resolution				= Other.Resolution;
-		this->Spacing					= Other.Spacing;
-		this->NormalizeSize				= Other.NormalizeSize;
-		this->HostVoxels				= Other.HostVoxels;
-
-		return *this;
-	}
-
-	HOST void BindVoxels(const unsigned short* Voxels, const Vec3i& Resolution, const Vec3f& Spacing, const bool& NormalizeSize = false)
-	{
-		if (Voxels == NULL)
-			throw(Exception(Enums::Warning, "BindVoxels() failed: voxels pointer is NULL"));
-
-		this->Resolution		= Resolution;
-		this->Spacing			= Spacing;
-		this->NormalizeSize		= NormalizeSize;
-
-		this->UnbindVoxels();
-
-		const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
-
-		if (NoVoxels <= 0)
-			throw(Exception(Enums::Warning, "BindVoxels() failed: bad no. voxels!"));
-
-		this->HostVoxels = new unsigned short[NoVoxels];
-
-		memcpy(this->HostVoxels, Voxels, NoVoxels * sizeof(unsigned short));
-
-		this->Dirty = true;
-	}
-
-	HOST void UnbindVoxels()
-	{
-		if (!this->HostMemoryOwner)
-			return;
-
-		if (this->HostVoxels != NULL)
-		{
-			delete[] this->HostVoxels;
-			this->HostVoxels = NULL;
-		}
-
-		this->Dirty = true;
-	}
-
-	Vec3i				Resolution;
-	bool				NormalizeSize;
-	Vec3f				Spacing;
-	unsigned short*		HostVoxels;
-	bool				HostMemoryOwner;
-};
 
 class EXPOSURE_RENDER_DLL Volume : public ErVolume
 {
 public:
 	HOST Volume() :
 		ErVolume()
-
 	{
 	}
 
@@ -191,7 +108,6 @@ public:
 		this->GradientDeltaY = Vec3f(0.0f, MinVoxelSize, 0.0f);
 		this->GradientDeltaZ = Vec3f(0.0f, 0.0f, MinVoxelSize);
 
-#ifdef __CUDA_ARCH__
 		if (this->Dirty && this->HostVoxels)
 		{
 			const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
@@ -202,7 +118,6 @@ public:
 				Cuda::MemCopyHostToDevice(this->HostVoxels, this->DeviceVoxels, NoVoxels);
 			}
 		}
-#endif
 	}
 
 	HOST void UnbindDevice()
@@ -210,9 +125,7 @@ public:
 		if (!this->DeviceMemoryOwner)
 			return;
 
-#ifdef __CUDA_ARCH__
 		Cuda::Free(this->DeviceVoxels);
-#endif
 	}
 
 	HOST_DEVICE unsigned short Get(const Vec3i& XYZ) const

@@ -97,54 +97,18 @@ public:
 		BindIDs(ClippingObjectIDs, this->ClippingObjectIDs, HashMap);
 	}
 
-	ErScalarTransferFunction1D		Opacity1D;
-	ErColorTransferFunction1D		Diffuse1D;
-	ErColorTransferFunction1D		Specular1D;
-	ErScalarTransferFunction1D		Glossiness1D;
-	ErColorTransferFunction1D		Emission1D;
-	ErCamera						Camera;
-	ErRenderSettings				RenderSettings;
+	ScalarTransferFunction1D		Opacity1D;
+	ColorTransferFunction1D			Diffuse1D;
+	ColorTransferFunction1D			Specular1D;
+	ScalarTransferFunction1D		Glossiness1D;
+	ColorTransferFunction1D			Emission1D;
+	Camera							Camera;
+	RenderSettings					RenderSettings;
 	int								NoIterations;
 	int								VolumeID;
 	Indices							LightIDs;
 	Indices							ObjectIDs;
 	Indices							ClippingObjectIDs;
 };
-
-#include "framebuffer.h"
-
-#ifdef __CUDA_ARCH__
-
-class Tracer : public ErTracer
-{
-public:
-	HOST Tracer() :
-		ErTracer(),
-		fb()
-	{
-	}
-
-	HOST ~Tracer()
-	{
-	}
-	
-	HOST Tracer(const ErTracer& Other)
-	{
-		*this = Other;
-	}
-
-	HOST Tracer& Tracer::operator = (const ErTracer& Other)
-	{
-		ErTracer::operator=(Other);
-		
-		this->FrameBuffer.Resize(Other.Camera.FilmSize);
-
-		return *this;
-	}
-
-	FrameBuffer	fb;
-};
-
-#endif
 
 }

@@ -13,11 +13,15 @@
 
 #define __CUDA_ARCH__ 200
 
-#include "exposurerender.h"
+#include "tracer.cuh"
+#include "volume.cuh"
+#include "light.cuh"
+#include "object.cuh"
+#include "clippingobject.cuh"
+#include "texture.cuh"
+#include "bitmap.cuh"
 
-/*
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
-DEVICE ExposureRender::FrameBuffer*		gpFrameBuffer		= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
 DEVICE ExposureRender::Light*			gpLights			= NULL;
 DEVICE ExposureRender::Object*			gpObjects			= NULL;
@@ -26,7 +30,6 @@ DEVICE ExposureRender::Texture*			gpTextures			= NULL;
 DEVICE ExposureRender::Bitmap*			gpBitmaps			= NULL;
 
 ExposureRender::Cuda::List<ExposureRender::Volume>						gVolumes("gpVolumes");
-ExposureRender::Cuda::List<ExposureRender::FrameBuffer>					gFramebuffers("gpFramebuffers");
 ExposureRender::Cuda::List<ExposureRender::Light>						gLights("gpLights");
 ExposureRender::Cuda::List<ExposureRender::Object>						gObjects("gpObjects");
 ExposureRender::Cuda::List<ExposureRender::ClippingObject>				gClippingObjects("gpClippingObjects");
@@ -42,7 +45,7 @@ ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffe
 #include "estimate.cuh"
 #include "toneMap.cuh"
 #include "gaussianfilter.cuh"
-
+/*
 namespace ExposureRender
 {
 

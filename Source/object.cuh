@@ -13,52 +13,10 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "shape.h"
+#include "object.h"
 
 namespace ExposureRender
 {
-
-class EXPOSURE_RENDER_DLL ErObject : public Bindable
-{
-public:
-	HOST ErObject() :
-		Bindable()
-	{
-		this->DiffuseTextureID		= -1;
-		this->SpecularTextureID		= -1;
-		this->GlossinessTextureID	= -1;
-		this->Ior					= 0.0f;
-	}
-
-	HOST ~ErObject()
-	{
-	}
-
-	HOST ErObject(const ErObject& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ErObject& operator = (const ErObject& Other)
-	{
-		Bindable::operator=(Other);
-
-		this->Shape					= Other.Shape;
-		this->DiffuseTextureID		= Other.DiffuseTextureID;
-		this->SpecularTextureID		= Other.SpecularTextureID;
-		this->GlossinessTextureID	= Other.GlossinessTextureID;
-		this->Ior					= Other.Ior;
-
-		return *this;
-	}
-
-	Shape		Shape;
-	int			DiffuseTextureID;
-	int			SpecularTextureID;
-	int			GlossinessTextureID;
-	float		Ior;
-};
 
 class EXPOSURE_RENDER_DLL Object : public ErObject
 {

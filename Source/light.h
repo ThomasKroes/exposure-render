@@ -60,47 +60,4 @@ public:
 	Enums::EmissionUnit		Unit;
 };
 
-#ifdef __CUDA_ARCH__
-
-class Light : public ErLight
-{
-public:
-	HOST Light() :
-		ErLight()
-	{
-	}
-
-	HOST ~Light()
-	{
-	}
-
-	HOST Light(const Light& Other)
-	{
-		*this = Other;
-	}
-
-	HOST Light(const ErLight& Other)
-	{
-		*this = Other;
-	}
-	
-	HOST Light& operator = (const Light& Other)
-	{
-		ErLight::operator=(Other);
-		this->Shape.Update();
-
-		return *this;
-	}
-
-	HOST Light& operator = (const ErLight& Other)
-	{
-		ErLight::operator=(Other);
-		this->Shape.Update();
-
-		return *this;
-	}
-};
-
-#endif
-
 }

@@ -18,23 +18,23 @@
 namespace ExposureRender
 {
 
-class EXPOSURE_RENDER_DLL ErCamera
+class EXPOSURE_RENDER_DLL Camera
 {
 public:
-	HOST ErCamera()
+	HOST Camera()
 	{
 	}
 
-	HOST ErCamera(const ErCamera& Other)
+	HOST Camera(const Camera& Other)
 	{
 		*this = Other;
 	}
 
-	HOST ~ErCamera()
+	HOST ~Camera()
 	{
 	}
 	
-	HOST ErCamera& ErCamera::operator = (const ErCamera& Other)
+	HOST Camera& Camera::operator = (const Camera& Other)
 	{
 		this->FilmSize		= Other.FilmSize;
 		this->Pos			= Other.Pos;
@@ -47,48 +47,6 @@ public:
 		this->Exposure		= Other.Exposure;
 		this->Gamma			= Other.Gamma;
 		this->FOV			= Other.FOV;
-
-		return *this;
-	}
-
-	Resolution2i	FilmSize;
-	Vec3f			Pos;
-	Vec3f			Target;
-	Vec3f			Up;
-	float			FocalDistance;
-	float			ApertureSize;
-	float			ClipNear;
-	float			ClipFar;
-	float			Exposure;
-	float			Gamma;
-	float			FOV;
-};
-
-class Camera : public ErCamera
-{
-public:
-	HOST Camera()
-	{
-	}
-
-	HOST Camera(const Camera& Other)
-	{
-		*this = Other;
-	}
-
-	HOST Camera(const ErCamera& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ~Camera()
-	{
-	}
-	
-	HOST Camera& Camera::operator = (const Camera& Other)
-	{
-		ErCamera::operator=(Other);
-		
 		this->N				= Other.N;
 		this->U				= Other.U;
 		this->V				= Other.V;
@@ -100,15 +58,6 @@ public:
 		this->InvScreen[1]	= Other.InvScreen[1];
 		this->InvExposure	= Other.InvExposure;
 		this->InvGamma		= Other.InvGamma;
-		
-		return *this;
-	}
-
-	HOST Camera& Camera::operator = (const ErCamera& Other)
-	{
-		ErCamera::operator=(Other);
-		
-		this->Update();
 
 		return *this;
 	}
@@ -150,39 +99,25 @@ public:
 		this->InvScreen[1] = (this->Screen[1][1] - this->Screen[1][0]) / (float)this->FilmSize[1];
 	}
 
-	Vec3f	N;
-	Vec3f	U;
-	Vec3f	V;
-	float	Screen[2][2];
-	float	InvScreen[2];
-	float	InvExposure;
-	float	InvGamma;
+	Resolution2i	FilmSize;
+	Vec3f			Pos;
+	Vec3f			Target;
+	Vec3f			Up;
+	float			FocalDistance;
+	float			ApertureSize;
+	float			ClipNear;
+	float			ClipFar;
+	float			Exposure;
+	float			Gamma;
+	float			FOV;
+
+	Vec3f			N;
+	Vec3f			U;
+	Vec3f			V;
+	float			Screen[2][2];
+	float			InvScreen[2];
+	float			InvExposure;
+	float			InvGamma;
 };
 
 }
-
-
-
-/*
-// sample N-gon
-// FIXME: this could use concentric sampling
-float lensSides = 6.0f;
-float lensRotationRadians = 0.0f;
-float lensY = CS.LensUV[0] * lensSides;
-float side = (int)lensY;
-float offs = (float) lensY - side;
-float dist = (float) sqrtf(CS.LensUV[1]);
-float a0 = (float) (side * PI_F * 2.0f / lensSides + lensRotationRadians);
-float a1 = (float) ((side + 1.0f) * PI_F * 2.0f / lensSides + lensRotationRadians);
-float eyeX = (float) ((cos(a0) * (1.0f - offs) + cos(a1) * offs) * dist);
-float eyeY = (float) ((sin(a0) * (1.0f - offs) + sin(a1) * offs) * dist);
-eyeX *= gpTracer->ErCamera.ApertureSize;
-eyeY *= gpTracer->ErCamera.ApertureSize;
-
-const Vec2f LensUV(eyeX, eyeY);// = gpTracer->ErCamera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
-
-const Vec3f LI = ToVec3f(gpTracer->ErCamera.U) * LensUV[0] + ToVec3f(gpTracer->ErCamera.V) * LensUV[1];
-
-Rc.O += LI;
-Rc.D = Normalize(Rc.D * gpTracer->ErCamera.FocalDistance - LI);
-*/

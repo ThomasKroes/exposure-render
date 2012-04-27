@@ -19,7 +19,7 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL ErRenderSettings
+struct EXPOSURE_RENDER_DLL RenderSettings
 {
 	struct EXPOSURE_RENDER_DLL TraversalSettings
 	{
@@ -187,20 +187,20 @@ struct EXPOSURE_RENDER_DLL ErRenderSettings
 	ShadingSettings		Shading;
 	Filtering			Filtering;
 
-	HOST ErRenderSettings()
+	HOST RenderSettings()
 	{
 	}
 
-	HOST ~ErRenderSettings()
+	HOST ~RenderSettings()
 	{
 	}
 
-	HOST ErRenderSettings(const ErRenderSettings& Other)
+	HOST RenderSettings(const RenderSettings& Other)
 	{
 		*this = Other;
 	}
 
-	HOST ErRenderSettings& operator = (const ErRenderSettings& Other)
+	HOST RenderSettings& operator = (const RenderSettings& Other)
 	{
 		this->Traversal		= Other.Traversal;
 		this->Shading		= Other.Shading;

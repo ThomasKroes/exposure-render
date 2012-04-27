@@ -13,43 +13,10 @@
 
 #pragma once
 
-#include "bindable.h"
-#include "shape.h"
+#include "clippingobject.h"
 
 namespace ExposureRender
 {
-
-class EXPOSURE_RENDER_DLL ErClippingObject : public Bindable
-{
-public:
-	HOST ErClippingObject() :
-		Bindable()
-	{
-		this->Invert	= false;
-	}
-	
-	HOST ~ErClippingObject()
-	{
-	}
-	
-	HOST ErClippingObject(const ErClippingObject& Other)
-	{
-		*this = Other;
-	}
-
-	HOST ErClippingObject& operator = (const ErClippingObject& Other)
-	{
-		Bindable::operator=(Other);
-
-		this->Shape		= Other.Shape;
-		this->Invert	= Other.Invert;
-
-		return *this;
-	}
-
-	Shape	Shape;
-	bool	Invert;
-};
 
 class EXPOSURE_RENDER_DLL ClippingObject : public ErClippingObject
 {
@@ -85,6 +52,5 @@ public:
 		return *this;
 	}
 };
-
 
 }

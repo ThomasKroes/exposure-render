@@ -16,10 +16,6 @@
 #include "bindable.h"
 #include "color.h"
 
-#ifdef __CUDA_ARCH__
-	#include "cuda.h"
-#endif
-
 namespace ExposureRender
 {
 
@@ -64,7 +60,7 @@ public:
 		const int NoPixels = this->Size[0] * this->Size[1];
 
 		if (NoPixels <= 0)
-			throw(Exception(Enums::Warning, "BindPixels() failed: bad no. voxels!"));
+			throw(Exception(Enums::Warning, "BindPixels() failed: bad no. pixels!"));
 
 		this->HostPixels = new ColorRGBAuc[NoPixels];
 
@@ -92,68 +88,5 @@ public:
 	ColorRGBAuc*	HostPixels;
 	bool			HostMemoryOwner;
 };
-
-#ifdef __CUDA_ARCH__
-
-class Bitmap : public ErBitmap
-{
-public:
-	HOST Bitmap() :
-		ErBitmap(),
-		DevicePixels(NULL),
-		DeviceMemoryOwner(false)
-	{
-	}
-
-	HOST ~Bitmap()
-	{
-		Cuda::Free(this->DevicePixels);
-	}
-
-	HOST Bitmap(const Bitmap& Other)
-	{
-		*this = Other;
-	}
-
-	HOST Bitmap(const ErBitmap& Other)
-	{
-		*this = Other;
-	}
-
-	HOST Bitmap& operator = (const Bitmap& Other)
-	{
-		this->Size			= Other.Size;
-		this->DevicePixels	= Other.DevicePixels;
-		
-		return *this;
-	}
-
-	HOST Bitmap& operator = (const ErBitmap& Other)
-	{
-		ErBitmap::operator=(Other);
-
-		if (Other.Dirty)
-		{
-			Cuda::Free(this->DevicePixels);
-
-			const int NoPixels = this->Size[0] * this->Size[1];
-
-			if (NoPixels > 0)
-			{
-				Cuda::Allocate(this->DevicePixels, NoPixels);
-				Cuda::MemCopyHostToDevice(Other.HostPixels, this->DevicePixels, NoPixels);
-				
-				this->DeviceMemoryOwner = true;
-			}
-		}
-
-		return *this;
-	}
-
-	ColorRGBAuc*	DevicePixels;
-	bool			DeviceMemoryOwner;
-};
-
-#endif
 
 }

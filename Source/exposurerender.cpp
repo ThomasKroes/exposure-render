@@ -12,4 +12,4 @@
 */
 
 #define __CUDA_ARCH__ 200
-#include "framebuffer.h"
+#include "clippingobject.cuh"

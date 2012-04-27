@@ -132,23 +132,23 @@ public:
 	ScalarNode	ScalarNodes[3];
 };
 
-class EXPOSURE_RENDER_DLL ErScalarTransferFunction1D
+class EXPOSURE_RENDER_DLL ScalarTransferFunction1D
 {
 public:
-	HOST ErScalarTransferFunction1D()
+	HOST ScalarTransferFunction1D()
 	{
 	}
 
-	HOST ~ErScalarTransferFunction1D()
+	HOST ~ScalarTransferFunction1D()
 	{
 	}
 
-	HOST ErScalarTransferFunction1D(const ErScalarTransferFunction1D& Other)
+	HOST ScalarTransferFunction1D(const ScalarTransferFunction1D& Other)
 	{
 		*this = Other;
 	}
 
-	HOST ErScalarTransferFunction1D& operator = (const ErScalarTransferFunction1D& Other)
+	HOST ScalarTransferFunction1D& operator = (const ScalarTransferFunction1D& Other)
 	{	
 		this->PLF = Other.PLF;
 		
@@ -163,23 +163,23 @@ public:
 	PiecewiseLinearFunction PLF;
 };
 
-class EXPOSURE_RENDER_DLL ErColorTransferFunction1D
+class EXPOSURE_RENDER_DLL ColorTransferFunction1D
 {
 public:
-	HOST ErColorTransferFunction1D()
+	HOST ColorTransferFunction1D()
 	{
 	}
 
-	HOST ~ErColorTransferFunction1D()
+	HOST ~ColorTransferFunction1D()
 	{
 	}
 
-	HOST ErColorTransferFunction1D(const ErColorTransferFunction1D& Other)
+	HOST ColorTransferFunction1D(const ColorTransferFunction1D& Other)
 	{
 		*this = Other;
 	}
 
-	HOST ErColorTransferFunction1D& operator = (const ErColorTransferFunction1D& Other)
+	HOST ColorTransferFunction1D& operator = (const ColorTransferFunction1D& Other)
 	{	
 		for (int i = 0; i < 3; i++)
 			this->PLF[i] = Other.PLF[i];

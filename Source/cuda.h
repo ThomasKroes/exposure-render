@@ -243,7 +243,6 @@ public:
 	T*									DevicePtr;
 };
 
-/*
 template<typename T, int MaxSize = 256>
 class SynchronizeSingle
 {
@@ -330,7 +329,6 @@ protected:
 	char							DeviceSymbol[MAX_CHAR_SIZE];
 	T*								DevicePtr;
 };
-*/
 
 #define LAUNCH_DIMENSIONS(width, height, depth, block_width, block_height, block_depth)						\
 																											\
