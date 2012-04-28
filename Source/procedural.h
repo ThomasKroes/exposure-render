@@ -19,8 +19,9 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL Procedural
+class EXPOSURE_RENDER_DLL Procedural
 {
+public:
 	Enums::ProceduralType		Type;
 	ColorXYZf					UniformColor;
 	ColorXYZf					CheckerColor1;

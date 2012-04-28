@@ -19,14 +19,16 @@ namespace ExposureRender
 #define MAX_GAUSSIAN_FILTER_KERNEL_SIZE		256
 #define MAX_BILATERAL_FILTER_KERNEL_SIZE	256
 
-struct GaussianFilter
+class GaussianFilter
 {
+public:
 	int		KernelRadius;
 	float	KernelD[MAX_BILATERAL_FILTER_KERNEL_SIZE];
 };
 
-struct BilateralFilter
+class BilateralFilter
 {
+public:
 	int		KernelRadius;
 	float	KernelD[MAX_BILATERAL_FILTER_KERNEL_SIZE];
 	float	GaussSimilarity[256];

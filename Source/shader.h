@@ -21,8 +21,9 @@
 namespace ExposureRender
 {
 
-struct Lambertian
+class Lambertian
 {
+public:
 	DEVICE Lambertian(void)
 	{
 	}
@@ -70,8 +71,9 @@ DEVICE inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, co
 	return (Rparl*Rparl + Rperp*Rperp) / 2.f;
 }
 
-struct Fresnel
+class Fresnel
 {
+public:
 	DEVICE Fresnel(void)
 	{
 	}
@@ -120,8 +122,9 @@ struct Fresnel
 	float EtaI, EtaT;
 };
 
-struct Blinn
+class Blinn
 {
+public:
 	DEVICE Blinn(void)
 	{
 	}
@@ -187,8 +190,9 @@ struct Blinn
 	float	Exponent;
 };
 
-struct Microfacet
+class Microfacet
 {
+public:
 	DEVICE Microfacet(void)
 	{
 	}
@@ -264,8 +268,9 @@ struct Microfacet
 
 };
 
-struct IsotropicPhase
+class IsotropicPhase
 {
+public:
 	DEVICE IsotropicPhase(void)
 	{
 	}
@@ -303,8 +308,9 @@ struct IsotropicPhase
 	ColorXYZf	Kd;
 };
 
-struct BRDF
+class BRDF
 {
+public:
 	DEVICE BRDF(void)
 	{
 	}
@@ -401,8 +407,9 @@ struct BRDF
 	Microfacet		Microfacet;
 };
 
-struct VolumeShader
+class VolumeShader
 {
+public:
 	enum EType
 	{
 		Brdf,

@@ -49,12 +49,9 @@ DEVICE void Mutate3(Vec3f& V, CRNG& RNG, const float& S1 = 0.0009765625f, const 
 	Mutate1(V[2], RNG, S1, S2);
 }
 
-struct SurfaceSample
+class SurfaceSample
 {
-	Vec3f		P;
-	Vec3f		N;
-	Vec2f		UV;
-
+public:
 	DEVICE SurfaceSample(void)
 	{
 		this->P		= Vec3f();
@@ -70,12 +67,15 @@ struct SurfaceSample
 
 		return *this;
 	}
+
+	Vec3f	P;
+	Vec3f	N;
+	Vec2f	UV;
 };
 
-struct LightSample
+class LightSample
 {
-	Vec3f 	SurfaceUVW;
-
+public:
 	DEVICE LightSample(void)
 	{
 		this->SurfaceUVW = Vec3f();
@@ -102,13 +102,13 @@ struct LightSample
 	{
 		Mutate3(this->SurfaceUVW, RNG);
 	}
+
+	Vec3f 	SurfaceUVW;
 };
 
-struct BrdfSample
+class BrdfSample
 {
-	float	Component;
-	Vec2f	Dir;
-
+public:
 	DEVICE BrdfSample(void)
 	{
 		this->Component	= 0.0f;
@@ -145,14 +145,14 @@ struct BrdfSample
 		Mutate1(this->Component, RNG);
 		Mutate2(this->Dir, RNG);
 	}
+
+	float	Component;
+	Vec2f	Dir;
 };
 
-struct LightingSample
+class LightingSample
 {
-	BrdfSample		BrdfSample;
-	LightSample 	LightSample;
-	float			LightNum;
-
+public:
 	DEVICE LightingSample(void)
 	{
 		this->LightNum = 0.0f;
@@ -185,13 +185,15 @@ struct LightingSample
 		this->LightSample.Mutate(RNG);
 		Mutate1(this->LightNum, RNG);
 	}
+
+	BrdfSample		BrdfSample;
+	LightSample 	LightSample;
+	float			LightNum;
 };
 
-struct CameraSample
+class CameraSample
 {
-	Vec2f	FilmUV;
-	Vec2f	LensUV;
-
+public:
 	DEVICE CameraSample(void)
 	{
 		this->FilmUV	= Vec2f();
@@ -222,14 +224,14 @@ struct CameraSample
 		Mutate2(this->FilmUV, RNG, 0.001953125f, 0.0625f);
 		Mutate2(this->LensUV, RNG);
 	}
+
+	Vec2f	FilmUV;
+	Vec2f	LensUV;
 };
 
-struct MetroSample
+class MetroSample
 {
-	LightingSample	LightingSample;
-	CameraSample	CameraSample;
-	ColorXYZAf		OldL;
-
+public:
 	DEVICE MetroSample(void)
 	{
 	}
@@ -263,6 +265,10 @@ struct MetroSample
 
 		return Result;
 	}
+
+	LightingSample	LightingSample;
+	CameraSample	CameraSample;
+	ColorXYZAf		OldL;
 };
 
 }

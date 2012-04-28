@@ -19,8 +19,9 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL Matrix44
+class EXPOSURE_RENDER_DLL Matrix44
 {
+public:
 	float NN[4][4];
 
 	HOST Matrix44()

@@ -19,10 +19,12 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL RenderSettings
+class EXPOSURE_RENDER_DLL RenderSettings
 {
-	struct EXPOSURE_RENDER_DLL TraversalSettings
+public:
+	class EXPOSURE_RENDER_DLL TraversalSettings
 	{
+	public:
 		float				StepSize;
 		float				StepSizeShadow;
 		bool				Shadows;
@@ -56,8 +58,9 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 		}
 	};
 
-	struct EXPOSURE_RENDER_DLL ShadingSettings
+	class EXPOSURE_RENDER_DLL ShadingSettings
 	{
+	public:
 		int					Type;
 		float				DensityScale;
 		bool				OpacityModulated;
@@ -97,10 +100,12 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 		}
 	};
 
-	struct EXPOSURE_RENDER_DLL Filtering
+	class EXPOSURE_RENDER_DLL Filtering
 	{
-		struct EXPOSURE_RENDER_DLL GaussianFilterParameters
+	public:
+		class EXPOSURE_RENDER_DLL GaussianFilterParameters
 		{
+		public:
 			int		KernelRadius;
 			float	Sigma;
 
@@ -128,8 +133,9 @@ struct EXPOSURE_RENDER_DLL RenderSettings
 			}
 		};
 
-		struct EXPOSURE_RENDER_DLL BilateralFilterParameters
+		class EXPOSURE_RENDER_DLL BilateralFilterParameters
 		{
+		public:
 			float	SigmaD;
 			float	SigmaR;
 

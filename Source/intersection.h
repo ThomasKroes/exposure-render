@@ -262,6 +262,14 @@ public:
 class Intersection
 {
 public:
+	bool		Valid;
+	bool		Front;
+	float		NearT;
+	float		FarT;
+	Vec3f		P;
+	Vec3f		N;
+	Vec2f		UV;
+	
 	HOST_DEVICE Intersection()
 	{
 		this->SetInvalid();
@@ -299,14 +307,6 @@ public:
 
 		return *this;
 	}
-
-	bool		Valid;
-	bool		Front;
-	float		NearT;
-	float		FarT;
-	Vec3f		P;
-	Vec3f		N;
-	Vec2f		UV;
 };
 
 class EXPOSURE_RENDER_DLL BoundingBox

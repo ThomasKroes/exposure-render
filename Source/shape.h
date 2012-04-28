@@ -49,8 +49,9 @@ EXPOSURE_RENDER_DLL inline float CylinderArea(const float& Radius, const float& 
 	return (2.0f * PI_F * (Radius * Radius)) + (2.0f * PI_F * Radius * Height);
 }
 
-struct EXPOSURE_RENDER_DLL Shape
+class EXPOSURE_RENDER_DLL Shape
 {
+public:
 	Matrix44			TM;
 	Matrix44			InvTM;
 	bool				OneSided;

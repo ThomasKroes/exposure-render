@@ -18,8 +18,9 @@
 namespace ExposureRender
 {
 
-struct CRNG
+class CRNG
 {
+public:
 	DEVICE CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
 	{
 		this->pSeed0 = pSeed0;

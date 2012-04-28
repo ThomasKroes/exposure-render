@@ -18,8 +18,9 @@
 namespace ExposureRender
 {
 
-struct Ray
+class Ray
 {	
+public:
 	DEVICE Ray(Vec3f O = Vec3f(), Vec3f D = Vec3f(0.0f, 0.0f, 1.0f), float MinT = 0.0f, float MaxT = 1000000.0f)
 	{
 		this->O		= O;

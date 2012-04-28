@@ -19,11 +19,9 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL KernelTiming
+class EXPOSURE_RENDER_DLL KernelTiming
 {
-	char	Event[MAX_CHAR_SIZE];
-	float	Duration;
-
+public:
 	HOST KernelTiming()
 	{
 		sprintf_s(this->Event, MAX_CHAR_SIZE, "Undefined");
@@ -52,6 +50,9 @@ struct EXPOSURE_RENDER_DLL KernelTiming
 
 		return *this;
 	}
+
+	char	Event[MAX_CHAR_SIZE];
+	float	Duration;
 };
 
 }

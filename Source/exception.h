@@ -19,11 +19,9 @@
 namespace ExposureRender
 {
 
-struct EXPOSURE_RENDER_DLL Exception
+class EXPOSURE_RENDER_DLL Exception
 {
-	Enums::ExceptionLevel	Level;
-	char					Message[MAX_CHAR_SIZE];
-
+public:
 	HOST Exception(const Enums::ExceptionLevel& Level, const char* pMessage = "")
 	{
 		this->Level = Level;
@@ -46,6 +44,9 @@ struct EXPOSURE_RENDER_DLL Exception
 
 		return *this;
 	}
+
+	Enums::ExceptionLevel	Level;
+	char					Message[MAX_CHAR_SIZE];
 };
 
 }
