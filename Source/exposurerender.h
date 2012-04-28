@@ -13,19 +13,17 @@
 
 #pragma once
 
-#include "tracer.h"
-#include "volume.h"
-#include "light.h"
-#include "object.h"
-#include "clippingobject.h"
-#include "texture.h"
-#include "bitmap.h"
+#include "ertracer.h"
+#include "ervolume.h"
+#include "erlight.h"
+#include "erobject.h"
+#include "erclippingobject.h"
+#include "ertexture.h"
+#include "erbitmap.h"
 
 namespace ExposureRender
 {
 
-EXPOSURE_RENDER_DLL void InitializeTracer(const Tracer& Tracer);
-EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID);
 EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer);
 EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID);
 EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume);

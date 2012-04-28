@@ -45,7 +45,7 @@ public:
 	{
 	}
 
-	HOST Buffer2D(const Enums::MemoryType& MemoryType, const Vec2i& Resolution, const Vec2f& Spacing, const T* Data)
+	HOST Buffer2D(const Enums::MemoryType& MemoryType, const Vec2i& Resolution, const Vec2f& Spacing, T* Data)
 	{
 		Buffer2D Other;
 
@@ -237,7 +237,7 @@ public:
 	{
 	}
 
-	HOST Buffer3D(const Enums::MemoryType& MemoryType, const Vec3i& Resolution, const Vec3f& Spacing, const T* Data)
+	HOST Buffer3D(const Enums::MemoryType& MemoryType, const Vec3i& Resolution, const Vec3f& Spacing, T* Data)
 	{
 		Buffer3D Other;
 

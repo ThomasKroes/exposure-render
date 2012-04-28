@@ -49,18 +49,6 @@ ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffe
 namespace ExposureRender
 {
 
-EXPOSURE_RENDER_DLL void InitializeTracer(const Tracer& Tracer)
-{
-	gTracers.Bind(Tracer);
-	gFrameBuffers.Bind(FrameBuffer());
-}
-
-EXPOSURE_RENDER_DLL void DeinitializeTracer(int TracerID)
-{
-	gTracers.Unbind(TracerID);
-	gFrameBuffers.Unbind(TracerID);
-}
-
 EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer)
 {
 	gTracers.Bind(Tracer);
