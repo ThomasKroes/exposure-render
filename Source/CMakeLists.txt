@@ -84,7 +84,9 @@ SET(General
 	texture.h
 	bitmap.h
 	hostbuffer.h
+	hostbuffer.cpp
 	devicebuffer.h
+	devicebuffer.cpp
 	framebuffer.h
 )
 
@@ -118,7 +120,7 @@ SET(Bindable
 )
 
 # API group
-SOURCE_GROUP("Bindable" FILES ${ErBindable})
+SOURCE_GROUP("Bindable" FILES ${Bindable})
 
 # Filters
 SET(Cuda
@@ -136,4 +138,4 @@ SET(Cuda
 SOURCE_GROUP("Cuda" FILES ${Cuda})
 
 # Make the library
-CUDA_ADD_LIBRARY(ErCore ${General} ${Shapes} ${ErBindable} ${Cuda} SHARED)
+CUDA_ADD_LIBRARY(ErCore ${General} ${Shapes} ${Bindable} ${Cuda} SHARED)

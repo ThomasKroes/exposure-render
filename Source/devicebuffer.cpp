@@ -13,53 +13,9 @@
 
 #pragma once
 
-#include "erbitmap.h"
 #include "devicebuffer.h"
 
 namespace ExposureRender
 {
-
-class Bitmap : public ErBitmap
-{
-public:
-	HOST Bitmap() :
-		ErBitmap(),
-		DevicePixels()
-	{
-	}
-
-	HOST ~Bitmap()
-	{
-	}
-
-	HOST_DEVICE Bitmap(const Bitmap& Other)
-	{
-		*this = Other;
-	}
-
-	HOST_DEVICE Bitmap(const ErBitmap& Other)
-	{
-		*this = Other;
-	}
-
-	HOST_DEVICE Bitmap& operator = (const Bitmap& Other)
-	{
-		this->DevicePixels		= Other.DevicePixels;
-		this->Size				= Other.Size;
-		
-		return *this;
-	}
-
-	HOST_DEVICE Bitmap& operator = (const ErBitmap& Other)
-	{
-		ErBitmap::operator=(Other);
-
-//		this->DevicePixels = Other.HostPixels;
-
-		return *this;
-	}
-
-	DeviceBuffer2D<ColorRGBAuc>	DevicePixels;
-};
 
 }

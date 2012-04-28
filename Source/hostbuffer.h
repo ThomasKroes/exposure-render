@@ -18,27 +18,27 @@
 namespace ExposureRender
 {
 
-template<class T, bool pitched = false>
-class HostBuffer2D
+template<class T>
+class Buffer2D
 {
 public:
-	HostBuffer2D(void) :
+	HOST Buffer2D(const Enums::MemoryType& MemoryType) :
+		MemoryType(MemoryType)
 		Resolution(),
-		pData(NULL)
+		Data(NULL)
 	{
 	}
 
-	virtual ~HostBuffer2D(void)
+	HOST virtual ~Buffer2D(void)
 	{
 		this->Free();
 	}
 
-	void Resize(Resolution2i Resolution)
+	HOST void Resize(const Resolution2i& Resolution)
 	{
 		if (this->Resolution == Resolution)
 			return;
-
-		if (this->Resolution != Resolution)
+		else
 			this->Free();
 
 		this->Resolution = Resolution;
@@ -46,28 +46,44 @@ public:
 		if (this->GetNoElements() <= 0)
 			return;
 
-		this->pData = (T*)malloc(this->GetSize());
+		if (this->MemoryType == Host)
+			this->Data = (T*)malloc(this->GetNoBytes());
+
+		if (this->MemoryType == Device)
+			Cuda::Allocate(this->Data, this->GetNoElements());
 
 		this->Reset();
 	}
 
-	void Reset(void)
+	HOST void Reset(void)
 	{
 		if (this->GetSize() <= 0)
-			return;
+			throw(Exception(Enums::Warning, "Buffer2D::Reset() failed: no elements in buffer!"));
+		
+		if (this->MemoryType == Host)
+			memset(this->Data, 0, this->GetNoBytes());
 
-		memset(this->pData, 0, this->GetSize());
+		if (this->MemoryType == Device)
+			Cuda::MemSet(this->Data, 0, this->GetNoElements());
 	}
 
-	void Free(void)
+	HOST void Free(void)
 	{
-		if (this->pData)
+		if (this->Data)
 		{
-			free(this->pData);
-			this->pData = NULL;
+			if (this->MemoryType == Host)
+			{
+				free(this->Data);
+				this->Data = NULL;
+			}
+
+			if (this->MemoryType == Device)
+				Cuda::Free(this->Data);
 		}
+		else
+			throw(Exception(Enums::Warning, "Buffer2D::Free() failed: data pointer is NULL!"));
 		
-		this->Resolution = Resolution2i();
+		this->Resolution = Resolution2i(0, 0);
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
@@ -75,56 +91,52 @@ public:
 		return this->Resolution.GetNoElements();
 	}
 
-	HOST_DEVICE int GetSize(void) const
+	HOST_DEVICE int GetNoBytes(void) const
 	{
 		return this->GetNoElements() * sizeof(T);
 	}
 
-	HOST_DEVICE T Get(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T& operator()(const int& X = 0, const int& Y = 0) const
 	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return T();
-
-		return this->pData[Y * this->GetWidth() + X];
+		return this->Data[Y * this->Resolution[0] + X];
 	}
 
-	HOST_DEVICE T& GetRef(const int& X = 0, const int& Y = 0)
+	HOST_DEVICE T& operator()(const Vec2i& XY) const
 	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return T();
-
-		return this->pData[Y * this->GetWidth() + X];
+		return this->Data[XY[1] * this->Resolution[0] + XY[0]];
 	}
 
-	HOST_DEVICE T* GetPtr(const int& X = 0, const int& Y = 0)
+	HOST Buffer2D& operator = (const Buffer2D& Other)
 	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return NULL;
+		this->Resolution = Other.Resolution;
 
-		return &this->pData[Y * this->GetWidth() + X];
-	}
+		this->Resize(Other.Resolution);
 
-	HOST_DEVICE void Set(T& Value, const int& X = 0, const int& Y = 0)
-	{
-		if (X > this->GetWidth() || Y > this->GetHeight())
-			return;
+		if (this->MemoryType == Host)
+		{
+			if (Other.MemoryType == Host)
+				memcpy(this->Data, Other.Data);
+			
+			if (Other.MemoryType == Device)
+				Cuda::MemCopyDeviceToHost(Other.Data, this->Data, this->GetNoElements());
+		}
 
-		this->pData[Y * this->GetWidth() + X] = Value;
-	}
+		if (this->MemoryType == Device)
+		{
+			if (Other.MemoryType == Host)
+				Cuda::MemCopyHostToDevice(Other.Data, this->Data, this->GetNoElements());
 
-	HOST_DEVICE int GetWidth(void) const
-	{
-		return this->Resolution[0];
-	}
+			if (Other.MemoryType == Device)
+				Cuda::MemCopyDeviceToDevice(Other.Data, this->Data, this->GetNoElements());
+		}
 
-	HOST_DEVICE int GetHeight(void) const
-	{
-		return this->Resolution[1];
+		return *this;
 	}
 
 protected:
-	Resolution2i	Resolution;
-	T*				pData;
+	Enums::MemoryType	MemoryType;
+	Resolution2i		Resolution;
+	T*					Data;
 };
 
 }
