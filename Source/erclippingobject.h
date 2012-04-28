@@ -23,9 +23,10 @@ class EXPOSURE_RENDER_DLL ErClippingObject : public ErBindable
 {
 public:
 	HOST ErClippingObject() :
-		ErBindable()
+		ErBindable(),
+		Shape(),
+		Invert(false)
 	{
-		this->Invert	= false;
 	}
 	
 	HOST ~ErClippingObject()

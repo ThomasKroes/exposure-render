@@ -13,8 +13,7 @@
 
 #pragma once
 
-#include "hostbuffer.h"
-#include "devicebuffer.h"
+#include "buffer.h"
 
 namespace ExposureRender
 {
@@ -24,21 +23,21 @@ class FrameBuffer
 public:
 	FrameBuffer(void) :
 		Resolution(),
-		FrameEstimate(),
-		FrameEstimateTemp(),
-		RunningEstimateXyza(),
-		DisplayEstimate(),
-		DisplayEstimateTemp(),
-		DisplayEstimateFiltered(),
-		RandomSeeds1(),
-		RandomSeeds2(),
-		RandomSeedsCopy1(),
-		RandomSeedsCopy2(),
-		HostDisplayEstimate()
+		FrameEstimate(Enums::Device),
+		FrameEstimateTemp(Enums::Device),
+		RunningEstimateXyza(Enums::Device),
+		DisplayEstimate(Enums::Device),
+		DisplayEstimateTemp(Enums::Device),
+		DisplayEstimateFiltered(Enums::Device),
+		RandomSeeds1(Enums::Device),
+		RandomSeeds2(Enums::Device),
+		RandomSeedsCopy1(Enums::Device),
+		RandomSeedsCopy2(Enums::Device),
+		HostDisplayEstimate(Enums::Host)
 	{
 	}
 
-	void Resize(Resolution2i Resolution)
+	void Resize(const Vec2i& Resolution)
 	{
 		if (this->Resolution == Resolution)
 			return;
@@ -57,16 +56,16 @@ public:
 		this->RandomSeedsCopy2.Resize(this->Resolution);
 		this->HostDisplayEstimate.Resize(this->Resolution);
 
-		Cuda::MemCopyDeviceToDevice(RandomSeeds1.GetPtr(), RandomSeedsCopy1.GetPtr(), RandomSeedsCopy1.GetNoElements());
-		Cuda::MemCopyDeviceToDevice(RandomSeeds2.GetPtr(), RandomSeedsCopy2.GetPtr(), RandomSeedsCopy2.GetNoElements());
+		RandomSeedsCopy1 = RandomSeeds1;
+		RandomSeedsCopy2 = RandomSeeds2;
 
 		this->Reset();
 	}
 
 	void Reset(void)
 	{
-		Cuda::MemCopyDeviceToDevice(RandomSeedsCopy1.GetPtr(), RandomSeeds1.GetPtr(), RandomSeedsCopy1.GetNoElements());
-		Cuda::MemCopyDeviceToDevice(RandomSeedsCopy2.GetPtr(), RandomSeeds2.GetPtr(), RandomSeedsCopy2.GetNoElements());
+		RandomSeeds1 = RandomSeedsCopy1;
+		RandomSeeds2 = RandomSeedsCopy2;
 	}
 
 	void Free(void)
@@ -83,21 +82,21 @@ public:
 		this->RandomSeedsCopy2.Free();
 		this->HostDisplayEstimate.Free();
 
-		this->Resolution = Resolution2i();
+		this->Resolution = Vec2i(0);
 	}
 
-	Resolution2i					Resolution;
-	DeviceBuffer2D<ColorXYZAf>		FrameEstimate;
-	DeviceBuffer2D<ColorXYZAf>		FrameEstimateTemp;
-	DeviceBuffer2D<ColorXYZAf>		RunningEstimateXyza;
-	DeviceBuffer2D<ColorRGBAuc>		DisplayEstimate;
-	DeviceBuffer2D<ColorRGBAuc>		DisplayEstimateTemp;
-	DeviceBuffer2D<ColorRGBAuc>		DisplayEstimateFiltered;
-	DeviceRandomBuffer2D			RandomSeeds1;
-	DeviceRandomBuffer2D			RandomSeeds2;
-	DeviceRandomBuffer2D			RandomSeedsCopy1;
-	DeviceRandomBuffer2D			RandomSeedsCopy2;
-	HostBuffer2D<ColorRGBAuc>		HostDisplayEstimate;
+	Vec2i					Resolution;
+	Buffer2D<ColorXYZAf>	FrameEstimate;
+	Buffer2D<ColorXYZAf>	FrameEstimateTemp;
+	Buffer2D<ColorXYZAf>	RunningEstimateXyza;
+	Buffer2D<ColorRGBAuc>	DisplayEstimate;
+	Buffer2D<ColorRGBAuc>	DisplayEstimateTemp;
+	Buffer2D<ColorRGBAuc>	DisplayEstimateFiltered;
+	RandomSeedBuffer2D		RandomSeeds1;
+	RandomSeedBuffer2D		RandomSeeds2;
+	RandomSeedBuffer2D		RandomSeedsCopy1;
+	RandomSeedBuffer2D		RandomSeedsCopy2;
+	Buffer2D<ColorRGBAuc>	HostDisplayEstimate;
 };
 
 }

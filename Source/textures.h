@@ -18,14 +18,6 @@
 namespace ExposureRender
 {
 
-DEVICE_NI ColorXYZf EvaluateBitmap(const Bitmap& Bitmap, const int& U, const int& V)
-{
-	if (Bitmap.DevicePixels == NULL)
-		return ColorXYZf(0.0f);
-
-	return ColorXYZf::FromRGBAuc(Bitmap.DevicePixels[V * Bitmap.Size[0] + U]);
-}
-
 DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f& UVW)
 {
 	switch (Procedural.Type)

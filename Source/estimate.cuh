@@ -23,7 +23,7 @@ KERNEL void KrnlComputeEstimate()
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
-	gpTracer->FrameBuffer.RunningEstimateXyza(IDx, IDy) = CumulativeMovingAverage(gpTracer->FrameBuffer.RunningEstimateXyza.Get(IDx, IDy), gpTracer->FrameBuffer.FrameEstimate.Get(IDx, IDy), gpTracer->NoIterations);
+	gpTracer->FrameBuffer.RunningEstimateXyza(IDx, IDy) = CumulativeMovingAverage(gpTracer->FrameBuffer.RunningEstimateXyza(IDx, IDy), gpTracer->FrameBuffer.FrameEstimate(IDx, IDy), gpTracer->NoIterations);
 }
 
 void ComputeEstimate(int Width, int Height)

@@ -29,7 +29,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	
 	Intersection Int;
 
-	IntersectBox(R, gpVolumes[0].MinAABB, gpVolumes[0].MaxAABB, Int);
+	IntersectBox(R, gpVolumes[0].BoundingBox.MinP, gpVolumes[0].BoundingBox.MaxP, Int);
 
 	if (!Int.Valid)
 		return;
@@ -72,7 +72,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 	Intersection Int;
 		
-	IntersectBox(R, gpVolumes[0].MinAABB, gpVolumes[0].MaxAABB, Int);
+	IntersectBox(R, gpVolumes[0].BoundingBox.MinP, gpVolumes[0].BoundingBox.MaxP, Int);
 	
 	if (!Int.Valid)
 		return false;

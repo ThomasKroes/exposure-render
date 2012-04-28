@@ -15,6 +15,7 @@
 
 #include "erbindable.h"
 #include "vector.h"
+#include "buffer.h"
 
 namespace ExposureRender
 {
@@ -24,11 +25,8 @@ class EXPOSURE_RENDER_DLL ErVolume : public ErBindable
 public:
 	HOST ErVolume() :
 		ErBindable(),
-		Resolution(0, 0, 0),
-		NormalizeSize(false),
-		Spacing(0.0f, 0.0f, 0.0f),
-		HostVoxels(NULL),
-		HostMemoryOwner(false)
+		HostVoxels(Enums::Host),
+		NormalizeSize(false)
 	{
 	}
 
@@ -45,56 +43,21 @@ public:
 	{
 		ErBindable::operator=(Other);
 
-		this->Resolution				= Other.Resolution;
-		this->Spacing					= Other.Spacing;
-		this->NormalizeSize				= Other.NormalizeSize;
-		this->HostVoxels				= Other.HostVoxels;
+		this->NormalizeSize		= Other.NormalizeSize;
+		this->HostVoxels		= Other.HostVoxels;
 
 		return *this;
 	}
 
-	HOST void BindVoxels(const unsigned short* Voxels, const Vec3i& Resolution, const Vec3f& Spacing, const bool& NormalizeSize = false)
+	HOST void BindVoxels(const Buffer3D<unsigned short>& Voxels, const bool& NormalizeSize = false)
 	{
-		if (Voxels == NULL)
-			throw(Exception(Enums::Warning, "BindVoxels() failed: voxels pointer is NULL"));
-
-		this->Resolution		= Resolution;
-		this->Spacing			= Spacing;
-		this->NormalizeSize		= NormalizeSize;
-
-		this->UnbindVoxels();
-
-		const int NoVoxels = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
-
-		if (NoVoxels <= 0)
-			throw(Exception(Enums::Warning, "BindVoxels() failed: bad no. voxels!"));
-
-		this->HostVoxels = new unsigned short[NoVoxels];
-
-		memcpy(this->HostVoxels, Voxels, NoVoxels * sizeof(unsigned short));
-
-		this->Dirty = true;
+		this->HostVoxels	= Voxels;
+		this->NormalizeSize	= NormalizeSize;
+		this->Dirty			= true;
 	}
 
-	HOST void UnbindVoxels()
-	{
-		if (!this->HostMemoryOwner)
-			return;
-
-		if (this->HostVoxels != NULL)
-		{
-			delete[] this->HostVoxels;
-			this->HostVoxels = NULL;
-		}
-
-		this->Dirty = true;
-	}
-
-	Vec3i				Resolution;
-	bool				NormalizeSize;
-	Vec3f				Spacing;
-	unsigned short*		HostVoxels;
-	bool				HostMemoryOwner;
+	Buffer3D<unsigned short>	HostVoxels;
+	bool						NormalizeSize;
 };
 
 }

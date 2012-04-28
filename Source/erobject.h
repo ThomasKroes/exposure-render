@@ -23,12 +23,12 @@ class EXPOSURE_RENDER_DLL ErObject : public ErBindable
 {
 public:
 	HOST ErObject() :
-		ErBindable()
+		ErBindable(),
+		DiffuseTextureID(-1),
+		SpecularTextureID(-1),
+		GlossinessTextureID(-1),
+		Ior(5.0f)
 	{
-		this->DiffuseTextureID		= -1;
-		this->SpecularTextureID		= -1;
-		this->GlossinessTextureID	= -1;
-		this->Ior					= 0.0f;
 	}
 
 	HOST ~ErObject()

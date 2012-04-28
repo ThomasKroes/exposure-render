@@ -22,7 +22,7 @@ using namespace std;
 namespace ExposureRender
 {
 
-DEVICE Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
+DEVICE inline Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
 {
 	Vec3f Vt;
 
@@ -35,7 +35,7 @@ DEVICE Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
 	return Vt;
 }
 
-DEVICE Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
+DEVICE inline Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
 {
 	const float x = P[0], y = P[1], z = P[2];
     
@@ -46,7 +46,7 @@ DEVICE Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
 	return Vec3f(Px, Py, Pz);
 }
 
-DEVICE Ray TransformRay(const Matrix44& TM, const Ray& R)
+DEVICE inline Ray TransformRay(const Matrix44& TM, const Ray& R)
 {
 	Ray Rt;
 
@@ -62,39 +62,39 @@ DEVICE Ray TransformRay(const Matrix44& TM, const Ray& R)
 	return Rt;
 }
 
-DEVICE float SphericalTheta(const Vec3f& W)
+DEVICE inline float SphericalTheta(const Vec3f& W)
 {
 	return acosf(Clamp(W[1], -1.0f, 1.0f));
 }
 
-DEVICE float SphericalPhi(const Vec3f& W)
+DEVICE inline float SphericalPhi(const Vec3f& W)
 {
 	float p = atan2f(W[2], W[0]);
 	return (p < 0.0f) ? p + 2.0f * PI_F : p;
 }
 
-DEVICE_NI Vec2f SphericalToUV(const Vec3f& W)
+DEVICE_NI inline Vec2f SphericalToUV(const Vec3f& W)
 {
 	const Vec3f V = Normalize(W);
 	return Vec2f(INV_TWO_PI_F * SphericalPhi(V), 1.0f - (INV_PI_F * SphericalTheta(V)));
 }
 
-HOST_DEVICE float Lerp(float t, float v1, float v2)
+HOST_DEVICE inline float Lerp(float t, float v1, float v2)
 {
 	return (1.f - t) * v1 + t * v2;
 }
 
-HOST_DEVICE void swap(int& a, int& b)
+HOST_DEVICE inline void swap(int& a, int& b)
 {
 	int t = a; a = b; b = t;
 }
 
-HOST_DEVICE void swap(float& a, float& b)
+HOST_DEVICE inline void swap(float& a, float& b)
 {
 	float t = a; a = b; b = t;
 }
 
-HOST_DEVICE void Swap(float* pF1, float* pF2)
+HOST_DEVICE inline void Swap(float* pF1, float* pF2)
 {
 	const float TempFloat = *pF1;
 
@@ -102,7 +102,7 @@ HOST_DEVICE void Swap(float* pF1, float* pF2)
 	*pF2 = TempFloat;
 }
 
-HOST_DEVICE void Swap(float& F1, float& F2)
+HOST_DEVICE inline void Swap(float& F1, float& F2)
 {
 	const float TempFloat = F1;
 
@@ -110,7 +110,7 @@ HOST_DEVICE void Swap(float& F1, float& F2)
 	F2 = TempFloat;
 }
 
-HOST_DEVICE void Swap(int* pI1, int* pI2)
+HOST_DEVICE inline void Swap(int* pI1, int* pI2)
 {
 	const int TempInt = *pI1;
 
@@ -118,7 +118,7 @@ HOST_DEVICE void Swap(int* pI1, int* pI2)
 	*pI2 = TempInt;
 }
 
-HOST_DEVICE void Swap(int& I1, int& I2)
+HOST_DEVICE inline void Swap(int& I1, int& I2)
 {
 	const int TempInt = I1;
 
@@ -164,7 +164,7 @@ class EXPOSURE_RENDER_DLL Resolution3i
 {
 public:
 	CONSTRUCTORS(Resolution3i, int, 3)
-	VEC2_CONSTRUCTOR(Resolution3i, int)
+	VEC3_CONSTRUCTOR(Resolution3i, int)
 	ALL_OPERATORS(Resolution3i, int, 3)
 	NO_ELEMENTS(int, 3)
 
@@ -175,7 +175,7 @@ class EXPOSURE_RENDER_DLL Resolution3f
 {
 public:
 	CONSTRUCTORS(Resolution3f, float, 3)
-	VEC2_CONSTRUCTOR(Resolution3f, float)
+	VEC3_CONSTRUCTOR(Resolution3f, float)
 	ALL_OPERATORS(Resolution3f, float, 3)
 	NO_ELEMENTS(float, 3)
 
@@ -305,6 +305,59 @@ struct Intersection
 
 		return *this;
 	}
+};
+
+class EXPOSURE_RENDER_DLL BoundingBox
+{
+public:
+	HOST_DEVICE BoundingBox() :
+		MinP(FLT_MAX),
+		MaxP(FLT_MIN),
+		Size(0.0f),
+		InvSize(0.0f)
+	{
+	}
+
+	HOST_DEVICE BoundingBox(const Vec3f& MinP, const Vec3f& MaxP) :
+		MinP(MinP),
+		MaxP(MaxP),
+		Size(MaxP - MinP),
+		InvSize(1.0f / Size)
+	{
+	}
+
+	HOST_DEVICE BoundingBox& BoundingBox::operator = (const BoundingBox& Other)
+	{
+		this->MinP		= Other.MinP;	
+		this->MaxP		= Other.MaxP;
+		this->Size		= Other.Size;
+		this->InvSize	= Other.InvSize;
+
+		return *this;
+	}
+
+	HOST_DEVICE void SetMinP(const Vec3f& MinP)
+	{
+		this->MinP = MinP;
+		this->Update();
+	}
+
+	HOST_DEVICE void SetMaxP(const Vec3f& MaxP)
+	{
+		this->MaxP = MaxP;
+		this->Update();
+	}
+
+	HOST_DEVICE void Update()
+	{
+		this->Size		= this->MaxP - this->MinP,
+		this->InvSize	= 1.0f / Size;
+	}
+
+	Vec3f	MinP;
+	Vec3f	MaxP;
+	Vec3f	Size;
+	Vec3f	InvSize;
 };
 
 }

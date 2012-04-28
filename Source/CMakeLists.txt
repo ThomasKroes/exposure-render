@@ -83,10 +83,7 @@ SET(General
 	clippingobject.h
 	texture.h
 	bitmap.h
-	hostbuffer.h
-	hostbuffer.cpp
-	devicebuffer.h
-	devicebuffer.cpp
+	buffer.h
 	framebuffer.h
 )
 

@@ -14,7 +14,7 @@
 #pragma once
 
 #include "erbitmap.h"
-#include "devicebuffer.h"
+#include "buffer.h"
 
 namespace ExposureRender
 {
@@ -24,7 +24,7 @@ class Bitmap : public ErBitmap
 public:
 	HOST Bitmap() :
 		ErBitmap(),
-		DevicePixels()
+		DevicePixels(Enums::Device)
 	{
 	}
 
@@ -32,34 +32,33 @@ public:
 	{
 	}
 
-	HOST_DEVICE Bitmap(const Bitmap& Other)
+	HOST Bitmap(const Bitmap& Other)
 	{
 		*this = Other;
 	}
 
-	HOST_DEVICE Bitmap(const ErBitmap& Other)
+	HOST Bitmap(const ErBitmap& Other)
 	{
 		*this = Other;
 	}
 
-	HOST_DEVICE Bitmap& operator = (const Bitmap& Other)
+	HOST Bitmap& operator = (const Bitmap& Other)
 	{
-		this->DevicePixels		= Other.DevicePixels;
-		this->Size				= Other.Size;
+		this->DevicePixels = Other.DevicePixels;
 		
 		return *this;
 	}
 
-	HOST_DEVICE Bitmap& operator = (const ErBitmap& Other)
+	HOST Bitmap& operator = (const ErBitmap& Other)
 	{
 		ErBitmap::operator=(Other);
 
-//		this->DevicePixels = Other.HostPixels;
+		this->DevicePixels = Other.HostPixels;
 
 		return *this;
 	}
 
-	DeviceBuffer2D<ColorRGBAuc>	DevicePixels;
+	Buffer2D<ColorRGBAuc>	DevicePixels;
 };
 
 }

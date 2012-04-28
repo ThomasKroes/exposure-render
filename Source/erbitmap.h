@@ -15,7 +15,7 @@
 
 #include "erbindable.h"
 #include "color.h"
-#include "hostbuffer.h"
+#include "buffer.h"
 
 namespace ExposureRender
 {
@@ -25,7 +25,7 @@ class EXPOSURE_RENDER_DLL ErBitmap : public ErBindable
 public:
 	HOST ErBitmap() :
 		ErBindable(),
-		HostPixels()
+		HostPixels(Enums::Host)
 	{
 	}
 
@@ -45,30 +45,12 @@ public:
 		return *this;
 	}
 
-	HOST void BindPixels(const ColorRGBAuc* Pixels, const Vec2i& Size)
+	HOST void BindPixels(const Buffer2D<ColorRGBAuc>& Pixels)
 	{
-		/*
-		if (Pixels == NULL)
-			throw(Exception(Enums::Warning, "BindPixels() failed: pixels pointer is NULL"));
-
-
-		this->UnbindPixels();
-
-		const int NoPixels = this->Size[0] * this->Size[1];
-
-		if (NoPixels <= 0)
-			throw(Exception(Enums::Warning, "BindPixels() failed: bad no. pixels!"));
-
-		this->HostPixels = new ColorRGBAuc[NoPixels];
-
-		memcpy(this->HostPixels, Pixels, NoPixels * sizeof(ColorRGBAuc));
-
-		this->Dirty				= true;
-		this->HostMemoryOwner	= true;
-		*/
+		this->HostPixels = Pixels;
 	}
 
-	HostBuffer2D<ColorRGBAuc>	HostPixels;
+	Buffer2D<ColorRGBAuc>	HostPixels;
 };
 
 }

@@ -97,18 +97,18 @@ public:
 		BindIDs(ClippingObjectIDs, this->ClippingObjectIDs, HashMap);
 	}
 
-	ScalarTransferFunction1D		Opacity1D;
-	ColorTransferFunction1D			Diffuse1D;
-	ColorTransferFunction1D			Specular1D;
-	ScalarTransferFunction1D		Glossiness1D;
-	ColorTransferFunction1D			Emission1D;
-	Camera							Camera;
-	RenderSettings					RenderSettings;
-	int								NoIterations;
-	int								VolumeID;
-	Indices							LightIDs;
-	Indices							ObjectIDs;
-	Indices							ClippingObjectIDs;
+	ScalarTransferFunction1D	Opacity1D;
+	ColorTransferFunction1D		Diffuse1D;
+	ColorTransferFunction1D		Specular1D;
+	ScalarTransferFunction1D	Glossiness1D;
+	ColorTransferFunction1D		Emission1D;
+	Camera						Camera;
+	RenderSettings				RenderSettings;
+	int							NoIterations;
+	int							VolumeID;
+	Indices						LightIDs;
+	Indices						ObjectIDs;
+	Indices						ClippingObjectIDs;
 };
 
 }

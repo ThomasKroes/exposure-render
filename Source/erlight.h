@@ -23,12 +23,12 @@ class EXPOSURE_RENDER_DLL ErLight : public ErBindable
 {
 public:
 	HOST ErLight() :
-		ErBindable()
+		ErBindable(),
+		Visible(),
+		TextureID(-1),
+		Multiplier(0.0f),
+		Unit(Enums::Power)
 	{
-		this->Visible		= true;
-		this->TextureID		= 0;
-		this->Multiplier	= 1.0f;
-		this->Unit			= Enums::Power;
 	}
 
 	HOST ~ErLight()

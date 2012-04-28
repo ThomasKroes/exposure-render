@@ -70,7 +70,7 @@ KERNEL void KrnlSingleScattering()
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
-	CRNG RNG(gpTracer->FrameBuffer.RandomSeeds1.GetPtr(IDx, IDy), gpTracer->FrameBuffer.RandomSeeds2.GetPtr(IDx, IDy));
+	CRNG RNG(&gpTracer->FrameBuffer.RandomSeeds1(IDx, IDy), &gpTracer->FrameBuffer.RandomSeeds2(IDx, IDy));
 
 	ColorXYZf Lv = ColorXYZf::Black();
 

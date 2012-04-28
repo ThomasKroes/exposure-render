@@ -99,25 +99,24 @@ public:
 		this->InvScreen[1] = (this->Screen[1][1] - this->Screen[1][0]) / (float)this->FilmSize[1];
 	}
 
-	Resolution2i	FilmSize;
-	Vec3f			Pos;
-	Vec3f			Target;
-	Vec3f			Up;
-	float			FocalDistance;
-	float			ApertureSize;
-	float			ClipNear;
-	float			ClipFar;
-	float			Exposure;
-	float			Gamma;
-	float			FOV;
-
-	Vec3f			N;
-	Vec3f			U;
-	Vec3f			V;
-	float			Screen[2][2];
-	float			InvScreen[2];
-	float			InvExposure;
-	float			InvGamma;
+	Vec2i	FilmSize;
+	Vec3f	Pos;
+	Vec3f	Target;
+	Vec3f	Up;
+	float	FocalDistance;
+	float	ApertureSize;
+	float	ClipNear;
+	float	ClipFar;
+	float	Exposure;
+	float	Gamma;
+	float	FOV;
+	Vec3f	N;
+	Vec3f	U;
+	Vec3f	V;
+	float	Screen[2][2];
+	float	InvScreen[2];
+	float	InvExposure;
+	float	InvGamma;
 };
 
 }
