@@ -24,6 +24,7 @@ class EXPOSURE_RENDER_DLL ErObject : public ErBindable
 public:
 	HOST ErObject() :
 		ErBindable(),
+		Shape(),
 		DiffuseTextureID(-1),
 		SpecularTextureID(-1),
 		GlossinessTextureID(-1),

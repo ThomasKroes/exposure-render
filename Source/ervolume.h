@@ -43,8 +43,8 @@ public:
 	{
 		ErBindable::operator=(Other);
 
-		this->NormalizeSize		= Other.NormalizeSize;
-		this->HostVoxels		= Other.HostVoxels;
+		this->HostVoxels	= Other.HostVoxels;
+		this->NormalizeSize	= Other.NormalizeSize;
 
 		return *this;
 	}
@@ -53,7 +53,6 @@ public:
 	{
 		this->HostVoxels	= Voxels;
 		this->NormalizeSize	= NormalizeSize;
-		this->Dirty			= true;
 	}
 
 	Buffer3D<unsigned short>	HostVoxels;

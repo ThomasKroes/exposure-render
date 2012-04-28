@@ -19,11 +19,10 @@
 namespace ExposureRender
 {
 
-class Bitmap : public ErBitmap
+class Bitmap
 {
 public:
 	HOST Bitmap() :
-		ErBitmap(),
 		DevicePixels(Enums::Device)
 	{
 	}
@@ -51,8 +50,6 @@ public:
 
 	HOST Bitmap& operator = (const ErBitmap& Other)
 	{
-		ErBitmap::operator=(Other);
-
 		this->DevicePixels = Other.HostPixels;
 
 		return *this;

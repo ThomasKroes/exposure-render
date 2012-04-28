@@ -28,9 +28,9 @@ public:
 		OutputLevel(1.0f),
 		BitmapID(-1),
 		Procedural(),
-		Offset(0.0f, 0.0f),
-		Repeat(0.0f, 0.0f),
-		Flip(0, 0)
+		Offset(0.0f),
+		Repeat(0.0f),
+		Flip(0)
 	{
 	}
 

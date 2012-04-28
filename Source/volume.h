@@ -17,11 +17,10 @@
 
 namespace ExposureRender
 {
-class EXPOSURE_RENDER_DLL Volume : public ErVolume
+class EXPOSURE_RENDER_DLL Volume
 {
 public:
 	HOST Volume() :
-		ErVolume(),
 		BoundingBox(),
 		GradientDeltaX(),
 		GradientDeltaY(),
@@ -46,8 +45,6 @@ public:
 
 	HOST Volume& Volume::operator = (const Volume& Other)
 	{
-		ErVolume::operator=(Other);
-
 		this->BoundingBox		= Other.BoundingBox;
 		this->GradientDeltaX	= Other.GradientDeltaX;
 		this->GradientDeltaY	= Other.GradientDeltaY;
@@ -59,13 +56,11 @@ public:
 
 	HOST Volume& Volume::operator = (const ErVolume& Other)
 	{
-		ErVolume::operator=(Other);
-
 		this->DeviceVoxels = Other.HostVoxels;
 
 		float Scale = 1.0f;
 
-		if (this->NormalizeSize)
+		if (Other.NormalizeSize)
 		{
 			const Vec3f PhysicalSize = Vec3f((float)this->DeviceVoxels.Resolution[0], (float)this->DeviceVoxels.Resolution[1], (float)this->DeviceVoxels.Resolution[2]) * Other.HostVoxels.Spacing;
 			const float Scale = 1.0f / max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
