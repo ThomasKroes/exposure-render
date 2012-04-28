@@ -19,50 +19,58 @@
 namespace ExposureRender
 {
 
+#define BUFFER_CONSTRUCTORS(nodims)																						\
+																														\
+HOST Buffer##nodims##D() :																								\
+	MemoryType(Enums::Host),																							\
+	Resolution(0),																										\
+	InvResolution(0.0f),																								\
+	Spacing(1.0f),																										\
+	InvSpacing(1.0f),																									\
+	Data(NULL),																											\
+	ModifiedTime(0)																										\
+{																														\
+}																														\
+																														\
+HOST Buffer##nodims##D(const Enums::MemoryType& MemoryType) :															\
+	MemoryType(MemoryType),																								\
+	Resolution(0),																										\
+	InvResolution(0.0f),																								\
+	Spacing(1.0f),																										\
+	InvSpacing(1.0f),																									\
+	Data(NULL),																											\
+	ModifiedTime(0)																										\
+{																														\
+}																														\
+																														\
+HOST Buffer##nodims##D(const Enums::MemoryType& MemoryType, const Vec2i& Resolution, const Vec2f& Spacing, T* Data)		\
+{																														\
+	Buffer2D Other;																										\
+																														\
+	Other.MemoryType	= MemoryType;																					\
+	Other.Resolution	= Resolution;																					\
+	Other.InvResolution	= 1.0f / Resolution;																			\
+	Other.Spacing		= Spacing;																						\
+	Other.InvSpacing	= 1.0f / Spacing;																				\
+	Other.Data			= Data;																							\
+																														\
+	*this = Other;																										\
+}
+
+#define BUFFER_DESTRUCTOR(nodims)																						\
+																														\
+HOST virtual ~Buffer##nodims##D(void)																					\
+{																														\
+	this->Free();																										\
+}
+
 template<class T>
 class EXPOSURE_RENDER_DLL Buffer2D
 {
 public:
-	HOST Buffer2D() :
-		MemoryType(Enums::Host),
-		Resolution(0),
-		InvResolution(0.0f),
-		Spacing(1.0f),
-		InvSpacing(1.0f),
-		Data(NULL),
-		ModifiedTime(0)
-	{
-	}
-
-	HOST Buffer2D(const Enums::MemoryType& MemoryType) :
-		MemoryType(MemoryType),
-		Resolution(0),
-		InvResolution(0.0f),
-		Spacing(1.0f),
-		InvSpacing(1.0f),
-		Data(NULL),
-		ModifiedTime(0)
-	{
-	}
-
-	HOST Buffer2D(const Enums::MemoryType& MemoryType, const Vec2i& Resolution, const Vec2f& Spacing, T* Data)
-	{
-		Buffer2D Other;
-
-		Other.MemoryType	= MemoryType;
-		Other.Resolution	= Resolution;
-		Other.InvResolution	= 1.0f / Resolution;
-		Other.Spacing		= Spacing;
-		Other.InvSpacing	= 1.0f / Spacing;
-		Other.Data			= Data;
-
-		*this = Other;
-	}
-
-	HOST virtual ~Buffer2D(void)
-	{
-		this->Free();
-	}
+	BUFFER_CONSTRUCTORS(2)
+	BUFFER_DESTRUCTOR(2)
+	
 
 	HOST void Resize(const Vec2i& Resolution)
 	{
@@ -215,46 +223,8 @@ template<class T>
 class EXPOSURE_RENDER_DLL Buffer3D
 {
 public:
-	HOST Buffer3D() :
-		MemoryType(Enums::Host),
-		Resolution(0),
-		InvResolution(0.0f),
-		Spacing(1.0f),
-		InvSpacing(1.0f),
-		Data(NULL),
-		ModifiedTime(0)
-	{
-	}
-
-	HOST Buffer3D(const Enums::MemoryType& MemoryType) :
-		MemoryType(MemoryType),
-		Resolution(0),
-		InvResolution(0.0f),
-		Spacing(1.0f),
-		InvSpacing(1.0f),
-		Data(NULL),
-		ModifiedTime(0)
-	{
-	}
-
-	HOST Buffer3D(const Enums::MemoryType& MemoryType, const Vec3i& Resolution, const Vec3f& Spacing, T* Data)
-	{
-		Buffer3D Other;
-
-		Other.MemoryType	= MemoryType;
-		Other.Resolution	= Resolution;
-		Other.InvResolution	= 1.0f / Resolution;
-		Other.Spacing		= Spacing;
-		Other.InvSpacing	= 1.0f / Spacing;
-		Other.Data			= Data;
-
-		*this = Other;
-	}
-
-	HOST virtual ~Buffer3D(void)
-	{
-		this->Free();
-	}
+	BUFFER_CONSTRUCTORS(3)
+	BUFFER_DESTRUCTOR(3)
 
 	HOST void Resize(const Vec3i& Resolution)
 	{
