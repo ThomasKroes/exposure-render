@@ -49,9 +49,9 @@ public:
 		return *this;
 	}
 
-	HOST void BindVoxels(const Buffer3D<unsigned short>& Voxels, const bool& NormalizeSize = false)
+	HOST void BindVoxels(const Vec3i& Resolution, const Vec3f& Spacing, unsigned short* Voxels, const bool& NormalizeSize = false)
 	{
-		this->HostVoxels	= Voxels;
+		this->HostVoxels	= Buffer3D<unsigned short>(Enums::Host, Resolution, Spacing, Voxels);
 		this->NormalizeSize	= NormalizeSize;
 	}
 

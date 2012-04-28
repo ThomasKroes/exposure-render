@@ -38,7 +38,6 @@ EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture);
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID);
 EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap);
 EXPOSURE_RENDER_DLL void UnbindBitmap(int ID);
-EXPOSURE_RENDER_DLL void ResizeFrameBuffer(int TracerID, Resolution2i Resolution);
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID);
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData);
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance);

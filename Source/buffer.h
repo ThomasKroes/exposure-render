@@ -424,4 +424,7 @@ public:
 	}
 };
 
+typedef Buffer2D<ColorRGBAuc> BitmapBuffer;
+typedef Buffer3D<unsigned short> VolumeBuffer;
+
 }

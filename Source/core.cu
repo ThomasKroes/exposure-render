@@ -45,113 +45,107 @@ ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffe
 #include "estimate.cuh"
 #include "toneMap.cuh"
 #include "gaussianfilter.cuh"
-/*
+
 namespace ExposureRender
 {
 
 EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer)
 {
-	gTracers.Bind(Tracer);
+//	gTracers.Bind(Tracer);
 }
 
 EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID)
 {
-	gTracers.Unbind(TracerID);
+//	gTracers.Unbind(TracerID);
 }
 
 EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume)
 {
-	gVolumes.Bind(Volume);
+//	gVolumes.Bind(Volume);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 {
-	gVolumes.Unbind(ID);
+//	gVolumes.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light)
 {
-	gLights.Bind(Light);
+//	gLights.Bind(Light);
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 {
-	gLights.Unbind(ID);
+//	gLights.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object)
 {
-	gObjects.Bind(Object);
+//	gObjects.Bind(Object);
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 {
-	gObjects.Unbind(ID);
+//	gObjects.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject)
 {
-	gClippingObjects.Bind(ClippingObject);
+//	gClippingObjects.Bind(ClippingObject);
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 {
-	gClippingObjects.Unbind(ID);
+//	gClippingObjects.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture)
 {
-	gTextures.Bind(Texture);
+//	gTextures.Bind(Texture);
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 {
-	gTextures.Unbind(ID);
+//	gTextures.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap)
 {
-	gBitmaps.Bind(Bitmap);
+//	gBitmaps.Bind(Bitmap);
 }
 
 EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
 {
-	gBitmaps.Unbind(ID);
-}
-
-EXPOSURE_RENDER_DLL void ResizeFrameBuffer(int TracerID, Resolution2i Resolution)
-{
-	gFrameBuffers[TracerID].Resize(Resolution);
+//	gBitmaps.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
+	/*
 	gTracers.Synchronize(TracerID);
 
 	SingleScattering(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
-	return;
 	ComputeEstimate(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 //	FilterGaussian(Tracer.FrameBuffer.FrameEstimate.GetPtr(), Tracer.FrameBuffer.FrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ToneMap(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 
 	gTracers[TracerID].NoIterations++;
+	*/
 }
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)
 {
-	Cuda::MemCopyDeviceToHost(gFrameBuffers[TracerID].DisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffers[TracerID].DisplayEstimate.GetNoElements());
+//	Cuda::MemCopyDeviceToHost(gFrameBuffers[TracerID].DisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffers[TracerID].DisplayEstimate.GetNoElements());
 }
 
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance)
 {
-	return;
 //	ComputeAutoFocusDistance(FilmU, FilmV, AutoFocusDistance);
 }
 
 EXPOSURE_RENDER_DLL void GetNoIterations(int TracerID, int& NoIterations)
 {
-	NoIterations = gTracers[TracerID].NoIterations; 
+//	NoIterations = gTracers[TracerID].NoIterations; 
 }
 
 }
-*/
