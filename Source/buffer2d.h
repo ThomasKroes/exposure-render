@@ -19,10 +19,10 @@ namespace ExposureRender
 {
 
 template<class T>
-class EXPOSURE_RENDER_DLL Buffer2 : public Buffer
+class EXPOSURE_RENDER_DLL Buffer2D : public Buffer
 {
 public:
-	HOST Buffer2(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (2D)") :
+	HOST Buffer2D(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (2D)") :
 		Buffer(MemoryType, pName),
 		Resolution(0),
 		Data(NULL),
@@ -31,14 +31,14 @@ public:
 		DebugLog("Creating 2D Buffer: %s", this->GetFullName());
 	}
 
-	HOST virtual ~Buffer2(void)
+	HOST virtual ~Buffer2D(void)
 	{
 		this->Free();
 	}
 
 	HOST void Resize(const Vec2i& Resolution)
 	{
-		DebugLog("Resizing 2D buffer: %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
+		DebugLog("Resizing 2D buffer: %s, %d x %d", this->GetFullName(), Resolution[0], Resolution[1]);
 
 		if (this->Resolution == Resolution)
 			return;
@@ -104,7 +104,7 @@ public:
 
 	HOST void Set(const Enums::MemoryType& MemoryType, const Vec2i& Resolution, T* Data)
 	{
-		DebugLog("Setting 2D buffer: %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
+		DebugLog("Setting 2D buffer: %s, %d x %d", this->GetFullName(), Resolution[0], Resolution[1]);
 
 		this->Resize(Resolution);
 
@@ -135,7 +135,7 @@ public:
 
 	HOST_DEVICE int GetNoElements(void) const
 	{
-		return this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
+		return this->Resolution[0] * this->Resolution[1];
 	}
 
 	HOST_DEVICE int GetNoBytes(void) const
@@ -143,14 +143,14 @@ public:
 		return this->GetNoElements() * sizeof(T);
 	}
 
-	HOST_DEVICE T& operator()(const int& x = 0, const int& y = 0, const int& z = 0) const
+	HOST_DEVICE T& operator()(const int& x = 0, const int& y = 0) const
 	{
-		return this->Data[z * this->Resolution[0] * this->Resolution[1] + y * this->Resolution[0] + x];
+		return this->Data[y * this->Resolution[0] + x];
 	}
 
-	HOST_DEVICE T& operator()(const Vec2i& xyz) const
+	HOST_DEVICE T& operator()(const Vec2i& xy) const
 	{
-		return this->Data[xyz[2] * this->Resolution[0] * this->Resolution[1] + xyz[1] * this->Resolution[0] + xyz[0]];
+		return this->Data[xy[1] * this->Resolution[0] + xy[0]];
 	}
 
 	HOST_DEVICE T& operator[](const int& i) const
@@ -158,10 +158,14 @@ public:
 		return this->Data[i];
 	}
 
-	HOST Buffer2& operator = (const Buffer2& Other)
+	HOST Buffer2D& operator = (const Buffer2D& Other)
 	{
+		DebugLog("Assigning %s to %s", Other.GetFullName(), this->GetFullName());
+
 		this->Set(Other.MemoryType, Other.Resolution, Other.Data);
-		 
+		
+		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
+
 		return *this;
 	}
 
@@ -181,14 +185,16 @@ public:
 
 	void Resize(const Vec2i& Resolution)
 	{
-		Buffer2D Seeds(Enums::Host);
+		const int NoSeeds = Resolution[0] * Resolution[1];
 
-		Seeds.Resize(Resolution);
+		unsigned int* pSeeds = new unsigned int[NoSeeds];
 
-		for (int i = 0; i < Seeds.GetNoElements(); i++)
-			Seeds[i] = rand();
+		for (int i = 0; i < NoSeeds; i++)
+			pSeeds[i] = rand();
 
-		this->Copy(Seeds);
+		this->Set(Enums::Host, Resolution, pSeeds);
+
+		delete[] pSeeds;
 	}
 };
 }

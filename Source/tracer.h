@@ -32,10 +32,6 @@ public:
 	{
 	}
 
-	HOST ~Tracer()
-	{
-	}
-	
 	HOST Tracer(const ErTracer& Other)
 	{
 		*this = Other;

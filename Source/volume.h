@@ -18,10 +18,11 @@
 
 namespace ExposureRender
 {
-class EXPOSURE_RENDER_DLL Volume
+class EXPOSURE_RENDER_DLL Volume : public ErVolume
 {
 public:
 	HOST Volume() :
+		ErVolume(),
 		BoundingBox(),
 		GradientDeltaX(),
 		GradientDeltaY(),
@@ -30,31 +31,9 @@ public:
 	{
 	}
 
-	HOST ~Volume()
-	{
-	}
-	
-	HOST Volume(const Volume& Other)
-	{
-		*this = Other;
-	}
-
 	HOST Volume(const ErVolume& Other)
 	{
 		*this = Other;
-	}
-
-	HOST Volume& Volume::operator = (const Volume& Other)
-	{
-		this->BoundingBox		= Other.BoundingBox;
-		this->GradientDeltaX	= Other.GradientDeltaX;
-		this->GradientDeltaY	= Other.GradientDeltaY;
-		this->GradientDeltaZ	= Other.GradientDeltaZ;
-		this->Spacing			= Other.Spacing;
-		this->InvSpacing		= Other.InvSpacing;
-		this->DeviceVoxels		= Other.DeviceVoxels;
-
-		return *this;
 	}
 
 	HOST Volume& Volume::operator = (const ErVolume& Other)

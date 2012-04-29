@@ -101,7 +101,7 @@ DEVICE float GradientMagnitude(const int& VolumeID, const Vec3f& P)
 	for (int i = 0; i < 3; i++)
 	{
 		D = GetIntensity(VolumeID, Pts[i][1]) - GetIntensity(VolumeID, Pts[i][0]);
-		D *= 0.5f / gpVolumes[VolumeID].DeviceVoxels.Spacing[i];
+		D *= 0.5f / gpVolumes[VolumeID].Spacing[i];
 		Sum += D * D;
 	}
 

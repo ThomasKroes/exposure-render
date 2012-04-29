@@ -26,24 +26,9 @@ public:
 	{
 	}
 	
-	HOST ~ClippingObject()
-	{
-	}
-	
-	HOST ClippingObject(const ClippingObject& Other)
-	{
-		*this = Other;
-	}
-
 	HOST ClippingObject(const ErClippingObject& Other)
 	{
 		*this = Other;
-	}
-
-	HOST ClippingObject& operator = (const ClippingObject& Other)
-	{
-		ErClippingObject::operator=(Other);
-		return *this;
 	}
 
 	HOST ClippingObject& operator = (const ErClippingObject& Other)

@@ -172,12 +172,12 @@ public:
 		if (!Exists)
 		{
 			Resource.ID = this->ResourceCounter;
-			this->ResourceMap[Resource.ID].BindDevice(Resource);
+			this->ResourceMap[Resource.ID] = Resource;
 			this->ResourceCounter++;
 		}
 		else
 		{
-			this->ResourceMap[Resource.ID].BindDevice(Resource);
+			this->ResourceMap[Resource.ID] = Resource;
 		}
 
 		this->Synchronize();
@@ -203,6 +203,9 @@ public:
 
 	HOST void Synchronize()
 	{
+		// FIXME
+		return;
+
 		if (this->ResourceMap.size() <= 0)
 			return;
 

@@ -26,25 +26,9 @@ public:
 	{
 	}
 
-	HOST ~Object()
-	{
-	}
-
-	HOST Object(const Object& Other)
-	{
-		*this = Other;
-	}
-
 	HOST Object(const ErObject& Other)
 	{
 		*this = Other;
-	}
-
-	HOST Object& operator = (const Object& Other)
-	{
-		ErObject::operator=(Other);
-
-		return *this;
 	}
 
 	HOST Object& operator = (const ErObject& Other)

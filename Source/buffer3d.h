@@ -19,10 +19,10 @@ namespace ExposureRender
 {
 
 template<class T>
-class EXPOSURE_RENDER_DLL Buffer3 : public Buffer
+class EXPOSURE_RENDER_DLL Buffer3D : public Buffer
 {
 public:
-	HOST Buffer3(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (3D)") :
+	HOST Buffer3D(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (3D)") :
 		Buffer(MemoryType, pName),
 		Resolution(0),
 		Data(NULL),
@@ -31,7 +31,7 @@ public:
 		DebugLog("Creating 3D Buffer: %s", this->GetFullName());
 	}
 
-	HOST virtual ~Buffer3(void)
+	HOST virtual ~Buffer3D(void)
 	{
 		this->Free();
 	}
@@ -158,10 +158,14 @@ public:
 		return this->Data[i];
 	}
 
-	HOST Buffer3& operator = (const Buffer3& Other)
+	HOST Buffer3D& operator = (const Buffer3D& Other)
 	{
+		DebugLog("Assigning %s to %s", Other.GetFullName(), this->GetFullName());
+
 		this->Set(Other.MemoryType, Other.Resolution, Other.Data);
-		 
+		
+		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
+
 		return *this;
 	}
 

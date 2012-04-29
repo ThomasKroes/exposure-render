@@ -21,7 +21,7 @@
 #include "clippingobject.h"
 #include "texture.h"
 #include "bitmap.h"
-/*
+
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
 DEVICE ExposureRender::Light*			gpLights			= NULL;
@@ -30,7 +30,7 @@ DEVICE ExposureRender::ClippingObject*	gpClippingObjects	= NULL;
 DEVICE ExposureRender::Texture*			gpTextures			= NULL;
 DEVICE ExposureRender::Bitmap*			gpBitmaps			= NULL;
 
-ExposureRender::Cuda::List<ExposureRender::Volume>						gVolumes("gpVolumes");
+ExposureRender::Cuda::List<ExposureRender::Volume>						gVolumes("gpVolumes");/*
 ExposureRender::Cuda::List<ExposureRender::Light>						gLights("gpLights");
 ExposureRender::Cuda::List<ExposureRender::Object>						gObjects("gpObjects");
 ExposureRender::Cuda::List<ExposureRender::ClippingObject>				gClippingObjects("gpClippingObjects");
@@ -40,6 +40,7 @@ ExposureRender::Cuda::List<ExposureRender::Bitmap>						gBitmaps("gpBitmaps");
 ExposureRender::Cuda::SynchronizeSingle<ExposureRender::Tracer>			gTracers("gpTracer");
 ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffers("gpFrameBuffer");
 
+
 #include "utilities.h"
 
 #include "singlescattering.cuh"
@@ -47,6 +48,7 @@ ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffe
 #include "toneMap.cuh"
 #include "gaussianfilter.cuh"
 */
+
 namespace ExposureRender
 {
 
@@ -62,7 +64,7 @@ EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID)
 
 EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume)
 {
-//	gVolumes.Bind(Volume);
+	gVolumes.Bind(Volume);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)

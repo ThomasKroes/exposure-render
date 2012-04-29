@@ -45,9 +45,9 @@ public:
 		return *this;
 	}
 
-	HOST void BindPixels(const Buffer2D<ColorRGBAuc>& Pixels)
+	HOST void BindPixels(const Vec2i& Resolution, ColorRGBAuc* Pixels)
 	{
-		this->HostPixels = Pixels;
+		this->HostPixels.Set(Enums::Host, Resolution, Pixels);
 	}
 
 	Buffer2D<ColorRGBAuc>	HostPixels;

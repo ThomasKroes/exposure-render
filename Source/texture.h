@@ -26,25 +26,9 @@ public:
 	{
 	}
 
-	HOST ~Texture()
-	{
-	}
-	
-	HOST Texture(const Texture& Other)
-	{
-		*this = Other;
-	}
-
 	HOST Texture(const ErTexture& Other)
 	{
 		*this = Other;
-	}
-
-	HOST Texture& operator = (const Texture& Other)
-	{
-		ErTexture::operator=(Other);
-		
-		return *this;
 	}
 
 	HOST Texture& operator = (const ErTexture& Other)
