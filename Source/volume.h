@@ -26,7 +26,7 @@ public:
 		GradientDeltaX(),
 		GradientDeltaY(),
 		GradientDeltaZ(),
-		DeviceVoxels(Enums::Device)
+		DeviceVoxels(Enums::Device, "Voxels")
 	{
 	}
 
@@ -50,6 +50,8 @@ public:
 		this->GradientDeltaX	= Other.GradientDeltaX;
 		this->GradientDeltaY	= Other.GradientDeltaY;
 		this->GradientDeltaZ	= Other.GradientDeltaZ;
+		this->Spacing			= Other.Spacing;
+		this->InvSpacing		= Other.InvSpacing;
 		this->DeviceVoxels		= Other.DeviceVoxels;
 
 		return *this;
@@ -63,18 +65,19 @@ public:
 
 		if (Other.NormalizeSize)
 		{
-			const Vec3f PhysicalSize = Vec3f((float)this->DeviceVoxels.Resolution[0], (float)this->DeviceVoxels.Resolution[1], (float)this->DeviceVoxels.Resolution[2]) * Other.HostVoxels.Spacing;
+			const Vec3f PhysicalSize = Vec3f((float)this->DeviceVoxels.Resolution[0], (float)this->DeviceVoxels.Resolution[1], (float)this->DeviceVoxels.Resolution[2]) * Other.Spacing;
 			const float Scale = 1.0f / max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
 		}
 
-		this->DeviceVoxels.SetSpacing(Scale * Other.HostVoxels.Spacing);
+		this->Spacing		= Scale * Other.Spacing;
+		this->InvSpacing	= 1.0f / this->Spacing;
 
-		Vec3f Size((float)this->DeviceVoxels.Resolution[0] * this->DeviceVoxels.Spacing[0], (float)this->DeviceVoxels.Resolution[1] *this->DeviceVoxels.Spacing[1], (float)this->DeviceVoxels.Resolution[2] * this->DeviceVoxels.Spacing[2]);
+		Vec3f Size((float)this->DeviceVoxels.Resolution[0] * this->Spacing[0], (float)this->DeviceVoxels.Resolution[1] *this->Spacing[1], (float)this->DeviceVoxels.Resolution[2] * this->Spacing[2]);
 		
 		this->BoundingBox.SetMinP(-0.5f * Size);
 		this->BoundingBox.SetMaxP(0.5f * Size);
 
-		const float MinVoxelSize = min(this->DeviceVoxels.Spacing[0], min(this->DeviceVoxels.Spacing[1], this->DeviceVoxels.Spacing[2]));
+		const float MinVoxelSize = min(this->Spacing[0], min(this->Spacing[1], this->Spacing[2]));
 
 		this->GradientDeltaX = Vec3f(MinVoxelSize, 0.0f, 0.0f);
 		this->GradientDeltaY = Vec3f(0.0f, MinVoxelSize, 0.0f);
@@ -95,6 +98,8 @@ public:
 	Vec3f						GradientDeltaY;
 	Vec3f						GradientDeltaZ;
 	Vec2f						GradientMagnitudeRange;
+	Vec3f						Spacing;
+	Vec3f						InvSpacing;
 	Buffer3D<unsigned short>	DeviceVoxels;
 };
 

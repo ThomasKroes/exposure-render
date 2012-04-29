@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "buffer.h"
+#include "buffer2d.h"
 
 namespace ExposureRender
 {
@@ -23,17 +23,17 @@ class FrameBuffer
 public:
 	FrameBuffer(void) :
 		Resolution(),
-		FrameEstimate(Enums::Device),
-		FrameEstimateTemp(Enums::Device),
-		RunningEstimateXyza(Enums::Device),
-		DisplayEstimate(Enums::Device),
-		DisplayEstimateTemp(Enums::Device),
-		DisplayEstimateFiltered(Enums::Device),
-		RandomSeeds1(Enums::Device),
-		RandomSeeds2(Enums::Device),
-		RandomSeedsCopy1(Enums::Device),
-		RandomSeedsCopy2(Enums::Device),
-		HostDisplayEstimate(Enums::Host)
+		FrameEstimate(Enums::Device, "Frame Estimate XYZA"),
+		FrameEstimateTemp(Enums::Device, "Temp Frame Estimate XYZA"),
+		RunningEstimateXyza(Enums::Device, "Running Estimate XYZA"),
+		DisplayEstimate(Enums::Device, "Display Estimate RGBA"),
+		DisplayEstimateTemp(Enums::Device, "Temp Display Estimate RGBA"),
+		DisplayEstimateFiltered(Enums::Device, "Filtered Display Estimate RGBA"),
+		RandomSeeds1(Enums::Device, "Random Seeds 1"),
+		RandomSeeds2(Enums::Device, "Random Seeds 2"),
+		RandomSeedsCopy1(Enums::Device, "Random Seeds 1 (Cache)"),
+		RandomSeedsCopy2(Enums::Device, "Random Seeds 2 (Cache)"),
+		HostDisplayEstimate(Enums::Host, "Display Estimate RGBA")
 	{
 	}
 

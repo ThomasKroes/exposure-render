@@ -62,12 +62,16 @@ SET(General
 	textures.h
 	transferfunctions.h
 	filter.h
+	log.h
 	defines.h
 	camera.h
 	procedural.h
 	shape.h
 	matrix.h
 	vector.h
+	buffer1d.h
+	buffer2d.h
+	buffer3d.h
 	boundingbox.h
 	transferfunction.h
 	rendersettings.h

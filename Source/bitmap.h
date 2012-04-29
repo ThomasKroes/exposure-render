@@ -23,7 +23,7 @@ class Bitmap
 {
 public:
 	HOST Bitmap() :
-		DevicePixels(Enums::Device)
+		DevicePixels(Enums::Device, "Pixels")
 	{
 	}
 

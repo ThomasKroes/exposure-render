@@ -15,7 +15,7 @@
 
 #include "erbindable.h"
 #include "color.h"
-#include "buffer.h"
+#include "buffer2d.h"
 
 namespace ExposureRender
 {
@@ -25,7 +25,7 @@ class EXPOSURE_RENDER_DLL ErBitmap : public ErBindable
 public:
 	HOST ErBitmap() :
 		ErBindable(),
-		HostPixels(Enums::Host)
+		HostPixels(Enums::Host, "Pixels")
 	{
 	}
 

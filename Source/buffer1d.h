@@ -13,58 +13,9 @@
 
 #pragma once
 
-#include "geometry.h"
-#include "cuda.h"
+#include "buffer.h"
 
 namespace ExposureRender
 {
-
-class EXPOSURE_RENDER_DLL Buffer
-{
-public:
-	HOST Buffer(const Enums::MemoryType& MemoryType, const char* pName) :
-		MemoryType(MemoryType)
-	{
-		sprintf_s(this->Name, MAX_CHAR_SIZE, "%s", pName);
-
-		this->UpdateFullName();
-	}
-
-	HOST void UpdateFullName()
-	{
-		char MemoryTypeName[MAX_CHAR_SIZE];
-
-		switch (this->MemoryType)
-		{
-			case Enums::Host:
-				sprintf_s(MemoryTypeName, MAX_CHAR_SIZE, "%s", "HOST");
-				break;
-			
-			case Enums::Device:
-				sprintf_s(MemoryTypeName, MAX_CHAR_SIZE, "%s", "DEVICE");
-				break;
-
-			default:
-				sprintf_s(MemoryTypeName, MAX_CHAR_SIZE, "%s", "UNDEFINED");
-				break;
-		}
-
-		sprintf_s(this->FullName, MAX_CHAR_SIZE, "['%s', %s]", this->Name, MemoryTypeName);
-	}
-
-	HOST const char* GetName() const
-	{
-		return this->Name;
-	}
-	
-	HOST const char* GetFullName() const
-	{
-		return this->FullName;
-	}
-
-	Enums::MemoryType	MemoryType;
-	char				Name[MAX_CHAR_SIZE];
-	char				FullName[MAX_CHAR_SIZE];
-};
 
 }

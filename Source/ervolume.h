@@ -15,7 +15,7 @@
 
 #include "erbindable.h"
 #include "vector.h"
-#include "buffer.h"
+#include "buffer3d.h"
 
 namespace ExposureRender
 {
@@ -25,8 +25,9 @@ class EXPOSURE_RENDER_DLL ErVolume : public ErBindable
 public:
 	HOST ErVolume() :
 		ErBindable(),
-		HostVoxels(Enums::Host),
-		NormalizeSize(false)
+		HostVoxels(Enums::Host, "Voxels"),
+		NormalizeSize(false),
+		Spacing(1.0f)
 	{
 	}
 
@@ -43,20 +44,24 @@ public:
 	{
 		ErBindable::operator=(Other);
 
-		this->HostVoxels	= Other.HostVoxels;
-		this->NormalizeSize	= Other.NormalizeSize;
+		this->HostVoxels		= Other.HostVoxels;
+		this->NormalizeSize		= Other.NormalizeSize;
+		this->Spacing			= Other.Spacing;
 
 		return *this;
 	}
 
 	HOST void BindVoxels(const Vec3i& Resolution, const Vec3f& Spacing, unsigned short* Voxels, const bool& NormalizeSize = false)
 	{
-		this->HostVoxels	= Buffer3D<unsigned short>(Enums::Host, Resolution, Spacing, Voxels);
+		this->HostVoxels.Set(Enums::Host, Resolution, Voxels);
+
 		this->NormalizeSize	= NormalizeSize;
+		this->Spacing		= Spacing;
 	}
 
 	Buffer3D<unsigned short>	HostVoxels;
 	bool						NormalizeSize;
+	Vec3f						Spacing;
 };
 
 }

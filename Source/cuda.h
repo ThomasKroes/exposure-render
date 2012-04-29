@@ -13,13 +13,14 @@
 
 #pragma once
 
+#include "exception.h"
+#include "log.h"
+
 #ifdef __CUDA_ARCH__
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <map>
-
-#include "exception.h"
 
 using namespace std;
 
