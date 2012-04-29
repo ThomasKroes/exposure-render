@@ -52,15 +52,6 @@ EXPOSURE_RENDER_DLL inline float CylinderArea(const float& Radius, const float& 
 class EXPOSURE_RENDER_DLL Shape
 {
 public:
-	Matrix44			TM;
-	Matrix44			InvTM;
-	bool				OneSided;
-	Enums::ShapeType	Type;
-	Vec3f				Size;
-	float				Area;
-	float				InnerRadius;
-	float				OuterRadius;
-
 	HOST Shape()
 	{
 		this->OneSided		= false;
@@ -105,6 +96,15 @@ public:
 			case Enums::Cylinder:	this->Area = CylinderArea(this->OuterRadius, this->Size[2]);				break;
 		}
 	}
+
+	Matrix44			TM;
+	Matrix44			InvTM;
+	bool				OneSided;
+	Enums::ShapeType	Type;
+	Vec3f				Size;
+	float				Area;
+	float				InnerRadius;
+	float				OuterRadius;
 };
 
 }

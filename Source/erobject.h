@@ -32,7 +32,7 @@ public:
 	{
 	}
 
-	HOST ~ErObject()
+	HOST virtual ~ErObject()
 	{
 	}
 

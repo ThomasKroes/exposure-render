@@ -27,10 +27,10 @@ public:
 	{
 		this->ID		= -1;
 		this->Enabled	= true;
-		this->Dirty		= NULL;
+		this->Dirty		= false;
 	}
 
-	HOST ~ErBindable()
+	HOST virtual ~ErBindable()
 	{
 	}
 

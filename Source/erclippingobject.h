@@ -29,7 +29,7 @@ public:
 	{
 	}
 	
-	HOST ~ErClippingObject()
+	HOST virtual ~ErClippingObject()
 	{
 	}
 	

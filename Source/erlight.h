@@ -31,7 +31,7 @@ public:
 	{
 	}
 
-	HOST ~ErLight()
+	HOST virtual ~ErLight()
 	{
 	}
 

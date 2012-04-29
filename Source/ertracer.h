@@ -45,7 +45,7 @@ public:
 	{
 	}
 
-	HOST ~ErTracer()
+	HOST virtual ~ErTracer()
 	{
 	}
 	

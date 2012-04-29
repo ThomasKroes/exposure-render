@@ -90,7 +90,7 @@ public:
 	HOST void Reset(void)
 	{
 		if (this->GetNoElements() <= 0)
-			throw(Exception(Enums::Warning, "Buffer2D::Reset() failed: no elements in buffer!"));
+			printf("Buffer2D::Reset() failed: no elements in buffer!\n");
 		
 		if (this->MemoryType == Enums::Host)
 			memset(this->Data, 0, this->GetNoBytes());
@@ -119,7 +119,7 @@ public:
 #endif
 		}
 		else
-			throw(Exception(Enums::Warning, "Buffer2D::Free() failed: data pointer is NULL!"));
+			printf("Buffer2D::Free() failed: data pointer is NULL!");
 		
 		this->Resolution = Vec2i(0);
 
@@ -282,7 +282,7 @@ public:
 	HOST void Reset(void)
 	{
 		if (this->GetNoElements() <= 0)
-			throw(Exception(Enums::Warning, "Buffer3D::Reset() failed: no elements in buffer!"));
+			printf("Buffer3D::Reset() failed: no elements in buffer!");
 		
 		if (this->MemoryType == Enums::Host)
 			memset(this->Data, 0, this->GetNoBytes());
@@ -311,7 +311,7 @@ public:
 #endif
 		}
 		else
-			throw(Exception(Enums::Warning, "Buffer3D::Free() failed: data pointer is NULL!"));
+			printf("Buffer3D::Free() failed: data pointer is NULL!");
 		
 		this->Resolution = Vec3i(0);
 
@@ -423,8 +423,5 @@ public:
 		this->Copy(Seeds);
 	}
 };
-
-typedef Buffer2D<ColorRGBAuc> BitmapBuffer;
-typedef Buffer3D<unsigned short> VolumeBuffer;
 
 }

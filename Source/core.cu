@@ -13,6 +13,7 @@
 
 #define __CUDA_ARCH__ 200
 
+
 #include "tracer.h"
 #include "volume.h"
 #include "light.h"
@@ -20,7 +21,7 @@
 #include "clippingobject.h"
 #include "texture.h"
 #include "bitmap.h"
-
+/*
 DEVICE ExposureRender::Tracer*			gpTracer			= NULL;
 DEVICE ExposureRender::Volume* 			gpVolumes			= NULL;
 DEVICE ExposureRender::Light*			gpLights			= NULL;
@@ -45,7 +46,7 @@ ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffe
 #include "estimate.cuh"
 #include "toneMap.cuh"
 #include "gaussianfilter.cuh"
-
+*/
 namespace ExposureRender
 {
 
@@ -121,16 +122,14 @@ EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
-	/*
-	gTracers.Synchronize(TracerID);
+//	gTracers.Synchronize(TracerID);
 
-	SingleScattering(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
-	ComputeEstimate(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
+//	SingleScattering(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
+//	ComputeEstimate(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 //	FilterGaussian(Tracer.FrameBuffer.FrameEstimate.GetPtr(), Tracer.FrameBuffer.FrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
-	ToneMap(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
+//	ToneMap(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
 
-	gTracers[TracerID].NoIterations++;
-	*/
+//	gTracers[TracerID].NoIterations++;
 }
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)

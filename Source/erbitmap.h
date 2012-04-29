@@ -29,7 +29,7 @@ public:
 	{
 	}
 
-	HOST ~ErBitmap()
+	HOST virtual ~ErBitmap()
 	{
 	}
 

@@ -34,7 +34,7 @@ public:
 	{
 	}
 
-	HOST ~ErTexture()
+	HOST virtual ~ErTexture()
 	{
 	}
 	

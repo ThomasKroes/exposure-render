@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "geometry.h"
+#include "Intersection.h"
 #include "sample.h"
 
 namespace ExposureRender

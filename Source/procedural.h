@@ -22,12 +22,6 @@ namespace ExposureRender
 class EXPOSURE_RENDER_DLL Procedural
 {
 public:
-	Enums::ProceduralType		Type;
-	ColorXYZf					UniformColor;
-	ColorXYZf					CheckerColor1;
-	ColorXYZf					CheckerColor2;
-	ColorTransferFunction1D		Gradient;
-
 	HOST Procedural()
 	{
 		this->Type = Enums::Uniform;
@@ -52,6 +46,12 @@ public:
 
 		return *this;
 	}
+
+	Enums::ProceduralType		Type;
+	ColorXYZf					UniformColor;
+	ColorXYZf					CheckerColor1;
+	ColorXYZf					CheckerColor2;
+	ColorTransferFunction1D		Gradient;
 };
 
 }

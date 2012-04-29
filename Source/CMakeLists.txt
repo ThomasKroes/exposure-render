@@ -68,6 +68,7 @@ SET(General
 	shape.h
 	matrix.h
 	vector.h
+	boundingbox.h
 	transferfunction.h
 	rendersettings.h
 	timing.h
@@ -79,6 +80,8 @@ SET(General
 	tracer.h
 	volume.h
 	light.h
+	scatterevent.h
+	intersection.h
 	object.h
 	clippingobject.h
 	texture.h

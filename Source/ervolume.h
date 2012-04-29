@@ -30,7 +30,7 @@ public:
 	{
 	}
 
-	HOST ~ErVolume()
+	HOST virtual ~ErVolume()
 	{
 	}
 	

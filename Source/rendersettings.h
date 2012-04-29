@@ -25,11 +25,6 @@ public:
 	class EXPOSURE_RENDER_DLL TraversalSettings
 	{
 	public:
-		float				StepSize;
-		float				StepSizeShadow;
-		bool				Shadows;
-		float				MaxShadowDistance;
-
 		HOST TraversalSettings()
 		{
 			this->StepSize			= 0.1f;
@@ -56,18 +51,16 @@ public:
 
 			return *this;
 		}
+
+		float	StepSize;
+		float	StepSizeShadow;
+		bool	Shadows;
+		float	MaxShadowDistance;
 	};
 
 	class EXPOSURE_RENDER_DLL ShadingSettings
 	{
 	public:
-		int					Type;
-		float				DensityScale;
-		bool				OpacityModulated;
-		int					GradientComputation;
-		float				GradientThreshold;
-		float				GradientFactor;
-
 		HOST ShadingSettings()
 		{
 			this->Type					= 0;
@@ -98,100 +91,14 @@ public:
 
 			return *this;
 		}
+
+		int		Type;
+		float	DensityScale;
+		bool	OpacityModulated;
+		int		GradientComputation;
+		float	GradientThreshold;
+		float	GradientFactor;
 	};
-
-	class EXPOSURE_RENDER_DLL Filtering
-	{
-	public:
-		class EXPOSURE_RENDER_DLL GaussianFilterParameters
-		{
-		public:
-			int		KernelRadius;
-			float	Sigma;
-
-			HOST GaussianFilterParameters()
-			{
-				this->KernelRadius	= 2;
-				this->Sigma			= 1.25f;
-			}
-
-			HOST ~GaussianFilterParameters()
-			{
-			}
-
-			HOST GaussianFilterParameters(const GaussianFilterParameters& Other)
-			{
-				*this = Other;
-			}
-
-			HOST GaussianFilterParameters& operator = (const GaussianFilterParameters& Other)
-			{
-				this->KernelRadius	= Other.KernelRadius;
-				this->Sigma			= Other.Sigma;
-
-				return *this;
-			}
-		};
-
-		class EXPOSURE_RENDER_DLL BilateralFilterParameters
-		{
-		public:
-			float	SigmaD;
-			float	SigmaR;
-
-			HOST BilateralFilterParameters()
-			{
-				this->SigmaD	= 5.0f;
-				this->SigmaR	= 5.0f;
-			}
-			
-			HOST ~BilateralFilterParameters()
-			{
-			}
-
-			HOST BilateralFilterParameters(const BilateralFilterParameters& Other)
-			{
-				*this = Other;
-			}
-
-			HOST BilateralFilterParameters& operator = (const BilateralFilterParameters& Other)
-			{
-				this->SigmaD	= Other.SigmaD;
-				this->SigmaR	= Other.SigmaR;
-
-				return *this;
-			}
-		};
-
-		// FIXME
-		GaussianFilterParameters	FrameEstimateFilterParams;
-		BilateralFilterParameters	PostProcessingFilterParams;
-
-		HOST Filtering()
-		{
-		}
-
-		HOST ~Filtering()
-		{
-		}
-		
-		HOST Filtering(const Filtering& Other)
-		{
-			*this = Other;
-		}
-
-		HOST Filtering& operator = (const Filtering& Other)
-		{
-			this->FrameEstimateFilterParams		= Other.FrameEstimateFilterParams;
-			this->PostProcessingFilterParams	= Other.PostProcessingFilterParams;
-
-			return *this;
-		}
-	};
-
-	TraversalSettings	Traversal;
-	ShadingSettings		Shading;
-	Filtering			Filtering;
 
 	HOST RenderSettings()
 	{
@@ -210,10 +117,12 @@ public:
 	{
 		this->Traversal		= Other.Traversal;
 		this->Shading		= Other.Shading;
-		this->Filtering		= Other.Filtering;
 
 		return *this;
 	}
+
+	TraversalSettings	Traversal;
+	ShadingSettings		Shading;
 };
 
 }

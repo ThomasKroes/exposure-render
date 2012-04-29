@@ -22,8 +22,6 @@ namespace ExposureRender
 class EXPOSURE_RENDER_DLL Matrix44
 {
 public:
-	float NN[4][4];
-
 	HOST Matrix44()
 	{
 		for (int i = 0; i < 4; i++)
@@ -48,6 +46,8 @@ public:
 
 		return *this;
 	}
+
+	float NN[4][4];
 };
 
 }

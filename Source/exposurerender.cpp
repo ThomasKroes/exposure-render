@@ -14,6 +14,3 @@
 #define __CUDA_ARCH__ 200
 
 #include "buffer.h"
-
-ExposureRender::BitmapBuffer gBitmapBuffer;
-ExposureRender::VolumeBuffer gVolumeBuffer;

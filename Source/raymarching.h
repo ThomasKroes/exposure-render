@@ -18,6 +18,7 @@
 #include "volumes.h"
 #include "transferfunctions.h"
 #include "shapes.h"
+#include "scatterevent.h"
 
 namespace ExposureRender
 {

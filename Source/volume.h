@@ -14,6 +14,7 @@
 #pragma once
 
 #include "ervolume.h"
+#include "boundingbox.h"
 
 namespace ExposureRender
 {
