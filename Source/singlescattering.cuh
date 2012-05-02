@@ -14,7 +14,6 @@
 #pragma once
 
 #include "macros.cuh"
-
 #include "utilities.h"
 #include "transport.h"
 #include "camera.h"
@@ -99,9 +98,9 @@ KERNEL void KrnlSingleScattering()
 	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
 }
 
-void SingleScattering(int Width, int Height)
+void SingleScattering(const Tracer& Tracer)
 {
-	LAUNCH_DIMENSIONS(Width, Height, 1, 16, 8, 1)
+	LAUNCH_DIMENSIONS(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1], 1, 16, 8, 1)
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlSingleScattering<<<GridDim, BlockDim>>>()), "Single Scattering"); 
 }
 

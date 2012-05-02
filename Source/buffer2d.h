@@ -19,25 +19,19 @@ namespace ExposureRender
 {
 
 template<class T>
-class EXPOSURE_RENDER_DLL Buffer2D : public Buffer
+class EXPOSURE_RENDER_DLL Buffer2D : public Buffer<T>
 {
 public:
 	HOST Buffer2D(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (2D)") :
-		Buffer(MemoryType, pName),
-		Resolution(0),
-		NoElements(0),
-		Data(NULL),
-		Dirty(false)
+		Buffer<T>(MemoryType, pName),
+		Resolution(0)
 	{
 		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
 	}
 
 	HOST Buffer2D(const Buffer2D& Other) :
-		Buffer(),
-		Resolution(0),
-		NoElements(0),
-		Data(NULL),
-		Dirty(false)
+		Buffer<T>(),
+		Resolution(0)
 	{
 		DebugLog("%s: Other = %s", __FUNCTION__, Other.GetFullName());
 		
@@ -185,6 +179,11 @@ public:
 		return this->GetNoElements() * sizeof(T);
 	}
 
+	HOST_DEVICE T* GetData(void) const
+	{
+		return this->Data;
+	}
+
 	HOST_DEVICE T& operator()(const int& x = 0, const int& y = 0) const
 	{
 		return this->Data[y * this->Resolution[0] + x];
@@ -200,11 +199,7 @@ public:
 		return this->Data[i];
 	}
 
-	Enums::MemoryType	MemoryType;
-	Vec2i				Resolution;
-	int					NoElements;
-	T*					Data;
-	mutable bool		Dirty;
+	Vec2i	Resolution;
 };
 
 class RandomSeedBuffer2D : public Buffer2D<unsigned int>

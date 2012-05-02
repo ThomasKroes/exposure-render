@@ -41,14 +41,9 @@ ExposureRender::Cuda::List<ExposureRender::Texture, ExposureRender::ErTexture>		
 ExposureRender::Cuda::List<ExposureRender::Bitmap, ExposureRender::ErBitmap>					gBitmaps("gpBitmaps");
 
 #include "singlescattering.cuh"
-
-/*
-
-
 #include "estimate.cuh"
 #include "toneMap.cuh"
 #include "gaussianfilter.cuh"
-*/
 
 namespace ExposureRender
 {
@@ -125,19 +120,21 @@ EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap, const bool& Bind /*=
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 {
-//	gTracers.Synchronize(TracerID);
+	gTracers.Synchronize(TracerID);
 
-//	SingleScattering(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
-//	ComputeEstimate(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
+	SingleScattering(gTracers[TracerID]);
+	ComputeEstimate(gTracers[TracerID]);
 //	FilterGaussian(Tracer.FrameBuffer.FrameEstimate.GetPtr(), Tracer.FrameBuffer.FrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
-//	ToneMap(gFrameBuffers[TracerID].Resolution[0], gFrameBuffers[TracerID].Resolution[1]);
+	ToneMap(gTracers[TracerID]);
 
-//	gTracers[TracerID].NoIterations++;
+	gTracers[TracerID].NoIterations++;
 }
 
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData)
 {
-//	Cuda::MemCopyDeviceToHost(gFrameBuffers[TracerID].DisplayEstimate.GetPtr(), (ColorRGBAuc*)pData, gFrameBuffers[TracerID].DisplayEstimate.GetNoElements());
+	FrameBuffer& FB = gTracers[TracerID].FrameBuffer;
+
+	Cuda::MemCopyDeviceToHost(FB.DisplayEstimate.GetData(), (ColorRGBAuc*)pData, FB.DisplayEstimate.GetNoElements());
 }
 
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance)

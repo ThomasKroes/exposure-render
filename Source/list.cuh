@@ -102,45 +102,60 @@ public:
 
 	HOST void Synchronize(const int& ID = 0)
 	{
-		DebugLog(__FUNCTION__);
+//		DebugLog(__FUNCTION__);
 
 		if (this->Map.size() <= 0)
-			DebugLog("%s failed, map is empty", __FUNCTION__);
+			return; // DebugLog("%s failed, map is empty", __FUNCTION__);
 
-		D* pHostList = (D*)malloc(this->Map.size() * sizeof(D));
-	
-		int Size = 0, Offset = 0;
-
-		for (this->MapIt = this->Map.begin(); this->MapIt != this->Map.end(); this->MapIt++)
+		if (ID == 0)
 		{
-			memcpy((void*)&pHostList[Size], (void*)this->MapIt->second, sizeof(D));
-			HashMap[this->MapIt->first] = Size;
-
-			if (this->MapIt->first == ID)
-				Offset = Size;
-
-			Size++;
-		}
+			D* pHostList = (D*)malloc(this->Map.size() * sizeof(D));
 		
-		Cuda::Free(this->DeviceList);
-		Cuda::Allocate(this->DeviceList, (int)this->Map.size());
-		Cuda::MemCopyHostToDevice(pHostList, this->DeviceList, Size);
-		Cuda::MemCopyHostToDeviceSymbol(&this->DeviceList, this->DeviceSymbol, 1, Offset);
+			int Size = 0;
 
-		free(pHostList);
+			for (this->MapIt = this->Map.begin(); this->MapIt != this->Map.end(); this->MapIt++)
+			{
+				memcpy((void*)&pHostList[Size], (void*)this->MapIt->second, sizeof(D));
+				HashMap[this->MapIt->first] = Size;
+				Size++;
+			}
+			
+			Cuda::Free(this->DeviceList);
+			Cuda::Allocate(this->DeviceList, (int)this->Map.size());
+			Cuda::MemCopyHostToDevice(pHostList, this->DeviceList, Size);
+			Cuda::MemCopyHostToDeviceSymbol(&this->DeviceList, this->DeviceSymbol);
+		
+			free(pHostList);
+		}
+		else
+		{
+			if (!this->Exists(ID))
+				return;
+
+			Cuda::Free(this->DeviceList);
+			Cuda::Allocate(this->DeviceList);
+			
+			this->MapIt = this->Map.find(ID);
+
+			Cuda::MemCopyHostToDevice(this->MapIt->second, this->DeviceList);
+			Cuda::MemCopyHostToDeviceSymbol(&this->DeviceList, this->DeviceSymbol);
+		}
 	}
 
-	HOST D* operator[](const int& i)
+	HOST D& operator[](const int& i)
 	{
-		DebugLog(__FUNCTION__);
+//		DebugLog(__FUNCTION__);
 
 		if (!this->Exists(i))
 		{
-			DebugLog("%s failed, resource item with ID:%d does not exist", __FUNCTION__, i);
-			return NULL;
+			char Message[MAX_CHAR_SIZE];
+
+			sprintf_s(Message, MAX_CHAR_SIZE, "%s failed, resource item with ID:%d does not exist", __FUNCTION__, i);
+
+			throw(Exception(Enums::Warning, Message));
 		}
 
-		return this->Map[i];
+		return *this->Map[i];
 	}
 
 	map<int, D*>						Map;

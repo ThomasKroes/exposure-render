@@ -19,25 +19,19 @@ namespace ExposureRender
 {
 
 template<class T>
-class EXPOSURE_RENDER_DLL Buffer1D : public Buffer
+class EXPOSURE_RENDER_DLL Buffer1D : public Buffer<T>
 {
 public:
 	HOST Buffer1D(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (1D)") :
 		Buffer(MemoryType, pName),
-		Resolution(0),
-		NoElements(0),
-		Data(NULL),
-		Dirty(false)
+		Resolution(0)
 	{
 		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
 	}
 
 	HOST Buffer1D(const Buffer1D& Other) :
 		Buffer(),
-		Resolution(0),
-		NoElements(0),
-		Data(NULL),
-		Dirty(false)
+		Resolution(0)
 	{
 		DebugLog("%s: Other = %s", __FUNCTION__, Other.GetFullName());
 		
@@ -190,11 +184,7 @@ public:
 		return this->Data[i];
 	}
 
-	Enums::MemoryType	MemoryType;
-	int					Resolution;
-	int					NoElements;
-	T*					Data;
-	mutable bool		Dirty;
+	int		Resolution;
 };
 
 }

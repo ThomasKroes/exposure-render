@@ -19,18 +19,19 @@
 namespace ExposureRender
 {
 
+template<class T>
 class EXPOSURE_RENDER_DLL Buffer
 {
 public:
-	HOST Buffer(const Enums::MemoryType& MemoryType, const char* pName) :
-		MemoryType(MemoryType)
+	HOST Buffer(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Untitled") :
+		MemoryType(MemoryType),
+		Name(),
+		FullName(),
+		Data(NULL),
+		NoElements(0),
+		Dirty(false)
 	{
 		this->SetName(pName);
-	}
-
-	HOST Buffer()
-	{
-		this->SetName("Untitled");
 	}
 
 	HOST Buffer(const Buffer& Other)
@@ -79,6 +80,9 @@ public:
 	Enums::MemoryType	MemoryType;
 	char				Name[MAX_CHAR_SIZE];
 	char				FullName[MAX_CHAR_SIZE];
+	T*					Data;
+	int					NoElements;
+	mutable bool		Dirty;
 };
 
 }
