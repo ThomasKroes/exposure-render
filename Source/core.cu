@@ -40,10 +40,11 @@ ExposureRender::Cuda::List<ExposureRender::ClippingObject, ExposureRender::ErCli
 ExposureRender::Cuda::List<ExposureRender::Texture, ExposureRender::ErTexture>					gTextures("gpTextures");
 ExposureRender::Cuda::List<ExposureRender::Bitmap, ExposureRender::ErBitmap>					gBitmaps("gpBitmaps");
 
-/*
-#include "utilities.h"
-
 #include "singlescattering.cuh"
+
+/*
+
+
 #include "estimate.cuh"
 #include "toneMap.cuh"
 #include "gaussianfilter.cuh"

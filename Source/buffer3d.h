@@ -25,6 +25,7 @@ public:
 	HOST Buffer3D(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (3D)") :
 		Buffer(MemoryType, pName),
 		Resolution(0),
+		NoElements(0),
 		Data(NULL),
 		Dirty(false)
 	{
@@ -34,6 +35,7 @@ public:
 	HOST Buffer3D(const Buffer3D& Other) :
 		Buffer(),
 		Resolution(0),
+		NoElements(0),
 		Data(NULL),
 		Dirty(false)
 	{
@@ -81,9 +83,9 @@ public:
 #endif
 		}
 				
-		this->Resolution = Vec3i(0);
-
-		this->Dirty = true;
+		this->Resolution	= Vec3i(0);
+		this->NoElements	= 0;
+		this->Dirty			= true;
 	}
 
 	HOST void Destroy(void)
@@ -91,13 +93,14 @@ public:
 		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
 
 		this->Resize(Vec3i(0));
-
+		
 		this->Dirty = true;
 	}
 
 	HOST void Reset(void)
 	{
 		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
+		
 		if (this->GetNoElements() <= 0)
 			return;
 		
@@ -108,7 +111,7 @@ public:
 		if (this->MemoryType == Enums::Device)
 			Cuda::MemSet(this->Data, 0, this->GetNoElements());
 #endif
-
+		
 		this->Dirty = true;
 	}
 
@@ -121,9 +124,10 @@ public:
 		else
 			this->Free();
 
-		this->Resolution = Resolution;
+		this->Resolution	= Resolution;
+		this->NoElements	= this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
 
-		if (this->GetNoElements() <= 0)
+		if (this->NoElements <= 0)
 			return;
 
 		if (this->MemoryType == Enums::Host)
@@ -143,7 +147,7 @@ public:
 
 		this->Resize(Resolution);
 
-		if (this->GetNoElements() <= 0)
+		if (this->NoElements <= 0)
 			return;
 
 		if (this->MemoryType == Enums::Host)
@@ -173,7 +177,7 @@ public:
 
 	HOST_DEVICE int GetNoElements(void) const
 	{
-		return this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
+		return this->NoElements;
 	}
 
 	HOST_DEVICE int GetNoBytes(void) const
@@ -198,6 +202,7 @@ public:
 
 	Enums::MemoryType	MemoryType;
 	Vec3i				Resolution;
+	int					NoElements;
 	T*					Data;
 	mutable bool		Dirty;
 };

@@ -25,63 +25,49 @@ public:
 	HOST Buffer2D(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Buffer (2D)") :
 		Buffer(MemoryType, pName),
 		Resolution(0),
+		NoElements(0),
 		Data(NULL),
-		ModifiedTime(0)
+		Dirty(false)
 	{
-		DebugLog("Creating 2D Buffer: %s", this->GetFullName());
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
+	}
+
+	HOST Buffer2D(const Buffer2D& Other) :
+		Buffer(),
+		Resolution(0),
+		NoElements(0),
+		Data(NULL),
+		Dirty(false)
+	{
+		DebugLog("%s: Other = %s", __FUNCTION__, Other.GetFullName());
+		
+		*this = Other;
 	}
 
 	HOST virtual ~Buffer2D(void)
 	{
+		DebugLog(__FUNCTION__);
 		this->Free();
 	}
 
-	HOST void Resize(const Vec2i& Resolution)
+	HOST Buffer2D& operator = (const Buffer2D& Other)
 	{
-		DebugLog("Resizing 2D buffer: %s, %d x %d", this->GetFullName(), Resolution[0], Resolution[1]);
-
-		if (this->Resolution == Resolution)
-			return;
-		else
-			this->Free();
-
-		this->Resolution = Resolution;
-
-		if (this->GetNoElements() <= 0)
-			return;
-
-		if (this->MemoryType == Enums::Host)
-			this->Data = (T*)malloc(this->GetNoBytes());
-
-#ifdef __CUDA_ARCH__
-		if (this->MemoryType == Enums::Device)
-			Cuda::Allocate(this->Data, this->GetNoElements());
-#endif
-
-		this->Reset();
-	}
-
-	HOST void Reset(void)
-	{
-		DebugLog("Resetting 2D buffer: %s", this->GetFullName());
-
-		if (this->GetNoElements() <= 0)
-			return;
+		DebugLog("%s: this = %s, Other = %s", __FUNCTION__, this->GetFullName(), Other.GetFullName());
 		
-		if (this->MemoryType == Enums::Host)
-			memset(this->Data, 0, this->GetNoBytes());
+		if (Other.Dirty)
+		{
+			this->Set(Other.MemoryType, Other.Resolution, Other.Data);
+			Other.Dirty = false;
+		}
+		
+		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
 
-#ifdef __CUDA_ARCH__
-		if (this->MemoryType == Enums::Device)
-			Cuda::MemSet(this->Data, 0, this->GetNoElements());
-#endif
-
-		this->ModifiedTime++;
+		return *this;
 	}
 
 	HOST void Free(void)
 	{
-		DebugLog("Freeing 2D buffer: %s", this->GetFullName());
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
 
 		if (this->Data)
 		{
@@ -97,16 +83,72 @@ public:
 #endif
 		}
 				
-		this->Resolution = Vec2i(0);
+		this->Resolution	= Vec2i(0);
+		this->NoElements	= 0;
+		this->Dirty			= true;
+	}
 
-		this->ModifiedTime++;
+	HOST void Destroy(void)
+	{
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
+
+		this->Resize(Vec2i(0));
+		
+		this->Dirty = true;
+	}
+
+	HOST void Reset(void)
+	{
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
+		
+		if (this->GetNoElements() <= 0)
+			return;
+		
+		if (this->MemoryType == Enums::Host)
+			memset(this->Data, 0, this->GetNoBytes());
+
+#ifdef __CUDA_ARCH__
+		if (this->MemoryType == Enums::Device)
+			Cuda::MemSet(this->Data, 0, this->GetNoElements());
+#endif
+		
+		this->Dirty = true;
+	}
+
+	HOST void Resize(const Vec2i& Resolution)
+	{
+		DebugLog("%s: %s, %d x %d", __FUNCTION__, this->GetFullName(), Resolution[0], Resolution[1]);
+
+		if (this->Resolution == Resolution)
+			return;
+		else
+			this->Free();
+
+		this->Resolution	= Resolution;
+		this->NoElements	= this->Resolution[0] * this->Resolution[1];
+
+		if (this->NoElements <= 0)
+			return;
+
+		if (this->MemoryType == Enums::Host)
+			this->Data = (T*)malloc(this->GetNoBytes());
+
+#ifdef __CUDA_ARCH__
+		if (this->MemoryType == Enums::Device)
+			Cuda::Allocate(this->Data, this->GetNoElements());
+#endif
+
+		this->Reset();
 	}
 
 	HOST void Set(const Enums::MemoryType& MemoryType, const Vec2i& Resolution, T* Data)
 	{
-		DebugLog("Setting 2D buffer: %s, %d x %d", this->GetFullName(), Resolution[0], Resolution[1]);
+		DebugLog("%s: %s, %d x %d", __FUNCTION__, this->GetFullName(), Resolution[0], Resolution[1]);
 
 		this->Resize(Resolution);
+
+		if (this->NoElements <= 0)
+			return;
 
 		if (this->MemoryType == Enums::Host)
 		{
@@ -130,12 +172,12 @@ public:
 		}
 #endif
 
-		this->ModifiedTime++;
+		this->Dirty = true;
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
 	{
-		return this->Resolution[0] * this->Resolution[1];
+		return this->NoElements;
 	}
 
 	HOST_DEVICE int GetNoBytes(void) const
@@ -158,21 +200,11 @@ public:
 		return this->Data[i];
 	}
 
-	HOST Buffer2D& operator = (const Buffer2D& Other)
-	{
-		DebugLog("Assigning %s to %s", Other.GetFullName(), this->GetFullName());
-
-		this->Set(Other.MemoryType, Other.Resolution, Other.Data);
-		
-		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
-
-		return *this;
-	}
-
 	Enums::MemoryType	MemoryType;
 	Vec2i				Resolution;
+	int					NoElements;
 	T*					Data;
-	long				ModifiedTime;
+	mutable bool		Dirty;
 };
 
 class RandomSeedBuffer2D : public Buffer2D<unsigned int>
@@ -197,4 +229,5 @@ public:
 		delete[] pSeeds;
 	}
 };
+
 }

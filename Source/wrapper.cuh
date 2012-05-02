@@ -27,6 +27,9 @@ using namespace std;
 namespace ExposureRender
 {
 
+namespace Cuda
+{
+
 static inline void HandleCudaError(const cudaError_t& CudaError, const char* pTitle = "")
 {
 	char Message[256];

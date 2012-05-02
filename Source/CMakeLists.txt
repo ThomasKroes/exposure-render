@@ -45,7 +45,6 @@ SOURCE_GROUP("Core" FILES ${vtkErCoreSources})
 # General
 SET(General
 	device.h
-	cuda.h
 	utilities.h
 	geometry.h
 	transport.h

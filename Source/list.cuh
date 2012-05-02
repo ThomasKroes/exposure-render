@@ -100,7 +100,7 @@ public:
 		this->Synchronize();
 	}
 
-	HOST void Synchronize(const int& Offset = 0)
+	HOST void Synchronize(const int& ID = 0)
 	{
 		DebugLog(__FUNCTION__);
 
@@ -109,12 +109,16 @@ public:
 
 		D* pHostList = (D*)malloc(this->Map.size() * sizeof(D));
 	
-		int Size = 0;
+		int Size = 0, Offset = 0;
 
 		for (this->MapIt = this->Map.begin(); this->MapIt != this->Map.end(); this->MapIt++)
 		{
 			memcpy((void*)&pHostList[Size], (void*)this->MapIt->second, sizeof(D));
 			HashMap[this->MapIt->first] = Size;
+
+			if (this->MapIt->first == ID)
+				Offset = Size;
+
 			Size++;
 		}
 		

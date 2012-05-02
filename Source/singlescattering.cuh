@@ -13,6 +13,9 @@
 
 #pragma once
 
+#include "macros.cuh"
+
+#include "utilities.h"
 #include "transport.h"
 #include "camera.h"
 

@@ -14,7 +14,7 @@
 #pragma once
 
 #include "geometry.h"
-#include "cuda.h"
+#include "wrapper.cuh"
 
 namespace ExposureRender
 {
