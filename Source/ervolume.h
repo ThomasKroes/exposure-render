@@ -25,41 +25,49 @@ class EXPOSURE_RENDER_DLL ErVolume : public ErBindable
 public:
 	HOST ErVolume() :
 		ErBindable(),
-		HostVoxels(Enums::Host, "Voxels"),
+		Voxels(Enums::Host, "Host Voxels"),
 		NormalizeSize(false),
 		Spacing(1.0f)
 	{
+		DebugLog("ErVolume()");
 	}
 
-	HOST virtual ~ErVolume()
+	HOST virtual ~ErVolume(void)
 	{
+		DebugLog("~ErVolume()");
 	}
-	
+
 	HOST ErVolume(const ErVolume& Other)
 	{
+		DebugLog("ErVolume(const ErVolume& Other)");
+
 		*this = Other;
 	}
 
 	HOST ErVolume& ErVolume::operator = (const ErVolume& Other)
 	{
+		DebugLog("ErVolume& ErVolume::operator = (const ErVolume& Other)");
+
 		ErBindable::operator=(Other);
 
-		this->HostVoxels		= Other.HostVoxels;
-		this->NormalizeSize		= Other.NormalizeSize;
-		this->Spacing			= Other.Spacing;
+		this->Voxels		= Other.Voxels;
+		this->NormalizeSize	= Other.NormalizeSize;
+		this->Spacing		= Other.Spacing;
 
 		return *this;
 	}
 
 	HOST void BindVoxels(const Vec3i& Resolution, const Vec3f& Spacing, unsigned short* Voxels, const bool& NormalizeSize = false)
 	{
-		this->HostVoxels.Set(Enums::Host, Resolution, Voxels);
+		DebugLog("ErVolume::BindVoxels()");
+
+		this->Voxels.Set(Enums::Host, Resolution, Voxels);
 
 		this->NormalizeSize	= NormalizeSize;
 		this->Spacing		= Spacing;
 	}
 
-	Buffer3D<unsigned short>	HostVoxels;
+	Buffer3D<unsigned short>	Voxels;
 	bool						NormalizeSize;
 	Vec3f						Spacing;
 };

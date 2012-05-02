@@ -28,7 +28,22 @@ public:
 		Data(NULL),
 		ModifiedTime(0)
 	{
-		DebugLog("Creating 3D Buffer: %s", this->GetFullName());
+		DebugLog("Buffer3D(): %s", this->GetFullName());
+	}
+
+	HOST Buffer3D(const Buffer3D& Other)
+	{
+		DebugLog("Buffer3D(const Buffer3D& Other = %s)", Other.GetFullName());
+		
+		*this = Other;
+
+		/*
+		char NewName[MAX_CHAR_SIZE];
+
+		sprintf_s(NewName, MAX_CHAR_SIZE, "Copy of %s", Other.GetName());
+
+		this->SetName(NewName);
+		*/
 	}
 
 	HOST virtual ~Buffer3D(void)
@@ -36,9 +51,20 @@ public:
 		this->Free();
 	}
 
+	HOST Buffer3D& operator = (const Buffer3D& Other)
+	{
+		DebugLog("Assigning %s to %s", Other.GetFullName(), this->GetFullName());
+
+		this->Set(Other.MemoryType, Other.Resolution, Other.Data);
+		
+		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
+
+		return *this;
+	}
+
 	HOST void Resize(const Vec3i& Resolution)
 	{
-		DebugLog("Resizing 3D buffer: %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
+		DebugLog("Buffer3D::Resize(): %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
 
 		if (this->Resolution == Resolution)
 			return;
@@ -63,7 +89,7 @@ public:
 
 	HOST void Reset(void)
 	{
-		DebugLog("Resetting 3D buffer: %s", this->GetFullName());
+		DebugLog("Buffer3D::Reset(): %s", this->GetFullName());
 
 		if (this->GetNoElements() <= 0)
 			return;
@@ -81,7 +107,7 @@ public:
 
 	HOST void Free(void)
 	{
-		DebugLog("Freeing 3D buffer: %s", this->GetFullName());
+		DebugLog("Buffer3D::Free(): %s", this->GetFullName());
 
 		if (this->Data)
 		{
@@ -104,7 +130,7 @@ public:
 
 	HOST void Set(const Enums::MemoryType& MemoryType, const Vec3i& Resolution, T* Data)
 	{
-		DebugLog("Setting 3D buffer: %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
+		DebugLog("Buffer3D::Set(): %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
 
 		this->Resize(Resolution);
 
@@ -156,17 +182,6 @@ public:
 	HOST_DEVICE T& operator[](const int& i) const
 	{
 		return this->Data[i];
-	}
-
-	HOST Buffer3D& operator = (const Buffer3D& Other)
-	{
-		DebugLog("Assigning %s to %s", Other.GetFullName(), this->GetFullName());
-
-		this->Set(Other.MemoryType, Other.Resolution, Other.Data);
-		
-		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
-
-		return *this;
 	}
 
 	Enums::MemoryType	MemoryType;

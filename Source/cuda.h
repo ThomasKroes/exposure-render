@@ -135,7 +135,7 @@ static inline void GetSymbolAddress(void** pDevicePointer, char* pSymbol)
 	HandleCudaError(cudaGetSymbolAddress(pDevicePointer, pSymbol), "cudaGetSymbolAddress");
 }
 
-template<typename T, int MaxSize = 256>
+template<typename T, typename U, int MaxSize = 256>
 class List
 {
 public:
@@ -162,7 +162,7 @@ public:
 		return this->ResourceMapIt != this->ResourceMap.end();
 	}
 
-	HOST void Bind(const T& Resource)
+	HOST void Bind(const U& Resource)
 	{
 		if (this->ResourceMap.size() >= MaxSize)
 			throw(Exception(Enums::Warning, "Maximum number of ResourceMap reached"));
@@ -172,15 +172,16 @@ public:
 		if (!Exists)
 		{
 			Resource.ID = this->ResourceCounter;
-			this->ResourceMap[Resource.ID] = Resource;
+//			this->ResourceMap[Resource.ID];// = Resource;
+			this->ResourceMap.insert(pair<int,T>(Resource.ID, T(Resource)));
 			this->ResourceCounter++;
 		}
 		else
 		{
-			this->ResourceMap[Resource.ID] = Resource;
+//			this->ResourceMap[Resource.ID] = Resource;
 		}
 
-		this->Synchronize();
+//		this->Synchronize();
 	}
 
 	HOST void Unbind(int ID)

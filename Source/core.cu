@@ -30,7 +30,7 @@ DEVICE ExposureRender::ClippingObject*	gpClippingObjects	= NULL;
 DEVICE ExposureRender::Texture*			gpTextures			= NULL;
 DEVICE ExposureRender::Bitmap*			gpBitmaps			= NULL;
 
-ExposureRender::Cuda::List<ExposureRender::Volume>						gVolumes("gpVolumes");/*
+ExposureRender::Cuda::List<ExposureRender::Volume, ExposureRender::ErVolume>						gVolumes("gpVolumes");/*
 ExposureRender::Cuda::List<ExposureRender::Light>						gLights("gpLights");
 ExposureRender::Cuda::List<ExposureRender::Object>						gObjects("gpObjects");
 ExposureRender::Cuda::List<ExposureRender::ClippingObject>				gClippingObjects("gpClippingObjects");
@@ -54,71 +54,85 @@ namespace ExposureRender
 
 EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer)
 {
+	DebugLog("BindTracer()");
 //	gTracers.Bind(Tracer);
 }
 
 EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID)
 {
+	DebugLog("UnbindTracer()");
 //	gTracers.Unbind(TracerID);
 }
 
 EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume)
 {
+	DebugLog("BindVolume()");
 	gVolumes.Bind(Volume);
 }
 
 EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
 {
+	DebugLog("UnbindVolume()");
 //	gVolumes.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light)
 {
+	DebugLog("BindLight()");
 //	gLights.Bind(Light);
 }
 
 EXPOSURE_RENDER_DLL void UnbindLight(int ID)
 {
+	DebugLog("UnbindLight()");
 //	gLights.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object)
 {
+	DebugLog("BindObject()");
 //	gObjects.Bind(Object);
 }
 
 EXPOSURE_RENDER_DLL void UnbindObject(int ID)
 {
+	DebugLog("UnbindObject()");
 //	gObjects.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject)
 {
+	DebugLog("BindClippingObject()");
 //	gClippingObjects.Bind(ClippingObject);
 }
 
 EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
 {
+	DebugLog("UnbindClippingObject()");
 //	gClippingObjects.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture)
 {
+	DebugLog("BindTexture()");
 //	gTextures.Bind(Texture);
 }
 
 EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
 {
+	DebugLog("UnbindTexture()");
 //	gTextures.Unbind(ID);
 }
 
 EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap)
 {
+	DebugLog("BindBitmap()");
 //	gBitmaps.Bind(Bitmap);
 }
 
 EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
 {
+	DebugLog("UnbindBitmap()");
 //	gBitmaps.Unbind(ID);
 }
 
