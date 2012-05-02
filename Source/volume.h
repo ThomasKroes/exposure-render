@@ -92,8 +92,8 @@ public:
 
 		Vec3f Size((float)this->Voxels.Resolution[0] * this->Spacing[0], (float)this->Voxels.Resolution[1] *this->Spacing[1], (float)this->Voxels.Resolution[2] * this->Spacing[2]);
 		
-		this->BoundingBox.SetMinP(-0.5f * Size);
-		this->BoundingBox.SetMaxP(0.5f * Size);
+		this->BoundingBox.SetMinP(-0.5f);// * Size);
+		this->BoundingBox.SetMaxP(0.5f);// * Size);
 
 		const float MinVoxelSize = min(this->Spacing[0], min(this->Spacing[1], this->Spacing[2]));
 

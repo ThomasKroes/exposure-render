@@ -43,6 +43,8 @@ public:
 		
 		this->FrameBuffer.Resize(Other.Camera.FilmSize);
 
+		this->Camera.Update();
+
 		return *this;
 	}
 

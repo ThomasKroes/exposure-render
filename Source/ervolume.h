@@ -57,7 +57,6 @@ public:
 
 	HOST void BindVoxels(const Vec3i& Resolution, const Vec3f& Spacing, unsigned short* Voxels, const bool& NormalizeSize = false)
 	{
-		
 		this->Voxels.Set(Enums::Host, Resolution, Voxels);
 
 		this->NormalizeSize	= NormalizeSize;
