@@ -19,25 +19,53 @@
 namespace ExposureRender
 {
 
-class Bitmap : public ErBitmap
+class Bitmap
 {
 public:
 	HOST Bitmap() :
-		ErBitmap(),
-		DevicePixels(Enums::Device, "Pixels")
+		Pixels(Enums::Device, "Device Pixels")
 	{
+		DebugLog(__FUNCTION__);
 	}
 
-	HOST Bitmap& operator = (const ErBitmap& Other)
+	HOST virtual ~Bitmap(void)
 	{
-		ErBitmap::operator = (Other);
+		DebugLog(__FUNCTION__);
+	}
 
-		this->DevicePixels = Other.HostPixels;
+	HOST Bitmap(const Bitmap& Other) :
+		Pixels(Enums::Device, "Device Pixels")
+	{
+		DebugLog(__FUNCTION__);
+		*this = Other;
+	}
+		
+	HOST Bitmap(const ErBitmap& Other) :
+		Pixels(Enums::Device, "Device Pixels")
+	{
+		DebugLog(__FUNCTION__);
+		*this = Other;
+	}
+
+	HOST Bitmap& operator = (const Bitmap& Other)
+	{
+		DebugLog(__FUNCTION__);
+
+		this->Pixels = Other.Pixels;
 
 		return *this;
 	}
 
-	Buffer2D<ColorRGBAuc>	DevicePixels;
+	HOST Bitmap& operator = (const ErBitmap& Other)
+	{
+		DebugLog(__FUNCTION__);
+
+		this->Pixels = Other.Pixels;
+
+		return *this;
+	}
+
+	Buffer2D<ColorRGBAuc> Pixels;
 };
 
 }

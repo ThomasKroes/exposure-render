@@ -25,7 +25,7 @@ class EXPOSURE_RENDER_DLL ErBitmap : public ErBindable
 public:
 	HOST ErBitmap() :
 		ErBindable(),
-		HostPixels(Enums::Host, "Pixels")
+		Pixels(Enums::Host, "Host Pixels")
 	{
 	}
 
@@ -33,24 +33,26 @@ public:
 	{
 	}
 
-	HOST ErBitmap(const ErBitmap& Other)
+	HOST ErBitmap(const ErBitmap& Other) :
+		ErBindable(),
+		Pixels(Enums::Host, "Host Pixels")
 	{
 		*this = Other;
 	}
 
 	HOST ErBitmap& operator = (const ErBitmap& Other)
 	{
-		this->HostPixels = Other.HostPixels;
+		this->Pixels = Other.Pixels;
 		
 		return *this;
 	}
 
 	HOST void BindPixels(const Vec2i& Resolution, ColorRGBAuc* Pixels)
 	{
-		this->HostPixels.Set(Enums::Host, Resolution, Pixels);
+		this->Pixels.Set(Enums::Host, Resolution, Pixels);
 	}
 
-	Buffer2D<ColorRGBAuc>	HostPixels;
+	Buffer2D<ColorRGBAuc> Pixels;
 };
 
 }

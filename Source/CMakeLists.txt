@@ -135,6 +135,9 @@ SET(Cuda
 	gaussianfilter.cuh
 	tonemap.cuh
 	autofocus.cuh
+	list.cuh
+	wrapper.cuh
+	launcher.cuh
 	core.cu
 )
 

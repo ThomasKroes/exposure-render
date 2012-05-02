@@ -28,17 +28,22 @@ public:
 		GradientDeltaZ(),
 		Voxels(Enums::Device, "Device Voxels")
 	{
-		DebugLog("Volume()");
+		DebugLog(__FUNCTION__);
 	}
 
 	HOST virtual ~Volume(void)
 	{
-		DebugLog("~Volume()");
+		DebugLog(__FUNCTION__);
 	}
 
-	HOST Volume(const Volume& Other)
+	HOST Volume(const Volume& Other) :
+		BoundingBox(),
+		GradientDeltaX(),
+		GradientDeltaY(),
+		GradientDeltaZ(),
+		Voxels(Enums::Device, "Device Voxels")
 	{
-		DebugLog("Volume(const Volume& Other)");
+		DebugLog(__FUNCTION__);
 		*this = Other;
 	}
 		
@@ -49,13 +54,13 @@ public:
 		GradientDeltaZ(),
 		Voxels(Enums::Device, "Device Voxels")
 	{
-		DebugLog("Volume(const ErVolume& Other)");
+		DebugLog(__FUNCTION__);
 		*this = Other;
 	}
 
 	HOST Volume& Volume::operator = (const Volume& Other)
 	{
-		DebugLog("Volume& Volume::operator = (const Volume& Other)");
+		DebugLog(__FUNCTION__);
 
 		this->BoundingBox		= Other.BoundingBox;
 		this->GradientDeltaX 	= Other.GradientDeltaX;
@@ -70,7 +75,7 @@ public:
 
 	HOST Volume& Volume::operator = (const ErVolume& Other)
 	{
-		DebugLog("Volume& Volume::operator = (const ErVolume& Other)");
+		DebugLog(__FUNCTION__);
 
 		this->Voxels = Other.Voxels;
 

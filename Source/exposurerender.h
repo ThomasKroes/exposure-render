@@ -24,20 +24,13 @@
 namespace ExposureRender
 {
 
-EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer);
-EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID);
-EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume);
-EXPOSURE_RENDER_DLL void UnbindVolume(int ID);
-EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light);
-EXPOSURE_RENDER_DLL void UnbindLight(int ID);
-EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object);
-EXPOSURE_RENDER_DLL void UnbindObject(int ID);
-EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject);
-EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID);
-EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture);
-EXPOSURE_RENDER_DLL void UnbindTexture(int ID);
-EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap);
-EXPOSURE_RENDER_DLL void UnbindBitmap(int ID);
+EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer, const bool& Bind = true);
+EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume, const bool& Bind = true);
+EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light, const bool& Bind = true);
+EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object, const bool& Bind = true);
+EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject, const bool& Bind = true);
+EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture, const bool& Bind = true);
+EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap, const bool& Bind = true);
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID);
 EXPOSURE_RENDER_DLL void GetEstimate(int TracerID, unsigned char* pData);
 EXPOSURE_RENDER_DLL void GetAutoFocusDistance(int TracerID, int FilmU, int FilmV, float& AutoFocusDistance);

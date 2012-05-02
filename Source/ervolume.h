@@ -29,25 +29,23 @@ public:
 		NormalizeSize(false),
 		Spacing(1.0f)
 	{
-		DebugLog("ErVolume()");
 	}
 
 	HOST virtual ~ErVolume(void)
 	{
-		DebugLog("~ErVolume()");
 	}
 
-	HOST ErVolume(const ErVolume& Other)
+	HOST ErVolume(const ErVolume& Other) :
+		ErBindable(),
+		Voxels(Enums::Host, "Host Voxels"),
+		NormalizeSize(false),
+		Spacing(1.0f)
 	{
-		DebugLog("ErVolume(const ErVolume& Other)");
-
 		*this = Other;
 	}
 
 	HOST ErVolume& ErVolume::operator = (const ErVolume& Other)
 	{
-		DebugLog("ErVolume& ErVolume::operator = (const ErVolume& Other)");
-
 		ErBindable::operator=(Other);
 
 		this->Voxels		= Other.Voxels;
@@ -59,8 +57,7 @@ public:
 
 	HOST void BindVoxels(const Vec3i& Resolution, const Vec3f& Spacing, unsigned short* Voxels, const bool& NormalizeSize = false)
 	{
-		DebugLog("ErVolume::BindVoxels()");
-
+		
 		this->Voxels.Set(Enums::Host, Resolution, Voxels);
 
 		this->NormalizeSize	= NormalizeSize;

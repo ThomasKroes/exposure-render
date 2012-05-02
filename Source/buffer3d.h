@@ -26,45 +26,95 @@ public:
 		Buffer(MemoryType, pName),
 		Resolution(0),
 		Data(NULL),
-		ModifiedTime(0)
+		Dirty(false)
 	{
-		DebugLog("Buffer3D(): %s", this->GetFullName());
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
 	}
 
-	HOST Buffer3D(const Buffer3D& Other)
+	HOST Buffer3D(const Buffer3D& Other) :
+		Buffer(),
+		Resolution(0),
+		Data(NULL),
+		Dirty(false)
 	{
-		DebugLog("Buffer3D(const Buffer3D& Other = %s)", Other.GetFullName());
+		DebugLog("%s: Other = %s", __FUNCTION__, Other.GetFullName());
 		
 		*this = Other;
-
-		/*
-		char NewName[MAX_CHAR_SIZE];
-
-		sprintf_s(NewName, MAX_CHAR_SIZE, "Copy of %s", Other.GetName());
-
-		this->SetName(NewName);
-		*/
 	}
 
 	HOST virtual ~Buffer3D(void)
 	{
+		DebugLog(__FUNCTION__);
 		this->Free();
 	}
 
 	HOST Buffer3D& operator = (const Buffer3D& Other)
 	{
-		DebugLog("Assigning %s to %s", Other.GetFullName(), this->GetFullName());
-
-		this->Set(Other.MemoryType, Other.Resolution, Other.Data);
+		DebugLog("%s: this = %s, Other = %s", __FUNCTION__, this->GetFullName(), Other.GetFullName());
+		
+		if (Other.Dirty)
+		{
+			this->Set(Other.MemoryType, Other.Resolution, Other.Data);
+			Other.Dirty = false;
+		}
 		
 		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
 
 		return *this;
 	}
 
+	HOST void Free(void)
+	{
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
+
+		if (this->Data)
+		{
+			if (this->MemoryType == Enums::Host)
+			{
+				free(this->Data);
+				this->Data = NULL;
+			}
+
+#ifdef __CUDA_ARCH__
+			if (this->MemoryType == Enums::Device)
+				Cuda::Free(this->Data);
+#endif
+		}
+				
+		this->Resolution = Vec3i(0);
+
+		this->Dirty = true;
+	}
+
+	HOST void Destroy(void)
+	{
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
+
+		this->Resize(Vec3i(0));
+
+		this->Dirty = true;
+	}
+
+	HOST void Reset(void)
+	{
+		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
+		if (this->GetNoElements() <= 0)
+			return;
+		
+		if (this->MemoryType == Enums::Host)
+			memset(this->Data, 0, this->GetNoBytes());
+
+#ifdef __CUDA_ARCH__
+		if (this->MemoryType == Enums::Device)
+			Cuda::MemSet(this->Data, 0, this->GetNoElements());
+#endif
+
+		this->Dirty = true;
+	}
+
 	HOST void Resize(const Vec3i& Resolution)
 	{
-		DebugLog("Buffer3D::Resize(): %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
+		DebugLog("%s: %s, %d x %d x %d", __FUNCTION__, this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
 
 		if (this->Resolution == Resolution)
 			return;
@@ -87,52 +137,14 @@ public:
 		this->Reset();
 	}
 
-	HOST void Reset(void)
+	HOST void Set(const Enums::MemoryType& MemoryType, const Vec3i& Resolution, T* Data)
 	{
-		DebugLog("Buffer3D::Reset(): %s", this->GetFullName());
+		DebugLog("%s: %s, %d x %d x %d", __FUNCTION__, this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
+
+		this->Resize(Resolution);
 
 		if (this->GetNoElements() <= 0)
 			return;
-		
-		if (this->MemoryType == Enums::Host)
-			memset(this->Data, 0, this->GetNoBytes());
-
-#ifdef __CUDA_ARCH__
-		if (this->MemoryType == Enums::Device)
-			Cuda::MemSet(this->Data, 0, this->GetNoElements());
-#endif
-
-		this->ModifiedTime++;
-	}
-
-	HOST void Free(void)
-	{
-		DebugLog("Buffer3D::Free(): %s", this->GetFullName());
-
-		if (this->Data)
-		{
-			if (this->MemoryType == Enums::Host)
-			{
-				free(this->Data);
-				this->Data = NULL;
-			}
-
-#ifdef __CUDA_ARCH__
-			if (this->MemoryType == Enums::Device)
-				Cuda::Free(this->Data);
-#endif
-		}
-				
-		this->Resolution = Vec3i(0);
-
-		this->ModifiedTime++;
-	}
-
-	HOST void Set(const Enums::MemoryType& MemoryType, const Vec3i& Resolution, T* Data)
-	{
-		DebugLog("Buffer3D::Set(): %s, %d x %d x %d", this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
-
-		this->Resize(Resolution);
 
 		if (this->MemoryType == Enums::Host)
 		{
@@ -156,7 +168,7 @@ public:
 		}
 #endif
 
-		this->ModifiedTime++;
+		this->Dirty = true;
 	}
 
 	HOST_DEVICE int GetNoElements(void) const
@@ -187,7 +199,7 @@ public:
 	Enums::MemoryType	MemoryType;
 	Vec3i				Resolution;
 	T*					Data;
-	long				ModifiedTime;
+	mutable bool		Dirty;
 };
 
 }

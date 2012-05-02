@@ -30,17 +30,17 @@ DEVICE ExposureRender::ClippingObject*	gpClippingObjects	= NULL;
 DEVICE ExposureRender::Texture*			gpTextures			= NULL;
 DEVICE ExposureRender::Bitmap*			gpBitmaps			= NULL;
 
-ExposureRender::Cuda::List<ExposureRender::Volume, ExposureRender::ErVolume>						gVolumes("gpVolumes");/*
-ExposureRender::Cuda::List<ExposureRender::Light>						gLights("gpLights");
-ExposureRender::Cuda::List<ExposureRender::Object>						gObjects("gpObjects");
-ExposureRender::Cuda::List<ExposureRender::ClippingObject>				gClippingObjects("gpClippingObjects");
-ExposureRender::Cuda::List<ExposureRender::Texture>						gTextures("gpTextures");
-ExposureRender::Cuda::List<ExposureRender::Bitmap>						gBitmaps("gpBitmaps");
+#include "list.cuh"
 
-ExposureRender::Cuda::SynchronizeSingle<ExposureRender::Tracer>			gTracers("gpTracer");
-ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffers("gpFrameBuffer");
+ExposureRender::Cuda::List<ExposureRender::Tracer, ExposureRender::ErTracer>					gTracers("gpTracer");
+ExposureRender::Cuda::List<ExposureRender::Volume, ExposureRender::ErVolume>					gVolumes("gpVolumes");
+ExposureRender::Cuda::List<ExposureRender::Light, ExposureRender::ErLight>						gLights("gpLights");
+ExposureRender::Cuda::List<ExposureRender::Object, ExposureRender::ErObject>					gObjects("gpObjects");
+ExposureRender::Cuda::List<ExposureRender::ClippingObject, ExposureRender::ErClippingObject>	gClippingObjects("gpClippingObjects");
+ExposureRender::Cuda::List<ExposureRender::Texture, ExposureRender::ErTexture>					gTextures("gpTextures");
+ExposureRender::Cuda::List<ExposureRender::Bitmap, ExposureRender::ErBitmap>					gBitmaps("gpBitmaps");
 
-
+/*
 #include "utilities.h"
 
 #include "singlescattering.cuh"
@@ -52,88 +52,74 @@ ExposureRender::Cuda::SynchronizeSingle<ExposureRender::FrameBuffer>	gFrameBuffe
 namespace ExposureRender
 {
 
-EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer)
+EXPOSURE_RENDER_DLL void BindTracer(const ErTracer& Tracer, const bool& Bind /*= true*/)
 {
-	DebugLog("BindTracer()");
-//	gTracers.Bind(Tracer);
+	DebugLog("%s, Bind = %s", __FUNCTION__, Bind ? "true" : "false");
+	
+	if (Bind)
+		gTracers.Bind(Tracer);
+	else
+		gTracers.Unbind(Tracer);
 }
 
-EXPOSURE_RENDER_DLL void UnbindTracer(int TracerID)
+EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume, const bool& Bind /*= true*/)
 {
-	DebugLog("UnbindTracer()");
-//	gTracers.Unbind(TracerID);
+	DebugLog("%s, Bind = %s", __FUNCTION__, Bind ? "true" : "false");
+
+	if (Bind)
+		gVolumes.Bind(Volume);
+	else
+		gVolumes.Unbind(Volume);
 }
 
-EXPOSURE_RENDER_DLL void BindVolume(const ErVolume& Volume)
+EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light, const bool& Bind /*= true*/)
 {
-	DebugLog("BindVolume()");
-	gVolumes.Bind(Volume);
+	DebugLog("%s, Bind = %s", __FUNCTION__, Bind ? "true" : "false");
+	
+	if (Bind)
+		gLights.Bind(Light);
+	else
+		gLights.Unbind(Light);
 }
 
-EXPOSURE_RENDER_DLL void UnbindVolume(int ID)
+EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object, const bool& Bind /*= true*/)
 {
-	DebugLog("UnbindVolume()");
-//	gVolumes.Unbind(ID);
+	DebugLog("%s, Bind = %s", __FUNCTION__, Bind ? "true" : "false");
+	
+	if (Bind)
+		gObjects.Bind(Object);
+	else
+		gObjects.Unbind(Object);
 }
 
-EXPOSURE_RENDER_DLL void BindLight(const ErLight& Light)
+EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject, const bool& Bind /*= true*/)
 {
-	DebugLog("BindLight()");
-//	gLights.Bind(Light);
+	DebugLog("%s, Bind = %s", __FUNCTION__, Bind ? "true" : "false");
+	
+	if (Bind)
+		gClippingObjects.Bind(ClippingObject);
+	else
+		gClippingObjects.Unbind(ClippingObject);
 }
 
-EXPOSURE_RENDER_DLL void UnbindLight(int ID)
+EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture, const bool& Bind /*= true*/)
 {
-	DebugLog("UnbindLight()");
-//	gLights.Unbind(ID);
+	DebugLog("%s, Bind = %s", __FUNCTION__, Bind ? "true" : "false");
+	
+	if (Bind)
+		gTextures.Bind(Texture);
+	else
+		gTextures.Unbind(Texture);
 }
 
-EXPOSURE_RENDER_DLL void BindObject(const ErObject& Object)
+EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap, const bool& Bind /*= true*/)
 {
-	DebugLog("BindObject()");
-//	gObjects.Bind(Object);
-}
-
-EXPOSURE_RENDER_DLL void UnbindObject(int ID)
-{
-	DebugLog("UnbindObject()");
-//	gObjects.Unbind(ID);
-}
-
-EXPOSURE_RENDER_DLL void BindClippingObject(const ErClippingObject& ClippingObject)
-{
-	DebugLog("BindClippingObject()");
-//	gClippingObjects.Bind(ClippingObject);
-}
-
-EXPOSURE_RENDER_DLL void UnbindClippingObject(int ID)
-{
-	DebugLog("UnbindClippingObject()");
-//	gClippingObjects.Unbind(ID);
-}
-
-EXPOSURE_RENDER_DLL void BindTexture(const ErTexture& Texture)
-{
-	DebugLog("BindTexture()");
-//	gTextures.Bind(Texture);
-}
-
-EXPOSURE_RENDER_DLL void UnbindTexture(int ID)
-{
-	DebugLog("UnbindTexture()");
-//	gTextures.Unbind(ID);
-}
-
-EXPOSURE_RENDER_DLL void BindBitmap(const ErBitmap& Bitmap)
-{
-	DebugLog("BindBitmap()");
-//	gBitmaps.Bind(Bitmap);
-}
-
-EXPOSURE_RENDER_DLL void UnbindBitmap(int ID)
-{
-	DebugLog("UnbindBitmap()");
-//	gBitmaps.Unbind(ID);
+	DebugLog("%s, Bind = %s", __FUNCTION__, Bind ? "true" : "false");
+	
+	if (Bind)
+		gBitmaps.Bind(Bitmap);
+	else
+		gBitmaps.Unbind(Bitmap);
 }
 
 EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
