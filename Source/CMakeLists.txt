@@ -137,7 +137,7 @@ SET(Cuda
 	autofocus.cuh
 	list.cuh
 	wrapper.cuh
-	launcher.cuh
+	macros.cuh
 	core.cu
 )
 
