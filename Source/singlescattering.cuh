@@ -96,7 +96,6 @@ KERNEL void KrnlSingleScattering()
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
 	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
-
 }
 
 void SingleScattering(const Tracer& Tracer)

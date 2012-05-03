@@ -24,6 +24,13 @@ namespace Enums
 		Device
 	};
 
+	enum MemoryUnit
+	{
+		KiloByte,
+		MegaByte,
+		GigaByte
+	};
+
 	enum ProceduralType
 	{
 		Uniform = 0,

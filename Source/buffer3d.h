@@ -63,17 +63,25 @@ public:
 	{
 		DebugLog("%s: %s", __FUNCTION__, this->GetFullName());
 
+		char MemoryString[MAX_CHAR_SIZE];
+		
+		this->GetMemoryString(MemoryString, Enums::MegaByte);
+
 		if (this->Data)
 		{
 			if (this->MemoryType == Enums::Host)
 			{
 				free(this->Data);
 				this->Data = NULL;
+				DebugLog("Freed %s on host", MemoryString);
 			}
 
 #ifdef __CUDA_ARCH__
 			if (this->MemoryType == Enums::Device)
+			{
 				Cuda::Free(this->Data);
+				DebugLog("Freed %s on device", MemoryString);
+			}
 #endif
 		}
 				
@@ -111,25 +119,40 @@ public:
 
 	HOST void Resize(const Vec3i& Resolution)
 	{
-		DebugLog("%s: %s, %d x %d x %d", __FUNCTION__, this->GetFullName(), Resolution[0], Resolution[1], Resolution[2]);
-
+		DebugLog("%s", __FUNCTION__);
+		
 		if (this->Resolution == Resolution)
 			return;
 		else
 			this->Free();
+		
+		this->Resolution = Resolution;
+		
+		DebugLog("Resolution = [%d x %d x %d]", this->Resolution[0], this->Resolution[1], this->Resolution[2]);
 
-		this->Resolution	= Resolution;
-		this->NoElements	= this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
-
+		this->NoElements = this->Resolution[0] * this->Resolution[1] * this->Resolution[2];
+		
 		if (this->NoElements <= 0)
 			return;
+		
+		DebugLog("No. Elements = %d", this->NoElements);
+
+		char MemoryString[MAX_CHAR_SIZE];
+		
+		this->GetMemoryString(MemoryString, Enums::MegaByte);
 
 		if (this->MemoryType == Enums::Host)
+		{
 			this->Data = (T*)malloc(this->GetNoBytes());
+			DebugLog("Allocated %s on host", MemoryString);
+		}
 
 #ifdef __CUDA_ARCH__
 		if (this->MemoryType == Enums::Device)
+		{
 			Cuda::Allocate(this->Data, this->GetNoElements());
+			DebugLog("Allocated %s on device", MemoryString);
+		}
 #endif
 
 		this->Reset();
@@ -174,7 +197,7 @@ public:
 		return this->NoElements;
 	}
 
-	HOST_DEVICE int GetNoBytes(void) const
+	HOST_DEVICE virtual int GetNoBytes(void) const
 	{
 		return this->GetNoElements() * sizeof(T);
 	}

@@ -134,7 +134,6 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	const Light& Light = gpLights[LightID];
 	
 	VolumeShader Shader;
- 
 	
 	switch (SE.Type)
 	{

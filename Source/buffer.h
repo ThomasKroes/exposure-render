@@ -77,6 +77,39 @@ public:
 		sprintf_s(this->FullName, MAX_CHAR_SIZE, "['%s', %s]", this->Name, MemoryTypeName);
 	}
 
+	HOST virtual int GetNoBytes() const
+	{
+		return 0;
+	}
+
+	HOST virtual float GetMemorySize(const Enums::MemoryUnit& MemoryUnit) const
+	{
+		switch (MemoryUnit)
+		{
+			case Enums::KiloByte:
+				return (float)this->GetNoBytes() / (1024.0f);
+
+			case Enums::MegaByte:
+				return (float)this->GetNoBytes() / (1024.0f * 1024.0f);
+			
+			case Enums::GigaByte:
+				return (float)this->GetNoBytes() / (1024.0f * 1024.0f * 1024.0f);
+		}
+
+		return 0.0f;
+	}
+
+	HOST virtual void GetMemoryString(char* pMemoryString, const Enums::MemoryUnit& MemoryUnit = Enums::MegaByte) const
+	{
+		switch (MemoryUnit)
+		{
+			case Enums::KiloByte:	sprintf_s(pMemoryString, MAX_CHAR_SIZE, "%0.2f KB", this->GetMemorySize(Enums::KiloByte));		break;
+			case Enums::MegaByte:	sprintf_s(pMemoryString, MAX_CHAR_SIZE, "%0.2f MB", this->GetMemorySize(Enums::MegaByte));		break;
+			case Enums::GigaByte:	sprintf_s(pMemoryString, MAX_CHAR_SIZE, "%0.2f GB", this->GetMemorySize(Enums::GigaByte));		break;
+		}
+	}
+
+
 	Enums::MemoryType	MemoryType;
 	char				Name[MAX_CHAR_SIZE];
 	char				FullName[MAX_CHAR_SIZE];

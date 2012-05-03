@@ -174,7 +174,7 @@ public:
 		return this->NoElements;
 	}
 
-	HOST_DEVICE int GetNoBytes(void) const
+	HOST_DEVICE virtual int GetNoBytes(void) const
 	{
 		return this->GetNoElements() * sizeof(T);
 	}

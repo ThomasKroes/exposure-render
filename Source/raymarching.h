@@ -64,7 +64,6 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	SE.SetValid(MinT, Ps, NormalizedGradient(gpTracer->VolumeID, Ps), -R.D, ColorXYZf());
 }
 
-// Determines if there is a scatter event along the ray
 DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 {
 	float MinT;
