@@ -16,7 +16,7 @@
 
 #include "geometry.h"
 #include "volumes.h"
-#include "transferfunctions.h"
+#include "transferfunction.h"
 #include "shapes.h"
 #include "scatterevent.h"
 
@@ -30,7 +30,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	
 	Intersection Int;
 
-	IntersectBox(R, gpVolumes[0].BoundingBox.MinP, gpVolumes[0].BoundingBox.MaxP, Int);
+	IntersectBox(R, gpVolumes[gpTracer->VolumeID].BoundingBox.MinP, gpVolumes[gpTracer->VolumeID].BoundingBox.MaxP, Int);
 
 	if (!Int.Valid)
 		return;
@@ -55,7 +55,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 		
 		float Intensity = GetIntensity(gpTracer->VolumeID, Ps);
 
-		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * EvaluateScalarTransferFunction(gpTracer->Opacity1D, Intensity);
+		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * gpTracer->Opacity1D.Evaluate(Intensity);
 
 		Sum		+= SigmaT * gpTracer->RenderSettings.Traversal.StepSize;
 		MinT	+= gpTracer->RenderSettings.Traversal.StepSize;
@@ -73,7 +73,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 	Intersection Int;
 		
-	IntersectBox(R, gpVolumes[0].BoundingBox.MinP, gpVolumes[0].BoundingBox.MaxP, Int);
+	IntersectBox(R, gpVolumes[gpTracer->VolumeID].BoundingBox.MinP, gpVolumes[gpTracer->VolumeID].BoundingBox.MaxP, Int);
 	
 	if (!Int.Valid)
 		return false;
@@ -96,7 +96,7 @@ DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 		
 		float Intensity = GetIntensity(gpTracer->VolumeID, Ps);
 
-		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * EvaluateScalarTransferFunction(gpTracer->Opacity1D, Intensity);
+		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * gpTracer->Opacity1D.Evaluate(Intensity);
 
 		Sum		+= SigmaT * gpTracer->RenderSettings.Traversal.StepSizeShadow;
 		MinT	+= gpTracer->RenderSettings.Traversal.StepSizeShadow;

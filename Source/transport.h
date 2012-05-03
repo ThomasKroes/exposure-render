@@ -121,7 +121,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 
 	const float Intensity = GetIntensity(gpTracer->VolumeID, SE.P);
 
-	Ld += EvaluateColorTransferFunction(gpTracer->Emission1D, Intensity);
+	Ld += gpTracer->Emission1D.Evaluate(Intensity);
 
 	if (gpTracer->LightIDs.Count <= 0)
 		return Ld;
@@ -139,7 +139,7 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 	switch (SE.Type)
 	{
 		case ScatterEvent::Volume:	
-			Shader = VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateColorTransferFunction(gpTracer->Diffuse1D, Intensity), EvaluateColorTransferFunction(gpTracer->Specular1D, Intensity), 15.0f, GlossinessExponent(EvaluateScalarTransferFunction(gpTracer->Glossiness1D, Intensity)));
+			Shader = VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, gpTracer->Diffuse1D.Evaluate(Intensity), gpTracer->Specular1D.Evaluate(Intensity), 15.0f, GlossinessExponent(gpTracer->Glossiness1D.Evaluate(Intensity)));
 			break;
 
 		case ScatterEvent::Object:

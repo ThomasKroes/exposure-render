@@ -59,7 +59,6 @@ SET(General
 	objects.h
 	clippingobjects.h
 	textures.h
-	transferfunctions.h
 	filter.h
 	log.h
 	defines.h
@@ -91,6 +90,8 @@ SET(General
 	bitmap.h
 	buffer.h
 	framebuffer.h
+	plf.h
+	pcf.h
 )
 
 # General group

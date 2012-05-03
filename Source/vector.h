@@ -37,6 +37,8 @@ HOST_DEVICE inline T Clamp(const T& Value, const T& Min, const T& Max)
 	return ExposureRender::Max(Min, ExposureRender::Min(Value, Max));
 }
 
+//static inline HOST_DEVICE float Lerp(const float& A, const float& B, const float& LerpC)	{ return A + LerpC * (B - A);												};
+
 #define DATA(type, size)																	\
 	type	D[size];																		\
 

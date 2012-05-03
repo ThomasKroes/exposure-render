@@ -13,45 +13,7 @@
 
 #pragma once
 
-#include "transferfunction.h"
-#include "color.h"
-
 namespace ExposureRender
 {
-
-DEVICE_NI float EvaluatePLF(const PiecewiseLinearFunction& PLF, const float& Intensity)
-{
-	if (PLF.Count <= 0)
-		return 0.0f;
-
-	if (Intensity < PLF.NodeRange[0])
-		return PLF.Value[0];
-
-	if (Intensity > PLF.NodeRange[1])
-		return PLF.Value[PLF.Count - 1];
-
-	for (int i = 1; i < PLF.Count; i++)
-	{
-		float P1 = PLF.Position[i - 1];
-		float P2 = PLF.Position[i];
-		float DeltaP = P2 - P1;
-		float LerpT = (Intensity - P1) / DeltaP;
-
-		if (Intensity >= P1 && Intensity < P2)
-			return Lerp(LerpT, PLF.Value[i - 1], PLF.Value[i]);
-	}
-
-	return 0.0f;
-}
-
-DEVICE_NI float EvaluateScalarTransferFunction(const ScalarTransferFunction1D& STF, const float& Intensity)
-{
-	return EvaluatePLF(STF.PLF, Intensity);
-}
-
-DEVICE_NI ColorXYZf EvaluateColorTransferFunction(const ColorTransferFunction1D& CTF, const float& Intensity)
-{
-	return ColorXYZf(EvaluatePLF(CTF.PLF[0], Intensity), EvaluatePLF(CTF.PLF[1], Intensity), EvaluatePLF(CTF.PLF[2], Intensity));
-}
 
 }

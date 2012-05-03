@@ -184,19 +184,51 @@ public:
 		return this->Data;
 	}
 
-	HOST_DEVICE T& operator()(const int& x = 0, const int& y = 0) const
+	HOST_DEVICE T& operator()(const int& X = 0, const int& Y = 0) const
 	{
-		return this->Data[y * this->Resolution[0] + x];
+		const Vec2i ClampedXY(Clamp(X, 0, this->Resolution[0] - 1), Clamp(Y, 0, this->Resolution[1] - 1));
+		return this->Data[ClampedXY[1] * this->Resolution[0] + ClampedXY[0]];
 	}
 
-	HOST_DEVICE T& operator()(const Vec2i& xy) const
+	HOST_DEVICE T& operator()(const Vec2i& XY) const
 	{
-		return this->Data[xy[1] * this->Resolution[0] + xy[0]];
+		const Vec2i ClampedXY(Clamp(XY[0], 0, this->Resolution[0] - 1), Clamp(XY[1], 0, this->Resolution[1] - 1));
+		return this->Data[ClampedXY[1] * this->Resolution[0] + ClampedXY[0]];
 	}
 
-	HOST_DEVICE T& operator[](const int& i) const
+	HOST_DEVICE T operator()(const Vec2f& XY, const bool Normalized = false) const
 	{
-		return this->Data[i];
+		const Vec2f UV = Normalized ? XY * Vec2f(this->Resolution[0], this->Resolution[1]) : XY;
+
+		int Coord[2][2] =
+		{
+			{ floorf(UV[0]), ceilf(UV[0]) },
+			{ floorf(UV[1]), ceilf(UV[1]) },
+		};
+
+		const float du = UV[0] - Coord[0][0];
+		const float dv = UV[1] - Coord[1][0];
+
+		Coord[0][0] = min(max(Coord[0][0], 0), this->Resolution[0] - 1);
+		Coord[0][1] = min(max(Coord[0][1], 0), this->Resolution[0] - 1);
+		Coord[1][0] = min(max(Coord[1][0], 0), this->Resolution[1] - 1);
+		Coord[1][1] = min(max(Coord[1][1], 0), this->Resolution[1] - 1);
+
+		T Values[4] = 
+		{
+			T((*this)(Coord[0][0], Coord[1][0])),
+			T((*this)(Coord[0][1], Coord[1][0])),
+			T((*this)(Coord[0][0], Coord[1][1])),
+			T((*this)(Coord[0][1], Coord[1][1]))
+		};
+
+		return (1.0f - dv) * ((1.0f - du) * Values[0] + du * Values[1]) + dv * ((1.0f - du) * Values[2] + du * Values[3]);
+	}
+
+	HOST_DEVICE T& operator[](const int& ID) const
+	{
+		const int ClampedID = Clamp(ID, 0, this->NoElements - 1);
+		return this->Data[ClampedID];
 	}
 
 	Vec2i	Resolution;

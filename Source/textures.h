@@ -50,7 +50,7 @@ DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f
 		}
 
 		case Enums::Gradient:
-			return EvaluateColorTransferFunction(Procedural.Gradient, UVW[0]);
+			return Procedural.Gradient.Evaluate(UVW[1]);
 	}
 
 	return ColorXYZf::Black();
@@ -95,34 +95,8 @@ DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 
 		case Enums::Bitmap:
 		{
-			/*
-			if (T.Bitmap.DevicePixels != NULL)
-			{
-				const int Size[2] = { T.Bitmap.Size[0], T.Bitmap.Size[1] };
-
-				int umin = int(Size[0] * TextureUV[0]);
-				int vmin = int(Size[1] * TextureUV[1]);
-				int umax = int(Size[0] * TextureUV[0]) + 1;
-				int vmax = int(Size[1] * TextureUV[1]) + 1;
-				float ucoef = fabsf(Size[0] * TextureUV[0] - umin);
-				float vcoef = fabsf(Size[1] * TextureUV[1] - vmin);
-
-				umin = min(max(umin, 0), Size[0] - 1);
-				umax = min(max(umax, 0), Size[0] - 1);
-				vmin = min(max(vmin, 0), Size[1] - 1);
-				vmax = min(max(vmax, 0), Size[1] - 1);
-		
-				ColorXYZf Color[4] = 
-				{
-					EvaluateBitmap(T.Bitmap, umin, vmin),
-					EvaluateBitmap(T.Bitmap, umax, vmin),
-					EvaluateBitmap(T.Bitmap, umin, vmax),
-					EvaluateBitmap(T.Bitmap, umax, vmax)
-				};
-
-				L = (1.0f - vcoef) * ((1.0f - ucoef) * Color[0] + ucoef * Color[1]) + vcoef * ((1.0f - ucoef) * Color[2] + ucoef * Color[3]);
-			}
-			*/
+			if (T.BitmapID >= 0)
+				L = ColorXYZf::FromRGBAuc(gpBitmaps[T.BitmapID].Pixels(TextureUV, true));
 
 			break;
 		}

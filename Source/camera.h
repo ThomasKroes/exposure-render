@@ -47,17 +47,8 @@ public:
 		this->Exposure		= Other.Exposure;
 		this->Gamma			= Other.Gamma;
 		this->FOV			= Other.FOV;
-		this->N				= Other.N;
-		this->U				= Other.U;
-		this->V				= Other.V;
-		this->Screen[0][0]	= Other.Screen[0][0];
-		this->Screen[0][1]	= Other.Screen[0][1];
-		this->Screen[1][0]	= Other.Screen[1][0];
-		this->Screen[1][1]	= Other.Screen[1][1];
-		this->InvScreen[0]	= Other.InvScreen[0];
-		this->InvScreen[1]	= Other.InvScreen[1];
-		this->InvExposure	= Other.InvExposure;
-		this->InvGamma		= Other.InvGamma;
+		
+		this->Update();
 
 		return *this;
 	}

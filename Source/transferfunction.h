@@ -13,69 +13,11 @@
 
 #pragma once
 
-#include "erbindable.h"
+#include "plf.h"
 #include "color.h"
 
 namespace ExposureRender
 {
-
-class EXPOSURE_RENDER_DLL NodesVector
-{
-public:
-	CONSTRUCTORS(NodesVector, float, MAX_NO_TF_NODES)
-	ALL_OPERATORS(NodesVector, float, MAX_NO_TF_NODES)
-	DATA(float, MAX_NO_TF_NODES)
-};
-
-class EXPOSURE_RENDER_DLL PiecewiseLinearFunction
-{
-public:
-	HOST PiecewiseLinearFunction()
-	{
-		this->Count = 0;
-	}
-
-	HOST ~PiecewiseLinearFunction()
-	{
-	}
-
-	HOST PiecewiseLinearFunction(const PiecewiseLinearFunction& Other)
-	{
-		*this = Other;
-	}
-
-	HOST PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
-	{
-		this->NodeRange		= Other.NodeRange;
-		this->Position		= Other.Position;
-		this->Value			= Other.Value;
-		this->Count			= Other.Count;
-
-		return *this;
-	}
-
-	HOST void AddNode(const float& Position, const float& Value)
-	{
-		if (this->Count + 1 >= MAX_NO_TF_NODES)
-			return;
-
-		this->Position[this->Count] = Position;
-		this->Value[this->Count]	= Value;
-
-		if (Value < this->NodeRange[0])
-			this->NodeRange[0] = Value;
-
-		if (Value > this->NodeRange[1])
-			this->NodeRange[1] = Value;
-
-		this->Count++;
-	}
-
-	Vec2f			NodeRange;
-	NodesVector		Position;
-	NodesVector		Value;
-	int				Count;
-};
 
 class EXPOSURE_RENDER_DLL ScalarNode
 {
@@ -160,6 +102,11 @@ public:
 		this->PLF.AddNode(Node.Position, Node.Value);
 	}
 
+	HOST_DEVICE float Evaluate(const float& Intensity) const
+	{
+		return this->PLF.Evaluate(Intensity);
+	}
+
 	PiecewiseLinearFunction PLF;
 };
 
@@ -191,6 +138,11 @@ public:
 	{
 		for (int i = 0; i < 3; i++)
 			this->PLF[i].AddNode(Node.ScalarNodes[i].Position, Node.ScalarNodes[i].Value);
+	}
+
+	HOST_DEVICE ColorXYZf Evaluate(const float& Intensity) const
+	{
+		return ColorXYZf(this->PLF[0].Evaluate(Intensity), this->PLF[1].Evaluate(Intensity), this->PLF[2].Evaluate(Intensity));
 	}
 
 	PiecewiseLinearFunction PLF[3];

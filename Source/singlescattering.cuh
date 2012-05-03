@@ -95,13 +95,8 @@ KERNEL void KrnlSingleScattering()
 	if (SE.Valid && SE.Type == ScatterEvent::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
-//	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
+	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
 
-	Intersection Int;
-
-	IntersectBox(R, gpVolumes[0].BoundingBox.MinP, gpVolumes[0].BoundingBox.MaxP, Int);
-
-	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Int.Valid ? 1 : 0, 1, 1, SE.Valid ? 1.0f : 0.0f);
 }
 
 void SingleScattering(const Tracer& Tracer)

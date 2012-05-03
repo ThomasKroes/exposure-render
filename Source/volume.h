@@ -20,12 +20,17 @@ namespace ExposureRender
 {
 class EXPOSURE_RENDER_DLL Volume
 {
+
 public:
 	HOST Volume() :
 		BoundingBox(),
 		GradientDeltaX(),
 		GradientDeltaY(),
 		GradientDeltaZ(),
+		Spacing(1.0f),
+		InvSpacing(1.0f),
+		Size(1.0f),
+		InvSize(1.0f),
 		Voxels(Enums::Device, "Device Voxels")
 	{
 		DebugLog(__FUNCTION__);
@@ -41,6 +46,10 @@ public:
 		GradientDeltaX(),
 		GradientDeltaY(),
 		GradientDeltaZ(),
+		Spacing(1.0f),
+		InvSpacing(1.0f),
+		Size(1.0f),
+		InvSize(1.0f),
 		Voxels(Enums::Device, "Device Voxels")
 	{
 		DebugLog(__FUNCTION__);
@@ -52,6 +61,10 @@ public:
 		GradientDeltaX(),
 		GradientDeltaY(),
 		GradientDeltaZ(),
+		Spacing(1.0f),
+		InvSpacing(1.0f),
+		Size(1.0f),
+		InvSize(1.0f),
 		Voxels(Enums::Device, "Device Voxels")
 	{
 		DebugLog(__FUNCTION__);
@@ -68,6 +81,8 @@ public:
 		this->GradientDeltaZ 	= Other.GradientDeltaZ;
 		this->Spacing			= Other.Spacing;
 		this->InvSpacing		= Other.InvSpacing;
+		this->Size				= Other.Size;
+		this->InvSize			= Other.InvSize;
 		this->Voxels			= Other.Voxels;
 
 		return *this;
@@ -79,21 +94,21 @@ public:
 
 		this->Voxels = Other.Voxels;
 
-		float Scale = 1.0f;
+		float Scale = 0.0f;
 
 		if (Other.NormalizeSize)
 		{
 			const Vec3f PhysicalSize = Vec3f((float)this->Voxels.Resolution[0], (float)this->Voxels.Resolution[1], (float)this->Voxels.Resolution[2]) * Other.Spacing;
-			const float Scale = 1.0f / max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
+			Scale = 1.0f / max(PhysicalSize[0], max(PhysicalSize[1], PhysicalSize[2]));
 		}
 
 		this->Spacing		= Scale * Other.Spacing;
 		this->InvSpacing	= 1.0f / this->Spacing;
+		this->Size			= Vec3f((float)this->Voxels.Resolution[0] * this->Spacing[0], (float)this->Voxels.Resolution[1] *this->Spacing[1], (float)this->Voxels.Resolution[2] * this->Spacing[2]);
+		this->InvSize		= 1.0f / this->Size;
 
-		Vec3f Size((float)this->Voxels.Resolution[0] * this->Spacing[0], (float)this->Voxels.Resolution[1] *this->Spacing[1], (float)this->Voxels.Resolution[2] * this->Spacing[2]);
-		
-		this->BoundingBox.SetMinP(-0.5f);// * Size);
-		this->BoundingBox.SetMaxP(0.5f);// * Size);
+		this->BoundingBox.SetMinP(-0.5 * Size);
+		this->BoundingBox.SetMaxP(0.5f * Size);
 
 		const float MinVoxelSize = min(this->Spacing[0], min(this->Spacing[1], this->Spacing[2]));
 
@@ -104,11 +119,13 @@ public:
 		return *this;
 	}
 
-	HOST_DEVICE unsigned short& operator()(const Vec3f& xyz = Vec3f(0.0f)) const
+	HOST_DEVICE unsigned short operator()(const Vec3f& XYZ = Vec3f(0.0f)) const
 	{
-		Vec3f LocalXYZ = Vec3f((float)this->Voxels.Resolution[0], (float)this->Voxels.Resolution[1], (float)this->Voxels.Resolution[2]) * ((xyz - this->BoundingBox.MinP) * this->BoundingBox.InvSize);
+		const Vec3f Offset = XYZ - this->BoundingBox.MinP;
+		
+		const Vec3f LocalXYZ = Offset * this->InvSize * Vec3f(this->Voxels.Resolution[0], this->Voxels.Resolution[1], this->Voxels.Resolution[2]);
 
-		return this->Voxels(Vec3i((int)LocalXYZ[0], (int)LocalXYZ[1], (int)LocalXYZ[2]));
+		return this->Voxels(LocalXYZ);
 	}
 
 	BoundingBox					BoundingBox;
@@ -117,6 +134,8 @@ public:
 	Vec3f						GradientDeltaZ;
 	Vec3f						Spacing;
 	Vec3f						InvSpacing;
+	Vec3f						Size;
+	Vec3f						InvSize;
 	Buffer3D<unsigned short>	Voxels;
 };
 

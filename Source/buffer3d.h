@@ -179,19 +179,44 @@ public:
 		return this->GetNoElements() * sizeof(T);
 	}
 
-	HOST_DEVICE T& operator()(const int& x = 0, const int& y = 0, const int& z = 0) const
+	HOST_DEVICE T& operator()(const int& X = 0, const int& Y = 0, const int& Z = 0) const
 	{
-		return this->Data[z * this->Resolution[0] * this->Resolution[1] + y * this->Resolution[0] + x];
+		const Vec3i ClampedXYZ(Clamp(X, 0, this->Resolution[0] - 1), Clamp(Y, 0, this->Resolution[1] - 1), Clamp(Z, 0, this->Resolution[2] - 1));
+		return this->Data[ClampedXYZ[2] * this->Resolution[0] * this->Resolution[1] + ClampedXYZ[1] * this->Resolution[0] + ClampedXYZ[0]];
 	}
 
-	HOST_DEVICE T& operator()(const Vec3i& xyz) const
+	HOST_DEVICE T& operator()(const Vec3i& XYZ) const
 	{
-		return this->Data[xyz[2] * this->Resolution[0] * this->Resolution[1] + xyz[1] * this->Resolution[0] + xyz[0]];
+		const Vec3i ClampedXYZ(Clamp(XYZ[0], 0, this->Resolution[0] - 1), Clamp(XYZ[1], 0, this->Resolution[1] - 1), Clamp(XYZ[2], 0, this->Resolution[2] - 1));
+		return this->Data[ClampedXYZ[2] * this->Resolution[0] * this->Resolution[1] + ClampedXYZ[1] * this->Resolution[0] + ClampedXYZ[0]];
+	}
+	
+	HOST_DEVICE T operator()(const Vec3f& XYZ, const bool Normalized = false) const
+	{
+		const Vec3f UVW = Normalized ? XYZ * Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) : XYZ;
+
+		const int vx = (int)floorf(UVW[0]);
+		const int vy = (int)floorf(UVW[1]);
+		const int vz = (int)floorf(UVW[2]);
+
+		const float dx = UVW[0] - vx;
+		const float dy = UVW[1] - vy;
+		const float dz = UVW[2] - vz;
+
+		const T d00 = Lerp(dx, (*this)(vx, vy, vz), (*this)(vx+1, vy, vz));
+		const T d10 = Lerp(dx, (*this)(vx, vy+1, vz), (*this)(vx+1, vy+1, vz));
+		const T d01 = Lerp(dx, (*this)(vx, vy, vz+1), (*this)(vx+1, vy, vz+1));
+		const T d11 = Lerp(dx, (*this)(vx, vy+1, vz+1), (*this)(vx+1, vy+1, vz+1));
+		const T d0	= Lerp(dy, d00, d10);
+		const T d1 	= Lerp(dy, d01, d11);
+
+		return Lerp(dz, d0, d1);
 	}
 
-	HOST_DEVICE T& operator[](const int& i) const
+	HOST_DEVICE T& operator[](const int& ID) const
 	{
-		return this->Data[i];
+		const int ClampedID = Clamp(ID, 0, this->NoElements - 1);
+		return this->Data[ClampedID];
 	}
 
 	Vec3i	Resolution;
