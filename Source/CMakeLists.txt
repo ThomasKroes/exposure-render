@@ -90,6 +90,7 @@ SET(General
 	bitmap.h
 	buffer.h
 	framebuffer.h
+	pf.h
 	plf.h
 	pcf.h
 )

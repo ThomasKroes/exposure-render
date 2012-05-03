@@ -107,7 +107,7 @@ public:
 		return this->PLF.Evaluate(Intensity);
 	}
 
-	PiecewiseLinearFunction PLF;
+	PiecewiseLinearFunction<MAX_NO_TF_NODES> PLF;
 };
 
 class EXPOSURE_RENDER_DLL ColorTransferFunction1D
@@ -145,7 +145,7 @@ public:
 		return ColorXYZf(this->PLF[0].Evaluate(Intensity), this->PLF[1].Evaluate(Intensity), this->PLF[2].Evaluate(Intensity));
 	}
 
-	PiecewiseLinearFunction PLF[3];
+	PiecewiseLinearFunction<MAX_NO_TF_NODES> PLF[3];
 };
 
 }
