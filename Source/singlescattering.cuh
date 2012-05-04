@@ -14,64 +14,16 @@
 #pragma once
 
 #include "macros.cuh"
-#include "utilities.h"
-#include "transport.h"
-#include "camera.h"
+#include "singlescattering.h"
 
 namespace ExposureRender
 {
-
-DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& V, CameraSample& CS)
-{
-	Vec2f ScreenPoint;
-
-	ScreenPoint[0] = Camera.Screen[0][0] + (Camera.InvScreen[0] * (float)(U + CS.FilmUV[0] * 1.0f / Camera.FilmSize[0]));
-	ScreenPoint[1] = Camera.Screen[1][0] + (Camera.InvScreen[1] * (float)(V + CS.FilmUV[1] * 1.0f / Camera.FilmSize[1]));
-
-	R.O		= Camera.Pos;
-	R.D		= Normalize(Camera.N + (ScreenPoint[0] * Camera.U) - (ScreenPoint[1] * Camera.V));
-	R.MinT	= Camera.ClipNear;
-	R.MaxT	= Camera.ClipFar;
-
-	if (Camera.ApertureSize != 0.0f)
-	{
-		const Vec2f LensUV = Camera.ApertureSize * ConcentricSampleDisk(CS.LensUV);
-
-		const Vec3f LI = Camera.U * LensUV[0] + Camera.V * LensUV[1];
-
-		R.O += LI;
-		R.D = Normalize(R.D * Camera.FocalDistance - LI);
-	}
-}
-
-DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
-{
-	ScatterEvent SE[3] = { ScatterEvent(Enums::Volume), ScatterEvent(Enums::Light), ScatterEvent(Enums::Object) };
-
-	SampleVolume(R, RNG, SE[0]);
-	IntersectLights(R, SE[1], true);
-	IntersectObjects(R, SE[2]);
-
-	float T = FLT_MAX;
-
-	ScatterEvent NearestRS(Enums::Volume);
-
-	for (int i = 0; i < 3; i++)
-	{
-		if (SE[i].Valid && SE[i].T < T)
-		{
-			NearestRS = SE[i];
-			T = SE[i].T;
-		}
-	}
-
-	return NearestRS;
-}
 
 KERNEL void KrnlSingleScattering()
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
+	/*
 	CRNG RNG(&gpTracer->FrameBuffer.RandomSeeds1(IDx, IDy), &gpTracer->FrameBuffer.RandomSeeds2(IDx, IDy));
 
 	ColorXYZf Lv = ColorXYZf::Black();
@@ -84,18 +36,12 @@ KERNEL void KrnlSingleScattering()
 
 	SampleCamera(gpTracer->Camera, R, IDx, IDy, Sample.CameraSample);
 
-	SE = SampleRay(R, RNG);
-
-	if (SE.Valid && SE.Type == Enums::Volume)
-		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
-
-	if (SE.Valid && SE.Type == Enums::Light)
-		Lv += SE.Le;
-	
-	if (SE.Valid && SE.Type == Enums::Object)
-		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
-
 	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
+	*/
+
+	
+
+	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = SingleScattering(Tracer* pTracer, IDx, IDy);
 }
 
 void SingleScattering(const Tracer& Tracer)

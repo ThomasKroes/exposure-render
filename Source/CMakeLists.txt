@@ -93,6 +93,7 @@ SET(General
 	pf.h
 	plf.h
 	pcf.h
+	singlescattering.h
 )
 
 # General group

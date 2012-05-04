@@ -68,11 +68,9 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 	return NearestRS;
 }
 
-KERNEL void KrnlSingleScattering()
+HOST_DEVICE ColorXYZAf SingleScattering(Tracer* pTracer, const Vec2i& PixelCoord)
 {
-	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
-
-	CRNG RNG(&gpTracer->FrameBuffer.RandomSeeds1(IDx, IDy), &gpTracer->FrameBuffer.RandomSeeds2(IDx, IDy));
+	CRNG RNG(&gpTracer->FrameBuffer.RandomSeeds1(PixelCoord[0], PixelCoord[1]), &gpTracer->FrameBuffer.RandomSeeds2(PixelCoord[0], PixelCoord[1]));
 
 	ColorXYZf Lv = ColorXYZf::Black();
 
@@ -82,7 +80,9 @@ KERNEL void KrnlSingleScattering()
 
 	Ray R;
 
-	SampleCamera(gpTracer->Camera, R, IDx, IDy, Sample.CameraSample);
+	SampleCamera(gpTracer->Camera, R, PixelCoord[0], PixelCoord[1], Sample.CameraSample);
+
+	ScatterEvent SE;
 
 	SE = SampleRay(R, RNG);
 
@@ -95,13 +95,7 @@ KERNEL void KrnlSingleScattering()
 	if (SE.Valid && SE.Type == ScatterEvent::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
-	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
-}
-
-void SingleScattering(const Tracer& Tracer)
-{
-	LAUNCH_DIMENSIONS(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1], 1, 16, 8, 1)
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlSingleScattering<<<GridDim, BlockDim>>>()), "Single Scattering"); 
+	return ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
 }
 
 }

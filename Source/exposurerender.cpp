@@ -13,4 +13,4 @@
 
 #define __CUDA_ARCH__ 200
 
-#include "buffer.h"
+// #include "singlescattering.h"
