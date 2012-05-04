@@ -19,7 +19,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI bool IntersectDiskP(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
+HOST_DEVICE bool IntersectDiskP(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
 {
 	IntersectPlaneP(R, OneSided, Int);
 
@@ -29,7 +29,7 @@ DEVICE_NI bool IntersectDiskP(const Ray& R, const bool& OneSided, const float& R
 	return Int.Valid;
 }
 
-DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
+HOST_DEVICE void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, Intersection& Int)
 {
 	IntersectPlane(R, OneSided, Int);
 
@@ -43,7 +43,7 @@ DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Ra
 	Int.UV[0] = 1.0f - Int.UV[0];
 }
 
-DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, const float& Offset, Intersection& Int)
+HOST_DEVICE void IntersectDisk(const Ray& R, const bool& OneSided, const float& Radius, const float& Offset, Intersection& Int)
 {
 	IntersectPlane(R, OneSided, Offset, Int);
 
@@ -51,7 +51,7 @@ DEVICE_NI void IntersectDisk(const Ray& R, const bool& OneSided, const float& Ra
 		Int.Valid = false;
 }
 
-DEVICE_NI void SampleUnitDisk(SurfaceSample& SS, const Vec3f& UVW)
+HOST_DEVICE void SampleUnitDisk(SurfaceSample& SS, const Vec3f& UVW)
 {
 	float r = sqrtf(UVW[0]);
 	float theta = 2.0f * PI_F * UVW[1];
@@ -61,7 +61,7 @@ DEVICE_NI void SampleUnitDisk(SurfaceSample& SS, const Vec3f& UVW)
 	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-DEVICE_NI void SampleDisk(SurfaceSample& SS, const Vec3f& UVW, const float& Radius)
+HOST_DEVICE void SampleDisk(SurfaceSample& SS, const Vec3f& UVW, const float& Radius)
 {
 	SampleUnitDisk(SS, UVW);
 	

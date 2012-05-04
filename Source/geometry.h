@@ -22,7 +22,7 @@ using namespace std;
 namespace ExposureRender
 {
 
-DEVICE inline Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
+HOST_DEVICE inline Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
 {
 	Vec3f Vt;
 
@@ -35,7 +35,7 @@ DEVICE inline Vec3f TransformVector(const Matrix44& TM, const Vec3f& V)
 	return Vt;
 }
 
-DEVICE inline Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
+HOST_DEVICE inline Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
 {
 	const float x = P[0], y = P[1], z = P[2];
     
@@ -46,7 +46,7 @@ DEVICE inline Vec3f TransformPoint(const Matrix44& TM, const Vec3f& P)
 	return Vec3f(Px, Py, Pz);
 }
 
-DEVICE inline Ray TransformRay(const Matrix44& TM, const Ray& R)
+HOST_DEVICE inline Ray TransformRay(const Matrix44& TM, const Ray& R)
 {
 	Ray Rt;
 
@@ -62,18 +62,18 @@ DEVICE inline Ray TransformRay(const Matrix44& TM, const Ray& R)
 	return Rt;
 }
 
-DEVICE inline float SphericalTheta(const Vec3f& W)
+HOST_DEVICE inline float SphericalTheta(const Vec3f& W)
 {
 	return acosf(Clamp(W[1], -1.0f, 1.0f));
 }
 
-DEVICE inline float SphericalPhi(const Vec3f& W)
+HOST_DEVICE inline float SphericalPhi(const Vec3f& W)
 {
 	float p = atan2f(W[2], W[0]);
 	return (p < 0.0f) ? p + 2.0f * PI_F : p;
 }
 
-DEVICE_NI inline Vec2f SphericalToUV(const Vec3f& W)
+HOST_DEVICE inline Vec2f SphericalToUV(const Vec3f& W)
 {
 	const Vec3f V = Normalize(W);
 	return Vec2f(INV_TWO_PI_F * SphericalPhi(V), 1.0f - (INV_PI_F * SphericalTheta(V)));

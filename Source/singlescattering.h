@@ -21,7 +21,7 @@
 namespace ExposureRender
 {
 
-DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& V, CameraSample& CS)
+HOST_DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& V, CameraSample& CS)
 {
 	Vec2f ScreenPoint;
 
@@ -44,9 +44,9 @@ DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& 
 	}
 }
 
-DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
+HOST_DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
-	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Object) };
+	ScatterEvent SE[3] = { ScatterEvent(Enums::Volume), ScatterEvent(Enums::Light), ScatterEvent(Enums::Object) };
 
 	SampleVolume(R, RNG, SE[0]);
 	IntersectLights(R, SE[1], true);
@@ -54,7 +54,7 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 
 	float T = FLT_MAX;
 
-	ScatterEvent NearestRS(ScatterEvent::Volume);
+	ScatterEvent NearestRS(Enums::Volume);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -74,8 +74,6 @@ HOST_DEVICE ColorXYZAf SingleScattering(Tracer* pTracer, const Vec2i& PixelCoord
 
 	ColorXYZf Lv = ColorXYZf::Black();
 
-	ScatterEvent SE;
-
 	MetroSample Sample(RNG); 
 
 	Ray R;
@@ -86,13 +84,13 @@ HOST_DEVICE ColorXYZAf SingleScattering(Tracer* pTracer, const Vec2i& PixelCoord
 
 	SE = SampleRay(R, RNG);
 
-	if (SE.Valid && SE.Type == ScatterEvent::Volume)
+	if (SE.Valid && SE.Type == Enums::Volume)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
-	if (SE.Valid && SE.Type == ScatterEvent::Light)
+	if (SE.Valid && SE.Type == Enums::Light)
 		Lv += SE.Le;
 	
-	if (SE.Valid && SE.Type == ScatterEvent::Object)
+	if (SE.Valid && SE.Type == Enums::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
 	return ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);

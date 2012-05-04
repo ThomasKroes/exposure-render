@@ -18,7 +18,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f& UVW)
+HOST_DEVICE ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f& UVW)
 {
 	switch (Procedural.Type)
 	{
@@ -56,7 +56,7 @@ DEVICE_NI ColorXYZf EvaluateProcedural(const Procedural& Procedural, const Vec2f
 	return ColorXYZf::Black();
 }
 
-DEVICE_NI ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
+HOST_DEVICE ColorXYZf EvaluateTexture(const int& ID, const Vec2f& UV)
 {
 	if (ID < 0)
 		return ColorXYZf::Black();

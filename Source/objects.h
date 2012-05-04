@@ -18,7 +18,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void IntersectObject(const Object& Object, const Ray& R, ScatterEvent& RS)
+HOST_DEVICE void IntersectObject(const Object& Object, const Ray& R, ScatterEvent& RS)
 {
 	Ray Rt = TransformRay(Object.Shape.InvTM, R);
 
@@ -38,7 +38,7 @@ DEVICE_NI void IntersectObject(const Object& Object, const Ray& R, ScatterEvent&
 	}
 }
 
-DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
+HOST_DEVICE void IntersectObjects(const Ray& R, ScatterEvent& RS)
 {
 	float T = FLT_MAX;
 
@@ -60,12 +60,12 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 	}
 }
 
-DEVICE_NI bool IntersectsObject(const Object& Object, const Ray& R)
+HOST_DEVICE bool IntersectsObject(const Object& Object, const Ray& R)
 {
 	return IntersectsShape(Object.Shape, TransformRay(Object.Shape.InvTM, R));
 }
 
-DEVICE_NI bool IntersectsObject(const Ray& R)
+HOST_DEVICE bool IntersectsObject(const Ray& R)
 {
 	for (int i = 0; i < gpTracer->ObjectIDs.Count; i++)
 	{

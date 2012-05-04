@@ -18,7 +18,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)
+HOST_DEVICE void IntersectUnitBox(const Ray& R, Intersection& Int)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (Vec3f(-0.5f) - R.O);
@@ -43,7 +43,7 @@ DEVICE_NI void IntersectUnitBox(const Ray& R, Intersection& Int)
 	Int.UV		= Vec2f(0.0f, 0.0f);
 }
 
-DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& MinAABB, const Vec3f& MaxAABB, Intersection& Int)
+HOST_DEVICE void IntersectBox(const Ray& R, const Vec3f& MinAABB, const Vec3f& MaxAABB, Intersection& Int)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (MinAABB - R.O);
@@ -77,12 +77,12 @@ DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& MinAABB, const Vec3f& Max
 	}
 }
 
-DEVICE_NI void IntersectBox(const Ray& R, const Vec3f& Size, Intersection& Int)
+HOST_DEVICE void IntersectBox(const Ray& R, const Vec3f& Size, Intersection& Int)
 {
 	IntersectBox(R, -0.5f * Size, 0.5f * Size, Int);
 }
 
-DEVICE_NI bool IntersectBoxP(const Ray& R, const Vec3f& MinAABB, const Vec3f& MaxAABB)
+HOST_DEVICE bool IntersectBoxP(const Ray& R, const Vec3f& MinAABB, const Vec3f& MaxAABB)
 {
 	const Vec3f InvR		= Vec3f(1.0f, 1.0f, 1.0f) / R.D;
 	const Vec3f BottomT		= InvR * (MinAABB - R.O);
@@ -103,18 +103,18 @@ DEVICE_NI bool IntersectBoxP(const Ray& R, const Vec3f& MinAABB, const Vec3f& Ma
 	return true;
 }
 
-DEVICE_NI bool IntersectBoxP(Ray R, Vec3f Size)
+HOST_DEVICE bool IntersectBoxP(Ray R, Vec3f Size)
 {
 	return IntersectBoxP(R, -0.5f * Size, 0.5f * Size);
 }
 
-DEVICE_NI bool InsideBox(Vec3f P, Vec3f Size)
+HOST_DEVICE bool InsideBox(Vec3f P, Vec3f Size)
 {
 	const float HalfSize[3] = { 0.5f * Size[0], 0.5f * Size[1], 0.5f * Size[2] };
 	return P[0] > -HalfSize[0] && P[0] < HalfSize[0] && P[1] > -HalfSize[1] && P[1] < HalfSize[1] && P[2] > -HalfSize[2] && P[2] < HalfSize[2];
 }
 
-DEVICE_NI void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
+HOST_DEVICE void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 {
 	int Side = floorf(UVW[0] * 6.0f);
 
@@ -178,7 +178,7 @@ DEVICE_NI void SampleUnitBox(SurfaceSample& SS, Vec3f UVW)
 	SS.UV = Vec2f(UVW[1], UVW[2]);
 }
 
-DEVICE_NI void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
+HOST_DEVICE void SampleBox(SurfaceSample& SS, Vec3f UVW, Vec3f Size)
 {
 	SampleUnitBox(SS, UVW);
 

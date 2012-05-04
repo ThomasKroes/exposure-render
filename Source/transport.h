@@ -22,7 +22,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
+HOST_DEVICE bool Intersect(const Ray& R, CRNG& RNG)
 {
 	ScatterEvent SE(Enums::Light);
 
@@ -38,7 +38,7 @@ DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 	return false;
 }
 
-DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
+HOST_DEVICE bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 {
 	if (!gpTracer->RenderSettings.Traversal.Shadows)
 		return true;
@@ -50,7 +50,7 @@ DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 	return !Intersect(R, RNG);
 }
 
-DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, ScatterEvent& SE, CRNG& RNG, Shader& Shader)
+HOST_DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, ScatterEvent& SE, CRNG& RNG, Shader& Shader)
 {
 	Vec3f Wi;
 	
@@ -105,17 +105,7 @@ DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, Sca
 	return Ld;
 }
 
-DEVICE_NI Shader GetLightShader(ScatterEvent& SE, CRNG& RNG)
-{
-	return Shader(Enums::Brdf, SE.N, SE.Wo, ColorXYZf(0.0f), ColorXYZf(0.0f), 5.0f, 0.0f);
-}
-
-DEVICE_NI Shader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
-{
-	return Shader(Enums::Brdf, SE.N, SE.Wo, EvaluateTexture(gpObjects[0].DiffuseTextureID, SE.UV), EvaluateTexture(gpObjects[0].SpecularTextureID, SE.UV), 10.0f, 100.0f);//GlossinessExponent(EvaluateTexture(gpObjects[0].GlossinessTextureID, SE.UV).Y()));
-}
-
-DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
+HOST_DEVICE ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
 {
 	ColorXYZf Ld;
 

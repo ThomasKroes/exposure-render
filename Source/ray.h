@@ -21,7 +21,7 @@ namespace ExposureRender
 class Ray
 {	
 public:
-	DEVICE Ray(Vec3f O = Vec3f(), Vec3f D = Vec3f(0.0f, 0.0f, 1.0f), float MinT = 0.0f, float MaxT = 1000000.0f)
+	HOST_DEVICE Ray(Vec3f O = Vec3f(), Vec3f D = Vec3f(0.0f, 0.0f, 1.0f), float MinT = 0.0f, float MaxT = 1000000.0f)
 	{
 		this->O		= O;
 		this->D		= D;
@@ -29,7 +29,7 @@ public:
 		this->MaxT	= MaxT;
 	}
 
-	DEVICE Ray& operator = (const Ray& Other)
+	HOST_DEVICE Ray& operator = (const Ray& Other)
 	{
 		this->O		= Other.O;
 		this->D		= Other.D;
@@ -39,7 +39,7 @@ public:
 		return *this;
 	}
 
-	DEVICE Vec3f operator()(float T) const
+	HOST_DEVICE Vec3f operator()(float T) const
 	{
 		return this->O + Normalize(this->D) * T;
 	}

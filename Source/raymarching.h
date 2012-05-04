@@ -23,7 +23,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
+HOST_DEVICE void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 {
 	float MinT;
 	float MaxT;
@@ -64,7 +64,7 @@ DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	SE.SetValid(MinT, Ps, NormalizedGradient(gpTracer->VolumeID, Ps), -R.D, ColorXYZf());
 }
 
-DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
+HOST_DEVICE bool ScatterEventInVolume(Ray R, CRNG& RNG)
 {
 	float MinT;
 	float MaxT;
@@ -125,7 +125,7 @@ float sign(float num){
 }
 
 
-DEVICE_NI void lightShootDDAWoodcock(const Ray& R, CRNG& RNG, ScatterEvent& SE)
+HOST_DEVICE void lightShootDDAWoodcock(const Ray& R, CRNG& RNG, ScatterEvent& SE)
 {
 	Intersection Int;
 

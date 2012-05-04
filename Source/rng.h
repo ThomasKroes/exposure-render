@@ -21,13 +21,13 @@ namespace ExposureRender
 class CRNG
 {
 public:
-	DEVICE CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
+	HOST_DEVICE CRNG(unsigned int* pSeed0, unsigned int* pSeed1)
 	{
 		this->pSeed0 = pSeed0;
 		this->pSeed1 = pSeed1;
 	}
 
-	DEVICE float Get1(void)
+	HOST_DEVICE float Get1(void)
 	{
 		*this->pSeed0 = 36969 * ((*pSeed0) & 65535) + ((*pSeed0) >> 16);
 		*this->pSeed1 = 18000 * ((*pSeed1) & 65535) + ((*pSeed1) >> 16);
@@ -45,12 +45,12 @@ public:
 		return (res.f - 2.f) / 2.f;
 	}
 
-	DEVICE Vec2f Get2(void)
+	HOST_DEVICE Vec2f Get2(void)
 	{
 		return Vec2f(Get1(), Get1());
 	}
 
-	DEVICE Vec3f Get3(void)
+	HOST_DEVICE Vec3f Get3(void)
 	{
 		return Vec3f(Get1(), Get1(), Get1());
 	}

@@ -22,7 +22,7 @@ namespace ExposureRender
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
 
 
-DEVICE ColorRGBuc ToneMap(const ColorXYZAf& XYZA)
+HOST_DEVICE ColorRGBuc ToneMap(const ColorXYZAf& XYZA)
 {
 	ColorRGBf RGBf = ColorRGBf::FromXYZAf(XYZA);
 

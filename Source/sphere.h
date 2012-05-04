@@ -20,7 +20,7 @@ namespace ExposureRender
 
 // http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection#Example_Code
 
-DEVICE_NI bool IntersectSphereP(const Ray& R, const float& Radius)
+HOST_DEVICE bool IntersectSphereP(const Ray& R, const float& Radius)
 {
 	// Compute A, B and C coefficients
     float a = Dot(R.D, R.D);
@@ -76,7 +76,7 @@ DEVICE_NI bool IntersectSphereP(const Ray& R, const float& Radius)
 	return true;
 }
 
-DEVICE_NI void IntersectSphere(const Ray& R, const float& Radius, Intersection& Int)
+HOST_DEVICE void IntersectSphere(const Ray& R, const float& Radius, Intersection& Int)
 {
 	// Compute A, B and C coefficients
     float a = Dot(R.D, R.D);
@@ -134,17 +134,17 @@ DEVICE_NI void IntersectSphere(const Ray& R, const float& Radius, Intersection& 
 	Int.UV		= SphericalToUV(Int.P);
 }
 
-DEVICE_NI void IntersectUnitSphere(const Ray& R, Intersection& Int)
+HOST_DEVICE void IntersectUnitSphere(const Ray& R, Intersection& Int)
 {
 	IntersectSphere(R, 1.0f, Int);
 }
 
-DEVICE_NI bool InsideSphere(const Vec3f& P, const float& Radius)
+HOST_DEVICE bool InsideSphere(const Vec3f& P, const float& Radius)
 {
 	return Length(P) < Radius;
 }
 
-DEVICE_NI void SampleUnitSphere(SurfaceSample& SS, const Vec3f& UVW)
+HOST_DEVICE void SampleUnitSphere(SurfaceSample& SS, const Vec3f& UVW)
 {
 	float z		= 1.0f - 2.0f * UVW[0];
 	float r		= sqrtf(max(0.0f, 1.0f - z * z));
@@ -157,7 +157,7 @@ DEVICE_NI void SampleUnitSphere(SurfaceSample& SS, const Vec3f& UVW)
 	SS.UV	= Vec2f(SphericalTheta(SS.P), SphericalPhi(SS.P));
 }
 
-DEVICE_NI void SampleSphere(SurfaceSample& SS, const Vec3f& UVW, const float& Radius)
+HOST_DEVICE void SampleSphere(SurfaceSample& SS, const Vec3f& UVW, const float& Radius)
 {
 	SampleUnitSphere(SS, UVW);
 

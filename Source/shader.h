@@ -24,21 +24,21 @@ namespace ExposureRender
 class Lambertian
 {
 public:
-	DEVICE Lambertian(void)
+	HOST_DEVICE Lambertian(void)
 	{
 	}
 
-	DEVICE Lambertian(const ColorXYZf& Kd)
+	HOST_DEVICE Lambertian(const ColorXYZf& Kd)
 	{
 		this->Kd = Kd;
 	}
 
-	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return Kd * INV_PI_F;
 	}
 
-	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	HOST_DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		Wi = CosineWeightedHemisphere(U);
 
@@ -50,12 +50,12 @@ public:
 		return this->F(Wo, Wi);
 	}
 
-	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return SameHemisphere(Wo, Wi) ? AbsCosTheta(Wi) * INV_PI_F : 0.0f;
 	}
 
-	DEVICE Lambertian& operator = (const Lambertian& Other)
+	HOST_DEVICE Lambertian& operator = (const Lambertian& Other)
 	{
 		this->Kd = Other.Kd;
 		return *this;
@@ -64,7 +64,7 @@ public:
 	ColorXYZf	Kd;
 };
 
-DEVICE inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, const ColorXYZf &etat)
+HOST_DEVICE inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, const ColorXYZf &etat)
 {
 	ColorXYZf Rparl = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
 	ColorXYZf Rperp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
@@ -74,17 +74,17 @@ DEVICE inline ColorXYZf FrDiel(float cosi, float cost, const ColorXYZf &etai, co
 class Fresnel
 {
 public:
-	DEVICE Fresnel(void)
+	HOST_DEVICE Fresnel(void)
 	{
 	}
 
-	DEVICE Fresnel(float ei, float et) :
+	HOST_DEVICE Fresnel(float ei, float et) :
 		EtaI(ei),
 		EtaT(et)
 	{
 	}
 
-	DEVICE ColorXYZf Evaluate(float cosi)
+	HOST_DEVICE ColorXYZf Evaluate(float cosi)
 	{
 		// Compute Fresnel reflectance for dielectric
 		cosi = Clamp(cosi, -1.0f, 1.0f);
@@ -111,7 +111,7 @@ public:
 		}
 	}
 
-	DEVICE Fresnel& operator = (const Fresnel& Other)
+	HOST_DEVICE Fresnel& operator = (const Fresnel& Other)
 	{
 		this->EtaI = Other.EtaI;
 		this->EtaT = Other.EtaT;
@@ -125,16 +125,16 @@ public:
 class Blinn
 {
 public:
-	DEVICE Blinn(void)
+	HOST_DEVICE Blinn(void)
 	{
 	}
 
-	DEVICE Blinn(const float& Exponent) :
+	HOST_DEVICE Blinn(const float& Exponent) :
 		Exponent(Exponent)
 	{
 	}
 
-	DEVICE void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	HOST_DEVICE void SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		// Compute sampled half-angle vector $\wh$ for Blinn distribution
 		float costheta = powf(U[0], 1.f / (this->Exponent+1));
@@ -158,7 +158,7 @@ public:
 		Pdf = blinn_pdf;
 	}
 
-	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		// Compute half angle vector
 		const Vec3f Wh = Normalize(Wo + Wi);
@@ -174,13 +174,13 @@ public:
 		return Pdf;
 	}
 
-	DEVICE float D(const Vec3f& Wh)
+	HOST_DEVICE float D(const Vec3f& Wh)
 	{
 		float CosThetaH = AbsCosTheta(Wh);
 		return (this->Exponent + 2) * INV_TWO_PI_F * powf(CosThetaH, this->Exponent);
 	}
 
-	DEVICE Blinn& operator = (const Blinn& Other)
+	HOST_DEVICE Blinn& operator = (const Blinn& Other)
 	{
 		this->Exponent = Other.Exponent;
 
@@ -193,18 +193,18 @@ public:
 class Microfacet
 {
 public:
-	DEVICE Microfacet(void)
+	HOST_DEVICE Microfacet(void)
 	{
 	}
 
-	DEVICE Microfacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
+	HOST_DEVICE Microfacet(const ColorXYZf& Reflectance, const float& Ior, const float& Exponent) :
 		R(Reflectance),
 		Fresnel(1.0f, Ior),
 		Blinn(Exponent)
 	{
 	}
 
-	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		float cosThetaO = AbsCosTheta(Wo);
 		float cosThetaI = AbsCosTheta(Wi);
@@ -225,7 +225,7 @@ public:
 		return this->R * this->Blinn.D(Wh) * G(Wo, Wi, Wh) * F / (4.0f * cosThetaI * cosThetaO);
 	}
 
-	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	HOST_DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		this->Blinn.SampleF(Wo, Wi, Pdf, U);
 
@@ -235,7 +235,7 @@ public:
 		return this->F(Wo, Wi);
 	}
 
-	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		if (!SameHemisphere(Wo, Wi))
 			return 0.0f;
@@ -243,7 +243,7 @@ public:
 		return Blinn.Pdf(Wo, Wi);
 	}
 
-	DEVICE float G(const Vec3f& Wo, const Vec3f& Wi, const Vec3f& Wh)
+	HOST_DEVICE float G(const Vec3f& Wo, const Vec3f& Wi, const Vec3f& Wh)
 	{
 		const float NdotWh 	= AbsCosTheta(Wh);
 		const float NdotWo 	= AbsCosTheta(Wo);
@@ -253,7 +253,7 @@ public:
 		return min(1.0f, min((2.0f * NdotWh * NdotWo / WOdotWh), (2.0f * NdotWh * NdotWi / WOdotWh)));
 	}
 
-	DEVICE Microfacet& operator = (const Microfacet& Other)
+	HOST_DEVICE Microfacet& operator = (const Microfacet& Other)
 	{
 		this->R			= Other.R;
 		this->Fresnel	= Other.Fresnel;
@@ -271,21 +271,21 @@ public:
 class IsotropicPhase
 {
 public:
-	DEVICE IsotropicPhase(void)
+	HOST_DEVICE IsotropicPhase(void)
 	{
 	}
 
-	DEVICE IsotropicPhase(const ColorXYZf& Kd) :
+	HOST_DEVICE IsotropicPhase(const ColorXYZf& Kd) :
 		Kd(Kd)
 	{
 	}
 
-	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return Kd * INV_PI_F;
 	}
 
-	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
+	HOST_DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const Vec2f& U)
 	{
 		Wi	= UniformSampleSphereSurface(U);
 		Pdf	= this->Pdf(Wo, Wi);
@@ -293,12 +293,12 @@ public:
 		return F(Wo, Wi);
 	}
 
-	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		return INV_FOUR_PI_F;
 	}
 
-	DEVICE IsotropicPhase& operator = (const IsotropicPhase& Other)
+	HOST_DEVICE IsotropicPhase& operator = (const IsotropicPhase& Other)
 	{
 		this->Kd = Other.Kd;
 
@@ -311,11 +311,11 @@ public:
 class BRDF
 {
 public:
-	DEVICE BRDF(void)
+	HOST_DEVICE BRDF(void)
 	{
 	}
 
-	DEVICE BRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
+	HOST_DEVICE BRDF(const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		Lambertian(Kd),
 		Microfacet(Ks, Ior, Exponent),
 		Nn(Normalize(N)),
@@ -324,19 +324,19 @@ public:
 	{
 	}
 
-	DEVICE Vec3f WorldToLocal(const Vec3f& W)
+	HOST_DEVICE Vec3f WorldToLocal(const Vec3f& W)
 	{
 		return Vec3f(Dot(W, this->Nu), Dot(W, this->Nv), Dot(W, this->Nn));
 	}
 
-	DEVICE Vec3f LocalToWorld(const Vec3f& W)
+	HOST_DEVICE Vec3f LocalToWorld(const Vec3f& W)
 	{
 		return Vec3f(	this->Nu[0] * W[0] + this->Nv[0] * W[1] + this->Nn[0] * W[2],
 						this->Nu[1] * W[0] + this->Nv[1] * W[1] + this->Nn[1] * W[2],
 						this->Nu[2] * W[0] + this->Nv[2] * W[1] + this->Nn[2] * W[2]);
 	}
 
-	DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE ColorXYZf F(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		const Vec3f Wil = WorldToLocal(Wi);
@@ -349,7 +349,7 @@ public:
 		return R;
 	}
 
-	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
+	HOST_DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		Vec3f Wil;
@@ -376,7 +376,7 @@ public:
 		return R;
 	}
 
-	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		const Vec3f Wol = WorldToLocal(Wo);
 		const Vec3f Wil = WorldToLocal(Wi);
@@ -389,7 +389,7 @@ public:
 		return Pdf;
 	}
 
-	DEVICE BRDF& operator = (const BRDF& Other)
+	HOST_DEVICE BRDF& operator = (const BRDF& Other)
 	{
 		this->Nn 			= Other.Nn;
 		this->Nu 			= Other.Nu;
@@ -410,18 +410,18 @@ public:
 class Shader
 {
 public:
-	DEVICE Shader(void)
+	HOST_DEVICE Shader(void)
 	{
 	}
 
-	DEVICE Shader(const Enums::ScatterFunction& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
+	HOST_DEVICE Shader(const Enums::ScatterFunction& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		Type(Type),
 		BRDF(N, Wo, Kd, Ks, Ior, Exponent),
 		IsotropicPhase(Kd)
 	{
 	}
 
-	DEVICE ColorXYZf F(Vec3f Wo, Vec3f Wi)
+	HOST_DEVICE ColorXYZf F(Vec3f Wo, Vec3f Wi)
 	{
 		switch (this->Type)
 		{
@@ -435,7 +435,7 @@ public:
 		return 1.0f;
 	}
 
-	DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
+	HOST_DEVICE ColorXYZf SampleF(const Vec3f& Wo, Vec3f& Wi, float& Pdf, const BrdfSample& S)
 	{
 		switch (this->Type)
 		{
@@ -449,7 +449,7 @@ public:
 		return ColorXYZf(0.0f);
 	}
 
-	DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
+	HOST_DEVICE float Pdf(const Vec3f& Wo, const Vec3f& Wi)
 	{
 		switch (this->Type)
 		{
@@ -463,7 +463,7 @@ public:
 		return 1.0f;
 	}
 
-	DEVICE Shader& operator = (const Shader& Other)
+	HOST_DEVICE Shader& operator = (const Shader& Other)
 	{
 		this->Type 				= Other.Type;
 		this->BRDF 				= Other.BRDF;

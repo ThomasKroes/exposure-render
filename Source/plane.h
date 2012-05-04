@@ -19,7 +19,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void IntersectPlaneP(const Ray& R, const bool& OneSided, Intersection& Int)
+HOST_DEVICE void IntersectPlaneP(const Ray& R, const bool& OneSided, Intersection& Int)
 {
 	if (fabs(R.O[2] - R.D[2]) < RAY_EPS)
 		return;
@@ -33,7 +33,7 @@ DEVICE_NI void IntersectPlaneP(const Ray& R, const bool& OneSided, Intersection&
 	Int.Valid	= true;
 }
 
-DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, Intersection& Int)
+HOST_DEVICE void IntersectPlane(const Ray& R, const bool& OneSided, Intersection& Int)
 {
 	if (fabs(R.O[2] - R.D[2]) < RAY_EPS)
 		return;
@@ -56,7 +56,7 @@ DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, Intersection& 
 	Int.Valid = true;
 }
 
-DEVICE_NI bool IntersectPlaneP(const Ray& R, const bool& OneSided, const Vec2f& Size)
+HOST_DEVICE bool IntersectPlaneP(const Ray& R, const bool& OneSided, const Vec2f& Size)
 {
 	Intersection Int;
 	
@@ -68,7 +68,7 @@ DEVICE_NI bool IntersectPlaneP(const Ray& R, const bool& OneSided, const Vec2f& 
 	return true;
 }
 
-DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, const Vec2f& Size, Intersection& Int)
+HOST_DEVICE void IntersectPlane(const Ray& R, const bool& OneSided, const Vec2f& Size, Intersection& Int)
 {
 	IntersectPlane(R, OneSided, Int);
 
@@ -82,19 +82,19 @@ DEVICE_NI void IntersectPlane(const Ray& R, const bool& OneSided, const Vec2f& S
 	Int.UV[0] = 1.0f - Int.UV[0];
 }
 
-DEVICE_NI bool InsidePlane(Vec3f P)
+HOST_DEVICE bool InsidePlane(Vec3f P)
 {
 	return P[2] > 0.0f;
 }
 
-DEVICE_NI void SampleUnitPlane(SurfaceSample& SS, const Vec3f& UVW)
+HOST_DEVICE void SampleUnitPlane(SurfaceSample& SS, const Vec3f& UVW)
 {
 	SS.P 	= Vec3f(-0.5f + UVW[0], -0.5f + UVW[1], 0.0f);
 	SS.N 	= Vec3f(0.0f, 0.0f, 1.0f);
 	SS.UV	= Vec2f(UVW[0], UVW[1]);
 }
 
-DEVICE_NI void SamplePlane(SurfaceSample& SS, const Vec3f& UVW, const Vec2f& Size)
+HOST_DEVICE void SamplePlane(SurfaceSample& SS, const Vec3f& UVW, const Vec2f& Size)
 {
 	SampleUnitPlane(SS, UVW);
 

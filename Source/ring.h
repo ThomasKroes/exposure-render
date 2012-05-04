@@ -19,7 +19,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void IntersectUnitRing(const Ray& R, const bool& OneSided, const float& InnerRadius, Intersection& Int)
+HOST_DEVICE void IntersectUnitRing(const Ray& R, const bool& OneSided, const float& InnerRadius, Intersection& Int)
 {
 	IntersectPlane(R, OneSided, Int);
 
@@ -27,7 +27,7 @@ DEVICE_NI void IntersectUnitRing(const Ray& R, const bool& OneSided, const float
 		Int.Valid = false;
 }
 
-DEVICE_NI bool IntersectRingP(const Ray& R, const bool& OneSided, const float& InnerRadius, const float& OuterRadius, Intersection& Int)
+HOST_DEVICE bool IntersectRingP(const Ray& R, const bool& OneSided, const float& InnerRadius, const float& OuterRadius, Intersection& Int)
 {
 	IntersectPlaneP(R, OneSided, Int);
 
@@ -37,7 +37,7 @@ DEVICE_NI bool IntersectRingP(const Ray& R, const bool& OneSided, const float& I
 	return Int.Valid;
 }
 
-DEVICE_NI void IntersectRing(const Ray& R, const bool& OneSided, const float& InnerRadius, const float& OuterRadius, Intersection& Int)
+HOST_DEVICE void IntersectRing(const Ray& R, const bool& OneSided, const float& InnerRadius, const float& OuterRadius, Intersection& Int)
 {
 	IntersectPlane(R, OneSided, Int);
 
@@ -51,7 +51,7 @@ DEVICE_NI void IntersectRing(const Ray& R, const bool& OneSided, const float& In
 	Int.UV[0] = 1.0f - Int.UV[0]; 
 }
 
-DEVICE_NI void SampleUnitRing(SurfaceSample& SS, const Vec3f& UVW, const float& InnerRadius)
+HOST_DEVICE void SampleUnitRing(SurfaceSample& SS, const Vec3f& UVW, const float& InnerRadius)
 {
 	float r = InnerRadius + (1.0f - InnerRadius) * sqrtf(UVW[0]);
 	float theta = 2.0f * PI_F * UVW[1];
@@ -61,7 +61,7 @@ DEVICE_NI void SampleUnitRing(SurfaceSample& SS, const Vec3f& UVW, const float& 
 	SS.UV	= Vec2f(SS.P[0], SS.P[1]);
 }
 
-DEVICE_NI void SampleRing(SurfaceSample& SS, const Vec3f& UVW, const float& InnerRadius, const float& OuterRadius)
+HOST_DEVICE void SampleRing(SurfaceSample& SS, const Vec3f& UVW, const float& InnerRadius, const float& OuterRadius)
 {
 	SampleUnitRing(SS, UVW, InnerRadius / OuterRadius);
 

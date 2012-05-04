@@ -23,25 +23,7 @@ KERNEL void KrnlSingleScattering()
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
-	/*
-	CRNG RNG(&gpTracer->FrameBuffer.RandomSeeds1(IDx, IDy), &gpTracer->FrameBuffer.RandomSeeds2(IDx, IDy));
-
-	ColorXYZf Lv = ColorXYZf::Black();
-
-	ScatterEvent SE;
-
-	MetroSample Sample(RNG); 
-
-	Ray R;
-
-	SampleCamera(gpTracer->Camera, R, IDx, IDy, Sample.CameraSample);
-
-	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);
-	*/
-
-	
-
-	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = SingleScattering(Tracer* pTracer, IDx, IDy);
+	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = SingleScattering(gpTracer, Vec2i(IDx, IDy));
 }
 
 void SingleScattering(const Tracer& Tracer)

@@ -45,18 +45,18 @@ HOST_DEVICE_NI ColorXYZf ToColorXYZf(float V[3])
 	return ColorXYZf(V[0], V[1], V[2]);
 }
 
-DEVICE float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
+HOST_DEVICE float G(Vec3f P1, Vec3f N1, Vec3f P2, Vec3f N2)
 {
 	const Vec3f W = Normalize(P2 - P1);
 	return (ClampedDot(W, N1) * ClampedDot(-1.0f * W, N2)) / DistanceSquared(P1, P2);
 }
 
-DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
+HOST_DEVICE ColorXYZAf CumulativeMovingAverage(const ColorXYZAf& A, const ColorXYZAf& Ax, const int& N)
 {
 	return A + (Ax - A) / max((float)N, 1.0f);
 }
 
-DEVICE ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
+HOST_DEVICE ColorXYZf CumulativeMovingAverage(const ColorXYZf& A, const ColorXYZf& Ax, const int& N)
 {
 	 return A + ((Ax - A) / max((float)N, 1.0f));
 }

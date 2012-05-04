@@ -27,22 +27,22 @@ namespace ExposureRender
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/BilateralFilter.cpp?r=3
 // http://code.google.com/p/bilateralfilter/source/browse/trunk/main.cpp
 
-DEVICE inline float GetSpatialWeight(BilateralFilter& Filter, const int& IDx, const int& KernelX)
+HOST_DEVICE inline float GetSpatialWeight(BilateralFilter& Filter, const int& IDx, const int& KernelX)
 {
 	return Filter.KernelD[Filter.KernelRadius + KernelX - IDx];
 }
 
-DEVICE inline float GaussianSimilarity(BilateralFilter& Filter, const ColorRGBf& A, const ColorRGBf& B)
+HOST_DEVICE inline float GaussianSimilarity(BilateralFilter& Filter, const ColorRGBf& A, const ColorRGBf& B)
 {
 	return Filter.GaussSimilarity[(int)fabs(LuminanceFromRGB(A[0], A[1], A[2]) - LuminanceFromRGB(B[0], B[1], B[2]))];//(int)floorf(A[0] - B[0])];
 }
 
-DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
+HOST_DEVICE ColorRGBf ToColorRGBf(ColorRGBAuc Color)
 {
 	return ColorRGBf(Color[0], Color[1], Color[2]);
 }
 
-DEVICE inline float FilterWeight(const int& IDx, const int& KernelX, const ColorRGBf& KernelPosColor, const ColorRGBf& CenterColor)
+HOST_DEVICE inline float FilterWeight(const int& IDx, const int& KernelX, const ColorRGBf& KernelPosColor, const ColorRGBf& CenterColor)
 {
 	return GetSpatialWeight(IDx, KernelX) * GaussianSimilarity(KernelPosColor, CenterColor);
 }

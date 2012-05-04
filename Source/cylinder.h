@@ -22,7 +22,7 @@
 namespace ExposureRender
 {
 
-DEVICE_NI void IntersectCylinder(const Ray& R, const float& Radius, const float& Height, Intersection& Int)
+HOST_DEVICE void IntersectCylinder(const Ray& R, const float& Radius, const float& Height, Intersection& Int)
 {
 	/*
 	const float HalfHeight = 0.5f * Height;
@@ -88,12 +88,12 @@ DEVICE_NI void IntersectCylinder(const Ray& R, const float& Radius, const float&
 	*/
 }
 
-DEVICE_NI bool InsideCylinder(Vec3f P, float Radius, float Height)
+HOST_DEVICE bool InsideCylinder(Vec3f P, float Radius, float Height)
 {
 	return sqrtf((P[0] * P[0]) + (P[2] * P[2])) < Radius && fabs(P[1]) < (0.5f * Height);
 }
 
-DEVICE_NI void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
+HOST_DEVICE void SampleCylinder(SurfaceSample& SS, Vec3f UVW, float Radius, float Height)
 {
 	/*
 	int Side = floorf(UVW[2] * 3.0f);
