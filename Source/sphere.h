@@ -39,9 +39,9 @@ HOST_DEVICE bool IntersectSphereP(const Ray& R, const float& Radius)
     float q;
 
     if (b < 0)
-        q = (-b - distSqrt) / 2.0;
+        q = (-b - distSqrt) / 2.0f;
     else
-        q = (-b + distSqrt) / 2.0;
+        q = (-b + distSqrt) / 2.0f;
 
     // compute t0 and t1
     float t0 = q / a;
@@ -95,9 +95,9 @@ HOST_DEVICE void IntersectSphere(const Ray& R, const float& Radius, Intersection
     float q;
 
     if (b < 0)
-        q = (-b - distSqrt) / 2.0;
+        q = (-b - distSqrt) / 2.0f;
     else
-        q = (-b + distSqrt) / 2.0;
+        q = (-b + distSqrt) / 2.0f;
 
     // compute t0 and t1
     float t0 = q / a;

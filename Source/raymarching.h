@@ -23,7 +23,7 @@
 namespace ExposureRender
 {
 
-HOST_DEVICE void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
+HOST_DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 {
 	float MinT;
 	float MaxT;
@@ -64,7 +64,7 @@ HOST_DEVICE void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 	SE.SetValid(MinT, Ps, NormalizedGradient(gpTracer->VolumeID, Ps), -R.D, ColorXYZf());
 }
 
-HOST_DEVICE bool ScatterEventInVolume(Ray R, CRNG& RNG)
+HOST_DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 {
 	float MinT;
 	float MaxT;

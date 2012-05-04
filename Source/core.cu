@@ -123,8 +123,8 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 	gTracers.Synchronize(TracerID);
 
 	SingleScattering(gTracers[TracerID]);
+	FilterGaussian(gTracers[TracerID]);
 	ComputeEstimate(gTracers[TracerID]);
-//	FilterGaussian(Tracer.FrameBuffer.FrameEstimate.GetPtr(), Tracer.FrameBuffer.FrameEstimateTemp.GetPtr(), Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1]);
 	ToneMap(gTracers[TracerID]);
 
 	gTracers[TracerID].NoIterations++;

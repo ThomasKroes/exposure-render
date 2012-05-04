@@ -21,10 +21,6 @@ namespace ExposureRender
 {
 
 /*
-#define KRNL_GAUSSIAN_FILTER_BLOCK_W		16
-#define KRNL_GAUSSIAN_FILTER_BLOCK_H		8
-#define KRNL_GAUSSIAN_FILTER_BLOCK_SIZE		KRNL_GAUSSIAN_FILTER_BLOCK_W * KRNL_GAUSSIAN_FILTER_BLOCK_H
-
 KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut)
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
@@ -122,5 +118,53 @@ void FilterGaussian(ColorXYZAf* pImage, ColorXYZAf* pTemp, int Width, int Height
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage)), "Gaussian filter (Vertical)");
 }
 */
+
+CD float gFilterWeights[5][5] =
+{
+	{ 1.0f, 4.0f, 7.0f, 4.0f, 1.0f },
+	{ 4.0f, 16.0f, 26.0f, 16.0f, 4.0f },
+	{ 7.0f, 26.0f, 41.0f, 26, 7.0f },
+	{ 4.0f, 16.0f, 26.0f, 16.0f, 4.0f },
+	{ 1.0f, 4.0f, 7.0f, 4.0f, 1.0f }
+};
+
+KERNEL void KrnlGaussianFilter(ColorXYZAf* pIn, ColorXYZAf* pOut)
+{
+	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
+
+	int Range[2][2];
+
+	Range[0][0] = max((int)ceilf(IDx - 2), 0);
+	Range[0][1] = min((int)floorf(IDx + 2), gpTracer->FrameBuffer.Resolution[0] - 1);
+	Range[1][0] = max((int)ceilf(IDy - 2), 0);
+	Range[1][1] = min((int)floorf(IDy + 2), gpTracer->FrameBuffer.Resolution[1] - 1);
+
+	ColorXYZAf Sum		= ColorXYZAf::Black();
+	float Weight		= 0.0f;
+	float TotalWeight	= 0.0f;
+
+	for (int y = Range[1][0]; y <= Range[1][1]; y++)
+	{
+		for (int x = Range[0][0]; x <= Range[0][1]; x++)
+		{
+			Weight		= 1.0f;//gFilterWeights[2 - (y - IDy)][2 - (x - IDx)];
+			Sum			+= pIn[y * gpTracer->FrameBuffer.Resolution[0] + x] * Weight;
+			TotalWeight	+= Weight;
+		}
+	}
+
+	if (TotalWeight > 0.0f)
+		pOut[IDk] = Sum / TotalWeight;
+	else
+		pOut[IDk] = ColorXYZAf::Black();
+}
+
+void FilterGaussian(Tracer& Tracer)
+{
+	LAUNCH_DIMENSIONS(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1], 1, 8, 8, 1)
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilter<<<GridDim, BlockDim>>>(&Tracer.FrameBuffer.FrameEstimate[0], &Tracer.FrameBuffer.FrameEstimateTemp[0])), "Gaussian filter (Horizontal)");
+
+	Tracer.FrameBuffer.FrameEstimate = Tracer.FrameBuffer.FrameEstimateTemp;
+}
 
 }

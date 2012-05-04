@@ -25,8 +25,6 @@ class EXPOSURE_RENDER_DLL Buffer
 public:
 	HOST Buffer(const Enums::MemoryType& MemoryType = Enums::Host, const char* pName = "Untitled") :
 		MemoryType(MemoryType),
-		Name(),
-		FullName(),
 		Data(NULL),
 		NoElements(0),
 		Dirty(false)
@@ -108,7 +106,6 @@ public:
 			case Enums::GigaByte:	sprintf_s(pMemoryString, MAX_CHAR_SIZE, "%0.2f GB", this->GetMemorySize(Enums::GigaByte));		break;
 		}
 	}
-
 
 	Enums::MemoryType	MemoryType;
 	char				Name[MAX_CHAR_SIZE];

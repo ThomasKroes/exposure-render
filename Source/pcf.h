@@ -72,7 +72,7 @@ public:
 		{
 			for (int j = 0; j < this->Count; i++)
 			{
-				if (this->Position[j] > 0.0f && this->Position[j] <= Max)
+				if (this->Position[j] <= Max)
 				{
 					Max = this->Position[j];
 					ID = j;
@@ -82,7 +82,7 @@ public:
 			PositionTemp[i] = this->Position[ID];
 			ValueTemp[i]	= this->Value[ID];
 
-			this->Position[ID] = -1.0f;
+			this->Position[ID] = FLT_MAX;
 		}
 
 		this->Position	= PositionTemp;

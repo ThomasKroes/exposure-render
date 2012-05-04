@@ -21,7 +21,7 @@
 namespace ExposureRender
 {
 
-HOST_DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& V, CameraSample& CS)
+HOST_DEVICE_NI void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& V, CameraSample& CS)
 {
 	Vec2f ScreenPoint;
 
@@ -44,7 +44,7 @@ HOST_DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const 
 	}
 }
 
-HOST_DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
+HOST_DEVICE_NI ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
 	ScatterEvent SE[3] = { ScatterEvent(Enums::Volume), ScatterEvent(Enums::Light), ScatterEvent(Enums::Object) };
 
@@ -68,7 +68,7 @@ HOST_DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 	return NearestRS;
 }
 
-HOST_DEVICE ColorXYZAf SingleScattering(Tracer* pTracer, const Vec2i& PixelCoord)
+HOST_DEVICE_NI ColorXYZAf SingleScattering(Tracer* pTracer, const Vec2i& PixelCoord)
 {
 	CRNG RNG(&gpTracer->FrameBuffer.RandomSeeds1(PixelCoord[0], PixelCoord[1]), &gpTracer->FrameBuffer.RandomSeeds2(PixelCoord[0], PixelCoord[1]));
 

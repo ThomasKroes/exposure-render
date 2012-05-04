@@ -70,10 +70,10 @@ HOST_DEVICE void IntersectBox(const Ray& R, const Vec3f& MinAABB, const Vec3f& M
 	for (int i = 0; i < 3; i++)
 	{
 		if (Int.P[i] <= MinAABB[i] + 0.0001f)
-			Int.N[i] == -1.0f;
+			Int.N[i] = -1.0f;
 
 		if (Int.P[i] >= MaxAABB[i] - 0.0001f)
-			Int.N[i] == 1.0f;
+			Int.N[i] = 1.0f;
 	}
 }
 

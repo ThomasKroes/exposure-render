@@ -53,7 +53,7 @@ KERNEL void KrnlToneMap()
 	gpTracer->FrameBuffer.DisplayEstimate(IDx, IDy)[3] = gpTracer->FrameBuffer.RunningEstimateXyza(IDx, IDy)[3] * 255.0f;
 }
 
-void ToneMap(const Tracer& Tracer)
+void ToneMap(Tracer& Tracer)
 {
 	LAUNCH_DIMENSIONS(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1], 1, 16, 8, 1)
 	LAUNCH_CUDA_KERNEL_TIMED((KrnlToneMap<<<GridDim, BlockDim>>>()), "Tone map");

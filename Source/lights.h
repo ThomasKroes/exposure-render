@@ -20,7 +20,7 @@
 namespace ExposureRender
 {
 
-HOST_DEVICE void SampleLightSurface(const Light& Light, LightSample& LS, SurfaceSample& SS)
+HOST_DEVICE_NI void SampleLightSurface(const Light& Light, LightSample& LS, SurfaceSample& SS)
 {
 	switch (Light.Shape.Type)
 	{
@@ -36,7 +36,7 @@ HOST_DEVICE void SampleLightSurface(const Light& Light, LightSample& LS, Surface
 	SS.N = TransformVector(Light.Shape.TM, SS.N);
 }
 
-HOST_DEVICE void SampleLight(const Light& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
+HOST_DEVICE_NI void SampleLight(const Light& Light, LightSample& LS, SurfaceSample& SS, ScatterEvent& SE, Vec3f& Wi, ColorXYZf& Le)
 {
 	SampleLightSurface(Light, LS, SS);
 
@@ -51,7 +51,7 @@ HOST_DEVICE void SampleLight(const Light& Light, LightSample& LS, SurfaceSample&
 		Le /= Light.Shape.Area;
 }
 
-HOST_DEVICE void IntersectLight(const Light& Light, const Ray& R, ScatterEvent& SE)
+HOST_DEVICE_NI void IntersectLight(const Light& Light, const Ray& R, ScatterEvent& SE)
 {
 	Ray Rt = TransformRay(Light.Shape.InvTM, R);
 
@@ -82,7 +82,7 @@ HOST_DEVICE void IntersectLight(const Light& Light, const Ray& R, ScatterEvent& 
 	}
 }
 
-HOST_DEVICE void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
+HOST_DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisibility = false)
 {
 	float T = FLT_MAX; 
 
@@ -107,12 +107,12 @@ HOST_DEVICE void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVis
 	}
 }
 
-HOST_DEVICE bool IntersectsLight(const Light& Light, const Ray& R)
+HOST_DEVICE_NI bool IntersectsLight(const Light& Light, const Ray& R)
 {
 	return IntersectsShape(Light.Shape, TransformRay(Light.Shape.InvTM, R));
 }
 
-HOST_DEVICE bool IntersectsLight(const Ray& R)
+HOST_DEVICE_NI bool IntersectsLight(const Ray& R)
 {
 	for (int i = 0; i < gpTracer->LightIDs.Count; i++)
 	{
