@@ -46,7 +46,7 @@ DEVICE_NI void IntersectObjects(const Ray& R, ScatterEvent& RS)
 	{
 		const Object& Object = gpObjects[i];
 
-		ScatterEvent LocalRS(ScatterEvent::Object);
+		ScatterEvent LocalRS(Enums::Object);
 
 		LocalRS.ObjectID = i;
 

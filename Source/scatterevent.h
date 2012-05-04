@@ -16,6 +16,7 @@
 #include "color.h"
 #include "ray.h"
 #include "matrix.h"
+#include "shader.h"
 
 using namespace std;
 
@@ -25,19 +26,11 @@ namespace ExposureRender
 class ScatterEvent
 {
 public:
-	enum SampleType
-	{
-		Volume,
-		Light,
-		Object,
-		SlicePlane
-	};
-
 	HOST_DEVICE ScatterEvent()
 	{
 	}
 
-	HOST_DEVICE ScatterEvent(const SampleType& Type)
+	HOST_DEVICE ScatterEvent(const Enums::ScatterType& Type)
 	{
 		this->Type = Type;
 		this->SetInvalid();
@@ -68,7 +61,7 @@ public:
 	HOST_DEVICE ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
 	{
 		this->Type			= Other.Type;
-		this->Valid			= Other.Valid;	
+		this->Valid			= Other.Valid;
 		this->T				= Other.T;
 		this->P				= Other.P;
 		this->N				= Other.N;
@@ -81,16 +74,134 @@ public:
 		return *this;
 	}
 
-	SampleType	Type;
-	bool		Valid;
-	float		T;
-	Vec3f		P;
-	Vec3f		N;
-	Vec3f		Wo;
-	ColorXYZf	Le;
-	Vec2f		UV;
-	int			ObjectID;
-	int			LightID;
+	HOST_DEVICE void GetShader(Shader& Shader)
+	{
+		switch (this->Type)
+		{
+			case Enums::Volume:
+			{
+				switch (gpTracer->RenderSettings.Shading.Type)
+				{
+					case Enums::BrdfOnly:
+					{
+						break;
+					}
+
+					case Enums::PhaseFunctionOnly:
+					{
+						break;
+					}
+
+					case Enums::Hybrid:
+					{
+						break;
+					}
+
+					case Enums::Modulation:
+					{
+						break;
+					}
+
+					case Enums::Threshold:
+					{
+						break;
+					}
+
+					case Enums::GradientMagnitude:
+					{
+						break;
+					}
+				}
+
+				break;
+			}
+
+			case Enums::Light:
+			{
+				break;
+			}
+
+			case Enums::Object:
+			{
+				break;
+			}
+
+			case Enums::SlicePlane:
+			{
+				break;
+			}
+		}
+	}
+
+	Enums::ScatterType	Type;
+	bool				Valid;
+	float				T;
+	Vec3f				P;
+	Vec3f				N;
+	Vec3f				Wo;
+	ColorXYZf			Le;
+	Vec2f				UV;
+	int					ObjectID;
+	int					LightID;
 };
 
 }
+
+/*
+bool BRDF = false;
+
+float PdfBrdf = 1.0f;
+
+switch (gpTracer->RenderSettings.Shading.Type)
+{
+	case 0:
+	{
+		BRDF = true;
+		break;
+	}
+
+	case 1:
+	{
+		BRDF = false;
+		break;
+	}
+
+	
+	case 2:
+	{
+		const float NGM			= GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
+		const float Sensitivity	= 25;
+		const float ExpGF		= 3;
+		const float Exponent	= Sensitivity * powf(gpTracer->RenderSettings.Shading.GradientFactor, ExpGF) * NGM;
+		
+		PdfBrdf = gpTracer->RenderSettings.Shading.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
+		BRDF = RNG.Get1() <= PdfBrdf;
+		break;
+	}
+
+	case 3:
+	{
+		const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
+		
+		PdfBrdf = 1.0f - powf(1.0f - NGM, 2.0f);
+		BRDF = RNG.Get1() < PdfBrdf;
+		break;
+	}
+
+	case 4:
+	{
+		const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
+
+		if (NGM > gpTracer->RenderSettings.Shading.GradientThreshold)
+			BRDF = true;
+		else
+			BRDF = false;
+	}
+	
+}
+
+if (BRDF)
+	return Shader(Shader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+else
+	return Shader(Shader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
+*/

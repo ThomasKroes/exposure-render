@@ -57,8 +57,8 @@ namespace Enums
 
 	enum ShadingMode
 	{
-		BRDF = 0,
-		Phase,
+		BrdfOnly = 0,
+		PhaseFunctionOnly,
 		Hybrid,
 		Modulation,
 		Threshold,
@@ -85,6 +85,20 @@ namespace Enums
 		Power = 0,
 		Lux,
 		Intensity
+	};
+
+	enum ScatterFunction
+	{
+		Brdf,
+		PhaseFunction
+	};
+
+	enum ScatterType
+	{
+		Volume,
+		Light,
+		Object,
+		SlicePlane
 	};
 }
 

@@ -407,20 +407,14 @@ public:
 	Microfacet		Microfacet;
 };
 
-class VolumeShader
+class Shader
 {
 public:
-	enum EType
-	{
-		Brdf,
-		Phase
-	};
-
-	DEVICE VolumeShader(void)
+	DEVICE Shader(void)
 	{
 	}
 
-	DEVICE VolumeShader(const EType& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
+	DEVICE Shader(const Enums::ScatterFunction& Type, const Vec3f& N, const Vec3f& Wo, const ColorXYZf& Kd, const ColorXYZf& Ks, const float& Ior, const float& Exponent) :
 		Type(Type),
 		BRDF(N, Wo, Kd, Ks, Ior, Exponent),
 		IsotropicPhase(Kd)
@@ -431,10 +425,10 @@ public:
 	{
 		switch (this->Type)
 		{
-			case Brdf:
+			case Enums::Brdf:
 				return this->BRDF.F(Wo, Wi);
 
-			case Phase:
+			case Enums::PhaseFunction:
 				return this->IsotropicPhase.F(Wo, Wi);
 		}
 
@@ -445,10 +439,10 @@ public:
 	{
 		switch (this->Type)
 		{
-			case Brdf:
+			case Enums::Brdf:
 				return this->BRDF.SampleF(Wo, Wi, Pdf, S);
 
-			case Phase:
+			case Enums::PhaseFunction:
 				return this->IsotropicPhase.SampleF(Wo, Wi, Pdf, S.Dir);
 		}
 
@@ -459,17 +453,17 @@ public:
 	{
 		switch (this->Type)
 		{
-			case Brdf:
+			case Enums::Brdf:
 				return this->BRDF.Pdf(Wo, Wi);
 
-			case Phase:
+			case Enums::PhaseFunction:
 				return this->IsotropicPhase.Pdf(Wo, Wi);
 		}
 
 		return 1.0f;
 	}
 
-	DEVICE VolumeShader& operator = (const VolumeShader& Other)
+	DEVICE Shader& operator = (const Shader& Other)
 	{
 		this->Type 				= Other.Type;
 		this->BRDF 				= Other.BRDF;
@@ -478,72 +472,9 @@ public:
 		return *this;
 	}
 
-	EType				Type;
-	BRDF				BRDF;
-	IsotropicPhase		IsotropicPhase;
+	Enums::ScatterFunction		Type;
+	BRDF						BRDF;
+	IsotropicPhase				IsotropicPhase;
 };
-
-DEVICE_NI VolumeShader GetVolumeShader(ScatterEvent& SE, CRNG& RNG)
-{
-	return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, ColorXYZf(0.5f), ColorXYZf(0.5f), 15.0f, 100.f);
-/*
-	bool BRDF = false;
-
-	float PdfBrdf = 1.0f;
-
-	switch (gpTracer->RenderSettings.Shading.Type)
-	{
-		case 0:
-		{
-			BRDF = true;
-			break;
-		}
-	
-		case 1:
-		{
-			BRDF = false;
-			break;
-		}
-	
-		
-		case 2:
-		{
-			const float NGM			= GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
-			const float Sensitivity	= 25;
-			const float ExpGF		= 3;
-			const float Exponent	= Sensitivity * powf(gpTracer->RenderSettings.Shading.GradientFactor, ExpGF) * NGM;
-			
-			PdfBrdf = gpTracer->RenderSettings.Shading.OpacityModulated ? GetOpacity(SE.P) * (1.0f - __expf(-Exponent)) : 1.0f - __expf(-Exponent);
-			BRDF = RNG.Get1() <= PdfBrdf;
-			break;
-		}
-
-		case 3:
-		{
-			const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
-			
-			PdfBrdf = 1.0f - powf(1.0f - NGM, 2.0f);
-			BRDF = RNG.Get1() < PdfBrdf;
-			break;
-		}
-
-		case 4:
-		{
-			const float NGM = GradientMagnitude(SE.P) * gpTracer->Volume.GradientMagnitudeRange.Inv;
-
-			if (NGM > gpTracer->RenderSettings.Shading.GradientThreshold)
-				BRDF = true;
-			else
-				BRDF = false;
-		}
-		
-	}
-
-	if (BRDF)
-		return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
-	else
-		return VolumeShader(VolumeShader::Phase, SE.N, SE.Wo, GetDiffuse(I), GetSpecular(I), gpTracer->RenderSettings.Shading.IndexOfReflection, GetGlossiness(I));
-	*/
-}
 
 }

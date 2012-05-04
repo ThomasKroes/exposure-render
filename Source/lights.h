@@ -90,7 +90,7 @@ DEVICE_NI void IntersectLights(const Ray& R, ScatterEvent& RS, bool RespectVisib
 	{
 		const Light& Light = gpLights[gpTracer->LightIDs[i]];
 		
-		ScatterEvent LocalRS(ScatterEvent::Light);
+		ScatterEvent LocalRS(Enums::Light);
 
 		LocalRS.LightID = i;
 

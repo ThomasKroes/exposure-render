@@ -46,7 +46,7 @@ DEVICE void SampleCamera(const Camera& Camera, Ray& R, const int& U, const int& 
 
 DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 {
-	ScatterEvent SE[3] = { ScatterEvent(Enums::Volume), ScatterEvent(Enums::Light), ScatterEvent(Enums::Object) };
+	ScatterEvent SE[3] = { ScatterEvent(ScatterEvent::Volume), ScatterEvent(ScatterEvent::Light), ScatterEvent(ScatterEvent::Object) };
 
 	SampleVolume(R, RNG, SE[0]);
 	IntersectLights(R, SE[1], true);
@@ -54,7 +54,7 @@ DEVICE ScatterEvent SampleRay(Ray R, CRNG& RNG)
 
 	float T = FLT_MAX;
 
-	ScatterEvent NearestRS(Enums::Volume);
+	ScatterEvent NearestRS(ScatterEvent::Volume);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -86,13 +86,13 @@ KERNEL void KrnlSingleScattering()
 
 	SE = SampleRay(R, RNG);
 
-	if (SE.Valid && SE.Type == Enums::Volume)
+	if (SE.Valid && SE.Type == ScatterEvent::Volume)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
-	if (SE.Valid && SE.Type == Enums::Light)
+	if (SE.Valid && SE.Type == ScatterEvent::Light)
 		Lv += SE.Le;
 	
-	if (SE.Valid && SE.Type == Enums::Object)
+	if (SE.Valid && SE.Type == ScatterEvent::Object)
 		Lv += UniformSampleOneLight(SE, RNG, Sample.LightingSample);
 
 	gpTracer->FrameBuffer.FrameEstimate(IDx, IDy) = ColorXYZAf(Lv[0], Lv[1], Lv[2], SE.Valid ? 1.0f : 0.0f);

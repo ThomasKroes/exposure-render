@@ -23,7 +23,7 @@ class EXPOSURE_RENDER_DLL PiecewiseLinearFunction : PiecewiseFunction<Size>
 {
 public:
 	HOST PiecewiseLinearFunction() :
-		PiecewiseFunction()
+		PiecewiseFunction<Size>()
 	{
 	}
 
@@ -38,7 +38,7 @@ public:
 
 	HOST PiecewiseLinearFunction& operator = (const PiecewiseLinearFunction& Other)
 	{
-		PiecewiseFunction::operator = Other;
+		PiecewiseFunction<Size>::operator = (Other);
 
 		return *this;
 	}

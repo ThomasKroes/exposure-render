@@ -13,11 +13,7 @@
 
 #pragma once
 
-#include "color.h"
-#include "ray.h"
-#include "matrix.h"
-
-using namespace std;
+#include "vector.h"
 
 namespace ExposureRender
 {

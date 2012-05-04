@@ -24,7 +24,7 @@ namespace ExposureRender
 
 DEVICE_NI bool Intersect(const Ray& R, CRNG& RNG)
 {
-	ScatterEvent SE(ScatterEvent::Light);
+	ScatterEvent SE(Enums::Light);
 
 	if (IntersectsLight(R))
 		return true;
@@ -50,7 +50,7 @@ DEVICE_NI bool Visible(const Vec3f& P1, const Vec3f& P2, CRNG& RNG)
 	return !Intersect(R, RNG);
 }
 
-DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, ScatterEvent& SE, CRNG& RNG, VolumeShader& Shader)
+DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, ScatterEvent& SE, CRNG& RNG, Shader& Shader)
 {
 	Vec3f Wi;
 	
@@ -70,7 +70,7 @@ DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, Sca
 
 		const float Weight = PowerHeuristic(1, LightPdf, 1, BsdfPdf);
 
-		if (Shader.Type == VolumeShader::Brdf)
+		if (Shader.Type == Enums::Brdf)
 			Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / LightPdf);
 		else
 			Ld += F * Li / LightPdf;
@@ -81,7 +81,7 @@ DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, Sca
 	if (F.IsBlack() || BsdfPdf <= 0.0f)
 		return Ld;
 	
-	ScatterEvent SE2(ScatterEvent::Light);
+	ScatterEvent SE2(Enums::Light);
 
 	IntersectLights(Ray(SE.P, Wi), SE2);
 	
@@ -96,7 +96,7 @@ DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, Sca
 
 		const float Weight = PowerHeuristic(1, BsdfPdf, 1, LightPdf);
 
-		if (Shader.Type == VolumeShader::Brdf)
+		if (Shader.Type == Enums::Brdf)
 			Ld += F * Li * (AbsDot(Wi, SE.N) * Weight / BsdfPdf);
 		else
 			Ld += F * Li / BsdfPdf;
@@ -105,14 +105,14 @@ DEVICE ColorXYZf EstimateDirectLight(const Light& Light, LightingSample& LS, Sca
 	return Ld;
 }
 
-DEVICE_NI VolumeShader GetLightShader(ScatterEvent& SE, CRNG& RNG)
+DEVICE_NI Shader GetLightShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, ColorXYZf(0.0f), ColorXYZf(0.0f), 5.0f, 0.0f);
+	return Shader(Enums::Brdf, SE.N, SE.Wo, ColorXYZf(0.0f), ColorXYZf(0.0f), 5.0f, 0.0f);
 }
 
-DEVICE_NI VolumeShader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
+DEVICE_NI Shader GetReflectorShader(ScatterEvent& SE, CRNG& RNG)
 {
-	return VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, EvaluateTexture(gpObjects[0].DiffuseTextureID, SE.UV), EvaluateTexture(gpObjects[0].SpecularTextureID, SE.UV), 10.0f, 100.0f);//GlossinessExponent(EvaluateTexture(gpObjects[0].GlossinessTextureID, SE.UV).Y()));
+	return Shader(Enums::Brdf, SE.N, SE.Wo, EvaluateTexture(gpObjects[0].DiffuseTextureID, SE.UV), EvaluateTexture(gpObjects[0].SpecularTextureID, SE.UV), 10.0f, 100.0f);//GlossinessExponent(EvaluateTexture(gpObjects[0].GlossinessTextureID, SE.UV).Y()));
 }
 
 DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingSample& LS)
@@ -133,21 +133,21 @@ DEVICE_NI ColorXYZf UniformSampleOneLight(ScatterEvent& SE, CRNG& RNG, LightingS
 
 	const Light& Light = gpLights[LightID];
 	
-	VolumeShader Shader;
+	Shader Shader;
 	
 	switch (SE.Type)
 	{
-		case ScatterEvent::Volume:	
-			Shader = VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, gpTracer->Diffuse1D.Evaluate(Intensity), gpTracer->Specular1D.Evaluate(Intensity), 15.0f, GlossinessExponent(gpTracer->Glossiness1D.Evaluate(Intensity)));
+		case Enums::Volume:	
+			Shader = ExposureRender::Shader(Enums::Brdf, SE.N, SE.Wo, gpTracer->Diffuse1D.Evaluate(Intensity), gpTracer->Specular1D.Evaluate(Intensity), 15.0f, GlossinessExponent(gpTracer->Glossiness1D.Evaluate(Intensity)));
 			break;
 
-		case ScatterEvent::Object:
+		case Enums::Object:
 		{
 			const ColorXYZf Diffuse		= EvaluateTexture(gpObjects[SE.ObjectID].DiffuseTextureID, SE.UV);
 			const ColorXYZf Specular	= EvaluateTexture(gpObjects[SE.ObjectID].SpecularTextureID, SE.UV);
 			const ColorXYZf Glossiness	= EvaluateTexture(gpObjects[SE.ObjectID].GlossinessTextureID, SE.UV);
 
-			Shader = VolumeShader(VolumeShader::Brdf, SE.N, SE.Wo, Diffuse, Specular, 15.0f, GlossinessExponent(Glossiness.Y()));
+			Shader = ExposureRender::Shader(Enums::Brdf, SE.N, SE.Wo, Diffuse, Specular, 15.0f, GlossinessExponent(Glossiness.Y()));
 			break;
 		}
 	}
