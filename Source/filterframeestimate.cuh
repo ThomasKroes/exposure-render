@@ -20,124 +20,21 @@
 namespace ExposureRender
 {
 
-/*
-KERNEL void KrnlGaussianFilterHorizontal(ColorXYZAf* pIn, ColorXYZAf* pOut)
+HOST_DEVICE_NI float Gauss2D(const float& Sigma, const int& X, const int& Y)
 {
-	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
-
-	// Compute kernel spatial range, taking into account the image boundaries
-	__shared__ int Range[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE][2];
-	
-	__syncthreads();
-
-	const GaussianFilter& Filter = gpTracer->FrameEstimateFilter;
-
-	Range[IDt][0] = max((int)ceilf(IDx - Filter.KernelRadius), 0);
-	Range[IDt][1] = min((int)floorf(IDx + Filter.KernelRadius), gpTracer->FrameBuffer.Resolution[0] - 1);
-
-	// Filter accumulated sum color
-	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
-
-	__syncthreads();
-
-	Sum[IDt] = ColorXYZAf(0.0f, 0.0f, 0.0f, 0.0f);
-
-	__shared__ float Weight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
-	__shared__ float TotalWeight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
-
-	__syncthreads();
-
-	Weight[IDt]			= 0.0f;
-	TotalWeight[IDt]	= 0.0f;
-
-	// Execute kernel
-	for (int x = Range[IDt][0]; x <= Range[IDt][1]; x++)
-	{
-		Weight[IDt]			= Filter.KernelD[Filter.KernelRadius - (x - IDx)];
-		Sum[IDt]			+= pIn[IDy * gpTracer->FrameBuffer.Resolution[0] + x] * Weight[IDt];
-		TotalWeight[IDt]	+= Weight[IDt];
-	}
-
-	__syncthreads();
-
-	if (TotalWeight[IDt] > 0.0f)
-		pOut[IDk] = Sum[IDt] / TotalWeight[IDt];
-	else
-		pOut[IDk] = ColorXYZAf(0.0f);
+	return expf(-((X * X + Y * Y) / (2 * Sigma * Sigma)));
 }
 
-KERNEL void KrnlGaussianFilterVertical(ColorXYZAf* pIn, ColorXYZAf* pOut)
-{
-	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
-
-	// Compute kernel spatial range, taking into account the image boundaries
-	__shared__ int Range[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE][2];
-	
-	__syncthreads();
-
-	const GaussianFilter& Filter = gpTracer->FrameEstimateFilter;
-
-	Range[IDt][0] = max((int)ceilf(IDy - Filter.KernelRadius), 0);
-	Range[IDt][1] = min((int)floorf(IDy + Filter.KernelRadius), gpTracer->FrameBuffer.Resolution[1] - 1);
-
-	// Filter accumulated sum color
-	__shared__ ColorXYZAf Sum[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
-
-	__syncthreads();
-
-	Sum[IDt] = ColorXYZAf(0.0f, 0.0f, 0.0f, 0.0f);
-
-	__shared__ float Weight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
-	__shared__ float TotalWeight[KRNL_GAUSSIAN_FILTER_BLOCK_SIZE];
-
-	__syncthreads();
-
-	Weight[IDt]			= 0.0f;
-	TotalWeight[IDt]	= 0.0f;
-
-	// Execute kernel
-	for (int y = Range[IDt][0]; y <= Range[IDt][1]; y++)
-	{
-		Weight[IDt]			= Filter.KernelD[Filter.KernelRadius - (y - IDy)];
-		Sum[IDt]			+= pIn[y * gpTracer->FrameBuffer.Resolution[0] + IDx] * Weight[IDt];
-		TotalWeight[IDt]	+= Weight[IDt];
-	}
-
-	__syncthreads();
-
-	if (TotalWeight[IDt] > 0.0f)
-		pOut[IDk] = Sum[IDt] / TotalWeight[IDt];
-	else
-		pOut[IDk] = ColorXYZAf(0.0f);
-}
-
-void FilterGaussian(ColorXYZAf* pImage, ColorXYZAf* pTemp, int Width, int Height)
-{
-	LAUNCH_DIMENSIONS(Width, Height, 1, 16, 8, 1)
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterHorizontal<<<GridDim, BlockDim>>>(pImage, pTemp)), "Gaussian filter (Horizontal)");
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilterVertical<<<GridDim, BlockDim>>>(pTemp, pImage)), "Gaussian filter (Vertical)");
-}
-*/
-
-CD float gFilterWeights[5][5] =
-{
-	{ 1.0f, 4.0f, 7.0f, 4.0f, 1.0f },
-	{ 4.0f, 16.0f, 26.0f, 16.0f, 4.0f },
-	{ 7.0f, 26.0f, 41.0f, 26, 7.0f },
-	{ 4.0f, 16.0f, 26.0f, 16.0f, 4.0f },
-	{ 1.0f, 4.0f, 7.0f, 4.0f, 1.0f }
-};
-
-KERNEL void KrnlGaussianFilter(ColorXYZAf* pIn, ColorXYZAf* pOut)
+KERNEL void KrnlFilterFrameEstimate(int KernelRadius, float Sigma)
 {
 	KERNEL_2D(gpTracer->FrameBuffer.Resolution[0], gpTracer->FrameBuffer.Resolution[1])
 
 	int Range[2][2];
 
-	Range[0][0] = max((int)ceilf(IDx - 2), 0);
-	Range[0][1] = min((int)floorf(IDx + 2), gpTracer->FrameBuffer.Resolution[0] - 1);
-	Range[1][0] = max((int)ceilf(IDy - 2), 0);
-	Range[1][1] = min((int)floorf(IDy + 2), gpTracer->FrameBuffer.Resolution[1] - 1);
+	Range[0][0] = max((int)ceilf(IDx - KernelRadius), 0);
+	Range[0][1] = min((int)floorf(IDx + KernelRadius), gpTracer->FrameBuffer.Resolution[0] - 1);
+	Range[1][0] = max((int)ceilf(IDy - KernelRadius), 0);
+	Range[1][1] = min((int)floorf(IDy + KernelRadius), gpTracer->FrameBuffer.Resolution[1] - 1);
 
 	ColorXYZAf Sum		= ColorXYZAf::Black();
 	float Weight		= 0.0f;
@@ -147,22 +44,26 @@ KERNEL void KrnlGaussianFilter(ColorXYZAf* pIn, ColorXYZAf* pOut)
 	{
 		for (int x = Range[0][0]; x <= Range[0][1]; x++)
 		{
-			Weight		= 1.0f;//gFilterWeights[2 - (y - IDy)][2 - (x - IDx)];
-			Sum			+= pIn[y * gpTracer->FrameBuffer.Resolution[0] + x] * Weight;
+			Weight		= Gauss2D(Sigma, x - IDx, y - IDy);
+			Sum			+= gpTracer->FrameBuffer.FrameEstimate(x, y) * Weight;
 			TotalWeight	+= Weight;
 		}
 	}
 
+	Sum[3] = gpTracer->FrameBuffer.FrameEstimate(IDx, IDy)[3];
+
 	if (TotalWeight > 0.0f)
-		pOut[IDk] = Sum / TotalWeight;
+		gpTracer->FrameBuffer.FrameEstimateTemp(IDx, IDy) = Sum / TotalWeight;
 	else
-		pOut[IDk] = ColorXYZAf::Black();
+		gpTracer->FrameBuffer.FrameEstimateTemp(IDx, IDy) = ColorXYZAf::Black();
 }
 
-void FilterGaussian(Tracer& Tracer)
+void FilterFrameEstimate(Tracer& Tracer)
 {
 	LAUNCH_DIMENSIONS(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1], 1, 8, 8, 1)
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlGaussianFilter<<<GridDim, BlockDim>>>(&Tracer.FrameBuffer.FrameEstimate[0], &Tracer.FrameBuffer.FrameEstimateTemp[0])), "Gaussian filter (Horizontal)");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlFilterFrameEstimate<<<GridDim, BlockDim>>>(2, 1.5f)), "Gaussian filter (Horizontal)");
+
+	Tracer.FrameBuffer.FrameEstimateTemp.Dirty = true;
 
 	Tracer.FrameBuffer.FrameEstimate = Tracer.FrameBuffer.FrameEstimateTemp;
 }

@@ -19,6 +19,7 @@
 namespace ExposureRender
 {
 
+
 HOST inline void DebugLog(const char* format, ...)
 {
 	va_list fmtargs;

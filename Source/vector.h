@@ -173,27 +173,6 @@ HOST_DEVICE classname operator * (const classname& V) const									\
 		Result[i] = this->D[i] * V[i];														\
 																							\
 	return Result;																			\
-}																							\
-																							\
-HOST_DEVICE classname operator * (const int& I) const										\
-{																							\
-	classname Result;																		\
-																							\
-	for (int i = 0; i < size; i++)															\
-		Result[i] = this->D[i] * (type)I;													\
-																							\
-	return Result;																			\
-}																							\
-																							\
-																							\
-HOST_DEVICE classname operator * (const float& F) const										\
-{																							\
-	classname Result;																		\
-																							\
-	for (int i = 0; i < size; i++)															\
-		Result[i] = this->D[i] * (type)F;													\
-																							\
-	return Result;																			\
 }
 
 #define OPERATOR_MULTIPLY_ASS(classname, type, size)										\
@@ -201,22 +180,6 @@ HOST_DEVICE classname& operator *= (const classname& V)										\
 {																							\
 	for (int i = 0; i < size; i++)															\
 		this->D[i] *= V[i];																	\
-																							\
-	return *this;																			\
-}																							\
-																							\
-HOST_DEVICE classname& operator *= (const int& I)											\
-{																							\
-	for (int i = 0; i < size; i++)															\
-		this->D[i] *= (type)I;																\
-																							\
-	return *this;																			\
-}																							\
-																							\
-HOST_DEVICE classname& operator *= (const float& F)											\
-{																							\
-	for (int i = 0; i < size; i++)															\
-		this->D[i] *= (type)F;																\
 																							\
 	return *this;																			\
 }

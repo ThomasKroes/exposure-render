@@ -133,8 +133,8 @@ SET(Cuda
 	singlescattering.cuh
 	estimate.cuh
 	gradientmagnitude.cuh
-	bilateralfilter.cuh
-	gaussianfilter.cuh
+	filterrunningestimate.cuh
+	filterframeestimate.cuh
 	tonemap.cuh
 	autofocus.cuh
 	list.cuh

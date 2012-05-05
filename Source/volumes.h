@@ -18,12 +18,12 @@
 namespace ExposureRender
 {
 
-HOST_DEVICE float GetIntensity(const int& VolumeID, const Vec3f& P)
+HOST_DEVICE_NI float GetIntensity(const int& VolumeID, const Vec3f& P)
 {
 	return gpVolumes[VolumeID](P);
 }
 
-HOST_DEVICE Vec3f GradientCD(const int& VolumeID, const Vec3f& P)
+HOST_DEVICE_NI Vec3f GradientCD(const int& VolumeID, const Vec3f& P)
 {
 	const float Intensity[3][2] = 
 	{
@@ -35,7 +35,7 @@ HOST_DEVICE Vec3f GradientCD(const int& VolumeID, const Vec3f& P)
 	return Vec3f(Intensity[0][1] - Intensity[0][0], Intensity[1][1] - Intensity[1][0], Intensity[2][1] - Intensity[2][0]);
 }
 
-HOST_DEVICE Vec3f GradientFD(const int& VolumeID, const Vec3f& P)
+HOST_DEVICE_NI Vec3f GradientFD(const int& VolumeID, const Vec3f& P)
 {
 	const float Intensity[4] = 
 	{
@@ -48,7 +48,7 @@ HOST_DEVICE Vec3f GradientFD(const int& VolumeID, const Vec3f& P)
     return Vec3f(Intensity[0] - Intensity[1], Intensity[0] - Intensity[2], Intensity[0] - Intensity[3]);
 }
 
-HOST_DEVICE Vec3f GradientFiltered(const int& VolumeID, const Vec3f& P)
+HOST_DEVICE_NI Vec3f GradientFiltered(const int& VolumeID, const Vec3f& P)
 {
 	Vec3f Offset(gpVolumes[VolumeID].GradientDeltaX[0], gpVolumes[VolumeID].GradientDeltaY[1], gpVolumes[VolumeID].GradientDeltaZ[2]);
 
@@ -68,7 +68,7 @@ HOST_DEVICE Vec3f GradientFiltered(const int& VolumeID, const Vec3f& P)
 	return Lerp(G0, Lerp(L0, L1, 0.5), 0.75);
 }
 
-HOST_DEVICE Vec3f Gradient(const int& VolumeID, const Vec3f& P)
+HOST_DEVICE_NI Vec3f Gradient(const int& VolumeID, const Vec3f& P)
 {
 	switch (gpTracer->RenderSettings.Shading.GradientComputation)
 	{
@@ -80,12 +80,12 @@ HOST_DEVICE Vec3f Gradient(const int& VolumeID, const Vec3f& P)
 	return GradientFD(VolumeID, P);
 }
 
-HOST_DEVICE Vec3f NormalizedGradient(const int& VolumeID, const Vec3f& P)
+HOST_DEVICE_NI Vec3f NormalizedGradient(const int& VolumeID, const Vec3f& P)
 {
 	return Normalize(Gradient(VolumeID, P));
 }
 
-HOST_DEVICE float GradientMagnitude(const int& VolumeID, const Vec3f& P)
+HOST_DEVICE_NI float GradientMagnitude(const int& VolumeID, const Vec3f& P)
 {
 	Vec3f Pts[3][2];
 

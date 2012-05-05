@@ -41,9 +41,9 @@ ExposureRender::Cuda::List<ExposureRender::Texture, ExposureRender::ErTexture>		
 ExposureRender::Cuda::List<ExposureRender::Bitmap, ExposureRender::ErBitmap>					gBitmaps("gpBitmaps");
 
 #include "singlescattering.cuh"
+#include "filterframeestimate.cuh"
 #include "estimate.cuh"
 #include "toneMap.cuh"
-#include "gaussianfilter.cuh"
 
 namespace ExposureRender
 {
@@ -123,7 +123,7 @@ EXPOSURE_RENDER_DLL void RenderEstimate(int TracerID)
 	gTracers.Synchronize(TracerID);
 
 	SingleScattering(gTracers[TracerID]);
-	FilterGaussian(gTracers[TracerID]);
+	FilterFrameEstimate(gTracers[TracerID]);
 	ComputeEstimate(gTracers[TracerID]);
 	ToneMap(gTracers[TracerID]);
 

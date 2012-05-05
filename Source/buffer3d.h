@@ -216,7 +216,7 @@ public:
 	
 	HOST_DEVICE T operator()(const Vec3f& XYZ, const bool Normalized = false) const
 	{
-		const Vec3f UVW = Normalized ? XYZ * Vec3f(this->Resolution[0], this->Resolution[1], this->Resolution[2]) : XYZ;
+		const Vec3f UVW = Normalized ? XYZ * Vec3f((float)this->Resolution[0], (float)this->Resolution[1], (float)this->Resolution[2]) : XYZ;
 
 		const int vx = (int)floorf(UVW[0]);
 		const int vy = (int)floorf(UVW[1]);

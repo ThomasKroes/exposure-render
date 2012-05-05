@@ -221,7 +221,7 @@ public:
 
 	HOST_DEVICE T operator()(const Vec2f& XY, const bool Normalized = false) const
 	{
-		const Vec2f UV = Normalized ? XY * Vec2f(this->Resolution[0], this->Resolution[1]) : XY;
+		const Vec2f UV = Normalized ? XY * Vec2f((float)this->Resolution[0], (float)this->Resolution[1]) : XY;
 
 		int Coord[2][2] =
 		{
