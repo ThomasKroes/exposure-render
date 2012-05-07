@@ -61,7 +61,7 @@ KERNEL void KrnlFilterFrameEstimate(int KernelRadius, float Sigma)
 void FilterFrameEstimate(Tracer& Tracer)
 {
 	LAUNCH_DIMENSIONS(Tracer.FrameBuffer.Resolution[0], Tracer.FrameBuffer.Resolution[1], 1, 8, 8, 1)
-	LAUNCH_CUDA_KERNEL_TIMED((KrnlFilterFrameEstimate<<<GridDim, BlockDim>>>(2, 1.5f)), "Gaussian filter (Horizontal)");
+	LAUNCH_CUDA_KERNEL_TIMED((KrnlFilterFrameEstimate<<<GridDim, BlockDim>>>(1, 1.0f)), "Gaussian filter (Horizontal)");
 
 	Tracer.FrameBuffer.FrameEstimateTemp.Dirty = true;
 

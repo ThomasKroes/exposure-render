@@ -19,9 +19,9 @@
 namespace ExposureRender
 {
 
-
 HOST inline void DebugLog(const char* format, ...)
 {
+	/*
 	va_list fmtargs;
 	char buffer[1024];
 
@@ -30,6 +30,7 @@ HOST inline void DebugLog(const char* format, ...)
 	va_end(fmtargs);
 
 	printf("%s\n", buffer);
+	*/
 }
 
 }

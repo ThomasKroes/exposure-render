@@ -76,6 +76,8 @@ HOST_DEVICE_NI ColorXYZf EstimateDirectLight(const Light& Light, LightingSample&
 			Ld += F * Li / LightPdf;
 	}
 
+	return Ld;
+
 	F = Shader.SampleF(SE.Wo, Wi, BsdfPdf, LS.BrdfSample);
 
 	if (F.IsBlack() || BsdfPdf <= 0.0f)

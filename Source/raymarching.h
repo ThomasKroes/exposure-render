@@ -44,7 +44,9 @@ HOST_DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 
 	Vec3f Ps;
 
-	MinT += RNG.Get1() * gpTracer->RenderSettings.Traversal.StepSize;
+	const float StepSize = gpTracer->RenderSettings.Traversal.StepFactorPrimary * gpVolumes[gpTracer->VolumeID].MinStep;
+
+	MinT += RNG.Get1() * StepSize;
 
 	while (Sum < S)
 	{
@@ -57,8 +59,8 @@ HOST_DEVICE_NI void SampleVolume(Ray R, CRNG& RNG, ScatterEvent& SE)
 
 		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * gpTracer->Opacity1D.Evaluate(Intensity);
 
-		Sum		+= SigmaT * gpTracer->RenderSettings.Traversal.StepSize;
-		MinT	+= gpTracer->RenderSettings.Traversal.StepSize;
+		Sum		+= SigmaT * StepSize;
+		MinT	+= StepSize;
 	}
 
 	SE.SetValid(MinT, Ps, NormalizedGradient(gpTracer->VolumeID, Ps), -R.D, ColorXYZf());
@@ -84,7 +86,9 @@ HOST_DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 	float Sum		= 0.0f;
 	float SigmaT	= 0.0f;
 
-	MinT += RNG.Get1() * gpTracer->RenderSettings.Traversal.StepSizeShadow;
+	const float StepSize = gpTracer->RenderSettings.Traversal.StepFactorShadow * gpVolumes[gpTracer->VolumeID].MinStep;
+
+	MinT += RNG.Get1() * StepSize;
 
 	while (Sum < S)
 	{
@@ -97,8 +101,8 @@ HOST_DEVICE_NI bool ScatterEventInVolume(Ray R, CRNG& RNG)
 
 		SigmaT	= gpTracer->RenderSettings.Shading.DensityScale * gpTracer->Opacity1D.Evaluate(Intensity);
 
-		Sum		+= SigmaT * gpTracer->RenderSettings.Traversal.StepSizeShadow;
-		MinT	+= gpTracer->RenderSettings.Traversal.StepSizeShadow;
+		Sum		+= SigmaT * StepSize;
+		MinT	+= StepSize;
 	}
 
 	return true;

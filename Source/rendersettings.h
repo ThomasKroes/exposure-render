@@ -27,8 +27,8 @@ public:
 	public:
 		HOST TraversalSettings()
 		{
-			this->StepSize			= 0.1f;
-			this->StepSizeShadow	= 0.1f;
+			this->StepFactorPrimary	= 0.1f;
+			this->StepFactorShadow	= 0.1f;
 			this->Shadows			= true;
 			this->MaxShadowDistance	= 1.0f;
 		}
@@ -44,16 +44,16 @@ public:
 
 		HOST TraversalSettings& operator = (const TraversalSettings& Other)
 		{
-			this->StepSize				= Other.StepSize;
-			this->StepSizeShadow		= Other.StepSizeShadow;
+			this->StepFactorPrimary		= Other.StepFactorPrimary;
+			this->StepFactorShadow		= Other.StepFactorShadow;
 			this->Shadows				= Other.Shadows;
 			this->MaxShadowDistance		= Other.MaxShadowDistance;
 
 			return *this;
 		}
 
-		float	StepSize;
-		float	StepSizeShadow;
+		float	StepFactorPrimary;
+		float	StepFactorShadow;
 		bool	Shadows;
 		float	MaxShadowDistance;
 	};

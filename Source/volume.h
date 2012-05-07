@@ -31,6 +31,7 @@ public:
 		InvSpacing(1.0f),
 		Size(1.0f),
 		InvSize(1.0f),
+		MinStep(1.0f),
 		Voxels(Enums::Device, "Device Voxels")
 	{
 		DebugLog(__FUNCTION__);
@@ -50,6 +51,7 @@ public:
 		InvSpacing(1.0f),
 		Size(1.0f),
 		InvSize(1.0f),
+		MinStep(1.0f),
 		Voxels(Enums::Device, "Device Voxels")
 	{
 		DebugLog(__FUNCTION__);
@@ -65,6 +67,7 @@ public:
 		InvSpacing(1.0f),
 		Size(1.0f),
 		InvSize(1.0f),
+		MinStep(1.0f),
 		Voxels(Enums::Device, "Device Voxels")
 	{
 		DebugLog(__FUNCTION__);
@@ -83,6 +86,7 @@ public:
 		this->InvSpacing		= Other.InvSpacing;
 		this->Size				= Other.Size;
 		this->InvSize			= Other.InvSize;
+		this->MinStep			= Other.MinStep;
 		this->Voxels			= Other.Voxels;
 
 		return *this;
@@ -110,11 +114,11 @@ public:
 		this->BoundingBox.SetMinP(-0.5 * Size);
 		this->BoundingBox.SetMaxP(0.5f * Size);
 
-		const float MinVoxelSize = min(this->Spacing[0], min(this->Spacing[1], this->Spacing[2]));
+		this->MinStep = min(this->Spacing[0], min(this->Spacing[1], this->Spacing[2]));
 
-		this->GradientDeltaX = Vec3f(MinVoxelSize, 0.0f, 0.0f);
-		this->GradientDeltaY = Vec3f(0.0f, MinVoxelSize, 0.0f);
-		this->GradientDeltaZ = Vec3f(0.0f, 0.0f, MinVoxelSize);
+		this->GradientDeltaX = Vec3f(this->MinStep, 0.0f, 0.0f);
+		this->GradientDeltaY = Vec3f(0.0f, this->MinStep, 0.0f);
+		this->GradientDeltaZ = Vec3f(0.0f, 0.0f, this->MinStep);
 
 		return *this;
 	}
@@ -136,6 +140,7 @@ public:
 	Vec3f						InvSpacing;
 	Vec3f						Size;
 	Vec3f						InvSize;
+	float						MinStep;
 	Buffer3D<unsigned short>	Voxels;
 };
 
