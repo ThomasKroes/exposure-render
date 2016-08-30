@@ -1,15 +1,11 @@
 
 #Exposure Render
 
-This is the Open-source implementation of "Interactive direct volume rendering with physically-based lighting"
+Exposure Render is a CUDA based volume raycaster, enhanced with physically based light transport. The implementation details are described in:
 
-This is dedicated to Exposure Render, a CUDA based volume raycaster, enhanced with physically based light transport. The implementation details are described in the paper:
+[An interactive photo-realistic volume rendering framework, T. Kroes, F. H. Post, C. P. Botha](http://graphics.tudelft.nl/Publications/kroes_exposure_2012)
 
-http://graphics.tudelft.nl/Publications/kroes_exposure_2012'>Exposure render: An interactive photo-realistic volume rendering framework, T. Kroes, F. H. Post, C. P. Botha, accepted at PLoS ONE
-
-http://exposure-render.googlecode.com/hg/Images/er_flyer.pdf
-
-![Alt text](/Images/er_flyer_thumbnail.png)
+![https://graphics.tudelft.nl/publications/](/Images/er_flyer_thumbnail.png)
 
 ##Building Exposure Render from source code
 If you are eager to build Exposure Render yourself you should clone https://github.com/ThomasKroes/exposure-render.release110.git and follow [this](https://github.com/ThomasKroes/exposure-render.release110/blob/master/build.md) link.
