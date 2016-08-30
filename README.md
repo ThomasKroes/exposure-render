@@ -12,8 +12,6 @@ T. Kroes, M. Eisemann, E. Eisemann
 ##Building Exposure Render from source code
 If you are eager to build Exposure Render yourself you should clone the [release110](https://github.com/ThomasKroes/exposure-render.release110.git) repository and follow  [these](https://github.com/ThomasKroes/exposure-render.release110/blob/master/build.md) instructions .
 
-For questions or comments contact me at t.kroes at lumc.nl/tudelft.nl.
-
 ##System requirements
 
 * Microsoft Windows XP, Vista, or 7.
