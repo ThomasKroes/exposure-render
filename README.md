@@ -19,16 +19,24 @@ You can also build the VTK wrapping and example project, find more info here htt
 
 ##System requirements
 
-Microsoft Windows XP, Vista, or 7.
-At least 1GB of system memory.
-NVIDIA CUDA-compatible GPU with compute capability 1.0 and at least 512 megabytes of DRAM. GTX270 or higher is recommended
-At the moment, larger data sets might give problems, we are working on that!
+* Microsoft Windows XP, Vista, or 7.
+* At least 1GB of system memory.
+* NVIDIA CUDA-compatible GPU with compute capability 1.0 and at least 512 megabytes of DRAM. GTX270 or higher is recommended
+* At the moment, larger data sets might give problems, we are working on that!
 
 ##Developer(s)
 
 Thomas Kroes
-PhD researcher at Delft University of Technology
-http://exposure-render.googlecode.com/hg/Images/photo_thomas_kroes_thumbnail.png' />
+
+Affiliations:
+
+Delft University of Technology (TU Delft)
+Computer Graphics and Visualization (CGV)
+t.kroes at tudelft.nl
+
+Leids Universitair medisch centrum (LUMC)
+Laboratorium voor Klinische en Experimentele Beeldverwerking (LKEB) 
+t.kroes at lumc.nl
 
 ##Acknowledgements
 
@@ -41,15 +49,16 @@ http://exposure-render.googlecode.com/hg/Images/photo_thomas_kroes_thumbnail.png
 
 Exposure Render has been tested on the following system configurations using Nvidia hardware:
 
-Windows 7 (64 bit) + Quadro FX1700
-Windows 7 (64 bit) + GTS240
-Windows 7 (64 bit) + GTS250
-Windows 7 (64 bit) + GTS450
-Windows 7 (64 bit) + GTX260
-Windows 7 (64 bit) + GTX270
-Windows 7 (64 bit) + GTX460
-Windows 7 (64 bit) + GTX470
-Windows 7 (64 bit) + GTX560
-Windows 7 (64 bit) + GTX570
-Windows 7 (64 bit) + GTX580
-Please mention your complete system setup when you http://code.google.com/p/exposure-render/issues/list'>submit a bug: (OS (32/64 bit), graphics card, driver version etc.), possibly along with screen shots and error messages. Help make Exposure Render stable!
+* Windows 7 (64 bit) + Quadro FX1700
+* Windows 7 (64 bit) + GTS240
+* Windows 7 (64 bit) + GTS250
+* Windows 7 (64 bit) + GTS450
+* Windows 7 (64 bit) + GTX260
+* Windows 7 (64 bit) + GTX270
+* Windows 7 (64 bit) + GTX460
+* Windows 7 (64 bit) + GTX470
+* Windows 7 (64 bit) + GTX560
+* Windows 7 (64 bit) + GTX570
+* Windows 7 (64 bit) + GTX580
+
+Please mention your complete system setup when you report a bug: (OS (32/64 bit), graphics card, driver version etc.), possibly along with screen shots and error messages. Help make Exposure Render stable!
