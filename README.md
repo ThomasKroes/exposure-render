@@ -17,17 +17,7 @@ For questions or comments contact me at t.kroes at tudelft.nl.
 
 You can also build the VTK wrapping and example project, find more info here http://code.google.com/p/exposure-render/wiki/BuildingErCore'>http://code.google.com/p/exposure-render/wiki/BuildingErCore. Note, this repo is still under development!
 
-
-Join our https://groups.google.com/forum/#!forum/exposure-render'>Google Group to remain up-to-date on recent developments!
-
-
-Overall demo of Exposure Render
-
-Demonstration of hybrid scattering
-
-Lighting
-
-System requirements
+##System requirements
 
 Microsoft Windows XP, Vista, or 7.
 At least 1GB of system memory.
