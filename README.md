@@ -5,6 +5,10 @@ Exposure Render is a CUDA based volume raycaster, enhanced with physically based
 
 [An interactive photo-realistic volume rendering framework, T. Kroes, F. H. Post, C. P. Botha](http://graphics.tudelft.nl/Publications/kroes_exposure_2012)
 
+and
+
+[Visibility sweeps for joint-hierarchical importance sampling of direct lighting for stochastic volume rendering](http://graphics.tudelft.nl/Publications-new/2015/KEE1)
+
 ![https://graphics.tudelft.nl/publications/](/Images/er_flyer_thumbnail.png)
 
 ##Building Exposure Render from source code
