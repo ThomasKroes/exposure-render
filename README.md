@@ -24,19 +24,20 @@ At least 1GB of system memory.
 NVIDIA CUDA-compatible GPU with compute capability 1.0 and at least 512 megabytes of DRAM. GTX270 or higher is recommended
 At the moment, larger data sets might give problems, we are working on that!
 
-Developer(s)
+##Developer(s)
 
 Thomas Kroes
 PhD researcher at Delft University of Technology
 http://exposure-render.googlecode.com/hg/Images/photo_thomas_kroes_thumbnail.png' />
 
-Acknowledgements
+##Acknowledgements
 
-Osirix Imaging Software for sharing the medical data sets
-Volvis website for the engine and bonsai data set
-Fugue icons for the icon database
-Francois Malan for pointing out the fruit MRI data sets
-Tested system configurations
+* Osirix Imaging Software for sharing the medical data sets
+* Volvis website for the engine and bonsai data set
+* Fugue icons for the icon database
+* Francois Malan for pointing out the fruit MRI data sets
+
+##Tested system configurations
 
 Exposure Render has been tested on the following system configurations using Nvidia hardware:
 
