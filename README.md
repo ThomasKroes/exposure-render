@@ -1,17 +1,17 @@
 
-Open-source implementation of "Interactive direct volume rendering with physically-based lighting"
+#Exposure Render
 
-Exposure Render
+This is the Open-source implementation of "Interactive direct volume rendering with physically-based lighting"
 
-This Google Code project website is dedicated to Exposure Render, a CUDA based volume raycaster, enhanced with physically based light transport. The implementation details are described in the paper:
+This is dedicated to Exposure Render, a CUDA based volume raycaster, enhanced with physically based light transport. The implementation details are described in the paper:
 
 http://graphics.tudelft.nl/Publications/kroes_exposure_2012'>Exposure render: An interactive photo-realistic volume rendering framework, T. Kroes, F. H. Post, C. P. Botha, accepted at PLoS ONE
 
-http://exposure-render.googlecode.com/hg/Images/er_flyer.pdf'>http://exposure-render.googlecode.com/hg/Images/er_flyer_thumbnail.png' alt='Exposure Render Flyer' />
+http://exposure-render.googlecode.com/hg/Images/er_flyer.pdf
 
-Exposure Render has been officially released! You can download it http://code.google.com/p/exposure-render/downloads/detail?name=ExposureRender-1.1.0-win32.exe&can=2&q=#makechanges'>here. We have managed to solve the most critical and annoying bugs and are still working hard to make it even more stable.
+![Alt text](/Images/er_flyer_thumbnail.png)
 
-Building Exposure Render
+##Building Exposure Render from source code
 If you are eager to build Exposure Render yourself you should clone the release 1.1.0http://code.google.com/p/exposure-render/source/clones'> mercurial repository, and not the default repository, because this repository is a WIP at the moment. Get more info on building Exposure Render with Visual Studio http://code.google.com/p/exposure-render/wiki/BuildingExposureRender'>here.
 For questions or comments contact me at t.kroes at tudelft.nl.
 
