@@ -7,7 +7,7 @@ T. Kroes, F. H. Post, C. P. Botha
 * [Visibility sweeps for joint-hierarchical importance sampling of direct lighting for stochastic volume rendering](http://graphics.tudelft.nl/Publications-new/2015/KEE1)  
 T. Kroes, M. Eisemann, E. Eisemann
 
-![https://graphics.tudelft.nl/publications/](/Images/er_flyer_thumbnail.png)
+![https://graphics.tudelft.nl/publications/](/Images/manix.png)
 
 ##Building Exposure Render from source code
 If you are eager to build Exposure Render yourself you should clone the [release110](https://github.com/ThomasKroes/exposure-render.release110.git) repository and follow  [these](https://github.com/ThomasKroes/exposure-render.release110/blob/master/build.md) instructions .
