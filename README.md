@@ -10,7 +10,7 @@ T. Kroes, M. Eisemann, E. Eisemann
 ![https://graphics.tudelft.nl/publications/](/Images/er_flyer_thumbnail.png)
 
 ##Building Exposure Render from source code
-If you are eager to build Exposure Render yourself you should clone https://github.com/ThomasKroes/exposure-render.release110.git and follow [this](https://github.com/ThomasKroes/exposure-render.release110/blob/master/build.md) link.
+If you are eager to build Exposure Render yourself you should clone the [release110](https://github.com/ThomasKroes/exposure-render.release110.git) repository and follow  [these](https://github.com/ThomasKroes/exposure-render.release110/blob/master/build.md) instructions .
 
 For questions or comments contact me at t.kroes at lumc.nl/tudelft.nl.
 
