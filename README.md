@@ -12,10 +12,12 @@ http://exposure-render.googlecode.com/hg/Images/er_flyer.pdf
 ![Alt text](/Images/er_flyer_thumbnail.png)
 
 ##Building Exposure Render from source code
-If you are eager to build Exposure Render yourself you should clone the release 1.1.0http://code.google.com/p/exposure-render/source/clones'> mercurial repository, and not the default repository, because this repository is a WIP at the moment. Get more info on building Exposure Render with Visual Studio http://code.google.com/p/exposure-render/wiki/BuildingExposureRender'>here.
-For questions or comments contact me at t.kroes at tudelft.nl.
+If you are eager to build Exposure Render yourself you should clone the release 
 
-You can also build the VTK wrapping and example project, find more info here http://code.google.com/p/exposure-render/wiki/BuildingErCore'>http://code.google.com/p/exposure-render/wiki/BuildingErCore. Note, this repo is still under development!
+
+
+1.1.0http://code.google.com/p/exposure-render/source/clones'> mercurial repository, and not the default repository, because this repository is a WIP at the moment. Get more info on building Exposure Render with Visual Studio http://code.google.com/p/exposure-render/wiki/BuildingExposureRender'>here.
+For questions or comments contact me at t.kroes at tudelft.nl.
 
 ##System requirements
 
@@ -32,11 +34,11 @@ Affiliations:
 
 **Delft University of Technology (TU Delft)**  
 Computer Graphics and Visualization (CGV)  
-t.kroes at tudelft.nl
+*t.kroes at tudelft.nl*
 
 **Leids Universitair medisch centrum (LUMC)**  
 Laboratorium voor Klinische en Experimentele Beeldverwerking (LKEB)  
-t.kroes at lumc.nl
+*t.kroes at lumc.nl*
 
 ##Acknowledgements
 
@@ -61,4 +63,4 @@ Exposure Render has been tested on the following system configurations using Nvi
 * Windows 7 (64 bit) + GTX570
 * Windows 7 (64 bit) + GTX580
 
-Please mention your complete system setup when you report a bug: (OS (32/64 bit), graphics card, driver version etc.), possibly along with screen shots and error messages. Help make Exposure Render stable!
+*Please mention your complete system setup when you report a bug: (OS (32/64 bit), graphics card, driver version etc.), possibly along with screen shots and error messages. Help make Exposure Render stable!*
