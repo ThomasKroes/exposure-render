@@ -12,11 +12,9 @@ http://exposure-render.googlecode.com/hg/Images/er_flyer.pdf
 ![Alt text](/Images/er_flyer_thumbnail.png)
 
 ##Building Exposure Render from source code
-If you are eager to build Exposure Render yourself you should clone the release 
+If you are eager to build Exposure Render yourself you should clone https://github.com/ThomasKroes/exposure-render.release110.git
 
-
-
-1.1.0http://code.google.com/p/exposure-render/source/clones'> mercurial repository, and not the default repository, because this repository is a WIP at the moment. Get more info on building Exposure Render with Visual Studio http://code.google.com/p/exposure-render/wiki/BuildingExposureRender'>here.
+Get more info on building Exposure Render with Visual Studio http://code.google.com/p/exposure-render/wiki/BuildingExposureRender'>here.
 For questions or comments contact me at t.kroes at tudelft.nl.
 
 ##System requirements
