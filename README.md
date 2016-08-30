@@ -7,7 +7,7 @@ T. Kroes, F. H. Post, C. P. Botha
 * [Visibility sweeps for joint-hierarchical importance sampling of direct lighting for stochastic volume rendering](http://graphics.tudelft.nl/Publications-new/2015/KEE1)  
 T. Kroes, M. Eisemann, E. Eisemann
 
-The latgest windows executable can be found [here](https://github.com/ThomasKroes/exposure-render/releases/tag/1.1.0)
+The latest windows executable can be found [here](https://github.com/ThomasKroes/exposure-render/releases/tag/1.1.0)
 
 ![https://graphics.tudelft.nl/publications/](/Images/manix.png)
 
