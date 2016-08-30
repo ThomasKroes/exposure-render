@@ -35,7 +35,6 @@ Computer Graphics and Visualization (CGV)
 t.kroes at tudelft.nl
 
 **Leids Universitair medisch centrum (LUMC)**
-
 Laboratorium voor Klinische en Experimentele Beeldverwerking (LKEB) 
 t.kroes at lumc.nl
 
