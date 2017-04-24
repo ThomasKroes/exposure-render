@@ -1,5 +1,5 @@
 
-#Exposure Render
+# Exposure Render
 
 Exposure Render is a CUDA based volume raycaster, enhanced with physically based light transport. More information about the rendering algorithm can be found here:
 * [An interactive photo-realistic volume rendering framework](http://graphics.tudelft.nl/Publications/kroes_exposure_2012)  
@@ -11,17 +11,17 @@ The latest windows executable can be found [here](https://github.com/ThomasKroes
 
 ![https://graphics.tudelft.nl/publications/](/Images/manix.png)
 
-##Building Exposure Render from source code
+## Building Exposure Render from source code
 If you are eager to build Exposure Render yourself you should clone the [release110](https://github.com/ThomasKroes/exposure-render.release110.git) repository and follow  [these](https://github.com/ThomasKroes/exposure-render.release110/blob/master/build.md) instructions .
 
-##System requirements
+## System requirements
 
 * Microsoft Windows XP, Vista, or 7.
 * At least 1GB of system memory.
 * NVIDIA CUDA-compatible GPU with compute capability 1.0 and at least 512 megabytes of DRAM. GTX270 or higher is recommended
 * At the moment, larger data sets might give problems, we are working on that!
 
-##Developer(s)
+## Developer(s)
 
 Thomas Kroes
 
@@ -35,14 +35,13 @@ Computer Graphics and Visualization (CGV)
 Laboratorium voor Klinische en Experimentele Beeldverwerking (LKEB)  
 *t.kroes at lumc.nl*
 
-##Acknowledgements
+## Acknowledgements
 
 * Osirix Imaging Software for sharing the medical data sets
 * Volvis website for the engine and bonsai data set
 * Fugue icons for the icon database
-* Francois Malan for pointing out the fruit MRI data sets
 
-##Tested system configurations
+## Tested system configurations
 
 Exposure Render has been tested on the following system configurations using Nvidia hardware:
 
