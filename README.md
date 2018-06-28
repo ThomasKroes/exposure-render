@@ -8,11 +8,11 @@ T. Kroes, F. H. Post, C. P. Botha
 T. Kroes, M. Eisemann, E. Eisemann
 
 The latest windows executable can be found [here](https://github.com/ThomasKroes/exposure-render/releases/tag/1.1.0)
-
+ repository and follow  [these]() instructions 
 ![https://graphics.tudelft.nl/publications/](/Images/manix.png)
 
 ## Building Exposure Render from source code
-If you are eager to build Exposure Render yourself you should clone the [release110](https://github.com/ThomasKroes/exposure-render.release110.git) repository and follow  [these](https://github.com/ThomasKroes/exposure-render.release110/blob/master/build.md) instructions .
+If you are eager to build Exposure Render yourself you should clone the release repository. Latest build instructions (tested with Visual Studio 2017, Qt5.11.1, VTK 7.1.1 and Cuda 9.2) can be found [here](https://github.com/ThomasKroes/exposure-render.release110/blob/qt5_vtk7_cuda9_vs2017/build.md).
 
 ## System requirements
 
