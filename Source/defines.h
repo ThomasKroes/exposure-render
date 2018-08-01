@@ -23,10 +23,14 @@
 
 using namespace std;
 
-#ifdef _EXPORTING
-	#define EXPOSURE_RENDER_DLL    __declspec(dllexport)
-#else
-	#define EXPOSURE_RENDER_DLL    __declspec(dllimport)
+#ifdef WIN32
+  #ifdef _EXPORTING
+    #define EXPOSURE_RENDER_DLL    __declspec(dllexport)
+  #else
+    #define EXPOSURE_RENDER_DLL    __declspec(dllimport)
+  #endif
+#else 
+  #define EXPOSURE_RENDER_DLL 
 #endif
 
 namespace ExposureRender
