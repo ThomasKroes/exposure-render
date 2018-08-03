@@ -37,7 +37,7 @@ public:
 		*this = Other;
 	}
 
-	HOST Tracer& Tracer::operator = (const ErTracer& Other)
+	HOST Tracer& operator = (const ErTracer& Other)
 	{
 		ErTracer::operator=(Other);
 		

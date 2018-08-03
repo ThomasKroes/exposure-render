@@ -119,6 +119,7 @@ public:
 
 	static inline HOST_DEVICE ColorRGBuc FromXYZf(const ColorXYZf& XYZ);
 	static inline HOST_DEVICE ColorRGBuc Black() { return ColorRGBuc(); }
+  static inline HOST_DEVICE ColorRGBuc Mul(const float a, const ColorRGBuc& XYZ);  
 
 	DATA(unsigned char, 3)
 };
@@ -135,6 +136,7 @@ public:
 
 	static inline HOST_DEVICE ColorRGBAuc FromXYZf(const ColorXYZf& XYZ);
 	static inline HOST_DEVICE ColorRGBAuc Black() { return ColorRGBAuc(); }
+  static inline HOST_DEVICE ColorRGBAuc Mul(const float a, const ColorRGBAuc& XYZ);  
 
 	DATA(unsigned char, 4)
 };
@@ -237,13 +239,13 @@ HOST_DEVICE ColorXYZAf ColorXYZAf::FromRGBf(const ColorRGBf& RGB)
 	return Result;
 };
 
-HOST_DEVICE ColorXYZAf Mul(const float a, const ColorXYZAf& XYZ)
+HOST_DEVICE ColorXYZAf ColorXYZAf::Mul(const float a, const ColorXYZAf& XYZA)
 {
   ColorXYZAf Result;
-  Result[0] = a * XYZ[0];
-  Result[1] = a * XYZ[1];
-  Result[2] = a * XYZ[2];
-  Result[3] = a * XYZ[3];
+  Result[0] = a * XYZA[0];
+  Result[1] = a * XYZA[1];
+  Result[2] = a * XYZA[2];
+  Result[3] = a * XYZA[3];
   return Result;
 }
 
@@ -265,6 +267,14 @@ HOST_DEVICE ColorRGBuc ColorRGBuc::FromXYZf(const ColorXYZf& XYZ)
 	return Result;
 };
 
+HOST_DEVICE ColorRGBuc ColorRGBuc::Mul(const float a, const ColorRGBuc& XYZ) {
+  ColorRGBuc Result;
+  Result[0] = a * XYZ[0];
+  Result[1] = a * XYZ[1];
+  Result[2] = a * XYZ[2];
+  return Result;
+}
+
 HOST_DEVICE ColorRGBAuc ColorRGBAuc::FromXYZf(const ColorXYZf& XYZ)
 {
 	ColorRGBAuc Result;
@@ -282,6 +292,15 @@ HOST_DEVICE ColorRGBAuc ColorRGBAuc::FromXYZf(const ColorXYZf& XYZ)
 
 	return Result;
 };
+
+HOST_DEVICE ColorRGBAuc ColorRGBAuc::Mul(const float a, const ColorRGBAuc& XYZA) {
+  ColorRGBAuc Result;
+  Result[0] = a * XYZA[0];
+  Result[1] = a * XYZA[1];
+  Result[2] = a * XYZA[2];
+  Result[3] = a * XYZA[3];
+  return Result;
+}
 
 static inline HOST_DEVICE ColorRGBf operator * (ColorRGBf& RGB, const float& F)									{ return RGB *= F; 								};
 static inline HOST_DEVICE ColorRGBf operator * (const float& F, ColorRGBf& RGB)									{ return RGB *= F; 								};

@@ -42,7 +42,7 @@ HOST_DEVICE_NI void SampleLight(const Light& Light, LightSample& LS, SurfaceSamp
 
 	Wi = Normalize(SS.P - SE.P);
 
-	Le = Light.Multiplier * EvaluateTexture(Light.TextureID, SS.UV);
+	Le = ColorXYZf::Mul(Light.Multiplier, EvaluateTexture(Light.TextureID, SS.UV));
 	
 	if (Light.Shape.OneSided && Dot(SE.P - SS.P, SS.N) < 0.0f)
 		Le = ColorXYZf::Black();
@@ -75,7 +75,7 @@ HOST_DEVICE_NI void IntersectLight(const Light& Light, const Ray& R, ScatterEven
 		SE.T 		= Length(SE.P - R.O);
 		SE.Wo		= -R.D;
 		SE.UV		= Int.UV;
-		SE.Le		= Int.Front ? Light.Multiplier * EvaluateTexture(Light.TextureID, SE.UV) : ColorXYZf::Black();
+		SE.Le		= Int.Front ? ColorXYZf::Mul(Light.Multiplier, EvaluateTexture(Light.TextureID, SE.UV)) : ColorXYZf::Black();
 		
 		if (Light.Unit == 1)
 			SE.Le /= Light.Shape.Area;

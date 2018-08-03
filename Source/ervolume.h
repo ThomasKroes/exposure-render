@@ -44,7 +44,7 @@ public:
 		*this = Other;
 	}
 
-	HOST ErVolume& ErVolume::operator = (const ErVolume& Other)
+	HOST ErVolume& operator = (const ErVolume& Other)
 	{
 		ErBindable::operator=(Other);
 

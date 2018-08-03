@@ -74,7 +74,7 @@ public:
 		*this = Other;
 	}
 
-	HOST Volume& Volume::operator = (const Volume& Other)
+	HOST Volume& operator = (const Volume& Other)
 	{
 		DebugLog(__FUNCTION__);
 
@@ -92,7 +92,7 @@ public:
 		return *this;
 	}
 
-	HOST Volume& Volume::operator = (const ErVolume& Other)
+	HOST Volume& operator = (const ErVolume& Other)
 	{
 		DebugLog(__FUNCTION__);
 

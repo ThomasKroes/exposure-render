@@ -75,7 +75,7 @@ public:
 		snprintf(this->FullName, MAX_CHAR_SIZE, "['%s', %s]", this->Name, MemoryTypeName);
 	}
 
-	HOST virtual int GetNoBytes() const
+	HOST_DEVICE virtual int GetNoBytes() const
 	{
 		return 0;
 	}

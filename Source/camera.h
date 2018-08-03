@@ -34,7 +34,7 @@ public:
 	{
 	}
 	
-	HOST Camera& Camera::operator = (const Camera& Other)
+	HOST Camera& operator = (const Camera& Other)
 	{
 		this->FilmSize		= Other.FilmSize;
 		this->Pos			= Other.Pos;
