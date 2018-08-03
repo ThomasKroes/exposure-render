@@ -44,7 +44,7 @@ public:
 
 	HOST void SetName(const char* pName)
 	{
-		sprintf_s(this->Name, MAX_CHAR_SIZE, "%s", pName);
+		snprintf(this->Name, MAX_CHAR_SIZE, "%s", pName);
 		this->UpdateFullName();
 	}
 	
@@ -60,19 +60,19 @@ public:
 		switch (this->MemoryType)
 		{
 			case Enums::Host:
-				sprintf_s(MemoryTypeName, MAX_CHAR_SIZE, "%s", "H");
+				snprintf(MemoryTypeName, MAX_CHAR_SIZE, "%s", "H");
 				break;
 			
 			case Enums::Device:
-				sprintf_s(MemoryTypeName, MAX_CHAR_SIZE, "%s", "D");
+				snprintf(MemoryTypeName, MAX_CHAR_SIZE, "%s", "D");
 				break;
 
 			default:
-				sprintf_s(MemoryTypeName, MAX_CHAR_SIZE, "%s", "U");
+				snprintf(MemoryTypeName, MAX_CHAR_SIZE, "%s", "U");
 				break;
 		}
 
-		sprintf_s(this->FullName, MAX_CHAR_SIZE, "['%s', %s]", this->Name, MemoryTypeName);
+		snprintf(this->FullName, MAX_CHAR_SIZE, "['%s', %s]", this->Name, MemoryTypeName);
 	}
 
 	HOST virtual int GetNoBytes() const
@@ -101,9 +101,9 @@ public:
 	{
 		switch (MemoryUnit)
 		{
-			case Enums::KiloByte:	sprintf_s(pMemoryString, MAX_CHAR_SIZE, "%0.2f KB", this->GetMemorySize(Enums::KiloByte));		break;
-			case Enums::MegaByte:	sprintf_s(pMemoryString, MAX_CHAR_SIZE, "%0.2f MB", this->GetMemorySize(Enums::MegaByte));		break;
-			case Enums::GigaByte:	sprintf_s(pMemoryString, MAX_CHAR_SIZE, "%0.2f GB", this->GetMemorySize(Enums::GigaByte));		break;
+			case Enums::KiloByte:	snprintf(pMemoryString, MAX_CHAR_SIZE, "%0.2f KB", this->GetMemorySize(Enums::KiloByte));		break;
+			case Enums::MegaByte:	snprintf(pMemoryString, MAX_CHAR_SIZE, "%0.2f MB", this->GetMemorySize(Enums::MegaByte));		break;
+			case Enums::GigaByte:	snprintf(pMemoryString, MAX_CHAR_SIZE, "%0.2f GB", this->GetMemorySize(Enums::GigaByte));		break;
 		}
 	}
 

@@ -54,7 +54,7 @@ public:
 			Other.Dirty = false;
 		}
 		
-		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
+		snprintf(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
 
 		return *this;
 	}

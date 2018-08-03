@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <cstdio>
 #include "defines.h"
 #include "enums.h"
 
@@ -25,7 +26,7 @@ public:
 	HOST Exception(const Enums::ExceptionLevel& Level, const char* pMessage = "")
 	{
 		this->Level = Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
+		snprintf(this->Message, MAX_CHAR_SIZE, "%s", pMessage);
 	}
 
 	HOST ~Exception()
@@ -40,7 +41,7 @@ public:
 	HOST Exception& operator = (const Exception& Other)
 	{
 		this->Level = Other.Level;
-		sprintf_s(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);
+		snprintf(this->Message, MAX_CHAR_SIZE, "%s", Other.Message);
 
 		return *this;
 	}
