@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <cstdio>
 #include "defines.h"
 #include "enums.h"
 
