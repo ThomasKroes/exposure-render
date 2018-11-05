@@ -39,7 +39,7 @@ static inline void HandleCudaError(const cudaError_t& CudaError, const char* pTi
 {
 	char Message[256];
 
-	sprintf_s(Message, 256, "%s (%s)", cudaGetErrorString(CudaError), pTitle);
+	snprintf(Message, 256, "%s (%s)", cudaGetErrorString(CudaError), pTitle);
 
 	if (CudaError != cudaSuccess)
 		throw(Exception(Enums::Error, Message));

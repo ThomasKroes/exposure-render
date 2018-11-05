@@ -59,7 +59,7 @@ public:
 		*this = Other;
 	}
 
-	HOST ErTracer& ErTracer::operator = (const ErTracer& Other)
+	HOST ErTracer& operator = (const ErTracer& Other)
 	{
 		ErBindable::operator=(Other);
 

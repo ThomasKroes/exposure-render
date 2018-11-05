@@ -38,7 +38,7 @@ public:
 		DeviceSymbol()
 	{
 		DebugLog(__FUNCTION__);
-		sprintf_s(DeviceSymbol, MAX_CHAR_SIZE, "%s", pDeviceSymbol);
+		snprintf(DeviceSymbol, MAX_CHAR_SIZE, "%s", pDeviceSymbol);
 	}
 
 	HOST ~List()
@@ -155,7 +155,7 @@ public:
 		{
 			char Message[MAX_CHAR_SIZE];
 
-			sprintf_s(Message, MAX_CHAR_SIZE, "%s failed, resource item with ID:%d does not exist", __FUNCTION__, i);
+			snprintf(Message, MAX_CHAR_SIZE, "%s failed, resource item with ID:%d does not exist", __FUNCTION__, i);
 
 			throw(Exception(Enums::Warning, Message));
 		}

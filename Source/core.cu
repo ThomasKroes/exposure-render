@@ -48,7 +48,7 @@ ExposureRender::Cuda::List<ExposureRender::Bitmap, ExposureRender::ErBitmap>				
 #include "singlescattering.cuh"
 #include "filterframeestimate.cuh"
 #include "estimate.cuh"
-#include "toneMap.cuh"
+#include "tonemap.cuh"
 
 namespace ExposureRender
 {

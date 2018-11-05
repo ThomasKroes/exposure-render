@@ -55,7 +55,7 @@ public:
 		this->UV		= Vec2f(0.0f);
 	}
 
-	HOST_DEVICE Intersection& Intersection::operator = (const Intersection& Other)
+	HOST_DEVICE Intersection& operator = (const Intersection& Other)
 	{
 		this->Valid			= Other.Valid;	
 		this->Front			= Other.Front;

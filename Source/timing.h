@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <cstdio>
 #include "defines.h"
 #include "enums.h"
 
@@ -29,7 +30,7 @@ class EXPOSURE_RENDER_DLL KernelTiming
 public:
 	HOST KernelTiming()
 	{
-		sprintf_s(this->Event, MAX_CHAR_SIZE, "Undefined");
+		snprintf(this->Event, MAX_CHAR_SIZE, "Undefined");
 		this->Duration = 0.0f;
 	}
 	
@@ -44,13 +45,13 @@ public:
 
 	HOST KernelTiming(const char* pEvent, const float& Duration)
 	{
-		sprintf_s(this->Event, MAX_CHAR_SIZE, pEvent);
+		snprintf(this->Event, MAX_CHAR_SIZE, pEvent);
 		this->Duration = Duration;
 	}
 
 	HOST KernelTiming& operator = (const KernelTiming& Other)
 	{
-		sprintf_s(this->Event, MAX_CHAR_SIZE, Other.Event);
+		snprintf(this->Event, MAX_CHAR_SIZE, Other.Event);
 		this->Duration = Other.Duration;
 
 		return *this;

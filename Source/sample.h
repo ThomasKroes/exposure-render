@@ -64,7 +64,7 @@ public:
 		this->UV	= Vec2f(0.0f);
 	}
 
-	HOST_DEVICE SurfaceSample& SurfaceSample::operator = (const SurfaceSample& Other)
+	HOST_DEVICE SurfaceSample& operator = (const SurfaceSample& Other)
 	{
 		this->P		= Other.P;
 		this->N		= Other.N;
@@ -91,7 +91,7 @@ public:
 		this->LargeStep(RNG);
 	}
 
-	HOST_DEVICE LightSample& LightSample::operator=(const LightSample& Other)
+	HOST_DEVICE LightSample& operator=(const LightSample& Other)
 	{
 		this->SurfaceUVW = Other.SurfaceUVW;
 
@@ -131,7 +131,7 @@ public:
 		this->Dir 		= Dir;
 	}
 
-	HOST_DEVICE BrdfSample& BrdfSample::operator=(const BrdfSample& Other)
+	HOST_DEVICE BrdfSample& operator=(const BrdfSample& Other)
 	{
 		this->Component	= Other.Component;
 		this->Dir 		= Other.Dir;
@@ -168,7 +168,7 @@ public:
 		this->LargeStep(RNG);
 	}
 
-	HOST_DEVICE LightingSample& LightingSample::operator=(const LightingSample& Other)
+	HOST_DEVICE LightingSample& operator=(const LightingSample& Other)
 	{
 		this->BrdfSample	= Other.BrdfSample;
 		this->LightSample	= Other.LightSample;
@@ -210,7 +210,7 @@ public:
 		this->LargeStep(RNG);
 	}
 
-	HOST_DEVICE CameraSample& CameraSample::operator=(const CameraSample& Other)
+	HOST_DEVICE CameraSample& operator=(const CameraSample& Other)
 	{
 		this->FilmUV	= Other.FilmUV;
 		this->LensUV	= Other.LensUV;
@@ -246,7 +246,7 @@ public:
 		this->LargeStep(RNG);
 	}
 
-	HOST_DEVICE MetroSample& MetroSample::operator=(const MetroSample& Other)
+	HOST_DEVICE MetroSample& operator=(const MetroSample& Other)
 	{
 		this->LightingSample 	= Other.LightingSample;
 		this->CameraSample		= Other.CameraSample;

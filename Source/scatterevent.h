@@ -63,7 +63,7 @@ public:
 		this->UV		= Vec2f(0.0f);
 	}
 
-	HOST_DEVICE ScatterEvent& ScatterEvent::operator = (const ScatterEvent& Other)
+	HOST_DEVICE ScatterEvent& operator = (const ScatterEvent& Other)
 	{
 		this->Type			= Other.Type;
 		this->Valid			= Other.Valid;

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "Intersection.h"
+#include "intersection.h"
 #include "sample.h"
 
 namespace ExposureRender

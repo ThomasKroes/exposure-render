@@ -42,7 +42,7 @@ public:
 	{
 	}
 
-	HOST_DEVICE BoundingBox& BoundingBox::operator = (const BoundingBox& Other)
+	HOST_DEVICE BoundingBox& operator = (const BoundingBox& Other)
 	{
 		this->MinP		= Other.MinP;	
 		this->MaxP		= Other.MaxP;

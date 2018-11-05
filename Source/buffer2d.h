@@ -59,7 +59,7 @@ public:
 			Other.Dirty = false;
 		}
 		
-		sprintf_s(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
+		snprintf(this->Name, MAX_CHAR_SIZE, "Copy of %s", Other.Name);
 
 		return *this;
 	}
@@ -250,7 +250,7 @@ public:
 			T((*this)(Coord[0][1], Coord[1][1]))
 		};
 
-		return (1.0f - dv) * ((1.0f - du) * Values[0] + du * Values[1]) + dv * ((1.0f - du) * Values[2] + du * Values[3]);
+		return T::Mul((1.0f - dv), ((1.0f - du) * Values[0] + du * Values[1])) + T::Mul(dv, ((1.0f - du) * Values[2] + du * Values[3]));
 	}
 
 	HOST_DEVICE T& operator[](const int& ID) const
